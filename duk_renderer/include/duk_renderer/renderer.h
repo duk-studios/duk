@@ -21,7 +21,12 @@ enum class RendererAPI {
 };
 
 struct RendererCreateInfo {
+    const char* applicationName;
+    uint32_t applicationVersion;
+    const char* engineName;
+    uint32_t engineVersion;
     RendererAPI api;
+    size_t gpuIndex;
 };
 
 class Renderer {

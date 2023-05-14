@@ -31,5 +31,6 @@ Renderer::ExpectedRenderer Renderer::create_renderer(const RendererCreateInfo& r
         oss << "Error when creating renderer: " << e.what();
         return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, oss.str());
     }
+    return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, "Unknown error occurred");
 }
 }

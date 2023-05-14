@@ -16,6 +16,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/mesh/mesh_data_source.cpp
         src/duk_renderer/mesh/vertex_data_source.cpp
         src/duk_renderer/mesh/vertex_layout.cpp
+        src/duk_renderer/vulkan/vulkan_debug_messenger.h
+        src/duk_renderer/vulkan/vulkan_debug_messenger.cpp
         src/duk_renderer/vulkan/vulkan_renderer.h
         src/duk_renderer/vulkan/vulkan_renderer.cpp
         )
@@ -29,11 +31,19 @@ target_include_directories(duk_renderer
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
+message(STATUS "Vulkan_FOUND on renderer: ${Vulkan_FOUND}")
+
 target_link_libraries(duk_renderer
         PUBLIC
+        # duk
         duk_hash
+
+        # external
         glm::glm
+
         tl::expected
+
+        Vulkan::Vulkan
         )
 
 set_target_properties(duk_renderer PROPERTIES CXX_STANDARD 20)
