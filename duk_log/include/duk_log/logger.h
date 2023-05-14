@@ -37,6 +37,10 @@ public:
 
     PrintEvent print_event;
 
+private:
+
+    std::mutex m_printMutex;
+
 };
 
 template<typename T>

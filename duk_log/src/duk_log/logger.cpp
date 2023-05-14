@@ -18,6 +18,7 @@ Logger::Log Logger::log() {
 }
 
 void Logger::print(const std::string& content) {
+    std::lock_guard<std::mutex> lock(m_printMutex);
     print_event(content);
 }
 
