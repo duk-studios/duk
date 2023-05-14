@@ -8,19 +8,43 @@
 #include <functional>
 #include <cassert>
 #include <vector>
+#include <memory>
 
 namespace duk::events {
 
 class Event {
+private:
+    friend class EventListener;
+    class Handle {
+    public:
+        explicit Handle(Event& owner);
+
+        void unsubscribe(size_t id);
+
+    private:
+        Event& m_owner;
+
+        //used to check if the event is still alive when unsubscribing
+        std::weak_ptr<void> m_controlBlock;
+    };
+
 public:
+
+    Event();
+
+    virtual ~Event();
+
     virtual void unsubscribe(size_t listenerId) = 0;
+
+private:
+    std::shared_ptr<void> m_controlBlock;
 };
 
 template<typename ...Args>
 class EventT : public Event {
 public:
+
     using Callback = std::function<void(Args...)>;
-public:
 
     inline void operator()(const Args& ... args) {
         emit(args...);
@@ -51,8 +75,7 @@ public:
             return listener == listenerId;
         });
 
-        assert(it != m_listeners.end() &&
-               "Attempted to unsubscribe from an event with a listener that is not subscribed.");
+        assert(it != m_listeners.end() && "Attempted to unsubscribe from an event with a listener that is not subscribed.");
 
         auto callbackIt = std::next(m_callbacks.begin(), std::distance(m_listeners.begin(), it));
         m_listeners.erase(it);
@@ -67,8 +90,6 @@ protected:
 
 class EventListener {
 public:
-    using Id = size_t;
-public:
 
     EventListener();
 
@@ -77,7 +98,7 @@ public:
     template<typename TEvent>
     void listen(TEvent& event, typename TEvent::Callback&& callback) {
         event.subscribe(std::move(callback), m_id);
-        m_events.emplace_back(&event);
+        m_events.emplace_back(event);
     }
 
     template<typename TEvent>
@@ -89,8 +110,8 @@ public:
 
 private:
 
-    Id m_id;
-    std::vector<Event*> m_events;
+    size_t m_id;
+    std::vector<Event::Handle> m_events;
 };
 
 }
