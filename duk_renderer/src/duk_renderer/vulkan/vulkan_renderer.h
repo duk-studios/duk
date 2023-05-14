@@ -2,12 +2,12 @@
 // Created by Ricardo on 04/02/2023.
 //
 
-#ifndef DUK_VULKAN_RENDERER_H
-#define DUK_VULKAN_RENDERER_H
+#ifndef DUK_RENDERER_VULKAN_RENDERER_H
+#define DUK_RENDERER_VULKAN_RENDERER_H
 
 #include <duk_renderer/renderer.h>
 
-namespace duk {
+namespace duk::renderer {
 
 struct VulkanRendererCreateInfo {
 
@@ -28,4 +28,4 @@ private:
 
 }
 
-#endif //DUK_VULKAN_RENDERER_H
+#endif //DUK_RENDERER_VULKAN_RENDERER_H

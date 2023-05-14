@@ -4,7 +4,7 @@
 
 #include <duk_renderer/vulkan/vulkan_renderer.h>
 
-namespace duk {
+namespace duk::renderer {
 
 VulkanRenderer::VulkanRenderer(const RendererCreateInfo& rendererCreateInfo,
                                const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {

@@ -2,10 +2,10 @@
 // Created by Ricardo on 04/02/2023.
 //
 
-#ifndef DUK_RENDERER_H
-#define DUK_RENDERER_H
+#ifndef DUK_RENDERER_RENDERER_H
+#define DUK_RENDERER_RENDERER_H
 
-namespace duk {
+namespace duk::renderer {
 
 struct RendererCreateInfo {
 
@@ -20,7 +20,7 @@ public:
     /// called to start a new frame
     virtual void begin_frame() = 0;
 
-    ///
+    /// called to end a frame, TODO: not sure if it will already present the frame
     virtual void end_frame() = 0;
 
 private:
@@ -29,4 +29,4 @@ private:
 
 }
 
-#endif //DUK_RENDERER_H
+#endif //DUK_RENDERER_RENDERER_H
