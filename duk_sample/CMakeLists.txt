@@ -17,6 +17,7 @@ target_include_directories(duk_sample
 target_link_libraries(duk_sample
         PUBLIC
         duk_renderer
+        duk_log
         )
 
 set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)

@@ -6,12 +6,19 @@
 #include <duk_renderer/renderer.h>
 
 #include <duk_platform/window.h>
-
-#include <iostream>
+#include <duk_log/logger.h>
+#include <duk_log/sink_std_console.h>
 
 int main() {
     using namespace duk::renderer;
     using namespace duk::platform;
+    using namespace duk::log;
+
+
+    Logger logger;
+    SinkStdConsole consoleSink;
+    consoleSink.flush_from(logger);
+
 
     WindowCreateInfo windowCreateInfo = {};
     windowCreateInfo.windowTitle = "Duk";
@@ -21,7 +28,7 @@ int main() {
     auto expectedWindow = Window::create_window(windowCreateInfo);
 
     if (!expectedWindow) {
-        std::cout << "Failed to create window!" << std::endl;
+        logger.log() << "Failed to create window!";
         return 1;
     }
 
@@ -53,10 +60,10 @@ int main() {
     auto expectedRenderer = Renderer::create_renderer(rendererCreateInfo);
 
     if (expectedRenderer) {
-        std::cout << "Renderer created!" << std::endl;
+        logger.log() << "Renderer created!";
     }
     else {
-        std::cout << "Renderer failed to be created!" << std::endl;
+        logger.log() << "Renderer failed to be created!";
         return 1;
     }
 
@@ -64,13 +71,13 @@ int main() {
 
     bool run = true;
 
-    listener.listen(window->window_close_event, [&window](auto){
-        std::cout << "Window asked to be closed" << std::endl;
+    listener.listen(window->window_close_event, [&window, &logger](auto){
+        logger.log() << "Window asked to be closed";
         window->close();
     });
 
-    listener.listen(window->window_destroy_event, [&run](auto){
-        std::cout << "Window was destroyed" << std::endl;
+    listener.listen(window->window_destroy_event, [&run, &logger](auto){
+        logger.log() << "Window was destroyed";
         run = false;
     });
 
@@ -78,7 +85,7 @@ int main() {
         window->pool_events();
     }
 
-    std::cout << "Closed!" << std::endl;
+    logger.log() << "Closed!";
 
     return 0;
 }
