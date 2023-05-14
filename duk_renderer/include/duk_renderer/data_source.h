@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_DATA_SOURCE_H
 #define DUK_RENDERER_DATA_SOURCE_H
 
-#include <duk_renderer/hash.h>
+#include <duk_hash/hash.h>
 #include <duk_renderer/macros.h>
 
 namespace duk::renderer {
@@ -19,14 +19,14 @@ public:
 
     void update_hash();
 
-    DUK_NO_DISCARD Hash hash() const;
+    DUK_NO_DISCARD hash::Hash hash() const;
 
 protected:
 
-    DUK_NO_DISCARD virtual Hash calculate_hash() const = 0;
+    DUK_NO_DISCARD virtual hash::Hash calculate_hash() const = 0;
 
 private:
-    Hash m_hash;
+    hash::Hash m_hash;
 };
 
 }

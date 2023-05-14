@@ -20,9 +20,9 @@ VertexDataSource* MeshDataSource::get_vertex_data_source() {
     return m_vertexDataSource;
 }
 
-Hash MeshDataSource::calculate_hash() const {
-    Hash hash = 0;
-    hash_combine(hash, m_vertexDataSource->hash());
+hash::Hash MeshDataSource::calculate_hash() const {
+    hash::Hash hash = 0;
+    hash::hash_combine(hash, m_vertexDataSource->hash());
     return hash;
 }
 

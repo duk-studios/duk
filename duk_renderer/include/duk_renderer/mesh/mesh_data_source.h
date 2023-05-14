@@ -20,7 +20,7 @@ public:
     DUK_NO_DISCARD VertexDataSource* get_vertex_data_source();
 
 protected:
-    DUK_NO_DISCARD Hash calculate_hash() const override;
+    DUK_NO_DISCARD hash::Hash calculate_hash() const override;
 
 private:
     VertexDataSource* m_vertexDataSource;

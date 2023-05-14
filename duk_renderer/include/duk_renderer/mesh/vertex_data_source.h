@@ -44,7 +44,7 @@ public:
 
 protected:
 
-    DUK_NO_DISCARD Hash calculate_hash() const override;
+    DUK_NO_DISCARD hash::Hash calculate_hash() const override;
 
 private:
     std::vector<T> m_vector;
@@ -78,9 +78,9 @@ void VertexDataSourceInterleaved<T>::read(uint8_t* dst, size_t size, size_t offs
 }
 
 template<typename T>
-Hash VertexDataSourceInterleaved<T>::calculate_hash() const {
-    Hash hash = 0;
-    hash_combine(hash, m_vector.begin(), m_vector.end());
+hash::Hash VertexDataSourceInterleaved<T>::calculate_hash() const {
+    hash::Hash hash = 0;
+    hash::hash_combine(hash, m_vector.begin(), m_vector.end());
     return hash;
 }
 
