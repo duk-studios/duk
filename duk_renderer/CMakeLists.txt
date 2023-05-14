@@ -44,6 +44,7 @@ target_link_libraries(duk_renderer
         duk_macros
         duk_hash
         duk_platform
+        duk_log
 
         # external
         glm::glm

@@ -32,7 +32,8 @@ static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT           
                                VkDebugUtilsMessageTypeFlagsEXT                  messageTypes,
                                const VkDebugUtilsMessengerCallbackDataEXT*      pCallbackData,
                                void*                                            pUserData) {
-
+    auto debugMessanger = (VulkanDebugMessenger*)pUserData;
+    debugMessanger->log(messageSeverity, messageTypes, pCallbackData);
     return VK_FALSE;
 }
 
@@ -106,6 +107,9 @@ void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRe
                 VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         debugCreateInfo.pfnUserCallback = detail::debug_callback;
         debugCreateInfo.pUserData = &m_debugMessenger;
+        m_debugMessenger.enabledMessageTypes = debugCreateInfo.messageType;
+        m_debugMessenger.enabledMessageSeverity = debugCreateInfo.messageSeverity;
+        m_debugMessenger.logger = rendererCreateInfo.logger;
 
         instanceCreateInfo.pNext = &debugCreateInfo;
     }

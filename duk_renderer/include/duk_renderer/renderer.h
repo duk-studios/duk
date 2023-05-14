@@ -7,6 +7,8 @@
 
 #include <duk_renderer/renderer_error.h>
 
+#include <duk_log/logger.h>
+
 #include <tl/expected.hpp>
 
 #include <memory>
@@ -28,6 +30,7 @@ enum class RendererAPI {
 
 struct RendererCreateInfo {
     duk::platform::Window* window;
+    duk::log::Logger* logger;
     const char* applicationName;
     uint32_t applicationVersion;
     const char* engineName;

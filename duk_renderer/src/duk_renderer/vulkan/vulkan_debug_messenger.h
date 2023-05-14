@@ -5,13 +5,21 @@
 #ifndef DUK_RENDERER_VULKANDEBUGMESSENGER_H
 #define DUK_RENDERER_VULKANDEBUGMESSENGER_H
 
+#include <duk_renderer/vulkan/vulkan_import.h>
+
+#include <duk_log/logger.h>
+
 namespace duk::renderer {
 
-class VulkanDebugMessenger {
+struct VulkanDebugMessenger {
 public:
+    VulkanDebugMessenger();
 
-private:
+    void log(VkDebugUtilsMessageSeverityFlagsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData) const;
 
+    log::Logger* logger;
+    VkDebugUtilsMessageSeverityFlagsEXT enabledMessageSeverity;
+    VkDebugUtilsMessageTypeFlagsEXT enabledMessageTypes;
 };
 
 } // duk::renderer
