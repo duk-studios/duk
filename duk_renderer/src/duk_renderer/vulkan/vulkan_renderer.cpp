@@ -54,10 +54,13 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
     if (vulkanRendererCreateInfo.rendererCreateInfo.window){
         create_vk_surface(vulkanRendererCreateInfo);
     }
+    select_vk_physical_device(vulkanRendererCreateInfo.rendererCreateInfo.deviceIndex);
     create_vk_device(vulkanRendererCreateInfo);
+    create_vk_swapchain(vulkanRendererCreateInfo);
 }
 
 VulkanRenderer::~VulkanRenderer() {
+    m_swapchain.reset();
     vkDestroyDevice(m_device, nullptr);
     vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
     vkDestroyInstance(m_instance, nullptr);
@@ -199,6 +202,19 @@ void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRend
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkDevice");
     }
+}
+
+void VulkanRenderer::create_vk_swapchain(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
+    VulkanSwapchainCreateInfo swapchainCreateInfo = {};
+    swapchainCreateInfo.physicalDevice = m_physicalDevice.get();
+    swapchainCreateInfo.device = m_device;
+    swapchainCreateInfo.surface = m_surface;
+    swapchainCreateInfo.sharedQueueFamilyIndices = {m_queueFamilyIndices[CommandQueueType::QUEUE_GRAPHICS]};
+    auto window = vulkanRendererCreateInfo.rendererCreateInfo.window;
+    swapchainCreateInfo.extent = {window->width(), window->height()};
+
+
+    m_swapchain = std::make_unique<VulkanSwapchain>(swapchainCreateInfo);
 }
 
 }

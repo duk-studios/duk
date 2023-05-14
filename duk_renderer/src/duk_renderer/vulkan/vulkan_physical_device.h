@@ -20,6 +20,14 @@ struct VulkanQueueFamilyProperties {
 
 using ExpectedVulkanQueueFamilyProperties = tl::expected<VulkanQueueFamilyProperties, VulkanQueryError>;
 
+struct VulkanSurfaceDetails {
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
+
+using ExpectedVulkanSurfaceDetails = tl::expected<VulkanSurfaceDetails, VulkanQueryError>;
+
 struct VulkanPhysicalDeviceCreateInfo {
     VkInstance instance;
     uint32_t deviceIndex;
@@ -28,9 +36,12 @@ struct VulkanPhysicalDeviceCreateInfo {
 class VulkanPhysicalDevice {
 public:
     explicit VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo& physicalDeviceCreateInfo);
+
     ~VulkanPhysicalDevice();
 
-    ExpectedVulkanQueueFamilyProperties find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags = 0);
+    DUK_NO_DISCARD ExpectedVulkanQueueFamilyProperties find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags = 0) const;
+
+    DUK_NO_DISCARD ExpectedVulkanSurfaceDetails query_surface_details(VkSurfaceKHR surface) const;
 
     DUK_NO_DISCARD VkPhysicalDevice handle();
 

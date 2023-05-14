@@ -8,7 +8,8 @@
 namespace duk::renderer {
 
 enum class VulkanQueryError {
-    NOT_FOUND = 0
+    NOT_FOUND = 0,
+    INVALID_ARGUMENT
 };
 
 }

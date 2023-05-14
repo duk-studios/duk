@@ -34,6 +34,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/pipeline/pipeline.cpp
         src/duk_renderer/pipeline/pipeline_data_source.cpp
         src/duk_renderer/pipeline/shader.cpp
+        src/duk_renderer/vulkan/vulkan_swapchain.h
+        src/duk_renderer/vulkan/vulkan_swapchain.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

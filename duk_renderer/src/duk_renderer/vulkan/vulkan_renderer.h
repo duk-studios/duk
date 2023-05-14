@@ -38,12 +38,15 @@ private:
 
     void create_vk_device(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
 
+    void create_vk_swapchain(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
+
 private:
 
     VkInstance m_instance;
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;
     VkSurfaceKHR m_surface;
     VkDevice m_device;
+    std::unique_ptr<VulkanSwapchain> m_swapchain;
 
     VulkanDebugMessenger m_debugMessenger;
 
