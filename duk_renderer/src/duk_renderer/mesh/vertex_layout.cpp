@@ -44,4 +44,12 @@ VertexLayout::VertexLayout(std::initializer_list<std::pair<VertexAttribute::Type
     }
 }
 
+bool VertexLayout::is_enabled(VertexAttribute::Type type) const {
+    return m_attributes[type] != VertexAttribute::Format::UNDEFINED;
+}
+
+VertexAttribute::Format VertexLayout::format_of(VertexAttribute::Type type) const {
+    return m_attributes[type];
+}
+
 }

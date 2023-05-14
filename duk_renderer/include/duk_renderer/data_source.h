@@ -23,7 +23,7 @@ public:
 
 protected:
 
-    virtual Hash calculate_hash() = 0;
+    DUK_NO_DISCARD virtual Hash calculate_hash() const = 0;
 
 private:
     Hash m_hash;

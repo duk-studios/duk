@@ -6,9 +6,5 @@
 
 namespace duk::renderer {
 
-VertexDataSource::VertexDataSource(VertexAttribute::Format format) :
-    m_attributeFormat(format) {
-
-}
 
 }

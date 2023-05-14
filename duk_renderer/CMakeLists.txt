@@ -6,6 +6,7 @@ set(DUK_HEADERS
         include/duk_renderer/mesh/mesh_data_source.h
         include/duk_renderer/mesh/vertex_data_source.h
         include/duk_renderer/mesh/vertex_layout.h
+        include/duk_renderer/mesh/vertex_types.h
         )
 
 set(DUK_SOURCES

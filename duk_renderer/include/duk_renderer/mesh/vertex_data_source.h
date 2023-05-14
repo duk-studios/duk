@@ -7,41 +7,82 @@
 
 #include <duk_renderer/data_source.h>
 #include <duk_renderer/mesh/vertex_layout.h>
+#include <duk_renderer/mesh/vertex_types.h>
+
+#include <cstring>
 
 namespace duk::renderer {
 
 class VertexDataSource : public DataSource {
-protected:
-
-    VertexDataSource(VertexAttribute::Format format);
-
-protected:
-    VertexAttribute::Format m_attributeFormat;
-};
-
-template<typename T>
-class VertexDataSourceT : public VertexDataSource {
 public:
 
-    VertexDataSourceT();
+    DUK_NO_DISCARD virtual size_t byte_count() const = 0;
 
-    std::vector<T>& container();
+    DUK_NO_DISCARD virtual size_t vertex_count() const = 0;
 
-private:
-    std::vector<T> m_data;
+    DUK_NO_DISCARD virtual VertexLayout vertex_layout() const = 0;
+
+    virtual void read(uint8_t* dst, size_t size, size_t offset) const = 0;
+
 };
 
 template<typename T>
-VertexDataSourceT<T>::VertexDataSourceT() :
-    VertexDataSource(VertexAttribute::format_of<T>()){
+class VertexDataSourceInterleaved : public VertexDataSource {
+public:
+    using VertexType = T;
 
+public:
+    std::vector<T>& vector();
+
+    DUK_NO_DISCARD size_t byte_count() const override;
+
+    DUK_NO_DISCARD size_t vertex_count() const override;
+
+    DUK_NO_DISCARD VertexLayout vertex_layout() const override;
+
+    void read(uint8_t* dst, size_t size, size_t offset) const override;
+
+protected:
+
+    DUK_NO_DISCARD Hash calculate_hash() const override;
+
+private:
+    std::vector<T> m_vector;
+};
+
+template<typename T>
+std::vector<T>& VertexDataSourceInterleaved<T>::vector() {
+    return m_vector;
 }
 
 template<typename T>
-std::vector<T>& VertexDataSourceT<T>::container() {
-    return m_data;
+size_t VertexDataSourceInterleaved<T>::byte_count() const {
+    return m_vector.size() * sizeof(T);
 }
 
+template<typename T>
+size_t VertexDataSourceInterleaved<T>::vertex_count() const {
+    return m_vector.size();
+}
+
+template<typename T>
+VertexLayout VertexDataSourceInterleaved<T>::vertex_layout() const {
+    return layout_of<T>();
+}
+
+template<typename T>
+void VertexDataSourceInterleaved<T>::read(uint8_t* dst, size_t size, size_t offset) const {
+    assert(byte_count() >= offset + size);
+    uint8_t* src = (uint8_t*)m_vector.data() + offset;
+    std::memcpy(dst, src, size);
+}
+
+template<typename T>
+Hash VertexDataSourceInterleaved<T>::calculate_hash() const {
+    Hash hash = 0;
+    hash_combine(hash, m_vector.begin(), m_vector.end());
+    return hash;
+}
 
 }
 

@@ -58,58 +58,62 @@ public:
 
     void disable(VertexAttribute::Type type);
 
+    DUK_NO_DISCARD bool is_enabled(VertexAttribute::Type type) const;
+
+    DUK_NO_DISCARD VertexAttribute::Format format_of(VertexAttribute::Type type) const;
+
 private:
     std::array<VertexAttribute::Format, VertexAttribute::Type::COUNT> m_attributes;
 };
 
 //UINT8,
 template<>
-VertexAttribute::Format VertexAttribute::format_of<uint8_t>() {
+inline VertexAttribute::Format VertexAttribute::format_of<uint8_t>() {
     return VertexAttribute::Format::UINT8;
 }
 //INT8,
 template<>
-VertexAttribute::Format VertexAttribute::format_of<int8_t>() {
+inline VertexAttribute::Format VertexAttribute::format_of<int8_t>() {
     return VertexAttribute::Format::INT8;
 }
 //UINT16,
 template<>
-VertexAttribute::Format VertexAttribute::format_of<uint16_t>() {
+inline VertexAttribute::Format VertexAttribute::format_of<uint16_t>() {
     return VertexAttribute::Format::UINT16;
 }
 //INT16,
 template<>
-VertexAttribute::Format VertexAttribute::format_of<int16_t>() {
+inline VertexAttribute::Format VertexAttribute::format_of<int16_t>() {
     return VertexAttribute::Format::INT16;
 }
 //UINT32,
 template<>
-VertexAttribute::Format VertexAttribute::format_of<uint32_t>() {
+inline VertexAttribute::Format VertexAttribute::format_of<uint32_t>() {
     return VertexAttribute::Format::UINT32;
 }
 //INT32,
 template<>
-VertexAttribute::Format VertexAttribute::format_of<int32_t>() {
+inline VertexAttribute::Format VertexAttribute::format_of<int32_t>() {
     return VertexAttribute::Format::INT32;
 }
 //FLOAT,
 template<>
-VertexAttribute::Format VertexAttribute::format_of<float>() {
+inline VertexAttribute::Format VertexAttribute::format_of<float>() {
     return VertexAttribute::Format::FLOAT;
 }
 //VEC2,
 template<>
-VertexAttribute::Format VertexAttribute::format_of<glm::vec2>() {
+inline VertexAttribute::Format VertexAttribute::format_of<glm::vec2>() {
     return VertexAttribute::Format::VEC2;
 }
 //VEC3,
 template<>
-VertexAttribute::Format VertexAttribute::format_of<glm::vec3>() {
+inline VertexAttribute::Format VertexAttribute::format_of<glm::vec3>() {
     return VertexAttribute::Format::VEC3;
 }
 //VEC4
 template<>
-VertexAttribute::Format VertexAttribute::format_of<glm::vec4>() {
+inline VertexAttribute::Format VertexAttribute::format_of<glm::vec4>() {
     return VertexAttribute::Format::VEC4;
 }
 
