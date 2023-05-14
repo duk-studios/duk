@@ -11,7 +11,7 @@
 #define DUK_ASSERT_MODE_EXCEPTION 1
 
 #define DUK_ASSERT_EXCEPTION(expression, message) \
-do { if (!expression) throw std::runtime_error(message); } while (false)
+do { if (!(expression)) throw std::runtime_error(message); } while (false)
 
 #if DUK_ASSERT_MODE == DUK_ASSERT_MODE_EXCEPTION
 #define DUK_ASSERT(expression, message) DUK_ASSERT_EXCEPTION(expression, message)
