@@ -3,10 +3,12 @@ set(DUK_HEADERS
         include/duk_renderer/macros.h
         include/duk_renderer/hash.h
         include/duk_renderer/renderer.h
+        include/duk_renderer/mesh/vertex_layout.h
         )
 
 set(DUK_SOURCES
         src/duk_renderer/data_source.cpp
+        src/duk_renderer/mesh/vertex_layout.cpp
         src/duk_renderer/vulkan/vulkan_renderer.h
         src/duk_renderer/vulkan/vulkan_renderer.cpp
         )
