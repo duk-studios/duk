@@ -1,4 +1,4 @@
-set(DUK_HEADERS
+set(DUK_RENDERER_HEADERS
         include/duk_renderer/data_source.h
         include/duk_renderer/macros.h
         include/duk_renderer/hash.h
@@ -9,7 +9,7 @@ set(DUK_HEADERS
         include/duk_renderer/mesh/vertex_types.h
         )
 
-set(DUK_SOURCES
+set(DUK_RENDERER_SOURCES
         src/duk_renderer/data_source.cpp
         src/duk_renderer/mesh/mesh_data_source.cpp
         src/duk_renderer/mesh/vertex_data_source.cpp
@@ -18,18 +18,18 @@ set(DUK_SOURCES
         src/duk_renderer/vulkan/vulkan_renderer.cpp
         )
 
-add_library(duk STATIC ${DUK_SOURCES} ${DUK_HEADERS})
+add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
 
-target_include_directories(duk
+target_include_directories(duk_renderer
         PUBLIC
         include
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk
+target_link_libraries(duk_renderer
         PUBLIC
         glm::glm
         )
 
-set_target_properties(duk PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk_renderer PROPERTIES CXX_STANDARD 20)
