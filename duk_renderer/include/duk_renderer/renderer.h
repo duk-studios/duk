@@ -66,7 +66,7 @@ public:
 
     DUK_NO_DISCARD virtual ExpectedMesh create_mesh(const MeshDataSource* meshDataSource) = 0;
 
-    DUK_NO_DISCARD virtual ExpectedPipeline create_mesh(const PipelineDataSource* pipelineDataSource) = 0;
+    DUK_NO_DISCARD virtual ExpectedPipeline create_pipeline(const PipelineDataSource* pipelineDataSource) = 0;
 
 private:
 
