@@ -6,7 +6,7 @@
 namespace duk::log {
 
 void Sink::flush_from(Logger& logger) {
-    m_listener.listen(logger.print_event, [this](const auto& message){
+    logger.listen_to_print(m_listener,[this](const auto& message){
         flush(message);
     });
 }

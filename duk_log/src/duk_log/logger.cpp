@@ -17,9 +17,9 @@ Logger::Log Logger::log() {
     return Logger::Log(*this);
 }
 
-void Logger::print(const std::string& content) {
+void Logger::listen_to_print(events::EventListener& listener, PrintEvent::Callback&& callback) {
     std::lock_guard<std::mutex> lock(m_printMutex);
-    print_event(content);
+    listener.listen(m_print_event, std::move(callback));
 }
 
 }
