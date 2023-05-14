@@ -15,9 +15,6 @@ namespace duk::renderer {
 
 struct VulkanRendererCreateInfo {
     RendererCreateInfo rendererCreateInfo;
-    std::vector<const char*> validationLayers = {
-            "VK_LAYER_KHRONOS_validation"
-    };
     bool hasValidationLayers;
 };
 
@@ -35,7 +32,9 @@ public:
 private:
     void create_vk_instance(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
 
-    void select_physical_device(VkInstance instance, uint32_t deviceIndex);
+    void select_vk_physical_device(VkInstance instance, uint32_t deviceIndex);
+
+    void create_vk_surface(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
 
     void create_vk_device(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
 
@@ -43,6 +42,7 @@ private:
 
     VkInstance m_instance;
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;
+    VkSurfaceKHR m_surface;
     VkDevice m_device;
 
     VulkanDebugMessenger m_debugMessenger;

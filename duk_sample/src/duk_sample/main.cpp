@@ -66,7 +66,7 @@ int main() {
 
     listener.listen(window->window_close_event, [&window](auto){
         std::cout << "Window asked to be closed" << std::endl;
-        window->hide();
+        window->close();
     });
 
     listener.listen(window->window_destroy_event, [&run](auto){

@@ -43,7 +43,9 @@ public:
 
     LRESULT window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    DUK_NO_DISCARD HWND win32_handle() const;
+    DUK_NO_DISCARD HWND win32_window_handle() const;
+
+    DUK_NO_DISCARD HINSTANCE win32_instance_handle() const;
 
     // overrides
     void show() override;

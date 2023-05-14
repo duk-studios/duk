@@ -142,8 +142,12 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
 }
 
 
-HWND WindowWin32::win32_handle() const {
+HWND WindowWin32::win32_window_handle() const {
     return m_hwnd;
+}
+
+HINSTANCE WindowWin32::win32_instance_handle() const {
+    return m_windowClassEntry->instance;
 }
 
 void WindowWin32::show() {

@@ -4,9 +4,17 @@
 
 #include <duk_renderer/vulkan/vulkan_renderer.h>
 
+#if DUK_PLATFORM_IS_WINDOWS
+#include <duk_platform/win32/window_win_32.h>
+#endif
+
 namespace duk::renderer {
 
 namespace detail {
+
+static std::vector<const char*> s_validationLayers = {
+        "VK_LAYER_KHRONOS_validation"
+};
 
 static std::vector<const char*> query_instance_extensions(bool hasValidationLayers) {
     std::vector<const char*> extensions = {VK_KHR_SURFACE_EXTENSION_NAME};
@@ -37,15 +45,20 @@ static std::vector<const char*> query_device_extensions() {
 VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) :
     m_instance(VK_NULL_HANDLE),
     m_physicalDevice(VK_NULL_HANDLE),
+    m_surface(VK_NULL_HANDLE),
     m_device(VK_NULL_HANDLE) {
 
     create_vk_instance(vulkanRendererCreateInfo);
-    select_physical_device(m_instance, vulkanRendererCreateInfo.rendererCreateInfo.deviceIndex);
+    select_vk_physical_device(m_instance, vulkanRendererCreateInfo.rendererCreateInfo.deviceIndex);
+    if (vulkanRendererCreateInfo.rendererCreateInfo.window){
+        create_vk_surface(vulkanRendererCreateInfo);
+    }
     create_vk_device(vulkanRendererCreateInfo);
 }
 
 VulkanRenderer::~VulkanRenderer() {
     vkDestroyDevice(m_device, nullptr);
+    vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
     vkDestroyInstance(m_instance, nullptr);
 }
 
@@ -78,8 +91,8 @@ void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRe
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
     if (vulkanRendererCreateInfo.hasValidationLayers) {
-        instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(vulkanRendererCreateInfo.validationLayers.size());
-        instanceCreateInfo.ppEnabledLayerNames = vulkanRendererCreateInfo.validationLayers.data();
+        instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(detail::s_validationLayers.size());
+        instanceCreateInfo.ppEnabledLayerNames = detail::s_validationLayers.data();
 
         debugCreateInfo = {};
         debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -107,7 +120,7 @@ void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRe
     }
 }
 
-void VulkanRenderer::select_physical_device(VkInstance instance, uint32_t deviceIndex) {
+void VulkanRenderer::select_vk_physical_device(VkInstance instance, uint32_t deviceIndex) {
 
     VulkanPhysicalDeviceCreateInfo physicalDeviceCreateInfo = {};
     physicalDeviceCreateInfo.instance = instance;
@@ -116,29 +129,51 @@ void VulkanRenderer::select_physical_device(VkInstance instance, uint32_t device
     m_physicalDevice = std::make_unique<VulkanPhysicalDevice>(physicalDeviceCreateInfo);
 }
 
+void VulkanRenderer::create_vk_surface(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
+    auto window = vulkanRendererCreateInfo.rendererCreateInfo.window;
+    assert(window);
+
+#if DUK_PLATFORM_IS_WINDOWS
+
+    auto windowWin32 = dynamic_cast<platform::WindowWin32*>(window);
+    assert(windowWin32);
+
+    VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo = {};
+    win32SurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    win32SurfaceCreateInfo.hwnd = windowWin32->win32_window_handle();
+    win32SurfaceCreateInfo.hinstance = windowWin32->win32_instance_handle();
+
+    auto result = vkCreateWin32SurfaceKHR(m_instance, &win32SurfaceCreateInfo, nullptr, &m_surface);
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create VkSurfaceKHR with vkCreateWin32SurfaceKHR");
+    }
+#endif
+}
+
 void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
 
-    auto expectedGraphicsQueueProperties = m_physicalDevice->query_queue_family_properties(VK_NULL_HANDLE, VK_QUEUE_GRAPHICS_BIT);
-
-    if (!expectedGraphicsQueueProperties){
-        throw std::runtime_error("could not find a suitable graphics queue");
-    }
-
-    auto graphicsQueueProperties = expectedGraphicsQueueProperties.value();
-
-    float queuePriority = 1.0f;
-    VkDeviceQueueCreateInfo graphicsQueueCreateInfo = {};
-    graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    graphicsQueueCreateInfo.queueFamilyIndex = graphicsQueueProperties.familyIndex;
-    graphicsQueueCreateInfo.queueCount = 1;
-    graphicsQueueCreateInfo.pQueuePriorities = &queuePriority;
-
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    {
+        auto expectedGraphicsQueueProperties = m_physicalDevice->query_queue_family_properties(m_surface, VK_QUEUE_GRAPHICS_BIT);
+        if (!expectedGraphicsQueueProperties){
+            throw std::runtime_error("could not find a suitable graphics queue");
+        }
+
+        auto graphicsQueueProperties = expectedGraphicsQueueProperties.value();
+        float queuePriority = 1.0f;
+        VkDeviceQueueCreateInfo graphicsQueueCreateInfo = {};
+        graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        graphicsQueueCreateInfo.queueFamilyIndex = graphicsQueueProperties.familyIndex;
+        graphicsQueueCreateInfo.queueCount = 1;
+        graphicsQueueCreateInfo.pQueuePriorities = &queuePriority;
+
+        queueCreateInfos.push_back(graphicsQueueCreateInfo);
+    }
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    deviceCreateInfo.pQueueCreateInfos = &graphicsQueueCreateInfo;
-    deviceCreateInfo.queueCreateInfoCount = 1;
+    deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
+    deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
 
     auto deviceExtensions = detail::query_device_extensions();
     deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
@@ -148,8 +183,8 @@ void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRend
     // but it's good to keep here for compatibility with older versions
     // (you never know when you're going to need it)
     if (vulkanRendererCreateInfo.hasValidationLayers) {
-        deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(vulkanRendererCreateInfo.validationLayers.size());
-        deviceCreateInfo.ppEnabledLayerNames = vulkanRendererCreateInfo.validationLayers.data();
+        deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(detail::s_validationLayers.size());
+        deviceCreateInfo.ppEnabledLayerNames = detail::s_validationLayers.data();
     } else {
         deviceCreateInfo.enabledLayerCount = 0;
     }
