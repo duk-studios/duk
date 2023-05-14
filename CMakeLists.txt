@@ -5,9 +5,11 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(DUK_HEADERS
         include/duk/renderer/renderer.h
+        include/duk/renderer/vulkan/vulkan_renderer.h
         )
 
 set(DUK_SOURCES
+        src/duk/renderer/vulkan/vulkan_renderer.cpp
         )
 
 add_library(duk STATIC ${DUK_SOURCES} ${DUK_HEADERS})
