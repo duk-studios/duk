@@ -24,3 +24,5 @@ target_link_libraries(duk
         PUBLIC
         glm::glm
         )
+
+set_target_properties(duk PROPERTIES CXX_STANDARD 20)
