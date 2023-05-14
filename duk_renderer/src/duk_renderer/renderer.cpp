@@ -11,6 +11,7 @@ namespace duk::renderer {
 
 static std::shared_ptr<VulkanRenderer> create_vulkan_renderer(const RendererCreateInfo& rendererCreateInfo) {
     VulkanRendererCreateInfo vulkanRendererCreateInfo = {};
+    vulkanRendererCreateInfo.hasValidationLayers = true;
     return std::make_shared<VulkanRenderer>(vulkanRendererCreateInfo);
 }
 

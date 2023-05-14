@@ -13,6 +13,7 @@ static std::vector<const char*> query_instance_extensions(bool hasValidationLaye
     if (hasValidationLayers) {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
+    //TODO: add platform specific extensions
     return extensions;
 }
 
@@ -24,8 +25,11 @@ static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT           
     return VK_FALSE;
 }
 
+static std::vector<const char*> query_device_extensions() {
+    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 }
 
+}
 
 VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) :
     m_instance(VK_NULL_HANDLE),
@@ -33,11 +37,12 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
     m_device(VK_NULL_HANDLE) {
 
     create_vk_instance(vulkanRendererCreateInfo);
-    select_physical_device(vulkanRendererCreateInfo);
-
+    select_physical_device(m_instance, vulkanRendererCreateInfo.rendererCreateInfo.deviceIndex);
+    create_vk_device(vulkanRendererCreateInfo);
 }
 
 VulkanRenderer::~VulkanRenderer() {
+    vkDestroyDevice(m_device, nullptr);
     vkDestroyInstance(m_instance, nullptr);
 }
 
@@ -48,8 +53,6 @@ void VulkanRenderer::begin_frame() {
 void VulkanRenderer::end_frame() {
 
 }
-
-
 
 void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
     auto& rendererCreateInfo = vulkanRendererCreateInfo.rendererCreateInfo;
@@ -88,7 +91,7 @@ void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRe
         debugCreateInfo.pfnUserCallback = detail::debug_callback;
         debugCreateInfo.pUserData = &m_debugMessenger;
 
-        instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
+        instanceCreateInfo.pNext = &debugCreateInfo;
     }
     else {
         instanceCreateInfo.enabledLayerCount = 0;
@@ -101,24 +104,58 @@ void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRe
     }
 }
 
-void VulkanRenderer::select_physical_device(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
-    uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
+void VulkanRenderer::select_physical_device(VkInstance instance, uint32_t deviceIndex) {
 
-    if (deviceCount == 0) {
-        throw std::runtime_error("failed to find GPUs with vulkan support!");
-    }
+    VulkanPhysicalDeviceCreateInfo physicalDeviceCreateInfo = {};
+    physicalDeviceCreateInfo.instance = instance;
+    physicalDeviceCreateInfo.deviceIndex = deviceIndex;
 
-    std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
-
-    auto desiredGPUIndex = vulkanRendererCreateInfo.rendererCreateInfo.gpuIndex;
-    if (desiredGPUIndex >= devices.size()){
-        throw std::runtime_error("gpu index not found");
-    }
-
-    m_physicalDevice = devices[desiredGPUIndex];
+    m_physicalDevice = std::make_unique<VulkanPhysicalDevice>(physicalDeviceCreateInfo);
 }
 
+void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
+
+    auto expectedGraphicsQueueProperties = m_physicalDevice->query_queue_family_properties(VK_NULL_HANDLE, VK_QUEUE_GRAPHICS_BIT);
+
+    if (!expectedGraphicsQueueProperties){
+        throw std::runtime_error("could not find a suitable graphics queue");
+    }
+
+    auto graphicsQueueProperties = expectedGraphicsQueueProperties.value();
+
+    float queuePriority = 1.0f;
+    VkDeviceQueueCreateInfo graphicsQueueCreateInfo = {};
+    graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    graphicsQueueCreateInfo.queueFamilyIndex = graphicsQueueProperties.familyIndex;
+    graphicsQueueCreateInfo.queueCount = 1;
+    graphicsQueueCreateInfo.pQueuePriorities = &queuePriority;
+
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+
+    VkDeviceCreateInfo deviceCreateInfo = {};
+    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.pQueueCreateInfos = &graphicsQueueCreateInfo;
+    deviceCreateInfo.queueCreateInfoCount = 1;
+
+    auto deviceExtensions = detail::query_device_extensions();
+    deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+    // Note: this is ignored on modern vulkan implementations,
+    // but it's good to keep here for compatibility with older versions
+    // (you never know when you're going to need it)
+    if (vulkanRendererCreateInfo.hasValidationLayers) {
+        deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(vulkanRendererCreateInfo.validationLayers.size());
+        deviceCreateInfo.ppEnabledLayerNames = vulkanRendererCreateInfo.validationLayers.data();
+    } else {
+        deviceCreateInfo.enabledLayerCount = 0;
+    }
+
+    auto result = vkCreateDevice(m_physicalDevice->handle(), &deviceCreateInfo, nullptr, &m_device);
+
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create VkDevice");
+    }
+}
 
 }

@@ -11,6 +11,12 @@
 
 #include <memory>
 
+namespace duk::platform {
+
+class Window;
+
+}
+
 namespace duk::renderer {
 
 enum class RendererAPI {
@@ -21,12 +27,13 @@ enum class RendererAPI {
 };
 
 struct RendererCreateInfo {
+    duk::platform::Window* window;
     const char* applicationName;
     uint32_t applicationVersion;
     const char* engineName;
     uint32_t engineVersion;
     RendererAPI api;
-    size_t gpuIndex;
+    size_t deviceIndex;
 };
 
 class Renderer {
