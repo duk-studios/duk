@@ -8,17 +8,17 @@
 #include <duk_platform/window.h>
 #include <duk_log/logger.h>
 #include <duk_log/sink_std_console.h>
+#include <duk_task/task_queue.h>
 
 int main() {
     using namespace duk::renderer;
     using namespace duk::platform;
     using namespace duk::log;
-
+    using namespace duk::task;
 
     Logger logger;
     SinkStdConsole consoleSink;
     consoleSink.flush_from(logger);
-
 
     WindowCreateInfo windowCreateInfo = {};
     windowCreateInfo.windowTitle = "Duk";
@@ -59,13 +59,11 @@ int main() {
 
     auto expectedRenderer = Renderer::create_renderer(rendererCreateInfo);
 
-    if (expectedRenderer) {
-        logger.log() << "Renderer created!";
-    }
-    else {
-        logger.log() << "Renderer failed to be created!";
+    if (!expectedRenderer) {
+        logger.log() << "Failed to create renderer: " << expectedRenderer.error().description();
         return 1;
     }
+    auto renderer = std::move(expectedRenderer.value());
 
     duk::events::EventListener listener;
 
@@ -81,8 +79,30 @@ int main() {
         run = false;
     });
 
+    CommandQueueCreateInfo graphicsCommandQueueCreateInfo = {};
+    graphicsCommandQueueCreateInfo.type = CommandQueueType::QUEUE_GRAPHICS;
+
+    auto expectedQueue = renderer->create_command_queue(graphicsCommandQueueCreateInfo);
+
+    if (!expectedQueue){
+        logger.log() << "failed to create graphics command queue: " << expectedQueue.error().description();
+        return 1;
+    }
+
+    auto graphicsQueue = std::move(expectedQueue.value());
+
+    graphicsQueue->enqueue([](CommandInterface* commandInterface, MeshDataSource* meshDataSource){
+
+    }, &meshDataSource);
+
     while (run){
         window->pool_events();
+
+        graphicsQueue->enqueue([&renderer](CommandInterface* commandInterface){
+            renderer->begin_frame();
+
+            renderer->end_frame();
+        });
     }
 
     logger.log() << "Closed!";

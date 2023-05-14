@@ -18,6 +18,7 @@ target_link_libraries(duk_sample
         PUBLIC
         duk_renderer
         duk_log
+        duk_task
         )
 
 set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)
