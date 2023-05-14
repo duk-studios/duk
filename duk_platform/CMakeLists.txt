@@ -2,10 +2,15 @@ project(duk_platform)
 
 set(DUK_PLATFORM_HEADERS
         include/duk_platform/window.h
+        include/duk_platform/window_error.h
+        include/duk_platform/events/window_events.h
         )
 
 set(DUK_PLATFORM_SOURCES
         src/duk_platform/window.cpp
+        src/duk_platform/window_error.cpp
+        src/duk_platform/win32/window_win_32.h
+        src/duk_platform/win32/window_win_32.cpp
         )
 
 add_library(duk_platform STATIC ${DUK_PLATFORM_SOURCES} ${DUK_PLATFORM_HEADERS})
@@ -15,6 +20,15 @@ target_include_directories(duk_platform
         include
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        )
+
+target_link_libraries(duk_platform
+        PUBLIC
+        duk_macros
+        duk_hash
+        duk_events
+
+        tl::expected
         )
 
 set_target_properties(duk_platform PROPERTIES CXX_STANDARD 20)
