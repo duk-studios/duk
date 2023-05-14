@@ -34,7 +34,6 @@ ExpectedWindow Window::create_window(const WindowCreateInfo& windowCreateInfo) {
     catch (const std::exception& e) {
         return tl::unexpected<WindowError>(WindowError::Type::INTERNAL_ERROR, e.what());
     }
-    return tl::unexpected<WindowError>(WindowError::Type::INTERNAL_ERROR, "Unknown error");
 }
 
 
