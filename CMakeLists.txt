@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(duk_renderer)
+project(duk)
 
 add_subdirectory(external)
 

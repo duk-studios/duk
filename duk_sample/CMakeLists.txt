@@ -1,3 +1,5 @@
+project(duk_sample)
+
 set(DUK_SAMPLE_HEADERS
         )
 

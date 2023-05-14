@@ -1,3 +1,5 @@
+project(duk_renderer)
+
 set(DUK_RENDERER_HEADERS
         include/duk_renderer/data_source.h
         include/duk_renderer/macros.h
