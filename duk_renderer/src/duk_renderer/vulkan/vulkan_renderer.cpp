@@ -13,7 +13,10 @@ static std::vector<const char*> query_instance_extensions(bool hasValidationLaye
     if (hasValidationLayers) {
         extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
-    //TODO: add platform specific extensions
+#if DUK_PLATFORM_IS_WINDOWS
+    extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+#elif DUK_PLATFORM_IS_LINUX
+#endif
     return extensions;
 }
 
