@@ -15,7 +15,7 @@ struct VulkanDebugMessenger {
 public:
     VulkanDebugMessenger();
 
-    void log(VkDebugUtilsMessageSeverityFlagsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData) const;
+    void log(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData) const;
 
     log::Logger* logger;
     VkDebugUtilsMessageSeverityFlagsEXT enabledMessageSeverity;

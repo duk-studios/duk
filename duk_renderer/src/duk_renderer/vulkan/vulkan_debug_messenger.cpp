@@ -20,7 +20,7 @@ void VulkanDebugMessenger::log(VkDebugUtilsMessageSeverityFlagBitsEXT messageSev
         return;
     }
 
-    if ((messageSeverity & enabledMessageSeverity) == 0) {
+    if ((messageSeverity < enabledMessageSeverity) == 0) {
         return;
     }
 
