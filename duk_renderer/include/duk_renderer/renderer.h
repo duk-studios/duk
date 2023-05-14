@@ -13,8 +13,14 @@ struct RendererCreateInfo {
 
 class Renderer {
 public:
+
+    /// destructor
     virtual ~Renderer() = default;
+
+    /// called to start a new frame
     virtual void begin_frame() = 0;
+
+    ///
     virtual void end_frame() = 0;
 
 private:

@@ -1,10 +1,10 @@
 set(DUK_HEADERS
-        include/duk/renderer/renderer.h
+        include/duk_renderer/renderer.h
         )
 
 set(DUK_SOURCES
-        src/duk/renderer/vulkan/vulkan_renderer.h
-        src/duk/renderer/vulkan/vulkan_renderer.cpp
+        src/duk_renderer/vulkan/vulkan_renderer.h
+        src/duk_renderer/vulkan/vulkan_renderer.cpp
         )
 
 add_library(duk STATIC ${DUK_SOURCES} ${DUK_HEADERS})

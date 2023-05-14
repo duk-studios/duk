@@ -2,7 +2,7 @@
 // Created by Ricardo on 04/02/2023.
 //
 
-#include <duk/renderer/vulkan/vulkan_renderer.h>
+#include <duk_renderer/vulkan/vulkan_renderer.h>
 
 namespace duk {
 

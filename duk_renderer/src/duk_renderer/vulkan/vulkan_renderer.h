@@ -5,7 +5,7 @@
 #ifndef DUK_VULKAN_RENDERER_H
 #define DUK_VULKAN_RENDERER_H
 
-#include <duk/renderer/renderer.h>
+#include <duk_renderer/renderer.h>
 
 namespace duk {
 
