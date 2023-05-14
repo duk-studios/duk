@@ -8,6 +8,10 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/mesh/vertex_data_source.h
         include/duk_renderer/mesh/vertex_layout.h
         include/duk_renderer/mesh/vertex_types.h
+        include/duk_renderer/mesh/mesh.h
+        include/duk_renderer/pipeline/pipeline.h
+        include/duk_renderer/pipeline/pipeline_data_source.h
+        include/duk_renderer/pipeline/shader.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -27,6 +31,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vulkan/vulkan_queue.cpp
         src/duk_renderer/vulkan/vulkan_renderer.h
         src/duk_renderer/vulkan/vulkan_renderer.cpp
+        src/duk_renderer/pipeline/pipeline.cpp
+        src/duk_renderer/pipeline/pipeline_data_source.cpp
+        src/duk_renderer/pipeline/shader.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
