@@ -2,7 +2,6 @@ project(duk_renderer)
 
 set(DUK_RENDERER_HEADERS
         include/duk_renderer/data_source.h
-        include/duk_renderer/macros.h
         include/duk_renderer/renderer.h
         include/duk_renderer/renderer_error.h
         include/duk_renderer/mesh/mesh_data_source.h
@@ -42,6 +41,7 @@ target_include_directories(duk_renderer
 target_link_libraries(duk_renderer
         PUBLIC
         # duk
+        duk_macros
         duk_hash
         duk_platform
 

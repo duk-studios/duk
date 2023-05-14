@@ -6,7 +6,7 @@
 #define DUK_RENDERER_VULKAN_QUEUE_H
 
 #include <duk_renderer/vulkan/vulkan_import.h>
-#include <duk_renderer/macros.h>
+#include <duk_macros/macros.h>
 
 #include <tl/expected.hpp>
 

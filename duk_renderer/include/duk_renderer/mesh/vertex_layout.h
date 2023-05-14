@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_VERTEX_LAYOUT_H
 #define DUK_RENDERER_VERTEX_LAYOUT_H
 
-#include <duk_renderer/macros.h>
+#include <duk_macros/macros.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>

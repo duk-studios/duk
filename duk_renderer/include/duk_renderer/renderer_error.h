@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_RENDERER_ERROR_H
 #define DUK_RENDERER_RENDERER_ERROR_H
 
-#include <duk_renderer/macros.h>
+#include <duk_macros/macros.h>
 
 #include <string>
 

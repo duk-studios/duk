@@ -6,7 +6,7 @@
 #define DUK_RENDERER_DATA_SOURCE_H
 
 #include <duk_hash/hash.h>
-#include <duk_renderer/macros.h>
+#include <duk_macros/macros.h>
 
 namespace duk::renderer {
 

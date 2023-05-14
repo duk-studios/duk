@@ -5,7 +5,7 @@
 #ifndef DUK_VULKAN_PHYSICAL_DEVICE_H
 #define DUK_VULKAN_PHYSICAL_DEVICE_H
 
-#include <duk_renderer/macros.h>
+#include <duk_macros/macros.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 #include <duk_renderer/vulkan/vulkan_query_error.h>
 
