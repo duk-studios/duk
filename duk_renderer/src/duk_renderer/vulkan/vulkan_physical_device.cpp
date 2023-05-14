@@ -38,7 +38,7 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
 
 VulkanPhysicalDevice::~VulkanPhysicalDevice() = default;
 
-ExpectedVulkanQueueFamilyProperties VulkanPhysicalDevice::query_queue_family_properties(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) {
+ExpectedVulkanQueueFamilyProperties VulkanPhysicalDevice::find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) {
     for (uint32_t candidateQueueIndex = 0; candidateQueueIndex < m_queueFamilyProperties.size(); candidateQueueIndex++) {
 
         const auto& candidateQueueFamily = m_queueFamilyProperties[candidateQueueIndex];
@@ -66,7 +66,7 @@ VkPhysicalDevice VulkanPhysicalDevice::handle() {
     return m_physicalDevice;
 }
 
-const VkPhysicalDevice VulkanPhysicalDevice::handle() const {
-    return m_physicalDevice;
+const std::vector<VkQueueFamilyProperties>& VulkanPhysicalDevice::queue_family_properties() const {
+    return m_queueFamilyProperties;
 }
 }

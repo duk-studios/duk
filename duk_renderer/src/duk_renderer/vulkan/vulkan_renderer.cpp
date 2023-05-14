@@ -158,7 +158,8 @@ void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRend
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     {
-        auto expectedGraphicsQueueProperties = m_physicalDevice->query_queue_family_properties(m_surface, VK_QUEUE_GRAPHICS_BIT);
+        auto expectedGraphicsQueueProperties = m_physicalDevice->find_queue_family(m_surface,
+                                                                                   VK_QUEUE_GRAPHICS_BIT);
         if (!expectedGraphicsQueueProperties){
             throw std::runtime_error("could not find a suitable graphics queue");
         }

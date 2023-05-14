@@ -30,11 +30,11 @@ public:
     explicit VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo& physicalDeviceCreateInfo);
     ~VulkanPhysicalDevice();
 
-    ExpectedVulkanQueueFamilyProperties query_queue_family_properties(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags = 0);
+    ExpectedVulkanQueueFamilyProperties find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags = 0);
 
     DUK_NO_DISCARD VkPhysicalDevice handle();
 
-    DUK_NO_DISCARD const VkPhysicalDevice handle() const;
+    DUK_NO_DISCARD const std::vector<VkQueueFamilyProperties>& queue_family_properties() const;
 
 private:
     VkPhysicalDevice m_physicalDevice;
