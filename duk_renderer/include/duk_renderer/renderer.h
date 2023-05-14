@@ -6,6 +6,7 @@
 #define DUK_RENDERER_RENDERER_H
 
 #include <duk_renderer/renderer_error.h>
+#include <duk_renderer/command_queue.h>
 
 #include <duk_log/logger.h>
 
@@ -39,18 +40,11 @@ struct RendererCreateInfo {
     size_t deviceIndex;
 };
 
-class Mesh;
-class MeshDataSource;
-class Pipeline;
-class PipelineDataSource;
+class Renderer;
+using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
+using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
 
 class Renderer {
-public:
-
-    using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
-    using ExpectedMesh = tl::expected<std::shared_ptr<Mesh>, RendererError>;
-    using ExpectedPipeline = tl::expected<std::shared_ptr<Pipeline>, RendererError>;
-
 public:
 
     static ExpectedRenderer create_renderer(const RendererCreateInfo& rendererCreateInfo);
@@ -64,9 +58,7 @@ public:
     /// called to end a frame, TODO: not sure if it will already present the frame
     virtual void end_frame() = 0;
 
-    DUK_NO_DISCARD virtual ExpectedMesh create_mesh(const MeshDataSource* meshDataSource) = 0;
-
-    DUK_NO_DISCARD virtual ExpectedPipeline create_pipeline(const PipelineDataSource* pipelineDataSource) = 0;
+    virtual ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
 
 private:
 

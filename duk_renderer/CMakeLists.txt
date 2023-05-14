@@ -12,6 +12,8 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/pipeline/pipeline.h
         include/duk_renderer/pipeline/pipeline_data_source.h
         include/duk_renderer/pipeline/shader.h
+        include/duk_renderer/command_queue.h
+        include/duk_renderer/command_interface.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -21,21 +23,24 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/mesh/mesh_data_source.cpp
         src/duk_renderer/mesh/vertex_data_source.cpp
         src/duk_renderer/mesh/vertex_layout.cpp
+        src/duk_renderer/pipeline/pipeline.cpp
+        src/duk_renderer/pipeline/pipeline_data_source.cpp
+        src/duk_renderer/pipeline/shader.cpp
+        src/duk_renderer/vulkan/vulkan_command_queue.h
+        src/duk_renderer/vulkan/vulkan_command_queue.cpp
         src/duk_renderer/vulkan/vulkan_debug_messenger.h
         src/duk_renderer/vulkan/vulkan_debug_messenger.cpp
         src/duk_renderer/vulkan/vulkan_import.h
         src/duk_renderer/vulkan/vulkan_physical_device.h
         src/duk_renderer/vulkan/vulkan_physical_device.cpp
         src/duk_renderer/vulkan/vulkan_query_error.h
-        src/duk_renderer/vulkan/vulkan_queue.h
-        src/duk_renderer/vulkan/vulkan_queue.cpp
         src/duk_renderer/vulkan/vulkan_renderer.h
         src/duk_renderer/vulkan/vulkan_renderer.cpp
-        src/duk_renderer/pipeline/pipeline.cpp
-        src/duk_renderer/pipeline/pipeline_data_source.cpp
-        src/duk_renderer/pipeline/shader.cpp
         src/duk_renderer/vulkan/vulkan_swapchain.h
         src/duk_renderer/vulkan/vulkan_swapchain.cpp
+        src/duk_renderer/command_queue.cpp
+        src/duk_renderer/vulkan/vulkan_command_interface.h
+        src/duk_renderer/vulkan/vulkan_command_interface.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
@@ -54,6 +59,7 @@ target_link_libraries(duk_renderer
         duk_hash
         duk_platform
         duk_log
+        duk_task
 
         # external
         glm::glm

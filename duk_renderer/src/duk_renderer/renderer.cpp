@@ -16,7 +16,7 @@ static std::shared_ptr<VulkanRenderer> create_vulkan_renderer(const RendererCrea
     return std::make_shared<VulkanRenderer>(vulkanRendererCreateInfo);
 }
 
-Renderer::ExpectedRenderer Renderer::create_renderer(const RendererCreateInfo& rendererCreateInfo) {
+ExpectedRenderer Renderer::create_renderer(const RendererCreateInfo& rendererCreateInfo) {
     try {
         switch (rendererCreateInfo.api){
             case RendererAPI::UNDEFINED:

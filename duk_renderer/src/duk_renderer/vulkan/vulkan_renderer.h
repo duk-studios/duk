@@ -9,7 +9,8 @@
 #include <duk_renderer/vulkan/vulkan_debug_messenger.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 #include <duk_renderer/vulkan/vulkan_physical_device.h>
-#include <duk_renderer/vulkan/vulkan_queue.h>
+#include <duk_renderer/vulkan/vulkan_command_queue.h>
+#include <duk_renderer/vulkan/vulkan_swapchain.h>
 
 namespace duk::renderer {
 
@@ -29,10 +30,12 @@ public:
 
     void end_frame() override;
 
+    ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
+
 private:
     void create_vk_instance(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
 
-    void select_vk_physical_device(VkInstance instance, uint32_t deviceIndex);
+    void select_vk_physical_device(uint32_t deviceIndex);
 
     void create_vk_surface(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
 
@@ -49,6 +52,7 @@ private:
     std::unique_ptr<VulkanSwapchain> m_swapchain;
 
     VulkanDebugMessenger m_debugMessenger;
+    std::array<uint32_t, CommandQueueType::QUEUE_COUNT> m_queueFamilyIndices;
 
 };
 

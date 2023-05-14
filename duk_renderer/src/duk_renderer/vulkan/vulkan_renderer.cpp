@@ -50,7 +50,6 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
     m_device(VK_NULL_HANDLE) {
 
     create_vk_instance(vulkanRendererCreateInfo);
-    select_vk_physical_device(m_instance, vulkanRendererCreateInfo.rendererCreateInfo.deviceIndex);
     if (vulkanRendererCreateInfo.rendererCreateInfo.window){
         create_vk_surface(vulkanRendererCreateInfo);
     }
@@ -72,6 +71,21 @@ void VulkanRenderer::begin_frame() {
 
 void VulkanRenderer::end_frame() {
 
+}
+
+ExpectedCommandQueue VulkanRenderer::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
+
+    auto familyIndex = m_queueFamilyIndices[commandQueueCreateInfo.type];
+    if (familyIndex == ~0){
+        return tl::unexpected<RendererError>(RendererError::INVALID_ARGUMENT, "queue type is not supported by the renderer");
+    }
+
+    VulkanCommandQueueCreateInfo vulkanCommandQueueCreateInfo = {};
+    vulkanCommandQueueCreateInfo.device = m_device;
+    vulkanCommandQueueCreateInfo.familyIndex = familyIndex;
+    vulkanCommandQueueCreateInfo.index = 0;
+
+    return std::make_shared<VulkanCommandQueue>(vulkanCommandQueueCreateInfo);
 }
 
 void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
@@ -127,10 +141,10 @@ void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRe
     }
 }
 
-void VulkanRenderer::select_vk_physical_device(VkInstance instance, uint32_t deviceIndex) {
+void VulkanRenderer::select_vk_physical_device(uint32_t deviceIndex) {
 
     VulkanPhysicalDeviceCreateInfo physicalDeviceCreateInfo = {};
-    physicalDeviceCreateInfo.instance = instance;
+    physicalDeviceCreateInfo.instance = m_instance;
     physicalDeviceCreateInfo.deviceIndex = deviceIndex;
 
     m_physicalDevice = std::make_unique<VulkanPhysicalDevice>(physicalDeviceCreateInfo);
@@ -159,24 +173,53 @@ void VulkanRenderer::create_vk_surface(const VulkanRendererCreateInfo& vulkanRen
 
 void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
 
-    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    m_queueFamilyIndices.fill(~0);
+    std::set<uint32_t> uniqueQueueFamilies;
+
     {
-        auto expectedGraphicsQueueProperties = m_physicalDevice->find_queue_family(m_surface,
-                                                                                   VK_QUEUE_GRAPHICS_BIT);
+        auto expectedGraphicsQueueProperties = m_physicalDevice->find_queue_family(m_surface, VK_QUEUE_GRAPHICS_BIT);
         if (!expectedGraphicsQueueProperties){
             throw std::runtime_error("could not find a suitable graphics queue");
         }
 
         auto graphicsQueueProperties = expectedGraphicsQueueProperties.value();
-        float queuePriority = 1.0f;
+
+        m_queueFamilyIndices[CommandQueueType::QUEUE_GRAPHICS] = graphicsQueueProperties.familyIndex;
+        uniqueQueueFamilies.insert(graphicsQueueProperties.familyIndex);
+    }
+
+    {
+        // this is terrible, someday I should bother making this better
+        auto expectedComputeQueueProperties = m_physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT, VK_QUEUE_GRAPHICS_BIT);
+        if (expectedComputeQueueProperties){
+            auto computeQueueProperties = expectedComputeQueueProperties.value();
+            m_queueFamilyIndices[CommandQueueType::QUEUE_COMPUTE] = computeQueueProperties.familyIndex;
+            uniqueQueueFamilies.insert(computeQueueProperties.familyIndex);
+        }
+        else {
+            expectedComputeQueueProperties = m_physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT);
+            if (expectedComputeQueueProperties){
+                auto computeQueueProperties = expectedComputeQueueProperties.value();
+                m_queueFamilyIndices[CommandQueueType::QUEUE_COMPUTE] = computeQueueProperties.familyIndex;
+                uniqueQueueFamilies.insert(computeQueueProperties.familyIndex);
+            }
+        }
+    }
+
+    std::vector<uint32_t> queueFamilyIndices(uniqueQueueFamilies.begin(), uniqueQueueFamilies.end());
+
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    float queuePriority = 1.0f;
+    for (auto familyIndex : queueFamilyIndices) {
         VkDeviceQueueCreateInfo graphicsQueueCreateInfo = {};
         graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        graphicsQueueCreateInfo.queueFamilyIndex = graphicsQueueProperties.familyIndex;
+        graphicsQueueCreateInfo.queueFamilyIndex = familyIndex;
         graphicsQueueCreateInfo.queueCount = 1;
         graphicsQueueCreateInfo.pQueuePriorities = &queuePriority;
 
         queueCreateInfos.push_back(graphicsQueueCreateInfo);
     }
+
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
