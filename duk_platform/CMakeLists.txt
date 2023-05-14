@@ -18,3 +18,9 @@ target_include_directories(duk_platform
         )
 
 set_target_properties(duk_platform PROPERTIES CXX_STANDARD 20)
+
+target_compile_definitions(duk_platform
+        PUBLIC
+        DUK_PLATFORM_IS_WINDOWS=$<PLATFORM_ID:Windows>
+        DUK_PLATFORM_IS_LINUX=$<PLATFORM_ID:Linux>
+        )
