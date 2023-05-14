@@ -5,14 +5,33 @@
 #ifndef DUK_RENDERER_RENDERER_H
 #define DUK_RENDERER_RENDERER_H
 
+#include <duk_renderer/renderer_error.h>
+
+#include <tl/expected.hpp>
+
+#include <memory>
+
 namespace duk::renderer {
 
-struct RendererCreateInfo {
+enum class RendererAPI {
+    UNDEFINED,
+    VULKAN,
+    OPENGL45,
+    DX12
+};
 
+struct RendererCreateInfo {
+    RendererAPI api;
 };
 
 class Renderer {
 public:
+
+    using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
+
+public:
+
+    static ExpectedRenderer create_renderer(const RendererCreateInfo& rendererCreateInfo);
 
     /// destructor
     virtual ~Renderer() = default;

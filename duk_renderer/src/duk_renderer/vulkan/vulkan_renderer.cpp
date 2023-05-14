@@ -6,8 +6,7 @@
 
 namespace duk::renderer {
 
-VulkanRenderer::VulkanRenderer(const RendererCreateInfo& rendererCreateInfo,
-                               const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
+VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
 
 }
 

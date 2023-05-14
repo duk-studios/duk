@@ -16,7 +16,7 @@ struct VulkanRendererCreateInfo {
 class VulkanRenderer : public Renderer {
 public:
 
-    VulkanRenderer(const RendererCreateInfo& rendererCreateInfo, const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
+    VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
 
     void begin_frame() override;
 

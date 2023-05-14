@@ -3,6 +3,9 @@
 //
 
 #include <duk_renderer/mesh/mesh_data_source.h>
+#include <duk_renderer/renderer.h>
+
+#include <iostream>
 
 int main() {
     using namespace duk::renderer;
@@ -20,5 +23,17 @@ int main() {
     MeshDataSource meshDataSource;
 
     meshDataSource.set_vertex_data_source(&vertexDataSource);
+
+    RendererCreateInfo rendererCreateInfo = {};
+    rendererCreateInfo.api = RendererAPI::VULKAN;
+
+    auto expectedRenderer = Renderer::create_renderer(rendererCreateInfo);
+
+    if (expectedRenderer) {
+        std::cout << "Renderer created!" << std::endl;
+    }
+    else {
+        std::cout << "Renderer failed to be created!" << std::endl;
+    }
 
 }
