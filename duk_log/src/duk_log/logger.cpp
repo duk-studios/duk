@@ -4,17 +4,27 @@
 
 namespace duk::log {
 
-Logger::Log::Log(Logger& owner) :
-    m_owner(owner) {
+Logger::Log::Log(Logger& owner, Level level) :
+    m_owner(owner),
+    m_level(level) {
 
 }
 
 Logger::Log::~Log() {
-    m_owner.print(m_buffer.str());
+    m_owner.print(m_level, m_buffer.str());
 }
 
-Logger::Log Logger::log() {
-    return Logger::Log(*this);
+Logger::Log Logger::log(Level level) {
+    return Logger::Log(*this, level);
+}
+
+Logger::Logger(Level minimumLevel) :
+    m_minimumLevel(minimumLevel){
+    m_printQueue.start();
+}
+
+Logger::~Logger() {
+    m_printQueue.stop();
 }
 
 void Logger::listen_to_print(events::EventListener& listener, PrintEvent::Callback&& callback) {

@@ -55,7 +55,10 @@ ExpectedVulkanQueueFamilyProperties VulkanPhysicalDevice::find_queue_family(VkSu
 
         auto candidateFlags = candidateQueueFamily.queueFlags;
 
-        if (candidateQueueFamily.queueCount > 0 && candidateFlags & requiredQueueFlags && (candidateFlags & prohibitedQueueFlags) == 0) {
+        bool hasRequiredFlags = candidateFlags & requiredQueueFlags || requiredQueueFlags == 0;
+        bool hasProhibitedFlags = candidateFlags & prohibitedQueueFlags;
+
+        if (candidateQueueFamily.queueCount > 0 && hasRequiredFlags && !hasProhibitedFlags) {
             return VulkanQueueFamilyProperties{candidateQueueFamily, candidateQueueIndex};
         }
     }

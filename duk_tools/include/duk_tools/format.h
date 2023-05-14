@@ -8,28 +8,27 @@
 #include <sstream>
 #include <vector>
 
-// keep on duk namespace for simplicity
-namespace duk {
+namespace duk::tools {
 
 template<typename T>
-std::string to_str(const T& value) {
+inline std::string to_str(const T& value) {
     return std::to_string(value);
 }
 
-std::string to_str(bool value) {
+inline std::string to_str(bool value) {
     return value ? "true" : "false";
 }
 
-std::string to_str(const std::string& value) {
+inline std::string to_str(const std::string& value) {
     return value;
 }
 
-std::string to_str(const char* value) {
+inline std::string to_str(const char* value) {
     return value;
 }
 
 template<typename ...Args>
-std::string format(const std::string& base, Args&& ... args) {
+inline  std::string format(const std::string& base, Args&& ... args) {
     if constexpr (sizeof...(args) == 0) {
         return base;
     }

@@ -4,7 +4,6 @@ set(DUK_LOG_HEADERS
         include/duk_log/logger.h
         include/duk_log/sink.h
         include/duk_log/sink_std_console.h
-        include/duk_log/format.h
         )
 set(DUK_LOG_SOURCES
         src/duk_log/logger.cpp
@@ -27,6 +26,7 @@ target_link_libraries(duk_log
         duk_macros
         duk_events
         duk_task
+        duk_tools
         )
 
 set_target_properties(duk_log PROPERTIES CXX_STANDARD 20)

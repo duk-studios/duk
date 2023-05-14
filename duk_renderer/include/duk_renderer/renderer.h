@@ -7,12 +7,18 @@
 
 #include <duk_renderer/renderer_error.h>
 #include <duk_renderer/command_queue.h>
+#include <duk_renderer/command_scheduler.h>
+#include <duk_renderer/render_pass.h>
+#include <duk_renderer/frame_buffer.h>
+#include <duk_renderer/mesh/mesh.h>
+#include <duk_renderer/pipeline/pipeline.h>
 
 #include <duk_log/logger.h>
 
 #include <tl/expected.hpp>
 
 #include <memory>
+#include <optional>
 
 namespace duk::platform {
 
@@ -43,6 +49,11 @@ struct RendererCreateInfo {
 class Renderer;
 using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
 using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
+using ExpectedMesh = tl::expected<std::shared_ptr<Mesh>, RendererError>;
+using ExpectedPipeline = tl::expected<std::shared_ptr<Pipeline>, RendererError>;
+using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
+using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
+using ExpectedCommandScheduler = tl::expected<std::shared_ptr<CommandScheduler>, RendererError>;
 
 class Renderer {
 public:
@@ -53,12 +64,55 @@ public:
     virtual ~Renderer() = default;
 
     /// called to start a new frame
-    virtual void begin_frame() = 0;
+    virtual void prepare_frame() = 0;
 
-    /// called to end a frame, TODO: not sure if it will already present the frame
-    virtual void end_frame() = 0;
+    /// returns a command that acquires the next image for presentation
+    virtual Command* acquire_image_command() = 0;
 
-    virtual ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
+    /// returns a command that presents the contents of the present image on the screen
+    virtual Command* present_command() = 0;
+
+    /// returns the current present image
+    virtual Image* present_image() = 0;
+
+    struct CommandQueueCreateInfo {
+        CommandQueueType type;
+    };
+
+    DUK_NO_DISCARD virtual ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
+
+    struct MeshCreateInfo {
+        MeshDataSource* meshDataSource;
+        CommandQueueType ownerQueueType;
+    };
+
+    DUK_NO_DISCARD virtual ExpectedCommandScheduler create_command_scheduler() = 0;
+
+    DUK_NO_DISCARD virtual ExpectedMesh create_mesh(const MeshCreateInfo& meshCreateInfo) = 0;
+
+    struct PipelineCreateInfo {
+
+    };
+
+    DUK_NO_DISCARD virtual ExpectedPipeline create_pipeline(const PipelineCreateInfo& pipelineCreateInfo) = 0;
+
+    struct RenderPassCreateInfo {
+        AttachmentDescription* colorAttachments;
+        uint32_t colorAttachmentCount;
+        AttachmentDescription* depthAttachment;
+    };
+
+    DUK_NO_DISCARD virtual ExpectedRenderPass create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) = 0;
+
+    struct FrameBufferCreateInfo {
+        uint32_t width;
+        uint32_t height;
+        RenderPass* renderPass;
+        Image* attachments;
+        uint32_t attachmentCount;
+    };
+
+    DUK_NO_DISCARD virtual ExpectedFrameBuffer create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) = 0;
 
 private:
 

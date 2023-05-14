@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_COMMAND_QUEUE_H
 #define DUK_RENDERER_COMMAND_QUEUE_H
 
-#include <duk_renderer/command_interface.h>
+#include <duk_renderer/command_buffer.h>
 
 #include <duk_task/task_queue.h>
 
@@ -16,10 +16,6 @@ enum CommandQueueType {
     QUEUE_COUNT
 };
 
-struct CommandQueueCreateInfo {
-    CommandQueueType type;
-};
-
 class CommandQueue {
 public:
 
@@ -27,13 +23,24 @@ public:
 
     virtual ~CommandQueue();
 
-    template <typename F, typename... Args>
-    auto enqueue(F&& func, Args&&... args) {
-        return m_taskQueue.template enqueue(func, m_commandInterface, std::forward<Args>(args)...);
+    template<typename F, typename ...Args, std::enable_if_t<std::is_void_v<std::invoke_result_t<F, CommandBuffer*, Args&&...>>, int> = 0>
+    FutureCommand enqueue(F&& func, Args&&... args) {
+        return m_taskQueue.template enqueue([
+                this,
+                taskFunc = std::forward<F>(func),
+                &args...
+                ]() -> Command* {
+            auto commandBuffer = next_command_buffer();
+            taskFunc(commandBuffer, std::forward<Args>(args)...);
+            return static_cast<Command*>(commandBuffer);
+        });
     }
 
+protected:
+
+    virtual CommandBuffer* next_command_buffer() = 0;
+
 private:
-    CommandInterface* m_commandInterface;
     duk::task::TaskQueue m_taskQueue;
 };
 

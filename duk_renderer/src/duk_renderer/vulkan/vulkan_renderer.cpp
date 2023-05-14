@@ -3,6 +3,11 @@
 //
 
 #include <duk_renderer/vulkan/vulkan_renderer.h>
+#include <duk_renderer/vulkan/vulkan_render_pass.h>
+#include <duk_renderer/vulkan/vulkan_frame_buffer.h>
+#include <duk_renderer/vulkan/vulkan_command_scheduler.h>
+#include <duk_renderer/mesh/mesh.h>
+
 
 #if DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/window_win_32.h>
@@ -41,13 +46,52 @@ static std::vector<const char*> query_device_extensions() {
     return {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 }
 
+static uint32_t find_present_queue_index(VulkanPhysicalDevice* physicalDevice, VkSurfaceKHR surface){
+    auto expectedPresentQueueProperties = physicalDevice->find_queue_family(surface, 0);
+    if (!expectedPresentQueueProperties){
+        throw std::runtime_error("could not find a suitable present queue");
+    }
+
+    auto presentQueueProperties = expectedPresentQueueProperties.value();
+    return presentQueueProperties.familyIndex;
+}
+
+static uint32_t find_graphics_queue_index(VulkanPhysicalDevice* physicalDevice){
+    auto expectedGraphicsQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_GRAPHICS_BIT);
+    if (!expectedGraphicsQueueProperties){
+        throw std::runtime_error("could not find a suitable present queue");
+    }
+
+    auto graphicsQueueProperties = expectedGraphicsQueueProperties.value();
+    return graphicsQueueProperties.familyIndex;
+}
+
+static uint32_t find_compute_queue_index(VulkanPhysicalDevice* physicalDevice) {
+    // try to find an exclusive compute queue
+    auto expectedComputeQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT, VK_QUEUE_GRAPHICS_BIT);
+    if (expectedComputeQueueProperties) {
+        auto computeQueueProperties = expectedComputeQueueProperties.value();
+        return computeQueueProperties.familyIndex;
+    }
+
+    // if not found, try to find any queue that supports compute
+    expectedComputeQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT);
+    if (expectedComputeQueueProperties) {
+        auto computeQueueProperties = expectedComputeQueueProperties.value();
+        return computeQueueProperties.familyIndex;
+    }
+    return ~0;
+}
+
 }
 
 VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) :
     m_instance(VK_NULL_HANDLE),
     m_physicalDevice(VK_NULL_HANDLE),
     m_surface(VK_NULL_HANDLE),
-    m_device(VK_NULL_HANDLE) {
+    m_device(VK_NULL_HANDLE),
+    m_maxFramesInFlight(vulkanRendererCreateInfo.maxFramesInFlight),
+    m_currentFrame(0) {
 
     create_vk_instance(vulkanRendererCreateInfo);
     if (vulkanRendererCreateInfo.rendererCreateInfo.window){
@@ -55,22 +99,38 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
     }
     select_vk_physical_device(vulkanRendererCreateInfo.rendererCreateInfo.deviceIndex);
     create_vk_device(vulkanRendererCreateInfo);
-    create_vk_swapchain(vulkanRendererCreateInfo);
+    if (m_surface) {
+        create_vk_swapchain(vulkanRendererCreateInfo);
+    }
 }
 
 VulkanRenderer::~VulkanRenderer() {
     m_swapchain.reset();
     vkDestroyDevice(m_device, nullptr);
-    vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+    if (m_surface) {
+        vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+    }
     vkDestroyInstance(m_instance, nullptr);
 }
 
-void VulkanRenderer::begin_frame() {
-
+void VulkanRenderer::prepare_frame() {
+    m_currentFrame = (m_currentFrame + 1) % m_maxFramesInFlight;
 }
 
-void VulkanRenderer::end_frame() {
+Command* VulkanRenderer::acquire_image_command() {
+    return m_swapchain->acquire_image_command();
+}
 
+Command* VulkanRenderer::present_command() {
+    return m_swapchain->present_command();
+}
+
+Image* VulkanRenderer::present_image() {
+    if (!m_swapchain) {
+        return nullptr;
+    }
+
+    return m_swapchain->image();
 }
 
 ExpectedCommandQueue VulkanRenderer::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
@@ -84,8 +144,60 @@ ExpectedCommandQueue VulkanRenderer::create_command_queue(const CommandQueueCrea
     vulkanCommandQueueCreateInfo.device = m_device;
     vulkanCommandQueueCreateInfo.familyIndex = familyIndex;
     vulkanCommandQueueCreateInfo.index = 0;
+    vulkanCommandQueueCreateInfo.currentFramePtr = &m_currentFrame;
+    vulkanCommandQueueCreateInfo.frameCount = m_maxFramesInFlight;
 
     return std::make_shared<VulkanCommandQueue>(vulkanCommandQueueCreateInfo);
+}
+
+ExpectedCommandScheduler VulkanRenderer::create_command_scheduler() {
+
+    VulkanCommandSchedulerCreateInfo commandSchedulerCreateInfo = {};
+    commandSchedulerCreateInfo.device = m_device;
+    commandSchedulerCreateInfo.frameCount = m_maxFramesInFlight;
+    commandSchedulerCreateInfo.currentFramePtr = &m_currentFrame;
+
+    return std::make_shared<VulkanCommandScheduler>(commandSchedulerCreateInfo);
+}
+
+ExpectedMesh VulkanRenderer::create_mesh(const MeshCreateInfo& meshCreateInfo) {
+    return tl::unexpected<RendererError>(RendererError::NOT_IMPLEMENTED, "Not implemented");
+}
+
+ExpectedPipeline VulkanRenderer::create_pipeline(const PipelineCreateInfo& pipelineCreateInfo) {
+    return tl::unexpected<RendererError>(RendererError::NOT_IMPLEMENTED, "Not implemented");
+}
+
+ExpectedRenderPass VulkanRenderer::create_render_pass(const Renderer::RenderPassCreateInfo& renderPassCreateInfo) {
+    try {
+        VulkanRenderPassCreateInfo vulkanRenderPassCreateInfo = {};
+        vulkanRenderPassCreateInfo.device = m_device;
+        vulkanRenderPassCreateInfo.colorAttachments = renderPassCreateInfo.colorAttachments;
+        vulkanRenderPassCreateInfo.colorAttachmentCount = renderPassCreateInfo.colorAttachmentCount;
+        vulkanRenderPassCreateInfo.depthAttachment = renderPassCreateInfo.depthAttachment;
+        return std::make_shared<VulkanRenderPass>(vulkanRenderPassCreateInfo);
+    }
+    catch (std::exception& e) {
+        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
+    }
+}
+
+ExpectedFrameBuffer VulkanRenderer::create_frame_buffer(const Renderer::FrameBufferCreateInfo& frameBufferCreateInfo) {
+
+    try {
+        VulkanFrameBufferCreateInfo vulkanFrameBufferCreateInfo = {};
+        vulkanFrameBufferCreateInfo.device = m_device;
+        vulkanFrameBufferCreateInfo.frameCount = m_maxFramesInFlight;
+        vulkanFrameBufferCreateInfo.width = frameBufferCreateInfo.width;
+        vulkanFrameBufferCreateInfo.height = frameBufferCreateInfo.height;
+        vulkanFrameBufferCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
+        vulkanFrameBufferCreateInfo.attachments = dynamic_cast<VulkanImage*>(frameBufferCreateInfo.attachments);
+        vulkanFrameBufferCreateInfo.attachmentCount = frameBufferCreateInfo.attachmentCount;
+        return std::make_shared<VulkanFrameBuffer>(vulkanFrameBufferCreateInfo);
+    }
+    catch (std::exception& e) {
+        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
+    }
 }
 
 void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
@@ -96,8 +208,8 @@ void VulkanRenderer::create_vk_instance(const VulkanRendererCreateInfo& vulkanRe
     applicationInfo.pApplicationName = rendererCreateInfo.applicationName;
     applicationInfo.applicationVersion = rendererCreateInfo.applicationVersion;
     applicationInfo.pEngineName = rendererCreateInfo.engineName;
-    applicationInfo.engineVersion = rendererCreateInfo.engineVersion;
-    applicationInfo.apiVersion = VK_VERSION_1_3;
+    applicationInfo.engineVersion = VK_MAKE_VERSION(rendererCreateInfo.engineVersion, 0, 0);
+    applicationInfo.apiVersion = VK_API_VERSION_1_3;
 
     VkInstanceCreateInfo instanceCreateInfo = {};
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -174,36 +286,24 @@ void VulkanRenderer::create_vk_surface(const VulkanRendererCreateInfo& vulkanRen
 void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
 
     m_queueFamilyIndices.fill(~0);
+    m_presentQueueFamilyIndex = ~0;
     std::set<uint32_t> uniqueQueueFamilies;
 
-    {
-        auto expectedGraphicsQueueProperties = m_physicalDevice->find_queue_family(m_surface, VK_QUEUE_GRAPHICS_BIT);
-        if (!expectedGraphicsQueueProperties){
-            throw std::runtime_error("could not find a suitable graphics queue");
-        }
-
-        auto graphicsQueueProperties = expectedGraphicsQueueProperties.value();
-
-        m_queueFamilyIndices[CommandQueueType::QUEUE_GRAPHICS] = graphicsQueueProperties.familyIndex;
-        uniqueQueueFamilies.insert(graphicsQueueProperties.familyIndex);
+    if (m_surface) {
+        m_presentQueueFamilyIndex = detail::find_present_queue_index(m_physicalDevice.get(), m_surface);
+        uniqueQueueFamilies.insert(m_presentQueueFamilyIndex);
     }
 
     {
-        // this is terrible, someday I should bother making this better
-        auto expectedComputeQueueProperties = m_physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT, VK_QUEUE_GRAPHICS_BIT);
-        if (expectedComputeQueueProperties){
-            auto computeQueueProperties = expectedComputeQueueProperties.value();
-            m_queueFamilyIndices[CommandQueueType::QUEUE_COMPUTE] = computeQueueProperties.familyIndex;
-            uniqueQueueFamilies.insert(computeQueueProperties.familyIndex);
-        }
-        else {
-            expectedComputeQueueProperties = m_physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT);
-            if (expectedComputeQueueProperties){
-                auto computeQueueProperties = expectedComputeQueueProperties.value();
-                m_queueFamilyIndices[CommandQueueType::QUEUE_COMPUTE] = computeQueueProperties.familyIndex;
-                uniqueQueueFamilies.insert(computeQueueProperties.familyIndex);
-            }
-        }
+        auto graphicsQueueFamilyIndex = detail::find_graphics_queue_index(m_physicalDevice.get());
+        m_queueFamilyIndices[CommandQueueType::QUEUE_GRAPHICS] = graphicsQueueFamilyIndex;
+        uniqueQueueFamilies.insert(graphicsQueueFamilyIndex);
+    }
+
+    {
+        auto computeQueueFamilyIndex = detail::find_compute_queue_index(m_physicalDevice.get());
+        m_queueFamilyIndices[CommandQueueType::QUEUE_COMPUTE] = computeQueueFamilyIndex;
+        uniqueQueueFamilies.insert(computeQueueFamilyIndex);
     }
 
     std::vector<uint32_t> queueFamilyIndices(uniqueQueueFamilies.begin(), uniqueQueueFamilies.end());
@@ -248,14 +348,17 @@ void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRend
 }
 
 void VulkanRenderer::create_vk_swapchain(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {
+
+    VkQueue presentQueue;
+    vkGetDeviceQueue(m_device, m_presentQueueFamilyIndex, 0, &presentQueue);
+
     VulkanSwapchainCreateInfo swapchainCreateInfo = {};
     swapchainCreateInfo.physicalDevice = m_physicalDevice.get();
     swapchainCreateInfo.device = m_device;
     swapchainCreateInfo.surface = m_surface;
-    swapchainCreateInfo.sharedQueueFamilyIndices = {m_queueFamilyIndices[CommandQueueType::QUEUE_GRAPHICS]};
     auto window = vulkanRendererCreateInfo.rendererCreateInfo.window;
     swapchainCreateInfo.extent = {window->width(), window->height()};
-
+    swapchainCreateInfo.presentQueue = presentQueue;
 
     m_swapchain = std::make_unique<VulkanSwapchain>(swapchainCreateInfo);
 }

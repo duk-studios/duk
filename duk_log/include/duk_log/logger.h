@@ -3,15 +3,23 @@
 #ifndef DUK_LOG_LOGGER_H
 #define DUK_LOG_LOGGER_H
 
-#include <duk_log/format.h>
 #include <duk_macros/macros.h>
 #include <duk_events/event.h>
 #include <duk_task/task_queue.h>
+#include <duk_tools/format.h>
 
 #include <sstream>
 #include <vector>
 
 namespace duk::log {
+
+enum Level : uint8_t {
+    VERBOSE = 0,
+    INFO,
+    DEBUG,
+    WARN,
+    ERR
+};
 
 class Logger {
 public:
@@ -21,7 +29,7 @@ public:
     class Log {
     public:
 
-        explicit Log(Logger& owner);
+        explicit Log(Logger& owner, Level level);
         ~Log();
 
         template<typename T>
@@ -29,24 +37,59 @@ public:
 
     private:
         Logger& m_owner;
+        Level m_level;
         std::ostringstream m_buffer;
     };
 public:
 
-    DUK_NO_DISCARD Log log();
+    explicit Logger(Level minimumLevel);
+
+    ~Logger();
+
+    DUK_NO_DISCARD Log log(Level level);
 
     template<typename ...Args>
-    void print(const std::string& format, Args&&... args){
+    void print(Level level, const std::string& format, Args&&... args) {
+        if (level < m_minimumLevel) {
+            return;
+        }
+
         m_printQueue.template enqueue([this](const std::string& format, Args&&... args){
-            auto formatted = duk::format(format, std::forward<Args>(args)...);
+            auto formatted = duk::tools::format(format, std::forward<Args>(args)...);
             std::lock_guard<std::mutex> lock(m_printMutex);
             m_print_event(formatted);
         }, format, std::forward<Args>(args)...);
     }
 
+    template<typename ...Args>
+    void print_verb(const std::string& format, Args&&... args) {
+        print(Level::VERBOSE, format, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void print_info(const std::string& format, Args&&... args) {
+        print(Level::INFO, format, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void print_debug(const std::string& format, Args&&... args) {
+        print(Level::DEBUG, format, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void print_warn(const std::string& format, Args&&... args) {
+        print(Level::WARN, format, std::forward<Args>(args)...);
+    }
+
+    template<typename ...Args>
+    void print_error(const std::string& format, Args&&... args) {
+        print(Level::ERR, format, std::forward<Args>(args)...);
+    }
+
     void listen_to_print(events::EventListener& listener, PrintEvent::Callback&& callback);
 
 private:
+    Level m_minimumLevel;
     task::TaskQueue m_printQueue;
     PrintEvent m_print_event;
     std::mutex m_printMutex;
@@ -54,7 +97,7 @@ private:
 
 template<typename T>
 Logger::Log& Logger::Log::operator<<(const T& value) {
-    m_buffer << duk::to_str(value);
+    m_buffer << duk::tools::to_str(value);
     return *this;
 }
 

@@ -6,6 +6,23 @@
 
 namespace duk::renderer {
 
+namespace detail {
+
+log::Level level_from_severity(VkDebugUtilsMessageSeverityFlagBitsEXT severity){
+    switch (severity){
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+            return log::Level::VERBOSE;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+            return log::Level::INFO;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            return log::Level::WARN;
+        default:
+            return log::Level::ERR;
+    }
+}
+
+}
+
 VulkanDebugMessenger::VulkanDebugMessenger() :
     logger(nullptr),
     enabledMessageSeverity(VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT),
@@ -28,7 +45,7 @@ void VulkanDebugMessenger::log(VkDebugUtilsMessageSeverityFlagBitsEXT messageSev
         return;
     }
 
-    logger->log() << pCallbackData->pMessage;
+    logger->log(detail::level_from_severity(messageSeverity)) << pCallbackData->pMessage;
 }
 
 } // duk::renderer

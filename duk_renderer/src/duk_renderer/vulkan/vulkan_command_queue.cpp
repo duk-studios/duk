@@ -4,28 +4,14 @@
 
 #include <duk_renderer/vulkan/vulkan_command_queue.h>
 
-#include <vector>
-
 namespace duk::renderer {
-
-VulkanCommandQueue::Fence::Fence(VulkanCommandQueue& owner, VkFence fence) :
-    m_owner(owner),
-    m_fence(fence) {
-
-}
-
-VulkanCommandQueue::Fence::~Fence() {
-    m_owner.free_fence(m_fence);
-}
-
-VkFence& VulkanCommandQueue::Fence::handle() {
-    return m_fence;
-}
 
 VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo) :
     m_device(commandQueueCreateInfo.device),
     m_familyIndex(commandQueueCreateInfo.familyIndex),
     m_index(commandQueueCreateInfo.index),
+    m_currentFramePtr(commandQueueCreateInfo.currentFramePtr),
+    m_frameCount(commandQueueCreateInfo.frameCount),
     m_queue(VK_NULL_HANDLE),
     m_commandPool(VK_NULL_HANDLE) {
 
@@ -40,17 +26,24 @@ VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& comma
     if (result != VK_SUCCESS){
         throw std::runtime_error("failed to create VkCommandPool");
     }
+
+    VulkanCommandBufferPoolCreateInfo commandBufferPoolCreateInfo = {};
+    commandBufferPoolCreateInfo.device = m_device;
+    commandBufferPoolCreateInfo.commandPool = m_commandPool;
+
+    m_commandBufferPool = std::make_unique<VulkanCommandBufferPool>(commandBufferPoolCreateInfo);
+
+    VulkanCommandBufferCreateInfo commandBufferCreateInfo = {};
+    commandBufferCreateInfo.commandQueue = this;
+    commandBufferCreateInfo.currentFramePtr = m_currentFramePtr;
+    commandBufferCreateInfo.frameCount = m_frameCount;
+
+    m_tempCommandBuffer = std::make_unique<VulkanCommandBuffer>(commandBufferCreateInfo);
 }
 
 VulkanCommandQueue::~VulkanCommandQueue() {
     vkQueueWaitIdle(m_queue);
-    trim_submissions();
-    if (!m_commandBuffers.empty()){
-        vkFreeCommandBuffers(m_device, m_commandPool, m_commandBuffers.size(), m_commandBuffers.data());
-    }
-    for (auto fence : m_fences){
-        vkDestroyFence(m_device, fence, nullptr);
-    }
+    m_commandBufferPool.reset();
     vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 }
 
@@ -63,77 +56,24 @@ uint32_t VulkanCommandQueue::family_index() const {
 }
 
 VkCommandBuffer VulkanCommandQueue::allocate_command_buffer() {
-    trim_submissions();
-
-    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
-
-    if (!m_commandBuffers.empty()) {
-        commandBuffer = m_commandBuffers.back();
-        m_commandBuffers.pop_back();
-
-        vkResetCommandBuffer(commandBuffer, 0);
-
-        return commandBuffer;
-    }
-
-    VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
-    commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    commandBufferAllocateInfo.commandBufferCount = 1;
-    commandBufferAllocateInfo.commandPool = m_commandPool;
-    commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-    vkAllocateCommandBuffers(m_device, &commandBufferAllocateInfo, &commandBuffer);
-
+    VkCommandBuffer commandBuffer = m_commandBufferPool->allocate();
+    vkResetCommandBuffer(commandBuffer, 0);
     return commandBuffer;
 }
 
-std::shared_ptr<VulkanCommandQueue::Fence> VulkanCommandQueue::submit(const VkSubmitInfo& submitInfo) {
-    auto fence = allocate_fence();
-
-    Submission submission = {};
-    submission.commandBuffers.insert(submission.commandBuffers.end(), submitInfo.pCommandBuffers, submitInfo.pCommandBuffers + submitInfo.commandBufferCount);
-    submission.fence = std::make_shared<Fence>(*this, fence);
-
-    m_submissions.push_back(submission);
-
-    vkQueueSubmit(m_queue, 1, &submitInfo, fence);
-
-    return submission.fence;
+void VulkanCommandQueue::free_command_buffer(VkCommandBuffer& commandBuffer) {
+    m_commandBufferPool->free(commandBuffer);
 }
 
-VkFence VulkanCommandQueue::allocate_fence() {
-
-    VkFence fence = VK_NULL_HANDLE;
-    if (!m_fences.empty()){
-        fence = m_fences.back();
-        m_fences.pop_back();
-        return fence;
+void VulkanCommandQueue::submit(const VkSubmitInfo& submitInfo, VkFence* fence) {
+    if (fence) {
+        vkResetFences(m_device, 1, fence);
     }
-
-    VkFenceCreateInfo fenceCreateInfo = {};
-    fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-    vkCreateFence(m_device, &fenceCreateInfo, nullptr, &fence);
-
-    return fence;
+    vkQueueSubmit(m_queue, 1, &submitInfo, *fence);
 }
 
-void VulkanCommandQueue::free_fence(VkFence fence) {
-    m_fences.push_back(fence);
-}
-
-void VulkanCommandQueue::trim_submissions() {
-    std::vector<Submission> activeSubmissions;
-    for (auto& submission : m_submissions){
-        auto result = vkWaitForFences(m_device, 1, &submission.fence->handle(), VK_TRUE, 0);
-        if (result == VK_TIMEOUT){
-            activeSubmissions.emplace_back(submission);
-            continue;
-        }
-        m_commandBuffers.insert(m_commandBuffers.end(), submission.commandBuffers.begin(), submission.commandBuffers.end());
-    }
-    m_submissions.swap(activeSubmissions);
+CommandBuffer* VulkanCommandQueue::next_command_buffer() {
+    return m_tempCommandBuffer.get();
 }
 
 }

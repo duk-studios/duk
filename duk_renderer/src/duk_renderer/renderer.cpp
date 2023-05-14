@@ -13,6 +13,7 @@ static std::shared_ptr<VulkanRenderer> create_vulkan_renderer(const RendererCrea
     VulkanRendererCreateInfo vulkanRendererCreateInfo = {};
     vulkanRendererCreateInfo.hasValidationLayers = true;
     vulkanRendererCreateInfo.rendererCreateInfo = rendererCreateInfo;
+    vulkanRendererCreateInfo.maxFramesInFlight = 3;
     return std::make_shared<VulkanRenderer>(vulkanRendererCreateInfo);
 }
 

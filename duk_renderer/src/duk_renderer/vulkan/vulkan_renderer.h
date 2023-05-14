@@ -6,16 +6,20 @@
 #define DUK_RENDERER_VULKAN_RENDERER_H
 
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/mesh/mesh.h>
+#include <duk_renderer/pipeline/pipeline.h>
 #include <duk_renderer/vulkan/vulkan_debug_messenger.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 #include <duk_renderer/vulkan/vulkan_physical_device.h>
 #include <duk_renderer/vulkan/vulkan_command_queue.h>
 #include <duk_renderer/vulkan/vulkan_swapchain.h>
+#include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 
 namespace duk::renderer {
 
 struct VulkanRendererCreateInfo {
     RendererCreateInfo rendererCreateInfo;
+    uint32_t maxFramesInFlight;
     bool hasValidationLayers;
 };
 
@@ -26,11 +30,25 @@ public:
 
     ~VulkanRenderer() override;
 
-    void begin_frame() override;
+    void prepare_frame() override;
 
-    void end_frame() override;
+    DUK_NO_DISCARD Command* acquire_image_command() override;
 
-    ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
+    DUK_NO_DISCARD Command* present_command() override;
+
+    DUK_NO_DISCARD Image* present_image() override;
+
+    DUK_NO_DISCARD ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
+
+    DUK_NO_DISCARD ExpectedCommandScheduler create_command_scheduler() override;
+
+    DUK_NO_DISCARD ExpectedMesh create_mesh(const MeshCreateInfo& meshCreateInfo) override;
+
+    DUK_NO_DISCARD ExpectedPipeline create_pipeline(const PipelineCreateInfo& pipelineCreateInfo) override;
+
+    DUK_NO_DISCARD ExpectedRenderPass create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) override;
+
+    DUK_NO_DISCARD ExpectedFrameBuffer create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) override;
 
 private:
     void create_vk_instance(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
@@ -49,10 +67,14 @@ private:
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;
     VkSurfaceKHR m_surface;
     VkDevice m_device;
+    uint32_t m_maxFramesInFlight;
     std::unique_ptr<VulkanSwapchain> m_swapchain;
 
     VulkanDebugMessenger m_debugMessenger;
     std::array<uint32_t, CommandQueueType::QUEUE_COUNT> m_queueFamilyIndices;
+    uint32_t m_presentQueueFamilyIndex;
+
+    uint32_t m_currentFrame;
 
 };
 
