@@ -56,6 +56,7 @@ public:
 public:
 
     WindowCloseEvent window_close_event;
+
     WindowDestroyEvent window_destroy_event;
 
 protected:
