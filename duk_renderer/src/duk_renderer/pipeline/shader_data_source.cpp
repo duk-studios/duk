@@ -16,11 +16,11 @@ bool ShaderDataSource::has_geometry_module() const {
 }
 
 bool ShaderDataSource::has_tesselation_control_module() const {
-    return module_mask() & Shader::ModuleType::TESSELATION_CTRL;
+    return module_mask() & Shader::ModuleType::TESSELATION_CONTROL;
 }
 
 bool ShaderDataSource::has_tesselation_evaluate_module() const {
-    return module_mask() & Shader::ModuleType::TESSELATION_EVAL;
+    return module_mask() & Shader::ModuleType::TESSELATION_EVALUATION;
 }
 
 bool ShaderDataSource::has_fragment_module() const {

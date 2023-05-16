@@ -13,8 +13,8 @@ public:
     struct ModuleType {
         enum Bits : uint32_t {
             VERTEX = 1 << 0,
-            TESSELATION_CTRL = 1 << 1,
-            TESSELATION_EVAL = 1 << 2,
+            TESSELATION_CONTROL = 1 << 1,
+            TESSELATION_EVALUATION = 1 << 2,
             GEOMETRY = 1 << 3,
             FRAGMENT = 1 << 4,
             COMPUTE = 1 << 5,
