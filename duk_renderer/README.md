@@ -22,9 +22,20 @@
 ## TODO
 ### Interface
 - Shader creation
-- Pipeline creation
-- Mesh creation
+  - ShaderDataSource:
+      - Holds information for all modules (vertex, fragment, etc...)
+      - Contains the shader source code: methods for getting the SPIR-V binary code.
+      - Plans on adding support for glsl and hlsl code in the future.
+      - At first, only have implementation for loading from disk, in the future we'll have code generation, and static content will be possible.
+  - Shader:
+    - Contains information related to required resources and attributes.
+- Pipeline:
+  - Describes all of the current pipeline state, can be modified on the fly while rendering.
 ### Vulkan
-- VulkanCommandQueue:
-  - Add support for multiple CommandBuffers in a single frame
+- VulkanCommandScheduler:
+  - Only create fences for Commands that actually require them.
+- Multi-Buffering:
+  - Guarantee that there are always exactly the same number of frames as there are swapchain images.
+- VulkanSwapchain recreation:
+  - Needs to make sure that every resource that depends on it is recreated as well.
   
