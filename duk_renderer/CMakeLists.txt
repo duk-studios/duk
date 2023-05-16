@@ -20,6 +20,8 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/pipeline/shader.h
         include/duk_renderer/command_scheduler.h
         include/duk_renderer/command.h
+        include/duk_renderer/pipeline/shader_data_source.h
+        include/duk_renderer/pipeline/std_shader_data_source.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -67,6 +69,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vulkan/vulkan_resource_pool.h
         src/duk_renderer/vulkan/vulkan_resource_pool.cpp
         src/duk_renderer/vulkan/vulkan_events.h
+        src/duk_renderer/pipeline/shader_data_source.cpp
+        src/duk_renderer/pipeline/std_shader_data_source.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
