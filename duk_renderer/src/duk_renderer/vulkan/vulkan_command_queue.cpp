@@ -33,16 +33,15 @@ VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& comma
 
     m_commandBufferPool = std::make_unique<VulkanCommandBufferPool>(commandBufferPoolCreateInfo);
 
-    VulkanCommandBufferCreateInfo commandBufferCreateInfo = {};
-    commandBufferCreateInfo.commandQueue = this;
-    commandBufferCreateInfo.currentFramePtr = m_currentFramePtr;
-    commandBufferCreateInfo.frameCount = m_frameCount;
-
-    m_tempCommandBuffer = std::make_unique<VulkanCommandBuffer>(commandBufferCreateInfo);
+    // resets command buffers for this frame
+    m_listener.listen(*commandQueueCreateInfo.prepareFrameEvent, [this](uint32_t){
+        m_usedCommandBuffers = 0;
+    });
 }
 
 VulkanCommandQueue::~VulkanCommandQueue() {
     vkQueueWaitIdle(m_queue);
+    m_commandBuffers.clear();
     m_commandBufferPool.reset();
     vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 }
@@ -73,7 +72,17 @@ void VulkanCommandQueue::submit(const VkSubmitInfo& submitInfo, VkFence* fence) 
 }
 
 CommandBuffer* VulkanCommandQueue::next_command_buffer() {
-    return m_tempCommandBuffer.get();
+    auto nextCommandBufferIndex = m_usedCommandBuffers++;
+    if (nextCommandBufferIndex < m_commandBuffers.size()){
+        auto commandBuffer = m_commandBuffers[nextCommandBufferIndex].get();
+        return commandBuffer;
+    }
+
+    VulkanCommandBufferCreateInfo commandBufferCreateInfo = {};
+    commandBufferCreateInfo.commandQueue = this;
+    commandBufferCreateInfo.currentFramePtr = m_currentFramePtr;
+    commandBufferCreateInfo.frameCount = m_frameCount;
+    return m_commandBuffers.emplace_back(std::make_unique<VulkanCommandBuffer>(commandBufferCreateInfo)).get();
 }
 
 }

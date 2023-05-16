@@ -66,6 +66,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vulkan/vulkan_command.cpp
         src/duk_renderer/vulkan/vulkan_resource_pool.h
         src/duk_renderer/vulkan/vulkan_resource_pool.cpp
+        src/duk_renderer/vulkan/vulkan_events.h
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

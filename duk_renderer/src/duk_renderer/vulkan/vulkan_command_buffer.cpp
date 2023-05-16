@@ -26,7 +26,6 @@ VulkanCommandBuffer::~VulkanCommandBuffer() {
 }
 
 void VulkanCommandBuffer::begin() {
-
     m_currentCommandBuffer = m_commandBuffers[*m_currentFramePtr];
 
     VkCommandBufferBeginInfo commandBufferBeginInfo = {};

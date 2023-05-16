@@ -14,6 +14,7 @@
 #include <duk_renderer/vulkan/vulkan_command_queue.h>
 #include <duk_renderer/vulkan/vulkan_swapchain.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
+#include <duk_renderer/vulkan/vulkan_events.h>
 
 namespace duk::renderer {
 
@@ -75,6 +76,7 @@ private:
     uint32_t m_presentQueueFamilyIndex;
 
     uint32_t m_currentFrame;
+    VulkanPrepareFrameEvent m_prepareFrameEvent;
 
 };
 

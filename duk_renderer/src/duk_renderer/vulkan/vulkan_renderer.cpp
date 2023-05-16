@@ -115,6 +115,7 @@ VulkanRenderer::~VulkanRenderer() {
 
 void VulkanRenderer::prepare_frame() {
     m_currentFrame = (m_currentFrame + 1) % m_maxFramesInFlight;
+    m_prepareFrameEvent(m_currentFrame);
 }
 
 Command* VulkanRenderer::acquire_image_command() {
@@ -146,6 +147,7 @@ ExpectedCommandQueue VulkanRenderer::create_command_queue(const CommandQueueCrea
     vulkanCommandQueueCreateInfo.index = 0;
     vulkanCommandQueueCreateInfo.currentFramePtr = &m_currentFrame;
     vulkanCommandQueueCreateInfo.frameCount = m_maxFramesInFlight;
+    vulkanCommandQueueCreateInfo.prepareFrameEvent = &m_prepareFrameEvent;
 
     return std::make_shared<VulkanCommandQueue>(vulkanCommandQueueCreateInfo);
 }

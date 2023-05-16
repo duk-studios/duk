@@ -10,6 +10,7 @@
 #include <duk_renderer/vulkan/vulkan_import.h>
 #include <duk_renderer/vulkan/vulkan_command_buffer.h>
 #include <duk_renderer/vulkan/vulkan_resource_pool.h>
+#include <duk_renderer/vulkan/vulkan_events.h>
 
 namespace duk::renderer {
 
@@ -21,6 +22,7 @@ struct VulkanCommandQueueCreateInfo {
     uint32_t index;
     uint32_t* currentFramePtr;
     uint32_t frameCount;
+    VulkanPrepareFrameEvent* prepareFrameEvent;
 };
 
 class VulkanCommandQueue : public CommandQueue {
@@ -29,8 +31,6 @@ public:
     explicit VulkanCommandQueue(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo);
 
     ~VulkanCommandQueue() override;
-
-    DUK_NO_DISCARD CommandBuffer* next_command_buffer() override;
 
     DUK_NO_DISCARD uint32_t index() const;
 
@@ -42,6 +42,9 @@ public:
 
     void submit(const VkSubmitInfo& submitInfo, VkFence* fence);
 
+    // CommandQueue overrides
+    DUK_NO_DISCARD CommandBuffer* next_command_buffer() override;
+
 private:
     VkDevice m_device;
     uint32_t m_familyIndex;
@@ -51,7 +54,9 @@ private:
     VkQueue m_queue;
     VkCommandPool m_commandPool;
     std::unique_ptr<VulkanCommandBufferPool> m_commandBufferPool;
-    std::unique_ptr<VulkanCommandBuffer> m_tempCommandBuffer;
+    std::vector<std::unique_ptr<VulkanCommandBuffer>> m_commandBuffers;
+    uint32_t m_usedCommandBuffers;
+    duk::events::EventListener m_listener;
 };
 
 }
