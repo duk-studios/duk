@@ -3,6 +3,7 @@
 //
 
 #include <duk_renderer/data_source.h>
+#include <duk_macros/assert.h>
 
 namespace duk::renderer {
 
@@ -18,6 +19,7 @@ void DataSource::update_hash() {
 }
 
 hash::Hash DataSource::hash() const {
+    DUK_ASSERT(m_hash != hash::UndefinedHash, "hash was not set, missing update_hash()");
     return m_hash;
 }
 
