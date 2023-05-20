@@ -18,10 +18,16 @@ public:
 
     void insert_spir_v_code(Shader::ModuleType::Bits type, std::vector<uint8_t>&& data);
 
+    void insert_descriptor_set_description(const DescriptorSetDescription& descriptorSetDescription);
+
+    void insert_descriptor_set_description(DescriptorSetDescription&& descriptorSetDescription);
+
     // overrides
     Shader::ModuleMask module_mask() const override;
 
     const std::vector<uint8_t>& shader_module_spir_v_code(Shader::ModuleType::Bits type) const override;
+
+    const std::vector<DescriptorSetDescription>& descriptor_set_descriptions() const override;
 
 protected:
     hash::Hash calculate_hash() const override;
@@ -32,6 +38,7 @@ protected:
 
     std::unordered_map<Shader::ModuleType::Bits, ShaderModule> m_shaderModules;
     Shader::ModuleMask m_moduleMask;
+    std::vector<DescriptorSetDescription> m_descriptorSetDescriptions;
 
 };
 }

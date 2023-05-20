@@ -19,6 +19,10 @@ const std::vector<uint8_t>& StdShaderDataSource::shader_module_spir_v_code(Shade
     return module.spirVCode;
 }
 
+const std::vector<DescriptorSetDescription>& StdShaderDataSource::descriptor_set_descriptions() const {
+    return m_descriptorSetDescriptions;
+}
+
 duk::hash::Hash StdShaderDataSource::calculate_hash() const {
     duk::hash::Hash hash = 0;
 
@@ -26,6 +30,10 @@ duk::hash::Hash StdShaderDataSource::calculate_hash() const {
     for (auto&[type, module] : m_shaderModules) {
         duk::hash::hash_combine(hash, type);
         duk::hash::hash_combine(hash, module.spirVCode.data(), module.spirVCode.size());
+    }
+
+    for (auto& descriptorSetDescription : m_descriptorSetDescriptions) {
+        duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
     }
 
     return hash;
@@ -50,6 +58,14 @@ void StdShaderDataSource::insert_spir_v_code(Shader::ModuleType::Bits type, std:
     m_moduleMask |= type;
     auto& module = m_shaderModules[type];
     module.spirVCode = std::move(data);
+}
+
+void StdShaderDataSource::insert_descriptor_set_description(const DescriptorSetDescription& descriptorSetDescription) {
+    m_descriptorSetDescriptions.push_back(descriptorSetDescription);
+}
+
+void StdShaderDataSource::insert_descriptor_set_description(DescriptorSetDescription&& descriptorSetDescription) {
+    m_descriptorSetDescriptions.emplace_back(std::move(descriptorSetDescription));
 }
 
 }

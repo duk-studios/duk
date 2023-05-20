@@ -4,6 +4,9 @@
 #ifndef DUK_RENDERER_SHADER_H
 #define DUK_RENDERER_SHADER_H
 
+#include <duk_macros/macros.h>
+#include <duk_hash/hash.h>
+
 #include <cstdint>
 
 namespace duk::renderer {
@@ -13,14 +16,19 @@ public:
     struct ModuleType {
         enum Bits : uint32_t {
             VERTEX = 1 << 0,
-            TESSELATION_CONTROL = 1 << 1,
-            TESSELATION_EVALUATION = 1 << 2,
+            TESSELLATION_CONTROL = 1 << 1,
+            TESSELLATION_EVALUATION = 1 << 2,
             GEOMETRY = 1 << 3,
             FRAGMENT = 1 << 4,
             COMPUTE = 1 << 5,
         };
+        static constexpr uint32_t kCount = 6;
     };
     using ModuleMask = uint32_t;
+
+    virtual ~Shader();
+
+    DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 
 };
 
