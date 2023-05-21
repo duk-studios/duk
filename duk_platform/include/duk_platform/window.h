@@ -30,8 +30,9 @@ using ExpectedWindow = tl::expected<std::shared_ptr<Window>, WindowError>;
 class Window {
 public:
 
-    using WindowCloseEvent = duk::events::EventT<duk::platform::events::WindowClose>;
-    using WindowDestroyEvent = duk::events::EventT<duk::platform::events::WindowDestroy>;
+    using CloseEvent = duk::events::EventT<duk::platform::events::WindowClose>;
+    using DestroyEvent = duk::events::EventT<duk::platform::events::WindowDestroy>;
+    using ResizeEvent = duk::events::EventT<duk::platform::events::WindowResize>;
 
 public:
 
@@ -55,9 +56,11 @@ public:
 
 public:
 
-    WindowCloseEvent window_close_event;
+    CloseEvent window_close_event;
 
-    WindowDestroyEvent window_destroy_event;
+    DestroyEvent window_destroy_event;
+
+    ResizeEvent window_resize_event;
 
 protected:
     uint32_t m_width;
