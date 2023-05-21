@@ -104,7 +104,7 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo) :
             WS_OVERLAPPEDWINDOW,            // Window style
 
             // Size and position
-            CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+            CW_USEDEFAULT, CW_USEDEFAULT, static_cast<int32_t>(m_width), static_cast<int32_t>(m_height),
 
             NULL,       // Parent window
             NULL,       // Menu
