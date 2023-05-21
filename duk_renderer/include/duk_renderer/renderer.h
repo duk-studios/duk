@@ -11,6 +11,8 @@
 #include <duk_renderer/render_pass.h>
 #include <duk_renderer/frame_buffer.h>
 #include <duk_renderer/mesh/mesh.h>
+#include <duk_renderer/pipeline/shader_data_source.h>
+#include <duk_renderer/pipeline/shader.h>
 #include <duk_renderer/pipeline/pipeline.h>
 
 #include <duk_log/logger.h>
@@ -50,6 +52,7 @@ class Renderer;
 using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
 using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
 using ExpectedMesh = tl::expected<std::shared_ptr<Mesh>, RendererError>;
+using ExpectedShader = tl::expected<std::shared_ptr<Shader>, RendererError>;
 using ExpectedPipeline = tl::expected<std::shared_ptr<Pipeline>, RendererError>;
 using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
 using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
@@ -90,8 +93,20 @@ public:
 
     DUK_NO_DISCARD virtual ExpectedMesh create_mesh(const MeshCreateInfo& meshCreateInfo) = 0;
 
-    struct PipelineCreateInfo {
+    struct ShaderCreateInfo {
+        ShaderDataSource* shaderDataSource;
+    };
 
+    DUK_NO_DISCARD virtual ExpectedShader create_shader(const ShaderCreateInfo& shaderCreateInfo) = 0;
+
+    struct PipelineCreateInfo {
+        Shader* shader;
+        RenderPass* renderPass;
+        Pipeline::Viewport viewport;
+        Pipeline::Scissor scissor;
+        Pipeline::CullMode::Mask cullModeMask;
+        Pipeline::Blend blend;
+        bool depthTesting;
     };
 
     DUK_NO_DISCARD virtual ExpectedPipeline create_pipeline(const PipelineCreateInfo& pipelineCreateInfo) = 0;

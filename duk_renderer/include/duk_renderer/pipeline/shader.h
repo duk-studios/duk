@@ -13,7 +13,7 @@ namespace duk::renderer {
 
 class Shader {
 public:
-    struct ModuleType {
+    struct Module {
         enum Bits : uint32_t {
             VERTEX = 1 << 0,
             TESSELLATION_CONTROL = 1 << 1,
@@ -23,10 +23,15 @@ public:
             COMPUTE = 1 << 5,
         };
         static constexpr uint32_t kCount = 6;
+        using Mask = uint32_t;
     };
-    using ModuleMask = uint32_t;
+
 
     virtual ~Shader();
+
+    DUK_NO_DISCARD virtual bool is_graphics_shader() const = 0;
+
+    DUK_NO_DISCARD virtual bool is_compute_shader() const = 0;
 
     DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 

@@ -10,24 +10,32 @@ namespace duk::renderer {
 
 class StdShaderDataSource : public ShaderDataSource {
 public:
+    StdShaderDataSource();
+
     ~StdShaderDataSource() override;
 
-    void insert_spir_v_code(Shader::ModuleType::Bits type, const uint8_t* data, size_t size);
+    void insert_spir_v_code(Shader::Module::Bits type, const uint8_t* data, size_t size);
 
-    void insert_spir_v_code(Shader::ModuleType::Bits type, const std::vector<uint8_t>& data);
+    void insert_spir_v_code(Shader::Module::Bits type, const std::vector<uint8_t>& data);
 
-    void insert_spir_v_code(Shader::ModuleType::Bits type, std::vector<uint8_t>&& data);
+    void insert_spir_v_code(Shader::Module::Bits type, std::vector<uint8_t>&& data);
 
     void insert_descriptor_set_description(const DescriptorSetDescription& descriptorSetDescription);
 
     void insert_descriptor_set_description(DescriptorSetDescription&& descriptorSetDescription);
 
-    // overrides
-    Shader::ModuleMask module_mask() const override;
+    void insert_vertex_attribute(VertexAttribute::Format format);
 
-    const std::vector<uint8_t>& shader_module_spir_v_code(Shader::ModuleType::Bits type) const override;
+    void insert_vertex_attributes(const std::initializer_list<VertexAttribute::Format>& formats);
+
+    // overrides
+    Shader::Module::Mask module_mask() const override;
+
+    const std::vector<uint8_t>& shader_module_spir_v_code(Shader::Module::Bits type) const override;
 
     const std::vector<DescriptorSetDescription>& descriptor_set_descriptions() const override;
+
+    const VertexLayout& vertex_layout() const override;
 
 protected:
     hash::Hash calculate_hash() const override;
@@ -36,9 +44,10 @@ protected:
         std::vector<uint8_t> spirVCode;
     };
 
-    std::unordered_map<Shader::ModuleType::Bits, ShaderModule> m_shaderModules;
-    Shader::ModuleMask m_moduleMask;
+    std::unordered_map<Shader::Module::Bits, ShaderModule> m_shaderModules;
+    Shader::Module::Mask m_moduleMask;
     std::vector<DescriptorSetDescription> m_descriptorSetDescriptions;
+    VertexLayout m_vertexLayout;
 
 };
 }

@@ -79,6 +79,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/pipeline/descriptor.cpp
         src/duk_renderer/vulkan/pipeline/vulkan_descriptor.h
         src/duk_renderer/vulkan/pipeline/vulkan_descriptor.cpp
+        src/duk_renderer/vulkan/vulkan_flags.h
+        src/duk_renderer/vulkan/mesh/vulkan_vertex.h
+        src/duk_renderer/vulkan/mesh/vulkan_vertex.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

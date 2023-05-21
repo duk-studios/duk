@@ -39,6 +39,8 @@ public:
 
     DUK_NO_DISCARD VkRenderPass handle() const;
 
+    DUK_NO_DISCARD size_t attachment_count() const override;
+
     DUK_NO_DISCARD size_t color_attachment_count() const override;
 
     DUK_NO_DISCARD bool has_depth_attachment() const override;

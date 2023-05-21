@@ -13,9 +13,9 @@ namespace duk::renderer {
 
 namespace vk {
 
-VkShaderStageFlagBits convert_module(Shader::ModuleType::Bits module);
+VkShaderStageFlagBits convert_module(Shader::Module::Bits module);
 
-VkShaderStageFlags convert_module_mask(Shader::ModuleMask moduleMask);
+VkShaderStageFlags convert_module_mask(Shader::Module::Mask moduleMask);
 
 }
 
@@ -31,7 +31,11 @@ public:
 
     ~VulkanShader() override;
 
-    DUK_NO_DISCARD const std::unordered_map<Shader::ModuleType::Bits, VkShaderModule>& shader_modules() const;
+    DUK_NO_DISCARD const std::vector<VkVertexInputAttributeDescription>& input_attributes() const;
+
+    DUK_NO_DISCARD const std::vector<VkVertexInputBindingDescription>& input_bindings() const;
+
+    DUK_NO_DISCARD const std::unordered_map<Shader::Module::Bits, VkShaderModule>& shader_modules() const;
 
     DUK_NO_DISCARD const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts() const;
 
@@ -39,16 +43,23 @@ public:
 
     DUK_NO_DISCARD hash::Hash hash() const override;
 
+    DUK_NO_DISCARD bool is_graphics_shader() const override;
+
+    DUK_NO_DISCARD bool is_compute_shader() const override;
+
 private:
 
-    bool create_shader_module(Shader::ModuleType::Bits type, ShaderDataSource* shaderDataSource);
+    bool create_shader_module(Shader::Module::Bits type, ShaderDataSource* shaderDataSource);
 
 private:
     VkDevice m_device;
     duk::hash::Hash m_hash;
-    std::unordered_map<Shader::ModuleType::Bits, VkShaderModule> m_shaderModules;
+    Shader::Module::Mask m_moduleMask;
+    std::unordered_map<Shader::Module::Bits, VkShaderModule> m_shaderModules;
     std::vector<VkDescriptorSetLayout> m_descriptorSetLayouts;
     VkPipelineLayout m_pipelineLayout;
+    std::vector<VkVertexInputBindingDescription> m_inputBindings;
+    std::vector<VkVertexInputAttributeDescription> m_inputAttributes;
 
 };
 

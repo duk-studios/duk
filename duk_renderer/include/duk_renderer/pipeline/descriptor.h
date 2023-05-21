@@ -24,7 +24,7 @@ enum class DescriptorType {
 
 struct DescriptorDescription {
     DescriptorType type;
-    Shader::ModuleMask moduleMask;
+    Shader::Module::Mask moduleMask;
 };
 
 struct DescriptorSetDescription {

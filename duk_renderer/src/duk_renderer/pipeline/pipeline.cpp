@@ -3,3 +3,8 @@
 
 #include <duk_renderer/pipeline/pipeline.h>
 
+namespace duk::renderer {
+
+Pipeline::~Pipeline() = default;
+
+}

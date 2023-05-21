@@ -40,6 +40,8 @@ public:
 
     virtual ~RenderPass();
 
+    DUK_NO_DISCARD virtual size_t attachment_count() const = 0;
+
     DUK_NO_DISCARD virtual size_t color_attachment_count() const = 0;
 
     DUK_NO_DISCARD virtual bool has_depth_attachment() const = 0;

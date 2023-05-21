@@ -7,6 +7,7 @@
 #include <duk_renderer/data_source.h>
 #include <duk_renderer/pipeline/shader.h>
 #include <duk_renderer/pipeline/descriptor.h>
+#include <duk_renderer/mesh/vertex_layout.h>
 
 #include <duk_macros/macros.h>
 
@@ -19,13 +20,15 @@ public:
 
     virtual ~ShaderDataSource();
 
-    DUK_NO_DISCARD virtual Shader::ModuleMask module_mask() const = 0;
+    DUK_NO_DISCARD virtual Shader::Module::Mask module_mask() const = 0;
 
-    DUK_NO_DISCARD virtual const std::vector<uint8_t>& shader_module_spir_v_code(Shader::ModuleType::Bits type) const = 0;
+    DUK_NO_DISCARD virtual const std::vector<uint8_t>& shader_module_spir_v_code(Shader::Module::Bits type) const = 0;
 
     DUK_NO_DISCARD virtual const std::vector<DescriptorSetDescription>& descriptor_set_descriptions() const = 0;
 
-    DUK_NO_DISCARD bool has_module(Shader::ModuleType::Bits module) const;
+    DUK_NO_DISCARD virtual const VertexLayout& vertex_layout() const = 0;
+
+    DUK_NO_DISCARD bool has_module(Shader::Module::Bits module) const;
 
     DUK_NO_DISCARD bool has_vertex_module() const;
 
