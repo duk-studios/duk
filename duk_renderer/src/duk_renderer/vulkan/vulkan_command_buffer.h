@@ -38,7 +38,9 @@ public:
 
     void end_render_pass() override;
 
-    void render(const RenderMeshInfo& renderMeshInfo) override;
+    void bind_pipeline(Pipeline* pipeline) override;
+
+    void draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) override;
 
     // VulkanCommand overrides
     void submit(const VulkanCommandParams& params) override;

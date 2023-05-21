@@ -7,6 +7,7 @@
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_render_pass.h>
 #include <duk_renderer/vulkan/vulkan_command.h>
+#include <duk_renderer/vulkan/pipeline/vulkan_pipeline.h>
 
 namespace duk::renderer {
 
@@ -73,8 +74,13 @@ void VulkanCommandBuffer::end_render_pass() {
     vkCmdEndRenderPass(m_currentCommandBuffer);
 }
 
-void VulkanCommandBuffer::render(const RenderMeshInfo& renderMeshInfo) {
+void VulkanCommandBuffer::bind_pipeline(Pipeline* pipeline) {
+    auto vulkanPipeline = dynamic_cast<VulkanPipeline*>(pipeline);
+    vkCmdBindPipeline(m_currentCommandBuffer, vulkanPipeline->bind_point(), vulkanPipeline->handle());
+}
 
+void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) {
+    vkCmdDraw(m_currentCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 }
 
 void VulkanCommandBuffer::submit(const VulkanCommandParams& params) {
