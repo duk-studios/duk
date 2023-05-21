@@ -106,6 +106,10 @@ VkRenderPass duk::renderer::VulkanRenderPass::handle() const {
     return m_renderPass;
 }
 
+size_t VulkanRenderPass::attachment_count() const {
+    return color_attachment_count() + has_depth_attachment();
+}
+
 size_t VulkanRenderPass::color_attachment_count() const {
     return m_colorAttachments.size();
 }

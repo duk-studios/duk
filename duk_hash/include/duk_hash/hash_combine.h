@@ -34,6 +34,26 @@ inline void hash_combine(std::size_t& seed, InputIterator begin, InputIterator e
     }
 }
 
+static inline void hash_combine(std::size_t& seed, const void* data, size_t size) {
+
+    auto uint64Ptr = (const uint64_t*)data;
+    auto uint64PtrEnd = uint64Ptr + (size / sizeof(uint64_t));
+
+    // write 8 byte blocks
+    while (uint64Ptr < uint64PtrEnd) {
+        hash_combine(seed, *uint64Ptr);
+        uint64Ptr++;
+    }
+
+    // write remaining bytes
+    auto uint8Ptr = (const uint8_t*)uint64Ptr;
+    auto uint8PtrEnd = (const uint8_t*)data + size;
+    while (uint8Ptr < uint8PtrEnd) {
+        hash_combine(seed, *uint8Ptr);
+        uint8Ptr++;
+    }
+}
+
 } // duk::hash
 
 #endif //DUK_HASH_HASH_COMBINE_H

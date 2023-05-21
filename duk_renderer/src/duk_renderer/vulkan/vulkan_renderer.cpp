@@ -6,6 +6,8 @@
 #include <duk_renderer/vulkan/vulkan_render_pass.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_command_scheduler.h>
+#include <duk_renderer/vulkan/pipeline/vulkan_shader.h>
+#include <duk_renderer/vulkan/pipeline/vulkan_pipeline.h>
 #include <duk_renderer/mesh/mesh.h>
 
 
@@ -166,8 +168,35 @@ ExpectedMesh VulkanRenderer::create_mesh(const MeshCreateInfo& meshCreateInfo) {
     return tl::unexpected<RendererError>(RendererError::NOT_IMPLEMENTED, "Not implemented");
 }
 
+ExpectedShader VulkanRenderer::create_shader(const Renderer::ShaderCreateInfo& shaderCreateInfo) {
+    try {
+        VulkanShaderCreateInfo vulkanShaderCreateInfo = {};
+        vulkanShaderCreateInfo.shaderDataSource = shaderCreateInfo.shaderDataSource;
+        vulkanShaderCreateInfo.device = m_device;
+        return std::make_shared<VulkanShader>(vulkanShaderCreateInfo);
+    }
+    catch (const std::exception& e){
+        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
+    }
+}
+
 ExpectedPipeline VulkanRenderer::create_pipeline(const PipelineCreateInfo& pipelineCreateInfo) {
-    return tl::unexpected<RendererError>(RendererError::NOT_IMPLEMENTED, "Not implemented");
+    try {
+        VulkanPipelineCreateInfo vulkanPipelineCreateInfo = {};
+        vulkanPipelineCreateInfo.device = m_device;
+        vulkanPipelineCreateInfo.shader = (VulkanShader*)pipelineCreateInfo.shader;
+        vulkanPipelineCreateInfo.renderPass = (VulkanRenderPass*)pipelineCreateInfo.renderPass;
+        vulkanPipelineCreateInfo.viewport = pipelineCreateInfo.viewport;
+        vulkanPipelineCreateInfo.scissor = pipelineCreateInfo.scissor;
+        vulkanPipelineCreateInfo.blend = pipelineCreateInfo.blend;
+        vulkanPipelineCreateInfo.cullModeMask = pipelineCreateInfo.cullModeMask;
+        vulkanPipelineCreateInfo.depthTesting = pipelineCreateInfo.depthTesting;
+
+        return std::make_shared<VulkanPipeline>(vulkanPipelineCreateInfo);
+    }
+    catch (const std::exception& e){
+        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
+    }
 }
 
 ExpectedRenderPass VulkanRenderer::create_render_pass(const Renderer::RenderPassCreateInfo& renderPassCreateInfo) {
@@ -185,7 +214,6 @@ ExpectedRenderPass VulkanRenderer::create_render_pass(const Renderer::RenderPass
 }
 
 ExpectedFrameBuffer VulkanRenderer::create_frame_buffer(const Renderer::FrameBufferCreateInfo& frameBufferCreateInfo) {
-
     try {
         VulkanFrameBufferCreateInfo vulkanFrameBufferCreateInfo = {};
         vulkanFrameBufferCreateInfo.device = m_device;

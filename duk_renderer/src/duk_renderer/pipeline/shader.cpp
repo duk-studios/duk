@@ -3,3 +3,8 @@
 
 #include <duk_renderer/pipeline/shader.h>
 
+namespace duk::renderer {
+
+Shader::~Shader() = default;
+
+}

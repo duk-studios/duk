@@ -21,8 +21,8 @@ struct Vertex2DColor {
 template<>
 inline VertexLayout layout_of<Vertex2DColor>() {
     return {
-        {VertexAttribute::POSITION, VertexAttribute::format_of<glm::vec2>() },
-        {VertexAttribute::COLOR, VertexAttribute::format_of<glm::vec4>() }
+        VertexAttribute::format_of<glm::vec2>(),
+        VertexAttribute::format_of<glm::vec4>()
     };
 }
 
