@@ -19,21 +19,23 @@ struct VulkanCommandBufferCreateInfo {
     uint32_t* currentFramePtr;
 };
 
-class VulkanCommandBuffer : public CommandBuffer, public VulkanCommand {
+class VulkanCommandBuffer : public CommandBuffer {
 public:
     explicit VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& commandInterfaceCreateInfo);
 
     ~VulkanCommandBuffer() override;
 
-    void begin() override;
-
-    void end() override;
-
     DUK_NO_DISCARD VulkanCommandQueue* command_queue();
 
     DUK_NO_DISCARD VkCommandBuffer& handle();
 
+    void submit(const VulkanCommandParams& params);
+
     // CommandBuffer overrides
+    void begin() override;
+
+    void end() override;
+
     void begin_render_pass(const RenderPassBeginInfo& renderPassBeginInfo) override;
 
     void end_render_pass() override;
@@ -42,14 +44,15 @@ public:
 
     void draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) override;
 
-    // VulkanCommand overrides
-    void submit(const VulkanCommandParams& params) override;
+    // Command overrides
+    DUK_NO_DISCARD const Submitter* submitter_ptr() const override;
 
 private:
     VulkanCommandQueue* m_commandQueue;
     std::vector<VkCommandBuffer> m_commandBuffers;
     VkCommandBuffer m_currentCommandBuffer;
     uint32_t* m_currentFramePtr;
+    VulkanSubmitter m_submitter;
 };
 
 }

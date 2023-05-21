@@ -26,15 +26,25 @@ struct VulkanCommandParams {
     VkFence* fence;
 };
 
-class VulkanCommand {
+class VulkanSubmitter : public Submitter {
 public:
-    virtual ~VulkanCommand() = default;
 
-    virtual void submit(const VulkanCommandParams& params) = 0;
+    using SubmissionFunc = std::function<void(const VulkanCommandParams&)>;
+
+    VulkanSubmitter(SubmissionFunc&& submissionFunc, bool signalsSemaphore, bool signalsFence);
+
+    void submit(const VulkanCommandParams& params) const;
+
+    DUK_NO_DISCARD bool signals_semaphore() const;
+
+    DUK_NO_DISCARD bool signals_fence() const;
+
+private:
+    SubmissionFunc m_submissionFunc;
+    bool m_signalsSemaphore;
+    bool m_signalsFence;
 };
-
 
 }
 
 #endif // DUK_RENDERER_VULKAN_COMMAND_H
-

@@ -27,7 +27,7 @@ class DescriptorSetDataSource;
 class CommandBuffer : public Command {
 public:
 
-    virtual ~CommandBuffer() = default;
+    ~CommandBuffer() override = default;
 
     virtual void begin() = 0;
 

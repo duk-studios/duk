@@ -21,14 +21,20 @@ struct VulkanImageAcquireCommandCreateInfo {
     uint32_t* currentImagePtr;
 };
 
-class VulkanImageAcquireCommand : public Command, public VulkanCommand {
+class VulkanImageAcquireCommand : public Command {
 public:
+
     explicit VulkanImageAcquireCommand(const VulkanImageAcquireCommandCreateInfo& commandCreateInfo);
-    void submit(const VulkanCommandParams& commandParams) override;
+
+    void submit(const VulkanCommandParams& commandParams);
+
+    const Submitter* submitter_ptr() const override;
+
 private:
     VkDevice m_device;
     VkSwapchainKHR m_swapchain;
     uint32_t* m_currentImagePtr;
+    VulkanSubmitter m_submitter;
 };
 
 struct VulkanPresentCommandCreateInfo {
@@ -38,14 +44,20 @@ struct VulkanPresentCommandCreateInfo {
     VkQueue presentQueue;
 };
 
-class VulkanPresentCommand : public Command, public VulkanCommand {
+class VulkanPresentCommand : public Command {
 public:
+
     explicit VulkanPresentCommand(const VulkanPresentCommandCreateInfo& commandCreateInfo);
-    void submit(const VulkanCommandParams& commandParams) override;
+
+    void submit(const VulkanCommandParams& commandParams);
+
+    DUK_NO_DISCARD const Submitter* submitter_ptr() const override;
+
 private:
     VkSwapchainKHR m_swapchain;
     VkQueue m_presentQueue;
     uint32_t* m_currentImagePtr;
+    VulkanSubmitter m_submitter;
 };
 
 struct VulkanSwapchainCreateInfo {
