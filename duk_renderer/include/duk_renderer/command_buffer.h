@@ -27,7 +27,7 @@ class DescriptorSetDataSource;
 class CommandBuffer : public Command {
 public:
 
-    virtual ~CommandBuffer() = default;
+    ~CommandBuffer() override = default;
 
     virtual void begin() = 0;
 
@@ -42,14 +42,9 @@ public:
 
     virtual void end_render_pass() = 0;
 
-    struct RenderMeshInfo {
-        Mesh* mesh;
-        Pipeline* pipeline;
-        DescriptorSet* descriptorSets;
-        uint32_t descriptorSetCount;
-    };
+    virtual void bind_pipeline(Pipeline* pipeline) = 0;
 
-    virtual void render(const RenderMeshInfo& renderMeshInfo) = 0;
+    virtual void draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) = 0;
 
 };
 

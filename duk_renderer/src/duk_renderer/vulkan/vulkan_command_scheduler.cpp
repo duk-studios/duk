@@ -64,6 +64,11 @@ VulkanCommandScheduler::CommandNode::~CommandNode() {
 }
 
 void VulkanCommandScheduler::CommandNode::submit(VkFence* fence) {
+    // not my brightest moment, but oh well
+    // it is what it is
+    auto command = m_futureCommand.get();
+    const auto submitter = command->submitter<VulkanSubmitter>();
+
     VulkanWaitDependency waitDependency = {};
     waitDependency.semaphores = m_waitSemaphores.data();
     waitDependency.semaphoreCount = m_waitSemaphores.size();
@@ -71,12 +76,15 @@ void VulkanCommandScheduler::CommandNode::submit(VkFence* fence) {
 
     VulkanCommandParams params = {};
     params.waitDependency = &waitDependency;
-    params.signalSemaphore = &m_semaphore;
-    params.fence = fence;
+    if (submitter->signals_semaphore()) {
+        params.signalSemaphore = &m_semaphore;
+    }
 
-    // does this even work?
-    auto command = reinterpret_cast<VulkanCommand*>(m_futureCommand.get());
-    command->submit(params);
+    if (submitter->signals_fence()) {
+        params.fence = fence;
+    }
+
+    submitter->submit(params);
 }
 
 VkSemaphore& VulkanCommandScheduler::CommandNode::semaphore() {

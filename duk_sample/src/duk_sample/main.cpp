@@ -3,17 +3,53 @@
 //
 
 #include <duk_renderer/mesh/mesh_data_source.h>
+#include <duk_renderer/pipeline/std_shader_data_source.h>
 #include <duk_renderer/renderer.h>
+#include <duk_macros/assert.h>
 
 #include <duk_platform/window.h>
 #include <duk_log/logger.h>
 #include <duk_log/sink_std_console.h>
 
+#include <fstream>
+
+using namespace duk::renderer;
+using namespace duk::platform;
+using namespace duk::log;
+using namespace duk::task;
+
+namespace detail {
+
+std::vector<uint8_t> load_spir_v(const char* filepath) {
+    std::ifstream file(filepath, std::ios::ate | std::ios::binary);
+
+    if (!file) {
+        std::ostringstream oss;
+        oss << "failed to open spir-V file at: " << filepath;
+        throw std::runtime_error(oss.str());
+    }
+
+    std::vector<uint8_t> buffer(file.tellg());
+    file.seekg(0);
+    file.read((char*)buffer.data(), buffer.size());
+
+    return buffer;
+}
+
+StdShaderDataSource load_shader_data_source(const char* vertexFilepath, const char* fragmentFilepath) {
+    StdShaderDataSource dataSource;
+
+    dataSource.insert_spir_v_code(Shader::Module::VERTEX, load_spir_v(vertexFilepath));
+    dataSource.insert_spir_v_code(Shader::Module::FRAGMENT, load_spir_v(fragmentFilepath));
+
+    dataSource.update_hash();
+
+    return dataSource;
+}
+
+}
+
 int main() {
-    using namespace duk::renderer;
-    using namespace duk::platform;
-    using namespace duk::log;
-    using namespace duk::task;
 
     Logger logger(Level::DEBUG);
     SinkStdConsole consoleSink;
@@ -106,6 +142,35 @@ int main() {
 
     auto renderPass = std::move(expectedRenderPass.value());
 
+    auto triangleShaderDataSource = ::detail::load_shader_data_source("triangle.vert.spv", "triangle.frag.spv");
+
+    Renderer::ShaderCreateInfo shaderCreateInfo = {};
+    shaderCreateInfo.shaderDataSource = &triangleShaderDataSource;
+
+    auto expectedShader = renderer->create_shader(shaderCreateInfo);
+
+    if (!expectedShader) {
+        logger.print_error("failed to create shader: {0}", expectedShader.error().description());
+    }
+
+    auto shader = std::move(expectedShader.value());
+
+    Renderer::PipelineCreateInfo pipelineCreateInfo = {};
+    pipelineCreateInfo.viewport.extent = {window->width(), window->height()};
+    pipelineCreateInfo.viewport.maxDepth = 1.0f;
+    pipelineCreateInfo.viewport.minDepth = 0.0f;
+    pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
+    pipelineCreateInfo.shader = shader.get();
+    pipelineCreateInfo.renderPass = renderPass.get();
+
+    auto expectedPipeline = renderer->create_pipeline(pipelineCreateInfo);
+
+    if (!expectedPipeline) {
+        logger.print_error("failed to create pipeline: {0}", expectedPipeline.error().description());
+    }
+
+    auto pipeline = std::move(expectedPipeline.value());
+
     Renderer::FrameBufferCreateInfo frameBufferCreateInfo = {};
     frameBufferCreateInfo.attachmentCount = 1;
     frameBufferCreateInfo.attachments = outputImage;
@@ -152,7 +217,7 @@ int main() {
 
         auto acquireImageCommand = scheduler->schedule(renderer->acquire_image_command());
 
-        auto mainRenderPassCommand = scheduler->schedule(graphicsQueue->enqueue([&renderPass, &frameBuffer](CommandBuffer* commandBuffer) {
+        auto mainRenderPassCommand = scheduler->schedule(graphicsQueue->enqueue([&renderPass, &frameBuffer, &pipeline](CommandBuffer* commandBuffer) {
 
             commandBuffer->begin();
             CommandBuffer::RenderPassBeginInfo renderPassBeginInfo = {};
@@ -160,6 +225,10 @@ int main() {
             renderPassBeginInfo.frameBuffer = frameBuffer.get();
 
             commandBuffer->begin_render_pass(renderPassBeginInfo);
+
+            commandBuffer->bind_pipeline(pipeline.get());
+
+            commandBuffer->draw(3, 0, 0, 0);
 
             commandBuffer->end_render_pass();
 

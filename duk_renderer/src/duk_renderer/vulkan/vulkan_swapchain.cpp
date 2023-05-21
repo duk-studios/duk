@@ -60,7 +60,8 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities, cons
 VulkanImageAcquireCommand::VulkanImageAcquireCommand(const VulkanImageAcquireCommandCreateInfo& commandCreateInfo) :
         m_device(commandCreateInfo.device),
         m_swapchain(commandCreateInfo.swapchain),
-        m_currentImagePtr(commandCreateInfo.currentImagePtr) {
+        m_currentImagePtr(commandCreateInfo.currentImagePtr),
+        m_submitter([this](const auto& params) { submit(params); }, true, false){
 
 }
 
@@ -76,10 +77,15 @@ void VulkanImageAcquireCommand::submit(const VulkanCommandParams& commandParams)
     }
 }
 
+const Submitter* VulkanImageAcquireCommand::submitter_ptr() const {
+    return &m_submitter;
+}
+
 VulkanPresentCommand::VulkanPresentCommand(const VulkanPresentCommandCreateInfo& commandCreateInfo) :
     m_swapchain(commandCreateInfo.swapchain),
     m_currentImagePtr(commandCreateInfo.currentImagePtr),
-    m_presentQueue(commandCreateInfo.presentQueue) {
+    m_presentQueue(commandCreateInfo.presentQueue),
+    m_submitter([this](const auto& params) { submit(params); }, false, false) {
 
 }
 
@@ -107,6 +113,9 @@ void VulkanPresentCommand::submit(const VulkanCommandParams& commandParams) {
     }
 }
 
+const Submitter* VulkanPresentCommand::submitter_ptr() const {
+    return &m_submitter;
+}
 
 VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreateInfo) :
     m_device(swapchainCreateInfo.device),
