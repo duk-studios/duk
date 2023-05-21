@@ -104,7 +104,7 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo) :
             WS_OVERLAPPEDWINDOW,            // Window style
 
             // Size and position
-            CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+            CW_USEDEFAULT, CW_USEDEFAULT, static_cast<int32_t>(m_width), static_cast<int32_t>(m_height),
 
             NULL,       // Parent window
             NULL,       // Menu
@@ -129,13 +129,21 @@ WindowWin32::~WindowWin32() {
 
 LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
-        case WM_CLOSE:
+        case WM_CLOSE: {
             window_close_event(events::WindowClose{});
             return 0;
-        case WM_DESTROY:
+        }
+        case WM_DESTROY: {
             window_destroy_event(events::WindowDestroy{});
             PostQuitMessage(0);
             return 0;
+        }
+        case WM_SIZE: {
+            m_width = LOWORD(lParam);
+            m_height = HIWORD(lParam);
+            window_resize_event(events::WindowResize{m_width, m_height});
+            return 0;
+        }
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
