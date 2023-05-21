@@ -12,36 +12,27 @@
 #include <glm/vec4.hpp>
 
 #include <cstdint>
-#include <array>
+#include <vector>
 
 namespace duk::renderer {
 
 class VertexAttribute {
 public:
-    enum class Format {
-        UNDEFINED = -1,
-        UINT8,
+    enum class Format : uint32_t {
+        UNDEFINED = 0,
         INT8,
-        UINT16,
+        UINT8,
         INT16,
-        UINT32,
+        UINT16,
         INT32,
-        FLOAT,
+        UINT32,
+        FLOAT32,
         VEC2,
         VEC3,
         VEC4
     };
 
-    enum Type {
-        UNDEFINED = -1,
-        POSITION,
-        COLOR,
-        COUNT // number of types
-    };
-
-public:
-
-    DUK_NO_DISCARD static size_t format_size(Format format);
+    static size_t size_of(Format type);
 
     template<typename T>
     DUK_NO_DISCARD static Format format_of() = delete;
@@ -50,20 +41,32 @@ public:
 class VertexLayout {
 public:
 
+    using Container = std::vector<VertexAttribute::Format>;
+
     VertexLayout();
 
-    VertexLayout(std::initializer_list<std::pair<VertexAttribute::Type, VertexAttribute::Format>> attributes);
+    VertexLayout(const std::initializer_list<VertexAttribute::Format>& attributes);
 
-    void enable(VertexAttribute::Type type, VertexAttribute::Format format);
+    void insert(VertexAttribute::Format attributes);
 
-    void disable(VertexAttribute::Type type);
+    void insert(const std::initializer_list<VertexAttribute::Format>& attributes);
 
-    DUK_NO_DISCARD bool is_enabled(VertexAttribute::Type type) const;
+    DUK_NO_DISCARD size_t size() const;
 
-    DUK_NO_DISCARD VertexAttribute::Format format_of(VertexAttribute::Type type) const;
+    DUK_NO_DISCARD size_t byte_size() const;
+
+    DUK_NO_DISCARD Container::iterator begin();
+
+    DUK_NO_DISCARD Container::iterator end();
+
+    DUK_NO_DISCARD Container::const_iterator begin() const;
+
+    DUK_NO_DISCARD Container::const_iterator end() const;
+
+    DUK_NO_DISCARD VertexAttribute::Format format_at(uint32_t location) const;
 
 private:
-    std::array<VertexAttribute::Format, VertexAttribute::Type::COUNT> m_attributes;
+    std::vector<VertexAttribute::Format> m_attributes;
 };
 
 //UINT8,
@@ -99,7 +102,7 @@ inline VertexAttribute::Format VertexAttribute::format_of<int32_t>() {
 //FLOAT,
 template<>
 inline VertexAttribute::Format VertexAttribute::format_of<float>() {
-    return VertexAttribute::Format::FLOAT;
+    return VertexAttribute::Format::FLOAT32;
 }
 //VEC2,
 template<>
