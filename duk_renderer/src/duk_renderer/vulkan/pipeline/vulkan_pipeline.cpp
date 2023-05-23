@@ -155,6 +155,7 @@ void VulkanPipeline::create_graphics_pipeline() {
     multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
     VkPipelineColorBlendAttachmentState blendAttachmentState = {};
+    blendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |  VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     if (m_blend.enabled) {
         blendAttachmentState.blendEnable = VK_TRUE;
         blendAttachmentState.srcColorBlendFactor = vk::convert_blend_factor(m_blend.srcColorBlendFactor);

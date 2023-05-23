@@ -160,6 +160,7 @@ int main() {
     pipelineCreateInfo.viewport.maxDepth = 1.0f;
     pipelineCreateInfo.viewport.minDepth = 0.0f;
     pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
+    pipelineCreateInfo.cullModeMask = Pipeline::CullMode::BACK;
     pipelineCreateInfo.shader = shader.get();
     pipelineCreateInfo.renderPass = renderPass.get();
 
@@ -228,7 +229,7 @@ int main() {
 
             commandBuffer->bind_pipeline(pipeline.get());
 
-            commandBuffer->draw(3, 0, 0, 0);
+            commandBuffer->draw(3, 0, 1, 0);
 
             commandBuffer->end_render_pass();
 

@@ -134,6 +134,7 @@ VulkanShader::~VulkanShader() {
     for (auto&[moduleType, module] : m_shaderModules) {
         vkDestroyShaderModule(m_device, module, nullptr);
     }
+    vkDestroyPipelineLayout(m_device, m_pipelineLayout, nullptr);
 }
 
 const std::vector<VkVertexInputAttributeDescription>& VulkanShader::input_attributes() const {

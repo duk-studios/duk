@@ -93,7 +93,7 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
     m_surface(VK_NULL_HANDLE),
     m_device(VK_NULL_HANDLE),
     m_maxFramesInFlight(vulkanRendererCreateInfo.maxFramesInFlight),
-    m_currentFrame(0) {
+    m_currentFrame(m_maxFramesInFlight - 1) {
 
     create_vk_instance(vulkanRendererCreateInfo);
     if (vulkanRendererCreateInfo.rendererCreateInfo.window){
