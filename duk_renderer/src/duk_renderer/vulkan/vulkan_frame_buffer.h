@@ -18,7 +18,7 @@ class VulkanRenderPass;
 struct VulkanFrameBufferCreateInfo {
     uint32_t width;
     uint32_t height;
-    uint32_t frameCount;
+    uint32_t imageCount;
     VkDevice device;
     VulkanRenderPass* renderPass;
     VulkanImage* attachments;
@@ -45,7 +45,7 @@ public:
 private:
     uint32_t m_width;
     uint32_t m_height;
-    uint32_t m_frameCount;
+    uint32_t m_imageCount;
     VkDevice m_device;
     VulkanRenderPass* m_renderPass;
     VulkanImage* m_attachments;

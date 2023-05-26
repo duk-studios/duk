@@ -20,8 +20,10 @@ struct VulkanCommandQueueCreateInfo {
     VkDevice device;
     uint32_t familyIndex;
     uint32_t index;
-    uint32_t* currentFramePtr;
+    const uint32_t* currentFramePtr;
+    const uint32_t* currentImagePtr;
     uint32_t frameCount;
+    uint32_t imageCount;
     VulkanPrepareFrameEvent* prepareFrameEvent;
 };
 
@@ -49,7 +51,8 @@ private:
     VkDevice m_device;
     uint32_t m_familyIndex;
     uint32_t m_index;
-    uint32_t* m_currentFramePtr;
+    const uint32_t* m_currentFramePtr;
+    const uint32_t* m_currentImagePtr;
     uint32_t m_frameCount;
     VkQueue m_queue;
     VkCommandPool m_commandPool;

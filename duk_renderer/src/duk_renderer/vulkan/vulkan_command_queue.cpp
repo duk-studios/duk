@@ -11,6 +11,7 @@ VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& comma
     m_familyIndex(commandQueueCreateInfo.familyIndex),
     m_index(commandQueueCreateInfo.index),
     m_currentFramePtr(commandQueueCreateInfo.currentFramePtr),
+    m_currentImagePtr(commandQueueCreateInfo.currentImagePtr),
     m_frameCount(commandQueueCreateInfo.frameCount),
     m_queue(VK_NULL_HANDLE),
     m_commandPool(VK_NULL_HANDLE) {
@@ -79,8 +80,10 @@ CommandBuffer* VulkanCommandQueue::next_command_buffer() {
     }
 
     VulkanCommandBufferCreateInfo commandBufferCreateInfo = {};
+    commandBufferCreateInfo.device = m_device;
     commandBufferCreateInfo.commandQueue = this;
     commandBufferCreateInfo.currentFramePtr = m_currentFramePtr;
+    commandBufferCreateInfo.currentImagePtr = m_currentImagePtr;
     commandBufferCreateInfo.frameCount = m_frameCount;
     return m_commandBuffers.emplace_back(std::make_unique<VulkanCommandBuffer>(commandBufferCreateInfo)).get();
 }

@@ -11,11 +11,11 @@
 
 namespace duk::renderer {
 
-VulkanCommandBuffer::VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& commandInterfaceCreateInfo) :
-    m_commandQueue(commandInterfaceCreateInfo.commandQueue),
-    m_currentFramePtr(commandInterfaceCreateInfo.currentFramePtr),
-    m_submitter([this](const auto& params) { submit(params); }, true, true) {
-    m_commandBuffers.resize(commandInterfaceCreateInfo.frameCount);
+VulkanCommandBuffer::VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& commandBufferCreateInfo) :
+    m_commandQueue(commandBufferCreateInfo.commandQueue),
+    m_currentImagePtr(commandBufferCreateInfo.currentImagePtr),
+    m_submitter([this](const auto& params) { submit(params); }, true, true, commandBufferCreateInfo.frameCount, commandBufferCreateInfo.currentFramePtr, commandBufferCreateInfo.device) {
+    m_commandBuffers.resize(commandBufferCreateInfo.frameCount);
     for (auto& commandBuffer : m_commandBuffers) {
         commandBuffer = m_commandQueue->allocate_command_buffer();
     }
@@ -40,7 +40,7 @@ void VulkanCommandBuffer::submit(const VulkanCommandParams& params) {
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
     // wait for all dependencies of this command buffer
-    if (params.waitDependency){
+    if (params.waitDependency) {
         submitInfo.waitSemaphoreCount = params.waitDependency->semaphoreCount;
         submitInfo.pWaitSemaphores = params.waitDependency->semaphores;
         submitInfo.pWaitDstStageMask = params.waitDependency->stages;
@@ -60,7 +60,7 @@ void VulkanCommandBuffer::submit(const VulkanCommandParams& params) {
 }
 
 void VulkanCommandBuffer::begin() {
-    m_currentCommandBuffer = m_commandBuffers[*m_currentFramePtr];
+    m_currentCommandBuffer = m_commandBuffers[*m_currentImagePtr];
 
     VkCommandBufferBeginInfo commandBufferBeginInfo = {};
     commandBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -81,7 +81,7 @@ void VulkanCommandBuffer::begin_render_pass(const CommandBuffer::RenderPassBegin
     VkRenderPassBeginInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = vulkanRenderPass->handle();
-    renderPassInfo.framebuffer = vulkanFramebuffer->handle(*m_currentFramePtr);
+    renderPassInfo.framebuffer = vulkanFramebuffer->handle(*m_currentImagePtr);
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = {vulkanFramebuffer->width(), vulkanFramebuffer->height()};
 
@@ -106,7 +106,7 @@ void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex, uint3
     vkCmdDraw(m_currentCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 }
 
-const Submitter* VulkanCommandBuffer::submitter_ptr() const {
+Submitter* VulkanCommandBuffer::submitter_ptr() {
     return &m_submitter;
 }
 

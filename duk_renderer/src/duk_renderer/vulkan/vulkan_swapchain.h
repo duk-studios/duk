@@ -7,6 +7,7 @@
 #include <duk_renderer/vulkan/vulkan_import.h>
 #include <duk_renderer/vulkan/vulkan_physical_device.h>
 #include <duk_renderer/vulkan/vulkan_command.h>
+#include <duk_renderer/vulkan/vulkan_events.h>
 
 #include <set>
 #include <memory>
@@ -17,8 +18,8 @@ class VulkanImage;
 
 struct VulkanImageAcquireCommandCreateInfo {
     VkDevice device;
-    VkSwapchainKHR swapchain;
-    uint32_t* currentImagePtr;
+    uint32_t frameCount;
+    const uint32_t* currentFramePtr;
 };
 
 class VulkanImageAcquireCommand : public Command {
@@ -28,12 +29,9 @@ public:
 
     void submit(const VulkanCommandParams& commandParams);
 
-    const Submitter* submitter_ptr() const override;
+    Submitter* submitter_ptr() override;
 
 private:
-    VkDevice m_device;
-    VkSwapchainKHR m_swapchain;
-    uint32_t* m_currentImagePtr;
     VulkanSubmitter m_submitter;
 };
 
@@ -51,7 +49,7 @@ public:
 
     void submit(const VulkanCommandParams& commandParams);
 
-    DUK_NO_DISCARD const Submitter* submitter_ptr() const override;
+    DUK_NO_DISCARD Submitter* submitter_ptr() override;
 
 private:
     VkSwapchainKHR m_swapchain;
@@ -66,6 +64,9 @@ struct VulkanSwapchainCreateInfo {
     VulkanPhysicalDevice* physicalDevice;
     VkExtent2D extent;
     VkQueue presentQueue;
+    VulkanPrepareFrameEvent* prepareFrameEvent;
+    uint32_t frameCount;
+    const uint32_t* currentFramePtr;
 };
 
 class VulkanSwapchain {
@@ -82,7 +83,7 @@ public:
 
     VulkanPresentCommand* present_command();
 
-    DUK_NO_DISCARD uint32_t current_image() const;
+    DUK_NO_DISCARD const uint32_t* current_image_ptr() const;
 
     DUK_NO_DISCARD uint32_t image_count() const;
 
@@ -102,8 +103,10 @@ private:
     VkSurfaceFormatKHR m_surfaceFormat;
     VkPresentModeKHR m_presentMode;
     VkExtent2D m_extent;
-    uint32_t m_currentImage;
 
+    duk::events::EventListener m_listener;
+
+    uint32_t m_currentImage{};
     std::unique_ptr<VulkanImage> m_image;
     std::unique_ptr<VulkanImageAcquireCommand> m_acquireImageCommand;
     std::unique_ptr<VulkanPresentCommand> m_presentCommand;

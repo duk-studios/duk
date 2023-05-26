@@ -25,8 +25,8 @@ public:
     virtual ~Command() = default;
 
     template<typename T>
-    DUK_NO_DISCARD const T* submitter() const {
-        auto derived = dynamic_cast<const T*>(submitter_ptr());
+    DUK_NO_DISCARD T* submitter() {
+        auto derived = dynamic_cast<T*>(submitter_ptr());
         if (!derived) {
             throw std::logic_error("invalid submitter_ptr type");
         }
@@ -34,7 +34,7 @@ public:
     }
 
 protected:
-    DUK_NO_DISCARD virtual const Submitter* submitter_ptr() const = 0;
+    DUK_NO_DISCARD virtual Submitter* submitter_ptr() = 0;
 };
 
 using FutureCommand = std::future<Command*>;

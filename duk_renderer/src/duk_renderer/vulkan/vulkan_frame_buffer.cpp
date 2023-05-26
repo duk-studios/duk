@@ -8,13 +8,13 @@
 namespace duk::renderer {
 
 VulkanFrameBuffer::VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFrameBufferCreateInfo) :
-    m_width(vulkanFrameBufferCreateInfo.width),
-    m_height(vulkanFrameBufferCreateInfo.height),
-    m_frameCount(vulkanFrameBufferCreateInfo.frameCount),
-    m_device(vulkanFrameBufferCreateInfo.device),
-    m_renderPass(vulkanFrameBufferCreateInfo.renderPass),
-    m_attachments(vulkanFrameBufferCreateInfo.attachments),
-    m_attachmentCount(vulkanFrameBufferCreateInfo.attachmentCount) {
+        m_width(vulkanFrameBufferCreateInfo.width),
+        m_height(vulkanFrameBufferCreateInfo.height),
+        m_imageCount(vulkanFrameBufferCreateInfo.imageCount),
+        m_device(vulkanFrameBufferCreateInfo.device),
+        m_renderPass(vulkanFrameBufferCreateInfo.renderPass),
+        m_attachments(vulkanFrameBufferCreateInfo.attachments),
+        m_attachmentCount(vulkanFrameBufferCreateInfo.attachmentCount) {
     create();
 }
 
@@ -32,7 +32,7 @@ void VulkanFrameBuffer::create() {
     framebufferCreateInfo.height = m_height;
     framebufferCreateInfo.layers = 1;
 
-    m_frameBuffers.resize(m_frameCount);
+    m_frameBuffers.resize(m_imageCount);
     for (int i = 0; i < m_frameBuffers.size(); i++) {
 
         std::vector<VkImageView> attachments(m_attachmentCount);

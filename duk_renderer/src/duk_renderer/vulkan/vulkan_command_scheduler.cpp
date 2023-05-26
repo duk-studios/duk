@@ -52,62 +52,39 @@ void VulkanCommandScheduler::flush() {
     frame.flush();
 }
 
-VulkanCommandScheduler::CommandNode::CommandNode(FutureCommand&& futureCommand, VulkanSemaphorePool* semaphorePool) noexcept :
+VulkanCommandScheduler::CommandNode::CommandNode(FutureCommand&& futureCommand) noexcept :
     m_futureCommand(std::move(futureCommand)),
-    m_semaphorePool(semaphorePool),
-    m_semaphore(m_semaphorePool->allocate()){
+    m_command(nullptr){
 
 }
 
-VulkanCommandScheduler::CommandNode::~CommandNode() {
-    m_semaphorePool->free(m_semaphore);
-}
+VulkanCommandScheduler::CommandNode::~CommandNode() = default;
 
-void VulkanCommandScheduler::CommandNode::submit(VkFence* fence) {
+void VulkanCommandScheduler::CommandNode::submit(VkFence& fence, uint32_t waitSemaphoreCount, VkSemaphore* waitSemaphores, VkPipelineStageFlags* waitStages) {
     // not my brightest moment, but oh well
     // it is what it is
-    auto command = m_futureCommand.get();
-    const auto submitter = command->submitter<VulkanSubmitter>();
+    m_command = m_futureCommand.get();
+    const auto submitter = m_command->submitter<VulkanSubmitter>();
 
     VulkanWaitDependency waitDependency = {};
-    waitDependency.semaphores = m_waitSemaphores.data();
-    waitDependency.semaphoreCount = m_waitSemaphores.size();
-    waitDependency.stages = m_waitStages.data();
-
-    VulkanCommandParams params = {};
-    params.waitDependency = &waitDependency;
-    if (submitter->signals_semaphore()) {
-        params.signalSemaphore = &m_semaphore;
-    }
+    waitDependency.semaphoreCount = waitSemaphoreCount;
+    waitDependency.semaphores = waitSemaphores;
+    waitDependency.stages = waitStages;
 
     if (submitter->signals_fence()) {
-        params.fence = fence;
+        fence = *submitter->fence();
     }
 
-    submitter->submit(params);
+    submitter->submit(&waitDependency);
 }
 
-VkSemaphore& VulkanCommandScheduler::CommandNode::semaphore() {
-    return m_semaphore;
-}
-
-void VulkanCommandScheduler::CommandNode::wait(const VkSemaphore& semaphore, VkPipelineStageFlags stage) {
-    m_waitSemaphores.push_back(semaphore);
-    m_waitStages.push_back(stage);
+Command* VulkanCommandScheduler::CommandNode::command() {
+    assert(m_command && "access to a command must happen after submission");
+    return m_command;
 }
 
 VulkanCommandScheduler::Frame::Frame(const VulkanCommandScheduler::FrameCreateInfo& frameCreateInfo) :
     m_device(frameCreateInfo.device) {
-    VulkanFencePoolCreateInfo fencePoolCreateInfo = {};
-    fencePoolCreateInfo.device = m_device;
-    fencePoolCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-    m_fencePool = std::make_unique<VulkanFencePool>(fencePoolCreateInfo);
-
-    VulkanSemaphorePoolCreateInfo semaphorePoolCreateInfo = {};
-    semaphorePoolCreateInfo.device = m_device;
-
-    m_semaphorePool = std::make_unique<VulkanSemaphorePool>(semaphorePoolCreateInfo);
 }
 
 VulkanCommandScheduler::Frame::Frame(VulkanCommandScheduler::Frame&& other) noexcept = default;
@@ -127,12 +104,11 @@ void VulkanCommandScheduler::Frame::clear() {
     m_independentNodes.clear();
     m_scheduledCommands.clear();
     m_waitDependencies.clear();
-    m_fencePool->free(m_fences);
     m_fences.clear();
 }
 
 std::size_t VulkanCommandScheduler::Frame::schedule_command(FutureCommand&& futureCommand) {
-    auto index = m_scheduledCommands.push(std::make_shared<CommandNode>(std::move(futureCommand), m_semaphorePool.get()));
+    auto index = m_scheduledCommands.push(std::make_shared<CommandNode>(std::move(futureCommand)));
 
     // we assume that every node is independent, until it is not
     m_independentNodes.insert(index);
@@ -150,16 +126,32 @@ void VulkanCommandScheduler::Frame::flush() {
     auto perNode = [this](std::size_t index) {
         auto commandNode = m_scheduledCommands.vertex(index)->get();
 
-        auto fence = m_fences.emplace_back(m_fencePool->allocate());
+        std::vector<VkSemaphore> semaphores;
+        std::vector<VkPipelineStageFlags> stages;
 
-        commandNode->submit(&fence);
+        auto& dependencies = m_commandDependencies[index];
+        for (auto dependency : dependencies) {
+            auto& dependencyCommandNode = *m_scheduledCommands.vertex(dependency);
+            auto dependencyCommand = dependencyCommandNode->command();
+            auto dependencySubmitter = dependencyCommand->submitter<VulkanSubmitter>();
+
+            if (dependencySubmitter->signals_semaphore()) {
+                semaphores.push_back(*dependencySubmitter->semaphore());
+                stages.push_back(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+            }
+        }
+
+        VkFence fence = VK_NULL_HANDLE;
+
+        commandNode->submit(fence, semaphores.size(), semaphores.data(), stages.data());
+
+        if (fence != VK_NULL_HANDLE) {
+            m_fences.push_back(fence);
+        }
     };
 
     auto perEdge = [this](std::size_t fromIndex, std::size_t toIndex) {
-        auto from = m_scheduledCommands.vertex(fromIndex)->get();
-        auto to = m_scheduledCommands.vertex(toIndex)->get();
-
-        to->wait(from->semaphore(), VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+        m_commandDependencies[toIndex].insert(fromIndex);
     };
 
     gpp::breadth_first_traverse(m_scheduledCommands, m_independentNodes, perNode, perEdge);
