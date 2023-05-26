@@ -93,7 +93,7 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
     m_surface(VK_NULL_HANDLE),
     m_device(VK_NULL_HANDLE),
     m_maxFramesInFlight(vulkanRendererCreateInfo.maxFramesInFlight),
-    m_currentFrame(m_maxFramesInFlight - 1) {
+    m_currentFrame(0) {
 
     create_vk_instance(vulkanRendererCreateInfo);
     if (vulkanRendererCreateInfo.rendererCreateInfo.window){
@@ -148,7 +148,9 @@ ExpectedCommandQueue VulkanRenderer::create_command_queue(const CommandQueueCrea
     vulkanCommandQueueCreateInfo.familyIndex = familyIndex;
     vulkanCommandQueueCreateInfo.index = 0;
     vulkanCommandQueueCreateInfo.currentFramePtr = &m_currentFrame;
+    vulkanCommandQueueCreateInfo.currentImagePtr = m_swapchain ? m_swapchain->current_image_ptr() : nullptr;
     vulkanCommandQueueCreateInfo.frameCount = m_maxFramesInFlight;
+    vulkanCommandQueueCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
     vulkanCommandQueueCreateInfo.prepareFrameEvent = &m_prepareFrameEvent;
 
     return std::make_shared<VulkanCommandQueue>(vulkanCommandQueueCreateInfo);
@@ -217,7 +219,7 @@ ExpectedFrameBuffer VulkanRenderer::create_frame_buffer(const Renderer::FrameBuf
     try {
         VulkanFrameBufferCreateInfo vulkanFrameBufferCreateInfo = {};
         vulkanFrameBufferCreateInfo.device = m_device;
-        vulkanFrameBufferCreateInfo.frameCount = m_maxFramesInFlight;
+        vulkanFrameBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
         vulkanFrameBufferCreateInfo.width = frameBufferCreateInfo.width;
         vulkanFrameBufferCreateInfo.height = frameBufferCreateInfo.height;
         vulkanFrameBufferCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
@@ -389,6 +391,9 @@ void VulkanRenderer::create_vk_swapchain(const VulkanRendererCreateInfo& vulkanR
     auto window = vulkanRendererCreateInfo.rendererCreateInfo.window;
     swapchainCreateInfo.extent = {window->width(), window->height()};
     swapchainCreateInfo.presentQueue = presentQueue;
+    swapchainCreateInfo.prepareFrameEvent = &m_prepareFrameEvent;
+    swapchainCreateInfo.frameCount = m_maxFramesInFlight;
+    swapchainCreateInfo.currentFramePtr = &m_currentFrame;
 
     m_swapchain = std::make_unique<VulkanSwapchain>(swapchainCreateInfo);
 }

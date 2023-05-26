@@ -21,7 +21,7 @@ struct VulkanWaitDependency {
 
 
 struct VulkanCommandParams {
-    VulkanWaitDependency* waitDependency;
+    const VulkanWaitDependency* waitDependency;
     VkSemaphore* signalSemaphore;
     VkFence* fence;
 };
@@ -31,18 +31,26 @@ public:
 
     using SubmissionFunc = std::function<void(const VulkanCommandParams&)>;
 
-    VulkanSubmitter(SubmissionFunc&& submissionFunc, bool signalsSemaphore, bool signalsFence);
+    VulkanSubmitter(SubmissionFunc&& submissionFunc, bool signalsSemaphore, bool signalsFence, uint32_t frameCount, const uint32_t* currentFramePtr, VkDevice device);
 
-    void submit(const VulkanCommandParams& params) const;
+    ~VulkanSubmitter() override;
+
+    void submit(const VulkanWaitDependency* waitDependency);
 
     DUK_NO_DISCARD bool signals_semaphore() const;
 
+    DUK_NO_DISCARD VkSemaphore* semaphore();
+
     DUK_NO_DISCARD bool signals_fence() const;
+
+    DUK_NO_DISCARD VkFence* fence();
 
 private:
     SubmissionFunc m_submissionFunc;
-    bool m_signalsSemaphore;
-    bool m_signalsFence;
+    const uint32_t* m_currentFramePtr;
+    VkDevice m_device;
+    std::vector<VkSemaphore> m_semaphores;
+    std::vector<VkFence> m_fences;
 };
 
 }

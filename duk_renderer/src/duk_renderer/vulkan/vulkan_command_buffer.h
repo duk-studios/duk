@@ -14,14 +14,16 @@ class VulkanCommandQueue;
 class VulkanRenderer;
 
 struct VulkanCommandBufferCreateInfo {
+    VkDevice device;
     VulkanCommandQueue* commandQueue;
     uint32_t frameCount;
-    uint32_t* currentFramePtr;
+    const uint32_t* currentFramePtr;
+    const uint32_t* currentImagePtr;
 };
 
 class VulkanCommandBuffer : public CommandBuffer {
 public:
-    explicit VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& commandInterfaceCreateInfo);
+    explicit VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& commandBufferCreateInfo);
 
     ~VulkanCommandBuffer() override;
 
@@ -45,13 +47,13 @@ public:
     void draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) override;
 
     // Command overrides
-    DUK_NO_DISCARD const Submitter* submitter_ptr() const override;
+    DUK_NO_DISCARD Submitter* submitter_ptr() override;
 
 private:
     VulkanCommandQueue* m_commandQueue;
     std::vector<VkCommandBuffer> m_commandBuffers;
     VkCommandBuffer m_currentCommandBuffer;
-    uint32_t* m_currentFramePtr;
+    const uint32_t* m_currentImagePtr;
     VulkanSubmitter m_submitter;
 };
 

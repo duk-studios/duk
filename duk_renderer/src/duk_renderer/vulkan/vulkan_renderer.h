@@ -72,6 +72,7 @@ private:
     VkDevice m_device;
     uint32_t m_maxFramesInFlight;
     std::unique_ptr<VulkanSwapchain> m_swapchain;
+    uint32_t m_imageCount;
 
     VulkanDebugMessenger m_debugMessenger;
     std::array<uint32_t, CommandQueueType::QUEUE_COUNT> m_queueFamilyIndices;

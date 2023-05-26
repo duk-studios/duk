@@ -58,26 +58,15 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities, cons
 }
 
 VulkanImageAcquireCommand::VulkanImageAcquireCommand(const VulkanImageAcquireCommandCreateInfo& commandCreateInfo) :
-        m_device(commandCreateInfo.device),
-        m_swapchain(commandCreateInfo.swapchain),
-        m_currentImagePtr(commandCreateInfo.currentImagePtr),
-        m_submitter([this](const auto& params) { submit(params); }, true, false){
+    m_submitter([](const auto&) {}, true, false, commandCreateInfo.frameCount, commandCreateInfo.currentFramePtr, commandCreateInfo.device) {
 
 }
 
 void VulkanImageAcquireCommand::submit(const VulkanCommandParams& commandParams) {
-    assert(commandParams.signalSemaphore);
-    auto result = vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), *commandParams.signalSemaphore, VK_NULL_HANDLE, m_currentImagePtr);
-    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        // TODO: recreate swapchain
-    }
-
-    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-        throw std::runtime_error("failed to acquire swapchain image!");
-    }
+    // do nothing, as the image was already acquired at the start of the frame
 }
 
-const Submitter* VulkanImageAcquireCommand::submitter_ptr() const {
+Submitter* VulkanImageAcquireCommand::submitter_ptr() {
     return &m_submitter;
 }
 
@@ -85,7 +74,7 @@ VulkanPresentCommand::VulkanPresentCommand(const VulkanPresentCommandCreateInfo&
     m_swapchain(commandCreateInfo.swapchain),
     m_currentImagePtr(commandCreateInfo.currentImagePtr),
     m_presentQueue(commandCreateInfo.presentQueue),
-    m_submitter([this](const auto& params) { submit(params); }, false, false) {
+    m_submitter([this](const auto& params) { submit(params); }, false, false, 0, nullptr, VK_NULL_HANDLE) {
 
 }
 
@@ -113,7 +102,7 @@ void VulkanPresentCommand::submit(const VulkanCommandParams& commandParams) {
     }
 }
 
-const Submitter* VulkanPresentCommand::submitter_ptr() const {
+Submitter* VulkanPresentCommand::submitter_ptr() {
     return &m_submitter;
 }
 
@@ -124,6 +113,31 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
     m_requestedExtent(swapchainCreateInfo.extent),
     m_presentQueue(swapchainCreateInfo.presentQueue),
     m_swapchain(VK_NULL_HANDLE) {
+
+    m_listener.listen(*swapchainCreateInfo.prepareFrameEvent, [this](uint32_t currentFrame) {
+
+        // we need to signal the semaphore of the acquire image command
+        // other commands might want to wait on this semaphore, but we need to get the current image index
+        // at the start of the frame, otherwise we will not be able to use the correct resources for this frame
+        auto submitter = m_acquireImageCommand->submitter<VulkanSubmitter>();
+
+        auto result = vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), *submitter->semaphore(), VK_NULL_HANDLE, &m_currentImage);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            // TODO: recreate swapchain
+        }
+
+        if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            throw std::runtime_error("failed to acquire swapchain image!");
+        }
+    });
+
+    VulkanImageAcquireCommandCreateInfo imageAcquireCommandCreateInfo = {};
+    imageAcquireCommandCreateInfo.device = m_device;
+    imageAcquireCommandCreateInfo.frameCount = swapchainCreateInfo.frameCount;
+    imageAcquireCommandCreateInfo.currentFramePtr = swapchainCreateInfo.currentFramePtr;
+
+    m_acquireImageCommand = std::make_unique<VulkanImageAcquireCommand>(imageAcquireCommandCreateInfo);
+
     create();
 }
 
@@ -184,12 +198,6 @@ void VulkanSwapchain::create() {
 
     m_image = std::make_unique<VulkanImage>(swapchainImageCreateInfo);
 
-    VulkanImageAcquireCommandCreateInfo imageAcquireCommandCreateInfo = {};
-    imageAcquireCommandCreateInfo.device = m_device;
-    imageAcquireCommandCreateInfo.swapchain = m_swapchain;
-    imageAcquireCommandCreateInfo.currentImagePtr = &m_currentImage;
-
-    m_acquireImageCommand = std::make_unique<VulkanImageAcquireCommand>(imageAcquireCommandCreateInfo);
 
     VulkanPresentCommandCreateInfo presentCommandCreateInfo = {};
     presentCommandCreateInfo.device = m_device;
@@ -208,8 +216,9 @@ void VulkanSwapchain::clean() {
     }
 }
 
-
 VulkanImageAcquireCommand* VulkanSwapchain::acquire_image_command() {
+
+
     return m_acquireImageCommand.get();
 }
 
@@ -217,8 +226,8 @@ VulkanPresentCommand* VulkanSwapchain::present_command() {
     return m_presentCommand.get();
 }
 
-uint32_t VulkanSwapchain::current_image() const {
-    return m_currentImage;
+const uint32_t* VulkanSwapchain::current_image_ptr() const {
+    return &m_currentImage;
 }
 
 uint32_t VulkanSwapchain::image_count() const {

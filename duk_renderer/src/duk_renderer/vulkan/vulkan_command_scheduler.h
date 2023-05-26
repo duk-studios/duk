@@ -39,22 +39,17 @@ private:
 
     class CommandNode {
     public:
-        explicit CommandNode(FutureCommand&& futureCommand, VulkanSemaphorePool* semaphorePool) noexcept;
+        explicit CommandNode(FutureCommand&& futureCommand) noexcept;
 
         ~CommandNode();
 
-        void submit(VkFence* fence);
+        void submit(VkFence& fence, uint32_t waitSemaphoreCount, VkSemaphore* waitSemaphores, VkPipelineStageFlags* waitStages);
 
-        void wait(const VkSemaphore& semaphore, VkPipelineStageFlags stage);
-
-        DUK_NO_DISCARD VkSemaphore& semaphore();
+        Command* command();
 
     private:
         FutureCommand m_futureCommand;
-        VulkanSemaphorePool* m_semaphorePool;
-        VkSemaphore m_semaphore;
-        std::vector<VkSemaphore> m_waitSemaphores;
-        std::vector<VkPipelineStageFlags> m_waitStages;
+        Command* m_command;
     };
 
     struct CommandConnection {
@@ -98,11 +93,10 @@ private:
         gpp::adjacency_list<std::shared_ptr<CommandNode>, CommandConnection> m_scheduledCommands;
         std::set<std::size_t> m_independentNodes;
 
+        std::unordered_map<std::size_t, std::set<std::size_t>> m_commandDependencies;
+
         // fences to check if this frame is being executed
         std::vector<VkFence> m_fences;
-
-        std::unique_ptr<VulkanFencePool> m_fencePool;
-        std::unique_ptr<VulkanSemaphorePool> m_semaphorePool;
     };
 
 private:
