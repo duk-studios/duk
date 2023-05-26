@@ -243,9 +243,7 @@ int main() {
         scheduler->flush();
     }
 
-    graphicsQueue.reset();
-
-    logger.log(Level::INFO) << "Closed!";
+    logger.log(Level::INFO) << "Closing";
 
     return 0;
 }
