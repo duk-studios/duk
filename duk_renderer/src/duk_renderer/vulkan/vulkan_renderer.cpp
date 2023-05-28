@@ -104,6 +104,7 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
     if (m_surface) {
         create_vk_swapchain(vulkanRendererCreateInfo);
     }
+    create_resource_manager();
 }
 
 VulkanRenderer::~VulkanRenderer() {
@@ -121,10 +122,16 @@ void VulkanRenderer::prepare_frame() {
 }
 
 Command* VulkanRenderer::acquire_image_command() {
+    if (!m_swapchain) {
+        return nullptr;
+    }
     return m_swapchain->acquire_image_command();
 }
 
 Command* VulkanRenderer::present_command() {
+    if (!m_swapchain) {
+        return nullptr;
+    }
     return m_swapchain->present_command();
 }
 
@@ -132,7 +139,6 @@ Image* VulkanRenderer::present_image() {
     if (!m_swapchain) {
         return nullptr;
     }
-
     return m_swapchain->image();
 }
 
@@ -220,12 +226,10 @@ ExpectedFrameBuffer VulkanRenderer::create_frame_buffer(const Renderer::FrameBuf
         VulkanFrameBufferCreateInfo vulkanFrameBufferCreateInfo = {};
         vulkanFrameBufferCreateInfo.device = m_device;
         vulkanFrameBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
-        vulkanFrameBufferCreateInfo.width = frameBufferCreateInfo.width;
-        vulkanFrameBufferCreateInfo.height = frameBufferCreateInfo.height;
         vulkanFrameBufferCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
-        vulkanFrameBufferCreateInfo.attachments = dynamic_cast<VulkanImage*>(frameBufferCreateInfo.attachments);
+        vulkanFrameBufferCreateInfo.attachments = dynamic_cast<VulkanSwapchainImage*>(frameBufferCreateInfo.attachments);
         vulkanFrameBufferCreateInfo.attachmentCount = frameBufferCreateInfo.attachmentCount;
-        return std::make_shared<VulkanFrameBuffer>(vulkanFrameBufferCreateInfo);
+        return m_resourceManager->create(vulkanFrameBufferCreateInfo);
     }
     catch (std::exception& e) {
         return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
@@ -389,13 +393,23 @@ void VulkanRenderer::create_vk_swapchain(const VulkanRendererCreateInfo& vulkanR
     swapchainCreateInfo.device = m_device;
     swapchainCreateInfo.surface = m_surface;
     auto window = vulkanRendererCreateInfo.rendererCreateInfo.window;
-    swapchainCreateInfo.extent = {window->width(), window->height()};
+    swapchainCreateInfo.window = window;
     swapchainCreateInfo.presentQueue = presentQueue;
     swapchainCreateInfo.prepareFrameEvent = &m_prepareFrameEvent;
     swapchainCreateInfo.frameCount = m_maxFramesInFlight;
     swapchainCreateInfo.currentFramePtr = &m_currentFrame;
 
     m_swapchain = std::make_unique<VulkanSwapchain>(swapchainCreateInfo);
+}
+
+void VulkanRenderer::create_resource_manager() {
+    VulkanResourceManagerCreateInfo resourceManagerCreateInfo = {};
+    if (m_swapchain) {
+        resourceManagerCreateInfo.swapchainCreateEvent = m_swapchain->create_event();
+        resourceManagerCreateInfo.swapchainCleanEvent = m_swapchain->clean_event();
+    }
+
+    m_resourceManager = std::make_unique<VulkanResourceManager>(resourceManagerCreateInfo);
 }
 
 }

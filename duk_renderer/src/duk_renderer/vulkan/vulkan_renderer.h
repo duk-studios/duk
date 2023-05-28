@@ -15,6 +15,7 @@
 #include <duk_renderer/vulkan/vulkan_swapchain.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_events.h>
+#include <duk_renderer/vulkan/vulkan_resource_manager.h>
 
 namespace duk::renderer {
 
@@ -64,6 +65,8 @@ private:
 
     void create_vk_swapchain(const VulkanRendererCreateInfo& vulkanRendererCreateInfo);
 
+    void create_resource_manager();
+
 private:
 
     VkInstance m_instance;
@@ -72,7 +75,7 @@ private:
     VkDevice m_device;
     uint32_t m_maxFramesInFlight;
     std::unique_ptr<VulkanSwapchain> m_swapchain;
-    uint32_t m_imageCount;
+    std::unique_ptr<VulkanResourceManager> m_resourceManager;
 
     VulkanDebugMessenger m_debugMessenger;
     std::array<uint32_t, CommandQueueType::QUEUE_COUNT> m_queueFamilyIndices;

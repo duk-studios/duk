@@ -168,16 +168,24 @@ void WindowWin32::hide() {
 
 void WindowWin32::pool_events() {
     MSG msg = {};
-    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-    {
+    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
 }
 
+void WindowWin32::wait_events() {
+    WaitMessage();
+    pool_events();
+}
+
 void WindowWin32::close() {
     DestroyWindow(m_hwnd);
     m_hwnd = nullptr;
+}
+
+bool WindowWin32::minimized() const {
+    return m_width == 0 || m_height == 0;
 }
 
 }

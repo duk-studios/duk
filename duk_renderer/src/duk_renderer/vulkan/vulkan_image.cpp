@@ -81,16 +81,104 @@ VkImageLayout convert_layout(ImageLayout layout) {
 
 }
 
-VulkanImage::VulkanImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainImageCreateInfo) :
+VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanImageCreateInfo) {
+
+}
+
+VulkanMemoryImage::~VulkanMemoryImage() {
+    for (auto& imageView : m_imageViews) {
+        vkDestroyImageView(m_device, imageView, nullptr);
+    }
+    m_imageViews.clear();
+
+    for (auto& image : m_images){
+        vkDestroyImage(m_device, image, nullptr);
+    }
+    m_images.clear();
+
+    for (auto& memory : m_memories){
+        vkFreeMemory(m_device, memory, nullptr);
+    }
+    m_memories.clear();
+}
+
+ImageFormat VulkanMemoryImage::format() const {
+    return ImageFormat::UNDEFINED;
+}
+
+uint32_t VulkanMemoryImage::width() const {
+    return 0;
+}
+
+uint32_t VulkanMemoryImage::height() const {
+    return 0;
+}
+
+VkImage VulkanMemoryImage::image(uint32_t frameIndex) const {
+    return nullptr;
+}
+
+VkImageView VulkanMemoryImage::image_view(uint32_t frameIndex) const {
+    return nullptr;
+}
+
+uint32_t VulkanMemoryImage::image_count() const {
+    return 0;
+}
+
+void VulkanMemoryImage::create(uint32_t imageCount) {
+
+}
+
+void VulkanMemoryImage::clean() {
+
+}
+
+VulkanSwapchainImage::VulkanSwapchainImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainImageCreateInfo) :
     m_device(vulkanSwapchainImageCreateInfo.device),
-    m_format(vulkanSwapchainImageCreateInfo.format) {
+    m_format(VK_FORMAT_UNDEFINED) {
+
+}
+
+VulkanSwapchainImage::~VulkanSwapchainImage() {
+    clean();
+}
+
+VkImage VulkanSwapchainImage::image(uint32_t frameIndex) const {
+    return m_images[frameIndex];
+}
+
+VkImageView VulkanSwapchainImage::image_view(uint32_t frameIndex) const {
+    return m_imageViews[frameIndex];
+}
+
+uint32_t VulkanSwapchainImage::image_count() const {
+    return m_images.size();
+}
+
+ImageFormat VulkanSwapchainImage::format() const {
+    return vk::convert_format(m_format);
+}
+
+uint32_t VulkanSwapchainImage::width() const {
+    return m_width;
+}
+
+uint32_t VulkanSwapchainImage::height() const {
+    return m_height;
+}
+
+void VulkanSwapchainImage::create(VkFormat format, uint32_t width, uint32_t height, VkSwapchainKHR swapchain) {
+    m_format = format;
+    m_width = width;
+    m_height = height;
 
     uint32_t imageCount = 0;
-    vkGetSwapchainImagesKHR(m_device, vulkanSwapchainImageCreateInfo.swapchain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(m_device, swapchain, &imageCount, nullptr);
 
     m_images.resize(imageCount);
 
-    vkGetSwapchainImagesKHR(m_device, vulkanSwapchainImageCreateInfo.swapchain, &imageCount, m_images.data());
+    vkGetSwapchainImagesKHR(m_device, swapchain, &imageCount, m_images.data());
 
     m_imageViews.resize(imageCount);
 
@@ -106,7 +194,7 @@ VulkanImage::VulkanImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainIm
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = m_images[i];
         viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.format = m_format;
+        viewInfo.format = format;
         viewInfo.subresourceRange = subresourceRange;
 
         auto result = vkCreateImageView(m_device, &viewInfo, nullptr, &m_imageViews[i]);
@@ -115,44 +203,13 @@ VulkanImage::VulkanImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainIm
             throw std::runtime_error("failed to create swapchain image view");
         }
     }
-
-    m_createdImages = false;
 }
 
-VulkanImage::~VulkanImage() {
+void VulkanSwapchainImage::clean() {
     for (auto& imageView : m_imageViews) {
         vkDestroyImageView(m_device, imageView, nullptr);
     }
     m_imageViews.clear();
-
-    // if the swapchain is responsible for destroying the images, so we should not destroy them ourselves
-    if (m_createdImages) {
-        for (auto& image : m_images){
-            vkDestroyImage(m_device, image, nullptr);
-        }
-        m_images.clear();
-
-        for (auto& memory : m_memories){
-            vkFreeMemory(m_device, memory, nullptr);
-        }
-        m_memories.clear();
-    }
-}
-
-VkImage VulkanImage::image(uint32_t frameIndex) const {
-    return m_images[frameIndex];
-}
-
-VkImageView VulkanImage::image_view(uint32_t frameIndex) const {
-    return m_imageViews[frameIndex];
-}
-
-uint32_t VulkanImage::image_count() const {
-    return m_images.size();
-}
-
-ImageFormat VulkanImage::format() const {
-    return vk::convert_format(m_format);
 }
 
 }

@@ -6,6 +6,8 @@
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_image.h>
 
+#include <duk_platform/window.h>
+
 #include <stdexcept>
 #include <limits>
 
@@ -71,11 +73,14 @@ Submitter* VulkanImageAcquireCommand::submitter_ptr() {
 }
 
 VulkanPresentCommand::VulkanPresentCommand(const VulkanPresentCommandCreateInfo& commandCreateInfo) :
-    m_swapchain(commandCreateInfo.swapchain),
     m_currentImagePtr(commandCreateInfo.currentImagePtr),
     m_presentQueue(commandCreateInfo.presentQueue),
+    m_requiresRecreationPtr(commandCreateInfo.requiresRecreationPtr),
     m_submitter([this](const auto& params) { submit(params); }, false, false, 0, nullptr, VK_NULL_HANDLE) {
 
+    m_listener.listen(*commandCreateInfo.swapchainCreateEvent, [this](const auto& swapchainInfo) {
+        m_swapchain = swapchainInfo.swapchain;
+    });
 }
 
 void VulkanPresentCommand::submit(const VulkanCommandParams& commandParams) {
@@ -95,7 +100,7 @@ void VulkanPresentCommand::submit(const VulkanCommandParams& commandParams) {
     auto result = vkQueuePresentKHR(m_presentQueue, &presentInfo);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-        // TODO: recreate swapchain
+        *m_requiresRecreationPtr = true;
     }
     else if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to present swapchain image!");
@@ -110,11 +115,16 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
     m_device(swapchainCreateInfo.device),
     m_physicalDevice(swapchainCreateInfo.physicalDevice),
     m_surface(swapchainCreateInfo.surface),
-    m_requestedExtent(swapchainCreateInfo.extent),
+    m_window(swapchainCreateInfo.window),
     m_presentQueue(swapchainCreateInfo.presentQueue),
-    m_swapchain(VK_NULL_HANDLE) {
+    m_swapchain(VK_NULL_HANDLE),
+    m_requiresRecreation(false) {
 
     m_listener.listen(*swapchainCreateInfo.prepareFrameEvent, [this](uint32_t currentFrame) {
+
+        if (m_requiresRecreation) {
+            recreate_swapchain();
+        }
 
         // we need to signal the semaphore of the acquire image command
         // other commands might want to wait on this semaphore, but we need to get the current image index
@@ -123,13 +133,23 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
 
         auto result = vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), *submitter->semaphore(), VK_NULL_HANDLE, &m_currentImage);
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            // TODO: recreate swapchain
+            m_requiresRecreation = true;
+            return;
         }
 
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-            throw std::runtime_error("failed to acquire swapchain image!");
+            throw std::runtime_error("failed to acquire swapchain image");
         }
     });
+
+    m_listener.listen(m_window->window_resize_event, [this](const auto& ev){
+        m_requiresRecreation = true;
+    });
+
+    VulkanSwapchainImageCreateInfo swapchainImageCreateInfo = {};
+    swapchainImageCreateInfo.device = m_device;
+
+    m_image = std::make_unique<VulkanSwapchainImage>(swapchainImageCreateInfo);
 
     VulkanImageAcquireCommandCreateInfo imageAcquireCommandCreateInfo = {};
     imageAcquireCommandCreateInfo.device = m_device;
@@ -137,6 +157,14 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
     imageAcquireCommandCreateInfo.currentFramePtr = swapchainCreateInfo.currentFramePtr;
 
     m_acquireImageCommand = std::make_unique<VulkanImageAcquireCommand>(imageAcquireCommandCreateInfo);
+
+    VulkanPresentCommandCreateInfo presentCommandCreateInfo = {};
+    presentCommandCreateInfo.currentImagePtr = &m_currentImage;
+    presentCommandCreateInfo.presentQueue = m_presentQueue;
+    presentCommandCreateInfo.swapchainCreateEvent = &m_swapchainCreateEvent;
+    presentCommandCreateInfo.requiresRecreationPtr = &m_requiresRecreation;
+
+    m_presentCommand = std::make_unique<VulkanPresentCommand>(presentCommandCreateInfo);
 
     create();
 }
@@ -156,7 +184,7 @@ void VulkanSwapchain::create() {
 
     m_presentMode = detail::choose_swap_present_mode(surfaceDetails.presentModes);
 
-    m_extent = detail::choose_swap_extent(surfaceDetails.capabilities, m_requestedExtent);
+    m_extent = detail::choose_swap_extent(surfaceDetails.capabilities, {m_window->width(), m_window->height()});
 
     //Old code, should check if this is right
     auto imageCount = surfaceDetails.capabilities.minImageCount + 1;
@@ -191,25 +219,22 @@ void VulkanSwapchain::create() {
         throw std::runtime_error("failed to create swapchain");
     }
 
-    VulkanSwapchainImageCreateInfo swapchainImageCreateInfo = {};
-    swapchainImageCreateInfo.device = m_device;
-    swapchainImageCreateInfo.swapchain = m_swapchain;
-    swapchainImageCreateInfo.format = m_surfaceFormat.format;
+    m_image->create(m_surfaceFormat.format, m_extent.width, m_extent.height, m_swapchain);
 
-    m_image = std::make_unique<VulkanImage>(swapchainImageCreateInfo);
+    VulkanSwapchainCreateEventInfo swapchainInfo = {};
+    swapchainInfo.format = m_surfaceFormat.format;
+    swapchainInfo.extent = m_extent;
+    swapchainInfo.imageCount = m_image->image_count();
+    swapchainInfo.swapchain = m_swapchain;
 
-
-    VulkanPresentCommandCreateInfo presentCommandCreateInfo = {};
-    presentCommandCreateInfo.device = m_device;
-    presentCommandCreateInfo.swapchain = m_swapchain;
-    presentCommandCreateInfo.currentImagePtr = &m_currentImage;
-    presentCommandCreateInfo.presentQueue = m_presentQueue;
-
-    m_presentCommand = std::make_unique<VulkanPresentCommand>(presentCommandCreateInfo);
+    m_swapchainCreateEvent(swapchainInfo);
 }
 
 void VulkanSwapchain::clean() {
-    m_image.reset();
+    m_swapchainCleanEvent();
+
+    m_image->clean();
+
     if (m_swapchain) {
         vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
         m_swapchain = VK_NULL_HANDLE;
@@ -217,8 +242,6 @@ void VulkanSwapchain::clean() {
 }
 
 VulkanImageAcquireCommand* VulkanSwapchain::acquire_image_command() {
-
-
     return m_acquireImageCommand.get();
 }
 
@@ -238,8 +261,26 @@ VkExtent2D VulkanSwapchain::extent() const {
     return m_extent;
 }
 
-VulkanImage* VulkanSwapchain::image() const {
+VulkanSwapchainImage* VulkanSwapchain::image() const {
     return m_image.get();
+}
+
+void VulkanSwapchain::recreate_swapchain() {
+    if (m_window->minimized()) {
+        return;
+    }
+    vkDeviceWaitIdle(m_device);
+    clean();
+    create();
+    m_requiresRecreation = false;
+}
+
+VulkanSwapchainCreateEvent* VulkanSwapchain::create_event() {
+    return &m_swapchainCreateEvent;
+}
+
+VulkanSwapchainCleanEvent* VulkanSwapchain::clean_event() {
+    return &m_swapchainCleanEvent;
 }
 
 }
