@@ -176,8 +176,6 @@ int main() {
     frameBufferCreateInfo.attachmentCount = 1;
     frameBufferCreateInfo.attachments = outputImage;
     frameBufferCreateInfo.renderPass = renderPass.get();
-    frameBufferCreateInfo.width = window->width();
-    frameBufferCreateInfo.height = window->height();
 
     auto expectedFrameBuffer = renderer->create_frame_buffer(frameBufferCreateInfo);
 
@@ -210,6 +208,11 @@ int main() {
     auto scheduler = std::move(expectedScheduler.value());
 
     while (run){
+        while (window->minimized()) {
+            logger.print_debug("window minimized");
+            window->wait_events();
+        }
+
         window->pool_events();
 
         renderer->prepare_frame();
