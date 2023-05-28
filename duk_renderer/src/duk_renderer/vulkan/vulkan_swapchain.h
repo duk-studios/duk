@@ -45,6 +45,7 @@ struct VulkanPresentCommandCreateInfo {
     VkQueue presentQueue;
     uint32_t* currentImagePtr;
     bool* requiresRecreationPtr;
+    bool* ableToPresentPtr;
     VulkanSwapchainCreateEvent* swapchainCreateEvent;
 };
 
@@ -62,6 +63,7 @@ private:
     VkQueue m_presentQueue;
     uint32_t* m_currentImagePtr;
     bool* m_requiresRecreationPtr;
+    bool* m_ableToPresentPtr;
     VulkanSubmitter m_submitter;
     events::EventListener m_listener;
 };
@@ -128,6 +130,7 @@ private:
     VulkanSwapchainCreateEvent m_swapchainCreateEvent;
     VulkanSwapchainCleanEvent m_swapchainCleanEvent;
     bool m_requiresRecreation;
+    bool m_ableToPresent;
 };
 
 } // namespace renderer

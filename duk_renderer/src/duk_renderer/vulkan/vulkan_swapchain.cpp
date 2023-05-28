@@ -76,6 +76,7 @@ VulkanPresentCommand::VulkanPresentCommand(const VulkanPresentCommandCreateInfo&
     m_currentImagePtr(commandCreateInfo.currentImagePtr),
     m_presentQueue(commandCreateInfo.presentQueue),
     m_requiresRecreationPtr(commandCreateInfo.requiresRecreationPtr),
+    m_ableToPresentPtr(commandCreateInfo.ableToPresentPtr),
     m_submitter([this](const auto& params) { submit(params); }, false, false, 0, nullptr, VK_NULL_HANDLE) {
 
     m_listener.listen(*commandCreateInfo.swapchainCreateEvent, [this](const auto& swapchainInfo) {
@@ -84,6 +85,9 @@ VulkanPresentCommand::VulkanPresentCommand(const VulkanPresentCommandCreateInfo&
 }
 
 void VulkanPresentCommand::submit(const VulkanCommandParams& commandParams) {
+    if (!(*m_ableToPresentPtr)) {
+        return;
+    }
 
     auto waitDependency = commandParams.waitDependency;
 
@@ -132,14 +136,23 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
         auto submitter = m_acquireImageCommand->submitter<VulkanSubmitter>();
 
         auto result = vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), *submitter->semaphore(), VK_NULL_HANDLE, &m_currentImage);
+
+        // VK_ERROR_OUT_OF_DATE_KHR means that this swapchain can no longer be used to present
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             m_requiresRecreation = true;
+
+            // if we are not able to present, skip present on VulkanPresentCommand
+            m_ableToPresent = false;
             return;
         }
 
+        // VK_SUBOPTIMAL_KHR means that this swapchain can still be used to present, so we allow it for now
+        // and recreate the swapchain on the next frame
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("failed to acquire swapchain image");
         }
+
+        m_ableToPresent = true;
     });
 
     m_listener.listen(m_window->window_resize_event, [this](const auto& ev){
@@ -163,6 +176,7 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
     presentCommandCreateInfo.presentQueue = m_presentQueue;
     presentCommandCreateInfo.swapchainCreateEvent = &m_swapchainCreateEvent;
     presentCommandCreateInfo.requiresRecreationPtr = &m_requiresRecreation;
+    presentCommandCreateInfo.ableToPresentPtr = &m_ableToPresent;
 
     m_presentCommand = std::make_unique<VulkanPresentCommand>(presentCommandCreateInfo);
 
