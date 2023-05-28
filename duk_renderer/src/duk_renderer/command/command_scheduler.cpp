@@ -1,7 +1,7 @@
 /// 12/05/2023
 /// command_scheduler.cpp
 
-#include <duk_renderer/command_scheduler.h>
+#include <duk_renderer/command/command_scheduler.h>
 
 
 namespace duk::renderer {

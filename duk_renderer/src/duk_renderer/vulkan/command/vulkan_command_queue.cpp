@@ -2,7 +2,7 @@
 // Created by Ricardo on 13/04/2023.
 //
 
-#include <duk_renderer/vulkan/vulkan_command_queue.h>
+#include <duk_renderer/vulkan/command/vulkan_command_queue.h>
 
 namespace duk::renderer {
 

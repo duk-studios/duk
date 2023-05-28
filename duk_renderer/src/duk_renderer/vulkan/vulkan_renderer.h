@@ -11,7 +11,7 @@
 #include <duk_renderer/vulkan/vulkan_debug_messenger.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 #include <duk_renderer/vulkan/vulkan_physical_device.h>
-#include <duk_renderer/vulkan/vulkan_command_queue.h>
+#include <duk_renderer/vulkan/command/vulkan_command_queue.h>
 #include <duk_renderer/vulkan/vulkan_swapchain.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_events.h>

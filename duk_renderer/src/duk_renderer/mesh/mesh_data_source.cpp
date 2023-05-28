@@ -3,7 +3,7 @@
 //
 
 #include <stdexcept>
-#include "duk_renderer/mesh/mesh_data_source.h"
+#include <duk_renderer/mesh/mesh_data_source.h>
 
 namespace duk::renderer {
 

@@ -5,7 +5,7 @@
 #define DUK_RENDERER_COMMAND_INTERFACE_H
 
 #include <duk_renderer/renderer_error.h>
-#include <duk_renderer/command.h>
+#include <duk_renderer/command/command.h>
 
 #include <duk_macros/macros.h>
 

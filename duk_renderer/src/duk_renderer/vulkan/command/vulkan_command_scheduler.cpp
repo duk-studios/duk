@@ -1,9 +1,9 @@
 /// 12/05/2023
 /// vulkan_command_scheduler.cpp
 
-#include <duk_renderer/vulkan/vulkan_command_scheduler.h>
-#include <duk_renderer/vulkan/vulkan_command_queue.h>
-#include <duk_renderer/vulkan/vulkan_command_buffer.h>
+#include <duk_renderer/vulkan/command/vulkan_command_scheduler.h>
+#include <duk_renderer/vulkan/command/vulkan_command_queue.h>
+#include <duk_renderer/vulkan/command/vulkan_command_buffer.h>
 
 #include <grapphs/algorithms/bfs_traversal.h>
 

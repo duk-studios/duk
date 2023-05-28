@@ -1,12 +1,12 @@
 /// 21/04/2023
 /// vulkan_command_interface.cpp
 
-#include <duk_renderer/vulkan/vulkan_command_buffer.h>
-#include <duk_renderer/vulkan/vulkan_command_queue.h>
+#include <duk_renderer/vulkan/command/vulkan_command_buffer.h>
+#include <duk_renderer/vulkan/command/vulkan_command_queue.h>
+#include <duk_renderer/vulkan/command/vulkan_command.h>
 #include <duk_renderer/vulkan/vulkan_renderer.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_render_pass.h>
-#include <duk_renderer/vulkan/vulkan_command.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_pipeline.h>
 
 namespace duk::renderer {

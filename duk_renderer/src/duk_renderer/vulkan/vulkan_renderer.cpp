@@ -5,7 +5,7 @@
 #include <duk_renderer/vulkan/vulkan_renderer.h>
 #include <duk_renderer/vulkan/vulkan_render_pass.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
-#include <duk_renderer/vulkan/vulkan_command_scheduler.h>
+#include <duk_renderer/vulkan/command/vulkan_command_scheduler.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_shader.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_pipeline.h>
 #include <duk_renderer/mesh/mesh.h>

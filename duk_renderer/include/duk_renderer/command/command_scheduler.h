@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_COMMAND_SCHEDULER_H
 #define DUK_RENDERER_COMMAND_SCHEDULER_H
 
-#include <duk_renderer/command_queue.h>
+#include <duk_renderer/command/command_queue.h>
 
 #include <grapphs/adjacency_list.h>
 

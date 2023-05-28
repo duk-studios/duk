@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_COMMAND_QUEUE_H
 #define DUK_RENDERER_COMMAND_QUEUE_H
 
-#include <duk_renderer/command_buffer.h>
+#include <duk_renderer/command/command_buffer.h>
 
 #include <duk_task/task_queue.h>
 

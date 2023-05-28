@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_VULKAN_COMMAND_H
 #define DUK_RENDERER_VULKAN_COMMAND_H
 
-#include <duk_renderer/command.h>
+#include <duk_renderer/command/command.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 
 #include <duk_macros/macros.h>

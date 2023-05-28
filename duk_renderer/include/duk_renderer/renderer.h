@@ -6,8 +6,8 @@
 #define DUK_RENDERER_RENDERER_H
 
 #include <duk_renderer/renderer_error.h>
-#include <duk_renderer/command_queue.h>
-#include <duk_renderer/command_scheduler.h>
+#include <duk_renderer/command/command_queue.h>
+#include <duk_renderer/command/command_scheduler.h>
 #include <duk_renderer/render_pass.h>
 #include <duk_renderer/frame_buffer.h>
 #include <duk_renderer/mesh/mesh.h>

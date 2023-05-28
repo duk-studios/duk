@@ -4,9 +4,9 @@
 #ifndef DUK_RENDERER_VULKAN_COMMAND_INTERFACE_H
 #define DUK_RENDERER_VULKAN_COMMAND_INTERFACE_H
 
-#include <duk_renderer/command_buffer.h>
+#include <duk_renderer/command/command_buffer.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
-#include <duk_renderer/vulkan/vulkan_command.h>
+#include <duk_renderer/vulkan/command/vulkan_command.h>
 
 namespace duk::renderer {
 
