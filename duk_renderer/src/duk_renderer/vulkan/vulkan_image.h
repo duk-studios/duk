@@ -6,6 +6,7 @@
 
 #include <duk_renderer/image.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
+#include <duk_renderer/vulkan/vulkan_events.h>
 
 #include <duk_macros/macros.h>
 
@@ -23,34 +24,84 @@ VkImageLayout convert_layout(ImageLayout layout);
 
 }
 
-struct VulkanSwapchainImageCreateInfo {
+class VulkanImage : public Image {
+public:
+    DUK_NO_DISCARD virtual VkImage image(uint32_t frameIndex) const = 0;
+
+    DUK_NO_DISCARD virtual VkImageView image_view(uint32_t frameIndex) const = 0;
+
+    DUK_NO_DISCARD virtual uint32_t image_count() const = 0;
+};
+
+struct VulkanMemoryImageCreateInfo {
     VkDevice device;
-    VkSwapchainKHR swapchain;
     VkFormat format;
 };
 
-class VulkanImage : public Image {
+class VulkanMemoryImage : public VulkanImage {
 public:
 
-    VulkanImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainImageCreateInfo);
+    explicit VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanImageCreateInfo);
 
-    ~VulkanImage() override;
+    ~VulkanMemoryImage() override;
 
-    DUK_NO_DISCARD VkImage image(uint32_t frameIndex) const;
+    DUK_NO_DISCARD ImageFormat format() const override;
 
-    ImageFormat format() const override;
+    DUK_NO_DISCARD VkImage image(uint32_t frameIndex) const override;
 
-    DUK_NO_DISCARD VkImageView image_view(uint32_t frameIndex) const;
+    DUK_NO_DISCARD VkImageView image_view(uint32_t frameIndex) const override;
 
-    DUK_NO_DISCARD uint32_t image_count() const;
+    DUK_NO_DISCARD uint32_t image_count() const override;
+
+    DUK_NO_DISCARD uint32_t width() const override;
+
+    DUK_NO_DISCARD uint32_t height() const override;
+
+    void create(uint32_t imageCount);
+
+    void clean();
+
+private:
+    VkDevice m_device;
+    std::vector<VkDeviceMemory> m_memories;
+    std::vector<VkImage> m_images;
+    std::vector<VkImageView> m_imageViews;
+};
+
+struct VulkanSwapchainImageCreateInfo {
+    VkDevice device;
+};
+
+class VulkanSwapchainImage : public VulkanImage {
+public:
+
+    explicit VulkanSwapchainImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainImageCreateInfo);
+
+    ~VulkanSwapchainImage() override;
+
+    DUK_NO_DISCARD ImageFormat format() const override;
+
+    DUK_NO_DISCARD uint32_t width() const override;
+
+    DUK_NO_DISCARD uint32_t height() const override;
+
+    DUK_NO_DISCARD VkImage image(uint32_t frameIndex) const override;
+
+    DUK_NO_DISCARD VkImageView image_view(uint32_t frameIndex) const override;
+
+    DUK_NO_DISCARD uint32_t image_count() const override;
+
+    void create(VkFormat format, uint32_t width, uint32_t height, VkSwapchainKHR swapchain);
+
+    void clean();
 
 private:
     VkDevice m_device;
     VkFormat m_format;
-    std::vector<VkDeviceMemory> m_memories;
+    uint32_t m_width;
+    uint32_t m_height;
     std::vector<VkImage> m_images;
     std::vector<VkImageView> m_imageViews;
-    bool m_createdImages;
 };
 
 }

@@ -6,6 +6,8 @@
 
 #include <duk_macros/macros.h>
 
+#include <cstdint>
+
 namespace duk::renderer {
 
 enum class ImageLayout {
@@ -44,6 +46,10 @@ public:
     virtual ~Image() = default;
 
     DUK_NO_DISCARD virtual ImageFormat format() const = 0;
+
+    DUK_NO_DISCARD virtual uint32_t width() const = 0;
+
+    DUK_NO_DISCARD virtual uint32_t height() const = 0;
 
 };
 
