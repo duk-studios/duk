@@ -54,8 +54,11 @@ public:
 
     void pool_events() override;
 
+    void wait_events() override;
+
     void close() override;
 
+    DUK_NO_DISCARD bool minimized() const override;
 
 private:
     std::shared_ptr<detail::WindowClassEntry> m_windowClassEntry;

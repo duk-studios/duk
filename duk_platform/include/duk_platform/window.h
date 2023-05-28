@@ -52,7 +52,11 @@ public:
 
     virtual void pool_events() = 0;
 
+    virtual void wait_events() = 0;
+
     virtual void close() = 0;
+
+    DUK_NO_DISCARD virtual bool minimized() const = 0;
 
 public:
 
