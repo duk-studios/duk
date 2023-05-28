@@ -120,8 +120,6 @@ public:
     DUK_NO_DISCARD virtual ExpectedRenderPass create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) = 0;
 
     struct FrameBufferCreateInfo {
-        uint32_t width;
-        uint32_t height;
         RenderPass* renderPass;
         Image* attachments;
         uint32_t attachmentCount;

@@ -16,8 +16,6 @@ class VulkanSwapchain;
 class VulkanRenderPass;
 
 struct VulkanFrameBufferCreateInfo {
-    uint32_t width;
-    uint32_t height;
     uint32_t imageCount;
     VkDevice device;
     VulkanRenderPass* renderPass;
@@ -36,7 +34,7 @@ public:
 
     DUK_NO_DISCARD uint32_t height() const override;
 
-    void create();
+    void create(uint32_t imageCount);
 
     void clean();
 
@@ -45,7 +43,6 @@ public:
 private:
     uint32_t m_width;
     uint32_t m_height;
-    uint32_t m_imageCount;
     VkDevice m_device;
     VulkanRenderPass* m_renderPass;
     VulkanImage* m_attachments;
