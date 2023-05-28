@@ -5,7 +5,7 @@
 #include <duk_renderer/mesh/mesh_data_source.h>
 #include <duk_renderer/pipeline/std_shader_data_source.h>
 #include <duk_renderer/renderer.h>
-#include <duk_macros/assert.h>
+#include <cassert>
 
 #include <duk_platform/window.h>
 #include <duk_log/logger.h>

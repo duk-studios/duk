@@ -5,9 +5,9 @@
 #define DUK_RENDERER_VULKAN_RESOURCE_POOL_H
 
 #include <duk_renderer/vulkan/vulkan_import.h>
-#include <duk_macros/assert.h>
 
 #include <vector>
+#include <cassert>
 
 namespace duk::renderer {
 
@@ -21,7 +21,7 @@ public:
     }
 
     virtual ~VulkanHandlePool() {
-        DUK_ASSERT(m_allocationCount == 0, "memory leak on VulkanHandlePool destructor");
+        assert(m_allocationCount == 0 && "memory leak on VulkanHandlePool destructor");
     }
 
     T allocate() {
@@ -36,7 +36,7 @@ public:
     }
 
     void free(T& resource) {
-        DUK_ASSERT(m_allocationCount > 0, "tried to free a resource on a VulkanHandlePool with no allocations");
+        assert(m_allocationCount > 0 && "tried to free a resource on a VulkanHandlePool with no allocations");
         m_allocationCount--;
         m_resources.push_back(resource);
         resource = VK_NULL_HANDLE;
@@ -105,7 +105,7 @@ class VulkanCommandBufferPool : public VulkanHandlePool<VkCommandBuffer> {
 public:
     explicit VulkanCommandBufferPool(const VulkanCommandBufferPoolCreateInfo& commandBufferPoolCreateInfo);
 
-    ~VulkanCommandBufferPool();
+    ~VulkanCommandBufferPool() override;
 
     void expand(size_t n) override;
 

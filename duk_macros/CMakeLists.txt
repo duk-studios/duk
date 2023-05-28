@@ -2,7 +2,6 @@ project(duk_macros)
 
 set(DUK_MACROS_HEADERS
         include/duk_macros/macros.h
-        include/duk_macros/assert.h
         )
 
 add_library(duk_macros INTERFACE ${DUK_MACROS_HEADERS})

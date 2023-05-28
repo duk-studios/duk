@@ -2,7 +2,7 @@
 /// descriptor.cpp
 
 #include <duk_renderer/pipeline/descriptor.h>
-#include <duk_macros/assert.h>
+#include <cassert>
 
 namespace duk::renderer {
 
@@ -25,12 +25,12 @@ DescriptorType Descriptor::type() const {
 }
 
 Image* Descriptor::image() const {
-    DUK_ASSERT(m_type == DescriptorType::IMAGE, "descriptor is not DescriptorType::IMAGE");
+    assert(m_type == DescriptorType::IMAGE && "descriptor is not DescriptorType::IMAGE");
     return m_data.image;
 }
 
 ImageSampler* Descriptor::image_sampler() const {
-    DUK_ASSERT(m_type == DescriptorType::IMAGE_SAMPLER, "descriptor is not DescriptorType::IMAGE_SAMPLER");
+    assert(m_type == DescriptorType::IMAGE_SAMPLER && "descriptor is not DescriptorType::IMAGE_SAMPLER");
     return m_data.imageSampler;
 }
 
