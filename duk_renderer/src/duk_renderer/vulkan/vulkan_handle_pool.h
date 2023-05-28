@@ -12,16 +12,16 @@
 namespace duk::renderer {
 
 template<typename T>
-class VulkanResourcePool {
+class VulkanHandlePool {
 public:
 
-    VulkanResourcePool() :
+    VulkanHandlePool() :
         m_allocationCount(0) {
 
     }
 
-    virtual ~VulkanResourcePool() {
-        DUK_ASSERT(m_allocationCount == 0, "memory leak on VulkanResourcePool destructor");
+    virtual ~VulkanHandlePool() {
+        DUK_ASSERT(m_allocationCount == 0, "memory leak on VulkanHandlePool destructor");
     }
 
     T allocate() {
@@ -36,7 +36,7 @@ public:
     }
 
     void free(T& resource) {
-        DUK_ASSERT(m_allocationCount > 0, "tried to free a resource on a VulkanResourcePool with no allocations");
+        DUK_ASSERT(m_allocationCount > 0, "tried to free a resource on a VulkanHandlePool with no allocations");
         m_allocationCount--;
         m_resources.push_back(resource);
         resource = VK_NULL_HANDLE;
@@ -64,7 +64,7 @@ struct VulkanFencePoolCreateInfo {
     VkFenceCreateFlags flags;
 };
 
-class VulkanFencePool : public VulkanResourcePool<VkFence> {
+class VulkanFencePool : public VulkanHandlePool<VkFence> {
 public:
     explicit VulkanFencePool(const VulkanFencePoolCreateInfo& fencePoolCreateInfo);
 
@@ -82,7 +82,7 @@ struct VulkanSemaphorePoolCreateInfo {
     VkDevice device;
 };
 
-class VulkanSemaphorePool : public VulkanResourcePool<VkSemaphore> {
+class VulkanSemaphorePool : public VulkanHandlePool<VkSemaphore> {
 public:
     explicit VulkanSemaphorePool(const VulkanSemaphorePoolCreateInfo& semaphorePoolCreateInfo);
 
@@ -101,7 +101,7 @@ struct VulkanCommandBufferPoolCreateInfo {
     VkCommandPool commandPool;
 };
 
-class VulkanCommandBufferPool : public VulkanResourcePool<VkCommandBuffer> {
+class VulkanCommandBufferPool : public VulkanHandlePool<VkCommandBuffer> {
 public:
     explicit VulkanCommandBufferPool(const VulkanCommandBufferPoolCreateInfo& commandBufferPoolCreateInfo);
 

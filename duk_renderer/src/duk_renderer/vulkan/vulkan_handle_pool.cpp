@@ -1,7 +1,7 @@
 /// 14/05/2023
 /// vulkan_resource_pool.cpp
 
-#include <duk_renderer/vulkan/vulkan_resource_pool.h>
+#include <duk_renderer/vulkan/vulkan_handle_pool.h>
 
 #include <stdexcept>
 

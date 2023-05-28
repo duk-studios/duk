@@ -9,7 +9,7 @@
 #include <duk_renderer/command/command_queue.h>
 #include <duk_renderer/vulkan/command/vulkan_command_buffer.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
-#include <duk_renderer/vulkan/vulkan_resource_pool.h>
+#include <duk_renderer/vulkan/vulkan_handle_pool.h>
 #include <duk_renderer/vulkan/vulkan_events.h>
 
 namespace duk::renderer {

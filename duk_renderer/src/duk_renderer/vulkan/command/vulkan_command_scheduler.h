@@ -7,7 +7,7 @@
 #include <duk_renderer/command/command_scheduler.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 #include <duk_renderer/vulkan/command/vulkan_command.h>
-#include <duk_renderer/vulkan/vulkan_resource_pool.h>
+#include <duk_renderer/vulkan/vulkan_handle_pool.h>
 
 #include <grapphs/adjacency_list.h>
 

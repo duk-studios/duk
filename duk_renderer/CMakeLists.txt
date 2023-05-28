@@ -70,8 +70,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vulkan/command/vulkan_command_scheduler.cpp
         src/duk_renderer/vulkan/command/vulkan_command.h
         src/duk_renderer/vulkan/command/vulkan_command.cpp
-        src/duk_renderer/vulkan/vulkan_resource_pool.h
-        src/duk_renderer/vulkan/vulkan_resource_pool.cpp
+        src/duk_renderer/vulkan/vulkan_handle_pool.h
+        src/duk_renderer/vulkan/vulkan_handle_pool.cpp
         src/duk_renderer/vulkan/vulkan_events.h
         src/duk_renderer/vulkan/pipeline/vulkan_pipeline.h
         src/duk_renderer/vulkan/pipeline/vulkan_pipeline.cpp
