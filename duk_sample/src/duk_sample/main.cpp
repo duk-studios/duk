@@ -210,16 +210,18 @@ int main() {
 
     auto scheduler = std::move(expectedScheduler.value());
 
-    std::array<Vertex2DColor, 3> vertices = {};
+    std::array<Vertex2DColor, 4> vertices = {};
     vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}};
     vertices[1] = {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}};
-    vertices[2] = {{0.0f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}};
+    vertices[2] = {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}};
+    vertices[3] = {{0.5f, -0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}};
 
 
     Renderer::BufferCreateInfo vertexBufferCreateInfo = {};
     vertexBufferCreateInfo.type = Buffer::Type::VERTEX;
     vertexBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::DYNAMIC;
-    vertexBufferCreateInfo.size = sizeof(Vertex2DColor) * vertices.size();
+    vertexBufferCreateInfo.size = vertices.size();
+    vertexBufferCreateInfo.elementSize = sizeof(Vertex2DColor);
 
     auto expectedVertexBuffer = renderer->create_buffer(vertexBufferCreateInfo);
 
@@ -229,9 +231,27 @@ int main() {
 
     auto vertexBuffer = std::move(expectedVertexBuffer.value());
 
-    vertexBuffer->write(vertices.data(), sizeof(Vertex2DColor) * vertices.size(), 0);
+    vertexBuffer->write(vertices.data(), vertexBuffer->byte_size(), 0);
 
-    while (run){
+    std::array<uint16_t, 6> indices = {0, 1, 2, 2, 1, 3};
+
+    Renderer::BufferCreateInfo indexBufferCreateInfo = {};
+    indexBufferCreateInfo.type = Buffer::Type::INDEX_16;
+    indexBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::DYNAMIC;
+    indexBufferCreateInfo.size = indices.size();
+    indexBufferCreateInfo.elementSize = sizeof(uint16_t);
+
+    auto expectedIndexBuffer = renderer->create_buffer(indexBufferCreateInfo);
+
+    if (!expectedIndexBuffer) {
+        logger.log(Level::ERR) << "failed to create index buffer: " << expectedIndexBuffer.error().description();
+    }
+
+    auto indexBuffer = std::move(expectedIndexBuffer.value());
+
+    indexBuffer->write(indices.data(), indexBuffer->byte_size(), 0);
+
+    while (run) {
         while (window->minimized()) {
             logger.print_debug("window minimized");
             window->wait_events();
@@ -245,7 +265,7 @@ int main() {
 
         auto acquireImageCommand = scheduler->schedule(renderer->acquire_image_command());
 
-        auto mainRenderPassCommand = scheduler->schedule(graphicsQueue->enqueue([&renderPass, &frameBuffer, &pipeline, &vertexBuffer](CommandBuffer* commandBuffer) {
+        auto mainRenderPassCommand = scheduler->schedule(graphicsQueue->enqueue([&renderPass, &frameBuffer, &pipeline, &vertexBuffer, &indexBuffer](CommandBuffer* commandBuffer) {
 
             commandBuffer->begin();
             CommandBuffer::RenderPassBeginInfo renderPassBeginInfo = {};
@@ -258,7 +278,9 @@ int main() {
 
             commandBuffer->bind_vertex_buffer(vertexBuffer.get());
 
-            commandBuffer->draw(3, 0, 1, 0);
+            commandBuffer->bind_index_buffer(indexBuffer.get());
+
+            commandBuffer->draw_indexed(indexBuffer->size(), 1, 0, 0, 0);
 
             commandBuffer->end_render_pass();
 
