@@ -35,6 +35,7 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
 
     vkGetPhysicalDeviceQueueFamilyProperties(m_physicalDevice, &queueFamilyCount, m_queueFamilyProperties.data());
 
+    vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &m_memoryProperties);
 }
 
 VulkanPhysicalDevice::~VulkanPhysicalDevice() = default;
@@ -100,6 +101,15 @@ VkPhysicalDevice VulkanPhysicalDevice::handle() {
 
 const std::vector<VkQueueFamilyProperties>& VulkanPhysicalDevice::queue_family_properties() const {
     return m_queueFamilyProperties;
+}
+
+uint32_t VulkanPhysicalDevice::find_memory_type(uint32_t typeFilter, VkMemoryPropertyFlags properties) const {
+    for (uint32_t i = 0; i < m_memoryProperties.memoryTypeCount; i++) {
+        if ((typeFilter & (1u << i)) && (m_memoryProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+    throw std::runtime_error("failed to find suitable memory type");
 }
 
 }

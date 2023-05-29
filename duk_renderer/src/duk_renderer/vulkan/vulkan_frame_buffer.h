@@ -38,6 +38,8 @@ public:
 
     void clean();
 
+    void clean(uint32_t imageIndex);
+
     DUK_NO_DISCARD VkFramebuffer handle(uint32_t frameIndex) const;
 
 private:

@@ -5,6 +5,7 @@
 #include <duk_renderer/vulkan/command/vulkan_command_queue.h>
 #include <duk_renderer/vulkan/command/vulkan_command.h>
 #include <duk_renderer/vulkan/vulkan_renderer.h>
+#include <duk_renderer/vulkan/vulkan_buffer.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_render_pass.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_pipeline.h>
@@ -100,6 +101,18 @@ void VulkanCommandBuffer::end_render_pass() {
 void VulkanCommandBuffer::bind_pipeline(Pipeline* pipeline) {
     auto vulkanPipeline = dynamic_cast<VulkanPipeline*>(pipeline);
     vkCmdBindPipeline(m_currentCommandBuffer, vulkanPipeline->bind_point(), vulkanPipeline->handle());
+}
+
+void VulkanCommandBuffer::bind_vertex_buffer(Buffer* buffer) {
+    assert(buffer->type() == Buffer::Type::VERTEX);
+
+    auto vulkanBuffer = dynamic_cast<VulkanBuffer*>(buffer);
+    vulkanBuffer->update(*m_currentImagePtr);
+
+    VkDeviceSize offsets[] = {0};
+    VkBuffer buffers[] = {vulkanBuffer->handle(*m_currentImagePtr)};
+
+    vkCmdBindVertexBuffers(m_currentCommandBuffer, 0, 1, buffers, offsets);
 }
 
 void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) {

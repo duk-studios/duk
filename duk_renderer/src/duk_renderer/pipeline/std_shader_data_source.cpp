@@ -73,7 +73,6 @@ void StdShaderDataSource::insert_vertex_attributes(const std::initializer_list<V
     m_vertexLayout.insert(formats);
 }
 
-
 void StdShaderDataSource::insert_descriptor_set_description(const DescriptorSetDescription& descriptorSetDescription) {
     m_descriptorSetDescriptions.push_back(descriptorSetDescription);
 }

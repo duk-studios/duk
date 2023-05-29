@@ -16,6 +16,7 @@
 namespace duk::renderer {
 
 class RenderPass;
+class Buffer;
 class FrameBuffer;
 class Mesh;
 class MeshDataSource;
@@ -43,6 +44,8 @@ public:
     virtual void end_render_pass() = 0;
 
     virtual void bind_pipeline(Pipeline* pipeline) = 0;
+
+    virtual void bind_vertex_buffer(Buffer* buffer) = 0;
 
     virtual void draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) = 0;
 

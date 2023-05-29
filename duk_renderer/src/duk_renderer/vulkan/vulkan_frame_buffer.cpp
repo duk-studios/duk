@@ -53,10 +53,18 @@ void VulkanFrameBuffer::create(uint32_t imageCount) {
 }
 
 void VulkanFrameBuffer::clean() {
-    for (auto& frameBuffer : m_frameBuffers) {
-        vkDestroyFramebuffer(m_device, frameBuffer, nullptr);
+    for (auto i = 0; i < m_frameBuffers.size(); i++) {
+        clean(i);
     }
     m_frameBuffers.clear();
+}
+
+void VulkanFrameBuffer::clean(uint32_t imageIndex) {
+    auto& frameBuffer = m_frameBuffers[imageIndex];
+    if (frameBuffer != VK_NULL_HANDLE) {
+        vkDestroyFramebuffer(m_device, frameBuffer, nullptr);
+        frameBuffer = VK_NULL_HANDLE;
+    }
 }
 
 VkFramebuffer VulkanFrameBuffer::handle(uint32_t frameIndex) const {

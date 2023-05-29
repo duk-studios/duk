@@ -4,6 +4,7 @@
 
 #include <duk_renderer/vulkan/vulkan_renderer.h>
 #include <duk_renderer/vulkan/vulkan_render_pass.h>
+#include <duk_renderer/vulkan/vulkan_buffer.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/command/vulkan_command_scheduler.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_shader.h>
@@ -108,6 +109,7 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
 }
 
 VulkanRenderer::~VulkanRenderer() {
+    vkDeviceWaitIdle(m_device);
     m_swapchain.reset();
     vkDestroyDevice(m_device, nullptr);
     if (m_surface) {
@@ -215,6 +217,23 @@ ExpectedRenderPass VulkanRenderer::create_render_pass(const Renderer::RenderPass
         vulkanRenderPassCreateInfo.colorAttachmentCount = renderPassCreateInfo.colorAttachmentCount;
         vulkanRenderPassCreateInfo.depthAttachment = renderPassCreateInfo.depthAttachment;
         return std::make_shared<VulkanRenderPass>(vulkanRenderPassCreateInfo);
+    }
+    catch (std::exception& e) {
+        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
+    }
+}
+
+ExpectedBuffer VulkanRenderer::create_buffer(const Renderer::BufferCreateInfo& bufferCreateInfo) {
+    try {
+        VulkanBufferCreateInfo vulkanBufferCreateInfo = {};
+        vulkanBufferCreateInfo.updateFrequency = bufferCreateInfo.updateFrequency;
+        vulkanBufferCreateInfo.type = bufferCreateInfo.type;
+        vulkanBufferCreateInfo.size = bufferCreateInfo.size;
+        vulkanBufferCreateInfo.device = m_device;
+        vulkanBufferCreateInfo.physicalDevice = m_physicalDevice.get();
+        vulkanBufferCreateInfo.queueFamilyIndex = m_queueFamilyIndices[CommandQueueType::QUEUE_GRAPHICS];
+        vulkanBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+        return m_resourceManager->create(vulkanBufferCreateInfo);
     }
     catch (std::exception& e) {
         return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
@@ -404,9 +423,11 @@ void VulkanRenderer::create_vk_swapchain(const VulkanRendererCreateInfo& vulkanR
 
 void VulkanRenderer::create_resource_manager() {
     VulkanResourceManagerCreateInfo resourceManagerCreateInfo = {};
+    resourceManagerCreateInfo.imageCount = m_maxFramesInFlight;
+    resourceManagerCreateInfo.prepareFrameEvent = &m_prepareFrameEvent;
     if (m_swapchain) {
-        resourceManagerCreateInfo.swapchainCreateEvent = m_swapchain->create_event();
-        resourceManagerCreateInfo.swapchainCleanEvent = m_swapchain->clean_event();
+        resourceManagerCreateInfo.swapchain = m_swapchain.get();
+        resourceManagerCreateInfo.imageCount = m_swapchain->image_count();
     }
 
     m_resourceManager = std::make_unique<VulkanResourceManager>(resourceManagerCreateInfo);
