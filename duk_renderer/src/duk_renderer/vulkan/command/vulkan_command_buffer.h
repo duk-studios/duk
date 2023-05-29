@@ -44,6 +44,8 @@ public:
 
     void bind_pipeline(Pipeline* pipeline) override;
 
+    void bind_vertex_buffer(Buffer* buffer) override;
+
     void draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) override;
 
     // Command overrides

@@ -134,6 +134,10 @@ void VulkanMemoryImage::clean() {
 
 }
 
+void VulkanMemoryImage::clean(uint32_t imageIndex) {
+
+}
+
 VulkanSwapchainImage::VulkanSwapchainImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainImageCreateInfo) :
     m_device(vulkanSwapchainImageCreateInfo.device),
     m_format(VK_FORMAT_UNDEFINED) {

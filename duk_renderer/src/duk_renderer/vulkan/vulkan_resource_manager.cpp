@@ -4,6 +4,8 @@
 #include <duk_renderer/vulkan/vulkan_resource_manager.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_image.h>
+#include <duk_renderer/vulkan/vulkan_buffer.h>
+#include <duk_renderer/vulkan/vulkan_swapchain.h>
 
 namespace duk::renderer {
 
@@ -23,42 +25,65 @@ void clean(std::vector<T*>& resources) {
     }
 }
 
-template<typename ResourceT, typename CreateInfoT>
-std::shared_ptr<ResourceT> create(std::vector<ResourceT*>& resources, const CreateInfoT& createInfo) {
-    auto deleter = [&resources](auto ptr) {
-        resources.erase(std::remove(resources.begin(), resources.end(), ptr), resources.end());
-        delete ptr;
-    };
-
-    auto ptr = resources.emplace_back(new ResourceT(createInfo));
-
-    return {ptr, deleter};
-}
 }
 
-VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateInfo& resourceManagerCreateInfo) {
-    m_listener.listen(*resourceManagerCreateInfo.swapchainCreateEvent, [this](const auto& swapchainInfo) {
-        detail::create(m_images, swapchainInfo.imageCount);
-        detail::create(m_frameBuffers, swapchainInfo.imageCount);
-    });
+VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateInfo& resourceManagerCreateInfo) :
+    m_swapchain(resourceManagerCreateInfo.swapchain),
+    m_imageCount(resourceManagerCreateInfo.imageCount) {
 
-    m_listener.listen(*resourceManagerCreateInfo.swapchainCleanEvent, [this] {
-        detail::clean(m_frameBuffers);
-        detail::clean(m_images);
+    if (m_swapchain) {
+        m_listener.listen(*m_swapchain->create_event(), [this](const auto& swapchainInfo) {
+            m_imageCount = swapchainInfo.imageCount;
+            detail::create(m_buffers, m_imageCount);
+            detail::create(m_images, m_imageCount);
+            detail::create(m_frameBuffers, m_imageCount);
+        });
+
+        m_listener.listen(*m_swapchain->clean_event(), [this] {
+            detail::clean(m_frameBuffers);
+            detail::clean(m_images);
+            detail::clean(m_buffers);
+            clean(m_frameBuffersToDelete);
+            clean(m_imagesToDelete);
+            clean(m_buffersToDelete);
+        });
+    }
+
+    m_listener.listen(*resourceManagerCreateInfo.prepareFrameEvent, [this](uint32_t frameIndex) {
+        clean(m_swapchain ? *m_swapchain->current_image_ptr() : frameIndex);
     });
 }
 
 VulkanResourceManager::~VulkanResourceManager() {
-    assert(m_images.empty());
     assert(m_frameBuffers.empty());
+    assert(m_images.empty());
+    assert(m_buffers.empty());
+}
+
+void VulkanResourceManager::clean(uint32_t imageIndex) {
+    clean(m_buffersToDelete, imageIndex);
+    clean(m_imagesToDelete, imageIndex);
+    clean(m_frameBuffersToDelete, imageIndex);
+}
+
+std::shared_ptr<VulkanBuffer> VulkanResourceManager::create(const VulkanBufferCreateInfo& bufferCreateInfo) {
+    return create(m_buffers, m_buffersToDelete, bufferCreateInfo);
 }
 
 std::shared_ptr<VulkanMemoryImage> VulkanResourceManager::create(const VulkanMemoryImageCreateInfo& imageCreateInfo) {
-    return detail::create(m_images, imageCreateInfo);
+    return create(m_images, m_imagesToDelete, imageCreateInfo);
 }
 
 std::shared_ptr<VulkanFrameBuffer> VulkanResourceManager::create(const VulkanFrameBufferCreateInfo& frameBufferCreateInfo) {
-    return detail::create(m_frameBuffers, frameBufferCreateInfo);
+    return create(m_frameBuffers, m_frameBuffersToDelete, frameBufferCreateInfo);
+}
+
+std::set<uint32_t> VulkanResourceManager::image_indices_set() const {
+    std::set<uint32_t> pendingIndices;
+    for (auto i = 0; i < m_imageCount; i++) {
+        pendingIndices.insert(i);
+    }
+    return pendingIndices;
 }
 
 }

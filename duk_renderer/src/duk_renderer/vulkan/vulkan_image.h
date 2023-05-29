@@ -61,6 +61,8 @@ public:
 
     void clean();
 
+    void clean(uint32_t imageIndex);
+
 private:
     VkDevice m_device;
     std::vector<VkDeviceMemory> m_memories;

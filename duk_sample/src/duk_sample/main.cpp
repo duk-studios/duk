@@ -42,6 +42,9 @@ StdShaderDataSource load_shader_data_source(const char* vertexFilepath, const ch
     dataSource.insert_spir_v_code(Shader::Module::VERTEX, load_spir_v(vertexFilepath));
     dataSource.insert_spir_v_code(Shader::Module::FRAGMENT, load_spir_v(fragmentFilepath));
 
+    dataSource.insert_vertex_attribute(VertexAttribute::Format::VEC2);
+    dataSource.insert_vertex_attribute(VertexAttribute::Format::VEC4);
+
     dataSource.update_hash();
 
     return dataSource;
@@ -207,6 +210,27 @@ int main() {
 
     auto scheduler = std::move(expectedScheduler.value());
 
+    std::array<Vertex2DColor, 3> vertices = {};
+    vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}};
+    vertices[1] = {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}};
+    vertices[2] = {{0.0f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}};
+
+
+    Renderer::BufferCreateInfo vertexBufferCreateInfo = {};
+    vertexBufferCreateInfo.type = Buffer::Type::VERTEX;
+    vertexBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::DYNAMIC;
+    vertexBufferCreateInfo.size = sizeof(Vertex2DColor) * vertices.size();
+
+    auto expectedVertexBuffer = renderer->create_buffer(vertexBufferCreateInfo);
+
+    if (!expectedVertexBuffer) {
+        logger.log(Level::ERR) << "failed to create vertex buffer: " << expectedVertexBuffer.error().description();
+    }
+
+    auto vertexBuffer = std::move(expectedVertexBuffer.value());
+
+    vertexBuffer->write(vertices.data(), sizeof(Vertex2DColor) * vertices.size(), 0);
+
     while (run){
         while (window->minimized()) {
             logger.print_debug("window minimized");
@@ -221,7 +245,7 @@ int main() {
 
         auto acquireImageCommand = scheduler->schedule(renderer->acquire_image_command());
 
-        auto mainRenderPassCommand = scheduler->schedule(graphicsQueue->enqueue([&renderPass, &frameBuffer, &pipeline](CommandBuffer* commandBuffer) {
+        auto mainRenderPassCommand = scheduler->schedule(graphicsQueue->enqueue([&renderPass, &frameBuffer, &pipeline, &vertexBuffer](CommandBuffer* commandBuffer) {
 
             commandBuffer->begin();
             CommandBuffer::RenderPassBeginInfo renderPassBeginInfo = {};
@@ -231,6 +255,8 @@ int main() {
             commandBuffer->begin_render_pass(renderPassBeginInfo);
 
             commandBuffer->bind_pipeline(pipeline.get());
+
+            commandBuffer->bind_vertex_buffer(vertexBuffer.get());
 
             commandBuffer->draw(3, 0, 1, 0);
 

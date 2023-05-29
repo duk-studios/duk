@@ -33,6 +33,7 @@ struct DescriptorSetDescription {
 
 class Image;
 class ImageSampler;
+class Buffer;
 
 class Descriptor {
 public:
@@ -42,6 +43,8 @@ public:
     Descriptor(Image* image);
 
     Descriptor(ImageSampler* imageSampler);
+
+    Descriptor(Buffer* buffer);
 
     DUK_NO_DISCARD DescriptorType type() const;
 
@@ -53,6 +56,7 @@ private:
     union Data {
         Image* image;
         ImageSampler* imageSampler;
+        Buffer* buffer;
     };
 
     Data m_data;
