@@ -1,5 +1,7 @@
 project(duk_sample)
 
+set(CMAKE_EXE_LINKER_FLAGS "-static")
+
 set(DUK_SAMPLE_HEADERS
         )
 

@@ -115,12 +115,28 @@ void VulkanCommandBuffer::bind_vertex_buffer(Buffer* buffer) {
     vkCmdBindVertexBuffers(m_currentCommandBuffer, 0, 1, buffers, offsets);
 }
 
+void VulkanCommandBuffer::bind_index_buffer(Buffer* buffer) {
+    assert(buffer->type() == Buffer::Type::INDEX_16 || buffer->type() == Buffer::Type::INDEX_32);
+
+    auto currentImage = *m_currentImagePtr;
+    auto indexType = buffer->type() == Buffer::Type::INDEX_16 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
+
+    auto vulkanBuffer = dynamic_cast<VulkanBuffer*>(buffer);
+    vulkanBuffer->update(currentImage);
+
+    vkCmdBindIndexBuffer(m_currentCommandBuffer, vulkanBuffer->handle(currentImage), 0, indexType);
+}
+
 void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) {
     vkCmdDraw(m_currentCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 }
 
 Submitter* VulkanCommandBuffer::submitter_ptr() {
     return &m_submitter;
+}
+
+void VulkanCommandBuffer::draw_indexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) {
+    vkCmdDrawIndexed(m_currentCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 
 }

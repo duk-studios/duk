@@ -125,6 +125,7 @@ public:
         Buffer::Type type;
         Buffer::UpdateFrequency updateFrequency;
         size_t size;
+        size_t elementSize;
     };
 
     DUK_NO_DISCARD virtual ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) = 0;

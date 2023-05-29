@@ -81,6 +81,7 @@ struct VulkanBufferCreateInfo {
     Buffer::Type type;
     Buffer::UpdateFrequency updateFrequency;
     size_t size;
+    size_t elementSize;
     VkDevice device;
     VulkanPhysicalDevice* physicalDevice;
     uint32_t queueFamilyIndex;
@@ -110,6 +111,10 @@ public:
 
     DUK_NO_DISCARD size_t size() const override;
 
+    DUK_NO_DISCARD size_t element_size() const override;
+
+    DUK_NO_DISCARD size_t byte_size() const override;
+
     DUK_NO_DISCARD Type type() const override;
 
 private:
@@ -119,6 +124,7 @@ private:
     Buffer::Type m_type;
     Buffer::UpdateFrequency m_updateFrequency;
     size_t m_size;
+    size_t m_elementSize;
     std::vector<std::unique_ptr<VulkanBufferMemory>> m_buffers;
     std::vector<duk::hash::Hash> m_bufferHashes;
     std::vector<uint8_t> m_data;
