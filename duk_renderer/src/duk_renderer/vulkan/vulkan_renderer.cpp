@@ -229,6 +229,7 @@ ExpectedBuffer VulkanRenderer::create_buffer(const Renderer::BufferCreateInfo& b
         vulkanBufferCreateInfo.updateFrequency = bufferCreateInfo.updateFrequency;
         vulkanBufferCreateInfo.type = bufferCreateInfo.type;
         vulkanBufferCreateInfo.size = bufferCreateInfo.size;
+        vulkanBufferCreateInfo.elementSize = bufferCreateInfo.elementSize;
         vulkanBufferCreateInfo.device = m_device;
         vulkanBufferCreateInfo.physicalDevice = m_physicalDevice.get();
         vulkanBufferCreateInfo.queueFamilyIndex = m_queueFamilyIndices[CommandQueueType::QUEUE_GRAPHICS];

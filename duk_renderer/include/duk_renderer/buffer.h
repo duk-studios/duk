@@ -7,6 +7,7 @@
 #include <duk_macros/macros.h>
 
 #include <cstdint>
+#include <cassert>
 
 namespace duk::renderer {
 
@@ -33,6 +34,7 @@ public:
 
     template<typename T>
     void read(T& dst, size_t index) {
+        assert(sizeof(T) == element_size());
         read(&dst, sizeof(T), index * sizeof(T));
     }
 
@@ -40,10 +42,15 @@ public:
 
     template<typename T>
     void write(const T& src, size_t index) {
+        assert(sizeof(T) == element_size());
         write(&src, sizeof(T), index * sizeof(T));
     }
 
     DUK_NO_DISCARD virtual size_t size() const = 0;
+
+    DUK_NO_DISCARD virtual size_t element_size() const = 0;
+
+    DUK_NO_DISCARD virtual size_t byte_size() const = 0;
 
     DUK_NO_DISCARD virtual Type type() const = 0;
 

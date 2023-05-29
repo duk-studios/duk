@@ -142,11 +142,12 @@ VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo) :
     m_queueFamilyIndex(bufferCreateInfo.queueFamilyIndex),
     m_type(bufferCreateInfo.type),
     m_updateFrequency(bufferCreateInfo.updateFrequency),
-    m_size(bufferCreateInfo.size) {
+    m_size(bufferCreateInfo.size),
+    m_elementSize(bufferCreateInfo.elementSize),
+    m_data(m_size * m_elementSize, 0),
+    m_dataHash(0) {
 
     create(bufferCreateInfo.imageCount);
-    m_data.resize(m_size, 0);
-    m_dataHash = 0;
 }
 
 VulkanBuffer::~VulkanBuffer() = default;
@@ -168,7 +169,7 @@ void VulkanBuffer::create(uint32_t imageCount) {
     bufferMemoryCreateInfo.device = m_device;
     bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
     bufferMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
-    bufferMemoryCreateInfo.size = m_size;
+    bufferMemoryCreateInfo.size = m_data.size();
     bufferMemoryCreateInfo.usageFlags = detail::buffer_usage_from_type(m_type);
 
     m_buffers.resize(imageCount);
@@ -208,6 +209,14 @@ void VulkanBuffer::write(void* src, size_t size, size_t offset) {
 
 size_t VulkanBuffer::size() const {
     return m_size;
+}
+
+size_t VulkanBuffer::element_size() const {
+    return m_elementSize;
+}
+
+size_t VulkanBuffer::byte_size() const {
+    return m_data.size();
 }
 
 Buffer::Type VulkanBuffer::type() const {
