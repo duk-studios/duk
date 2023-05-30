@@ -231,13 +231,13 @@ int main() {
 
     auto vertexBuffer = std::move(expectedVertexBuffer.value());
 
-    vertexBuffer->write(vertices.data(), vertexBuffer->byte_size(), 0);
+    vertexBuffer->write(vertices);
 
     std::array<uint16_t, 6> indices = {0, 1, 2, 2, 1, 3};
 
     Renderer::BufferCreateInfo indexBufferCreateInfo = {};
     indexBufferCreateInfo.type = Buffer::Type::INDEX_16;
-    indexBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::DYNAMIC;
+    indexBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::STATIC;
     indexBufferCreateInfo.size = indices.size();
     indexBufferCreateInfo.elementSize = sizeof(uint16_t);
 
@@ -249,7 +249,19 @@ int main() {
 
     auto indexBuffer = std::move(expectedIndexBuffer.value());
 
-    indexBuffer->write(indices.data(), indexBuffer->byte_size(), 0);
+    indexBuffer->write(indices);
+
+
+    uint16_t test[6];
+
+    indexBuffer->read(test);
+
+    assert(test[0] == indices[0]);
+    assert(test[1] == indices[1]);
+    assert(test[2] == indices[2]);
+    assert(test[3] == indices[3]);
+    assert(test[4] == indices[4]);
+    assert(test[5] == indices[5]);
 
     while (run) {
         while (window->minimized()) {
