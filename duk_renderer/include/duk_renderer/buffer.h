@@ -17,7 +17,8 @@ class Buffer {
 public:
     enum class UpdateFrequency {
         STATIC,
-        DYNAMIC
+        DYNAMIC,
+        SHARED
     };
 
     enum class Type {
@@ -49,6 +50,12 @@ public:
         assert(elementSize == element_size());
         write((void*)std::data(src), std::size(src) * elementSize, startElement * elementSize);
     }
+
+    /// Makes recent writes available to the GPU
+    virtual void flush() = 0;
+
+    /// Invalidates CPU cache and fetches data from GPU
+    virtual void invalidate() = 0;
 
     DUK_NO_DISCARD virtual size_t size() const = 0;
 

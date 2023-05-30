@@ -122,6 +122,10 @@ public:
 
     void write(void* src, size_t size, size_t offset) override;
 
+    void flush() override;
+
+    void invalidate() override;
+
     DUK_NO_DISCARD size_t size() const override;
 
     DUK_NO_DISCARD size_t element_size() const override;
@@ -129,6 +133,9 @@ public:
     DUK_NO_DISCARD size_t byte_size() const override;
 
     DUK_NO_DISCARD Type type() const override;
+private:
+
+    void update_data_hash();
 
 private:
     VkDevice m_device;

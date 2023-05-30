@@ -233,6 +233,8 @@ int main() {
 
     vertexBuffer->write(vertices);
 
+    vertexBuffer->flush();
+
     std::array<uint16_t, 6> indices = {0, 1, 2, 2, 1, 3};
 
     Renderer::BufferCreateInfo indexBufferCreateInfo = {};
@@ -250,6 +252,8 @@ int main() {
     auto indexBuffer = std::move(expectedIndexBuffer.value());
 
     indexBuffer->write(indices);
+
+    indexBuffer->flush();
 
 
     uint16_t test[6];

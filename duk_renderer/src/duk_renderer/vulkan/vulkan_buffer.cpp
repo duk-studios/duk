@@ -215,10 +215,13 @@ VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo) :
 VulkanBuffer::~VulkanBuffer() = default;
 
 VkBuffer VulkanBuffer::handle(uint32_t imageIndex) {
-    return m_buffers[imageIndex]->handle();
+    return m_buffers[m_updateFrequency == Buffer::UpdateFrequency::DYNAMIC ? imageIndex : 0]->handle();
 }
 
 void VulkanBuffer::update(uint32_t imageIndex) {
+
+    imageIndex = m_updateFrequency == Buffer::UpdateFrequency::DYNAMIC ? imageIndex : 0;
+
     auto& bufferHash = m_bufferHashes[imageIndex];
     if (bufferHash != m_dataHash) {
         m_buffers[imageIndex]->write(m_data.data(), m_data.size(), 0);
@@ -234,19 +237,20 @@ void VulkanBuffer::create(uint32_t imageCount) {
     bufferMemoryCreateInfo.size = m_data.size();
     bufferMemoryCreateInfo.usageFlags = detail::buffer_usage_from_type(m_type);
 
-    m_buffers.resize(imageCount);
-    for (auto& buffer : m_buffers) {
-        switch (m_updateFrequency) {
-            case UpdateFrequency::DYNAMIC:
+    switch (m_updateFrequency) {
+        case UpdateFrequency::DYNAMIC:
+            m_buffers.resize(imageCount);
+            for (auto& buffer : m_buffers) {
                 buffer = std::make_unique<VulkanBufferHostMemory>(bufferMemoryCreateInfo);
-                break;
-            case UpdateFrequency::STATIC:
-                buffer = std::make_unique<VulkanBufferDeviceMemory>(bufferMemoryCreateInfo);
-                break;
-            default:
-                throw std::invalid_argument("unhandled Buffer::UpdateFrequency");
-        }
+            }
+            break;
+        case UpdateFrequency::STATIC:
+            m_buffers.emplace_back(std::make_unique<VulkanBufferDeviceMemory>(bufferMemoryCreateInfo));
+            break;
+        default:
+            throw std::invalid_argument("unhandled Buffer::UpdateFrequency");
     }
+
     m_bufferHashes.resize(imageCount, 0);
 }
 
@@ -270,8 +274,35 @@ void VulkanBuffer::read(void* dst, size_t size, size_t offset) {
 void VulkanBuffer::write(void* src, size_t size, size_t offset) {
     assert(offset + size <= m_data.size());
     memcpy(m_data.data() + offset, src, size);
-    m_dataHash = 0;
-    duk::hash::hash_combine(m_dataHash, m_data.data(), m_data.size());
+}
+
+void VulkanBuffer::flush() {
+    update_data_hash();
+
+    // static buffers updates as soon as we flush
+    if (m_updateFrequency == Buffer::UpdateFrequency::STATIC) {
+
+        // this may be really expensive, we need to wait for the device to idle because it may be using this buffer while we update it
+        // we could try using pipeline barriers to make sure that we only wait when necessary
+        vkDeviceWaitIdle(m_device);
+
+        // updating a static buffer will use a vkQueueWaitIdle, which may also be expensive
+        update(0);
+    }
+}
+
+void VulkanBuffer::invalidate() {
+    assert(m_updateFrequency == Buffer::UpdateFrequency::SHARED);
+
+    // just as with flush, this is really expensive, and we could probably use a pipeline barrier to reduce idle time
+    vkDeviceWaitIdle(m_device);
+
+    m_buffers[0]->read(m_data.data(), m_data.size(), 0);
+
+    update_data_hash();
+
+    // update buffer hash, so we don't do a redundant write on the next update call
+    m_bufferHashes[0] = m_dataHash;
 }
 
 size_t VulkanBuffer::size() const {
@@ -289,5 +320,11 @@ size_t VulkanBuffer::byte_size() const {
 Buffer::Type VulkanBuffer::type() const {
     return m_type;
 }
+
+void VulkanBuffer::update_data_hash() {
+    m_dataHash = 0;
+    duk::hash::hash_combine(m_dataHash, m_data.data(), m_data.size());
+}
+
 
 }
