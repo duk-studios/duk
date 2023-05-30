@@ -26,7 +26,7 @@ struct VulkanBufferMemoryCreateInfo {
 class VulkanBufferMemory {
 protected:
 
-    explicit VulkanBufferMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo, VkMemoryPropertyFlags memoryPropertyFlags);
+    explicit VulkanBufferMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo, VkMemoryPropertyFlags memoryPropertyFlags, VkBufferUsageFlags additionalUsageFlags);
 
 public:
 
@@ -62,7 +62,7 @@ protected:
 
 class VulkanBufferHostMemory : public VulkanBufferMemory {
 public:
-    VulkanBufferHostMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo);
+    explicit VulkanBufferHostMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo);
 
     ~VulkanBufferHostMemory() override;
 
@@ -75,6 +75,19 @@ public:
     void unmap();
 private:
     void* m_mapped;
+};
+
+class VulkanBufferDeviceMemory : public VulkanBufferMemory {
+public:
+    explicit VulkanBufferDeviceMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo);
+
+    ~VulkanBufferDeviceMemory() override;
+
+    void write(void* src, size_t size, size_t offset) override;
+
+    void read(void* dst, size_t size, size_t offset) override;
+private:
+    VkBufferUsageFlags m_requiredBufferUsageFlags;
 };
 
 struct VulkanBufferCreateInfo {

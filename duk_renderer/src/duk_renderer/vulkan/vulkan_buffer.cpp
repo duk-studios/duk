@@ -2,6 +2,7 @@
 /// vulkan_buffer.cpp
 
 #include <duk_renderer/vulkan/vulkan_buffer.h>
+#include <duk_renderer/vulkan/command/vulkan_command_queue.h>
 
 #include <stdexcept>
 
@@ -33,11 +34,11 @@ static VkBufferUsageFlags buffer_usage_from_type(Buffer::Type type) {
 
 }
 
-VulkanBufferMemory::VulkanBufferMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo, VkMemoryPropertyFlags memoryPropertyFlags) :
+VulkanBufferMemory::VulkanBufferMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo, VkMemoryPropertyFlags memoryPropertyFlags, VkBufferUsageFlags additionalUsageFlags) :
     m_device(vulkanBufferMemoryCreateInfo.device),
     m_physicalDevice(vulkanBufferMemoryCreateInfo.physicalDevice),
     m_queueFamilyIndex(vulkanBufferMemoryCreateInfo.queueFamilyIndex),
-    m_usageFlags(vulkanBufferMemoryCreateInfo.usageFlags),
+    m_usageFlags(vulkanBufferMemoryCreateInfo.usageFlags | additionalUsageFlags),
     m_memoryProperties(memoryPropertyFlags),
     m_size(vulkanBufferMemoryCreateInfo.size) {
 
@@ -105,7 +106,8 @@ VkDeviceMemory VulkanBufferMemory::memory() const {
 }
 
 VulkanBufferHostMemory::VulkanBufferHostMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo) :
-    VulkanBufferMemory(vulkanBufferMemoryCreateInfo, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+    VulkanBufferMemory(vulkanBufferMemoryCreateInfo, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 0),
+    m_mapped(nullptr) {
     map();
 }
 
@@ -134,6 +136,66 @@ void VulkanBufferHostMemory::unmap() {
         vkUnmapMemory(m_device, m_memory);
         m_mapped = nullptr;
     }
+}
+
+VulkanBufferDeviceMemory::VulkanBufferDeviceMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo) :
+    VulkanBufferMemory(vulkanBufferMemoryCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT),
+    m_requiredBufferUsageFlags(vulkanBufferMemoryCreateInfo.usageFlags) {
+
+}
+
+VulkanBufferDeviceMemory::~VulkanBufferDeviceMemory() = default;
+
+void VulkanBufferDeviceMemory::write(void* src, size_t size, size_t offset) {
+
+    VulkanBufferMemoryCreateInfo bufferHostMemoryCreateInfo = {};
+    bufferHostMemoryCreateInfo.device = m_device;
+    bufferHostMemoryCreateInfo.physicalDevice = m_physicalDevice;
+    bufferHostMemoryCreateInfo.usageFlags = m_requiredBufferUsageFlags | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    bufferHostMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
+    bufferHostMemoryCreateInfo.size = size;
+
+    VulkanBufferHostMemory bufferHostMemory(bufferHostMemoryCreateInfo);
+
+    bufferHostMemory.write(src, size, 0);
+
+    auto commandQueue = VulkanCommandQueue::queue_for_family_index(m_queueFamilyIndex, 0);
+
+    commandQueue->submit([&](VkCommandBuffer commandBuffer) {
+
+        VkBufferCopy bufferCopyRegion = {};
+        bufferCopyRegion.size = size;
+        bufferCopyRegion.srcOffset = 0;
+        bufferCopyRegion.dstOffset = offset;
+
+        vkCmdCopyBuffer(commandBuffer, bufferHostMemory.handle(), m_buffer, 1, &bufferCopyRegion);
+    }, VK_NULL_HANDLE);
+}
+
+void VulkanBufferDeviceMemory::read(void* dst, size_t size, size_t offset) {
+
+    VulkanBufferMemoryCreateInfo bufferHostMemoryCreateInfo = {};
+    bufferHostMemoryCreateInfo.device = m_device;
+    bufferHostMemoryCreateInfo.physicalDevice = m_physicalDevice;
+    bufferHostMemoryCreateInfo.usageFlags = m_requiredBufferUsageFlags | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    bufferHostMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
+    bufferHostMemoryCreateInfo.size = size;
+
+    VulkanBufferHostMemory bufferHostMemory(bufferHostMemoryCreateInfo);
+
+    auto commandQueue = VulkanCommandQueue::queue_for_family_index(m_queueFamilyIndex, 0);
+
+    commandQueue->submit([&](VkCommandBuffer commandBuffer) {
+
+        VkBufferCopy bufferCopyRegion = {};
+        bufferCopyRegion.size = size;
+        bufferCopyRegion.srcOffset = offset;
+        bufferCopyRegion.dstOffset = 0;
+
+        vkCmdCopyBuffer(commandBuffer, m_buffer, bufferHostMemory.handle(), 1, &bufferCopyRegion);
+    }, VK_NULL_HANDLE);
+
+    bufferHostMemory.read(dst, size, offset);
 }
 
 VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo) :
@@ -178,6 +240,9 @@ void VulkanBuffer::create(uint32_t imageCount) {
             case UpdateFrequency::DYNAMIC:
                 buffer = std::make_unique<VulkanBufferHostMemory>(bufferMemoryCreateInfo);
                 break;
+            case UpdateFrequency::STATIC:
+                buffer = std::make_unique<VulkanBufferDeviceMemory>(bufferMemoryCreateInfo);
+                break;
             default:
                 throw std::invalid_argument("unhandled Buffer::UpdateFrequency");
         }
@@ -198,10 +263,12 @@ void VulkanBuffer::clean(uint32_t imageIndex) {
 }
 
 void VulkanBuffer::read(void* dst, size_t size, size_t offset) {
+    assert(offset + size <= m_data.size());
     memcpy(dst, m_data.data() + offset, size);
 }
 
 void VulkanBuffer::write(void* src, size_t size, size_t offset) {
+    assert(offset + size <= m_data.size());
     memcpy(m_data.data() + offset, src, size);
     m_dataHash = 0;
     duk::hash::hash_combine(m_dataHash, m_data.data(), m_data.size());
