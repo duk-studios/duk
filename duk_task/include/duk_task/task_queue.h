@@ -4,6 +4,8 @@
 #ifndef DUK_TASK_TASK_QUEUE_H
 #define DUK_TASK_TASK_QUEUE_H
 
+#include <duk_macros/macros.h>
+
 #include <thread>
 #include <future>
 #include <mutex>
@@ -86,6 +88,8 @@ public:
     void start();
 
     void stop();
+
+    DUK_NO_DISCARD bool owns_current_thread() const;
 
 private:
     std::vector<std::thread> m_threads;

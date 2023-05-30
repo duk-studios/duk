@@ -66,16 +66,16 @@ void VulkanCommandScheduler::CommandNode::submit(VkFence& fence, uint32_t waitSe
     m_command = m_futureCommand.get();
     const auto submitter = m_command->submitter<VulkanSubmitter>();
 
+    if (submitter->signals_fence()) {
+        fence = submitter->fence();
+    }
+
     VulkanWaitDependency waitDependency = {};
     waitDependency.semaphoreCount = waitSemaphoreCount;
     waitDependency.semaphores = waitSemaphores;
     waitDependency.stages = waitStages;
 
-    if (submitter->signals_fence()) {
-        fence = *submitter->fence();
-    }
-
-    submitter->submit(&waitDependency);
+    submitter->submit(waitDependency);
 }
 
 Command* VulkanCommandScheduler::CommandNode::command() {
@@ -136,7 +136,7 @@ void VulkanCommandScheduler::Frame::flush() {
             auto dependencySubmitter = dependencyCommand->submitter<VulkanSubmitter>();
 
             if (dependencySubmitter->signals_semaphore()) {
-                semaphores.push_back(*dependencySubmitter->semaphore());
+                semaphores.push_back(dependencySubmitter->semaphore());
                 stages.push_back(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
             }
         }

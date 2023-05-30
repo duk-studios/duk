@@ -40,7 +40,7 @@ VulkanSubmitter::~VulkanSubmitter() {
     }
 }
 
-void VulkanSubmitter::submit(const VulkanWaitDependency* waitDependency) {
+void VulkanSubmitter::submit(const VulkanWaitDependency& waitDependency) {
     VulkanCommandParams params = {};
     params.waitDependency = waitDependency;
     if (signals_semaphore()) {
@@ -56,16 +56,16 @@ bool VulkanSubmitter::signals_semaphore() const {
     return !m_semaphores.empty();
 }
 
-VkSemaphore* VulkanSubmitter::semaphore() {
-    return &m_semaphores[*m_currentFramePtr];
+VkSemaphore VulkanSubmitter::semaphore() {
+    return m_semaphores[*m_currentFramePtr];
 }
 
 bool VulkanSubmitter::signals_fence() const {
     return !m_fences.empty();
 }
 
-VkFence* VulkanSubmitter::fence() {
-    return &m_fences[*m_currentFramePtr];
+VkFence VulkanSubmitter::fence() {
+    return m_fences[*m_currentFramePtr];
 }
 
 }

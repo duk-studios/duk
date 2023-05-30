@@ -96,9 +96,9 @@ void VulkanPresentCommand::submit(const VulkanCommandParams& commandParams) {
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &m_swapchain;
     presentInfo.pImageIndices = m_currentImagePtr;
-    if (waitDependency) {
-        presentInfo.pWaitSemaphores = waitDependency->semaphores;
-        presentInfo.waitSemaphoreCount = waitDependency->semaphoreCount;
+    if (waitDependency.semaphoreCount > 0) {
+        presentInfo.pWaitSemaphores = waitDependency.semaphores;
+        presentInfo.waitSemaphoreCount = waitDependency.semaphoreCount;
     }
 
     auto result = vkQueuePresentKHR(m_presentQueue, &presentInfo);
@@ -135,7 +135,7 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
         // at the start of the frame, otherwise we will not be able to use the correct resources for this frame
         auto submitter = m_acquireImageCommand->submitter<VulkanSubmitter>();
 
-        auto result = vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), *submitter->semaphore(), VK_NULL_HANDLE, &m_currentImage);
+        auto result = vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), submitter->semaphore(), VK_NULL_HANDLE, &m_currentImage);
 
         // VK_ERROR_OUT_OF_DATE_KHR means that this swapchain can no longer be used to present
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {

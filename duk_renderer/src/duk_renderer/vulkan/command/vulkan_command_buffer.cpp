@@ -41,16 +41,16 @@ void VulkanCommandBuffer::submit(const VulkanCommandParams& params) {
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
     // wait for all dependencies of this command buffer
-    if (params.waitDependency) {
-        submitInfo.waitSemaphoreCount = params.waitDependency->semaphoreCount;
-        submitInfo.pWaitSemaphores = params.waitDependency->semaphores;
-        submitInfo.pWaitDstStageMask = params.waitDependency->stages;
+    if (params.waitDependency.semaphoreCount > 0) {
+        submitInfo.waitSemaphoreCount = params.waitDependency.semaphoreCount;
+        submitInfo.pWaitSemaphores = params.waitDependency.semaphores;
+        submitInfo.pWaitDstStageMask = params.waitDependency.stages;
     }
 
     // only signal one semaphore per submission
     if (params.signalSemaphore){
         submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = params.signalSemaphore;
+        submitInfo.pSignalSemaphores = &params.signalSemaphore;
     }
 
     // only one command buffer per submission, for now...?

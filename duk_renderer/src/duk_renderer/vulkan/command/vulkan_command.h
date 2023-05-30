@@ -21,9 +21,9 @@ struct VulkanWaitDependency {
 
 
 struct VulkanCommandParams {
-    const VulkanWaitDependency* waitDependency;
-    VkSemaphore* signalSemaphore;
-    VkFence* fence;
+    VulkanWaitDependency waitDependency;
+    VkSemaphore signalSemaphore;
+    VkFence fence;
 };
 
 class VulkanSubmitter : public Submitter {
@@ -35,15 +35,15 @@ public:
 
     ~VulkanSubmitter() override;
 
-    void submit(const VulkanWaitDependency* waitDependency);
+    void submit(const VulkanWaitDependency& waitDependency);
 
     DUK_NO_DISCARD bool signals_semaphore() const;
 
-    DUK_NO_DISCARD VkSemaphore* semaphore();
+    DUK_NO_DISCARD VkSemaphore semaphore();
 
     DUK_NO_DISCARD bool signals_fence() const;
 
-    DUK_NO_DISCARD VkFence* fence();
+    DUK_NO_DISCARD VkFence fence();
 
 private:
     SubmissionFunc m_submissionFunc;

@@ -40,8 +40,8 @@ void TaskQueue::start() {
                 });
 
                 // if asked to quit, stop the loop now
-                if (!m_running){
-                    break;
+                if (!m_running) {
+                    return;
                 }
 
                 // gets next task
@@ -70,6 +70,13 @@ void TaskQueue::stop() {
             thread.join();
         }
     }
+}
+
+bool TaskQueue::owns_current_thread() const {
+    auto predicate = [](const std::thread& thread) {
+        return thread.get_id() == std::this_thread::get_id();
+    };
+    return std::any_of(m_threads.begin(), m_threads.end(), predicate);
 }
 
 }

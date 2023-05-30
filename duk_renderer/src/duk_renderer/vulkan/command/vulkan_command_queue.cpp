@@ -6,6 +6,15 @@
 
 namespace duk::renderer {
 
+std::vector<std::vector<VulkanCommandQueue*>> VulkanCommandQueue::s_commandQueuesFamilies;
+
+VulkanCommandQueue* VulkanCommandQueue::queue_for_family_index(uint32_t queueFamilyIndex, uint32_t index) {
+    assert(s_commandQueuesFamilies.size() > queueFamilyIndex);
+    auto& familyQueues = s_commandQueuesFamilies.at(queueFamilyIndex);
+    assert(familyQueues.size() > index);
+    return familyQueues.at(index);
+}
+
 VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo) :
     m_device(commandQueueCreateInfo.device),
     m_familyIndex(commandQueueCreateInfo.familyIndex),
@@ -38,6 +47,17 @@ VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& comma
     m_listener.listen(*commandQueueCreateInfo.prepareFrameEvent, [this](uint32_t){
         m_usedCommandBuffers = 0;
     });
+
+    if (s_commandQueuesFamilies.size() <= m_familyIndex) {
+        s_commandQueuesFamilies.resize(m_familyIndex + 1);
+    }
+
+    auto& familyQueues = s_commandQueuesFamilies[m_familyIndex];
+    if (familyQueues.size() <= m_index) {
+        familyQueues.resize(m_index + 1);
+    }
+
+    familyQueues[m_index] = this;
 }
 
 VulkanCommandQueue::~VulkanCommandQueue() {
@@ -45,6 +65,8 @@ VulkanCommandQueue::~VulkanCommandQueue() {
     m_commandBuffers.clear();
     m_commandBufferPool.reset();
     vkDestroyCommandPool(m_device, m_commandPool, nullptr);
+
+    s_commandQueuesFamilies[m_familyIndex][m_index] = nullptr;
 }
 
 uint32_t VulkanCommandQueue::index() const {
@@ -53,6 +75,10 @@ uint32_t VulkanCommandQueue::index() const {
 
 uint32_t VulkanCommandQueue::family_index() const {
     return m_familyIndex;
+}
+
+VkQueue VulkanCommandQueue::handle() const {
+    return m_queue;
 }
 
 VkCommandBuffer VulkanCommandQueue::allocate_command_buffer() {
@@ -65,11 +91,16 @@ void VulkanCommandQueue::free_command_buffer(VkCommandBuffer& commandBuffer) {
     m_commandBufferPool->free(commandBuffer);
 }
 
-void VulkanCommandQueue::submit(const VkSubmitInfo& submitInfo, VkFence* fence) {
-    if (fence) {
-        vkResetFences(m_device, 1, fence);
+void VulkanCommandQueue::submit(const VkSubmitInfo& submitInfo, VkFence fence) {
+    if (fence != VK_NULL_HANDLE) {
+        vkResetFences(m_device, 1, &fence);
     }
-    vkQueueSubmit(m_queue, 1, &submitInfo, *fence);
+
+    vkQueueSubmit(m_queue, 1, &submitInfo, fence);
+
+    if (fence == VK_NULL_HANDLE) {
+        vkQueueWaitIdle(m_queue);
+    }
 }
 
 CommandBuffer* VulkanCommandQueue::next_command_buffer() {

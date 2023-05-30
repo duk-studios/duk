@@ -40,7 +40,7 @@ protected:
 
     virtual CommandBuffer* next_command_buffer() = 0;
 
-private:
+protected:
     duk::task::TaskQueue m_taskQueue;
 };
 

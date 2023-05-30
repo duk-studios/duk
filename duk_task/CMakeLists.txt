@@ -9,6 +9,8 @@ set(DUK_TASK_SOURCES
 
 add_library(duk_task STATIC ${DUK_TASK_HEADERS} ${DUK_TASK_SOURCES})
 
+target_link_libraries(duk_task PUBLIC duk_macros)
+
 target_include_directories(duk_task
      PUBLIC
      include
