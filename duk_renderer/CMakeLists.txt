@@ -22,7 +22,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/command/command.h
         include/duk_renderer/pipeline/shader_data_source.h
         include/duk_renderer/pipeline/std_shader_data_source.h
-        include/duk_renderer/pipeline/descriptor.h
+        include/duk_renderer/descriptor.h
         include/duk_renderer/buffer.h
         )
 
@@ -44,7 +44,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/command/command_scheduler.cpp
         src/duk_renderer/pipeline/shader_data_source.cpp
         src/duk_renderer/pipeline/std_shader_data_source.cpp
-        src/duk_renderer/pipeline/descriptor.cpp
+        src/duk_renderer/descriptor.cpp
         src/duk_renderer/vulkan/vulkan_image.h
         src/duk_renderer/vulkan/vulkan_image.cpp
         src/duk_renderer/vulkan/vulkan_sampler.h
@@ -78,8 +78,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vulkan/pipeline/vulkan_pipeline.cpp
         src/duk_renderer/vulkan/pipeline/vulkan_shader.h
         src/duk_renderer/vulkan/pipeline/vulkan_shader.cpp
-        src/duk_renderer/vulkan/pipeline/vulkan_descriptor.h
-        src/duk_renderer/vulkan/pipeline/vulkan_descriptor.cpp
+        src/duk_renderer/vulkan/vulkan_descriptor.h
+        src/duk_renderer/vulkan/vulkan_descriptor.cpp
         src/duk_renderer/vulkan/vulkan_flags.h
         src/duk_renderer/vulkan/mesh/vulkan_vertex.h
         src/duk_renderer/vulkan/mesh/vulkan_vertex.cpp

@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_VULKAN_DESCRIPTOR_H
 #define DUK_RENDERER_VULKAN_DESCRIPTOR_H
 
-#include <duk_renderer/pipeline/descriptor.h>
+#include <duk_renderer/descriptor.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 
 namespace duk::renderer {

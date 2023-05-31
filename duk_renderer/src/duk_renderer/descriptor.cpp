@@ -1,7 +1,7 @@
 /// 20/05/2023
 /// descriptor.cpp
 
-#include <duk_renderer/pipeline/descriptor.h>
+#include <duk_renderer/descriptor.h>
 #include <duk_renderer/buffer.h>
 
 #include <cassert>
