@@ -70,9 +70,11 @@ public:
 
     void read(void* dst, size_t size, size_t offset) override;
 
+private:
     void map();
 
     void unmap();
+
 private:
     void* m_mapped;
 };

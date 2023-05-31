@@ -108,27 +108,33 @@ VkDeviceMemory VulkanBufferMemory::memory() const {
 VulkanBufferHostMemory::VulkanBufferHostMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo) :
     VulkanBufferMemory(vulkanBufferMemoryCreateInfo, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 0),
     m_mapped(nullptr) {
-    map();
+
 }
 
-VulkanBufferHostMemory::~VulkanBufferHostMemory() {
-    unmap();
-}
+VulkanBufferHostMemory::~VulkanBufferHostMemory() = default;
 
 void VulkanBufferHostMemory::write(void* src, size_t size, size_t offset) {
+    map();
     assert(m_mapped);
     auto dst = (uint8_t*)m_mapped + offset;
     memcpy(dst, src, size);
+    unmap();
 }
 
 void VulkanBufferHostMemory::read(void* dst, size_t size, size_t offset) {
-    assert(m_mapped);
+    map();
     auto src = (uint8_t*)m_mapped + offset;
     memcpy(dst, src, size);
+    unmap();
 }
 
 void VulkanBufferHostMemory::map() {
-    vkMapMemory(m_device, m_memory, 0, m_size, 0, &m_mapped);
+    if (!m_mapped) {
+        auto result = vkMapMemory(m_device, m_memory, 0, m_size, 0, &m_mapped);
+        if (result != VK_SUCCESS) {
+            throw std::runtime_error("failed to map VkDeviceMemory");
+        }
+    }
 }
 
 void VulkanBufferHostMemory::unmap() {
