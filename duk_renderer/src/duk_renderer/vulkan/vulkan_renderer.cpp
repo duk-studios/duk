@@ -106,11 +106,14 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
         create_vk_swapchain(vulkanRendererCreateInfo);
     }
     create_resource_manager();
+    create_descriptor_set_layout_cache();
 }
 
 VulkanRenderer::~VulkanRenderer() {
     vkDeviceWaitIdle(m_device);
+    m_descriptorSetLayoutCache.reset();
     m_swapchain.reset();
+    m_resourceManager.reset();
     vkDestroyDevice(m_device, nullptr);
     if (m_surface) {
         vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
@@ -183,6 +186,7 @@ ExpectedShader VulkanRenderer::create_shader(const Renderer::ShaderCreateInfo& s
         VulkanShaderCreateInfo vulkanShaderCreateInfo = {};
         vulkanShaderCreateInfo.shaderDataSource = shaderCreateInfo.shaderDataSource;
         vulkanShaderCreateInfo.device = m_device;
+        vulkanShaderCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
         return std::make_shared<VulkanShader>(vulkanShaderCreateInfo);
     }
     catch (const std::exception& e){
@@ -432,6 +436,13 @@ void VulkanRenderer::create_resource_manager() {
     }
 
     m_resourceManager = std::make_unique<VulkanResourceManager>(resourceManagerCreateInfo);
+}
+
+void VulkanRenderer::create_descriptor_set_layout_cache() {
+    VulkanDescriptorSetLayoutCacheCreateInfo descriptorSetLayoutCacheCreateInfo = {};
+    descriptorSetLayoutCacheCreateInfo.device = m_device;
+
+    m_descriptorSetLayoutCache = std::make_unique<VulkanDescriptorSetLayoutCache>(descriptorSetLayoutCacheCreateInfo);
 }
 
 }

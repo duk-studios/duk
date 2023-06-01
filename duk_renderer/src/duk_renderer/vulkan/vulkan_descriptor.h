@@ -11,7 +11,7 @@ namespace duk::renderer {
 
 namespace vk {
 
-VkDescriptorType convert_descriptor_type(DescriptorType descriptorType);
+
 
 }
 

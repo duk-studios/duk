@@ -79,6 +79,17 @@ struct hash<duk::renderer::DescriptorDescription> {
 
 };
 
+template<>
+struct hash<duk::renderer::DescriptorSetDescription> {
+
+    size_t operator()(const duk::renderer::DescriptorSetDescription& descriptorSetDescription) noexcept {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
+        return hash;
+    }
+
+};
+
 }
 #endif // DUK_RENDERER_DESCRIPTOR_H
 
