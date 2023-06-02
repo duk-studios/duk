@@ -227,4 +227,8 @@ VkPipelineBindPoint VulkanPipeline::bind_point() const {
     return m_pipelineBindPoint;
 }
 
+VkPipelineLayout VulkanPipeline::pipeline_layout() const {
+    return m_shader->pipeline_layout();
+}
+
 }

@@ -79,8 +79,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vulkan/pipeline/vulkan_pipeline.cpp
         src/duk_renderer/vulkan/pipeline/vulkan_shader.h
         src/duk_renderer/vulkan/pipeline/vulkan_shader.cpp
-        src/duk_renderer/vulkan/vulkan_descriptor.h
-        src/duk_renderer/vulkan/vulkan_descriptor.cpp
         src/duk_renderer/vulkan/vulkan_flags.h
         src/duk_renderer/vulkan/mesh/vulkan_vertex.h
         src/duk_renderer/vulkan/mesh/vulkan_vertex.cpp

@@ -5,6 +5,7 @@
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_image.h>
 #include <duk_renderer/vulkan/vulkan_buffer.h>
+#include <duk_renderer/vulkan/vulkan_descriptor_set.h>
 #include <duk_renderer/vulkan/vulkan_swapchain.h>
 
 namespace duk::renderer {
@@ -36,14 +37,17 @@ VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateIn
             m_imageCount = swapchainInfo.imageCount;
             detail::create(m_buffers, m_imageCount);
             detail::create(m_images, m_imageCount);
+            detail::create(m_descriptorSets, m_imageCount);
             detail::create(m_frameBuffers, m_imageCount);
         });
 
         m_listener.listen(*m_swapchain->clean_event(), [this] {
             detail::clean(m_frameBuffers);
+            detail::clean(m_descriptorSets);
             detail::clean(m_images);
             detail::clean(m_buffers);
             clean(m_frameBuffersToDelete);
+            clean(m_descriptorSetsToDelete);
             clean(m_imagesToDelete);
             clean(m_buffersToDelete);
         });
@@ -56,14 +60,16 @@ VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateIn
 
 VulkanResourceManager::~VulkanResourceManager() {
     assert(m_frameBuffers.empty());
+    assert(m_descriptorSets.empty());
     assert(m_images.empty());
     assert(m_buffers.empty());
 }
 
 void VulkanResourceManager::clean(uint32_t imageIndex) {
-    clean(m_buffersToDelete, imageIndex);
-    clean(m_imagesToDelete, imageIndex);
+    clean(m_descriptorSetsToDelete, imageIndex);
     clean(m_frameBuffersToDelete, imageIndex);
+    clean(m_imagesToDelete, imageIndex);
+    clean(m_buffersToDelete, imageIndex);
 }
 
 std::shared_ptr<VulkanBuffer> VulkanResourceManager::create(const VulkanBufferCreateInfo& bufferCreateInfo) {
@@ -72,6 +78,10 @@ std::shared_ptr<VulkanBuffer> VulkanResourceManager::create(const VulkanBufferCr
 
 std::shared_ptr<VulkanMemoryImage> VulkanResourceManager::create(const VulkanMemoryImageCreateInfo& imageCreateInfo) {
     return create(m_images, m_imagesToDelete, imageCreateInfo);
+}
+
+std::shared_ptr<VulkanDescriptorSet> VulkanResourceManager::create(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo) {
+    return create(m_descriptorSets, m_descriptorSetsToDelete, descriptorSetCreateInfo);
 }
 
 std::shared_ptr<VulkanFrameBuffer> VulkanResourceManager::create(const VulkanFrameBufferCreateInfo& frameBufferCreateInfo) {

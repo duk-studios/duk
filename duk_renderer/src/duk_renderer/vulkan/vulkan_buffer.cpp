@@ -327,10 +327,13 @@ Buffer::Type VulkanBuffer::type() const {
     return m_type;
 }
 
+duk::hash::Hash VulkanBuffer::hash() const {
+    return m_dataHash;
+}
+
 void VulkanBuffer::update_data_hash() {
     m_dataHash = 0;
     duk::hash::hash_combine(m_dataHash, m_data.data(), m_data.size());
 }
-
 
 }

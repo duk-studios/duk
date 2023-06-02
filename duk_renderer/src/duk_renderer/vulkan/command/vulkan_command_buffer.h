@@ -12,6 +12,7 @@ namespace duk::renderer {
 
 class VulkanCommandQueue;
 class VulkanRenderer;
+class VulkanPipeline;
 
 struct VulkanCommandBufferCreateInfo {
     VkDevice device;
@@ -48,6 +49,8 @@ public:
 
     void bind_index_buffer(Buffer* buffer) override;
 
+    void bind_descriptor_set(DescriptorSet* descriptorSet, uint32_t setIndex) override;
+
     void draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) override;
 
     void draw_indexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) override;
@@ -61,6 +64,10 @@ private:
     VkCommandBuffer m_currentCommandBuffer;
     const uint32_t* m_currentImagePtr;
     VulkanSubmitter m_submitter;
+
+    // state cache
+    VulkanPipeline* m_currentPipeline;
+
 };
 
 }

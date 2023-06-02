@@ -3,3 +3,8 @@
 
 #include <duk_renderer/descriptor_set.h>
 
+namespace duk::renderer {
+
+DescriptorSet::~DescriptorSet() = default;
+
+}

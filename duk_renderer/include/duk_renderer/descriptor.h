@@ -48,9 +48,14 @@ public:
 
     DUK_NO_DISCARD DescriptorType type() const;
 
+    DUK_NO_DISCARD duk::hash::Hash hash() const;
+
     DUK_NO_DISCARD Image* image() const;
 
     DUK_NO_DISCARD ImageSampler* image_sampler() const;
+
+    DUK_NO_DISCARD Buffer* buffer() const;
+
 
 private:
     union Data {

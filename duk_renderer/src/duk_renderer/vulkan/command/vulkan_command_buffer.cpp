@@ -15,7 +15,8 @@ namespace duk::renderer {
 VulkanCommandBuffer::VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& commandBufferCreateInfo) :
     m_commandQueue(commandBufferCreateInfo.commandQueue),
     m_currentImagePtr(commandBufferCreateInfo.currentImagePtr),
-    m_submitter([this](const auto& params) { submit(params); }, true, true, commandBufferCreateInfo.frameCount, commandBufferCreateInfo.currentFramePtr, commandBufferCreateInfo.device) {
+    m_submitter([this](const auto& params) { submit(params); }, true, true, commandBufferCreateInfo.frameCount, commandBufferCreateInfo.currentFramePtr, commandBufferCreateInfo.device),
+    m_currentPipeline(nullptr) {
     m_commandBuffers.resize(commandBufferCreateInfo.frameCount);
     for (auto& commandBuffer : m_commandBuffers) {
         commandBuffer = m_commandQueue->allocate_command_buffer();
@@ -96,11 +97,14 @@ void VulkanCommandBuffer::begin_render_pass(const CommandBuffer::RenderPassBegin
 
 void VulkanCommandBuffer::end_render_pass() {
     vkCmdEndRenderPass(m_currentCommandBuffer);
+    m_currentPipeline = nullptr;
 }
 
 void VulkanCommandBuffer::bind_pipeline(Pipeline* pipeline) {
     auto vulkanPipeline = dynamic_cast<VulkanPipeline*>(pipeline);
     vkCmdBindPipeline(m_currentCommandBuffer, vulkanPipeline->bind_point(), vulkanPipeline->handle());
+
+    m_currentPipeline = vulkanPipeline;
 }
 
 void VulkanCommandBuffer::bind_vertex_buffer(Buffer* buffer) {
@@ -125,6 +129,18 @@ void VulkanCommandBuffer::bind_index_buffer(Buffer* buffer) {
     vulkanBuffer->update(currentImage);
 
     vkCmdBindIndexBuffer(m_currentCommandBuffer, vulkanBuffer->handle(currentImage), 0, indexType);
+}
+
+void VulkanCommandBuffer::bind_descriptor_set(DescriptorSet* descriptorSet, uint32_t setIndex) {
+    assert(m_currentPipeline);
+
+    auto currentImage = *m_currentImagePtr;
+    auto vulkanDescriptorSet = dynamic_cast<VulkanDescriptorSet*>(descriptorSet);
+    vulkanDescriptorSet->update(currentImage);
+
+    auto handle = vulkanDescriptorSet->handle(currentImage);
+
+    vkCmdBindDescriptorSets(m_currentCommandBuffer, m_currentPipeline->bind_point(), m_currentPipeline->pipeline_layout(), setIndex, 1, &handle, 0, nullptr);
 }
 
 void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) {

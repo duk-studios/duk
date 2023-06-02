@@ -30,22 +30,78 @@ public:
 
     ~VulkanDescriptorSetLayoutCache();
 
-    DUK_NO_DISCARD VkDescriptorSetLayout get(const DescriptorSetDescription& descriptorSetDescription);
+    DUK_NO_DISCARD VkDescriptorSetLayout get_layout(const DescriptorSetDescription& descriptorSetDescription);
 
-private:
-
-    static duk::hash::Hash calculate_hash(const DescriptorSetDescription& descriptorSetDescription);
-
-    VkDescriptorSetLayout create_descriptor_set_layout(const DescriptorSetDescription& descriptorSetDescription, duk::hash::Hash hash);
+    DUK_NO_DISCARD const std::vector<VkDescriptorSetLayoutBinding>& get_bindings(const DescriptorSetDescription& descriptorSetDescription);
 
 private:
 
     struct CacheEntry {
         VkDescriptorSetLayout descriptorSetLayout;
+        std::vector<VkDescriptorSetLayoutBinding> bindings;
     };
+
+private:
+
+    static duk::hash::Hash calculate_hash(const DescriptorSetDescription& descriptorSetDescription);
+
+    const CacheEntry& create_descriptor_set_layout(const DescriptorSetDescription& descriptorSetDescription, duk::hash::Hash hash);
+
+private:
 
     VkDevice m_device;
     std::unordered_map<duk::hash::Hash, CacheEntry> m_descriptorLayoutCache;
+
+};
+
+struct VulkanDescriptorSetCreateInfo {
+    VkDevice device;
+    VulkanDescriptorSetLayoutCache* descriptorSetLayoutCache;
+    uint32_t imageCount;
+    DescriptorSetDescription descriptorSetDescription;
+};
+
+class VulkanDescriptorSet : public DescriptorSet {
+public:
+
+    explicit VulkanDescriptorSet(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo);
+
+    ~VulkanDescriptorSet() override;
+
+    void create(uint32_t imageCount);
+
+    void clean();
+
+    void clean(uint32_t imageIndex);
+
+    void update(uint32_t imageIndex);
+
+    DUK_NO_DISCARD VkDescriptorSet handle(uint32_t imageIndex);
+
+    DUK_NO_DISCARD Descriptor& at(uint32_t binding) override;
+
+    DUK_NO_DISCARD const Descriptor& at(uint32_t binding) const override;
+
+    DUK_NO_DISCARD Image* image(uint32_t binding) override;
+
+    DUK_NO_DISCARD const Image* image(uint32_t binding) const override;
+
+    DUK_NO_DISCARD Buffer* buffer(uint32_t binding) override;
+
+    DUK_NO_DISCARD const Buffer* buffer(uint32_t binding) const override;
+
+    void flush() override;
+
+private:
+    VkDevice m_device;
+    DescriptorSetDescription m_descriptorSetDescription;
+    VkDescriptorSetLayout m_descriptorSetLayout;
+    std::vector<VkDescriptorSetLayoutBinding> m_descriptorBindings;
+    std::vector<Descriptor> m_descriptors;
+    VkDescriptorPool m_descriptorPool;
+    std::vector<VkDescriptorSet> m_descriptorSets;
+    duk::hash::Hash m_descriptorSetHash;
+    std::vector<duk::hash::Hash> m_descriptorSetHashes;
 
 };
 

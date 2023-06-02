@@ -2,7 +2,7 @@
 /// vulkan_shader.cpp
 
 #include <duk_renderer/vulkan/pipeline/vulkan_shader.h>
-#include <duk_renderer/vulkan/vulkan_descriptor.h>
+#include <duk_renderer/vulkan/vulkan_descriptor_set.h>
 #include <duk_renderer/vulkan/mesh/vulkan_vertex.h>
 #include <duk_renderer/vulkan/vulkan_flags.h>
 
@@ -66,7 +66,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
     const auto& descriptorSetDescriptions = shaderDataSource->descriptor_set_descriptions();
     m_descriptorSetLayouts.reserve(descriptorSetDescriptions.size());
     for (auto& descriptorSetDescription : descriptorSetDescriptions) {
-        m_descriptorSetLayouts.push_back(shaderCreateInfo.descriptorSetLayoutCache->get(descriptorSetDescription));
+        m_descriptorSetLayouts.push_back(shaderCreateInfo.descriptorSetLayoutCache->get_layout(descriptorSetDescription));
     }
 
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
@@ -75,7 +75,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
     pipelineLayoutCreateInfo.pSetLayouts = m_descriptorSetLayouts.data();
 
     auto result = vkCreatePipelineLayout(m_device, &pipelineLayoutCreateInfo, nullptr, &m_pipelineLayout);
-    if (result != VK_SUCCESS){
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkPipelineLayout");
     }
 

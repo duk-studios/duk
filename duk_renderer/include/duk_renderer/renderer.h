@@ -10,6 +10,7 @@
 #include <duk_renderer/command/command_scheduler.h>
 #include <duk_renderer/render_pass.h>
 #include <duk_renderer/buffer.h>
+#include <duk_renderer/descriptor_set.h>
 #include <duk_renderer/frame_buffer.h>
 #include <duk_renderer/mesh/mesh.h>
 #include <duk_renderer/pipeline/shader_data_source.h>
@@ -58,6 +59,7 @@ using ExpectedPipeline = tl::expected<std::shared_ptr<Pipeline>, RendererError>;
 using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
 using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
 using ExpectedBuffer = tl::expected<std::shared_ptr<Buffer>, RendererError>;
+using ExpectedDescriptorSet = tl::expected<std::shared_ptr<DescriptorSet>, RendererError>;
 using ExpectedCommandScheduler = tl::expected<std::shared_ptr<CommandScheduler>, RendererError>;
 
 class Renderer {
@@ -129,6 +131,13 @@ public:
     };
 
     DUK_NO_DISCARD virtual ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) = 0;
+
+
+    struct DescriptorSetCreateInfo {
+        DescriptorSetDescription description;
+    };
+
+    DUK_NO_DISCARD virtual ExpectedDescriptorSet create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) = 0;
 
     struct FrameBufferCreateInfo {
         RenderPass* renderPass;

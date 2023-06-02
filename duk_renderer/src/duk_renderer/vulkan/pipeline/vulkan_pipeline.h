@@ -48,6 +48,8 @@ public:
 
     DUK_NO_DISCARD VkPipelineBindPoint bind_point() const;
 
+    DUK_NO_DISCARD VkPipelineLayout pipeline_layout() const;
+
 private:
 
     void create_graphics_pipeline();

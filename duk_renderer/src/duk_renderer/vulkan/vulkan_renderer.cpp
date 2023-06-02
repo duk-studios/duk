@@ -5,6 +5,7 @@
 #include <duk_renderer/vulkan/vulkan_renderer.h>
 #include <duk_renderer/vulkan/vulkan_render_pass.h>
 #include <duk_renderer/vulkan/vulkan_buffer.h>
+#include <duk_renderer/vulkan/vulkan_descriptor_set.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/command/vulkan_command_scheduler.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_shader.h>
@@ -97,7 +98,7 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
     m_currentFrame(0) {
 
     create_vk_instance(vulkanRendererCreateInfo);
-    if (vulkanRendererCreateInfo.rendererCreateInfo.window){
+    if (vulkanRendererCreateInfo.rendererCreateInfo.window) {
         create_vk_surface(vulkanRendererCreateInfo);
     }
     select_vk_physical_device(vulkanRendererCreateInfo.rendererCreateInfo.deviceIndex);
@@ -150,7 +151,7 @@ Image* VulkanRenderer::present_image() {
 ExpectedCommandQueue VulkanRenderer::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
 
     auto familyIndex = m_queueFamilyIndices[commandQueueCreateInfo.type];
-    if (familyIndex == ~0){
+    if (familyIndex == ~0) {
         return tl::unexpected<RendererError>(RendererError::INVALID_ARGUMENT, "queue type is not supported by the renderer");
     }
 
@@ -244,6 +245,22 @@ ExpectedBuffer VulkanRenderer::create_buffer(const Renderer::BufferCreateInfo& b
         return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
     }
 }
+
+
+ExpectedDescriptorSet VulkanRenderer::create_descriptor_set(const Renderer::DescriptorSetCreateInfo& descriptorSetCreateInfo) {
+    try {
+        VulkanDescriptorSetCreateInfo vulkanDescriptorSetCreateInfo = {};
+        vulkanDescriptorSetCreateInfo.device = m_device;
+        vulkanDescriptorSetCreateInfo.descriptorSetDescription = descriptorSetCreateInfo.description;
+        vulkanDescriptorSetCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
+        vulkanDescriptorSetCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+        return m_resourceManager->create(vulkanDescriptorSetCreateInfo);
+    }
+    catch (std::exception& e) {
+        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
+    }
+}
+
 
 ExpectedFrameBuffer VulkanRenderer::create_frame_buffer(const Renderer::FrameBufferCreateInfo& frameBufferCreateInfo) {
     try {
