@@ -45,6 +45,13 @@ StdShaderDataSource load_shader_data_source(const char* vertexFilepath, const ch
     dataSource.insert_vertex_attribute(VertexAttribute::Format::VEC2);
     dataSource.insert_vertex_attribute(VertexAttribute::Format::VEC4);
 
+    DescriptorSetDescription descriptorSetDescription;
+    auto& uniformBinding = descriptorSetDescription.bindings.emplace_back();
+    uniformBinding.type = DescriptorType::UNIFORM_BUFFER;
+    uniformBinding.moduleMask = Shader::Module::FRAGMENT;
+
+    dataSource.insert_descriptor_set_description(descriptorSetDescription);
+
     dataSource.update_hash();
 
     return dataSource;
@@ -227,6 +234,7 @@ int main() {
 
     if (!expectedVertexBuffer) {
         logger.log(Level::ERR) << "failed to create vertex buffer: " << expectedVertexBuffer.error().description();
+        return 1;
     }
 
     auto vertexBuffer = std::move(expectedVertexBuffer.value());
@@ -239,7 +247,7 @@ int main() {
 
     Renderer::BufferCreateInfo indexBufferCreateInfo = {};
     indexBufferCreateInfo.type = Buffer::Type::INDEX_16;
-    indexBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::STATIC;
+    indexBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::DYNAMIC;
     indexBufferCreateInfo.size = indices.size();
     indexBufferCreateInfo.elementSize = sizeof(uint16_t);
 
@@ -247,25 +255,50 @@ int main() {
 
     if (!expectedIndexBuffer) {
         logger.log(Level::ERR) << "failed to create index buffer: " << expectedIndexBuffer.error().description();
+        return 1;
     }
 
     auto indexBuffer = std::move(expectedIndexBuffer.value());
 
     indexBuffer->write(indices);
-
     indexBuffer->flush();
 
+    struct UniformBuffer {
+        glm::vec4 color;
+    };
 
-    uint16_t test[6];
+    Renderer::BufferCreateInfo uniformBufferCreateInfo = {};
+    uniformBufferCreateInfo.type = Buffer::Type::UNIFORM;
+    uniformBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::DYNAMIC;
+    uniformBufferCreateInfo.size = 1;
+    uniformBufferCreateInfo.elementSize = sizeof(UniformBuffer);
 
-    indexBuffer->read(test);
+    auto expectedUniformBuffer = renderer->create_buffer(uniformBufferCreateInfo);
 
-    assert(test[0] == indices[0]);
-    assert(test[1] == indices[1]);
-    assert(test[2] == indices[2]);
-    assert(test[3] == indices[3]);
-    assert(test[4] == indices[4]);
-    assert(test[5] == indices[5]);
+    if (!expectedUniformBuffer) {
+        logger.log(Level::ERR) << "failed to create uniform buffer:" << expectedUniformBuffer.error().description();
+        return 1;
+    }
+
+    auto uniformBuffer = std::move(expectedUniformBuffer.value());
+
+    uniformBuffer->write(UniformBuffer{glm::vec4(1.0f, 0.3f, 0.6f, 1.0f)});
+    uniformBuffer->flush();
+
+    Renderer::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
+    descriptorSetCreateInfo.description = triangleShaderDataSource.descriptor_set_descriptions().at(0);
+
+    auto expectedDescriptorSet = renderer->create_descriptor_set(descriptorSetCreateInfo);
+
+    if (!expectedDescriptorSet) {
+        logger.log(Level::ERR) << "failed to create descriptor set: " << expectedDescriptorSet.error().description();
+    }
+
+    auto descriptorSet = std::move(expectedDescriptorSet.value());
+
+    descriptorSet->at(0) = uniformBuffer.get();
+    descriptorSet->flush();
+
 
     while (run) {
         while (window->minimized()) {
@@ -281,7 +314,7 @@ int main() {
 
         auto acquireImageCommand = scheduler->schedule(renderer->acquire_image_command());
 
-        auto mainRenderPassCommand = scheduler->schedule(graphicsQueue->enqueue([&renderPass, &frameBuffer, &pipeline, &vertexBuffer, &indexBuffer](CommandBuffer* commandBuffer) {
+        auto mainRenderPassCommand = scheduler->schedule(graphicsQueue->enqueue([&renderPass, &frameBuffer, &pipeline, &vertexBuffer, &indexBuffer, &descriptorSet](CommandBuffer* commandBuffer) {
 
             commandBuffer->begin();
             CommandBuffer::RenderPassBeginInfo renderPassBeginInfo = {};
@@ -295,6 +328,8 @@ int main() {
             commandBuffer->bind_vertex_buffer(vertexBuffer.get());
 
             commandBuffer->bind_index_buffer(indexBuffer.get());
+
+            commandBuffer->bind_descriptor_set(descriptorSet.get(), 0);
 
             commandBuffer->draw_indexed(indexBuffer->size(), 1, 0, 0, 0);
 
