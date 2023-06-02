@@ -18,10 +18,13 @@ namespace duk::renderer {
 class VulkanSwapchain;
 class VulkanMemoryImage;
 class VulkanMemoryImageCreateInfo;
-class VulkanFrameBuffer;
-class VulkanFrameBufferCreateInfo;
 class VulkanBuffer;
 class VulkanBufferCreateInfo;
+class VulkanDescriptorSet;
+class VulkanDescriptorSetCreateInfo;
+class VulkanFrameBuffer;
+class VulkanFrameBufferCreateInfo;
+
 
 struct VulkanResourceManagerCreateInfo {
     VulkanSwapchain* swapchain;
@@ -41,6 +44,8 @@ public:
     std::shared_ptr<VulkanBuffer> create(const VulkanBufferCreateInfo& bufferCreateInfo);
 
     std::shared_ptr<VulkanMemoryImage> create(const VulkanMemoryImageCreateInfo& imageCreateInfo);
+
+    std::shared_ptr<VulkanDescriptorSet> create(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo);
 
     std::shared_ptr<VulkanFrameBuffer> create(const VulkanFrameBufferCreateInfo& frameBufferCreateInfo);
 private:
@@ -101,6 +106,8 @@ private:
     std::vector<DeletionEntry<VulkanBuffer>> m_buffersToDelete;
     std::vector<VulkanMemoryImage*> m_images;
     std::vector<DeletionEntry<VulkanMemoryImage>> m_imagesToDelete;
+    std::vector<VulkanDescriptorSet*> m_descriptorSets;
+    std::vector<DeletionEntry<VulkanDescriptorSet>> m_descriptorSetsToDelete;
     std::vector<VulkanFrameBuffer*> m_frameBuffers;
     std::vector<DeletionEntry<VulkanFrameBuffer>> m_frameBuffersToDelete;
 };

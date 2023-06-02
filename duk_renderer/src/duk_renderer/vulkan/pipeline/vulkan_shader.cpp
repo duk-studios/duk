@@ -2,7 +2,7 @@
 /// vulkan_shader.cpp
 
 #include <duk_renderer/vulkan/pipeline/vulkan_shader.h>
-#include <duk_renderer/vulkan/vulkan_descriptor.h>
+#include <duk_renderer/vulkan/vulkan_descriptor_set.h>
 #include <duk_renderer/vulkan/mesh/vulkan_vertex.h>
 #include <duk_renderer/vulkan/vulkan_flags.h>
 
@@ -66,31 +66,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
     const auto& descriptorSetDescriptions = shaderDataSource->descriptor_set_descriptions();
     m_descriptorSetLayouts.reserve(descriptorSetDescriptions.size());
     for (auto& descriptorSetDescription : descriptorSetDescriptions) {
-
-        const auto& descriptorBindings = descriptorSetDescription.bindings;
-        std::vector<VkDescriptorSetLayoutBinding> bindings;
-        bindings.reserve(descriptorBindings.size());
-        for (auto& descriptorBinding : descriptorBindings) {
-            VkDescriptorSetLayoutBinding binding = {};
-            binding.binding = bindings.size();
-            binding.descriptorCount = 1;
-            binding.stageFlags = vk::convert_module_mask(descriptorBinding.moduleMask);
-            binding.descriptorType = vk::convert_descriptor_type(descriptorBinding.type);
-            bindings.push_back(binding);
-        }
-
-        VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
-        descriptorSetLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        descriptorSetLayoutCreateInfo.bindingCount = descriptorSetDescription.bindings.size();
-        descriptorSetLayoutCreateInfo.pBindings = bindings.data();
-
-        VkDescriptorSetLayout descriptorSetLayout;
-        auto result = vkCreateDescriptorSetLayout(m_device, &descriptorSetLayoutCreateInfo, nullptr, &descriptorSetLayout);
-
-        if (result != VK_SUCCESS) {
-            throw std::runtime_error("failed to create VkDescriptorSetLayout");
-        }
-        m_descriptorSetLayouts.push_back(descriptorSetLayout);
+        m_descriptorSetLayouts.push_back(shaderCreateInfo.descriptorSetLayoutCache->get_layout(descriptorSetDescription));
     }
 
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
@@ -99,7 +75,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
     pipelineLayoutCreateInfo.pSetLayouts = m_descriptorSetLayouts.data();
 
     auto result = vkCreatePipelineLayout(m_device, &pipelineLayoutCreateInfo, nullptr, &m_pipelineLayout);
-    if (result != VK_SUCCESS){
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkPipelineLayout");
     }
 

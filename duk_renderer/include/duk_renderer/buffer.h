@@ -5,6 +5,7 @@
 #define DUK_RENDERER_BUFFER_H
 
 #include <duk_macros/macros.h>
+#include <duk_hash/hash.h>
 
 #include <cstdint>
 #include <cassert>
@@ -42,6 +43,13 @@ public:
         read((void*)std::data(dst), std::size(dst) * elementSize, startElement * elementSize);
     }
 
+    template<typename T>
+    void read(T& dst, size_t elementIndex = 0) {
+        constexpr size_t elementSize = sizeof(T);
+        assert(elementSize == element_size());
+        read((void*)&dst, elementSize, elementIndex * elementSize);
+    }
+
     virtual void write(void* src, size_t size, size_t offset) = 0;
 
     template<std::ranges::contiguous_range T>
@@ -49,6 +57,13 @@ public:
         constexpr size_t elementSize = sizeof(std::ranges::range_value_t<T>);
         assert(elementSize == element_size());
         write((void*)std::data(src), std::size(src) * elementSize, startElement * elementSize);
+    }
+
+    template<typename T>
+    void write(const T& src, size_t elementIndex = 0) {
+        constexpr size_t elementSize = sizeof(T);
+        assert(elementSize == element_size());
+        write((void*)&src, elementSize, elementIndex * elementSize);
     }
 
     /// Makes recent writes available to the GPU
@@ -64,6 +79,8 @@ public:
     DUK_NO_DISCARD virtual size_t byte_size() const = 0;
 
     DUK_NO_DISCARD virtual Type type() const = 0;
+
+    DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 
 };
 

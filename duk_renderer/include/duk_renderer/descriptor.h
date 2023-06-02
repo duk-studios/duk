@@ -48,9 +48,14 @@ public:
 
     DUK_NO_DISCARD DescriptorType type() const;
 
+    DUK_NO_DISCARD duk::hash::Hash hash() const;
+
     DUK_NO_DISCARD Image* image() const;
 
     DUK_NO_DISCARD ImageSampler* image_sampler() const;
+
+    DUK_NO_DISCARD Buffer* buffer() const;
+
 
 private:
     union Data {
@@ -74,6 +79,17 @@ struct hash<duk::renderer::DescriptorDescription> {
         size_t hash = 0;
         duk::hash::hash_combine(hash, descriptorDescription.type);
         duk::hash::hash_combine(hash, descriptorDescription.moduleMask);
+        return hash;
+    }
+
+};
+
+template<>
+struct hash<duk::renderer::DescriptorSetDescription> {
+
+    size_t operator()(const duk::renderer::DescriptorSetDescription& descriptorSetDescription) noexcept {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
         return hash;
     }
 

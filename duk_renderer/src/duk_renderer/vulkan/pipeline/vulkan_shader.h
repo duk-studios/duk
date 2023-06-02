@@ -6,8 +6,8 @@
 
 #include <duk_renderer/pipeline/shader.h>
 #include <duk_renderer/pipeline/shader_data_source.h>
-
 #include <duk_renderer/vulkan/vulkan_import.h>
+#include <duk_renderer/vulkan/vulkan_descriptor_set.h>
 
 namespace duk::renderer {
 
@@ -22,6 +22,7 @@ VkShaderStageFlags convert_module_mask(Shader::Module::Mask moduleMask);
 struct VulkanShaderCreateInfo {
     VkDevice device;
     ShaderDataSource* shaderDataSource;
+    VulkanDescriptorSetLayoutCache* descriptorSetLayoutCache;
 };
 
 class VulkanShader : public Shader {

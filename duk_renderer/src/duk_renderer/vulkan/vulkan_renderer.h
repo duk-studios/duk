@@ -16,6 +16,7 @@
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_events.h>
 #include <duk_renderer/vulkan/vulkan_resource_manager.h>
+#include <duk_renderer/vulkan/vulkan_descriptor_set.h>
 
 namespace duk::renderer {
 
@@ -54,6 +55,8 @@ public:
 
     DUK_NO_DISCARD ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) override;
 
+    DUK_NO_DISCARD ExpectedDescriptorSet create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) override;
+
     DUK_NO_DISCARD ExpectedFrameBuffer create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) override;
 
 private:
@@ -69,6 +72,8 @@ private:
 
     void create_resource_manager();
 
+    void create_descriptor_set_layout_cache();
+
 private:
 
     VkInstance m_instance;
@@ -78,6 +83,7 @@ private:
     uint32_t m_maxFramesInFlight;
     std::unique_ptr<VulkanSwapchain> m_swapchain;
     std::unique_ptr<VulkanResourceManager> m_resourceManager;
+    std::unique_ptr<VulkanDescriptorSetLayoutCache> m_descriptorSetLayoutCache;
 
     VulkanDebugMessenger m_debugMessenger;
     std::array<uint32_t, CommandQueueType::QUEUE_COUNT> m_queueFamilyIndices;

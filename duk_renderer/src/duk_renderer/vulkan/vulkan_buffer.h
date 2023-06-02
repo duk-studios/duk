@@ -135,6 +135,9 @@ public:
     DUK_NO_DISCARD size_t byte_size() const override;
 
     DUK_NO_DISCARD Type type() const override;
+
+    DUK_NO_DISCARD duk::hash::Hash hash() const override;
+
 private:
 
     void update_data_hash();
