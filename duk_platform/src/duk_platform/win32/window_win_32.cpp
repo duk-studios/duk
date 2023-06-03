@@ -130,18 +130,18 @@ WindowWin32::~WindowWin32() {
 LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
         case WM_CLOSE: {
-            window_close_event(events::WindowClose{});
+            window_close_event();
             return 0;
         }
         case WM_DESTROY: {
-            window_destroy_event(events::WindowDestroy{});
+            window_destroy_event();
             PostQuitMessage(0);
             return 0;
         }
         case WM_SIZE: {
             m_width = LOWORD(lParam);
             m_height = HIWORD(lParam);
-            window_resize_event(events::WindowResize{m_width, m_height});
+            window_resize_event(m_width, m_height);
             return 0;
         }
         default:

@@ -4,7 +4,6 @@ set(DUK_PLATFORM_HEADERS
         include/duk_platform/window.h
         include/duk_platform/window_error.h
         include/duk_platform/win32/window_win_32.h
-        include/duk_platform/events/window_events.h
         )
 
 set(DUK_PLATFORM_SOURCES

@@ -6,7 +6,6 @@
 #define DUK_PLATFORM_WINDOW_H
 
 #include <duk_platform/window_error.h>
-#include <duk_platform/events/window_events.h>
 
 #include <duk_events/event.h>
 
@@ -30,9 +29,9 @@ using ExpectedWindow = tl::expected<std::shared_ptr<Window>, WindowError>;
 class Window {
 public:
 
-    using CloseEvent = duk::events::EventT<duk::platform::events::WindowClose>;
-    using DestroyEvent = duk::events::EventT<duk::platform::events::WindowDestroy>;
-    using ResizeEvent = duk::events::EventT<duk::platform::events::WindowResize>;
+    using CloseEvent = duk::events::EventVoid;
+    using DestroyEvent = duk::events::EventVoid;
+    using ResizeEvent = duk::events::EventT<uint32_t, uint32_t>;
 
 public:
 

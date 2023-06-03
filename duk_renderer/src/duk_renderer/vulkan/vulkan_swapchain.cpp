@@ -155,7 +155,7 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
         m_ableToPresent = true;
     });
 
-    m_listener.listen(m_window->window_resize_event, [this](const auto& ev){
+    m_listener.listen(m_window->window_resize_event, [this] (auto, auto) {
         m_requiresRecreation = true;
     });
 
