@@ -7,6 +7,8 @@ set(DUK_SAMPLE_HEADERS
 
 set(DUK_SAMPLE_SOURCES
         src/duk_sample/main.cpp
+        src/duk_sample/application.h
+        src/duk_sample/application.cpp
         )
 
 add_executable(duk_sample ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
@@ -17,7 +19,7 @@ target_include_directories(duk_sample
         )
 
 target_link_libraries(duk_sample
-        PUBLIC
+        PRIVATE
         duk_renderer
         duk_log
         duk_task
