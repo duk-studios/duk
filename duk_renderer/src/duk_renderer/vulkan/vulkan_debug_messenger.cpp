@@ -17,7 +17,7 @@ log::Level level_from_severity(VkDebugUtilsMessageSeverityFlagBitsEXT severity){
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
             return log::Level::WARN;
         default:
-            return log::Level::ERR;
+            return log::Level::FATAL;
     }
 }
 

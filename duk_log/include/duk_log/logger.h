@@ -18,7 +18,7 @@ enum Level : uint8_t {
     INFO,
     DEBUG,
     WARN,
-    ERR
+    FATAL
 };
 
 class Logger {
@@ -47,6 +47,16 @@ public:
     ~Logger();
 
     DUK_NO_DISCARD Log log(Level level);
+
+    DUK_NO_DISCARD Log log_verb();
+
+    DUK_NO_DISCARD Log log_info();
+
+    DUK_NO_DISCARD Log log_debug();
+
+    DUK_NO_DISCARD Log log_warn();
+
+    DUK_NO_DISCARD Log log_fatal();
 
     template<typename ...Args>
     void print(Level level, const std::string& format, Args&&... args) {
@@ -82,8 +92,8 @@ public:
     }
 
     template<typename ...Args>
-    void print_error(const std::string& format, Args&&... args) {
-        print(Level::ERR, format, std::forward<Args>(args)...);
+    void print_fatal(const std::string& format, Args&&... args) {
+        print(Level::FATAL, format, std::forward<Args>(args)...);
     }
 
     void listen_to_print(events::EventListener& listener, PrintEvent::Callback&& callback);
