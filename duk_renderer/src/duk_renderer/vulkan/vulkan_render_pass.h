@@ -37,6 +37,10 @@ public:
 
     ~VulkanRenderPass() override;
 
+    void clean();
+
+    void clean(uint32_t imageIndex);
+
     DUK_NO_DISCARD VkRenderPass handle() const;
 
     DUK_NO_DISCARD size_t attachment_count() const override;

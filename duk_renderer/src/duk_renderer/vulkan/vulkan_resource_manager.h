@@ -22,8 +22,12 @@ class VulkanBuffer;
 class VulkanBufferCreateInfo;
 class VulkanDescriptorSet;
 class VulkanDescriptorSetCreateInfo;
+class VulkanPipeline;
+class VulkanPipelineCreateInfo;
 class VulkanFrameBuffer;
 class VulkanFrameBufferCreateInfo;
+class VulkanRenderPass;
+class VulkanRenderPassCreateInfo;
 
 
 struct VulkanResourceManagerCreateInfo {
@@ -47,7 +51,11 @@ public:
 
     std::shared_ptr<VulkanDescriptorSet> create(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo);
 
+    std::shared_ptr<VulkanPipeline> create(const VulkanPipelineCreateInfo& pipelineCreateInfo);
+
     std::shared_ptr<VulkanFrameBuffer> create(const VulkanFrameBufferCreateInfo& frameBufferCreateInfo);
+
+    std::shared_ptr<VulkanRenderPass> create(const VulkanRenderPassCreateInfo& renderPassCreateInfo);
 private:
 
     template<typename T>
@@ -108,8 +116,12 @@ private:
     std::vector<DeletionEntry<VulkanMemoryImage>> m_imagesToDelete;
     std::vector<VulkanDescriptorSet*> m_descriptorSets;
     std::vector<DeletionEntry<VulkanDescriptorSet>> m_descriptorSetsToDelete;
+    std::vector<VulkanPipeline*> m_pipelines;
+    std::vector<DeletionEntry<VulkanPipeline>> m_pipelinesToDelete;
     std::vector<VulkanFrameBuffer*> m_frameBuffers;
     std::vector<DeletionEntry<VulkanFrameBuffer>> m_frameBuffersToDelete;
+    std::vector<VulkanRenderPass*> m_renderPasses;
+    std::vector<DeletionEntry<VulkanRenderPass>> m_renderPassesToDelete;
 };
 
 }

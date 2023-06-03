@@ -73,19 +73,15 @@ VulkanPipeline::VulkanPipeline(const VulkanPipelineCreateInfo& pipelineCreateInf
     m_cullModeMask(pipelineCreateInfo.cullModeMask),
     m_blend(pipelineCreateInfo.blend),
     m_depthTesting(pipelineCreateInfo.depthTesting) {
-    if (m_shader->is_graphics_shader()) {
-        create_graphics_pipeline();
-    }
-    else {
-        throw std::invalid_argument("Unsupported shader type");
-    }
+    create(pipelineCreateInfo.imageCount);
+
 }
 
 VulkanPipeline::~VulkanPipeline() {
-    vkDestroyPipeline(m_device, m_pipeline, nullptr);
+    clean();
 }
 
-void VulkanPipeline::create_graphics_pipeline() {
+void VulkanPipeline::create_graphics_pipeline(uint32_t imageCount) {
 
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
     {
@@ -211,7 +207,10 @@ void VulkanPipeline::create_graphics_pipeline() {
     graphicsPipelineCreateInfo.pColorBlendState = &colorBlending;
     graphicsPipelineCreateInfo.pDepthStencilState = &depthStencil;
 
-    auto result = vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_pipeline);
+    std::vector<VkGraphicsPipelineCreateInfo> graphicsPipelineCreateInfos(imageCount, graphicsPipelineCreateInfo);
+    m_pipelines.resize(3);
+
+    auto result = vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, imageCount, graphicsPipelineCreateInfos.data(), nullptr, m_pipelines.data());
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkPipeline");
     }
@@ -219,8 +218,32 @@ void VulkanPipeline::create_graphics_pipeline() {
     m_pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 }
 
-const VkPipeline& VulkanPipeline::handle() const {
-    return m_pipeline;
+void VulkanPipeline::create(uint32_t imageCount) {
+    if (m_shader->is_graphics_shader()) {
+        create_graphics_pipeline(imageCount);
+    }
+    else {
+        throw std::invalid_argument("Unsupported shader type");
+    }
+}
+
+void VulkanPipeline::clean(uint32_t imageIndex) {
+    auto& pipeline = m_pipelines[imageIndex];
+    if (pipeline != VK_NULL_HANDLE) {
+        vkDestroyPipeline(m_device, pipeline, nullptr);
+        pipeline = VK_NULL_HANDLE;
+    }
+}
+
+void VulkanPipeline::clean() {
+    for (int i = 0; i < m_pipelines.size(); i++) {
+        clean(i);
+    }
+    m_pipelines.clear();
+}
+
+const VkPipeline& VulkanPipeline::handle(uint32_t imageIndex) const {
+    return m_pipelines[imageIndex];
 }
 
 VkPipelineBindPoint VulkanPipeline::bind_point() const {

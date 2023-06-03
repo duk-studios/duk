@@ -199,6 +199,7 @@ ExpectedPipeline VulkanRenderer::create_pipeline(const PipelineCreateInfo& pipel
     try {
         VulkanPipelineCreateInfo vulkanPipelineCreateInfo = {};
         vulkanPipelineCreateInfo.device = m_device;
+        vulkanPipelineCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
         vulkanPipelineCreateInfo.shader = (VulkanShader*)pipelineCreateInfo.shader;
         vulkanPipelineCreateInfo.renderPass = (VulkanRenderPass*)pipelineCreateInfo.renderPass;
         vulkanPipelineCreateInfo.viewport = pipelineCreateInfo.viewport;
@@ -206,8 +207,7 @@ ExpectedPipeline VulkanRenderer::create_pipeline(const PipelineCreateInfo& pipel
         vulkanPipelineCreateInfo.blend = pipelineCreateInfo.blend;
         vulkanPipelineCreateInfo.cullModeMask = pipelineCreateInfo.cullModeMask;
         vulkanPipelineCreateInfo.depthTesting = pipelineCreateInfo.depthTesting;
-
-        return std::make_shared<VulkanPipeline>(vulkanPipelineCreateInfo);
+        return m_resourceManager->create(vulkanPipelineCreateInfo);
     }
     catch (const std::exception& e){
         return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
@@ -221,7 +221,7 @@ ExpectedRenderPass VulkanRenderer::create_render_pass(const Renderer::RenderPass
         vulkanRenderPassCreateInfo.colorAttachments = renderPassCreateInfo.colorAttachments;
         vulkanRenderPassCreateInfo.colorAttachmentCount = renderPassCreateInfo.colorAttachmentCount;
         vulkanRenderPassCreateInfo.depthAttachment = renderPassCreateInfo.depthAttachment;
-        return std::make_shared<VulkanRenderPass>(vulkanRenderPassCreateInfo);
+        return m_resourceManager->create(vulkanRenderPassCreateInfo);
     }
     catch (std::exception& e) {
         return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());

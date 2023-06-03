@@ -9,6 +9,8 @@
 
 #include <duk_macros/macros.h>
 
+#include <vector>
+
 namespace duk::renderer {
 
 namespace vk {
@@ -28,6 +30,7 @@ class VulkanRenderPass;
 
 struct VulkanPipelineCreateInfo {
     VkDevice device;
+    uint32_t imageCount;
     VulkanShader* shader;
     VulkanRenderPass* renderPass;
     Pipeline::Viewport viewport;
@@ -44,7 +47,13 @@ public:
 
     ~VulkanPipeline() override;
 
-    DUK_NO_DISCARD const VkPipeline& handle() const;
+    void create(uint32_t imageCount);
+
+    void clean(uint32_t imageIndex);
+
+    void clean();
+
+    DUK_NO_DISCARD const VkPipeline& handle(uint32_t imageIndex) const;
 
     DUK_NO_DISCARD VkPipelineBindPoint bind_point() const;
 
@@ -52,7 +61,7 @@ public:
 
 private:
 
-    void create_graphics_pipeline();
+    void create_graphics_pipeline(uint32_t imageCount);
 
 private:
     VkDevice m_device;
@@ -63,7 +72,7 @@ private:
     Pipeline::CullMode::Mask m_cullModeMask;
     Pipeline::Blend m_blend;
     bool m_depthTesting;
-    VkPipeline m_pipeline;
+    std::vector<VkPipeline> m_pipelines;
     VkPipelineBindPoint m_pipelineBindPoint;
 };
 

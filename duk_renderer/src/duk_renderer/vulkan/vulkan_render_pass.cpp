@@ -99,7 +99,7 @@ VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRende
 }
 
 VulkanRenderPass::~VulkanRenderPass() {
-    vkDestroyRenderPass(m_device, m_renderPass, nullptr);
+    clean();
 }
 
 VkRenderPass duk::renderer::VulkanRenderPass::handle() const {
@@ -116,6 +116,14 @@ size_t VulkanRenderPass::color_attachment_count() const {
 
 bool VulkanRenderPass::has_depth_attachment() const {
     return m_depthAttachment.has_value();
+}
+
+void VulkanRenderPass::clean() {
+    vkDestroyRenderPass(m_device, m_renderPass, nullptr);
+}
+
+void VulkanRenderPass::clean(uint32_t imageIndex) {
+    // do nothing, it's only here so that we can avoid deleting it while at use at VulkanResourceManager
 }
 
 }
