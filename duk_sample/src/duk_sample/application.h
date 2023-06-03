@@ -50,8 +50,8 @@ private:
     duk::events::EventListener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;
     std::shared_ptr<duk::renderer::Renderer> m_renderer;
-    std::shared_ptr<duk::renderer::CommandScheduler> m_scheduler;
     std::shared_ptr<duk::renderer::CommandQueue> m_mainCommandQueue;
+    std::shared_ptr<duk::renderer::CommandScheduler> m_scheduler;
     std::shared_ptr<duk::renderer::RenderPass> m_renderPass;
     std::shared_ptr<duk::renderer::FrameBuffer> m_frameBuffer;
     std::shared_ptr<duk::renderer::Shader> m_colorShader;
