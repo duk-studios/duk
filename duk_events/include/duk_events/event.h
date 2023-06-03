@@ -88,6 +88,8 @@ protected:
     bool m_emitting = false;
 };
 
+using EventVoid = EventT<>;
+
 class EventListener {
 public:
 
