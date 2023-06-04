@@ -126,7 +126,7 @@ public:
     struct BufferCreateInfo {
         Buffer::Type type;
         Buffer::UpdateFrequency updateFrequency;
-        size_t size;
+        size_t elementCount;
         size_t elementSize;
     };
 

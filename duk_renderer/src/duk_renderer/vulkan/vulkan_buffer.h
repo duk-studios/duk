@@ -95,7 +95,7 @@ private:
 struct VulkanBufferCreateInfo {
     Buffer::Type type;
     Buffer::UpdateFrequency updateFrequency;
-    size_t size;
+    size_t elementCount;
     size_t elementSize;
     VkDevice device;
     VulkanPhysicalDevice* physicalDevice;
@@ -148,7 +148,7 @@ private:
     uint32_t m_queueFamilyIndex;
     Buffer::Type m_type;
     Buffer::UpdateFrequency m_updateFrequency;
-    size_t m_size;
+    size_t m_elementCount;
     size_t m_elementSize;
     std::vector<std::unique_ptr<VulkanBufferMemory>> m_buffers;
     std::vector<duk::hash::Hash> m_bufferHashes;

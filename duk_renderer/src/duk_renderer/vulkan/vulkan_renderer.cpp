@@ -233,7 +233,7 @@ ExpectedBuffer VulkanRenderer::create_buffer(const Renderer::BufferCreateInfo& b
         VulkanBufferCreateInfo vulkanBufferCreateInfo = {};
         vulkanBufferCreateInfo.updateFrequency = bufferCreateInfo.updateFrequency;
         vulkanBufferCreateInfo.type = bufferCreateInfo.type;
-        vulkanBufferCreateInfo.size = bufferCreateInfo.size;
+        vulkanBufferCreateInfo.elementCount = bufferCreateInfo.elementCount;
         vulkanBufferCreateInfo.elementSize = bufferCreateInfo.elementSize;
         vulkanBufferCreateInfo.device = m_device;
         vulkanBufferCreateInfo.physicalDevice = m_physicalDevice.get();

@@ -210,9 +210,9 @@ VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo) :
     m_queueFamilyIndex(bufferCreateInfo.queueFamilyIndex),
     m_type(bufferCreateInfo.type),
     m_updateFrequency(bufferCreateInfo.updateFrequency),
-    m_size(bufferCreateInfo.size),
+    m_elementCount(bufferCreateInfo.elementCount),
     m_elementSize(bufferCreateInfo.elementSize),
-    m_data(m_size * m_elementSize, 0),
+    m_data(m_elementCount * m_elementSize, 0),
     m_dataHash(0) {
 
     create(bufferCreateInfo.imageCount);
@@ -312,7 +312,7 @@ void VulkanBuffer::invalidate() {
 }
 
 size_t VulkanBuffer::size() const {
-    return m_size;
+    return m_elementCount;
 }
 
 size_t VulkanBuffer::element_size() const {
