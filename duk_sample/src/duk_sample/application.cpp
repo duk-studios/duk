@@ -102,9 +102,9 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     duk::renderer::AttachmentDescription colorAttachmentDescription = {};
     colorAttachmentDescription.format = outputImage->format();
-    colorAttachmentDescription.initialLayout = duk::renderer::ImageLayout::UNDEFINED;
-    colorAttachmentDescription.layout = duk::renderer::ImageLayout::COLOR_ATTACHMENT;
-    colorAttachmentDescription.finalLayout = duk::renderer::ImageLayout::PRESENT_SRC;
+    colorAttachmentDescription.initialLayout = duk::renderer::Image::Layout::UNDEFINED;
+    colorAttachmentDescription.layout = duk::renderer::Image::Layout::COLOR_ATTACHMENT;
+    colorAttachmentDescription.finalLayout = duk::renderer::Image::Layout::PRESENT_SRC;
     colorAttachmentDescription.storeOp = duk::renderer::StoreOp::STORE;
     colorAttachmentDescription.loadOp = duk::renderer::LoadOp::CLEAR;
 

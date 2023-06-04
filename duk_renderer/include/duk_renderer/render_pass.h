@@ -27,10 +27,10 @@ enum class LoadOp {
 };
 
 struct AttachmentDescription {
-    ImageLayout initialLayout;
-    ImageLayout layout;
-    ImageLayout finalLayout;
-    ImageFormat format;
+    Image::Layout initialLayout;
+    Image::Layout layout;
+    Image::Layout finalLayout;
+    Image::Format format;
     StoreOp storeOp;
     LoadOp loadOp;
 };

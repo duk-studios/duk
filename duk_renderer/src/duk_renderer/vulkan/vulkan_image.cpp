@@ -8,73 +8,73 @@ namespace duk::renderer {
 
 namespace vk {
 
-VkFormat convert_format(ImageFormat format) {
+VkFormat convert_format(Image::Format format) {
     VkFormat converted;
     switch (format){
-        case ImageFormat::UNDEFINED: converted = VK_FORMAT_UNDEFINED; break;
-        case ImageFormat::R8_UNORM: converted = VK_FORMAT_R8_UNORM; break;
-        case ImageFormat::R8_SNORM: converted = VK_FORMAT_R8_SNORM; break;
-        case ImageFormat::R8_SRGB: converted = VK_FORMAT_R8_SRGB; break;
-        case ImageFormat::R8G8_UNORM: converted = VK_FORMAT_R8G8_UNORM; break;
-        case ImageFormat::R8G8_SNORM: converted = VK_FORMAT_R8G8_SNORM; break;
-        case ImageFormat::R8G8_SRGB: converted = VK_FORMAT_R8G8_SRGB; break;
-        case ImageFormat::R8G8B8_UNORM: converted = VK_FORMAT_R8G8B8_UNORM; break;
-        case ImageFormat::R8G8B8_SNORM: converted = VK_FORMAT_R8G8B8_SNORM; break;
-        case ImageFormat::R8G8B8_SRGB: converted = VK_FORMAT_R8G8B8_SRGB; break;
-        case ImageFormat::B8G8R8_UNORM: converted = VK_FORMAT_B8G8R8_UNORM; break;
-        case ImageFormat::B8G8R8_SNORM: converted = VK_FORMAT_B8G8R8_SNORM; break;
-        case ImageFormat::B8G8R8_SRGB: converted = VK_FORMAT_B8G8R8_SRGB; break;
-        case ImageFormat::R8G8B8A8_UNORM: converted = VK_FORMAT_R8G8B8A8_UNORM; break;
-        case ImageFormat::R8G8B8A8_SNORM: converted = VK_FORMAT_R8G8B8A8_SNORM; break;
-        case ImageFormat::R8G8B8A8_SRGB: converted = VK_FORMAT_R8G8B8A8_SRGB; break;
-        case ImageFormat::B8G8R8A8_UNORM: converted = VK_FORMAT_B8G8R8A8_UNORM; break;
-        case ImageFormat::B8G8R8A8_SNORM: converted = VK_FORMAT_B8G8R8A8_SNORM; break;
-        case ImageFormat::B8G8R8A8_SRGB: converted = VK_FORMAT_B8G8R8A8_SRGB; break;
+        case Image::Format::UNDEFINED: converted = VK_FORMAT_UNDEFINED; break;
+        case Image::Format::R8_UNORM: converted = VK_FORMAT_R8_UNORM; break;
+        case Image::Format::R8_SNORM: converted = VK_FORMAT_R8_SNORM; break;
+        case Image::Format::R8_SRGB: converted = VK_FORMAT_R8_SRGB; break;
+        case Image::Format::R8G8_UNORM: converted = VK_FORMAT_R8G8_UNORM; break;
+        case Image::Format::R8G8_SNORM: converted = VK_FORMAT_R8G8_SNORM; break;
+        case Image::Format::R8G8_SRGB: converted = VK_FORMAT_R8G8_SRGB; break;
+        case Image::Format::R8G8B8_UNORM: converted = VK_FORMAT_R8G8B8_UNORM; break;
+        case Image::Format::R8G8B8_SNORM: converted = VK_FORMAT_R8G8B8_SNORM; break;
+        case Image::Format::R8G8B8_SRGB: converted = VK_FORMAT_R8G8B8_SRGB; break;
+        case Image::Format::B8G8R8_UNORM: converted = VK_FORMAT_B8G8R8_UNORM; break;
+        case Image::Format::B8G8R8_SNORM: converted = VK_FORMAT_B8G8R8_SNORM; break;
+        case Image::Format::B8G8R8_SRGB: converted = VK_FORMAT_B8G8R8_SRGB; break;
+        case Image::Format::R8G8B8A8_UNORM: converted = VK_FORMAT_R8G8B8A8_UNORM; break;
+        case Image::Format::R8G8B8A8_SNORM: converted = VK_FORMAT_R8G8B8A8_SNORM; break;
+        case Image::Format::R8G8B8A8_SRGB: converted = VK_FORMAT_R8G8B8A8_SRGB; break;
+        case Image::Format::B8G8R8A8_UNORM: converted = VK_FORMAT_B8G8R8A8_UNORM; break;
+        case Image::Format::B8G8R8A8_SNORM: converted = VK_FORMAT_B8G8R8A8_SNORM; break;
+        case Image::Format::B8G8R8A8_SRGB: converted = VK_FORMAT_B8G8R8A8_SRGB; break;
         default:
-            throw std::invalid_argument("unhandled ImageFormat for Vulkan");
+            throw std::invalid_argument("unhandled Image::Format for Vulkan");
     }
     return converted;
 }
 
-ImageFormat convert_format(VkFormat format) {
-    ImageFormat converted;
+Image::Format convert_format(VkFormat format) {
+    Image::Format converted;
     switch (format){
-        case VK_FORMAT_UNDEFINED: converted = ImageFormat::UNDEFINED; break;
-        case VK_FORMAT_R8_UNORM: converted = ImageFormat::R8_UNORM; break;
-        case VK_FORMAT_R8_SNORM: converted = ImageFormat::R8_SNORM; break;
-        case VK_FORMAT_R8_SRGB: converted = ImageFormat::R8_SRGB; break;
-        case VK_FORMAT_R8G8_UNORM: converted = ImageFormat::R8G8_UNORM; break;
-        case VK_FORMAT_R8G8_SNORM: converted = ImageFormat::R8G8_SNORM; break;
-        case VK_FORMAT_R8G8_SRGB: converted = ImageFormat::R8G8_SRGB; break;
-        case VK_FORMAT_R8G8B8_UNORM: converted = ImageFormat::R8G8B8_UNORM; break;
-        case VK_FORMAT_R8G8B8_SNORM: converted = ImageFormat::R8G8B8_SNORM; break;
-        case VK_FORMAT_R8G8B8_SRGB: converted = ImageFormat::R8G8B8_SRGB; break;
-        case VK_FORMAT_B8G8R8_UNORM: converted = ImageFormat::B8G8R8_UNORM; break;
-        case VK_FORMAT_B8G8R8_SNORM: converted = ImageFormat::B8G8R8_SNORM; break;
-        case VK_FORMAT_B8G8R8_SRGB: converted = ImageFormat::B8G8R8_SRGB; break;
-        case VK_FORMAT_R8G8B8A8_UNORM: converted = ImageFormat::R8G8B8A8_UNORM; break;
-        case VK_FORMAT_R8G8B8A8_SNORM: converted = ImageFormat::R8G8B8A8_SNORM; break;
-        case VK_FORMAT_R8G8B8A8_SRGB: converted = ImageFormat::R8G8B8A8_SRGB; break;
-        case VK_FORMAT_B8G8R8A8_UNORM: converted = ImageFormat::B8G8R8A8_UNORM; break;
-        case VK_FORMAT_B8G8R8A8_SNORM: converted = ImageFormat::B8G8R8A8_SNORM; break;
-        case VK_FORMAT_B8G8R8A8_SRGB: converted = ImageFormat::B8G8R8A8_SRGB; break;
+        case VK_FORMAT_UNDEFINED: converted = Image::Format::UNDEFINED; break;
+        case VK_FORMAT_R8_UNORM: converted = Image::Format::R8_UNORM; break;
+        case VK_FORMAT_R8_SNORM: converted = Image::Format::R8_SNORM; break;
+        case VK_FORMAT_R8_SRGB: converted = Image::Format::R8_SRGB; break;
+        case VK_FORMAT_R8G8_UNORM: converted = Image::Format::R8G8_UNORM; break;
+        case VK_FORMAT_R8G8_SNORM: converted = Image::Format::R8G8_SNORM; break;
+        case VK_FORMAT_R8G8_SRGB: converted = Image::Format::R8G8_SRGB; break;
+        case VK_FORMAT_R8G8B8_UNORM: converted = Image::Format::R8G8B8_UNORM; break;
+        case VK_FORMAT_R8G8B8_SNORM: converted = Image::Format::R8G8B8_SNORM; break;
+        case VK_FORMAT_R8G8B8_SRGB: converted = Image::Format::R8G8B8_SRGB; break;
+        case VK_FORMAT_B8G8R8_UNORM: converted = Image::Format::B8G8R8_UNORM; break;
+        case VK_FORMAT_B8G8R8_SNORM: converted = Image::Format::B8G8R8_SNORM; break;
+        case VK_FORMAT_B8G8R8_SRGB: converted = Image::Format::B8G8R8_SRGB; break;
+        case VK_FORMAT_R8G8B8A8_UNORM: converted = Image::Format::R8G8B8A8_UNORM; break;
+        case VK_FORMAT_R8G8B8A8_SNORM: converted = Image::Format::R8G8B8A8_SNORM; break;
+        case VK_FORMAT_R8G8B8A8_SRGB: converted = Image::Format::R8G8B8A8_SRGB; break;
+        case VK_FORMAT_B8G8R8A8_UNORM: converted = Image::Format::B8G8R8A8_UNORM; break;
+        case VK_FORMAT_B8G8R8A8_SNORM: converted = Image::Format::B8G8R8A8_SNORM; break;
+        case VK_FORMAT_B8G8R8A8_SRGB: converted = Image::Format::B8G8R8A8_SRGB; break;
         default:
             throw std::invalid_argument("unhandled VkFormat for duk");
     }
     return converted;
 }
 
-VkImageLayout convert_layout(ImageLayout layout) {
+VkImageLayout convert_layout(Image::Layout layout) {
     VkImageLayout converted;
     switch (layout){
-        case ImageLayout::UNDEFINED: converted = VK_IMAGE_LAYOUT_UNDEFINED; break;
-        case ImageLayout::GENERAL: converted = VK_IMAGE_LAYOUT_GENERAL; break;
-        case ImageLayout::COLOR_ATTACHMENT: converted = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; break;
-        case ImageLayout::DEPTH_ATTACHMENT: converted = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL; break;
-        case ImageLayout::SHADER_READ_ONLY: converted = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; break;
-        case ImageLayout::PRESENT_SRC: converted = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; break;
+        case Image::Layout::UNDEFINED: converted = VK_IMAGE_LAYOUT_UNDEFINED; break;
+        case Image::Layout::GENERAL: converted = VK_IMAGE_LAYOUT_GENERAL; break;
+        case Image::Layout::COLOR_ATTACHMENT: converted = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; break;
+        case Image::Layout::DEPTH_ATTACHMENT: converted = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL; break;
+        case Image::Layout::SHADER_READ_ONLY: converted = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; break;
+        case Image::Layout::PRESENT_SRC: converted = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; break;
         default:
-            throw std::invalid_argument("unhandled ImageLayout for Vulkan");
+            throw std::invalid_argument("unhandled Image::Layout for Vulkan");
     }
     return converted;
 }
@@ -102,8 +102,8 @@ VulkanMemoryImage::~VulkanMemoryImage() {
     m_memories.clear();
 }
 
-ImageFormat VulkanMemoryImage::format() const {
-    return ImageFormat::UNDEFINED;
+Image::Format VulkanMemoryImage::format() const {
+    return Image::Format::UNDEFINED;
 }
 
 uint32_t VulkanMemoryImage::width() const {
@@ -160,7 +160,7 @@ uint32_t VulkanSwapchainImage::image_count() const {
     return m_images.size();
 }
 
-ImageFormat VulkanSwapchainImage::format() const {
+Image::Format VulkanSwapchainImage::format() const {
     return vk::convert_format(m_format);
 }
 

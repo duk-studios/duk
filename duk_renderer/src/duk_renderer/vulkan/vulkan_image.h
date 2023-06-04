@@ -16,11 +16,11 @@ namespace duk::renderer {
 
 namespace vk {
 
-VkFormat convert_format(ImageFormat format);
+VkFormat convert_format(Image::Format format);
 
-ImageFormat convert_format(VkFormat format);
+Image::Format convert_format(VkFormat format);
 
-VkImageLayout convert_layout(ImageLayout layout);
+VkImageLayout convert_layout(Image::Layout layout);
 
 }
 
@@ -35,7 +35,11 @@ public:
 
 struct VulkanMemoryImageCreateInfo {
     VkDevice device;
-    VkFormat format;
+    Image::Format format;
+    uint32_t width;
+    uint32_t height;
+    uint32_t dataSize;
+    uint8_t* data;
 };
 
 class VulkanMemoryImage : public VulkanImage {
@@ -45,7 +49,7 @@ public:
 
     ~VulkanMemoryImage() override;
 
-    DUK_NO_DISCARD ImageFormat format() const override;
+    DUK_NO_DISCARD Image::Format format() const override;
 
     DUK_NO_DISCARD VkImage image(uint32_t frameIndex) const override;
 
@@ -81,7 +85,7 @@ public:
 
     ~VulkanSwapchainImage() override;
 
-    DUK_NO_DISCARD ImageFormat format() const override;
+    DUK_NO_DISCARD Image::Format format() const override;
 
     DUK_NO_DISCARD uint32_t width() const override;
 
