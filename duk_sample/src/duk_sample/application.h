@@ -39,7 +39,7 @@ private:
         return std::move(expectedResult.value());
     }
 
-    void update();
+    void update(double time, double deltaTime);
 
     void draw();
 

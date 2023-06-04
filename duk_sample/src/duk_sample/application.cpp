@@ -4,9 +4,11 @@
 #include <duk_sample/application.h>
 #include <duk_platform/window.h>
 #include <duk_renderer/pipeline/std_shader_data_source.h>
+#include <duk_renderer/mesh/vertex_types.h>
 
+#include <cmath>
 #include <fstream>
-#include "duk_renderer/mesh/vertex_types.h"
+#include <chrono>
 
 namespace duk::sample {
 
@@ -50,6 +52,10 @@ duk::renderer::StdShaderDataSource load_color_shader() {
 }
 
 }
+
+struct UniformBuffer {
+    glm::vec4 color;
+};
 
 Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     m_logger(duk::log::DEBUG),
@@ -143,7 +149,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     duk::renderer::Renderer::BufferCreateInfo vertexBufferCreateInfo = {};
     vertexBufferCreateInfo.type = duk::renderer::Buffer::Type::VERTEX;
     vertexBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::STATIC;
-    vertexBufferCreateInfo.size = vertices.size();
+    vertexBufferCreateInfo.elementCount = vertices.size();
     vertexBufferCreateInfo.elementSize = sizeof(duk::renderer::Vertex2DColor);
 
     m_vertexBuffer = check_expected_result(m_renderer->create_buffer(vertexBufferCreateInfo));
@@ -155,27 +161,21 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     duk::renderer::Renderer::BufferCreateInfo indexBufferCreateInfo = {};
     indexBufferCreateInfo.type = duk::renderer::Buffer::Type::INDEX_16;
     indexBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
-    indexBufferCreateInfo.size = indices.size();
+    indexBufferCreateInfo.elementCount = indices.size();
     indexBufferCreateInfo.elementSize = sizeof(uint16_t);
 
     m_indexBuffer = check_expected_result(m_renderer->create_buffer(indexBufferCreateInfo));
     m_indexBuffer->write(indices);
     m_indexBuffer->flush();
 
-    struct UniformBuffer {
-        glm::vec4 color;
-    };
 
     duk::renderer::Renderer::BufferCreateInfo uniformBufferCreateInfo = {};
     uniformBufferCreateInfo.type = duk::renderer::Buffer::Type::UNIFORM;
     uniformBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
-    uniformBufferCreateInfo.size = 1;
+    uniformBufferCreateInfo.elementCount = 1;
     uniformBufferCreateInfo.elementSize = sizeof(UniformBuffer);
 
     m_uniformBuffer = check_expected_result(m_renderer->create_buffer(uniformBufferCreateInfo));
-    m_uniformBuffer->write(UniformBuffer{glm::vec4(1.0f, 0.3f, 0.6f, 1.0f)});
-    m_uniformBuffer->flush();
-
 
     duk::renderer::Renderer::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
     descriptorSetCreateInfo.description = colorShaderDataSource.descriptor_set_descriptions().at(0);
@@ -191,23 +191,38 @@ Application::~Application() {
 }
 
 void Application::run() {
+
+    using clock = std::chrono::high_resolution_clock;
+
     m_run = true;
 
     m_window->show();
 
+    double time = 0;
+    double deltaTime = 0;
+
     while (m_run) {
+        auto start = clock::now();
         m_window->pool_events();
 
-        update();
+        update(time, deltaTime);
 
         if (!m_window->minimized()) {
             draw();
         }
+        auto end = clock::now();
+        deltaTime = std::chrono::duration<double>(end - start).count();
+        time += deltaTime;
     }
 }
 
-void Application::update() {
+void Application::update(double time, double deltaTime) {
 
+    UniformBuffer uniformBuffer = {};
+    uniformBuffer.color = glm::vec4(std::abs(std::sin(time * 4.0)), std::abs(std::cos(time * 0.3)), std::abs(std::tan(time)), 1);
+
+    m_uniformBuffer->write(uniformBuffer);
+    m_uniformBuffer->flush();
 }
 
 void Application::draw() {
