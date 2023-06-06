@@ -10,7 +10,7 @@
 
 namespace duk::hash {
 
-using Hash = uint64_t;
+using Hash = std::size_t;
 
 constexpr Hash UndefinedHash = Hash(-1);
 
