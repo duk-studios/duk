@@ -38,17 +38,53 @@ duk::renderer::StdShaderDataSource load_color_shader() {
 
     dataSource.insert_vertex_attribute(duk::renderer::VertexAttribute::Format::VEC2);
     dataSource.insert_vertex_attribute(duk::renderer::VertexAttribute::Format::VEC4);
+    dataSource.insert_vertex_attribute(duk::renderer::VertexAttribute::Format::VEC2);
 
     duk::renderer::DescriptorSetDescription descriptorSetDescription;
     auto& uniformBinding = descriptorSetDescription.bindings.emplace_back();
     uniformBinding.type = duk::renderer::DescriptorType::UNIFORM_BUFFER;
     uniformBinding.moduleMask = duk::renderer::Shader::Module::FRAGMENT;
 
+    auto& samplerBinding = descriptorSetDescription.bindings.emplace_back();
+    samplerBinding.type = duk::renderer::DescriptorType::IMAGE_SAMPLER;
+    samplerBinding.moduleMask = duk::renderer::Shader::Module::FRAGMENT;
+
     dataSource.insert_descriptor_set_description(descriptorSetDescription);
 
     dataSource.update_hash();
 
     return dataSource;
+}
+
+struct PixelRGBA {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+    uint8_t a;
+};
+
+using PixelRGBAImageDataSource = duk::renderer::StdImageDataSource<PixelRGBA, duk::renderer::Image::PixelFormat::R8G8B8A8_UNORM>;
+
+template<typename T>
+T lerp(T from, T to, float percent) {
+    return (from * (1 - percent)) + (to * percent);
+}
+
+PixelRGBAImageDataSource load_image() {
+    PixelRGBAImageDataSource imageDataSource(64, 64);
+    for (int x = 0; x < 64; x++) {
+        for (int y = 0; y < 64; y++) {
+            auto xPercent = (float)x / 63;
+            auto yPercent = (float)x / 63;
+
+            auto r = lerp<uint8_t>(0, 255, xPercent);
+            auto g = lerp<uint8_t>(0, 255, yPercent);
+            auto b = lerp<uint8_t>(0, 255, xPercent * yPercent);
+
+            imageDataSource.write_pixel(x, y, {r, g, b, 255});
+        }
+    }
+    return imageDataSource;
 }
 
 }
@@ -139,18 +175,18 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_pipeline = check_expected_result(m_renderer->create_pipeline(pipelineCreateInfo));
 
-    std::array<duk::renderer::Vertex2DColor, 4> vertices = {};
-    vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}};
-    vertices[1] = {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}};
-    vertices[2] = {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}};
-    vertices[3] = {{0.5f, -0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}};
+    std::array<duk::renderer::Vertex2DColorUV, 4> vertices = {};
+    vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[1] = {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[2] = {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[3] = {{0.5f, -0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
 
 
     duk::renderer::Renderer::BufferCreateInfo vertexBufferCreateInfo = {};
     vertexBufferCreateInfo.type = duk::renderer::Buffer::Type::VERTEX;
     vertexBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::STATIC;
     vertexBufferCreateInfo.elementCount = vertices.size();
-    vertexBufferCreateInfo.elementSize = sizeof(duk::renderer::Vertex2DColor);
+    vertexBufferCreateInfo.elementSize = sizeof(duk::renderer::Vertex2DColorUV);
 
     m_vertexBuffer = check_expected_result(m_renderer->create_buffer(vertexBufferCreateInfo));
     m_vertexBuffer->write(vertices);
@@ -160,7 +196,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     duk::renderer::Renderer::BufferCreateInfo indexBufferCreateInfo = {};
     indexBufferCreateInfo.type = duk::renderer::Buffer::Type::INDEX_16;
-    indexBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
+    indexBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::STATIC;
     indexBufferCreateInfo.elementCount = indices.size();
     indexBufferCreateInfo.elementSize = sizeof(uint16_t);
 
@@ -177,12 +213,27 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_uniformBuffer = check_expected_result(m_renderer->create_buffer(uniformBufferCreateInfo));
 
+    auto imageDataSource = detail::load_image();
+
+    duk::renderer::Renderer::ImageCreateInfo imageCreateInfo = {};
+    imageCreateInfo.imageDataSource = &imageDataSource;
+    imageCreateInfo.usage =  duk::renderer::Image::Usage::SAMPLED;
+    imageCreateInfo.initialLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
+    imageCreateInfo.updateFrequency = duk::renderer::Image::UpdateFrequency::STATIC;
+
+    m_image = check_expected_result(m_renderer->create_image(imageCreateInfo));
+
     duk::renderer::Renderer::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
     descriptorSetCreateInfo.description = colorShaderDataSource.descriptor_set_descriptions().at(0);
 
     m_descriptorSet = check_expected_result(m_renderer->create_descriptor_set(descriptorSetCreateInfo));
 
+    duk::renderer::Sampler sampler = {};
+    sampler.filter = duk::renderer::Sampler::Filter::LINEAR;
+    sampler.wrapMode = duk::renderer::Sampler::WrapMode::REPEAT;
+
     m_descriptorSet->at(0) = m_uniformBuffer.get();
+    m_descriptorSet->at(1) = {m_image.get(), duk::renderer::Image::Layout::SHADER_READ_ONLY, sampler};
     m_descriptorSet->flush();
 }
 
@@ -219,7 +270,8 @@ void Application::run() {
 void Application::update(double time, double deltaTime) {
 
     UniformBuffer uniformBuffer = {};
-    uniformBuffer.color = glm::vec4(std::abs(std::sin(time * 4.0)), std::abs(std::cos(time * 0.3)), std::abs(std::tan(time)), 1);
+//    uniformBuffer.color = glm::vec4(std::abs(std::sin(time * 4.0)), std::abs(std::cos(time * 0.3)), std::abs(std::tan(time)), 1);
+    uniformBuffer.color = glm::vec4(1);
 
     m_uniformBuffer->write(uniformBuffer);
     m_uniformBuffer->flush();
