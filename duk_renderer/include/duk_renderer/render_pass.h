@@ -30,7 +30,7 @@ struct AttachmentDescription {
     Image::Layout initialLayout;
     Image::Layout layout;
     Image::Layout finalLayout;
-    Image::Format format;
+    Image::PixelFormat format;
     StoreOp storeOp;
     LoadOp loadOp;
 };

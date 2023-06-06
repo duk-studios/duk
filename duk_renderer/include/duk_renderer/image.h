@@ -12,7 +12,7 @@ namespace duk::renderer {
 
 class Image {
 public:
-    enum class Format {
+    enum class PixelFormat {
         UNDEFINED = 0,
         R8_UNORM,
         R8_SNORM,
@@ -31,7 +31,7 @@ public:
         R8G8B8A8_SRGB,
         B8G8R8A8_UNORM,
         B8G8R8A8_SNORM,
-        B8G8R8A8_SRGB,
+        B8G8R8A8_SRGB
     };
 
     enum class Layout {
@@ -40,18 +40,33 @@ public:
         COLOR_ATTACHMENT,
         DEPTH_ATTACHMENT,
         SHADER_READ_ONLY,
-        PRESENT_SRC,
+        PRESENT_SRC
+    };
+
+    enum class Usage {
+        SAMPLED,
+        STORAGE,
+        COLOR_ATTACHMENT,
+        DEPTH_STENCIL_ATTACHMENT
+    };
+
+    enum class UpdateFrequency {
+        STATIC,
+        HOST_DYNAMIC,
+        DEVICE_DYNAMIC
     };
 
 public:
 
     virtual ~Image() = default;
 
-    DUK_NO_DISCARD virtual Format format() const = 0;
+    DUK_NO_DISCARD virtual PixelFormat format() const = 0;
 
     DUK_NO_DISCARD virtual uint32_t width() const = 0;
 
     DUK_NO_DISCARD virtual uint32_t height() const = 0;
+
+    DUK_NO_DISCARD static size_t pixel_format_size(PixelFormat format);
 
 };
 
