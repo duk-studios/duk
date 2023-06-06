@@ -59,6 +59,7 @@ private:
     std::shared_ptr<duk::renderer::Buffer> m_vertexBuffer;
     std::shared_ptr<duk::renderer::Buffer> m_indexBuffer;
     std::shared_ptr<duk::renderer::Buffer> m_uniformBuffer;
+    std::shared_ptr<duk::renderer::Image> m_image;
     std::shared_ptr<duk::renderer::DescriptorSet> m_descriptorSet;
     bool m_run;
 

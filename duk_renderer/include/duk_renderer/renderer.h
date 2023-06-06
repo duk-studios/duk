@@ -10,6 +10,8 @@
 #include <duk_renderer/command/command_scheduler.h>
 #include <duk_renderer/render_pass.h>
 #include <duk_renderer/buffer.h>
+#include <duk_renderer/image.h>
+#include <duk_renderer/image_data_source.h>
 #include <duk_renderer/descriptor_set.h>
 #include <duk_renderer/frame_buffer.h>
 #include <duk_renderer/mesh/mesh.h>
@@ -59,6 +61,7 @@ using ExpectedPipeline = tl::expected<std::shared_ptr<Pipeline>, RendererError>;
 using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
 using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
 using ExpectedBuffer = tl::expected<std::shared_ptr<Buffer>, RendererError>;
+using ExpectedImage = tl::expected<std::shared_ptr<Image>, RendererError>;
 using ExpectedDescriptorSet = tl::expected<std::shared_ptr<DescriptorSet>, RendererError>;
 using ExpectedCommandScheduler = tl::expected<std::shared_ptr<CommandScheduler>, RendererError>;
 
@@ -132,6 +135,14 @@ public:
 
     DUK_NO_DISCARD virtual ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) = 0;
 
+    struct ImageCreateInfo {
+        ImageDataSource* imageDataSource;
+        Image::Layout initialLayout;
+        Image::Usage usage;
+        Image::UpdateFrequency updateFrequency;
+    };
+
+    DUK_NO_DISCARD virtual ExpectedImage create_image(const ImageCreateInfo& imageCreateInfo) = 0;
 
     struct DescriptorSetCreateInfo {
         DescriptorSetDescription description;

@@ -55,6 +55,8 @@ public:
 
     DUK_NO_DISCARD ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) override;
 
+    DUK_NO_DISCARD ExpectedImage create_image(const ImageCreateInfo& imageCreateInfo) override;
+
     DUK_NO_DISCARD ExpectedDescriptorSet create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) override;
 
     DUK_NO_DISCARD ExpectedFrameBuffer create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) override;
@@ -74,6 +76,8 @@ private:
 
     void create_descriptor_set_layout_cache();
 
+    void create_sampler_cache();
+
 private:
 
     VkInstance m_instance;
@@ -84,6 +88,7 @@ private:
     std::unique_ptr<VulkanSwapchain> m_swapchain;
     std::unique_ptr<VulkanResourceManager> m_resourceManager;
     std::unique_ptr<VulkanDescriptorSetLayoutCache> m_descriptorSetLayoutCache;
+    std::unique_ptr<VulkanSamplerCache> m_samplerCache;
 
     VulkanDebugMessenger m_debugMessenger;
     std::array<uint32_t, CommandQueueType::QUEUE_COUNT> m_queueFamilyIndices;

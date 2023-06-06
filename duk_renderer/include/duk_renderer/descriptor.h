@@ -5,6 +5,9 @@
 #define DUK_RENDERER_DESCRIPTOR_H
 
 #include <duk_renderer/pipeline/shader.h>
+#include <duk_renderer/image.h>
+#include <duk_renderer/buffer.h>
+#include <duk_renderer/sampler.h>
 
 #include <duk_macros/macros.h>
 #include <duk_hash/hash_combine.h>
@@ -31,18 +34,15 @@ struct DescriptorSetDescription {
     std::vector<DescriptorDescription> bindings;
 };
 
-class Image;
-class ImageSampler;
-class Buffer;
 
 class Descriptor {
 public:
 
     Descriptor();
 
-    Descriptor(Image* image);
+    Descriptor(Image* image, Image::Layout layout);
 
-    Descriptor(ImageSampler* imageSampler);
+    Descriptor(Image* image, Image::Layout layout, Sampler sampler);
 
     Descriptor(Buffer* buffer);
 
@@ -52,16 +52,27 @@ public:
 
     DUK_NO_DISCARD Image* image() const;
 
-    DUK_NO_DISCARD ImageSampler* image_sampler() const;
+    DUK_NO_DISCARD Image::Layout image_layout() const;
+
+    DUK_NO_DISCARD Sampler sampler() const;
 
     DUK_NO_DISCARD Buffer* buffer() const;
 
 
 private:
-    union Data {
+    struct ImageDescriptor {
         Image* image;
-        ImageSampler* imageSampler;
+        Image::Layout layout;
+        Sampler sampler;
+    };
+
+    struct BufferDescriptor {
         Buffer* buffer;
+    };
+
+    union Data {
+        ImageDescriptor imageDescriptor;
+        BufferDescriptor bufferDescriptor;
     };
 
     Data m_data;

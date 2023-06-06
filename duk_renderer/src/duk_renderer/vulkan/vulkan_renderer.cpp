@@ -108,11 +108,13 @@ VulkanRenderer::VulkanRenderer(const VulkanRendererCreateInfo& vulkanRendererCre
     }
     create_resource_manager();
     create_descriptor_set_layout_cache();
+    create_sampler_cache();
 }
 
 VulkanRenderer::~VulkanRenderer() {
     vkDeviceWaitIdle(m_device);
     m_descriptorSetLayoutCache.reset();
+    m_samplerCache.reset();
     m_swapchain.reset();
     m_resourceManager.reset();
     vkDestroyDevice(m_device, nullptr);
@@ -246,6 +248,24 @@ ExpectedBuffer VulkanRenderer::create_buffer(const Renderer::BufferCreateInfo& b
     }
 }
 
+ExpectedImage VulkanRenderer::create_image(const Renderer::ImageCreateInfo& imageCreateInfo) {
+    try {
+        VulkanMemoryImageCreateInfo memoryImageCreateInfo = {};
+        memoryImageCreateInfo.device = m_device;
+        memoryImageCreateInfo.physicalDevice = m_physicalDevice.get();
+        memoryImageCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+        memoryImageCreateInfo.queueFamilyIndex = m_queueFamilyIndices[CommandQueueType::QUEUE_GRAPHICS];
+        memoryImageCreateInfo.imageDataSource = imageCreateInfo.imageDataSource;
+        memoryImageCreateInfo.initialLayout = imageCreateInfo.initialLayout;
+        memoryImageCreateInfo.usage = imageCreateInfo.usage;
+        memoryImageCreateInfo.updateFrequency = imageCreateInfo.updateFrequency;
+        return m_resourceManager->create(memoryImageCreateInfo);
+    }
+    catch (std::exception& e) {
+        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
+    }
+}
+
 
 ExpectedDescriptorSet VulkanRenderer::create_descriptor_set(const Renderer::DescriptorSetCreateInfo& descriptorSetCreateInfo) {
     try {
@@ -253,6 +273,7 @@ ExpectedDescriptorSet VulkanRenderer::create_descriptor_set(const Renderer::Desc
         vulkanDescriptorSetCreateInfo.device = m_device;
         vulkanDescriptorSetCreateInfo.descriptorSetDescription = descriptorSetCreateInfo.description;
         vulkanDescriptorSetCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
+        vulkanDescriptorSetCreateInfo.samplerCache = m_samplerCache.get();
         vulkanDescriptorSetCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
         return m_resourceManager->create(vulkanDescriptorSetCreateInfo);
     }
@@ -460,6 +481,14 @@ void VulkanRenderer::create_descriptor_set_layout_cache() {
     descriptorSetLayoutCacheCreateInfo.device = m_device;
 
     m_descriptorSetLayoutCache = std::make_unique<VulkanDescriptorSetLayoutCache>(descriptorSetLayoutCacheCreateInfo);
+}
+
+void VulkanRenderer::create_sampler_cache() {
+    VulkanSamplerCacheCreateInfo samplerCacheCreateInfo = {};
+    samplerCacheCreateInfo.device = m_device;
+
+    m_samplerCache = std::make_unique<VulkanSamplerCache>(samplerCacheCreateInfo);
+
 }
 
 }

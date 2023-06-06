@@ -6,9 +6,9 @@
 
 #include <duk_renderer/descriptor_set.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
+#include <duk_renderer/vulkan/vulkan_sampler.h>
 
 #include <duk_macros/macros.h>
-#include <duk_tools/singleton.h>
 #include <duk_hash/hash_combine.h>
 
 namespace duk::renderer {
@@ -57,6 +57,7 @@ private:
 struct VulkanDescriptorSetCreateInfo {
     VkDevice device;
     VulkanDescriptorSetLayoutCache* descriptorSetLayoutCache;
+    VulkanSamplerCache* samplerCache;
     uint32_t imageCount;
     DescriptorSetDescription descriptorSetDescription;
 };
@@ -94,6 +95,7 @@ public:
 
 private:
     VkDevice m_device;
+    VulkanSamplerCache* m_samplerCache;
     DescriptorSetDescription m_descriptorSetDescription;
     VkDescriptorSetLayout m_descriptorSetLayout;
     std::vector<VkDescriptorSetLayoutBinding> m_descriptorBindings;

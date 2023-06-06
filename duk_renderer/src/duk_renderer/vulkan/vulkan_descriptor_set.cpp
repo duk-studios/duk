@@ -110,6 +110,7 @@ duk::hash::Hash VulkanDescriptorSetLayoutCache::calculate_hash(const DescriptorS
 
 VulkanDescriptorSet::VulkanDescriptorSet(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo) :
     m_device(descriptorSetCreateInfo.device),
+    m_samplerCache(descriptorSetCreateInfo.samplerCache),
     m_descriptorSetDescription(descriptorSetCreateInfo.descriptorSetDescription),
     m_descriptorSetLayout(descriptorSetCreateInfo.descriptorSetLayoutCache->get_layout(m_descriptorSetDescription)),
     m_descriptorBindings(descriptorSetCreateInfo.descriptorSetLayoutCache->get_bindings(m_descriptorSetDescription)),
@@ -220,6 +221,10 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
                 auto image = dynamic_cast<VulkanImage*>(descriptor.image());
                 VkDescriptorImageInfo imageInfo = {};
                 imageInfo.imageView = image->image_view(imageIndex);
+                imageInfo.imageLayout = vk::convert_layout(descriptor.image_layout());
+                if (descriptor.type() == DescriptorType::IMAGE_SAMPLER) {
+                    imageInfo.sampler = m_samplerCache->get(descriptor.sampler());
+                }
                 imageInfos.push_back(imageInfo);
                 writeDescriptor.pImageInfo = &imageInfos.back();
                 break;

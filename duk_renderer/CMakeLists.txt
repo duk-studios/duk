@@ -9,7 +9,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/render_pass.h
         include/duk_renderer/frame_buffer.h
         include/duk_renderer/image.h
-        include/duk_renderer/image_sampler.h
+        include/duk_renderer/sampler.h
         include/duk_renderer/mesh/mesh_data_source.h
         include/duk_renderer/mesh/vertex_data_source.h
         include/duk_renderer/mesh/vertex_layout.h
@@ -25,6 +25,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/descriptor.h
         include/duk_renderer/buffer.h
         include/duk_renderer/descriptor_set.h
+        include/duk_renderer/image_data_source.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -41,7 +42,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/render_pass.cpp
         src/duk_renderer/frame_buffer.cpp
         src/duk_renderer/image.cpp
-        src/duk_renderer/image_sampler.cpp
+        src/duk_renderer/sampler.cpp
         src/duk_renderer/command/command_scheduler.cpp
         src/duk_renderer/pipeline/shader_data_source.cpp
         src/duk_renderer/pipeline/std_shader_data_source.cpp

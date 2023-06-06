@@ -35,7 +35,7 @@ VkAttachmentLoadOp convert_load_op(LoadOp loadOp) {
 
 VkAttachmentDescription convert_attachment_description(const AttachmentDescription& attachmentDescription) {
     VkAttachmentDescription converted = {};
-    converted.format = vk::convert_format(attachmentDescription.format);
+    converted.format = vk::convert_pixel_format(attachmentDescription.format);
     converted.initialLayout = vk::convert_layout(attachmentDescription.initialLayout);
     converted.finalLayout = vk::convert_layout(attachmentDescription.finalLayout);
     converted.samples = VK_SAMPLE_COUNT_1_BIT;

@@ -13,20 +13,23 @@ Descriptor::Descriptor() {
     m_type = DescriptorType::UNDEFINED;
 }
 
-Descriptor::Descriptor(Image* image) {
+Descriptor::Descriptor(Image* image, Image::Layout layout) {
     m_type = DescriptorType::IMAGE;
-    m_data.image = image;
+    m_data.imageDescriptor.image = image;
+    m_data.imageDescriptor.layout = layout;
 }
 
-Descriptor::Descriptor(ImageSampler* imageSampler) {
+Descriptor::Descriptor(Image* image, Image::Layout layout, Sampler sampler) {
     m_type = DescriptorType::IMAGE_SAMPLER;
-    m_data.imageSampler = imageSampler;
+    m_data.imageDescriptor.image = image;
+    m_data.imageDescriptor.layout = layout;
+    m_data.imageDescriptor.sampler = sampler;
 }
 
 Descriptor::Descriptor(Buffer* buffer) {
     auto type = buffer->type();
     assert(type == Buffer::Type::UNIFORM || type == Buffer::Type::STORAGE);
-    m_data.buffer = buffer;
+    m_data.bufferDescriptor.buffer = buffer;
     switch (type) {
         case Buffer::Type::UNIFORM:
             m_type = DescriptorType::UNIFORM_BUFFER;
@@ -48,11 +51,13 @@ duk::hash::Hash Descriptor::hash() const {
     switch (m_type) {
         case DescriptorType::UNIFORM_BUFFER:
         case DescriptorType::STORAGE_BUFFER:
-            duk::hash::hash_combine(hash, m_data.buffer);
+            duk::hash::hash_combine(hash, m_data.bufferDescriptor.buffer);
             break;
-        case DescriptorType::IMAGE:
         case DescriptorType::IMAGE_SAMPLER:
-            duk::hash::hash_combine(hash, m_data.image);
+            duk::hash::hash_combine(hash, m_data.imageDescriptor.sampler);
+        case DescriptorType::IMAGE:
+            duk::hash::hash_combine(hash, m_data.imageDescriptor.image);
+            duk::hash::hash_combine(hash, m_data.imageDescriptor.layout);
             break;
         default:
             break;
@@ -61,17 +66,23 @@ duk::hash::Hash Descriptor::hash() const {
 }
 
 Image* Descriptor::image() const {
-    assert(m_type == DescriptorType::IMAGE && "descriptor is not DescriptorType::IMAGE");
-    return m_data.image;
+    assert(m_type == DescriptorType::IMAGE || m_type == DescriptorType::IMAGE_SAMPLER && "descriptor is not DescriptorType::IMAGE or DescriptorType::IMAGE_SAMPLER");
+    return m_data.imageDescriptor.image;
 }
 
-ImageSampler* Descriptor::image_sampler() const {
+Image::Layout Descriptor::image_layout() const {
+    assert(m_type == DescriptorType::IMAGE || m_type == DescriptorType::IMAGE_SAMPLER && "descriptor is not DescriptorType::IMAGE or DescriptorType::IMAGE_SAMPLER");
+    return m_data.imageDescriptor.layout;
+}
+
+Sampler Descriptor::sampler() const {
     assert(m_type == DescriptorType::IMAGE_SAMPLER && "descriptor is not DescriptorType::IMAGE_SAMPLER");
-    return m_data.imageSampler;
+    return m_data.imageDescriptor.sampler;
 }
 
 Buffer* Descriptor::buffer() const {
     assert((m_type == DescriptorType::UNIFORM_BUFFER || m_type == DescriptorType::STORAGE_BUFFER) && "descriptor is not DescriptorType::IMAGE_SAMPLER");
-    return m_data.buffer;
+    return m_data.bufferDescriptor.buffer;
 }
+
 }
