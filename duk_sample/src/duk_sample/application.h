@@ -58,8 +58,10 @@ private:
     std::shared_ptr<duk::renderer::Pipeline> m_pipeline;
     std::shared_ptr<duk::renderer::Buffer> m_vertexBuffer;
     std::shared_ptr<duk::renderer::Buffer> m_indexBuffer;
-    std::shared_ptr<duk::renderer::Buffer> m_uniformBuffer;
+    std::shared_ptr<duk::renderer::Buffer> m_materialUniformBuffer;
+    std::shared_ptr<duk::renderer::Buffer> m_transformUniformBuffer;
     std::shared_ptr<duk::renderer::Image> m_image;
+    std::shared_ptr<duk::renderer::Image> m_depthImage;
     std::shared_ptr<duk::renderer::DescriptorSet> m_descriptorSet;
     bool m_run;
 

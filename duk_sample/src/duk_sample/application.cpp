@@ -6,11 +6,17 @@
 #include <duk_renderer/pipeline/std_shader_data_source.h>
 #include <duk_renderer/vertex_types.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <cmath>
 #include <fstream>
 #include <chrono>
 
 namespace duk::sample {
+
+struct Transform {
+    glm::mat4 model;
+};
 
 namespace detail {
 
@@ -41,6 +47,10 @@ duk::renderer::StdShaderDataSource load_color_shader() {
     dataSource.insert_vertex_attribute(duk::renderer::VertexAttribute::Format::VEC2);
 
     duk::renderer::DescriptorSetDescription descriptorSetDescription;
+    auto& transformBinding = descriptorSetDescription.bindings.emplace_back();
+    transformBinding.type = renderer::DescriptorType::UNIFORM_BUFFER;
+    transformBinding.moduleMask = duk::renderer::Shader::Module::VERTEX;
+
     auto& uniformBinding = descriptorSetDescription.bindings.emplace_back();
     uniformBinding.type = duk::renderer::DescriptorType::UNIFORM_BUFFER;
     uniformBinding.moduleMask = duk::renderer::Shader::Module::FRAGMENT;
@@ -134,6 +144,16 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_mainCommandQueue = check_expected_result(m_renderer->create_command_queue(commandQueueCreateInfo));
 
+    duk::renderer::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
+
+    duk::renderer::Renderer::ImageCreateInfo depthImageCreateInfo = {};
+    depthImageCreateInfo.usage = duk::renderer::Image::Usage::DEPTH_STENCIL_ATTACHMENT;
+    depthImageCreateInfo.initialLayout = duk::renderer::Image::Layout::DEPTH_ATTACHMENT;
+    depthImageCreateInfo.updateFrequency = duk::renderer::Image::UpdateFrequency::DEVICE_DYNAMIC;
+    depthImageCreateInfo.imageDataSource = &depthImageDataSource;
+
+    m_depthImage = check_expected_result(m_renderer->create_image(depthImageCreateInfo));
+
     auto outputImage = m_renderer->present_image();
 
     duk::renderer::AttachmentDescription colorAttachmentDescription = {};
@@ -144,15 +164,28 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     colorAttachmentDescription.storeOp = duk::renderer::StoreOp::STORE;
     colorAttachmentDescription.loadOp = duk::renderer::LoadOp::CLEAR;
 
+    duk::renderer::AttachmentDescription depthAttachmentDescription = {};
+    depthAttachmentDescription.format = m_depthImage->format();
+    depthAttachmentDescription.initialLayout = duk::renderer::Image::Layout::UNDEFINED;
+    depthAttachmentDescription.layout = duk::renderer::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
+    depthAttachmentDescription.finalLayout = duk::renderer::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
+    depthAttachmentDescription.storeOp = duk::renderer::StoreOp::DONT_CARE;
+    depthAttachmentDescription.loadOp = duk::renderer::LoadOp::CLEAR;
+
+    duk::renderer::AttachmentDescription attachmentDescriptions[] = {colorAttachmentDescription};
+
     duk::renderer::Renderer::RenderPassCreateInfo renderPassCreateInfo = {};
-    renderPassCreateInfo.colorAttachments = &colorAttachmentDescription;
-    renderPassCreateInfo.colorAttachmentCount = 1;
+    renderPassCreateInfo.colorAttachments = attachmentDescriptions;
+    renderPassCreateInfo.colorAttachmentCount = std::size(attachmentDescriptions);
+    renderPassCreateInfo.depthAttachment = &depthAttachmentDescription;
 
     m_renderPass = check_expected_result(m_renderer->create_render_pass(renderPassCreateInfo));
 
+    duk::renderer::Image* frameBufferAttachments[] = {outputImage, m_depthImage.get()};
+
     duk::renderer::Renderer::FrameBufferCreateInfo frameBufferCreateInfo = {};
-    frameBufferCreateInfo.attachmentCount = 1;
-    frameBufferCreateInfo.attachments = outputImage;
+    frameBufferCreateInfo.attachmentCount = std::size(frameBufferAttachments);
+    frameBufferCreateInfo.attachments = frameBufferAttachments;
     frameBufferCreateInfo.renderPass = m_renderPass.get();
 
     m_frameBuffer = check_expected_result(m_renderer->create_frame_buffer(frameBufferCreateInfo));
@@ -172,6 +205,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     pipelineCreateInfo.cullModeMask = duk::renderer::Pipeline::CullMode::BACK;
     pipelineCreateInfo.shader = m_colorShader.get();
     pipelineCreateInfo.renderPass = m_renderPass.get();
+    pipelineCreateInfo.depthTesting = true;
 
     m_pipeline = check_expected_result(m_renderer->create_pipeline(pipelineCreateInfo));
 
@@ -204,20 +238,31 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     m_indexBuffer->write(indices);
     m_indexBuffer->flush();
 
+    duk::renderer::Renderer::BufferCreateInfo transformUniformBufferCreateInfo = {};
+    transformUniformBufferCreateInfo.type = duk::renderer::Buffer::Type::UNIFORM;
+    transformUniformBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
+    transformUniformBufferCreateInfo.elementCount = 1;
+    transformUniformBufferCreateInfo.elementSize = sizeof(Transform);
 
-    duk::renderer::Renderer::BufferCreateInfo uniformBufferCreateInfo = {};
-    uniformBufferCreateInfo.type = duk::renderer::Buffer::Type::UNIFORM;
-    uniformBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
-    uniformBufferCreateInfo.elementCount = 1;
-    uniformBufferCreateInfo.elementSize = sizeof(UniformBuffer);
+    m_transformUniformBuffer = check_expected_result(m_renderer->create_buffer(transformUniformBufferCreateInfo));
 
-    m_uniformBuffer = check_expected_result(m_renderer->create_buffer(uniformBufferCreateInfo));
+    duk::renderer::Renderer::BufferCreateInfo materialUniformBufferCreateInfo = {};
+    materialUniformBufferCreateInfo.type = duk::renderer::Buffer::Type::UNIFORM;
+    materialUniformBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
+    materialUniformBufferCreateInfo.elementCount = 1;
+    materialUniformBufferCreateInfo.elementSize = sizeof(UniformBuffer);
+
+    m_materialUniformBuffer = check_expected_result(m_renderer->create_buffer(materialUniformBufferCreateInfo));
+    UniformBuffer uniformBuffer = {};
+    uniformBuffer.color = glm::vec4(1);
+    m_materialUniformBuffer->write(uniformBuffer);
+    m_materialUniformBuffer->flush();
 
     auto imageDataSource = detail::load_image();
 
     duk::renderer::Renderer::ImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageDataSource = &imageDataSource;
-    imageCreateInfo.usage =  duk::renderer::Image::Usage::SAMPLED;
+    imageCreateInfo.usage = duk::renderer::Image::Usage::SAMPLED;
     imageCreateInfo.initialLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
     imageCreateInfo.updateFrequency = duk::renderer::Image::UpdateFrequency::STATIC;
 
@@ -229,11 +274,12 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     m_descriptorSet = check_expected_result(m_renderer->create_descriptor_set(descriptorSetCreateInfo));
 
     duk::renderer::Sampler sampler = {};
-    sampler.filter = duk::renderer::Sampler::Filter::LINEAR;
+    sampler.filter = duk::renderer::Sampler::Filter::NEAREST;
     sampler.wrapMode = duk::renderer::Sampler::WrapMode::REPEAT;
 
-    m_descriptorSet->at(0) = m_uniformBuffer.get();
-    m_descriptorSet->at(1) = {m_image.get(), duk::renderer::Image::Layout::SHADER_READ_ONLY, sampler};
+    m_descriptorSet->at(0) = m_transformUniformBuffer.get();
+    m_descriptorSet->at(1) = m_materialUniformBuffer.get();
+    m_descriptorSet->at(2) = {m_image.get(), duk::renderer::Image::Layout::SHADER_READ_ONLY, sampler};
     m_descriptorSet->flush();
 }
 
@@ -269,12 +315,11 @@ void Application::run() {
 
 void Application::update(double time, double deltaTime) {
 
-    UniformBuffer uniformBuffer = {};
-//    uniformBuffer.color = glm::vec4(std::abs(std::sin(time * 4.0)), std::abs(std::cos(time * 0.3)), std::abs(std::tan(time)), 1);
-    uniformBuffer.color = glm::vec4(1);
-
-    m_uniformBuffer->write(uniformBuffer);
-    m_uniformBuffer->flush();
+    Transform transform = {};
+    glm::vec3 position = glm::vec3(std::sin(time), 0, 0);
+    transform.model = glm::translate(glm::mat4(1), position);
+    m_transformUniformBuffer->write(transform);
+    m_transformUniformBuffer->flush();
 }
 
 void Application::draw() {
@@ -310,7 +355,7 @@ duk::renderer::FutureCommand Application::main_render_pass() {
 
         commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 
-        commandBuffer->draw_indexed(m_indexBuffer->size(), 1, 0, 0, 0);
+        commandBuffer->draw_indexed(m_indexBuffer->element_count(), 1, 0, 0, 0);
 
         commandBuffer->end_render_pass();
 
