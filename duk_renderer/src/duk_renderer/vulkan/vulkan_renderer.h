@@ -47,8 +47,6 @@ public:
 
     DUK_NO_DISCARD ExpectedCommandScheduler create_command_scheduler() override;
 
-    DUK_NO_DISCARD ExpectedMesh create_mesh(const MeshCreateInfo& meshCreateInfo) override;
-
     DUK_NO_DISCARD ExpectedShader create_shader(const ShaderCreateInfo& shaderCreateInfo) override;
 
     DUK_NO_DISCARD ExpectedPipeline create_pipeline(const PipelineCreateInfo& pipelineCreateInfo) override;

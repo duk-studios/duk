@@ -183,10 +183,6 @@ ExpectedCommandScheduler VulkanRenderer::create_command_scheduler() {
     return std::make_shared<VulkanCommandScheduler>(commandSchedulerCreateInfo);
 }
 
-ExpectedMesh VulkanRenderer::create_mesh(const MeshCreateInfo& meshCreateInfo) {
-    return tl::unexpected<RendererError>(RendererError::NOT_IMPLEMENTED, "Not implemented");
-}
-
 ExpectedShader VulkanRenderer::create_shader(const Renderer::ShaderCreateInfo& shaderCreateInfo) {
     try {
         VulkanShaderCreateInfo vulkanShaderCreateInfo = {};
