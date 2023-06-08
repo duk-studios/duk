@@ -149,6 +149,10 @@ Image* VulkanRenderer::present_image() {
     return m_swapchain->image();
 }
 
+RendererCapabilities* VulkanRenderer::capabilities() const {
+    return m_rendererCapabilities.get();
+}
+
 ExpectedCommandQueue VulkanRenderer::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
 
     auto familyIndex = m_queueFamilyIndices[commandQueueCreateInfo.type];
@@ -357,6 +361,11 @@ void VulkanRenderer::select_vk_physical_device(uint32_t deviceIndex) {
     physicalDeviceCreateInfo.deviceIndex = deviceIndex;
 
     m_physicalDevice = std::make_unique<VulkanPhysicalDevice>(physicalDeviceCreateInfo);
+
+    VulkanRendererCapabilitiesCreateInfo rendererCapabilitiesCreateInfo = {};
+    rendererCapabilitiesCreateInfo.physicalDevice = m_physicalDevice.get();
+
+    m_rendererCapabilities = std::make_unique<VulkanRendererCapabilities>(rendererCapabilitiesCreateInfo);
 }
 
 void VulkanRenderer::create_vk_surface(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {

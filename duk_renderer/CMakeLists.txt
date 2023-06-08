@@ -24,6 +24,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/buffer.h
         include/duk_renderer/descriptor_set.h
         include/duk_renderer/image_data_source.h
+        include/duk_renderer/renderer_capabilities.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -88,6 +89,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/descriptor_set.cpp
         src/duk_renderer/vulkan/vulkan_descriptor_set.cpp
         src/duk_renderer/vulkan/vulkan_descriptor_set.h
+        src/duk_renderer/vulkan/vulkan_renderer_capabilities.h
+        src/duk_renderer/vulkan/vulkan_renderer_capabilities.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

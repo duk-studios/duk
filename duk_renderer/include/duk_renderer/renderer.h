@@ -6,6 +6,7 @@
 #define DUK_RENDERER_RENDERER_H
 
 #include <duk_renderer/renderer_error.h>
+#include <duk_renderer/renderer_capabilities.h>
 #include <duk_renderer/command/command_queue.h>
 #include <duk_renderer/command/command_scheduler.h>
 #include <duk_renderer/render_pass.h>
@@ -76,13 +77,16 @@ public:
     virtual void prepare_frame() = 0;
 
     /// returns a command that acquires the next image for presentation
-    virtual Command* acquire_image_command() = 0;
+    DUK_NO_DISCARD virtual Command* acquire_image_command() = 0;
 
     /// returns a command that presents the contents of the present image on the screen
-    virtual Command* present_command() = 0;
+    DUK_NO_DISCARD virtual Command* present_command() = 0;
 
     /// returns the current present image
-    virtual Image* present_image() = 0;
+    DUK_NO_DISCARD virtual Image* present_image() = 0;
+
+    /// returns an object that can be used to check for limits and capabilities of this renderer
+    DUK_NO_DISCARD virtual RendererCapabilities* capabilities() const = 0;
 
     struct CommandQueueCreateInfo {
         CommandQueueType type;
@@ -90,14 +94,7 @@ public:
 
     DUK_NO_DISCARD virtual ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
 
-    struct MeshCreateInfo {
-        MeshDataSource* meshDataSource;
-        CommandQueueType ownerQueueType;
-    };
-
     DUK_NO_DISCARD virtual ExpectedCommandScheduler create_command_scheduler() = 0;
-
-    DUK_NO_DISCARD virtual ExpectedMesh create_mesh(const MeshCreateInfo& meshCreateInfo) = 0;
 
     struct ShaderCreateInfo {
         ShaderDataSource* shaderDataSource;
@@ -151,7 +148,7 @@ public:
 
     struct FrameBufferCreateInfo {
         RenderPass* renderPass;
-        Image* attachments;
+        Image** attachments;
         uint32_t attachmentCount;
     };
 

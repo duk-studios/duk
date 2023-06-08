@@ -8,6 +8,24 @@
 
 namespace duk::renderer {
 
+namespace detail {
+
+VkFormat find_supported_format(VkPhysicalDevice physicalDevice, std::span<VkFormat> candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+    for (VkFormat format : candidates) {
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+
+        if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+            return format;
+        } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+            return format;
+        }
+    }
+    throw std::runtime_error("failed to find supported format!");
+}
+
+}
+
 
 VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo& physicalDeviceCreateInfo) :
     m_physicalDevice(VK_NULL_HANDLE){
@@ -110,6 +128,10 @@ uint32_t VulkanPhysicalDevice::find_memory_type(uint32_t typeFilter, VkMemoryPro
         }
     }
     throw std::runtime_error("failed to find suitable memory type");
+}
+
+VkFormat VulkanPhysicalDevice::select_depth_format(std::span<VkFormat> formats) const {
+    return detail::find_supported_format(m_physicalDevice, formats, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
 }

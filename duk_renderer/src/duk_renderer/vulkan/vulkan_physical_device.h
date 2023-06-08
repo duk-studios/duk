@@ -11,6 +11,8 @@
 
 #include <tl/expected.hpp>
 
+#include <span>
+
 namespace duk::renderer {
 
 struct VulkanQueueFamilyProperties {
@@ -48,6 +50,8 @@ public:
     DUK_NO_DISCARD const std::vector<VkQueueFamilyProperties>& queue_family_properties() const;
 
     DUK_NO_DISCARD uint32_t find_memory_type(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
+
+    DUK_NO_DISCARD VkFormat select_depth_format(std::span<VkFormat> formats) const;
 
 private:
     VkPhysicalDevice m_physicalDevice;
