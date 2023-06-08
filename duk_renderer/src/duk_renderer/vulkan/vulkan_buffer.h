@@ -128,7 +128,7 @@ public:
 
     void invalidate() override;
 
-    DUK_NO_DISCARD size_t size() const override;
+    DUK_NO_DISCARD size_t element_count() const override;
 
     DUK_NO_DISCARD size_t element_size() const override;
 

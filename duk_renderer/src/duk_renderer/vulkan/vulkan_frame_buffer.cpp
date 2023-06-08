@@ -12,8 +12,7 @@ namespace duk::renderer {
 VulkanFrameBuffer::VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFrameBufferCreateInfo) :
     m_device(vulkanFrameBufferCreateInfo.device),
     m_renderPass(vulkanFrameBufferCreateInfo.renderPass),
-    m_attachments(vulkanFrameBufferCreateInfo.attachments),
-    m_attachmentCount(vulkanFrameBufferCreateInfo.attachmentCount) {
+    m_attachments(vulkanFrameBufferCreateInfo.attachments, vulkanFrameBufferCreateInfo.attachments + vulkanFrameBufferCreateInfo.attachmentCount) {
     create(vulkanFrameBufferCreateInfo.imageCount);
 }
 
@@ -25,9 +24,9 @@ void VulkanFrameBuffer::create(uint32_t imageCount) {
 
     m_width = std::numeric_limits<uint32_t>::max();
     m_height = std::numeric_limits<uint32_t>::max();
-    for (auto it = m_attachments, endAttachment = m_attachments + m_attachmentCount; it != endAttachment; it++) {
-        m_width = std::min(m_width, it->width());
-        m_height = std::min(m_height, it->height());
+    for (auto& attachment : m_attachments) {
+        m_width = std::min(m_width, attachment->width());
+        m_height = std::min(m_height, attachment->height());
     }
 
     VkFramebufferCreateInfo framebufferCreateInfo = {};
@@ -38,17 +37,16 @@ void VulkanFrameBuffer::create(uint32_t imageCount) {
     framebufferCreateInfo.layers = 1;
 
     m_frameBuffers.resize(imageCount);
-    for (int i = 0; i < m_frameBuffers.size(); i++) {
-
-        std::vector<VkImageView> attachments(m_attachmentCount);
-        for (int j = 0; j < m_attachmentCount; j++) {
-            attachments[j] = m_attachments[j].image_view(i);
+    std::vector<VkImageView> attachments(m_attachments.size());
+    for (int imageIndex = 0; imageIndex < m_frameBuffers.size(); imageIndex++) {
+        for (int attachmentIndex = 0; attachmentIndex < attachments.size(); attachmentIndex++) {
+            attachments[attachmentIndex] = m_attachments[attachmentIndex]->image_view(imageIndex);
         }
 
         framebufferCreateInfo.attachmentCount = attachments.size();
         framebufferCreateInfo.pAttachments = attachments.data();
 
-        vkCreateFramebuffer(m_device, &framebufferCreateInfo, nullptr, &m_frameBuffers[i]);
+        vkCreateFramebuffer(m_device, &framebufferCreateInfo, nullptr, &m_frameBuffers[imageIndex]);
     }
 }
 

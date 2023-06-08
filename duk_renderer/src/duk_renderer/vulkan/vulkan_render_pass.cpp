@@ -96,13 +96,35 @@ VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRende
     if (result != VK_SUCCESS){
         throw std::runtime_error("failed to create a VkRenderPass");
     }
+
+    m_clearValues.resize(attachments.size());
+    for (int i = 0; i < m_clearValues.size(); i++) {
+        if (i == m_clearValues.size() - 1) {
+            m_clearValues[i].depthStencil = {1.0f, 0};
+        }
+        else {
+            m_clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
+        }
+    }
 }
 
 VulkanRenderPass::~VulkanRenderPass() {
     clean();
 }
 
-VkRenderPass duk::renderer::VulkanRenderPass::handle() const {
+void VulkanRenderPass::clean() {
+    vkDestroyRenderPass(m_device, m_renderPass, nullptr);
+}
+
+void VulkanRenderPass::clean(uint32_t imageIndex) {
+    // do nothing, it's only here so that we can avoid deleting it while at use at VulkanResourceManager
+}
+
+const std::vector<VkClearValue>& VulkanRenderPass::clear_values() const {
+    return m_clearValues;
+}
+
+VkRenderPass VulkanRenderPass::handle() const {
     return m_renderPass;
 }
 
@@ -118,12 +140,5 @@ bool VulkanRenderPass::has_depth_attachment() const {
     return m_depthAttachment.has_value();
 }
 
-void VulkanRenderPass::clean() {
-    vkDestroyRenderPass(m_device, m_renderPass, nullptr);
-}
-
-void VulkanRenderPass::clean(uint32_t imageIndex) {
-    // do nothing, it's only here so that we can avoid deleting it while at use at VulkanResourceManager
-}
 
 }

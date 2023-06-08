@@ -8,6 +8,7 @@
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/pipeline/pipeline.h>
 #include <duk_renderer/vulkan/vulkan_debug_messenger.h>
+#include <duk_renderer/vulkan/vulkan_renderer_capabilities.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 #include <duk_renderer/vulkan/vulkan_physical_device.h>
 #include <duk_renderer/vulkan/command/vulkan_command_queue.h>
@@ -40,11 +41,11 @@ public:
 
     DUK_NO_DISCARD Image* present_image() override;
 
+    RendererCapabilities* capabilities() const override;
+
     DUK_NO_DISCARD ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
 
     DUK_NO_DISCARD ExpectedCommandScheduler create_command_scheduler() override;
-
-    DUK_NO_DISCARD ExpectedMesh create_mesh(const MeshCreateInfo& meshCreateInfo) override;
 
     DUK_NO_DISCARD ExpectedShader create_shader(const ShaderCreateInfo& shaderCreateInfo) override;
 
@@ -81,6 +82,7 @@ private:
 
     VkInstance m_instance;
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;
+    std::unique_ptr<VulkanRendererCapabilities> m_rendererCapabilities;
     VkSurfaceKHR m_surface;
     VkDevice m_device;
     uint32_t m_maxFramesInFlight;

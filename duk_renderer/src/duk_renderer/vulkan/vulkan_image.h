@@ -21,7 +21,7 @@ namespace vk {
 
 VkFormat convert_pixel_format(Image::PixelFormat format);
 
-Image::PixelFormat convert_format(VkFormat format);
+Image::PixelFormat convert_pixel_format(VkFormat format);
 
 VkImageLayout convert_layout(Image::Layout layout);
 

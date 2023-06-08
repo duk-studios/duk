@@ -7,6 +7,7 @@
 #include <duk_renderer/vulkan/vulkan_image.h>
 
 #include <stdexcept>
+#include <list>
 
 namespace duk::renderer {
 
@@ -188,8 +189,10 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
     m_descriptorSetHashes[imageIndex] = imageIndex;
 
     auto& descriptorSet = m_descriptorSets[imageIndex];
-    std::vector<VkDescriptorBufferInfo> bufferInfos;
-    std::vector<VkDescriptorImageInfo> imageInfos;
+
+    // we need to use lists here, because we do not want to invalidate references to its elements while adding new elements
+    std::list<VkDescriptorBufferInfo> bufferInfos;
+    std::list<VkDescriptorImageInfo> imageInfos;
     std::vector<VkWriteDescriptorSet> writeDescriptors;
 
     for (auto& descriptor : m_descriptors) {
@@ -211,7 +214,7 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
                 VkDescriptorBufferInfo bufferInfo = {};
                 bufferInfo.buffer = buffer->handle(imageIndex);
                 bufferInfo.offset = 0;
-                bufferInfo.range = buffer->size();
+                bufferInfo.range = buffer->byte_size();
                 bufferInfos.push_back(bufferInfo);
                 writeDescriptor.pBufferInfo = &bufferInfos.back();
                 break;

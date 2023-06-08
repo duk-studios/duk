@@ -149,6 +149,10 @@ Image* VulkanRenderer::present_image() {
     return m_swapchain->image();
 }
 
+RendererCapabilities* VulkanRenderer::capabilities() const {
+    return m_rendererCapabilities.get();
+}
+
 ExpectedCommandQueue VulkanRenderer::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
 
     auto familyIndex = m_queueFamilyIndices[commandQueueCreateInfo.type];
@@ -177,10 +181,6 @@ ExpectedCommandScheduler VulkanRenderer::create_command_scheduler() {
     commandSchedulerCreateInfo.currentFramePtr = &m_currentFrame;
 
     return std::make_shared<VulkanCommandScheduler>(commandSchedulerCreateInfo);
-}
-
-ExpectedMesh VulkanRenderer::create_mesh(const MeshCreateInfo& meshCreateInfo) {
-    return tl::unexpected<RendererError>(RendererError::NOT_IMPLEMENTED, "Not implemented");
 }
 
 ExpectedShader VulkanRenderer::create_shader(const Renderer::ShaderCreateInfo& shaderCreateInfo) {
@@ -288,7 +288,7 @@ ExpectedFrameBuffer VulkanRenderer::create_frame_buffer(const Renderer::FrameBuf
         vulkanFrameBufferCreateInfo.device = m_device;
         vulkanFrameBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
         vulkanFrameBufferCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
-        vulkanFrameBufferCreateInfo.attachments = dynamic_cast<VulkanSwapchainImage*>(frameBufferCreateInfo.attachments);
+        vulkanFrameBufferCreateInfo.attachments = reinterpret_cast<VulkanImage**>(frameBufferCreateInfo.attachments);
         vulkanFrameBufferCreateInfo.attachmentCount = frameBufferCreateInfo.attachmentCount;
         return m_resourceManager->create(vulkanFrameBufferCreateInfo);
     }
@@ -357,6 +357,11 @@ void VulkanRenderer::select_vk_physical_device(uint32_t deviceIndex) {
     physicalDeviceCreateInfo.deviceIndex = deviceIndex;
 
     m_physicalDevice = std::make_unique<VulkanPhysicalDevice>(physicalDeviceCreateInfo);
+
+    VulkanRendererCapabilitiesCreateInfo rendererCapabilitiesCreateInfo = {};
+    rendererCapabilitiesCreateInfo.physicalDevice = m_physicalDevice.get();
+
+    m_rendererCapabilities = std::make_unique<VulkanRendererCapabilities>(rendererCapabilitiesCreateInfo);
 }
 
 void VulkanRenderer::create_vk_surface(const VulkanRendererCreateInfo& vulkanRendererCreateInfo) {

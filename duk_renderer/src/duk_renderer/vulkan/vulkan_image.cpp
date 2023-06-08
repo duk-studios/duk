@@ -26,16 +26,24 @@ static VkMemoryPropertyFlags memory_properties_from_update_frequency(Image::Upda
     return converted;
 }
 
-static VkImageAspectFlags image_aspect_from_usage(Image::Usage usage) {
+static VkImageAspectFlags image_aspect(Image::Usage usage, Image::PixelFormat format) {
     VkImageAspectFlags aspectFlags = 0;
     switch (usage) {
-        case Image::Usage::SAMPLED:
-        case Image::Usage::STORAGE:
         case Image::Usage::COLOR_ATTACHMENT:
             aspectFlags |= VK_IMAGE_ASPECT_COLOR_BIT;
             break;
+        case Image::Usage::SAMPLED:
+        case Image::Usage::STORAGE:
         case Image::Usage::DEPTH_STENCIL_ATTACHMENT:
-            aspectFlags |= VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+            if (Image::is_depth_format(format)) {
+                aspectFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
+                if (Image::is_stencil_format(format)) {
+                    aspectFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+                }
+            }
+            else {
+                aspectFlags |= VK_IMAGE_ASPECT_COLOR_BIT;
+            }
             break;
         default:
             throw std::invalid_argument("unhandled Image::Usage for VkImageAspectFlags conversion");
@@ -69,13 +77,18 @@ VkFormat convert_pixel_format(Image::PixelFormat format) {
         case Image::PixelFormat::B8G8R8A8_UNORM: converted = VK_FORMAT_B8G8R8A8_UNORM; break;
         case Image::PixelFormat::B8G8R8A8_SNORM: converted = VK_FORMAT_B8G8R8A8_SNORM; break;
         case Image::PixelFormat::B8G8R8A8_SRGB: converted = VK_FORMAT_B8G8R8A8_SRGB; break;
+        case Image::PixelFormat::D32_SFLOAT: converted = VK_FORMAT_D32_SFLOAT; break;
+        case Image::PixelFormat::D16_UNORM_S8_UINT: converted = VK_FORMAT_D16_UNORM_S8_UINT; break;
+        case Image::PixelFormat::D24_UNORM_S8_UINT: converted = VK_FORMAT_D24_UNORM_S8_UINT; break;
+        case Image::PixelFormat::D32_SFLOAT_S8_UINT: converted = VK_FORMAT_D32_SFLOAT_S8_UINT; break;
         default:
             throw std::invalid_argument("unhandled Image::Format for Vulkan");
+
     }
     return converted;
 }
 
-Image::PixelFormat convert_format(VkFormat format) {
+Image::PixelFormat convert_pixel_format(VkFormat format) {
     Image::PixelFormat converted;
     switch (format){
         case VK_FORMAT_UNDEFINED: converted = Image::PixelFormat::UNDEFINED; break;
@@ -97,6 +110,10 @@ Image::PixelFormat convert_format(VkFormat format) {
         case VK_FORMAT_B8G8R8A8_UNORM: converted = Image::PixelFormat::B8G8R8A8_UNORM; break;
         case VK_FORMAT_B8G8R8A8_SNORM: converted = Image::PixelFormat::B8G8R8A8_SNORM; break;
         case VK_FORMAT_B8G8R8A8_SRGB: converted = Image::PixelFormat::B8G8R8A8_SRGB; break;
+        case VK_FORMAT_D32_SFLOAT: converted = Image::PixelFormat::D32_SFLOAT; break;
+        case VK_FORMAT_D16_UNORM_S8_UINT: converted = Image::PixelFormat::D16_UNORM_S8_UINT; break;
+        case VK_FORMAT_D24_UNORM_S8_UINT: converted = Image::PixelFormat::D24_UNORM_S8_UINT; break;
+        case VK_FORMAT_D32_SFLOAT_S8_UINT: converted = Image::PixelFormat::D32_SFLOAT_S8_UINT; break;
         default:
             throw std::invalid_argument("unhandled VkFormat for duk");
     }
@@ -110,6 +127,7 @@ VkImageLayout convert_layout(Image::Layout layout) {
         case Image::Layout::GENERAL: converted = VK_IMAGE_LAYOUT_GENERAL; break;
         case Image::Layout::COLOR_ATTACHMENT: converted = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL; break;
         case Image::Layout::DEPTH_ATTACHMENT: converted = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL; break;
+        case Image::Layout::DEPTH_STENCIL_ATTACHMENT: converted = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL; break;
         case Image::Layout::SHADER_READ_ONLY: converted = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL; break;
         case Image::Layout::PRESENT_SRC: converted = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR; break;
         default:
@@ -302,10 +320,12 @@ VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanIm
     m_format(vulkanImageCreateInfo.imageDataSource->pixel_format()),
     m_width(vulkanImageCreateInfo.imageDataSource->width()),
     m_height(vulkanImageCreateInfo.imageDataSource->height()),
-    m_data(vulkanImageCreateInfo.imageDataSource->byte_count()),
     m_queueFamilyIndex(vulkanImageCreateInfo.queueFamilyIndex) {
 
-    vulkanImageCreateInfo.imageDataSource->read_bytes(m_data.data(), m_data.size(), 0);
+    if (vulkanImageCreateInfo.imageDataSource->has_data()) {
+        m_data.resize(vulkanImageCreateInfo.imageDataSource->byte_count());
+        vulkanImageCreateInfo.imageDataSource->read_bytes(m_data.data(), m_data.size(), 0);
+    }
 
     create(vulkanImageCreateInfo.imageCount);
 }
@@ -355,7 +375,7 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     imageCreateInfo.format = vk::convert_pixel_format(m_format);
     imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageCreateInfo.usage = vk::convert_usage(m_usage) | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+    imageCreateInfo.usage = vk::convert_usage(m_usage) | (m_data.empty() ? 0 : VK_IMAGE_USAGE_TRANSFER_DST_BIT);
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -386,35 +406,37 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
         vkBindImageMemory(m_device, m_images[i], m_memories[i], 0);
     }
 
-    VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
-    bufferMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
-    bufferMemoryCreateInfo.device = m_device;
-    bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
-    bufferMemoryCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    bufferMemoryCreateInfo.size = m_width * m_height * pixel_format_size(m_format);
-
-    VulkanBufferHostMemory bufferHostMemory(bufferMemoryCreateInfo);
-    bufferHostMemory.write(m_data.data(), m_data.size(), 0);
-
     VkImageSubresourceRange subresourceRange = {};
     subresourceRange.layerCount = 1;
     subresourceRange.baseArrayLayer = 0;
     subresourceRange.levelCount = 1;
     subresourceRange.baseMipLevel = 0;
-    subresourceRange.aspectMask = detail::image_aspect_from_usage(m_usage);
+    subresourceRange.aspectMask = detail::image_aspect(m_usage, m_format);
 
-    CopyBufferToImageInfo copyBufferToImageInfo = {};
-    copyBufferToImageInfo.buffer = &bufferHostMemory;
-    copyBufferToImageInfo.subresourceRange = subresourceRange;
-    copyBufferToImageInfo.queueFamilyIndex = m_queueFamilyIndex;
-    copyBufferToImageInfo.finalLayout = vk::convert_layout(m_layout);
-    copyBufferToImageInfo.width = m_width;
-    copyBufferToImageInfo.height = m_height;
-    copyBufferToImageInfo.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    if (!m_data.empty()) {
+        VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
+        bufferMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
+        bufferMemoryCreateInfo.device = m_device;
+        bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
+        bufferMemoryCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        bufferMemoryCreateInfo.size = m_width * m_height * pixel_format_size(m_format);
 
-    for (auto& image : m_images) {
-        copyBufferToImageInfo.image = image;
-        copy_buffer_to_image(copyBufferToImageInfo);
+        VulkanBufferHostMemory bufferHostMemory(bufferMemoryCreateInfo);
+        bufferHostMemory.write(m_data.data(), m_data.size(), 0);
+
+        CopyBufferToImageInfo copyBufferToImageInfo = {};
+        copyBufferToImageInfo.buffer = &bufferHostMemory;
+        copyBufferToImageInfo.subresourceRange = subresourceRange;
+        copyBufferToImageInfo.queueFamilyIndex = m_queueFamilyIndex;
+        copyBufferToImageInfo.finalLayout = vk::convert_layout(m_layout);
+        copyBufferToImageInfo.width = m_width;
+        copyBufferToImageInfo.height = m_height;
+        copyBufferToImageInfo.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+        for (auto& image : m_images) {
+            copyBufferToImageInfo.image = image;
+            copy_buffer_to_image(copyBufferToImageInfo);
+        }
     }
 
     VkImageViewCreateInfo viewInfo = {};
@@ -491,7 +513,7 @@ uint32_t VulkanSwapchainImage::image_count() const {
 }
 
 Image::PixelFormat VulkanSwapchainImage::format() const {
-    return vk::convert_format(m_format);
+    return vk::convert_pixel_format(m_format);
 }
 
 uint32_t VulkanSwapchainImage::width() const {
