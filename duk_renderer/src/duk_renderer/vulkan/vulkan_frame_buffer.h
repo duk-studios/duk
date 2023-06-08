@@ -19,7 +19,7 @@ struct VulkanFrameBufferCreateInfo {
     uint32_t imageCount;
     VkDevice device;
     VulkanRenderPass* renderPass;
-    VulkanImage* attachments;
+    VulkanImage** attachments;
     uint32_t attachmentCount;
 };
 
@@ -47,8 +47,7 @@ private:
     uint32_t m_height;
     VkDevice m_device;
     VulkanRenderPass* m_renderPass;
-    VulkanImage* m_attachments;
-    uint32_t m_attachmentCount;
+    std::vector<VulkanImage*> m_attachments;
     std::vector<VkFramebuffer> m_frameBuffers;
 };
 

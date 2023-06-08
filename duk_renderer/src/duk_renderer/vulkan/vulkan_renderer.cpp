@@ -292,7 +292,7 @@ ExpectedFrameBuffer VulkanRenderer::create_frame_buffer(const Renderer::FrameBuf
         vulkanFrameBufferCreateInfo.device = m_device;
         vulkanFrameBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
         vulkanFrameBufferCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
-        vulkanFrameBufferCreateInfo.attachments = dynamic_cast<VulkanSwapchainImage*>(frameBufferCreateInfo.attachments);
+        vulkanFrameBufferCreateInfo.attachments = reinterpret_cast<VulkanImage**>(frameBufferCreateInfo.attachments);
         vulkanFrameBufferCreateInfo.attachmentCount = frameBufferCreateInfo.attachmentCount;
         return m_resourceManager->create(vulkanFrameBufferCreateInfo);
     }
