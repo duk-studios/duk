@@ -87,10 +87,9 @@ void VulkanCommandBuffer::begin_render_pass(const CommandBuffer::RenderPassBegin
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = {vulkanFramebuffer->width(), vulkanFramebuffer->height()};
 
-    VkClearValue clearColor = {};
-    clearColor.color = {0.0f, 0.0f, 0.0f, 1.0f};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+    const auto& clearValues = vulkanRenderPass->clear_values();
+    renderPassInfo.clearValueCount = clearValues.size();
+    renderPassInfo.pClearValues = clearValues.data();
 
     vkCmdBeginRenderPass(m_currentCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }

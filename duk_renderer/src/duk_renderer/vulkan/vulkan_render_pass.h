@@ -41,6 +41,8 @@ public:
 
     void clean(uint32_t imageIndex);
 
+    DUK_NO_DISCARD const std::vector<VkClearValue>& clear_values() const;
+
     DUK_NO_DISCARD VkRenderPass handle() const;
 
     DUK_NO_DISCARD size_t attachment_count() const override;
@@ -54,6 +56,7 @@ private:
     std::optional<AttachmentDescription> m_depthAttachment;
     VkDevice m_device;
     VkRenderPass m_renderPass;
+    std::vector<VkClearValue> m_clearValues;
 };
 
 }
