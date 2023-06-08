@@ -171,7 +171,7 @@ void VulkanPipeline::create_graphics_pipeline(uint32_t imageCount) {
         blendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
     }
 
-    std::vector<VkPipelineColorBlendAttachmentState> blendAttachments(m_renderPass->attachment_count(), blendAttachmentState);
+    std::vector<VkPipelineColorBlendAttachmentState> blendAttachments(m_renderPass->color_attachment_count(), blendAttachmentState);
 
     VkPipelineColorBlendStateCreateInfo colorBlending = {};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
