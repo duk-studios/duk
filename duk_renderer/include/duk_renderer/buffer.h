@@ -72,7 +72,7 @@ public:
     /// Invalidates CPU cache and fetches data from GPU
     virtual void invalidate() = 0;
 
-    DUK_NO_DISCARD virtual size_t size() const = 0;
+    DUK_NO_DISCARD virtual size_t element_count() const = 0;
 
     DUK_NO_DISCARD virtual size_t element_size() const = 0;
 

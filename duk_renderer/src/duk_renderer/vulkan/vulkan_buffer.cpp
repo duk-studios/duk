@@ -311,7 +311,7 @@ void VulkanBuffer::invalidate() {
     m_bufferHashes[0] = m_dataHash;
 }
 
-size_t VulkanBuffer::size() const {
+size_t VulkanBuffer::element_count() const {
     return m_elementCount;
 }
 
