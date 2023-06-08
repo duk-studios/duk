@@ -10,11 +10,9 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/frame_buffer.h
         include/duk_renderer/image.h
         include/duk_renderer/sampler.h
-        include/duk_renderer/mesh/mesh_data_source.h
-        include/duk_renderer/mesh/vertex_data_source.h
-        include/duk_renderer/mesh/vertex_layout.h
-        include/duk_renderer/mesh/vertex_types.h
-        include/duk_renderer/mesh/mesh.h
+        include/duk_renderer/vertex_data_source.h
+        include/duk_renderer/vertex_layout.h
+        include/duk_renderer/vertex_types.h
         include/duk_renderer/pipeline/pipeline.h
         include/duk_renderer/pipeline/pipeline_data_source.h
         include/duk_renderer/pipeline/shader.h
@@ -32,9 +30,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/data_source.cpp
         src/duk_renderer/renderer.cpp
         src/duk_renderer/renderer_error.cpp
-        src/duk_renderer/mesh/mesh_data_source.cpp
-        src/duk_renderer/mesh/vertex_data_source.cpp
-        src/duk_renderer/mesh/vertex_layout.cpp
+        src/duk_renderer/vertex_data_source.cpp
+        src/duk_renderer/vertex_layout.cpp
         src/duk_renderer/pipeline/pipeline.cpp
         src/duk_renderer/pipeline/pipeline_data_source.cpp
         src/duk_renderer/pipeline/shader.cpp
@@ -81,8 +78,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vulkan/pipeline/vulkan_shader.h
         src/duk_renderer/vulkan/pipeline/vulkan_shader.cpp
         src/duk_renderer/vulkan/vulkan_flags.h
-        src/duk_renderer/vulkan/mesh/vulkan_vertex.h
-        src/duk_renderer/vulkan/mesh/vulkan_vertex.cpp
+        src/duk_renderer/vulkan/vulkan_vertex.h
+        src/duk_renderer/vulkan/vulkan_vertex.cpp
         src/duk_renderer/vulkan/vulkan_resource_manager.h
         src/duk_renderer/vulkan/vulkan_resource_manager.cpp
         src/duk_renderer/buffer.cpp

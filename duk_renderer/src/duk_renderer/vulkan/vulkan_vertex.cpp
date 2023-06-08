@@ -1,7 +1,7 @@
 /// 21/05/2023
 /// vulkan_vertex.cpp
 
-#include <duk_renderer/vulkan/mesh/vulkan_vertex.h>
+#include <duk_renderer/vulkan/vulkan_vertex.h>
 
 namespace duk::renderer::vk {
 

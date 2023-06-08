@@ -2,7 +2,7 @@
 // Created by Ricardo on 07/04/2023.
 //
 
-#include <duk_renderer/mesh/vertex_layout.h>
+#include <duk_renderer/vertex_layout.h>
 
 #include <numeric>
 

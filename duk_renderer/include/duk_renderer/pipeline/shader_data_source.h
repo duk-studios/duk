@@ -7,7 +7,7 @@
 #include <duk_renderer/data_source.h>
 #include <duk_renderer/descriptor.h>
 #include <duk_renderer/pipeline/shader.h>
-#include <duk_renderer/mesh/vertex_layout.h>
+#include <duk_renderer/vertex_layout.h>
 
 #include <duk_macros/macros.h>
 

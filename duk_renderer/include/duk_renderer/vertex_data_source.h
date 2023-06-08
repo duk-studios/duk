@@ -6,8 +6,8 @@
 #define DUK_RENDERER_VERTEX_DATA_SOURCE_H
 
 #include <duk_renderer/data_source.h>
-#include <duk_renderer/mesh/vertex_layout.h>
-#include <duk_renderer/mesh/vertex_types.h>
+#include <duk_renderer/vertex_layout.h>
+#include <duk_renderer/vertex_types.h>
 
 #include <cstring>
 

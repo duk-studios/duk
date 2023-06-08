@@ -4,7 +4,7 @@
 #include <duk_sample/application.h>
 #include <duk_platform/window.h>
 #include <duk_renderer/pipeline/std_shader_data_source.h>
-#include <duk_renderer/mesh/vertex_types.h>
+#include <duk_renderer/vertex_types.h>
 
 #include <cmath>
 #include <fstream>

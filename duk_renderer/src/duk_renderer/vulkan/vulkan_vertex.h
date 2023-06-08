@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_VULKAN_VERTEX_H
 #define DUK_RENDERER_VULKAN_VERTEX_H
 
-#include <duk_renderer/mesh/vertex_layout.h>
+#include <duk_renderer/vertex_layout.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 
 namespace duk::renderer::vk {

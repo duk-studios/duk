@@ -10,7 +10,6 @@
 #include <duk_renderer/vulkan/command/vulkan_command_scheduler.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_shader.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_pipeline.h>
-#include <duk_renderer/mesh/mesh.h>
 
 
 #if DUK_PLATFORM_IS_WINDOWS

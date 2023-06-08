@@ -6,7 +6,6 @@
 #define DUK_RENDERER_VULKAN_RENDERER_H
 
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/mesh/mesh.h>
 #include <duk_renderer/pipeline/pipeline.h>
 #include <duk_renderer/vulkan/vulkan_debug_messenger.h>
 #include <duk_renderer/vulkan/vulkan_import.h>

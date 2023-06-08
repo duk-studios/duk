@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_VERTEX_TYPES_H
 #define DUK_RENDERER_VERTEX_TYPES_H
 
-#include <duk_renderer/mesh/vertex_layout.h>
+#include <duk_renderer/vertex_layout.h>
 
 namespace duk::renderer {
 

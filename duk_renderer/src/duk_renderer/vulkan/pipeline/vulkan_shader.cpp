@@ -3,7 +3,7 @@
 
 #include <duk_renderer/vulkan/pipeline/vulkan_shader.h>
 #include <duk_renderer/vulkan/vulkan_descriptor_set.h>
-#include <duk_renderer/vulkan/mesh/vulkan_vertex.h>
+#include <duk_renderer/vulkan/vulkan_vertex.h>
 #include <duk_renderer/vulkan/vulkan_flags.h>
 
 #include <stdexcept>

@@ -14,7 +14,6 @@
 #include <duk_renderer/image_data_source.h>
 #include <duk_renderer/descriptor_set.h>
 #include <duk_renderer/frame_buffer.h>
-#include <duk_renderer/mesh/mesh.h>
 #include <duk_renderer/pipeline/shader_data_source.h>
 #include <duk_renderer/pipeline/shader.h>
 #include <duk_renderer/pipeline/pipeline.h>
