@@ -214,7 +214,7 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
                 VkDescriptorBufferInfo bufferInfo = {};
                 bufferInfo.buffer = buffer->handle(imageIndex);
                 bufferInfo.offset = 0;
-                bufferInfo.range = buffer->size();
+                bufferInfo.range = buffer->byte_size();
                 bufferInfos.push_back(bufferInfo);
                 writeDescriptor.pBufferInfo = &bufferInfos.back();
                 break;
