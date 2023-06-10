@@ -30,6 +30,8 @@ public:
 
     ~VulkanFrameBuffer() override;
 
+    void update(uint32_t imageIndex);
+
     DUK_NO_DISCARD uint32_t width() const override;
 
     DUK_NO_DISCARD uint32_t height() const override;
@@ -41,6 +43,11 @@ public:
     void clean(uint32_t imageIndex);
 
     DUK_NO_DISCARD VkFramebuffer handle(uint32_t frameIndex) const;
+private:
+
+    void update_extent();
+
+    void update_hash();
 
 private:
     uint32_t m_width;
@@ -49,6 +56,9 @@ private:
     VulkanRenderPass* m_renderPass;
     std::vector<VulkanImage*> m_attachments;
     std::vector<VkFramebuffer> m_frameBuffers;
+    duk::events::EventListener m_listener;
+    duk::hash::Hash m_hash;
+    std::vector<duk::hash::Hash> m_frameBufferHashes;
 };
 
 

@@ -80,10 +80,14 @@ void VulkanCommandBuffer::begin_render_pass(const CommandBuffer::RenderPassBegin
     auto vulkanFramebuffer = (VulkanFrameBuffer*)renderPassBeginInfo.frameBuffer;
     auto vulkanRenderPass = (VulkanRenderPass*)renderPassBeginInfo.renderPass;
 
+    auto imageIndex = *m_currentImagePtr;
+
+    vulkanFramebuffer->update(imageIndex);
+
     VkRenderPassBeginInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = vulkanRenderPass->handle();
-    renderPassInfo.framebuffer = vulkanFramebuffer->handle(*m_currentImagePtr);
+    renderPassInfo.framebuffer = vulkanFramebuffer->handle(imageIndex);
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = {vulkanFramebuffer->width(), vulkanFramebuffer->height()};
 

@@ -13,21 +13,27 @@ VulkanFrameBuffer::VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFr
     m_device(vulkanFrameBufferCreateInfo.device),
     m_renderPass(vulkanFrameBufferCreateInfo.renderPass),
     m_attachments(vulkanFrameBufferCreateInfo.attachments, vulkanFrameBufferCreateInfo.attachments + vulkanFrameBufferCreateInfo.attachmentCount) {
+
+    for (auto& attachment : m_attachments) {
+        m_listener.listen(attachment->hash_changed_event(), [this](auto hash) {
+            update_hash();
+            update_extent();
+        });
+    }
     create(vulkanFrameBufferCreateInfo.imageCount);
+    update_extent();
 }
 
 VulkanFrameBuffer::~VulkanFrameBuffer() {
     clean();
 }
 
-void VulkanFrameBuffer::create(uint32_t imageCount) {
-
-    m_width = std::numeric_limits<uint32_t>::max();
-    m_height = std::numeric_limits<uint32_t>::max();
-    for (auto& attachment : m_attachments) {
-        m_width = std::min(m_width, attachment->width());
-        m_height = std::min(m_height, attachment->height());
+void VulkanFrameBuffer::update(uint32_t imageIndex) {
+    auto& hash = m_frameBufferHashes[imageIndex];
+    if (hash == m_hash) {
+        return;
     }
+    hash = m_hash;
 
     VkFramebufferCreateInfo framebufferCreateInfo = {};
     framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -36,18 +42,22 @@ void VulkanFrameBuffer::create(uint32_t imageCount) {
     framebufferCreateInfo.height = m_height;
     framebufferCreateInfo.layers = 1;
 
-    m_frameBuffers.resize(imageCount);
     std::vector<VkImageView> attachments(m_attachments.size());
-    for (int imageIndex = 0; imageIndex < m_frameBuffers.size(); imageIndex++) {
-        for (int attachmentIndex = 0; attachmentIndex < attachments.size(); attachmentIndex++) {
-            attachments[attachmentIndex] = m_attachments[attachmentIndex]->image_view(imageIndex);
-        }
+    for (int attachmentIndex = 0; attachmentIndex < attachments.size(); attachmentIndex++) {
+        auto attachment = m_attachments[attachmentIndex];
 
-        framebufferCreateInfo.attachmentCount = attachments.size();
-        framebufferCreateInfo.pAttachments = attachments.data();
-
-        vkCreateFramebuffer(m_device, &framebufferCreateInfo, nullptr, &m_frameBuffers[imageIndex]);
+        attachments[attachmentIndex] = attachment->image_view(imageIndex);
     }
+
+    framebufferCreateInfo.attachmentCount = attachments.size();
+    framebufferCreateInfo.pAttachments = attachments.data();
+
+    vkCreateFramebuffer(m_device, &framebufferCreateInfo, nullptr, &m_frameBuffers[imageIndex]);
+}
+
+void VulkanFrameBuffer::create(uint32_t imageCount) {
+    m_frameBuffers.resize(imageCount);
+    m_frameBufferHashes.resize(imageCount, duk::hash::UndefinedHash);
 }
 
 void VulkanFrameBuffer::clean() {
@@ -55,6 +65,7 @@ void VulkanFrameBuffer::clean() {
         clean(i);
     }
     m_frameBuffers.clear();
+    m_frameBufferHashes.clear();
 }
 
 void VulkanFrameBuffer::clean(uint32_t imageIndex) {
@@ -75,6 +86,22 @@ uint32_t VulkanFrameBuffer::width() const {
 
 uint32_t VulkanFrameBuffer::height() const {
     return m_height;
+}
+
+void VulkanFrameBuffer::update_extent() {
+    m_width = std::numeric_limits<uint32_t>::max();
+    m_height = std::numeric_limits<uint32_t>::max();
+    for (auto& attachment : m_attachments) {
+        m_width = std::min(m_width, attachment->width());
+        m_height = std::min(m_height, attachment->height());
+    }
+}
+
+void VulkanFrameBuffer::update_hash() {
+    m_hash = 0;
+    for (auto& attachment : m_attachments) {
+        duk::hash::hash_combine(m_hash, attachment->hash());
+    }
 }
 
 }
