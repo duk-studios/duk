@@ -1,5 +1,5 @@
 /// 23/04/2023
-/// image_sampler.h
+/// sampler.h
 
 #ifndef DUK_RENDERER_IMAGE_SAMPLER_H
 #define DUK_RENDERER_IMAGE_SAMPLER_H

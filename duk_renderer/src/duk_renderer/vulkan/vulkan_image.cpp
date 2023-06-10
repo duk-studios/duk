@@ -151,7 +151,7 @@ VkImageUsageFlags convert_usage(Image::Usage usage) {
 
 }
 
-void VulkanImage::transition_image_layout(const TransitionImageLayoutInfo& transitionImageLayoutInfo) {
+void VulkanImage::transition_image_layout(VkCommandBuffer commandBuffer, const TransitionImageLayoutInfo& transitionImageLayoutInfo) {
     VkImageMemoryBarrier imageMemoryBarrier = {};
     imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     imageMemoryBarrier.oldLayout = transitionImageLayoutInfo.oldLayout;
@@ -251,7 +251,7 @@ void VulkanImage::transition_image_layout(const TransitionImageLayoutInfo& trans
     }
 
     vkCmdPipelineBarrier(
-            transitionImageLayoutInfo.commandBuffer,
+            commandBuffer,
             transitionImageLayoutInfo.srcStageMask, transitionImageLayoutInfo.dstStageMask,
             0,
             0, nullptr,
@@ -260,55 +260,49 @@ void VulkanImage::transition_image_layout(const TransitionImageLayoutInfo& trans
     );
 }
 
-void VulkanImage::copy_buffer_to_image(const CopyBufferToImageInfo& copyBufferToImageInfo) {
+void VulkanImage::copy_buffer_to_image(VkCommandBuffer commandBuffer, const CopyBufferToImageInfo& copyBufferToImageInfo) {
 
-    auto commandQueue = VulkanCommandQueue::queue_for_family_index(copyBufferToImageInfo.queueFamilyIndex, 0);
+    TransitionImageLayoutInfo transitionImageLayoutInfo = {};
+    transitionImageLayoutInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    transitionImageLayoutInfo.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    transitionImageLayoutInfo.subresourceRange = copyBufferToImageInfo.subresourceRange;
+    transitionImageLayoutInfo.image = copyBufferToImageInfo.image;
+    transitionImageLayoutInfo.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+    transitionImageLayoutInfo.dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
 
-    commandQueue->submit([&](VkCommandBuffer commandBuffer) {
+    transition_image_layout(commandBuffer, transitionImageLayoutInfo);
 
-        TransitionImageLayoutInfo transitionImageLayoutInfo = {};
-        transitionImageLayoutInfo.commandBuffer = commandBuffer;
-        transitionImageLayoutInfo.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        transitionImageLayoutInfo.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        transitionImageLayoutInfo.subresourceRange = copyBufferToImageInfo.subresourceRange;
-        transitionImageLayoutInfo.image = copyBufferToImageInfo.image;
-        transitionImageLayoutInfo.srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-        transitionImageLayoutInfo.dstStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    VkBufferImageCopy bufferImageCopyRegion = {};
+    bufferImageCopyRegion.imageSubresource.aspectMask = copyBufferToImageInfo.subresourceRange.aspectMask;
+    bufferImageCopyRegion.imageSubresource.mipLevel = 0;
+    bufferImageCopyRegion.imageSubresource.baseArrayLayer = 0;
+    bufferImageCopyRegion.imageSubresource.layerCount = 1;
 
-        transition_image_layout(transitionImageLayoutInfo);
+    bufferImageCopyRegion.imageOffset = {0, 0, 0};
+    bufferImageCopyRegion.imageExtent = {
+            copyBufferToImageInfo.width,
+            copyBufferToImageInfo.height,
+            1
+    };
 
-        VkBufferImageCopy bufferImageCopyRegion = {};
-        bufferImageCopyRegion.imageSubresource.aspectMask = copyBufferToImageInfo.subresourceRange.aspectMask;
-        bufferImageCopyRegion.imageSubresource.mipLevel = 0;
-        bufferImageCopyRegion.imageSubresource.baseArrayLayer = 0;
-        bufferImageCopyRegion.imageSubresource.layerCount = 1;
+    vkCmdCopyBufferToImage(
+            commandBuffer,
+            copyBufferToImageInfo.buffer->handle(),
+            copyBufferToImageInfo.image,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1,
+            &bufferImageCopyRegion
+    );
 
-        bufferImageCopyRegion.imageOffset = {0, 0, 0};
-        bufferImageCopyRegion.imageExtent = {
-                copyBufferToImageInfo.width,
-                copyBufferToImageInfo.height,
-                1
-        };
+    transitionImageLayoutInfo.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+    transitionImageLayoutInfo.newLayout = copyBufferToImageInfo.finalLayout;
+    transitionImageLayoutInfo.subresourceRange = copyBufferToImageInfo.subresourceRange;
+    transitionImageLayoutInfo.image = copyBufferToImageInfo.image;
+    transitionImageLayoutInfo.srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    transitionImageLayoutInfo.dstStageMask = copyBufferToImageInfo.dstStageMask;
 
-        vkCmdCopyBufferToImage(
-                commandBuffer,
-                copyBufferToImageInfo.buffer->handle(),
-                copyBufferToImageInfo.image,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                1,
-                &bufferImageCopyRegion
-        );
+    transition_image_layout(commandBuffer, transitionImageLayoutInfo);
 
-        transitionImageLayoutInfo.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        transitionImageLayoutInfo.newLayout = copyBufferToImageInfo.finalLayout;
-        transitionImageLayoutInfo.subresourceRange = copyBufferToImageInfo.subresourceRange;
-        transitionImageLayoutInfo.image = copyBufferToImageInfo.image;
-        transitionImageLayoutInfo.srcStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
-        transitionImageLayoutInfo.dstStageMask = copyBufferToImageInfo.dstStageMask;
-
-        transition_image_layout(transitionImageLayoutInfo);
-
-    }, VK_NULL_HANDLE);
 }
 
 VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanImageCreateInfo) :
@@ -320,6 +314,7 @@ VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanIm
     m_format(vulkanImageCreateInfo.imageDataSource->pixel_format()),
     m_width(vulkanImageCreateInfo.imageDataSource->width()),
     m_height(vulkanImageCreateInfo.imageDataSource->height()),
+    m_dataSourceHash(vulkanImageCreateInfo.imageDataSource->hash()),
     m_queueFamilyIndex(vulkanImageCreateInfo.queueFamilyIndex) {
 
     if (vulkanImageCreateInfo.imageDataSource->has_data()) {
@@ -332,6 +327,80 @@ VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanIm
 
 VulkanMemoryImage::~VulkanMemoryImage() {
     clean();
+}
+
+void VulkanMemoryImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFlags) {
+    auto index = fix_index(imageIndex);
+    if (m_dataSourceHash == m_imageDataHashes[index]) {
+        return;
+    }
+    m_imageDataHashes[index] = m_dataSourceHash;
+
+    VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
+    bufferMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
+    bufferMemoryCreateInfo.device = m_device;
+    bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
+    bufferMemoryCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    bufferMemoryCreateInfo.size = m_width * m_height * pixel_format_size(m_format);
+
+    VulkanBufferHostMemory bufferHostMemory(bufferMemoryCreateInfo);
+    bufferHostMemory.write(m_data.data(), m_data.size(), 0);
+
+    CopyBufferToImageInfo copyBufferToImageInfo = {};
+    copyBufferToImageInfo.buffer = &bufferHostMemory;
+    copyBufferToImageInfo.subresourceRange.layerCount = 1;
+    copyBufferToImageInfo.subresourceRange.baseArrayLayer = 0;
+    copyBufferToImageInfo.subresourceRange.levelCount = 1;
+    copyBufferToImageInfo.subresourceRange.baseMipLevel = 0;
+    copyBufferToImageInfo.subresourceRange.aspectMask = detail::image_aspect(m_usage, m_format);
+    copyBufferToImageInfo.queueFamilyIndex = m_queueFamilyIndex;
+    copyBufferToImageInfo.finalLayout = vk::convert_layout(m_layout);
+    copyBufferToImageInfo.width = m_width;
+    copyBufferToImageInfo.height = m_height;
+    copyBufferToImageInfo.dstStageMask = stageFlags;
+    copyBufferToImageInfo.image = m_images[index];
+
+    auto commandQueue = VulkanCommandQueue::queue_for_family_index(copyBufferToImageInfo.queueFamilyIndex, 0);
+
+    commandQueue->submit([&](VkCommandBuffer commandBuffer) {
+        copy_buffer_to_image(commandBuffer, copyBufferToImageInfo);
+    });
+}
+
+void VulkanMemoryImage::update(ImageDataSource* imageDataSource) {
+    auto hash = imageDataSource->hash();
+    if (m_dataSourceHash == hash) {
+        return;
+    }
+    m_dataSourceHash = hash;
+
+    if (imageDataSource->has_data()) {
+        m_data.resize(imageDataSource->byte_count());
+        imageDataSource->read_bytes(m_data.data(), m_data.size(), 0);
+    }
+    else {
+        m_data.clear();
+    }
+
+    auto width = imageDataSource->width();
+    auto height = imageDataSource->height();
+    auto format = imageDataSource->pixel_format();
+
+    // if the size or format of the image changed, we need to recreate it immediately
+    // otherwise, we will just update the data when needed during descriptor set update
+    if (m_width != width || m_height != height || m_format != format) {
+        m_format = imageDataSource->pixel_format();
+        m_width = imageDataSource->width();
+        m_height = imageDataSource->height();
+
+        // guarantees that no one is using this image
+        vkDeviceWaitIdle(m_device);
+
+        auto imageCount = m_images.size();
+        clean();
+        create(imageCount);
+    }
+    hash_changed(m_dataSourceHash);
 }
 
 Image::PixelFormat VulkanMemoryImage::format() const {
@@ -347,15 +416,19 @@ uint32_t VulkanMemoryImage::height() const {
 }
 
 VkImage VulkanMemoryImage::image(uint32_t imageIndex) const {
-    return m_images[valid_index(imageIndex)];
+    return m_images[fix_index(imageIndex)];
 }
 
 VkImageView VulkanMemoryImage::image_view(uint32_t imageIndex) const {
-    return m_imageViews[valid_index(imageIndex)];
+    return m_imageViews[fix_index(imageIndex)];
 }
 
 uint32_t VulkanMemoryImage::image_count() const {
     return m_images.size();
+}
+
+duk::hash::Hash VulkanMemoryImage::hash() const {
+    return m_dataSourceHash;
 }
 
 void VulkanMemoryImage::create(uint32_t imageCount) {
@@ -406,6 +479,8 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
         vkBindImageMemory(m_device, m_images[i], m_memories[i], 0);
     }
 
+    m_imageDataHashes.resize(imageCount, duk::hash::UndefinedHash);
+
     VkImageSubresourceRange subresourceRange = {};
     subresourceRange.layerCount = 1;
     subresourceRange.baseArrayLayer = 0;
@@ -414,6 +489,8 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     subresourceRange.aspectMask = detail::image_aspect(m_usage, m_format);
 
     if (!m_data.empty()) {
+        auto commandQueue = VulkanCommandQueue::queue_for_family_index(m_queueFamilyIndex, 0);
+
         VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
         bufferMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
         bufferMemoryCreateInfo.device = m_device;
@@ -424,19 +501,23 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
         VulkanBufferHostMemory bufferHostMemory(bufferMemoryCreateInfo);
         bufferHostMemory.write(m_data.data(), m_data.size(), 0);
 
-        CopyBufferToImageInfo copyBufferToImageInfo = {};
-        copyBufferToImageInfo.buffer = &bufferHostMemory;
-        copyBufferToImageInfo.subresourceRange = subresourceRange;
-        copyBufferToImageInfo.queueFamilyIndex = m_queueFamilyIndex;
-        copyBufferToImageInfo.finalLayout = vk::convert_layout(m_layout);
-        copyBufferToImageInfo.width = m_width;
-        copyBufferToImageInfo.height = m_height;
-        copyBufferToImageInfo.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        commandQueue->submit([this, &subresourceRange, &bufferHostMemory](VkCommandBuffer commandBuffer) {
 
-        for (auto& image : m_images) {
-            copyBufferToImageInfo.image = image;
-            copy_buffer_to_image(copyBufferToImageInfo);
-        }
+            CopyBufferToImageInfo copyBufferToImageInfo = {};
+            copyBufferToImageInfo.buffer = &bufferHostMemory;
+            copyBufferToImageInfo.subresourceRange = subresourceRange;
+            copyBufferToImageInfo.queueFamilyIndex = m_queueFamilyIndex;
+            copyBufferToImageInfo.finalLayout = vk::convert_layout(m_layout);
+            copyBufferToImageInfo.width = m_width;
+            copyBufferToImageInfo.height = m_height;
+            copyBufferToImageInfo.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+
+            for (int i = 0; i < m_images.size(); i++) {
+                m_imageDataHashes[i] = m_dataSourceHash;
+                copyBufferToImageInfo.image = m_images[i];
+                copy_buffer_to_image(commandBuffer, copyBufferToImageInfo);
+            }
+        });
     }
 
     VkImageViewCreateInfo viewInfo = {};
@@ -466,7 +547,7 @@ void VulkanMemoryImage::clean() {
 }
 
 void VulkanMemoryImage::clean(uint32_t imageIndex) {
-    auto validIndex = valid_index(imageIndex);
+    auto validIndex = fix_index(imageIndex);
     auto& imageView = m_imageViews[validIndex];
     if (imageView) {
         vkDestroyImageView(m_device, imageView, nullptr);
@@ -486,7 +567,7 @@ void VulkanMemoryImage::clean(uint32_t imageIndex) {
     }
 }
 
-uint32_t VulkanMemoryImage::valid_index(uint32_t imageIndex) const {
+uint32_t VulkanMemoryImage::fix_index(uint32_t imageIndex) const {
     return m_updateFrequency == Image::UpdateFrequency::STATIC ? 0 : imageIndex;
 }
 
@@ -498,6 +579,14 @@ VulkanSwapchainImage::VulkanSwapchainImage(const VulkanSwapchainImageCreateInfo&
 
 VulkanSwapchainImage::~VulkanSwapchainImage() {
     clean();
+}
+
+void VulkanSwapchainImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFlags) {
+
+}
+
+void VulkanSwapchainImage::update(ImageDataSource* imageDataSource) {
+
 }
 
 VkImage VulkanSwapchainImage::image(uint32_t frameIndex) const {
@@ -522,6 +611,10 @@ uint32_t VulkanSwapchainImage::width() const {
 
 uint32_t VulkanSwapchainImage::height() const {
     return m_height;
+}
+
+duk::hash::Hash VulkanSwapchainImage::hash() const {
+    return m_hash;
 }
 
 void VulkanSwapchainImage::create(VkFormat format, uint32_t width, uint32_t height, VkSwapchainKHR swapchain) {
@@ -559,6 +652,13 @@ void VulkanSwapchainImage::create(VkFormat format, uint32_t width, uint32_t heig
             throw std::runtime_error("failed to create swapchain image view");
         }
     }
+
+    m_hash = 0;
+    duk::hash::hash_combine(m_hash, m_width);
+    duk::hash::hash_combine(m_hash, m_height);
+    duk::hash::hash_combine(m_hash, m_format);
+    duk::hash::hash_combine(m_hash, imageCount);
+    hash_changed(m_hash);
 }
 
 void VulkanSwapchainImage::clean() {
@@ -569,4 +669,3 @@ void VulkanSwapchainImage::clean() {
 }
 
 }
-

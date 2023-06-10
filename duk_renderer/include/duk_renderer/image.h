@@ -4,13 +4,16 @@
 #ifndef DUK_RENDERER_IMAGE_H
 #define DUK_RENDERER_IMAGE_H
 
+#include <duk_renderer/resource.h>
 #include <duk_macros/macros.h>
 
 #include <cstdint>
 
 namespace duk::renderer {
 
-class Image {
+class ImageDataSource;
+
+class Image : public Resource {
 public:
     enum class PixelFormat {
         UNDEFINED = 0,
@@ -63,13 +66,15 @@ public:
 
 public:
 
-    virtual ~Image() = default;
+    virtual void update(ImageDataSource* imageDataSource) = 0;
 
     DUK_NO_DISCARD virtual PixelFormat format() const = 0;
 
     DUK_NO_DISCARD virtual uint32_t width() const = 0;
 
     DUK_NO_DISCARD virtual uint32_t height() const = 0;
+
+    DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 
     DUK_NO_DISCARD static size_t pixel_format_size(PixelFormat format);
 
