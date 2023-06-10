@@ -46,6 +46,8 @@ public:
 
     Descriptor(Buffer* buffer);
 
+    DUK_NO_DISCARD Resource::HashChangedEvent& hash_changed_event() const;
+
     DUK_NO_DISCARD DescriptorType type() const;
 
     DUK_NO_DISCARD duk::hash::Hash hash() const;

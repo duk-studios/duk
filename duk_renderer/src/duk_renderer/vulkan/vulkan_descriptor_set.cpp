@@ -195,7 +195,12 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
     std::list<VkDescriptorImageInfo> imageInfos;
     std::vector<VkWriteDescriptorSet> writeDescriptors;
 
-    for (auto& descriptor : m_descriptors) {
+    for (auto i = 0; i < m_descriptors.size(); i++) {
+        auto& descriptor = m_descriptors[i];
+        if (descriptor.type() == DescriptorType::UNDEFINED) {
+            throw std::logic_error("tried to update a DescriptorSet with an undefined descriptor");
+        }
+
         VkWriteDescriptorSet writeDescriptor = {};
         writeDescriptor.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         writeDescriptor.dstBinding = writeDescriptors.size();
@@ -221,7 +226,11 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
             }
             case DescriptorType::IMAGE:
             case DescriptorType::IMAGE_SAMPLER: {
+                auto& bindingDescription = m_descriptorSetDescription.bindings[i];
                 auto image = dynamic_cast<VulkanImage*>(descriptor.image());
+
+                image->update(imageIndex, vk::convert_module_mask(bindingDescription.moduleMask));
+
                 VkDescriptorImageInfo imageInfo = {};
                 imageInfo.imageView = image->image_view(imageIndex);
                 imageInfo.imageLayout = vk::convert_layout(descriptor.image_layout());
@@ -245,12 +254,19 @@ VkDescriptorSet VulkanDescriptorSet::handle(uint32_t imageIndex) {
     return m_descriptorSets[imageIndex];
 }
 
-Descriptor& VulkanDescriptorSet::at(uint32_t binding) {
-    return m_descriptors.at(binding);
-}
+void VulkanDescriptorSet::set(uint32_t binding, const Descriptor& descriptor) {
+    assert(m_descriptorSetDescription.bindings[binding].type == descriptor.type());
 
-const Descriptor& VulkanDescriptorSet::at(uint32_t binding) const {
-    return m_descriptors.at(binding);
+    auto& oldDescriptor = m_descriptors[binding];
+
+    if (oldDescriptor.type() != DescriptorType::UNDEFINED) {
+        m_listener.ignore(oldDescriptor.hash_changed_event());
+    }
+
+    m_descriptors[binding] = descriptor;
+    m_listener.listen(descriptor.hash_changed_event(), [this](duk::hash::Hash hash) {
+        update_hash();
+    });
 }
 
 Image* VulkanDescriptorSet::image(uint32_t binding) {
@@ -270,13 +286,18 @@ const Buffer* VulkanDescriptorSet::buffer(uint32_t binding) const {
 }
 
 void VulkanDescriptorSet::flush() {
+    update_hash();
+}
+
+void VulkanDescriptorSet::update_hash() {
     duk::hash::Hash hash = 0;
     for (auto& descriptor : m_descriptors) {
         if (descriptor.type() == DescriptorType::UNDEFINED) {
-            throw std::logic_error("tried to flush a DescriptorSet with undefined descriptor");
+            continue;
         }
         duk::hash::hash_combine(hash, descriptor.hash());
     }
+    duk::hash::hash_combine(hash, m_descriptors.size());
     m_descriptorSetHash = hash;
 }
 

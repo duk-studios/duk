@@ -42,6 +42,19 @@ Descriptor::Descriptor(Buffer* buffer) {
     }
 }
 
+Resource::HashChangedEvent& Descriptor::hash_changed_event() const {
+    switch (m_type) {
+        case DescriptorType::UNIFORM_BUFFER:
+        case DescriptorType::STORAGE_BUFFER:
+            return m_data.bufferDescriptor.buffer->hash_changed_event();
+        case DescriptorType::IMAGE:
+        case DescriptorType::IMAGE_SAMPLER:
+            return m_data.imageDescriptor.image->hash_changed_event();
+        default:
+            throw std::logic_error("tried to get HashChangedEvent from an undefined descriptor");
+    }
+}
+
 DescriptorType Descriptor::type() const {
     return m_type;
 }
@@ -52,12 +65,14 @@ duk::hash::Hash Descriptor::hash() const {
         case DescriptorType::UNIFORM_BUFFER:
         case DescriptorType::STORAGE_BUFFER:
             duk::hash::hash_combine(hash, m_data.bufferDescriptor.buffer);
+            duk::hash::hash_combine(hash, m_data.bufferDescriptor.buffer->hash());
             break;
         case DescriptorType::IMAGE_SAMPLER:
             duk::hash::hash_combine(hash, m_data.imageDescriptor.sampler);
         case DescriptorType::IMAGE:
-            duk::hash::hash_combine(hash, m_data.imageDescriptor.image);
             duk::hash::hash_combine(hash, m_data.imageDescriptor.layout);
+            duk::hash::hash_combine(hash, m_data.imageDescriptor.image);
+            duk::hash::hash_combine(hash, m_data.imageDescriptor.image->hash());
             break;
         default:
             break;

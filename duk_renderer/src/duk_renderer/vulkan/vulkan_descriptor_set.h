@@ -79,9 +79,7 @@ public:
 
     DUK_NO_DISCARD VkDescriptorSet handle(uint32_t imageIndex);
 
-    DUK_NO_DISCARD Descriptor& at(uint32_t binding) override;
-
-    DUK_NO_DISCARD const Descriptor& at(uint32_t binding) const override;
+    void set(uint32_t binding, const Descriptor& descriptor) override;
 
     DUK_NO_DISCARD Image* image(uint32_t binding) override;
 
@@ -94,6 +92,10 @@ public:
     void flush() override;
 
 private:
+
+    void update_hash();
+
+private:
     VkDevice m_device;
     VulkanSamplerCache* m_samplerCache;
     DescriptorSetDescription m_descriptorSetDescription;
@@ -104,6 +106,7 @@ private:
     std::vector<VkDescriptorSet> m_descriptorSets;
     duk::hash::Hash m_descriptorSetHash;
     std::vector<duk::hash::Hash> m_descriptorSetHashes;
+    duk::events::EventListener m_listener;
 
 };
 

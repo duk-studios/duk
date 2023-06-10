@@ -175,7 +175,7 @@ void VulkanBufferDeviceMemory::write(void* src, size_t size, size_t offset) {
         bufferCopyRegion.dstOffset = offset;
 
         vkCmdCopyBuffer(commandBuffer, bufferHostMemory.handle(), m_buffer, 1, &bufferCopyRegion);
-    }, VK_NULL_HANDLE);
+    });
 }
 
 void VulkanBufferDeviceMemory::read(void* dst, size_t size, size_t offset) {
@@ -199,7 +199,7 @@ void VulkanBufferDeviceMemory::read(void* dst, size_t size, size_t offset) {
         bufferCopyRegion.dstOffset = 0;
 
         vkCmdCopyBuffer(commandBuffer, m_buffer, bufferHostMemory.handle(), 1, &bufferCopyRegion);
-    }, VK_NULL_HANDLE);
+    });
 
     bufferHostMemory.read(dst, size, offset);
 }

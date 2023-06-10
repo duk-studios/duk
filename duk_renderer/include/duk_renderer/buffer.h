@@ -4,6 +4,7 @@
 #ifndef DUK_RENDERER_BUFFER_H
 #define DUK_RENDERER_BUFFER_H
 
+#include <duk_renderer/resource.h>
 #include <duk_macros/macros.h>
 #include <duk_hash/hash.h>
 
@@ -14,7 +15,7 @@
 
 namespace duk::renderer {
 
-class Buffer {
+class Buffer : public Resource {
 public:
     enum class UpdateFrequency {
         STATIC,
@@ -31,8 +32,6 @@ public:
     };
 
 public:
-
-    virtual ~Buffer() = default;
 
     virtual void read(void* dst, size_t size, size_t offset) = 0;
 

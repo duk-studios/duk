@@ -17,9 +17,7 @@ public:
 
     virtual ~DescriptorSet();
 
-    DUK_NO_DISCARD virtual Descriptor& at(uint32_t binding) = 0;
-
-    DUK_NO_DISCARD virtual const Descriptor& at(uint32_t binding) const = 0;
+    virtual void set(uint32_t binding, const Descriptor& descriptor) = 0;
 
     DUK_NO_DISCARD virtual Image* image(uint32_t binding) = 0;
 
