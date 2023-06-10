@@ -141,6 +141,12 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         viewport.maxDepth = 1.0f;
 
         m_pipeline->set_viewport(viewport);
+
+        duk::renderer::Pipeline::Scissor scissor = {};
+        scissor.extent = viewport.extent;
+
+        m_pipeline->set_scissor(scissor);
+
         m_pipeline->flush();
     });
 
