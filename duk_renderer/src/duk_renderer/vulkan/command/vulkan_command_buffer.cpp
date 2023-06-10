@@ -101,6 +101,11 @@ void VulkanCommandBuffer::end_render_pass() {
 
 void VulkanCommandBuffer::bind_pipeline(Pipeline* pipeline) {
     auto vulkanPipeline = dynamic_cast<VulkanPipeline*>(pipeline);
+
+    auto imageIndex = *m_currentImagePtr;
+
+    vulkanPipeline->update(imageIndex);
+
     vkCmdBindPipeline(m_currentCommandBuffer, vulkanPipeline->bind_point(), vulkanPipeline->handle(*m_currentImagePtr));
 
     m_currentPipeline = vulkanPipeline;

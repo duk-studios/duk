@@ -4,6 +4,9 @@
 #ifndef DUK_RENDERER_PIPELINE_H
 #define DUK_RENDERER_PIPELINE_H
 
+#include <duk_hash/hash.h>
+#include <duk_macros/macros.h>
+
 #include <glm/vec2.hpp>
 
 #include <cstdint>
@@ -102,12 +105,13 @@ public:
         bool enabled;
     };
 
-
-
-
     virtual ~Pipeline();
 
-private:
+    virtual void set_viewport(const Viewport& viewport) = 0;
+
+    virtual void flush() = 0;
+
+    DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 
 };
 

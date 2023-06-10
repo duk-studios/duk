@@ -51,7 +51,8 @@ VkAttachmentDescription convert_attachment_description(const AttachmentDescripti
 
 VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRenderPassCreateInfo) :
     m_colorAttachments(vulkanRenderPassCreateInfo.colorAttachments, vulkanRenderPassCreateInfo.colorAttachments + vulkanRenderPassCreateInfo.colorAttachmentCount),
-    m_device(vulkanRenderPassCreateInfo.device) {
+    m_device(vulkanRenderPassCreateInfo.device),
+    m_hash(duk::hash::UndefinedHash) {
 
     if (vulkanRenderPassCreateInfo.depthAttachment) {
         m_depthAttachment = *vulkanRenderPassCreateInfo.depthAttachment;
@@ -106,6 +107,12 @@ VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRende
             m_clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
         }
     }
+
+    m_hash = 0;
+    duk::hash::hash_combine(m_hash, m_colorAttachments.begin(), m_colorAttachments.end());
+    if (m_depthAttachment.has_value()) {
+        duk::hash::hash_combine(m_hash, m_depthAttachment.value());
+    }
 }
 
 VulkanRenderPass::~VulkanRenderPass() {
@@ -138,6 +145,10 @@ size_t VulkanRenderPass::color_attachment_count() const {
 
 bool VulkanRenderPass::has_depth_attachment() const {
     return m_depthAttachment.has_value();
+}
+
+hash::Hash VulkanRenderPass::hash() const {
+    return m_hash;
 }
 
 
