@@ -94,6 +94,7 @@ PixelRGBAImageDataSource load_image() {
             imageDataSource.write_pixel(x, y, {r, g, b, 255});
         }
     }
+    imageDataSource.update_hash();
     return imageDataSource;
 }
 
@@ -125,6 +126,15 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         m_run = false;
     });
 
+    m_listener.listen(m_window->window_resize_event, [this](uint32_t width, uint32_t height){
+        if (m_window->minimized()) {
+            return;
+        }
+        duk::renderer::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
+        depthImageDataSource.update_hash();
+        m_depthImage->update(&depthImageDataSource);
+    });
+
     duk::renderer::RendererCreateInfo rendererCreateInfo = {};
     rendererCreateInfo.window = m_window.get();
     rendererCreateInfo.logger = &m_logger;
@@ -145,6 +155,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     m_mainCommandQueue = check_expected_result(m_renderer->create_command_queue(commandQueueCreateInfo));
 
     duk::renderer::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
+    depthImageDataSource.update_hash();
 
     duk::renderer::Renderer::ImageCreateInfo depthImageCreateInfo = {};
     depthImageCreateInfo.usage = duk::renderer::Image::Usage::DEPTH_STENCIL_ATTACHMENT;
@@ -273,13 +284,19 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_descriptorSet = check_expected_result(m_renderer->create_descriptor_set(descriptorSetCreateInfo));
 
+    duk::renderer::Descriptor transformDescriptor(m_transformUniformBuffer.get());
+    m_descriptorSet->set(0, transformDescriptor);
+
+    duk::renderer::Descriptor materialDescriptor(m_materialUniformBuffer.get());
+    m_descriptorSet->set(1, materialDescriptor);
+
     duk::renderer::Sampler sampler = {};
     sampler.filter = duk::renderer::Sampler::Filter::NEAREST;
     sampler.wrapMode = duk::renderer::Sampler::WrapMode::REPEAT;
 
-    m_descriptorSet->at(0) = m_transformUniformBuffer.get();
-    m_descriptorSet->at(1) = m_materialUniformBuffer.get();
-    m_descriptorSet->at(2) = {m_image.get(), duk::renderer::Image::Layout::SHADER_READ_ONLY, sampler};
+    duk::renderer::Descriptor colorImageDescriptor(m_image.get(), duk::renderer::Image::Layout::SHADER_READ_ONLY, sampler);
+    m_descriptorSet->set(2, colorImageDescriptor);
+
     m_descriptorSet->flush();
 }
 
@@ -338,7 +355,7 @@ void Application::draw() {
 }
 
 duk::renderer::FutureCommand Application::main_render_pass() {
-    return m_mainCommandQueue->enqueue([this](duk::renderer::CommandBuffer* commandBuffer) {
+    return m_mainCommandQueue->submit([this](duk::renderer::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
 
         duk::renderer::CommandBuffer::RenderPassBeginInfo renderPassBeginInfo = {};
