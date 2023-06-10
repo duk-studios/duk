@@ -64,6 +64,8 @@ public:
     // Pipeline overrides
     void set_viewport(const Viewport& viewport) override;
 
+    void set_scissor(const Scissor& scissor) override;
+
     void flush() override;
 
     DUK_NO_DISCARD hash::Hash hash() const override;

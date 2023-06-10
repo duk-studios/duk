@@ -109,6 +109,8 @@ public:
 
     virtual void set_viewport(const Viewport& viewport) = 0;
 
+    virtual void set_scissor(const Scissor& scissor) = 0;
+
     virtual void flush() = 0;
 
     DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;

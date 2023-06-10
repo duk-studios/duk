@@ -138,6 +138,10 @@ void VulkanPipeline::set_viewport(const Pipeline::Viewport& viewport) {
     m_viewport = viewport;
 }
 
+void VulkanPipeline::set_scissor(const Pipeline::Scissor& scissor) {
+    m_scissor = scissor;
+}
+
 void VulkanPipeline::flush() {
     calculate_hash();
 }
