@@ -242,7 +242,7 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
                 break;
             }
             default:
-                throw std::logic_error("un-handled DescriptorType");
+                throw std::logic_error("unhandled DescriptorType");
         }
         writeDescriptors.push_back(writeDescriptor);
     }
