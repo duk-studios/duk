@@ -138,8 +138,32 @@ void VulkanPipeline::set_viewport(const Pipeline::Viewport& viewport) {
     m_viewport = viewport;
 }
 
+const Pipeline::Viewport& VulkanPipeline::viewport() const {
+    return m_viewport;
+}
+
 void VulkanPipeline::set_scissor(const Pipeline::Scissor& scissor) {
     m_scissor = scissor;
+}
+
+const Pipeline::Scissor& VulkanPipeline::scissor() const {
+    return m_scissor;
+}
+
+void VulkanPipeline::set_blend(const Pipeline::Blend& blend) {
+    m_blend = blend;
+}
+
+const Pipeline::Blend& VulkanPipeline::blend() const {
+    return m_blend;
+}
+
+void VulkanPipeline::set_cull_mode(Pipeline::CullMode::Mask cullModeMask) {
+    m_cullModeMask = cullModeMask;
+}
+
+Pipeline::CullMode::Mask VulkanPipeline::cull_mode() {
+    return m_cullModeMask;
 }
 
 void VulkanPipeline::flush() {

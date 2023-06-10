@@ -64,7 +64,19 @@ public:
     // Pipeline overrides
     void set_viewport(const Viewport& viewport) override;
 
+    DUK_NO_DISCARD const Viewport& viewport() const override;
+
     void set_scissor(const Scissor& scissor) override;
+
+    DUK_NO_DISCARD const Scissor& scissor() const override;
+
+    void set_blend(const Blend& blend) override;
+
+    DUK_NO_DISCARD const Blend& blend() const override;
+
+    void set_cull_mode(CullMode::Mask cullModeMask) override;
+
+    CullMode::Mask cull_mode() override;
 
     void flush() override;
 
