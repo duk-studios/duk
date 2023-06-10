@@ -133,6 +133,15 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         duk::renderer::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
         depthImageDataSource.update_hash();
         m_depthImage->update(&depthImageDataSource);
+
+
+        duk::renderer::Pipeline::Viewport viewport = {};
+        viewport.extent = {width, height};
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+
+        m_pipeline->set_viewport(viewport);
+        m_pipeline->flush();
     });
 
     duk::renderer::RendererCreateInfo rendererCreateInfo = {};

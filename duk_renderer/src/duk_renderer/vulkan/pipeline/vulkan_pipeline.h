@@ -53,15 +53,26 @@ public:
 
     void clean();
 
+    void update(uint32_t imageIndex);
+
     DUK_NO_DISCARD const VkPipeline& handle(uint32_t imageIndex) const;
 
     DUK_NO_DISCARD VkPipelineBindPoint bind_point() const;
 
     DUK_NO_DISCARD VkPipelineLayout pipeline_layout() const;
 
+    // Pipeline overrides
+    void set_viewport(const Viewport& viewport) override;
+
+    void flush() override;
+
+    DUK_NO_DISCARD hash::Hash hash() const override;
+
 private:
 
-    void create_graphics_pipeline(uint32_t imageCount);
+    void update_graphics_pipeline(uint32_t imageIndex);
+
+    void calculate_hash();
 
 private:
     VkDevice m_device;
@@ -74,6 +85,8 @@ private:
     bool m_depthTesting;
     std::vector<VkPipeline> m_pipelines;
     VkPipelineBindPoint m_pipelineBindPoint;
+    duk::hash::Hash m_hash;
+    std::vector<duk::hash::Hash> m_pipelineHashes;
 };
 
 }

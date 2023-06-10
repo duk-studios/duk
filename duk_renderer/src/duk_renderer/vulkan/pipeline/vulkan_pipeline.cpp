@@ -74,15 +74,79 @@ VulkanPipeline::VulkanPipeline(const VulkanPipelineCreateInfo& pipelineCreateInf
     m_blend(pipelineCreateInfo.blend),
     m_depthTesting(pipelineCreateInfo.depthTesting) {
     create(pipelineCreateInfo.imageCount);
-
+    if (m_shader->is_graphics_shader()) {
+        m_pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+    }
+    else {
+        throw std::invalid_argument("Unsupported shader type");
+    }
 }
 
 VulkanPipeline::~VulkanPipeline() {
     clean();
 }
 
-void VulkanPipeline::create_graphics_pipeline(uint32_t imageCount) {
+void VulkanPipeline::create(uint32_t imageCount) {
+    m_pipelineHashes.resize(imageCount, duk::hash::UndefinedHash);
+    m_pipelines.resize(imageCount);
+}
 
+void VulkanPipeline::clean(uint32_t imageIndex) {
+    auto& pipeline = m_pipelines[imageIndex];
+    if (pipeline != VK_NULL_HANDLE) {
+        vkDestroyPipeline(m_device, pipeline, nullptr);
+        pipeline = VK_NULL_HANDLE;
+    }
+}
+
+void VulkanPipeline::clean() {
+    for (int i = 0; i < m_pipelines.size(); i++) {
+        clean(i);
+    }
+    m_pipelines.clear();
+}
+
+void VulkanPipeline::update(uint32_t imageIndex) {
+    auto& pipelineHash = m_pipelineHashes[imageIndex];
+    if (pipelineHash == m_hash) {
+        return;
+    }
+    pipelineHash = m_hash;
+
+    switch (m_pipelineBindPoint) {
+        case VK_PIPELINE_BIND_POINT_GRAPHICS:
+            update_graphics_pipeline(imageIndex);
+            break;
+        default:
+            throw std::logic_error("tried to update an unsupported VulkanPipeline");
+    }
+}
+
+const VkPipeline& VulkanPipeline::handle(uint32_t imageIndex) const {
+    return m_pipelines[imageIndex];
+}
+
+VkPipelineBindPoint VulkanPipeline::bind_point() const {
+    return m_pipelineBindPoint;
+}
+
+VkPipelineLayout VulkanPipeline::pipeline_layout() const {
+    return m_shader->pipeline_layout();
+}
+
+void VulkanPipeline::set_viewport(const Pipeline::Viewport& viewport) {
+    m_viewport = viewport;
+}
+
+void VulkanPipeline::flush() {
+    calculate_hash();
+}
+
+hash::Hash VulkanPipeline::hash() const {
+    return m_hash;
+}
+
+void VulkanPipeline::update_graphics_pipeline(uint32_t imageIndex) {
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
     {
         auto& shaderModules = m_shader->shader_modules();
@@ -207,51 +271,32 @@ void VulkanPipeline::create_graphics_pipeline(uint32_t imageCount) {
     graphicsPipelineCreateInfo.pColorBlendState = &colorBlending;
     graphicsPipelineCreateInfo.pDepthStencilState = &depthStencil;
 
-    std::vector<VkGraphicsPipelineCreateInfo> graphicsPipelineCreateInfos(imageCount, graphicsPipelineCreateInfo);
-    m_pipelines.resize(3);
+    auto& pipeline = m_pipelines[imageIndex];
 
-    auto result = vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, imageCount, graphicsPipelineCreateInfos.data(), nullptr, m_pipelines.data());
+    auto result = vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline);
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkPipeline");
     }
-
-    m_pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 }
 
-void VulkanPipeline::create(uint32_t imageCount) {
-    if (m_shader->is_graphics_shader()) {
-        create_graphics_pipeline(imageCount);
-    }
-    else {
-        throw std::invalid_argument("Unsupported shader type");
-    }
-}
 
-void VulkanPipeline::clean(uint32_t imageIndex) {
-    auto& pipeline = m_pipelines[imageIndex];
-    if (pipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(m_device, pipeline, nullptr);
-        pipeline = VK_NULL_HANDLE;
-    }
-}
-
-void VulkanPipeline::clean() {
-    for (int i = 0; i < m_pipelines.size(); i++) {
-        clean(i);
-    }
-    m_pipelines.clear();
-}
-
-const VkPipeline& VulkanPipeline::handle(uint32_t imageIndex) const {
-    return m_pipelines[imageIndex];
-}
-
-VkPipelineBindPoint VulkanPipeline::bind_point() const {
-    return m_pipelineBindPoint;
-}
-
-VkPipelineLayout VulkanPipeline::pipeline_layout() const {
-    return m_shader->pipeline_layout();
+void VulkanPipeline::calculate_hash() {
+    m_hash = 0;
+    duk::hash::hash_combine(m_hash, m_viewport.offset);
+    duk::hash::hash_combine(m_hash, m_viewport.extent);
+    duk::hash::hash_combine(m_hash, m_blend.alphaBlendOp);
+    duk::hash::hash_combine(m_hash, m_blend.colorBlendOp);
+    duk::hash::hash_combine(m_hash, m_blend.dstAlphaBlendFactor);
+    duk::hash::hash_combine(m_hash, m_blend.srcAlphaBlendFactor);
+    duk::hash::hash_combine(m_hash, m_blend.dstColorBlendFactor);
+    duk::hash::hash_combine(m_hash, m_blend.srcColorBlendFactor);
+    duk::hash::hash_combine(m_hash, m_blend.enabled);
+    duk::hash::hash_combine(m_hash, m_scissor.extent);
+    duk::hash::hash_combine(m_hash, m_scissor.offset);
+    duk::hash::hash_combine(m_hash, m_shader->hash());
+    duk::hash::hash_combine(m_hash, m_renderPass->hash());
+    duk::hash::hash_combine(m_hash, m_cullModeMask);
+    duk::hash::hash_combine(m_hash, m_depthTesting);
 }
 
 }
