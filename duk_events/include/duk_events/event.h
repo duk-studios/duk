@@ -21,6 +21,10 @@ private:
 
         void unsubscribe(size_t id);
 
+        Handle& operator=(const Handle& other);
+
+        bool operator==(Handle& other) const noexcept;
+
     private:
         Event& m_owner;
 
@@ -104,9 +108,10 @@ public:
     }
 
     template<typename TEvent>
-    void ignore(TEvent& event){
-        event.unsubscribe(m_id);
-        auto it = std::find(m_events.begin(), m_events.end(), &event);
+    void ignore(TEvent& event) {
+        Event::Handle handle(event);
+        handle.unsubscribe(m_id);
+        auto it = std::find(m_events.begin(), m_events.end(), handle);
         m_events.erase(it);
     }
 
