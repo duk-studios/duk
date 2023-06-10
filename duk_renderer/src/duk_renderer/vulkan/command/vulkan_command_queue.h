@@ -48,14 +48,9 @@ public:
 
     void submit(const VkSubmitInfo& submitInfo, VkFence fence);
 
-    /// Takes in a function that has a VkCommandBuffer as a parameter.
-    /// Will call vkBeginCommandBuffer before and vkEndCommandBuffer after invoking the given function
-    /// the given function is executed before returning, also guarantees that function is executed
-    /// on the underlying thread to avoid data races in the VkCommandPool that is being used
     template<typename F, std::enable_if_t<std::is_void_v<std::invoke_result_t<F, VkCommandBuffer>>, int> = 0>
-    void submit(F&& func, VkFence fence) {
-
-        auto submission = [this, taskFunc = std::forward<F>(func), fence] {
+    void submit(F&& func) {
+        auto submission = [this, taskFunc = std::forward<F>(func)] {
             auto commandBuffer = allocate_command_buffer();
 
             VkCommandBufferBeginInfo commandBufferBeginInfo = {};
@@ -73,7 +68,7 @@ public:
             submitInfo.commandBufferCount = 1;
             submitInfo.pCommandBuffers = &commandBuffer;
 
-            submit(submitInfo, fence);
+            submit(submitInfo, VK_NULL_HANDLE);
 
             free_command_buffer(commandBuffer);
         };
@@ -84,6 +79,18 @@ public:
         else {
             m_taskQueue.template enqueue(submission).wait();
         }
+    }
+
+    /// This method should only be used within a submission of this command queue
+    VkCommandBuffer current_submission_command_buffer() {
+        if (!m_taskQueue.owns_current_thread()) {
+            throw std::logic_error("append_current_submission called outside of a submission");
+        }
+
+        auto vulkanCommandBuffer = dynamic_cast<VulkanCommandBuffer*>(m_currentCommandBuffer);
+        assert(vulkanCommandBuffer);
+
+        return vulkanCommandBuffer->handle();
     }
 
     // CommandQueue overrides
