@@ -109,6 +109,8 @@ public:
         Pipeline::Scissor scissor;
         Pipeline::CullMode::Mask cullModeMask;
         Pipeline::Blend blend;
+        Pipeline::Topology topology;
+        Pipeline::FillMode fillMode;
         bool depthTesting;
     };
 

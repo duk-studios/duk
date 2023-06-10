@@ -105,6 +105,28 @@ public:
         bool enabled;
     };
 
+    enum class Topology {
+        TRIANGLE_LIST = 0,
+        TRIANGLE_STRIP = 1,
+        TRIANGLE_FAN = 2,
+        TRIANGLE_LIST_WITH_ADJACENCY = 3,
+        TRIANGLE_STRIP_WITH_ADJACENCY = 4,
+        POINT_LIST = 5,
+        LINE_LIST = 6,
+        LINE_STRIP = 7,
+        LINE_LIST_WITH_ADJACENCY = 8,
+        LINE_STRIP_WITH_ADJACENCY = 9,
+        PATCH_LIST = 10,
+    };
+
+    enum class FillMode {
+        FILL = 0,
+        LINE = 1,
+        POINT = 2
+    };
+
+public:
+
     virtual ~Pipeline();
 
     virtual void set_viewport(const Viewport& viewport) = 0;
@@ -140,6 +162,14 @@ public:
     virtual void set_cull_mode(CullMode::Mask cullModeMask) = 0;
 
     virtual CullMode::Mask cull_mode() = 0;
+
+    virtual void set_topology(Topology topology) = 0;
+
+    DUK_NO_DISCARD virtual Topology topology() const = 0;
+
+    virtual void set_fill_mode(FillMode fillMode) = 0;
+
+    DUK_NO_DISCARD virtual FillMode fill_mode() const = 0;
 
     virtual void flush() = 0;
 
