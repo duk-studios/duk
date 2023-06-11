@@ -208,6 +208,8 @@ ExpectedPipeline VulkanRenderer::create_pipeline(const PipelineCreateInfo& pipel
         vulkanPipelineCreateInfo.blend = pipelineCreateInfo.blend;
         vulkanPipelineCreateInfo.cullModeMask = pipelineCreateInfo.cullModeMask;
         vulkanPipelineCreateInfo.depthTesting = pipelineCreateInfo.depthTesting;
+        vulkanPipelineCreateInfo.topology = pipelineCreateInfo.topology;
+        vulkanPipelineCreateInfo.fillMode = pipelineCreateInfo.fillMode;
         return m_resourceManager->create(vulkanPipelineCreateInfo);
     }
     catch (const std::exception& e){
@@ -427,6 +429,11 @@ void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRend
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
     deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
+
+    VkPhysicalDeviceFeatures enabledFeatures = {};
+    enabledFeatures.fillModeNonSolid = VK_TRUE;
+
+    deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
 
     auto deviceExtensions = detail::query_device_extensions();
     deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());

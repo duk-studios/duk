@@ -229,6 +229,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     pipelineCreateInfo.viewport.minDepth = 0.0f;
     pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
     pipelineCreateInfo.cullModeMask = duk::renderer::Pipeline::CullMode::BACK;
+    pipelineCreateInfo.fillMode = duk::renderer::Pipeline::FillMode::FILL;
+    pipelineCreateInfo.topology = duk::renderer::Pipeline::Topology::TRIANGLE_LIST;
     pipelineCreateInfo.shader = m_colorShader.get();
     pipelineCreateInfo.renderPass = m_renderPass.get();
     pipelineCreateInfo.depthTesting = true;

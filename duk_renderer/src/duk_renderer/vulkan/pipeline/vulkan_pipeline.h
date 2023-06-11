@@ -23,6 +23,10 @@ VkBlendOp convert_blend_op(Pipeline::Blend::Operator blendOperator);
 
 VkBlendFactor convert_blend_factor(Pipeline::Blend::Factor blendFactor);
 
+VkPrimitiveTopology convert_topology(Pipeline::Topology topology);
+
+VkPolygonMode convert_fill_mode(Pipeline::FillMode fillMode);
+
 }
 
 class VulkanShader;
@@ -37,6 +41,8 @@ struct VulkanPipelineCreateInfo {
     Pipeline::Scissor scissor;
     Pipeline::CullMode::Mask cullModeMask;
     Pipeline::Blend blend;
+    Pipeline::Topology topology;
+    Pipeline::FillMode fillMode;
     bool depthTesting;
 };
 
@@ -64,7 +70,27 @@ public:
     // Pipeline overrides
     void set_viewport(const Viewport& viewport) override;
 
+    DUK_NO_DISCARD const Viewport& viewport() const override;
+
     void set_scissor(const Scissor& scissor) override;
+
+    DUK_NO_DISCARD const Scissor& scissor() const override;
+
+    void set_blend(const Blend& blend) override;
+
+    DUK_NO_DISCARD const Blend& blend() const override;
+
+    void set_cull_mode(CullMode::Mask cullModeMask) override;
+
+    DUK_NO_DISCARD CullMode::Mask cull_mode() override;
+
+    void set_topology(Topology topology) override;
+
+    DUK_NO_DISCARD Topology topology() const override;
+
+    void set_fill_mode(FillMode fillMode) override;
+
+    DUK_NO_DISCARD FillMode fill_mode() const override;
 
     void flush() override;
 
@@ -74,7 +100,7 @@ private:
 
     void update_graphics_pipeline(uint32_t imageIndex);
 
-    void calculate_hash();
+    void update_hash();
 
 private:
     VkDevice m_device;
@@ -84,6 +110,8 @@ private:
     Pipeline::Scissor m_scissor;
     Pipeline::CullMode::Mask m_cullModeMask;
     Pipeline::Blend m_blend;
+    Pipeline::Topology m_topology;
+    Pipeline::FillMode m_fillMode;
     bool m_depthTesting;
     std::vector<VkPipeline> m_pipelines;
     VkPipelineBindPoint m_pipelineBindPoint;

@@ -16,6 +16,8 @@ VkCullModeFlagBits convert_cull_mode(Pipeline::CullMode::Bits cullModeBit) {
         case Pipeline::CullMode::NONE: converted = VK_CULL_MODE_NONE; break;
         case Pipeline::CullMode::FRONT: converted = VK_CULL_MODE_FRONT_BIT; break;
         case Pipeline::CullMode::BACK: converted = VK_CULL_MODE_BACK_BIT; break;
+        default:
+            throw std::invalid_argument("unhandled Pipeline::CullMode for Vulkan");
     }
     return converted;
 }
@@ -32,6 +34,8 @@ VkBlendOp convert_blend_op(Pipeline::Blend::Operator blendOperator) {
         case Pipeline::Blend::Operator::REVERSE_SUBTRACT: converted = VK_BLEND_OP_REVERSE_SUBTRACT; break;
         case Pipeline::Blend::Operator::MIN: converted = VK_BLEND_OP_MIN; break;
         case Pipeline::Blend::Operator::MAX: converted = VK_BLEND_OP_MAX; break;
+        default:
+            throw std::invalid_argument("unhandled Pipeline::Blend::Operator for Vulkan");
     }
     return converted;
 }
@@ -58,6 +62,40 @@ VkBlendFactor convert_blend_factor(Pipeline::Blend::Factor blendFactor) {
         case Pipeline::Blend::Factor::ONE_MINUS_SRC1_COLOR: converted = VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR; break;
         case Pipeline::Blend::Factor::SRC1_ALPHA: converted = VK_BLEND_FACTOR_SRC1_ALPHA; break;
         case Pipeline::Blend::Factor::ONE_MINUS_SRC1_ALPHA: converted = VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA; break;
+        default:
+            throw std::invalid_argument("unhandled Pipeline::Blend::Factor for Vulkan");
+    }
+    return converted;
+}
+
+VkPrimitiveTopology convert_topology(Pipeline::Topology topology) {
+    VkPrimitiveTopology converted;
+    switch (topology) {
+        case Pipeline::Topology::POINT_LIST: converted = VK_PRIMITIVE_TOPOLOGY_POINT_LIST; break;
+        case Pipeline::Topology::LINE_LIST: converted = VK_PRIMITIVE_TOPOLOGY_LINE_LIST; break;
+        case Pipeline::Topology::LINE_STRIP: converted = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP; break;
+        case Pipeline::Topology::TRIANGLE_LIST: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST; break;
+        case Pipeline::Topology::TRIANGLE_STRIP: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP; break;
+        case Pipeline::Topology::TRIANGLE_FAN: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN; break;
+        case Pipeline::Topology::LINE_LIST_WITH_ADJACENCY: converted = VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY; break;
+        case Pipeline::Topology::LINE_STRIP_WITH_ADJACENCY: converted = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY; break;
+        case Pipeline::Topology::TRIANGLE_LIST_WITH_ADJACENCY: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY; break;
+        case Pipeline::Topology::TRIANGLE_STRIP_WITH_ADJACENCY: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY; break;
+        case Pipeline::Topology::PATCH_LIST: converted = VK_PRIMITIVE_TOPOLOGY_PATCH_LIST; break;
+        default:
+            throw std::invalid_argument("unhandled Pipeline::Topology for Vulkan");
+    }
+    return converted;
+}
+
+VkPolygonMode convert_fill_mode(Pipeline::FillMode fillMode) {
+    VkPolygonMode converted;
+    switch (fillMode) {
+        case Pipeline::FillMode::FILL: converted = VK_POLYGON_MODE_FILL; break;
+        case Pipeline::FillMode::LINE: converted = VK_POLYGON_MODE_LINE; break;
+        case Pipeline::FillMode::POINT: converted = VK_POLYGON_MODE_POINT; break;
+        default:
+            throw std::invalid_argument("unhandled Pipeline::FillMode for Vulkan");
     }
     return converted;
 }
@@ -72,14 +110,18 @@ VulkanPipeline::VulkanPipeline(const VulkanPipelineCreateInfo& pipelineCreateInf
     m_scissor(pipelineCreateInfo.scissor),
     m_cullModeMask(pipelineCreateInfo.cullModeMask),
     m_blend(pipelineCreateInfo.blend),
-    m_depthTesting(pipelineCreateInfo.depthTesting) {
-    create(pipelineCreateInfo.imageCount);
+    m_topology(pipelineCreateInfo.topology),
+    m_fillMode(pipelineCreateInfo.fillMode),
+    m_depthTesting(pipelineCreateInfo.depthTesting),
+    m_hash(duk::hash::UndefinedHash) {
     if (m_shader->is_graphics_shader()) {
         m_pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     }
     else {
-        throw std::invalid_argument("Unsupported shader type");
+        throw std::invalid_argument("unsupported shader type");
     }
+    create(pipelineCreateInfo.imageCount);
+    update_hash();
 }
 
 VulkanPipeline::~VulkanPipeline() {
@@ -104,6 +146,7 @@ void VulkanPipeline::clean() {
         clean(i);
     }
     m_pipelines.clear();
+    m_pipelineHashes.clear();
 }
 
 void VulkanPipeline::update(uint32_t imageIndex) {
@@ -138,12 +181,52 @@ void VulkanPipeline::set_viewport(const Pipeline::Viewport& viewport) {
     m_viewport = viewport;
 }
 
+const Pipeline::Viewport& VulkanPipeline::viewport() const {
+    return m_viewport;
+}
+
 void VulkanPipeline::set_scissor(const Pipeline::Scissor& scissor) {
     m_scissor = scissor;
 }
 
+const Pipeline::Scissor& VulkanPipeline::scissor() const {
+    return m_scissor;
+}
+
+void VulkanPipeline::set_blend(const Pipeline::Blend& blend) {
+    m_blend = blend;
+}
+
+const Pipeline::Blend& VulkanPipeline::blend() const {
+    return m_blend;
+}
+
+void VulkanPipeline::set_cull_mode(Pipeline::CullMode::Mask cullModeMask) {
+    m_cullModeMask = cullModeMask;
+}
+
+Pipeline::CullMode::Mask VulkanPipeline::cull_mode() {
+    return m_cullModeMask;
+}
+
+void VulkanPipeline::set_topology(Pipeline::Topology topology) {
+    m_topology = topology;
+}
+
+Pipeline::Topology VulkanPipeline::topology() const {
+    return m_topology;
+}
+
+void VulkanPipeline::set_fill_mode(Pipeline::FillMode fillMode) {
+    m_fillMode = fillMode;
+}
+
+Pipeline::FillMode VulkanPipeline::fill_mode() const {
+    return m_fillMode;
+}
+
 void VulkanPipeline::flush() {
-    calculate_hash();
+    update_hash();
 }
 
 hash::Hash VulkanPipeline::hash() const {
@@ -181,7 +264,7 @@ void VulkanPipeline::update_graphics_pipeline(uint32_t imageIndex) {
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    inputAssembly.topology = vk::convert_topology(m_topology);
     inputAssembly.primitiveRestartEnable = VK_FALSE;
 
     VkViewport viewport = {};
@@ -207,7 +290,7 @@ void VulkanPipeline::update_graphics_pipeline(uint32_t imageIndex) {
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+    rasterizer.polygonMode = vk::convert_fill_mode(m_fillMode);
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = vk::convert_cull_mode_mask(m_cullModeMask);
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
@@ -284,7 +367,7 @@ void VulkanPipeline::update_graphics_pipeline(uint32_t imageIndex) {
 }
 
 
-void VulkanPipeline::calculate_hash() {
+void VulkanPipeline::update_hash() {
     m_hash = 0;
     duk::hash::hash_combine(m_hash, m_viewport.offset);
     duk::hash::hash_combine(m_hash, m_viewport.extent);

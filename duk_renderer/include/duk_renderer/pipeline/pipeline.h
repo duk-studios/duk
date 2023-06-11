@@ -44,8 +44,8 @@ public:
     };
 
     struct Viewport {
-        glm::vec2 offset;
         glm::vec2 extent;
+        glm::vec2 offset;
         float minDepth;
         float maxDepth;
     };
@@ -105,11 +105,71 @@ public:
         bool enabled;
     };
 
+    enum class Topology {
+        TRIANGLE_LIST = 0,
+        TRIANGLE_STRIP = 1,
+        TRIANGLE_FAN = 2,
+        TRIANGLE_LIST_WITH_ADJACENCY = 3,
+        TRIANGLE_STRIP_WITH_ADJACENCY = 4,
+        POINT_LIST = 5,
+        LINE_LIST = 6,
+        LINE_STRIP = 7,
+        LINE_LIST_WITH_ADJACENCY = 8,
+        LINE_STRIP_WITH_ADJACENCY = 9,
+        PATCH_LIST = 10,
+    };
+
+    enum class FillMode {
+        FILL = 0,
+        LINE = 1,
+        POINT = 2
+    };
+
+public:
+
     virtual ~Pipeline();
 
     virtual void set_viewport(const Viewport& viewport) = 0;
 
+    DUK_NO_DISCARD virtual const Viewport& viewport() const = 0;
+
+    void set_viewport(const glm::vec2& extent, const glm::vec2& offset = {}, float minDepth = 0.0f, float maxDepth = 1.0f);
+
     virtual void set_scissor(const Scissor& scissor) = 0;
+
+    DUK_NO_DISCARD virtual const Scissor& scissor() const = 0;
+
+    void set_scissor(const glm::ivec2& extent, const glm::u32vec2& offset = {});
+
+    virtual void set_blend(const Blend& blend) = 0;
+
+    DUK_NO_DISCARD virtual const Blend& blend() const = 0;
+
+    void set_blend_src_color_factor(Blend::Factor srcColorBlendFactor);
+
+    void set_blend_dst_color_factor(Blend::Factor dstColorBlendFactor);
+
+    void set_blend_color_op(Blend::Operator colorBlendOp);
+
+    void set_blend_src_alpha_factor(Blend::Factor srcAlphaBlendFactor);
+
+    void set_blend_dst_alpha_factor(Blend::Factor dstAlphaBlendFactor);
+
+    void set_blend_alpha_op(Blend::Operator alphaBlendOp);
+
+    void set_blend_enabled(bool enabled);
+
+    virtual void set_cull_mode(CullMode::Mask cullModeMask) = 0;
+
+    virtual CullMode::Mask cull_mode() = 0;
+
+    virtual void set_topology(Topology topology) = 0;
+
+    DUK_NO_DISCARD virtual Topology topology() const = 0;
+
+    virtual void set_fill_mode(FillMode fillMode) = 0;
+
+    DUK_NO_DISCARD virtual FillMode fill_mode() const = 0;
 
     virtual void flush() = 0;
 
