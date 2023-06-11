@@ -6,15 +6,6 @@
 
 namespace duk::renderer {
 
-std::vector<std::vector<VulkanCommandQueue*>> VulkanCommandQueue::s_commandQueuesFamilies;
-
-VulkanCommandQueue* VulkanCommandQueue::queue_for_family_index(uint32_t queueFamilyIndex, uint32_t index) {
-    assert(s_commandQueuesFamilies.size() > queueFamilyIndex);
-    auto& familyQueues = s_commandQueuesFamilies.at(queueFamilyIndex);
-    assert(familyQueues.size() > index);
-    return familyQueues.at(index);
-}
-
 VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo) :
     m_device(commandQueueCreateInfo.device),
     m_familyIndex(commandQueueCreateInfo.familyIndex),
@@ -47,17 +38,6 @@ VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& comma
     m_listener.listen(*commandQueueCreateInfo.prepareFrameEvent, [this](uint32_t){
         m_usedCommandBuffers = 0;
     });
-
-    if (s_commandQueuesFamilies.size() <= m_familyIndex) {
-        s_commandQueuesFamilies.resize(m_familyIndex + 1);
-    }
-
-    auto& familyQueues = s_commandQueuesFamilies[m_familyIndex];
-    if (familyQueues.size() <= m_index) {
-        familyQueues.resize(m_index + 1);
-    }
-
-    familyQueues[m_index] = this;
 }
 
 VulkanCommandQueue::~VulkanCommandQueue() {
@@ -65,8 +45,6 @@ VulkanCommandQueue::~VulkanCommandQueue() {
     m_commandBuffers.clear();
     m_commandBufferPool.reset();
     vkDestroyCommandPool(m_device, m_commandPool, nullptr);
-
-    s_commandQueuesFamilies[m_familyIndex][m_index] = nullptr;
 }
 
 uint32_t VulkanCommandQueue::index() const {

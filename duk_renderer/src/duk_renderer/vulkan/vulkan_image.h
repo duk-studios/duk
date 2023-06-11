@@ -52,7 +52,6 @@ public:
     static void transition_image_layout(VkCommandBuffer commandBuffer, const TransitionImageLayoutInfo& transitionImageLayoutInfo);
 
     struct CopyBufferToImageInfo {
-        uint32_t queueFamilyIndex;
         VulkanBufferMemory* buffer;
         VkImage image;
         uint32_t width;
@@ -72,7 +71,7 @@ struct VulkanMemoryImageCreateInfo {
     Image::Usage usage;
     Image::UpdateFrequency updateFrequency;
     Image::Layout initialLayout;
-    uint32_t queueFamilyIndex;
+    VulkanCommandQueue* commandQueue;
     ImageDataSource* imageDataSource;
 };
 
@@ -121,7 +120,7 @@ private:
     uint32_t m_height;
     std::vector<uint8_t> m_data;
     duk::hash::Hash m_dataSourceHash;
-    uint32_t m_queueFamilyIndex;
+    VulkanCommandQueue* m_commandQueue;
 
     std::vector<VkDeviceMemory> m_memories;
     std::vector<VkImage> m_images;

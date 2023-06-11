@@ -37,7 +37,7 @@ static VkBufferUsageFlags buffer_usage_from_type(Buffer::Type type) {
 VulkanBufferMemory::VulkanBufferMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo, VkMemoryPropertyFlags memoryPropertyFlags, VkBufferUsageFlags additionalUsageFlags) :
     m_device(vulkanBufferMemoryCreateInfo.device),
     m_physicalDevice(vulkanBufferMemoryCreateInfo.physicalDevice),
-    m_queueFamilyIndex(vulkanBufferMemoryCreateInfo.queueFamilyIndex),
+    m_commandQueue(vulkanBufferMemoryCreateInfo.commandQueue),
     m_usageFlags(vulkanBufferMemoryCreateInfo.usageFlags | additionalUsageFlags),
     m_memoryProperties(memoryPropertyFlags),
     m_size(vulkanBufferMemoryCreateInfo.size) {
@@ -158,16 +158,14 @@ void VulkanBufferDeviceMemory::write(void* src, size_t size, size_t offset) {
     bufferHostMemoryCreateInfo.device = m_device;
     bufferHostMemoryCreateInfo.physicalDevice = m_physicalDevice;
     bufferHostMemoryCreateInfo.usageFlags = m_requiredBufferUsageFlags | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    bufferHostMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
+    bufferHostMemoryCreateInfo.commandQueue = m_commandQueue;
     bufferHostMemoryCreateInfo.size = size;
 
     VulkanBufferHostMemory bufferHostMemory(bufferHostMemoryCreateInfo);
 
     bufferHostMemory.write(src, size, 0);
 
-    auto commandQueue = VulkanCommandQueue::queue_for_family_index(m_queueFamilyIndex, 0);
-
-    commandQueue->submit([&](VkCommandBuffer commandBuffer) {
+    m_commandQueue->submit([&](VkCommandBuffer commandBuffer) {
 
         VkBufferCopy bufferCopyRegion = {};
         bufferCopyRegion.size = size;
@@ -184,14 +182,12 @@ void VulkanBufferDeviceMemory::read(void* dst, size_t size, size_t offset) {
     bufferHostMemoryCreateInfo.device = m_device;
     bufferHostMemoryCreateInfo.physicalDevice = m_physicalDevice;
     bufferHostMemoryCreateInfo.usageFlags = m_requiredBufferUsageFlags | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-    bufferHostMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
+    bufferHostMemoryCreateInfo.commandQueue = m_commandQueue;
     bufferHostMemoryCreateInfo.size = size;
 
     VulkanBufferHostMemory bufferHostMemory(bufferHostMemoryCreateInfo);
 
-    auto commandQueue = VulkanCommandQueue::queue_for_family_index(m_queueFamilyIndex, 0);
-
-    commandQueue->submit([&](VkCommandBuffer commandBuffer) {
+    m_commandQueue->submit([&](VkCommandBuffer commandBuffer) {
 
         VkBufferCopy bufferCopyRegion = {};
         bufferCopyRegion.size = size;
@@ -207,7 +203,7 @@ void VulkanBufferDeviceMemory::read(void* dst, size_t size, size_t offset) {
 VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo) :
     m_device(bufferCreateInfo.device),
     m_physicalDevice(bufferCreateInfo.physicalDevice),
-    m_queueFamilyIndex(bufferCreateInfo.queueFamilyIndex),
+    m_commandQueue(bufferCreateInfo.commandQueue),
     m_type(bufferCreateInfo.type),
     m_updateFrequency(bufferCreateInfo.updateFrequency),
     m_elementCount(bufferCreateInfo.elementCount),
@@ -239,7 +235,7 @@ void VulkanBuffer::create(uint32_t imageCount) {
     VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
     bufferMemoryCreateInfo.device = m_device;
     bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
-    bufferMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
+    bufferMemoryCreateInfo.commandQueue = m_commandQueue;
     bufferMemoryCreateInfo.size = m_data.size();
     bufferMemoryCreateInfo.usageFlags = detail::buffer_usage_from_type(m_type);
 

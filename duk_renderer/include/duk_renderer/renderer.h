@@ -41,17 +41,6 @@ enum class RendererAPI {
     DX12
 };
 
-struct RendererCreateInfo {
-    duk::platform::Window* window;
-    duk::log::Logger* logger;
-    const char* applicationName;
-    uint32_t applicationVersion;
-    const char* engineName;
-    uint32_t engineVersion;
-    RendererAPI api;
-    size_t deviceIndex;
-};
-
 class Renderer;
 using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
 using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
@@ -63,6 +52,17 @@ using ExpectedBuffer = tl::expected<std::shared_ptr<Buffer>, RendererError>;
 using ExpectedImage = tl::expected<std::shared_ptr<Image>, RendererError>;
 using ExpectedDescriptorSet = tl::expected<std::shared_ptr<DescriptorSet>, RendererError>;
 using ExpectedCommandScheduler = tl::expected<std::shared_ptr<CommandScheduler>, RendererError>;
+
+struct RendererCreateInfo {
+    duk::platform::Window* window;
+    duk::log::Logger* logger;
+    const char* applicationName;
+    uint32_t applicationVersion;
+    const char* engineName;
+    uint32_t engineVersion;
+    RendererAPI api;
+    size_t deviceIndex;
+};
 
 class Renderer {
 public:
@@ -88,7 +88,7 @@ public:
     DUK_NO_DISCARD virtual RendererCapabilities* capabilities() const = 0;
 
     struct CommandQueueCreateInfo {
-        CommandQueueType type;
+        CommandQueue::Type::Bits type;
     };
 
     DUK_NO_DISCARD virtual ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
@@ -128,6 +128,7 @@ public:
         Buffer::UpdateFrequency updateFrequency;
         size_t elementCount;
         size_t elementSize;
+        CommandQueue* commandQueue;
     };
 
     DUK_NO_DISCARD virtual ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) = 0;
@@ -137,6 +138,7 @@ public:
         Image::Layout initialLayout;
         Image::Usage usage;
         Image::UpdateFrequency updateFrequency;
+        CommandQueue* commandQueue;
     };
 
     DUK_NO_DISCARD virtual ExpectedImage create_image(const ImageCreateInfo& imageCreateInfo) = 0;

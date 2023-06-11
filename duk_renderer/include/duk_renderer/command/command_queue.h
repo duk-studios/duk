@@ -10,13 +10,19 @@
 
 namespace duk::renderer {
 
-enum CommandQueueType {
-    QUEUE_GRAPHICS = 0,
-    QUEUE_COMPUTE = 1,
-    QUEUE_COUNT
-};
-
 class CommandQueue {
+public:
+
+    struct Type {
+        enum Bits : uint32_t {
+            GRAPHICS = 1 << 0,
+            COMPUTE = 1 << 1,
+            PRESENT = 1 << 2
+        };
+        static constexpr uint32_t kCount = 3;
+        using Mask = uint32_t;
+    };
+
 public:
 
     CommandQueue();
