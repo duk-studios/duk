@@ -18,12 +18,8 @@ namespace duk::renderer {
 class RenderPass;
 class Buffer;
 class FrameBuffer;
-class Mesh;
-class MeshDataSource;
 class Pipeline;
-class PipelineDataSource;
 class DescriptorSet;
-class DescriptorSetDataSource;
 
 class CommandBuffer : public Command {
 public:

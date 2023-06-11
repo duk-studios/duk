@@ -55,7 +55,6 @@ struct RendererCreateInfo {
 class Renderer;
 using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
 using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
-using ExpectedMesh = tl::expected<std::shared_ptr<Mesh>, RendererError>;
 using ExpectedShader = tl::expected<std::shared_ptr<Shader>, RendererError>;
 using ExpectedPipeline = tl::expected<std::shared_ptr<Pipeline>, RendererError>;
 using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
