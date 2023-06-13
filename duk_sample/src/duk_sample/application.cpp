@@ -165,7 +165,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     m_scheduler = check_expected_result(m_renderer->create_command_scheduler());
 
     duk::renderer::Renderer::CommandQueueCreateInfo commandQueueCreateInfo = {};
-    commandQueueCreateInfo.type = duk::renderer::CommandQueueType::QUEUE_GRAPHICS;
+    commandQueueCreateInfo.type = duk::renderer::CommandQueue::Type::GRAPHICS;
 
     m_mainCommandQueue = check_expected_result(m_renderer->create_command_queue(commandQueueCreateInfo));
 
@@ -177,6 +177,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     depthImageCreateInfo.initialLayout = duk::renderer::Image::Layout::DEPTH_ATTACHMENT;
     depthImageCreateInfo.updateFrequency = duk::renderer::Image::UpdateFrequency::DEVICE_DYNAMIC;
     depthImageCreateInfo.imageDataSource = &depthImageDataSource;
+    depthImageCreateInfo.commandQueue = m_mainCommandQueue.get();
 
     m_depthImage = check_expected_result(m_renderer->create_image(depthImageCreateInfo));
 
@@ -249,6 +250,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     vertexBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::STATIC;
     vertexBufferCreateInfo.elementCount = vertices.size();
     vertexBufferCreateInfo.elementSize = sizeof(duk::renderer::Vertex2DColorUV);
+    vertexBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
 
     m_vertexBuffer = check_expected_result(m_renderer->create_buffer(vertexBufferCreateInfo));
     m_vertexBuffer->write(vertices);
@@ -261,6 +263,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     indexBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::STATIC;
     indexBufferCreateInfo.elementCount = indices.size();
     indexBufferCreateInfo.elementSize = sizeof(uint16_t);
+    indexBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
 
     m_indexBuffer = check_expected_result(m_renderer->create_buffer(indexBufferCreateInfo));
     m_indexBuffer->write(indices);
@@ -271,6 +274,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     transformUniformBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
     transformUniformBufferCreateInfo.elementCount = 1;
     transformUniformBufferCreateInfo.elementSize = sizeof(Transform);
+    transformUniformBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
+
 
     m_transformUniformBuffer = check_expected_result(m_renderer->create_buffer(transformUniformBufferCreateInfo));
 
@@ -279,6 +284,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     materialUniformBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
     materialUniformBufferCreateInfo.elementCount = 1;
     materialUniformBufferCreateInfo.elementSize = sizeof(UniformBuffer);
+    materialUniformBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
 
     m_materialUniformBuffer = check_expected_result(m_renderer->create_buffer(materialUniformBufferCreateInfo));
     UniformBuffer uniformBuffer = {};
@@ -293,6 +299,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     imageCreateInfo.usage = duk::renderer::Image::Usage::SAMPLED;
     imageCreateInfo.initialLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
     imageCreateInfo.updateFrequency = duk::renderer::Image::UpdateFrequency::STATIC;
+    imageCreateInfo.commandQueue = m_mainCommandQueue.get();
 
     m_image = check_expected_result(m_renderer->create_image(imageCreateInfo));
 

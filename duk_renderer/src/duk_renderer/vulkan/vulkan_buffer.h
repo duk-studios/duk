@@ -18,7 +18,7 @@ namespace duk::renderer {
 struct VulkanBufferMemoryCreateInfo {
     VkDevice device;
     VulkanPhysicalDevice* physicalDevice;
-    uint32_t queueFamilyIndex;
+    VulkanCommandQueue* commandQueue;
     VkBufferUsageFlags usageFlags;
     size_t size;
 };
@@ -49,7 +49,7 @@ public:
 protected:
     VkDevice m_device;
     VulkanPhysicalDevice* m_physicalDevice;
-    uint32_t m_queueFamilyIndex;
+    VulkanCommandQueue* m_commandQueue;
     VkBufferUsageFlags m_usageFlags;
     VkMemoryPropertyFlags m_memoryProperties;
     size_t m_size;
@@ -99,7 +99,7 @@ struct VulkanBufferCreateInfo {
     size_t elementSize;
     VkDevice device;
     VulkanPhysicalDevice* physicalDevice;
-    uint32_t queueFamilyIndex;
+    VulkanCommandQueue* commandQueue;
     uint32_t imageCount;
 };
 
@@ -145,7 +145,7 @@ private:
 private:
     VkDevice m_device;
     VulkanPhysicalDevice* m_physicalDevice;
-    uint32_t m_queueFamilyIndex;
+    VulkanCommandQueue* m_commandQueue;
     Buffer::Type m_type;
     Buffer::UpdateFrequency m_updateFrequency;
     size_t m_elementCount;

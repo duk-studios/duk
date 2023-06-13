@@ -41,7 +41,7 @@ public:
 
     DUK_NO_DISCARD Image* present_image() override;
 
-    RendererCapabilities* capabilities() const override;
+    DUK_NO_DISCARD RendererCapabilities* capabilities() const override;
 
     DUK_NO_DISCARD ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
 
@@ -92,8 +92,7 @@ private:
     std::unique_ptr<VulkanSamplerCache> m_samplerCache;
 
     VulkanDebugMessenger m_debugMessenger;
-    std::array<uint32_t, CommandQueueType::QUEUE_COUNT> m_queueFamilyIndices;
-    uint32_t m_presentQueueFamilyIndex;
+    std::unordered_map<CommandQueue::Type::Mask, uint32_t> m_queueFamilyIndices;
 
     uint32_t m_currentFrame;
     VulkanPrepareFrameEvent m_prepareFrameEvent;

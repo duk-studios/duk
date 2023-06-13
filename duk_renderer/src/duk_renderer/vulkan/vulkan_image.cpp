@@ -315,7 +315,7 @@ VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanIm
     m_width(vulkanImageCreateInfo.imageDataSource->width()),
     m_height(vulkanImageCreateInfo.imageDataSource->height()),
     m_dataSourceHash(vulkanImageCreateInfo.imageDataSource->hash()),
-    m_queueFamilyIndex(vulkanImageCreateInfo.queueFamilyIndex) {
+    m_commandQueue(vulkanImageCreateInfo.commandQueue) {
 
     if (vulkanImageCreateInfo.imageDataSource->has_data()) {
         m_data.resize(vulkanImageCreateInfo.imageDataSource->byte_count());
@@ -337,7 +337,7 @@ void VulkanMemoryImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFl
     m_imageDataHashes[index] = m_dataSourceHash;
 
     VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
-    bufferMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
+    bufferMemoryCreateInfo.commandQueue = m_commandQueue;
     bufferMemoryCreateInfo.device = m_device;
     bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
     bufferMemoryCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -353,16 +353,13 @@ void VulkanMemoryImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFl
     copyBufferToImageInfo.subresourceRange.levelCount = 1;
     copyBufferToImageInfo.subresourceRange.baseMipLevel = 0;
     copyBufferToImageInfo.subresourceRange.aspectMask = detail::image_aspect(m_usage, m_format);
-    copyBufferToImageInfo.queueFamilyIndex = m_queueFamilyIndex;
     copyBufferToImageInfo.finalLayout = vk::convert_layout(m_layout);
     copyBufferToImageInfo.width = m_width;
     copyBufferToImageInfo.height = m_height;
     copyBufferToImageInfo.dstStageMask = stageFlags;
     copyBufferToImageInfo.image = m_images[index];
 
-    auto commandQueue = VulkanCommandQueue::queue_for_family_index(copyBufferToImageInfo.queueFamilyIndex, 0);
-
-    commandQueue->submit([&](VkCommandBuffer commandBuffer) {
+    m_commandQueue->submit([&](VkCommandBuffer commandBuffer) {
         copy_buffer_to_image(commandBuffer, copyBufferToImageInfo);
     });
 }
@@ -489,10 +486,9 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     subresourceRange.aspectMask = detail::image_aspect(m_usage, m_format);
 
     if (!m_data.empty()) {
-        auto commandQueue = VulkanCommandQueue::queue_for_family_index(m_queueFamilyIndex, 0);
 
         VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
-        bufferMemoryCreateInfo.queueFamilyIndex = m_queueFamilyIndex;
+        bufferMemoryCreateInfo.commandQueue = m_commandQueue;
         bufferMemoryCreateInfo.device = m_device;
         bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
         bufferMemoryCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -501,12 +497,11 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
         VulkanBufferHostMemory bufferHostMemory(bufferMemoryCreateInfo);
         bufferHostMemory.write(m_data.data(), m_data.size(), 0);
 
-        commandQueue->submit([this, &subresourceRange, &bufferHostMemory](VkCommandBuffer commandBuffer) {
+        m_commandQueue->submit([this, &subresourceRange, &bufferHostMemory](VkCommandBuffer commandBuffer) {
 
             CopyBufferToImageInfo copyBufferToImageInfo = {};
             copyBufferToImageInfo.buffer = &bufferHostMemory;
             copyBufferToImageInfo.subresourceRange = subresourceRange;
-            copyBufferToImageInfo.queueFamilyIndex = m_queueFamilyIndex;
             copyBufferToImageInfo.finalLayout = vk::convert_layout(m_layout);
             copyBufferToImageInfo.width = m_width;
             copyBufferToImageInfo.height = m_height;

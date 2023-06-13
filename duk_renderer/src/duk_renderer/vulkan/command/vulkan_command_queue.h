@@ -34,8 +34,6 @@ public:
 
     ~VulkanCommandQueue() override;
 
-    static VulkanCommandQueue* queue_for_family_index(uint32_t queueFamilyIndex, uint32_t index);
-
     DUK_NO_DISCARD uint32_t index() const;
 
     DUK_NO_DISCARD uint32_t family_index() const;
@@ -97,7 +95,6 @@ public:
     DUK_NO_DISCARD CommandBuffer* next_command_buffer() override;
 
 private:
-    static std::vector<std::vector<VulkanCommandQueue*>> s_commandQueuesFamilies;
     VkDevice m_device;
     uint32_t m_familyIndex;
     uint32_t m_index;

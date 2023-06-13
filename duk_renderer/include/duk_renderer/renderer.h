@@ -41,6 +41,18 @@ enum class RendererAPI {
     DX12
 };
 
+class Renderer;
+using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
+using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
+using ExpectedShader = tl::expected<std::shared_ptr<Shader>, RendererError>;
+using ExpectedPipeline = tl::expected<std::shared_ptr<Pipeline>, RendererError>;
+using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
+using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
+using ExpectedBuffer = tl::expected<std::shared_ptr<Buffer>, RendererError>;
+using ExpectedImage = tl::expected<std::shared_ptr<Image>, RendererError>;
+using ExpectedDescriptorSet = tl::expected<std::shared_ptr<DescriptorSet>, RendererError>;
+using ExpectedCommandScheduler = tl::expected<std::shared_ptr<CommandScheduler>, RendererError>;
+
 struct RendererCreateInfo {
     duk::platform::Window* window;
     duk::log::Logger* logger;
@@ -51,19 +63,6 @@ struct RendererCreateInfo {
     RendererAPI api;
     size_t deviceIndex;
 };
-
-class Renderer;
-using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
-using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
-using ExpectedMesh = tl::expected<std::shared_ptr<Mesh>, RendererError>;
-using ExpectedShader = tl::expected<std::shared_ptr<Shader>, RendererError>;
-using ExpectedPipeline = tl::expected<std::shared_ptr<Pipeline>, RendererError>;
-using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
-using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
-using ExpectedBuffer = tl::expected<std::shared_ptr<Buffer>, RendererError>;
-using ExpectedImage = tl::expected<std::shared_ptr<Image>, RendererError>;
-using ExpectedDescriptorSet = tl::expected<std::shared_ptr<DescriptorSet>, RendererError>;
-using ExpectedCommandScheduler = tl::expected<std::shared_ptr<CommandScheduler>, RendererError>;
 
 class Renderer {
 public:
@@ -89,7 +88,7 @@ public:
     DUK_NO_DISCARD virtual RendererCapabilities* capabilities() const = 0;
 
     struct CommandQueueCreateInfo {
-        CommandQueueType type;
+        CommandQueue::Type::Bits type;
     };
 
     DUK_NO_DISCARD virtual ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
@@ -129,6 +128,7 @@ public:
         Buffer::UpdateFrequency updateFrequency;
         size_t elementCount;
         size_t elementSize;
+        CommandQueue* commandQueue;
     };
 
     DUK_NO_DISCARD virtual ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) = 0;
@@ -138,6 +138,7 @@ public:
         Image::Layout initialLayout;
         Image::Usage usage;
         Image::UpdateFrequency updateFrequency;
+        CommandQueue* commandQueue;
     };
 
     DUK_NO_DISCARD virtual ExpectedImage create_image(const ImageCreateInfo& imageCreateInfo) = 0;
