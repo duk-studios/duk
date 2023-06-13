@@ -22,7 +22,7 @@ class VulkanBuffer;
 class VulkanBufferCreateInfo;
 class VulkanDescriptorSet;
 class VulkanDescriptorSetCreateInfo;
-class VulkanPipeline;
+class VulkanGraphicsPipeline;
 class VulkanPipelineCreateInfo;
 class VulkanFrameBuffer;
 class VulkanFrameBufferCreateInfo;
@@ -51,7 +51,7 @@ public:
 
     std::shared_ptr<VulkanDescriptorSet> create(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo);
 
-    std::shared_ptr<VulkanPipeline> create(const VulkanPipelineCreateInfo& pipelineCreateInfo);
+    std::shared_ptr<VulkanGraphicsPipeline> create(const VulkanPipelineCreateInfo& pipelineCreateInfo);
 
     std::shared_ptr<VulkanFrameBuffer> create(const VulkanFrameBufferCreateInfo& frameBufferCreateInfo);
 
@@ -116,8 +116,8 @@ private:
     std::vector<DeletionEntry<VulkanMemoryImage>> m_imagesToDelete;
     std::vector<VulkanDescriptorSet*> m_descriptorSets;
     std::vector<DeletionEntry<VulkanDescriptorSet>> m_descriptorSetsToDelete;
-    std::vector<VulkanPipeline*> m_pipelines;
-    std::vector<DeletionEntry<VulkanPipeline>> m_pipelinesToDelete;
+    std::vector<VulkanGraphicsPipeline*> m_pipelines;
+    std::vector<DeletionEntry<VulkanGraphicsPipeline>> m_pipelinesToDelete;
     std::vector<VulkanFrameBuffer*> m_frameBuffers;
     std::vector<DeletionEntry<VulkanFrameBuffer>> m_frameBuffersToDelete;
     std::vector<VulkanRenderPass*> m_renderPasses;

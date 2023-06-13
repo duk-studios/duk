@@ -8,7 +8,7 @@
 #include <duk_renderer/vulkan/vulkan_buffer.h>
 #include <duk_renderer/vulkan/vulkan_frame_buffer.h>
 #include <duk_renderer/vulkan/vulkan_render_pass.h>
-#include <duk_renderer/vulkan/pipeline/vulkan_pipeline.h>
+#include <duk_renderer/vulkan/pipeline/vulkan_graphics_pipeline.h>
 
 namespace duk::renderer {
 
@@ -103,8 +103,8 @@ void VulkanCommandBuffer::end_render_pass() {
     m_currentPipeline = nullptr;
 }
 
-void VulkanCommandBuffer::bind_pipeline(Pipeline* pipeline) {
-    auto vulkanPipeline = dynamic_cast<VulkanPipeline*>(pipeline);
+void VulkanCommandBuffer::bind_pipeline(GraphicsPipeline* pipeline) {
+    auto vulkanPipeline = dynamic_cast<VulkanGraphicsPipeline*>(pipeline);
 
     auto imageIndex = *m_currentImagePtr;
 

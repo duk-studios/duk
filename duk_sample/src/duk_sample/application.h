@@ -55,7 +55,7 @@ private:
     std::shared_ptr<duk::renderer::RenderPass> m_renderPass;
     std::shared_ptr<duk::renderer::FrameBuffer> m_frameBuffer;
     std::shared_ptr<duk::renderer::Shader> m_colorShader;
-    std::shared_ptr<duk::renderer::Pipeline> m_pipeline;
+    std::shared_ptr<duk::renderer::GraphicsPipeline> m_graphicsPipeline;
     std::shared_ptr<duk::renderer::Buffer> m_vertexBuffer;
     std::shared_ptr<duk::renderer::Buffer> m_indexBuffer;
     std::shared_ptr<duk::renderer::Buffer> m_materialUniformBuffer;

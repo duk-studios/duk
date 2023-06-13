@@ -135,19 +135,19 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         m_depthImage->update(&depthImageDataSource);
 
 
-        duk::renderer::Pipeline::Viewport viewport = {};
+        duk::renderer::GraphicsPipeline::Viewport viewport = {};
         viewport.extent = {width, height};
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
-        m_pipeline->set_viewport(viewport);
+        m_graphicsPipeline->set_viewport(viewport);
 
-        duk::renderer::Pipeline::Scissor scissor = {};
+        duk::renderer::GraphicsPipeline::Scissor scissor = {};
         scissor.extent = viewport.extent;
 
-        m_pipeline->set_scissor(scissor);
+        m_graphicsPipeline->set_scissor(scissor);
 
-        m_pipeline->flush();
+        m_graphicsPipeline->flush();
     });
 
     duk::renderer::RendererCreateInfo rendererCreateInfo = {};
@@ -229,14 +229,14 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     pipelineCreateInfo.viewport.maxDepth = 1.0f;
     pipelineCreateInfo.viewport.minDepth = 0.0f;
     pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
-    pipelineCreateInfo.cullModeMask = duk::renderer::Pipeline::CullMode::BACK;
-    pipelineCreateInfo.fillMode = duk::renderer::Pipeline::FillMode::FILL;
-    pipelineCreateInfo.topology = duk::renderer::Pipeline::Topology::TRIANGLE_LIST;
+    pipelineCreateInfo.cullModeMask = duk::renderer::GraphicsPipeline::CullMode::BACK;
+    pipelineCreateInfo.fillMode = duk::renderer::GraphicsPipeline::FillMode::FILL;
+    pipelineCreateInfo.topology = duk::renderer::GraphicsPipeline::Topology::TRIANGLE_LIST;
     pipelineCreateInfo.shader = m_colorShader.get();
     pipelineCreateInfo.renderPass = m_renderPass.get();
     pipelineCreateInfo.depthTesting = true;
 
-    m_pipeline = check_expected_result(m_renderer->create_pipeline(pipelineCreateInfo));
+    m_graphicsPipeline = check_expected_result(m_renderer->create_pipeline(pipelineCreateInfo));
 
     std::array<duk::renderer::Vertex2DColorUV, 4> vertices = {};
     vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
@@ -388,7 +388,7 @@ duk::renderer::FutureCommand Application::main_render_pass() {
 
         commandBuffer->begin_render_pass(renderPassBeginInfo);
 
-        commandBuffer->bind_pipeline(m_pipeline.get());
+        commandBuffer->bind_pipeline(m_graphicsPipeline.get());
 
         commandBuffer->bind_vertex_buffer(m_vertexBuffer.get());
 

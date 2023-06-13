@@ -7,7 +7,7 @@
 #include <duk_renderer/vulkan/vulkan_image.h>
 #include <duk_renderer/vulkan/vulkan_buffer.h>
 #include <duk_renderer/vulkan/vulkan_descriptor_set.h>
-#include <duk_renderer/vulkan/pipeline/vulkan_pipeline.h>
+#include <duk_renderer/vulkan/pipeline/vulkan_graphics_pipeline.h>
 #include <duk_renderer/vulkan/vulkan_swapchain.h>
 
 namespace duk::renderer {
@@ -93,7 +93,7 @@ std::shared_ptr<VulkanDescriptorSet> VulkanResourceManager::create(const VulkanD
     return create(m_descriptorSets, m_descriptorSetsToDelete, descriptorSetCreateInfo);
 }
 
-std::shared_ptr<VulkanPipeline> VulkanResourceManager::create(const VulkanPipelineCreateInfo& pipelineCreateInfo) {
+std::shared_ptr<VulkanGraphicsPipeline> VulkanResourceManager::create(const VulkanPipelineCreateInfo& pipelineCreateInfo) {
     return create(m_pipelines, m_pipelinesToDelete, pipelineCreateInfo);
 }
 

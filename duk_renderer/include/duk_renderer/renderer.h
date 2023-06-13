@@ -17,7 +17,7 @@
 #include <duk_renderer/frame_buffer.h>
 #include <duk_renderer/pipeline/shader_data_source.h>
 #include <duk_renderer/pipeline/shader.h>
-#include <duk_renderer/pipeline/pipeline.h>
+#include <duk_renderer/pipeline/graphics_pipeline.h>
 
 #include <duk_log/logger.h>
 
@@ -45,7 +45,7 @@ class Renderer;
 using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
 using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
 using ExpectedShader = tl::expected<std::shared_ptr<Shader>, RendererError>;
-using ExpectedPipeline = tl::expected<std::shared_ptr<Pipeline>, RendererError>;
+using ExpectedPipeline = tl::expected<std::shared_ptr<GraphicsPipeline>, RendererError>;
 using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
 using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
 using ExpectedBuffer = tl::expected<std::shared_ptr<Buffer>, RendererError>;
@@ -104,12 +104,12 @@ public:
     struct PipelineCreateInfo {
         Shader* shader;
         RenderPass* renderPass;
-        Pipeline::Viewport viewport;
-        Pipeline::Scissor scissor;
-        Pipeline::CullMode::Mask cullModeMask;
-        Pipeline::Blend blend;
-        Pipeline::Topology topology;
-        Pipeline::FillMode fillMode;
+        GraphicsPipeline::Viewport viewport;
+        GraphicsPipeline::Scissor scissor;
+        GraphicsPipeline::CullMode::Mask cullModeMask;
+        GraphicsPipeline::Blend blend;
+        GraphicsPipeline::Topology topology;
+        GraphicsPipeline::FillMode fillMode;
         bool depthTesting;
     };
 

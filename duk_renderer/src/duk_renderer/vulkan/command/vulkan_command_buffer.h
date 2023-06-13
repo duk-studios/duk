@@ -12,7 +12,7 @@ namespace duk::renderer {
 
 class VulkanCommandQueue;
 class VulkanRenderer;
-class VulkanPipeline;
+class VulkanGraphicsPipeline;
 
 struct VulkanCommandBufferCreateInfo {
     VkDevice device;
@@ -43,7 +43,7 @@ public:
 
     void end_render_pass() override;
 
-    void bind_pipeline(Pipeline* pipeline) override;
+    void bind_pipeline(GraphicsPipeline* pipeline) override;
 
     void bind_vertex_buffer(Buffer* buffer) override;
 
@@ -66,7 +66,7 @@ private:
     VulkanSubmitter m_submitter;
 
     // state cache
-    VulkanPipeline* m_currentPipeline;
+    VulkanGraphicsPipeline* m_currentPipeline;
 
 };
 
