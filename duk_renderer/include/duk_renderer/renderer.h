@@ -18,6 +18,7 @@
 #include <duk_renderer/pipeline/shader_data_source.h>
 #include <duk_renderer/pipeline/shader.h>
 #include <duk_renderer/pipeline/graphics_pipeline.h>
+#include <duk_renderer/pipeline/compute_pipeline.h>
 
 #include <duk_log/logger.h>
 
@@ -46,6 +47,7 @@ using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
 using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
 using ExpectedShader = tl::expected<std::shared_ptr<Shader>, RendererError>;
 using ExpectedGraphicsPipeline = tl::expected<std::shared_ptr<GraphicsPipeline>, RendererError>;
+using ExpectedComputePipeline = tl::expected<std::shared_ptr<ComputePipeline>, RendererError>;
 using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
 using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
 using ExpectedBuffer = tl::expected<std::shared_ptr<Buffer>, RendererError>;
@@ -114,6 +116,12 @@ public:
     };
 
     DUK_NO_DISCARD virtual ExpectedGraphicsPipeline create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) = 0;
+
+    struct ComputePipelineCreateInfo {
+        Shader* shader;
+    };
+
+    DUK_NO_DISCARD virtual ExpectedComputePipeline create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) = 0;
 
     struct RenderPassCreateInfo {
         AttachmentDescription* colorAttachments;

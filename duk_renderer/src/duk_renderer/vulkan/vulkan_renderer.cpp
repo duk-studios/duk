@@ -10,6 +10,7 @@
 #include <duk_renderer/vulkan/command/vulkan_command_scheduler.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_shader.h>
 #include <duk_renderer/vulkan/pipeline/vulkan_graphics_pipeline.h>
+#include <duk_renderer/vulkan/pipeline/vulkan_compute_pipeline.h>
 
 
 #if DUK_PLATFORM_IS_WINDOWS
@@ -212,6 +213,18 @@ ExpectedGraphicsPipeline VulkanRenderer::create_graphics_pipeline(const Graphics
         vulkanPipelineCreateInfo.depthTesting = pipelineCreateInfo.depthTesting;
         vulkanPipelineCreateInfo.topology = pipelineCreateInfo.topology;
         vulkanPipelineCreateInfo.fillMode = pipelineCreateInfo.fillMode;
+        return m_resourceManager->create(vulkanPipelineCreateInfo);
+    }
+    catch (const std::exception& e){
+        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
+    }
+}
+
+ExpectedComputePipeline VulkanRenderer::create_compute_pipeline(const Renderer::ComputePipelineCreateInfo& pipelineCreateInfo) {
+    try {
+        VulkanComputePipelineCreateInfo vulkanPipelineCreateInfo = {};
+        vulkanPipelineCreateInfo.device = m_device;
+        vulkanPipelineCreateInfo.shader = dynamic_cast<VulkanShader*>(pipelineCreateInfo.shader);
         return m_resourceManager->create(vulkanPipelineCreateInfo);
     }
     catch (const std::exception& e){

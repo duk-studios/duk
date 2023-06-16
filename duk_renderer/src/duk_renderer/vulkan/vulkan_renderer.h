@@ -50,6 +50,8 @@ public:
 
     DUK_NO_DISCARD ExpectedGraphicsPipeline create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) override;
 
+    DUK_NO_DISCARD ExpectedComputePipeline create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) override;
+
     DUK_NO_DISCARD ExpectedRenderPass create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) override;
 
     DUK_NO_DISCARD ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) override;
