@@ -7,7 +7,7 @@
 #include <duk_renderer/vertex_layout.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
 
-namespace duk::renderer::vk {
+namespace duk::renderer {
 
 VkFormat convert_vertex_attribute_format(VertexAttribute::Format format);
 

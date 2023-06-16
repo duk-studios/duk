@@ -54,8 +54,6 @@ static VkImageAspectFlags image_aspect(Image::Usage usage, Image::PixelFormat fo
 
 }
 
-namespace vk {
-
 VkFormat convert_pixel_format(Image::PixelFormat format) {
     VkFormat converted;
     switch (format){
@@ -149,8 +147,6 @@ VkImageUsageFlags convert_usage(Image::Usage usage) {
             throw std::invalid_argument("unhandled Image::Usage for Vulkan");
     }
     return converted;
-}
-
 }
 
 void VulkanImage::transition_image_layout(VkCommandBuffer commandBuffer, const TransitionImageLayoutInfo& transitionImageLayoutInfo) {
@@ -355,7 +351,7 @@ void VulkanMemoryImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFl
     copyBufferToImageInfo.subresourceRange.levelCount = 1;
     copyBufferToImageInfo.subresourceRange.baseMipLevel = 0;
     copyBufferToImageInfo.subresourceRange.aspectMask = detail::image_aspect(m_usage, m_format);
-    copyBufferToImageInfo.finalLayout = vk::convert_layout(m_layout);
+    copyBufferToImageInfo.finalLayout = convert_layout(m_layout);
     copyBufferToImageInfo.width = m_width;
     copyBufferToImageInfo.height = m_height;
     copyBufferToImageInfo.dstStageMask = stageFlags;
@@ -444,10 +440,10 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     imageCreateInfo.extent.depth = 1;
     imageCreateInfo.mipLevels = 1;
     imageCreateInfo.arrayLayers = 1;
-    imageCreateInfo.format = vk::convert_pixel_format(m_format);
+    imageCreateInfo.format = convert_pixel_format(m_format);
     imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    imageCreateInfo.usage = vk::convert_usage(m_usage) | (m_data.empty() ? 0 : VK_IMAGE_USAGE_TRANSFER_DST_BIT);
+    imageCreateInfo.usage = convert_usage(m_usage) | (m_data.empty() ? 0 : VK_IMAGE_USAGE_TRANSFER_DST_BIT);
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -504,7 +500,7 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
             CopyBufferToImageInfo copyBufferToImageInfo = {};
             copyBufferToImageInfo.buffer = &bufferHostMemory;
             copyBufferToImageInfo.subresourceRange = subresourceRange;
-            copyBufferToImageInfo.finalLayout = vk::convert_layout(m_layout);
+            copyBufferToImageInfo.finalLayout = convert_layout(m_layout);
             copyBufferToImageInfo.width = m_width;
             copyBufferToImageInfo.height = m_height;
             copyBufferToImageInfo.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
@@ -520,7 +516,7 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     VkImageViewCreateInfo viewInfo = {};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    viewInfo.format = vk::convert_pixel_format(m_format);
+    viewInfo.format = convert_pixel_format(m_format);
     viewInfo.subresourceRange = subresourceRange;
 
     m_imageViews.resize(imageCount);
@@ -599,7 +595,7 @@ uint32_t VulkanSwapchainImage::image_count() const {
 }
 
 Image::PixelFormat VulkanSwapchainImage::format() const {
-    return vk::convert_pixel_format(m_format);
+    return convert_pixel_format(m_format);
 }
 
 uint32_t VulkanSwapchainImage::width() const {

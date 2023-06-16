@@ -10,8 +10,6 @@
 
 namespace duk::renderer {
 
-namespace vk {
-
 VkShaderStageFlagBits convert_module(Shader::Module::Bits module) {
     VkShaderStageFlagBits stage;
     switch (module) {
@@ -29,8 +27,6 @@ VkShaderStageFlagBits convert_module(Shader::Module::Bits module) {
 
 VkShaderStageFlags convert_module_mask(Shader::Module::Mask moduleMask) {
     return convert_flags<Shader::Module>(moduleMask, convert_module);
-}
-
 }
 
 VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
@@ -89,7 +85,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
         inputAttributeDescription.binding = 0;
         inputAttributeDescription.location = m_inputAttributes.size();
         inputAttributeDescription.offset = attributeOffset;
-        inputAttributeDescription.format = vk::convert_vertex_attribute_format(format);
+        inputAttributeDescription.format = convert_vertex_attribute_format(format);
 
         attributeOffset += VertexAttribute::size_of(format);
 

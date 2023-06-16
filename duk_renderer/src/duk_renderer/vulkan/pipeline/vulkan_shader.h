@@ -11,13 +11,9 @@
 
 namespace duk::renderer {
 
-namespace vk {
-
 VkShaderStageFlagBits convert_module(Shader::Module::Bits module);
 
 VkShaderStageFlags convert_module_mask(Shader::Module::Mask moduleMask);
-
-}
 
 struct VulkanShaderCreateInfo {
     VkDevice device;
