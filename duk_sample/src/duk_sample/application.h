@@ -21,6 +21,8 @@ struct ApplicationCreateInfo {
 class Application {
 public:
 
+    static std::vector<uint8_t> load_bytes(const char* filepath);
+
     explicit Application(const ApplicationCreateInfo& applicationCreateInfo);
 
     ~Application();
@@ -45,17 +47,22 @@ private:
 
     duk::renderer::FutureCommand main_render_pass();
 
+    duk::renderer::FutureCommand compute_pass();
+
 private:
     duk::log::Logger m_logger;
     duk::events::EventListener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;
     std::shared_ptr<duk::renderer::Renderer> m_renderer;
     std::shared_ptr<duk::renderer::CommandQueue> m_mainCommandQueue;
+    std::shared_ptr<duk::renderer::CommandQueue> m_computeQueue;
     std::shared_ptr<duk::renderer::CommandScheduler> m_scheduler;
     std::shared_ptr<duk::renderer::RenderPass> m_renderPass;
     std::shared_ptr<duk::renderer::FrameBuffer> m_frameBuffer;
     std::shared_ptr<duk::renderer::Shader> m_colorShader;
+    std::shared_ptr<duk::renderer::Shader> m_computeShader;
     std::shared_ptr<duk::renderer::GraphicsPipeline> m_graphicsPipeline;
+    std::shared_ptr<duk::renderer::ComputePipeline> m_computePipeline;
     std::shared_ptr<duk::renderer::Buffer> m_vertexBuffer;
     std::shared_ptr<duk::renderer::Buffer> m_indexBuffer;
     std::shared_ptr<duk::renderer::Buffer> m_materialUniformBuffer;
@@ -63,6 +70,7 @@ private:
     std::shared_ptr<duk::renderer::Image> m_image;
     std::shared_ptr<duk::renderer::Image> m_depthImage;
     std::shared_ptr<duk::renderer::DescriptorSet> m_descriptorSet;
+    std::shared_ptr<duk::renderer::DescriptorSet> m_computeDescriptorSet;
     bool m_run;
 
 };
