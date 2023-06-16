@@ -34,6 +34,7 @@ static VkImageAspectFlags image_aspect(Image::Usage usage, Image::PixelFormat fo
             break;
         case Image::Usage::SAMPLED:
         case Image::Usage::STORAGE:
+        case Image::Usage::SAMPLED_STORAGE:
         case Image::Usage::DEPTH_STENCIL_ATTACHMENT:
             if (Image::is_depth_format(format)) {
                 aspectFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -141,6 +142,7 @@ VkImageUsageFlags convert_usage(Image::Usage usage) {
     switch (usage) {
         case Image::Usage::SAMPLED: converted = VK_IMAGE_USAGE_SAMPLED_BIT; break;
         case Image::Usage::STORAGE: converted = VK_IMAGE_USAGE_STORAGE_BIT; break;
+        case Image::Usage::SAMPLED_STORAGE: converted = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT; break;
         case Image::Usage::COLOR_ATTACHMENT: converted = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; break;
         case Image::Usage::DEPTH_STENCIL_ATTACHMENT: converted = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT; break;
         default:

@@ -22,7 +22,8 @@ enum class DescriptorType {
     UNIFORM_BUFFER,
     STORAGE_BUFFER,
     IMAGE,
-    IMAGE_SAMPLER
+    IMAGE_SAMPLER,
+    STORAGE_IMAGE
 };
 
 struct DescriptorDescription {
@@ -40,11 +41,15 @@ public:
 
     Descriptor();
 
-    Descriptor(Image* image, Image::Layout layout);
+    static Descriptor uniform_buffer(Buffer* buffer);
 
-    Descriptor(Image* image, Image::Layout layout, Sampler sampler);
+    static Descriptor storage_buffer(Buffer* buffer);
 
-    Descriptor(Buffer* buffer);
+    static Descriptor image(Image* image, Image::Layout layout);
+
+    static Descriptor image_sampler(Image* image, Image::Layout layout, Sampler sampler);
+
+    static Descriptor storage_image(Image* image, Image::Layout layout);
 
     DUK_NO_DISCARD Resource::HashChangedEvent& hash_changed_event() const;
 

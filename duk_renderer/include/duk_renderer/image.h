@@ -54,6 +54,7 @@ public:
     enum class Usage {
         SAMPLED,
         STORAGE,
+        SAMPLED_STORAGE,
         COLOR_ATTACHMENT,
         DEPTH_STENCIL_ATTACHMENT
     };
