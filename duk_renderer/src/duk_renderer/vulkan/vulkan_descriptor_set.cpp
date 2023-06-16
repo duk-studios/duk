@@ -20,6 +20,7 @@ VkDescriptorType convert_descriptor_type(DescriptorType descriptorType) {
         case DescriptorType::STORAGE_BUFFER: converted = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER; break;
         case DescriptorType::IMAGE: converted = VK_DESCRIPTOR_TYPE_SAMPLER; break;
         case DescriptorType::IMAGE_SAMPLER: converted = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; break;
+        case DescriptorType::STORAGE_IMAGE: converted = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; break;
         default:
             throw std::logic_error("tried to convert a unsupported DescriptorType");
     }
@@ -225,6 +226,7 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
                 break;
             }
             case DescriptorType::IMAGE:
+            case DescriptorType::STORAGE_IMAGE:
             case DescriptorType::IMAGE_SAMPLER: {
                 auto& bindingDescription = m_descriptorSetDescription.bindings[i];
                 auto image = dynamic_cast<VulkanImage*>(descriptor.image());

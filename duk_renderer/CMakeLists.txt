@@ -13,7 +13,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/vertex_data_source.h
         include/duk_renderer/vertex_layout.h
         include/duk_renderer/vertex_types.h
-        include/duk_renderer/pipeline/pipeline.h
+        include/duk_renderer/pipeline/graphics_pipeline.h
         include/duk_renderer/pipeline/pipeline_data_source.h
         include/duk_renderer/pipeline/shader.h
         include/duk_renderer/command/command_scheduler.h
@@ -26,6 +26,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/image_data_source.h
         include/duk_renderer/renderer_capabilities.h
         include/duk_renderer/resource.h
+        include/duk_renderer/pipeline/compute_pipeline.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -34,7 +35,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/renderer_error.cpp
         src/duk_renderer/vertex_data_source.cpp
         src/duk_renderer/vertex_layout.cpp
-        src/duk_renderer/pipeline/pipeline.cpp
+        src/duk_renderer/pipeline/graphics_pipeline.cpp
         src/duk_renderer/pipeline/pipeline_data_source.cpp
         src/duk_renderer/pipeline/shader.cpp
         src/duk_renderer/command/command_queue.cpp
@@ -75,8 +76,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vulkan/vulkan_handle_pool.h
         src/duk_renderer/vulkan/vulkan_handle_pool.cpp
         src/duk_renderer/vulkan/vulkan_events.h
-        src/duk_renderer/vulkan/pipeline/vulkan_pipeline.h
-        src/duk_renderer/vulkan/pipeline/vulkan_pipeline.cpp
+        src/duk_renderer/vulkan/pipeline/vulkan_graphics_pipeline.h
+        src/duk_renderer/vulkan/pipeline/vulkan_graphics_pipeline.cpp
         src/duk_renderer/vulkan/pipeline/vulkan_shader.h
         src/duk_renderer/vulkan/pipeline/vulkan_shader.cpp
         src/duk_renderer/vulkan/vulkan_flags.h
@@ -93,6 +94,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vulkan/vulkan_renderer_capabilities.h
         src/duk_renderer/vulkan/vulkan_renderer_capabilities.cpp
         src/duk_renderer/resource.cpp
+        src/duk_renderer/pipeline/compute_pipeline.cpp
+        src/duk_renderer/vulkan/pipeline/vulkan_compute_pipeline.h
+        src/duk_renderer/vulkan/pipeline/vulkan_compute_pipeline.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

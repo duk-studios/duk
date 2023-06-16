@@ -7,7 +7,7 @@
 - Command:
   - Base class for everything that is executed in the GPU. Most of the time these are CommandBuffers, but can also be specialized commands for presentation (e.g. acquiring a swapchain image, presenting)
 - CommandQueue:
-  - Wraps a TaskQueue (see duk_task) to offload work to a different thread, provides a CommandBuffer as a parameter on enqueue callback;
+  - Wraps a TaskQueue (see duk_task) to offload work to a different thread, provides a CommandBuffer as a parameter on submit callback;
 - CommandBuffer:
   - All rendering is recorded in CommandBuffers,
 - CommandScheduler:
@@ -29,7 +29,7 @@
       - At first, only have implementation for loading from disk, in the future we'll have code generation, and static content will be possible.
   - Shader:
     - Contains information related to required resources and attributes.
-- Pipeline:
+- GraphicsPipeline:
   - Describes all of the current pipeline state, can be modified on the fly while rendering.
 ### Vulkan
 - VulkanCommandScheduler:

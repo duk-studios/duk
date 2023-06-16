@@ -2,6 +2,8 @@
 /// application.cpp
 
 #include <duk_sample/application.h>
+#include <duk_sample/color_shader_data_source.h>
+#include <duk_sample/compute_shader_data_source.h>
 #include <duk_platform/window.h>
 #include <duk_renderer/pipeline/std_shader_data_source.h>
 #include <duk_renderer/vertex_types.h>
@@ -19,52 +21,6 @@ struct Transform {
 };
 
 namespace detail {
-
-std::vector<uint8_t> load_bytes(const char* filepath) {
-    std::ifstream file(filepath, std::ios::ate | std::ios::binary);
-
-    if (!file) {
-        std::ostringstream oss;
-        oss << "failed to open file at: " << filepath;
-        throw std::runtime_error(oss.str());
-    }
-
-    std::vector<uint8_t> buffer(file.tellg());
-    file.seekg(0);
-    file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
-
-    return buffer;
-}
-
-duk::renderer::StdShaderDataSource load_color_shader() {
-    duk::renderer::StdShaderDataSource dataSource;
-
-    dataSource.insert_spir_v_code(duk::renderer::Shader::Module::VERTEX, load_bytes("triangle.vert.spv"));
-    dataSource.insert_spir_v_code(duk::renderer::Shader::Module::FRAGMENT, load_bytes("triangle.frag.spv"));
-
-    dataSource.insert_vertex_attribute(duk::renderer::VertexAttribute::Format::VEC2);
-    dataSource.insert_vertex_attribute(duk::renderer::VertexAttribute::Format::VEC4);
-    dataSource.insert_vertex_attribute(duk::renderer::VertexAttribute::Format::VEC2);
-
-    duk::renderer::DescriptorSetDescription descriptorSetDescription;
-    auto& transformBinding = descriptorSetDescription.bindings.emplace_back();
-    transformBinding.type = renderer::DescriptorType::UNIFORM_BUFFER;
-    transformBinding.moduleMask = duk::renderer::Shader::Module::VERTEX;
-
-    auto& uniformBinding = descriptorSetDescription.bindings.emplace_back();
-    uniformBinding.type = duk::renderer::DescriptorType::UNIFORM_BUFFER;
-    uniformBinding.moduleMask = duk::renderer::Shader::Module::FRAGMENT;
-
-    auto& samplerBinding = descriptorSetDescription.bindings.emplace_back();
-    samplerBinding.type = duk::renderer::DescriptorType::IMAGE_SAMPLER;
-    samplerBinding.moduleMask = duk::renderer::Shader::Module::FRAGMENT;
-
-    dataSource.insert_descriptor_set_description(descriptorSetDescription);
-
-    dataSource.update_hash();
-
-    return dataSource;
-}
 
 struct PixelRGBA {
     uint8_t r;
@@ -104,6 +60,22 @@ struct UniformBuffer {
     glm::vec4 color;
 };
 
+std::vector<uint8_t> Application::load_bytes(const char* filepath) {
+    std::ifstream file(filepath, std::ios::ate | std::ios::binary);
+
+    if (!file) {
+        std::ostringstream oss;
+        oss << "failed to open file at: " << filepath;
+        throw std::runtime_error(oss.str());
+    }
+
+    std::vector<uint8_t> buffer(file.tellg());
+    file.seekg(0);
+    file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
+
+    return buffer;
+}
+
 Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     m_logger(duk::log::DEBUG),
     m_run(false) {
@@ -135,19 +107,19 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         m_depthImage->update(&depthImageDataSource);
 
 
-        duk::renderer::Pipeline::Viewport viewport = {};
+        duk::renderer::GraphicsPipeline::Viewport viewport = {};
         viewport.extent = {width, height};
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
-        m_pipeline->set_viewport(viewport);
+        m_graphicsPipeline->set_viewport(viewport);
 
-        duk::renderer::Pipeline::Scissor scissor = {};
+        duk::renderer::GraphicsPipeline::Scissor scissor = {};
         scissor.extent = viewport.extent;
 
-        m_pipeline->set_scissor(scissor);
+        m_graphicsPipeline->set_scissor(scissor);
 
-        m_pipeline->flush();
+        m_graphicsPipeline->flush();
     });
 
     duk::renderer::RendererCreateInfo rendererCreateInfo = {};
@@ -164,10 +136,15 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_scheduler = check_expected_result(m_renderer->create_command_scheduler());
 
-    duk::renderer::Renderer::CommandQueueCreateInfo commandQueueCreateInfo = {};
-    commandQueueCreateInfo.type = duk::renderer::CommandQueue::Type::GRAPHICS;
+    duk::renderer::Renderer::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
+    mainCommandQueueCreateInfo.type = duk::renderer::CommandQueue::Type::GRAPHICS;
 
-    m_mainCommandQueue = check_expected_result(m_renderer->create_command_queue(commandQueueCreateInfo));
+    m_mainCommandQueue = check_expected_result(m_renderer->create_command_queue(mainCommandQueueCreateInfo));
+
+    duk::renderer::Renderer::CommandQueueCreateInfo computeCommandQueue = {};
+    computeCommandQueue.type = duk::renderer::CommandQueue::Type::COMPUTE;
+
+    m_computeQueue = check_expected_result(m_renderer->create_command_queue(computeCommandQueue));
 
     duk::renderer::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
     depthImageDataSource.update_hash();
@@ -217,26 +194,38 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_frameBuffer = check_expected_result(m_renderer->create_frame_buffer(frameBufferCreateInfo));
 
-    auto colorShaderDataSource = detail::load_color_shader();
+    ColorShaderDataSource colorShaderDataSource;
 
     duk::renderer::Renderer::ShaderCreateInfo colorShaderCreateInfo = {};
     colorShaderCreateInfo.shaderDataSource = &colorShaderDataSource;
 
     m_colorShader = check_expected_result(m_renderer->create_shader(colorShaderCreateInfo));
 
-    duk::renderer::Renderer::PipelineCreateInfo pipelineCreateInfo = {};
+    ComputeShaderDataSource computeShaderDataSource;
+
+    duk::renderer::Renderer::ShaderCreateInfo computeShaderCreateInfo = {};
+    computeShaderCreateInfo.shaderDataSource = &computeShaderDataSource;
+
+    m_computeShader = check_expected_result(m_renderer->create_shader(computeShaderCreateInfo));
+
+    duk::renderer::Renderer::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
     pipelineCreateInfo.viewport.extent = {m_window->width(), m_window->height()};
     pipelineCreateInfo.viewport.maxDepth = 1.0f;
     pipelineCreateInfo.viewport.minDepth = 0.0f;
     pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
-    pipelineCreateInfo.cullModeMask = duk::renderer::Pipeline::CullMode::BACK;
-    pipelineCreateInfo.fillMode = duk::renderer::Pipeline::FillMode::FILL;
-    pipelineCreateInfo.topology = duk::renderer::Pipeline::Topology::TRIANGLE_LIST;
+    pipelineCreateInfo.cullModeMask = duk::renderer::GraphicsPipeline::CullMode::BACK;
+    pipelineCreateInfo.fillMode = duk::renderer::GraphicsPipeline::FillMode::FILL;
+    pipelineCreateInfo.topology = duk::renderer::GraphicsPipeline::Topology::TRIANGLE_LIST;
     pipelineCreateInfo.shader = m_colorShader.get();
     pipelineCreateInfo.renderPass = m_renderPass.get();
     pipelineCreateInfo.depthTesting = true;
 
-    m_pipeline = check_expected_result(m_renderer->create_pipeline(pipelineCreateInfo));
+    m_graphicsPipeline = check_expected_result(m_renderer->create_graphics_pipeline(pipelineCreateInfo));
+
+    duk::renderer::Renderer::ComputePipelineCreateInfo computePipelineCreateInfo = {};
+    computePipelineCreateInfo.shader = m_computeShader.get();
+
+    m_computePipeline = check_expected_result(m_renderer->create_compute_pipeline(computePipelineCreateInfo));
 
     std::array<duk::renderer::Vertex2DColorUV, 4> vertices = {};
     vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
@@ -296,30 +285,31 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     duk::renderer::Renderer::ImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageDataSource = &imageDataSource;
-    imageCreateInfo.usage = duk::renderer::Image::Usage::SAMPLED;
-    imageCreateInfo.initialLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
-    imageCreateInfo.updateFrequency = duk::renderer::Image::UpdateFrequency::STATIC;
+    imageCreateInfo.usage = duk::renderer::Image::Usage::SAMPLED_STORAGE;
+    imageCreateInfo.initialLayout = duk::renderer::Image::Layout::GENERAL;
+    imageCreateInfo.updateFrequency = duk::renderer::Image::UpdateFrequency::DEVICE_DYNAMIC;
     imageCreateInfo.commandQueue = m_mainCommandQueue.get();
 
     m_image = check_expected_result(m_renderer->create_image(imageCreateInfo));
+
+    duk::renderer::Renderer::DescriptorSetCreateInfo computeDescriptorSet = {};
+    computeDescriptorSet.description = computeShaderDataSource.descriptor_set_descriptions().at(0);
+
+    m_computeDescriptorSet = check_expected_result(m_renderer->create_descriptor_set(computeDescriptorSet));
+    m_computeDescriptorSet->set(0, duk::renderer::Descriptor::storage_image(m_image.get(), duk::renderer::Image::Layout::GENERAL));
+    m_computeDescriptorSet->flush();
 
     duk::renderer::Renderer::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
     descriptorSetCreateInfo.description = colorShaderDataSource.descriptor_set_descriptions().at(0);
 
     m_descriptorSet = check_expected_result(m_renderer->create_descriptor_set(descriptorSetCreateInfo));
 
-    duk::renderer::Descriptor transformDescriptor(m_transformUniformBuffer.get());
-    m_descriptorSet->set(0, transformDescriptor);
-
-    duk::renderer::Descriptor materialDescriptor(m_materialUniformBuffer.get());
-    m_descriptorSet->set(1, materialDescriptor);
-
+    m_descriptorSet->set(0, duk::renderer::Descriptor::uniform_buffer(m_transformUniformBuffer.get()));
+    m_descriptorSet->set(1, duk::renderer::Descriptor::uniform_buffer(m_materialUniformBuffer.get()));
     duk::renderer::Sampler sampler = {};
     sampler.filter = duk::renderer::Sampler::Filter::NEAREST;
     sampler.wrapMode = duk::renderer::Sampler::WrapMode::REPEAT;
-
-    duk::renderer::Descriptor colorImageDescriptor(m_image.get(), duk::renderer::Image::Layout::SHADER_READ_ONLY, sampler);
-    m_descriptorSet->set(2, colorImageDescriptor);
+    m_descriptorSet->set(2, duk::renderer::Descriptor::image_sampler(m_image.get(), renderer::Image::Layout::GENERAL, sampler));
 
     m_descriptorSet->flush();
 }
@@ -369,13 +359,31 @@ void Application::draw() {
     m_scheduler->begin();
 
     auto acquireImageCommand = m_scheduler->schedule(m_renderer->acquire_image_command());
+    auto computePass = m_scheduler->schedule(compute_pass());
     auto mainRenderPassCommand = m_scheduler->schedule(main_render_pass());
     auto presentCommand = m_scheduler->schedule(m_renderer->present_command());
 
-    acquireImageCommand.then(mainRenderPassCommand).then(presentCommand);
+    acquireImageCommand
+        .then(computePass)
+        .then(mainRenderPassCommand)
+        .then(presentCommand);
 
     m_scheduler->flush();
 
+}
+
+duk::renderer::FutureCommand Application::compute_pass() {
+    return m_computeQueue->submit([this](duk::renderer::CommandBuffer* commandBuffer) {
+        commandBuffer->begin();
+
+        commandBuffer->bind_compute_pipeline(m_computePipeline.get());
+
+        commandBuffer->bind_descriptor_set(m_computeDescriptorSet.get(), 0);
+
+        commandBuffer->dispatch(m_image->width(), m_image->height(), 1);
+
+        commandBuffer->end();
+    });
 }
 
 duk::renderer::FutureCommand Application::main_render_pass() {
@@ -388,7 +396,7 @@ duk::renderer::FutureCommand Application::main_render_pass() {
 
         commandBuffer->begin_render_pass(renderPassBeginInfo);
 
-        commandBuffer->bind_pipeline(m_pipeline.get());
+        commandBuffer->bind_graphics_pipeline(m_graphicsPipeline.get());
 
         commandBuffer->bind_vertex_buffer(m_vertexBuffer.get());
 

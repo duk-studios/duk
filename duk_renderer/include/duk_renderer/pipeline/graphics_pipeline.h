@@ -15,7 +15,7 @@ namespace duk::renderer {
 
 class Shader;
 
-class Pipeline {
+class GraphicsPipeline {
 public:
 
     struct Stage {
@@ -127,7 +127,7 @@ public:
 
 public:
 
-    virtual ~Pipeline();
+    virtual ~GraphicsPipeline();
 
     virtual void set_viewport(const Viewport& viewport) = 0;
 
