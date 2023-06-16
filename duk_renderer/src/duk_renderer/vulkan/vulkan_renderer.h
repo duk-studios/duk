@@ -6,7 +6,6 @@
 #define DUK_RENDERER_VULKAN_RENDERER_H
 
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/pipeline/graphics_pipeline.h>
 #include <duk_renderer/vulkan/vulkan_debug_messenger.h>
 #include <duk_renderer/vulkan/vulkan_renderer_capabilities.h>
 #include <duk_renderer/vulkan/vulkan_import.h>
@@ -49,7 +48,7 @@ public:
 
     DUK_NO_DISCARD ExpectedShader create_shader(const ShaderCreateInfo& shaderCreateInfo) override;
 
-    DUK_NO_DISCARD ExpectedPipeline create_pipeline(const PipelineCreateInfo& pipelineCreateInfo) override;
+    DUK_NO_DISCARD ExpectedGraphicsPipeline create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) override;
 
     DUK_NO_DISCARD ExpectedRenderPass create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) override;
 

@@ -32,7 +32,7 @@ VkPolygonMode convert_fill_mode(GraphicsPipeline::FillMode fillMode);
 class VulkanShader;
 class VulkanRenderPass;
 
-struct VulkanPipelineCreateInfo {
+struct VulkanGraphicsPipelineCreateInfo {
     VkDevice device;
     uint32_t imageCount;
     VulkanShader* shader;
@@ -49,7 +49,7 @@ struct VulkanPipelineCreateInfo {
 class VulkanGraphicsPipeline : public GraphicsPipeline {
 public:
 
-    explicit VulkanGraphicsPipeline(const VulkanPipelineCreateInfo& pipelineCreateInfo);
+    explicit VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreateInfo& pipelineCreateInfo);
 
     ~VulkanGraphicsPipeline() override;
 
@@ -62,8 +62,6 @@ public:
     void update(uint32_t imageIndex);
 
     DUK_NO_DISCARD const VkPipeline& handle(uint32_t imageIndex) const;
-
-    DUK_NO_DISCARD VkPipelineBindPoint bind_point() const;
 
     DUK_NO_DISCARD VkPipelineLayout pipeline_layout() const;
 
@@ -114,7 +112,6 @@ private:
     GraphicsPipeline::FillMode m_fillMode;
     bool m_depthTesting;
     std::vector<VkPipeline> m_pipelines;
-    VkPipelineBindPoint m_pipelineBindPoint;
     duk::hash::Hash m_hash;
     std::vector<duk::hash::Hash> m_pipelineHashes;
 };

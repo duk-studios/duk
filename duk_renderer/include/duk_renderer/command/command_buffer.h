@@ -39,7 +39,7 @@ public:
 
     virtual void end_render_pass() = 0;
 
-    virtual void bind_pipeline(GraphicsPipeline* pipeline) = 0;
+    virtual void bind_graphics_pipeline(GraphicsPipeline* pipeline) = 0;
 
     virtual void bind_vertex_buffer(Buffer* buffer) = 0;
 

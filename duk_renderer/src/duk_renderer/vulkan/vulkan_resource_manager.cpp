@@ -41,7 +41,7 @@ VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateIn
             detail::create(m_images, m_imageCount);
             detail::create(m_descriptorSets, m_imageCount);
             detail::create(m_frameBuffers, m_imageCount);
-            detail::create(m_pipelines, m_imageCount);
+            detail::create(m_graphicsPipelines, m_imageCount);
         });
 
         m_listener.listen(*m_swapchain->clean_event(), [this] {
@@ -49,10 +49,10 @@ VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateIn
             detail::clean(m_descriptorSets);
             detail::clean(m_images);
             detail::clean(m_buffers);
-            detail::clean(m_pipelines);
+            detail::clean(m_graphicsPipelines);
             clean(m_frameBuffersToDelete);
             clean(m_descriptorSetsToDelete);
-            clean(m_pipelinesToDelete);
+            clean(m_graphicsPipelinesToDelete);
             clean(m_imagesToDelete);
             clean(m_buffersToDelete);
             clean(m_renderPassesToDelete);
@@ -69,7 +69,7 @@ VulkanResourceManager::~VulkanResourceManager() {
     assert(m_descriptorSets.empty());
     assert(m_images.empty());
     assert(m_buffers.empty());
-    assert(m_pipelines.empty());
+    assert(m_graphicsPipelines.empty());
 }
 
 void VulkanResourceManager::clean(uint32_t imageIndex) {
@@ -77,7 +77,7 @@ void VulkanResourceManager::clean(uint32_t imageIndex) {
     clean(m_frameBuffersToDelete, imageIndex);
     clean(m_imagesToDelete, imageIndex);
     clean(m_buffersToDelete, imageIndex);
-    clean(m_pipelinesToDelete, imageIndex);
+    clean(m_graphicsPipelinesToDelete, imageIndex);
     clean(m_renderPassesToDelete, imageIndex);
 }
 
@@ -93,8 +93,8 @@ std::shared_ptr<VulkanDescriptorSet> VulkanResourceManager::create(const VulkanD
     return create(m_descriptorSets, m_descriptorSetsToDelete, descriptorSetCreateInfo);
 }
 
-std::shared_ptr<VulkanGraphicsPipeline> VulkanResourceManager::create(const VulkanPipelineCreateInfo& pipelineCreateInfo) {
-    return create(m_pipelines, m_pipelinesToDelete, pipelineCreateInfo);
+std::shared_ptr<VulkanGraphicsPipeline> VulkanResourceManager::create(const VulkanGraphicsPipelineCreateInfo& pipelineCreateInfo) {
+    return create(m_graphicsPipelines, m_graphicsPipelinesToDelete, pipelineCreateInfo);
 }
 
 
@@ -113,5 +113,4 @@ std::set<uint32_t> VulkanResourceManager::image_indices_set() const {
     }
     return pendingIndices;
 }
-
 }

@@ -102,7 +102,7 @@ VkPolygonMode convert_fill_mode(GraphicsPipeline::FillMode fillMode) {
 
 }
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanPipelineCreateInfo& pipelineCreateInfo) :
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreateInfo& pipelineCreateInfo) :
     m_device(pipelineCreateInfo.device),
     m_shader(pipelineCreateInfo.shader),
     m_renderPass(pipelineCreateInfo.renderPass),
@@ -114,11 +114,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanPipelineCreateInfo& p
     m_fillMode(pipelineCreateInfo.fillMode),
     m_depthTesting(pipelineCreateInfo.depthTesting),
     m_hash(duk::hash::UndefinedHash) {
-    if (m_shader->is_graphics_shader()) {
-        m_pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    }
-    else {
-        throw std::invalid_argument("unsupported shader type");
+    if (!m_shader->is_graphics_shader()) {
+        throw std::invalid_argument("invalid shader type for GraphicsPipeline");
     }
     create(pipelineCreateInfo.imageCount);
     update_hash();
@@ -156,84 +153,6 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
     }
     pipelineHash = m_hash;
 
-    switch (m_pipelineBindPoint) {
-        case VK_PIPELINE_BIND_POINT_GRAPHICS:
-            update_graphics_pipeline(imageIndex);
-            break;
-        default:
-            throw std::logic_error("tried to update an unsupported VulkanPipeline");
-    }
-}
-
-const VkPipeline& VulkanGraphicsPipeline::handle(uint32_t imageIndex) const {
-    return m_pipelines[imageIndex];
-}
-
-VkPipelineBindPoint VulkanGraphicsPipeline::bind_point() const {
-    return m_pipelineBindPoint;
-}
-
-VkPipelineLayout VulkanGraphicsPipeline::pipeline_layout() const {
-    return m_shader->pipeline_layout();
-}
-
-void VulkanGraphicsPipeline::set_viewport(const GraphicsPipeline::Viewport& viewport) {
-    m_viewport = viewport;
-}
-
-const GraphicsPipeline::Viewport& VulkanGraphicsPipeline::viewport() const {
-    return m_viewport;
-}
-
-void VulkanGraphicsPipeline::set_scissor(const GraphicsPipeline::Scissor& scissor) {
-    m_scissor = scissor;
-}
-
-const GraphicsPipeline::Scissor& VulkanGraphicsPipeline::scissor() const {
-    return m_scissor;
-}
-
-void VulkanGraphicsPipeline::set_blend(const GraphicsPipeline::Blend& blend) {
-    m_blend = blend;
-}
-
-const GraphicsPipeline::Blend& VulkanGraphicsPipeline::blend() const {
-    return m_blend;
-}
-
-void VulkanGraphicsPipeline::set_cull_mode(GraphicsPipeline::CullMode::Mask cullModeMask) {
-    m_cullModeMask = cullModeMask;
-}
-
-GraphicsPipeline::CullMode::Mask VulkanGraphicsPipeline::cull_mode() {
-    return m_cullModeMask;
-}
-
-void VulkanGraphicsPipeline::set_topology(GraphicsPipeline::Topology topology) {
-    m_topology = topology;
-}
-
-GraphicsPipeline::Topology VulkanGraphicsPipeline::topology() const {
-    return m_topology;
-}
-
-void VulkanGraphicsPipeline::set_fill_mode(GraphicsPipeline::FillMode fillMode) {
-    m_fillMode = fillMode;
-}
-
-GraphicsPipeline::FillMode VulkanGraphicsPipeline::fill_mode() const {
-    return m_fillMode;
-}
-
-void VulkanGraphicsPipeline::flush() {
-    update_hash();
-}
-
-hash::Hash VulkanGraphicsPipeline::hash() const {
-    return m_hash;
-}
-
-void VulkanGraphicsPipeline::update_graphics_pipeline(uint32_t imageIndex) {
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
     {
         auto& shaderModules = m_shader->shader_modules();
@@ -366,6 +285,69 @@ void VulkanGraphicsPipeline::update_graphics_pipeline(uint32_t imageIndex) {
     }
 }
 
+const VkPipeline& VulkanGraphicsPipeline::handle(uint32_t imageIndex) const {
+    return m_pipelines[imageIndex];
+}
+
+VkPipelineLayout VulkanGraphicsPipeline::pipeline_layout() const {
+    return m_shader->pipeline_layout();
+}
+
+void VulkanGraphicsPipeline::set_viewport(const GraphicsPipeline::Viewport& viewport) {
+    m_viewport = viewport;
+}
+
+const GraphicsPipeline::Viewport& VulkanGraphicsPipeline::viewport() const {
+    return m_viewport;
+}
+
+void VulkanGraphicsPipeline::set_scissor(const GraphicsPipeline::Scissor& scissor) {
+    m_scissor = scissor;
+}
+
+const GraphicsPipeline::Scissor& VulkanGraphicsPipeline::scissor() const {
+    return m_scissor;
+}
+
+void VulkanGraphicsPipeline::set_blend(const GraphicsPipeline::Blend& blend) {
+    m_blend = blend;
+}
+
+const GraphicsPipeline::Blend& VulkanGraphicsPipeline::blend() const {
+    return m_blend;
+}
+
+void VulkanGraphicsPipeline::set_cull_mode(GraphicsPipeline::CullMode::Mask cullModeMask) {
+    m_cullModeMask = cullModeMask;
+}
+
+GraphicsPipeline::CullMode::Mask VulkanGraphicsPipeline::cull_mode() {
+    return m_cullModeMask;
+}
+
+void VulkanGraphicsPipeline::set_topology(GraphicsPipeline::Topology topology) {
+    m_topology = topology;
+}
+
+GraphicsPipeline::Topology VulkanGraphicsPipeline::topology() const {
+    return m_topology;
+}
+
+void VulkanGraphicsPipeline::set_fill_mode(GraphicsPipeline::FillMode fillMode) {
+    m_fillMode = fillMode;
+}
+
+GraphicsPipeline::FillMode VulkanGraphicsPipeline::fill_mode() const {
+    return m_fillMode;
+}
+
+void VulkanGraphicsPipeline::flush() {
+    update_hash();
+}
+
+hash::Hash VulkanGraphicsPipeline::hash() const {
+    return m_hash;
+}
 
 void VulkanGraphicsPipeline::update_hash() {
     m_hash = 0;

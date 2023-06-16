@@ -198,9 +198,9 @@ ExpectedShader VulkanRenderer::create_shader(const Renderer::ShaderCreateInfo& s
     }
 }
 
-ExpectedPipeline VulkanRenderer::create_pipeline(const PipelineCreateInfo& pipelineCreateInfo) {
+ExpectedGraphicsPipeline VulkanRenderer::create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) {
     try {
-        VulkanPipelineCreateInfo vulkanPipelineCreateInfo = {};
+        VulkanGraphicsPipelineCreateInfo vulkanPipelineCreateInfo = {};
         vulkanPipelineCreateInfo.device = m_device;
         vulkanPipelineCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
         vulkanPipelineCreateInfo.shader = dynamic_cast<VulkanShader*>(pipelineCreateInfo.shader);

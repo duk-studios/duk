@@ -45,7 +45,7 @@ class Renderer;
 using ExpectedRenderer = tl::expected<std::shared_ptr<Renderer>, RendererError>;
 using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
 using ExpectedShader = tl::expected<std::shared_ptr<Shader>, RendererError>;
-using ExpectedPipeline = tl::expected<std::shared_ptr<GraphicsPipeline>, RendererError>;
+using ExpectedGraphicsPipeline = tl::expected<std::shared_ptr<GraphicsPipeline>, RendererError>;
 using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
 using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
 using ExpectedBuffer = tl::expected<std::shared_ptr<Buffer>, RendererError>;
@@ -101,7 +101,7 @@ public:
 
     DUK_NO_DISCARD virtual ExpectedShader create_shader(const ShaderCreateInfo& shaderCreateInfo) = 0;
 
-    struct PipelineCreateInfo {
+    struct GraphicsPipelineCreateInfo {
         Shader* shader;
         RenderPass* renderPass;
         GraphicsPipeline::Viewport viewport;
@@ -113,7 +113,7 @@ public:
         bool depthTesting;
     };
 
-    DUK_NO_DISCARD virtual ExpectedPipeline create_pipeline(const PipelineCreateInfo& pipelineCreateInfo) = 0;
+    DUK_NO_DISCARD virtual ExpectedGraphicsPipeline create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) = 0;
 
     struct RenderPassCreateInfo {
         AttachmentDescription* colorAttachments;
