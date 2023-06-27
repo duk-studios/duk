@@ -11,8 +11,6 @@
 
 namespace duk::renderer {
 
-namespace vk {
-
 VkDescriptorType convert_descriptor_type(DescriptorType descriptorType) {
     VkDescriptorType converted;
     switch(descriptorType) {
@@ -25,8 +23,6 @@ VkDescriptorType convert_descriptor_type(DescriptorType descriptorType) {
             throw std::logic_error("tried to convert a unsupported DescriptorType");
     }
     return converted;
-}
-
 }
 
 VulkanDescriptorSetLayoutCache::VulkanDescriptorSetLayoutCache(const VulkanDescriptorSetLayoutCacheCreateInfo& descriptorSetLayoutCacheCreateInfo) :
@@ -74,8 +70,8 @@ const VulkanDescriptorSetLayoutCache::CacheEntry& VulkanDescriptorSetLayoutCache
         VkDescriptorSetLayoutBinding binding = {};
         binding.binding = bindings.size();
         binding.descriptorCount = 1;
-        binding.stageFlags = vk::convert_module_mask(descriptorBinding.moduleMask);
-        binding.descriptorType = vk::convert_descriptor_type(descriptorBinding.type);
+        binding.stageFlags = convert_module_mask(descriptorBinding.moduleMask);
+        binding.descriptorType = convert_descriptor_type(descriptorBinding.type);
         bindings.push_back(binding);
     }
 
@@ -205,7 +201,7 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
         VkWriteDescriptorSet writeDescriptor = {};
         writeDescriptor.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         writeDescriptor.dstBinding = writeDescriptors.size();
-        writeDescriptor.descriptorType = vk::convert_descriptor_type(descriptor.type());
+        writeDescriptor.descriptorType = convert_descriptor_type(descriptor.type());
         writeDescriptor.descriptorCount = 1;
         writeDescriptor.dstArrayElement = 0;
         writeDescriptor.dstSet = descriptorSet;
@@ -231,11 +227,11 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
                 auto& bindingDescription = m_descriptorSetDescription.bindings[i];
                 auto image = dynamic_cast<VulkanImage*>(descriptor.image());
 
-                image->update(imageIndex, vk::convert_module_mask(bindingDescription.moduleMask));
+                image->update(imageIndex, convert_module_mask(bindingDescription.moduleMask));
 
                 VkDescriptorImageInfo imageInfo = {};
                 imageInfo.imageView = image->image_view(imageIndex);
-                imageInfo.imageLayout = vk::convert_layout(descriptor.image_layout());
+                imageInfo.imageLayout = convert_layout(descriptor.image_layout());
                 if (descriptor.type() == DescriptorType::IMAGE_SAMPLER) {
                     imageInfo.sampler = m_samplerCache->get(descriptor.sampler());
                 }

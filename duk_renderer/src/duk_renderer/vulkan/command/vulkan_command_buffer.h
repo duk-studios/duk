@@ -60,6 +60,8 @@ public:
 
     void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
 
+    void pipeline_barrier(const PipelineBarrier& barrier) override;
+
     // Command overrides
     DUK_NO_DISCARD Submitter* submitter_ptr() override;
 

@@ -5,6 +5,7 @@
 #define DUK_RENDERER_COMMAND_SCHEDULER_H
 
 #include <duk_renderer/command/command_queue.h>
+#include <duk_renderer/pipeline/pipeline_flags.h>
 
 #include <grapphs/adjacency_list.h>
 
@@ -18,7 +19,9 @@ public:
     explicit ScheduledCommand(CommandScheduler* owner, std::size_t index);
     // schedules "next" to be submitted after "this",
     // returns "next", so we can chain up multiple commands
-    ScheduledCommand& then(ScheduledCommand& next);
+    ScheduledCommand& then(ScheduledCommand& next, PipelineStage::Mask waitStages = PipelineStage::BOTTOM_OF_PIPE);
+
+    ScheduledCommand& wait(ScheduledCommand& commandToWait, PipelineStage::Mask waitStages = PipelineStage::BOTTOM_OF_PIPE);
 
 private:
     friend class CommandScheduler;
@@ -38,7 +41,7 @@ public:
     virtual ScheduledCommand schedule(FutureCommand&& futureCommand) = 0;
 
     /// schedules a command to be executed AFTER given scheduled command
-    void schedule_after(const ScheduledCommand& before, const ScheduledCommand& after);
+    void schedule_after(const ScheduledCommand& before, const ScheduledCommand& after, PipelineStage::Mask waitStages);
 
     // flushes all scheduled commands, taking into account described dependencies
     virtual void flush() = 0;
@@ -46,7 +49,7 @@ public:
 
 protected:
 
-    virtual void schedule_after(std::size_t before, std::size_t after) = 0;
+    virtual void schedule_after(std::size_t before, std::size_t after, PipelineStage::Mask waitStages) = 0;
 };
 
 }

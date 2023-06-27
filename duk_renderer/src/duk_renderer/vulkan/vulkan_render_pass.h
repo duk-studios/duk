@@ -15,13 +15,9 @@
 
 namespace duk::renderer {
 
-namespace vk {
-
 VkAttachmentStoreOp convert_store_op(StoreOp storeOp);
 
 VkAttachmentLoadOp convert_load_op(LoadOp loadOp);
-
-}
 
 struct VulkanRenderPassCreateInfo {
     AttachmentDescription* colorAttachments;

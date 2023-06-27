@@ -49,6 +49,8 @@ private:
 
     duk::renderer::FutureCommand compute_pass();
 
+    duk::renderer::FutureCommand reacquire_compute_resources();
+
 private:
     duk::log::Logger m_logger;
     duk::events::EventListener m_listener;

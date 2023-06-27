@@ -31,9 +31,9 @@ public:
 
     ScheduledCommand schedule(FutureCommand&& futureCommand) override;
 
-    void schedule_after(std::size_t before, std::size_t after) override;
-
     void flush() override;
+
+    void schedule_after(std::size_t before, std::size_t after, PipelineStage::Mask waitStages) override;
 
 private:
 
@@ -53,7 +53,7 @@ private:
     };
 
     struct CommandConnection {
-        // nothing for now
+        PipelineStage::Mask waitStages;
     };
 
     struct FrameCreateInfo {
@@ -80,7 +80,7 @@ private:
 
         std::size_t schedule_command(FutureCommand&& commandNode);
 
-        void schedule_after(std::size_t before, std::size_t after);
+        void schedule_after(std::size_t before, std::size_t after, PipelineStage::Mask waitStages);
 
     private:
         VkDevice m_device;
@@ -93,7 +93,17 @@ private:
         gpp::adjacency_list<std::shared_ptr<CommandNode>, CommandConnection> m_scheduledCommands;
         std::set<std::size_t> m_independentNodes;
 
-        std::unordered_map<std::size_t, std::set<std::size_t>> m_commandDependencies;
+        struct Dependency {
+            std::size_t index;
+            PipelineStage::Mask waitStages;
+
+            bool operator<(const Dependency& rhs) const noexcept;
+
+            bool operator==(const Dependency& rhs) const noexcept;
+        };
+
+        // maps a command node to a set of command nodes which its dependencies (e.g. a set of command nodes which we must wait for its semaphores)
+        std::unordered_map<std::size_t, std::set<Dependency>> m_commandDependencies;
 
         // fences to check if this frame is being executed
         std::vector<VkFence> m_fences;

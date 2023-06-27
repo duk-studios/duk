@@ -6,8 +6,6 @@
 
 namespace duk::renderer {
 
-namespace vk {
-
 VkAttachmentStoreOp convert_store_op(StoreOp storeOp) {
     VkAttachmentStoreOp converted;
     switch (storeOp){
@@ -35,18 +33,16 @@ VkAttachmentLoadOp convert_load_op(LoadOp loadOp) {
 
 VkAttachmentDescription convert_attachment_description(const AttachmentDescription& attachmentDescription) {
     VkAttachmentDescription converted = {};
-    converted.format = vk::convert_pixel_format(attachmentDescription.format);
-    converted.initialLayout = vk::convert_layout(attachmentDescription.initialLayout);
-    converted.finalLayout = vk::convert_layout(attachmentDescription.finalLayout);
+    converted.format = convert_pixel_format(attachmentDescription.format);
+    converted.initialLayout = convert_layout(attachmentDescription.initialLayout);
+    converted.finalLayout = convert_layout(attachmentDescription.finalLayout);
     converted.samples = VK_SAMPLE_COUNT_1_BIT;
-    converted.loadOp = vk::convert_load_op(attachmentDescription.loadOp);
-    converted.storeOp = vk::convert_store_op(attachmentDescription.storeOp);
-    converted.storeOp = vk::convert_store_op(attachmentDescription.storeOp);
+    converted.loadOp = convert_load_op(attachmentDescription.loadOp);
+    converted.storeOp = convert_store_op(attachmentDescription.storeOp);
+    converted.storeOp = convert_store_op(attachmentDescription.storeOp);
     converted.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     converted.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     return converted;
-}
-
 }
 
 VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRenderPassCreateInfo) :
@@ -60,13 +56,13 @@ VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRende
 
     std::vector<VkAttachmentDescription> attachments(m_colorAttachments.size());
     for (uint32_t i = 0; i < attachments.size(); i++) {
-        attachments[i] = vk::convert_attachment_description(m_colorAttachments[i]);
+        attachments[i] = convert_attachment_description(m_colorAttachments[i]);
     }
 
     std::vector<VkAttachmentReference> colorAttachmentReferences(m_colorAttachments.size());
 
     for (uint32_t i = 0; i < colorAttachmentReferences.size(); i++) {
-        colorAttachmentReferences[i].layout = vk::convert_layout(m_colorAttachments[i].layout);
+        colorAttachmentReferences[i].layout = convert_layout(m_colorAttachments[i].layout);
         colorAttachmentReferences[i].attachment = i;
     }
 
@@ -78,9 +74,9 @@ VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRende
     subpassDescription.pColorAttachments = colorAttachmentReferences.data();
 
     if (m_depthAttachment.has_value()) {
-        attachments.push_back(vk::convert_attachment_description(m_depthAttachment.value()));
+        attachments.push_back(convert_attachment_description(m_depthAttachment.value()));
 
-        depthAttachmentReference.layout = vk::convert_layout(m_depthAttachment->layout);
+        depthAttachmentReference.layout = convert_layout(m_depthAttachment->layout);
         depthAttachmentReference.attachment = attachments.size() - 1;
 
         subpassDescription.pDepthStencilAttachment = &depthAttachmentReference;

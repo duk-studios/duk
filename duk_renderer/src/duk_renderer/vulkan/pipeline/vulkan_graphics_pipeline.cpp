@@ -8,8 +8,6 @@
 
 namespace duk::renderer {
 
-namespace vk {
-
 VkCullModeFlagBits convert_cull_mode(GraphicsPipeline::CullMode::Bits cullModeBit) {
     VkCullModeFlagBits converted;
     switch (cullModeBit) {
@@ -100,8 +98,6 @@ VkPolygonMode convert_fill_mode(GraphicsPipeline::FillMode fillMode) {
     return converted;
 }
 
-}
-
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreateInfo& pipelineCreateInfo) :
     m_device(pipelineCreateInfo.device),
     m_shader(pipelineCreateInfo.shader),
@@ -162,7 +158,7 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
 
             VkPipelineShaderStageCreateInfo shaderStageCreateInfo = {};
             shaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-            shaderStageCreateInfo.stage = vk::convert_module(moduleType);
+            shaderStageCreateInfo.stage = convert_module(moduleType);
             shaderStageCreateInfo.module = module;
             shaderStageCreateInfo.pName = "main";
 
@@ -183,7 +179,7 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = vk::convert_topology(m_topology);
+    inputAssembly.topology = convert_topology(m_topology);
     inputAssembly.primitiveRestartEnable = VK_FALSE;
 
     VkViewport viewport = {};
@@ -209,9 +205,9 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = vk::convert_fill_mode(m_fillMode);
+    rasterizer.polygonMode = convert_fill_mode(m_fillMode);
     rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = vk::convert_cull_mode_mask(m_cullModeMask);
+    rasterizer.cullMode = convert_cull_mode_mask(m_cullModeMask);
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
 
@@ -224,12 +220,12 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
     blendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |  VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     if (m_blend.enabled) {
         blendAttachmentState.blendEnable = VK_TRUE;
-        blendAttachmentState.srcColorBlendFactor = vk::convert_blend_factor(m_blend.srcColorBlendFactor);
-        blendAttachmentState.dstColorBlendFactor = vk::convert_blend_factor(m_blend.dstColorBlendFactor);
-        blendAttachmentState.colorBlendOp = vk::convert_blend_op(m_blend.colorBlendOp);
-        blendAttachmentState.srcAlphaBlendFactor = vk::convert_blend_factor(m_blend.srcAlphaBlendFactor);
-        blendAttachmentState.dstAlphaBlendFactor = vk::convert_blend_factor(m_blend.dstAlphaBlendFactor);
-        blendAttachmentState.alphaBlendOp = vk::convert_blend_op(m_blend.alphaBlendOp);
+        blendAttachmentState.srcColorBlendFactor = convert_blend_factor(m_blend.srcColorBlendFactor);
+        blendAttachmentState.dstColorBlendFactor = convert_blend_factor(m_blend.dstColorBlendFactor);
+        blendAttachmentState.colorBlendOp = convert_blend_op(m_blend.colorBlendOp);
+        blendAttachmentState.srcAlphaBlendFactor = convert_blend_factor(m_blend.srcAlphaBlendFactor);
+        blendAttachmentState.dstAlphaBlendFactor = convert_blend_factor(m_blend.dstAlphaBlendFactor);
+        blendAttachmentState.alphaBlendOp = convert_blend_op(m_blend.alphaBlendOp);
     }
     else {
         blendAttachmentState.blendEnable = VK_FALSE;

@@ -17,8 +17,6 @@
 
 namespace duk::renderer {
 
-namespace vk {
-
 VkFormat convert_pixel_format(Image::PixelFormat format);
 
 Image::PixelFormat convert_pixel_format(VkFormat format);
@@ -26,8 +24,6 @@ Image::PixelFormat convert_pixel_format(VkFormat format);
 VkImageLayout convert_layout(Image::Layout layout);
 
 VkImageUsageFlags convert_usage(Image::Usage usage);
-
-}
 
 class VulkanImage : public Image {
 public:
@@ -39,6 +35,8 @@ public:
     DUK_NO_DISCARD virtual VkImageView image_view(uint32_t imageIndex) const = 0;
 
     DUK_NO_DISCARD virtual uint32_t image_count() const = 0;
+
+    DUK_NO_DISCARD virtual VkImageAspectFlags image_aspect() const = 0;
 
     struct TransitionImageLayoutInfo {
         VkImageLayout oldLayout;
@@ -94,6 +92,8 @@ public:
 
     DUK_NO_DISCARD uint32_t image_count() const override;
 
+    DUK_NO_DISCARD VkImageAspectFlags image_aspect() const override;
+
     DUK_NO_DISCARD uint32_t width() const override;
 
     DUK_NO_DISCARD uint32_t height() const override;
@@ -121,6 +121,7 @@ private:
     std::vector<uint8_t> m_data;
     duk::hash::Hash m_dataSourceHash;
     VulkanCommandQueue* m_commandQueue;
+    VkImageAspectFlags m_aspectFlags;
 
     std::vector<VkDeviceMemory> m_memories;
     std::vector<VkImage> m_images;
@@ -154,6 +155,8 @@ public:
     DUK_NO_DISCARD VkImageView image_view(uint32_t frameIndex) const override;
 
     DUK_NO_DISCARD uint32_t image_count() const override;
+
+    DUK_NO_DISCARD VkImageAspectFlags image_aspect() const override;
 
     DUK_NO_DISCARD duk::hash::Hash hash() const override;
 

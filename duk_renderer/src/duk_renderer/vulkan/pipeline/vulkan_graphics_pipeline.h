@@ -13,8 +13,6 @@
 
 namespace duk::renderer {
 
-namespace vk {
-
 VkCullModeFlagBits convert_cull_mode(GraphicsPipeline::CullMode::Bits cullModeBit);
 
 VkCullModeFlags convert_cull_mode_mask(GraphicsPipeline::CullMode::Mask cullModeMask);
@@ -26,8 +24,6 @@ VkBlendFactor convert_blend_factor(GraphicsPipeline::Blend::Factor blendFactor);
 VkPrimitiveTopology convert_topology(GraphicsPipeline::Topology topology);
 
 VkPolygonMode convert_fill_mode(GraphicsPipeline::FillMode fillMode);
-
-}
 
 class VulkanShader;
 class VulkanRenderPass;

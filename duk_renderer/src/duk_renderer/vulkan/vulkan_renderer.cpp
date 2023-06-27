@@ -47,7 +47,7 @@ static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT           
 }
 
 static std::vector<const char*> query_device_extensions() {
-    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME};
 }
 
 static uint32_t find_present_queue_index(VulkanPhysicalDevice* physicalDevice, VkSurfaceKHR surface){
@@ -446,16 +446,20 @@ void VulkanRenderer::create_vk_device(const VulkanRendererCreateInfo& vulkanRend
         queueCreateInfos.push_back(graphicsQueueCreateInfo);
     }
 
+    VkPhysicalDeviceVulkan13Features vulkan13EnabledFeatures = {};
+    vulkan13EnabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
+    vulkan13EnabledFeatures.synchronization2 = VK_TRUE;
+
+    VkPhysicalDeviceFeatures2 enabledFeatures = {};
+    enabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    enabledFeatures.features.fillModeNonSolid = VK_TRUE;
+    enabledFeatures.pNext = &vulkan13EnabledFeatures;
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
     deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
-
-    VkPhysicalDeviceFeatures enabledFeatures = {};
-    enabledFeatures.fillModeNonSolid = VK_TRUE;
-
-    deviceCreateInfo.pEnabledFeatures = &enabledFeatures;
+    deviceCreateInfo.pNext = &enabledFeatures;
 
     auto deviceExtensions = detail::query_device_extensions();
     deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());

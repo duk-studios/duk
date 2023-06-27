@@ -4,6 +4,7 @@
 #include <duk_renderer/vulkan/command/vulkan_command_scheduler.h>
 #include <duk_renderer/vulkan/command/vulkan_command_queue.h>
 #include <duk_renderer/vulkan/command/vulkan_command_buffer.h>
+#include <duk_renderer/vulkan/pipeline/vulkan_pipeline_flags.h>
 
 #include <grapphs/algorithms/bfs_traversal.h>
 
@@ -42,14 +43,14 @@ ScheduledCommand VulkanCommandScheduler::schedule(FutureCommand&& futureCommand)
     return ScheduledCommand(this, index);
 }
 
-void VulkanCommandScheduler::schedule_after(std::size_t before, std::size_t after) {
-    auto& frame = m_frames[*m_currentFramePtr];
-    frame.schedule_after(before, after);
-}
-
 void VulkanCommandScheduler::flush() {
     auto& frame = m_frames[*m_currentFramePtr];
     frame.flush();
+}
+
+void VulkanCommandScheduler::schedule_after(std::size_t before, std::size_t after, PipelineStage::Mask waitStages) {
+    auto& frame = m_frames[*m_currentFramePtr];
+    frame.schedule_after(before, after, waitStages);
 }
 
 VulkanCommandScheduler::CommandNode::CommandNode(FutureCommand&& futureCommand) noexcept :
@@ -116,8 +117,8 @@ std::size_t VulkanCommandScheduler::Frame::schedule_command(FutureCommand&& futu
     return index;
 }
 
-void VulkanCommandScheduler::Frame::schedule_after(std::size_t before, std::size_t after) {
-    m_scheduledCommands.connect(before, after, CommandConnection{});
+void VulkanCommandScheduler::Frame::schedule_after(std::size_t before, std::size_t after, PipelineStage::Mask waitStages) {
+    m_scheduledCommands.connect(before, after, CommandConnection{waitStages});
     m_independentNodes.erase(after);
 }
 
@@ -131,13 +132,14 @@ void VulkanCommandScheduler::Frame::flush() {
 
         auto& dependencies = m_commandDependencies[index];
         for (auto dependency : dependencies) {
-            auto& dependencyCommandNode = *m_scheduledCommands.vertex(dependency);
+            auto& dependencyCommandNode = *m_scheduledCommands.vertex(dependency.index);
+            auto waitStages = convert_pipeline_stage_mask(dependency.waitStages);
             auto dependencyCommand = dependencyCommandNode->command();
             auto dependencySubmitter = dependencyCommand->submitter<VulkanSubmitter>();
 
             if (dependencySubmitter->signals_semaphore()) {
                 semaphores.push_back(dependencySubmitter->semaphore());
-                stages.push_back(VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+                stages.push_back(waitStages);
             }
         }
 
@@ -151,10 +153,17 @@ void VulkanCommandScheduler::Frame::flush() {
     };
 
     auto perEdge = [this](std::size_t fromIndex, std::size_t toIndex) {
-        m_commandDependencies[toIndex].insert(fromIndex);
+        m_commandDependencies[toIndex].insert(Dependency{fromIndex, m_scheduledCommands.edge(fromIndex, toIndex)->waitStages});
     };
 
     gpp::breadth_first_traverse(m_scheduledCommands, m_independentNodes, perNode, perEdge);
 }
 
+bool VulkanCommandScheduler::Frame::Dependency::operator<(const VulkanCommandScheduler::Frame::Dependency& rhs) const noexcept {
+    return index < rhs.index;
+}
+
+bool VulkanCommandScheduler::Frame::Dependency::operator==(const VulkanCommandScheduler::Frame::Dependency& rhs) const noexcept {
+    return index == rhs.index;
+}
 }
