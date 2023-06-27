@@ -65,6 +65,20 @@ public:
         DEVICE_DYNAMIC
     };
 
+    struct SubresourceRange {
+        uint32_t baseMipLevel;
+        uint32_t levelCount;
+        uint32_t baseArrayLayer;
+        uint32_t layerCount;
+        static constexpr uint32_t kRemainingMipLevels = ~0u;
+        static constexpr uint32_t kRemainingArrayLayers = ~0u;
+    };
+
+    static constexpr SubresourceRange kFullSubresourceRange {
+        0u, SubresourceRange::kRemainingMipLevels,
+        0u, SubresourceRange::kRemainingArrayLayers
+    };
+
 public:
 
     virtual void update(ImageDataSource* imageDataSource) = 0;

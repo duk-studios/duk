@@ -313,7 +313,8 @@ VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanIm
     m_width(vulkanImageCreateInfo.imageDataSource->width()),
     m_height(vulkanImageCreateInfo.imageDataSource->height()),
     m_dataSourceHash(vulkanImageCreateInfo.imageDataSource->hash()),
-    m_commandQueue(vulkanImageCreateInfo.commandQueue) {
+    m_commandQueue(vulkanImageCreateInfo.commandQueue),
+    m_aspectFlags(detail::image_aspect(m_usage, m_format)) {
 
     if (vulkanImageCreateInfo.imageDataSource->has_data()) {
         m_data.resize(vulkanImageCreateInfo.imageDataSource->byte_count());
@@ -387,6 +388,7 @@ void VulkanMemoryImage::update(ImageDataSource* imageDataSource) {
         m_format = imageDataSource->pixel_format();
         m_width = imageDataSource->width();
         m_height = imageDataSource->height();
+        m_aspectFlags = detail::image_aspect(m_usage, m_format);
 
         // guarantees that no one is using this image
         vkDeviceWaitIdle(m_device);
@@ -420,6 +422,10 @@ VkImageView VulkanMemoryImage::image_view(uint32_t imageIndex) const {
 
 uint32_t VulkanMemoryImage::image_count() const {
     return m_images.size();
+}
+
+VkImageAspectFlags VulkanMemoryImage::image_aspect() const {
+    return m_aspectFlags;
 }
 
 duk::hash::Hash VulkanMemoryImage::hash() const {
@@ -481,7 +487,7 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     subresourceRange.baseArrayLayer = 0;
     subresourceRange.levelCount = 1;
     subresourceRange.baseMipLevel = 0;
-    subresourceRange.aspectMask = detail::image_aspect(m_usage, m_format);
+    subresourceRange.aspectMask = m_aspectFlags;
 
     if (!m_data.empty()) {
 
@@ -604,6 +610,10 @@ uint32_t VulkanSwapchainImage::width() const {
 
 uint32_t VulkanSwapchainImage::height() const {
     return m_height;
+}
+
+VkImageAspectFlags VulkanSwapchainImage::image_aspect() const {
+    return VK_IMAGE_ASPECT_COLOR_BIT;
 }
 
 duk::hash::Hash VulkanSwapchainImage::hash() const {

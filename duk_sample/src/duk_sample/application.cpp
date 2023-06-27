@@ -309,7 +309,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     duk::renderer::Sampler sampler = {};
     sampler.filter = duk::renderer::Sampler::Filter::NEAREST;
     sampler.wrapMode = duk::renderer::Sampler::WrapMode::REPEAT;
-    m_descriptorSet->set(2, duk::renderer::Descriptor::image_sampler(m_image.get(), renderer::Image::Layout::GENERAL, sampler));
+    m_descriptorSet->set(2, duk::renderer::Descriptor::image_sampler(m_image.get(), renderer::Image::Layout::SHADER_READ_ONLY, sampler));
 
     m_descriptorSet->flush();
 }
@@ -361,12 +361,15 @@ void Application::draw() {
     auto acquireImageCommand = m_scheduler->schedule(m_renderer->acquire_image_command());
     auto computePass = m_scheduler->schedule(compute_pass());
     auto mainRenderPassCommand = m_scheduler->schedule(main_render_pass());
+    auto reacquireComputeResources = m_scheduler->schedule(reacquire_compute_resources());
     auto presentCommand = m_scheduler->schedule(m_renderer->present_command());
 
-    acquireImageCommand
-        .then(computePass)
-        .then(mainRenderPassCommand)
-        .then(presentCommand);
+    mainRenderPassCommand
+        .wait(acquireImageCommand, duk::renderer::PipelineStage::COLOR_ATTACHMENT_OUTPUT)
+        .wait(computePass, duk::renderer::PipelineStage::FRAGMENT_SHADER);
+
+    reacquireComputeResources.wait(mainRenderPassCommand, duk::renderer::PipelineStage::COMPUTE_SHADER);
+    presentCommand.wait(reacquireComputeResources);
 
     m_scheduler->flush();
 
@@ -382,6 +385,24 @@ duk::renderer::FutureCommand Application::compute_pass() {
 
         commandBuffer->dispatch(m_image->width(), m_image->height(), 1);
 
+        duk::renderer::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
+        imageMemoryBarrier.srcStageMask = duk::renderer::PipelineStage::COMPUTE_SHADER;
+        imageMemoryBarrier.dstStageMask = duk::renderer::PipelineStage::TOP_OF_PIPE;
+        imageMemoryBarrier.subresourceRange = duk::renderer::Image::kFullSubresourceRange;
+        imageMemoryBarrier.oldLayout = duk::renderer::Image::Layout::GENERAL;
+        imageMemoryBarrier.newLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
+        imageMemoryBarrier.srcAccessMask = duk::renderer::Access::SHADER_WRITE;
+        imageMemoryBarrier.dstAccessMask = duk::renderer::Access::SHADER_READ;
+        imageMemoryBarrier.srcCommandQueue = m_computeQueue.get();
+        imageMemoryBarrier.dstCommandQueue = m_mainCommandQueue.get();
+        imageMemoryBarrier.image = m_image.get();
+
+        duk::renderer::CommandBuffer::PipelineBarrier pipelineBarrier = {};
+        pipelineBarrier.imageMemoryBarriers = &imageMemoryBarrier;
+        pipelineBarrier.imageMemoryBarrierCount = 1;
+
+        commandBuffer->pipeline_barrier(pipelineBarrier);
+
         commandBuffer->end();
     });
 }
@@ -389,6 +410,26 @@ duk::renderer::FutureCommand Application::compute_pass() {
 duk::renderer::FutureCommand Application::main_render_pass() {
     return m_mainCommandQueue->submit([this](duk::renderer::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
+
+        {
+            duk::renderer::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
+            imageMemoryBarrier.srcStageMask = duk::renderer::PipelineStage::BOTTOM_OF_PIPE;
+            imageMemoryBarrier.dstStageMask = duk::renderer::PipelineStage::FRAGMENT_SHADER;
+            imageMemoryBarrier.subresourceRange = duk::renderer::Image::kFullSubresourceRange;
+            imageMemoryBarrier.oldLayout = duk::renderer::Image::Layout::GENERAL;
+            imageMemoryBarrier.newLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
+            imageMemoryBarrier.srcAccessMask = duk::renderer::Access::SHADER_WRITE;
+            imageMemoryBarrier.dstAccessMask = duk::renderer::Access::SHADER_READ;
+            imageMemoryBarrier.srcCommandQueue = m_computeQueue.get();
+            imageMemoryBarrier.dstCommandQueue = m_mainCommandQueue.get();
+            imageMemoryBarrier.image = m_image.get();
+
+            duk::renderer::CommandBuffer::PipelineBarrier pipelineBarrier = {};
+            pipelineBarrier.imageMemoryBarriers = &imageMemoryBarrier;
+            pipelineBarrier.imageMemoryBarrierCount = 1;
+
+            commandBuffer->pipeline_barrier(pipelineBarrier);
+        }
 
         duk::renderer::CommandBuffer::RenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.renderPass = m_renderPass.get();
@@ -407,6 +448,52 @@ duk::renderer::FutureCommand Application::main_render_pass() {
         commandBuffer->draw_indexed(m_indexBuffer->element_count(), 1, 0, 0, 0);
 
         commandBuffer->end_render_pass();
+
+        {
+            duk::renderer::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
+            imageMemoryBarrier.srcStageMask = duk::renderer::PipelineStage::FRAGMENT_SHADER;
+            imageMemoryBarrier.dstStageMask = duk::renderer::PipelineStage::TOP_OF_PIPE;
+            imageMemoryBarrier.subresourceRange = duk::renderer::Image::kFullSubresourceRange;
+            imageMemoryBarrier.oldLayout = duk::renderer::Image::Layout::UNDEFINED;
+            imageMemoryBarrier.newLayout = duk::renderer::Image::Layout::GENERAL;
+            imageMemoryBarrier.srcAccessMask = duk::renderer::Access::SHADER_READ;
+            imageMemoryBarrier.dstAccessMask = duk::renderer::Access::SHADER_WRITE;
+            imageMemoryBarrier.srcCommandQueue = m_mainCommandQueue.get();
+            imageMemoryBarrier.dstCommandQueue = m_computeQueue.get();
+            imageMemoryBarrier.image = m_image.get();
+
+            duk::renderer::CommandBuffer::PipelineBarrier pipelineBarrier = {};
+            pipelineBarrier.imageMemoryBarriers = &imageMemoryBarrier;
+            pipelineBarrier.imageMemoryBarrierCount = 1;
+
+            commandBuffer->pipeline_barrier(pipelineBarrier);
+        }
+
+        commandBuffer->end();
+    });
+}
+
+duk::renderer::FutureCommand Application::reacquire_compute_resources() {
+    return m_computeQueue->submit([this](duk::renderer::CommandBuffer* commandBuffer) {
+        commandBuffer->begin();
+
+        duk::renderer::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
+        imageMemoryBarrier.srcStageMask = duk::renderer::PipelineStage::BOTTOM_OF_PIPE;
+        imageMemoryBarrier.dstStageMask = duk::renderer::PipelineStage::COMPUTE_SHADER;
+        imageMemoryBarrier.subresourceRange = duk::renderer::Image::kFullSubresourceRange;
+        imageMemoryBarrier.oldLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
+        imageMemoryBarrier.newLayout = duk::renderer::Image::Layout::GENERAL;
+        imageMemoryBarrier.srcAccessMask = duk::renderer::Access::SHADER_READ;
+        imageMemoryBarrier.dstAccessMask = duk::renderer::Access::SHADER_WRITE;
+        imageMemoryBarrier.srcCommandQueue = m_mainCommandQueue.get();
+        imageMemoryBarrier.dstCommandQueue = m_computeQueue.get();
+        imageMemoryBarrier.image = m_image.get();
+
+        duk::renderer::CommandBuffer::PipelineBarrier pipelineBarrier = {};
+        pipelineBarrier.imageMemoryBarriers = &imageMemoryBarrier;
+        pipelineBarrier.imageMemoryBarrierCount = 1;
+
+        commandBuffer->pipeline_barrier(pipelineBarrier);
 
         commandBuffer->end();
     });

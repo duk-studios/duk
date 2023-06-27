@@ -27,7 +27,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/renderer_capabilities.h
         include/duk_renderer/resource.h
         include/duk_renderer/pipeline/compute_pipeline.h
-        include/duk_renderer/pipeline/pipeline_stages.h
+        include/duk_renderer/pipeline/pipeline_flags.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -98,8 +98,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/pipeline/compute_pipeline.cpp
         src/duk_renderer/vulkan/pipeline/vulkan_compute_pipeline.h
         src/duk_renderer/vulkan/pipeline/vulkan_compute_pipeline.cpp
-        src/duk_renderer/vulkan/pipeline/vulkan_pipeline_stages.h
-        src/duk_renderer/vulkan/pipeline/vulkan_pipeline_stages.cpp
+        src/duk_renderer/vulkan/pipeline/vulkan_pipeline_flags.h
+        src/duk_renderer/vulkan/pipeline/vulkan_pipeline_flags.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

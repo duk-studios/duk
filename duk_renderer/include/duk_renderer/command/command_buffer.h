@@ -6,6 +6,8 @@
 
 #include <duk_renderer/renderer_error.h>
 #include <duk_renderer/command/command.h>
+#include <duk_renderer/pipeline/pipeline_flags.h>
+#include <duk_renderer/image.h>
 
 #include <duk_macros/macros.h>
 
@@ -15,6 +17,7 @@
 
 namespace duk::renderer {
 
+class CommandQueue;
 class RenderPass;
 class Buffer;
 class FrameBuffer;
@@ -55,6 +58,40 @@ public:
     virtual void draw_indexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) = 0;
 
     virtual void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) = 0;
+
+    struct BufferMemoryBarrier {
+        PipelineStage::Mask srcStageMask;
+        Access::Mask srcAccessMask;
+        PipelineStage::Mask dstStageMask;
+        Access::Mask dstAccessMask;
+        CommandQueue* srcCommandQueue;
+        CommandQueue* dstCommandQueue;
+        Buffer* buffer;
+        size_t offset;
+        size_t size;
+    };
+
+    struct ImageMemoryBarrier {
+        PipelineStage::Mask srcStageMask;
+        Access::Mask srcAccessMask;
+        PipelineStage::Mask dstStageMask;
+        Access::Mask dstAccessMask;
+        CommandQueue* srcCommandQueue;
+        CommandQueue* dstCommandQueue;
+        Image* image;
+        Image::Layout oldLayout;
+        Image::Layout newLayout;
+        Image::SubresourceRange subresourceRange;
+    };
+
+    struct PipelineBarrier {
+        uint32_t bufferMemoryBarrierCount;
+        const BufferMemoryBarrier* bufferMemoryBarriers;
+        uint32_t imageMemoryBarrierCount;
+        const ImageMemoryBarrier* imageMemoryBarriers;
+    };
+
+    virtual void pipeline_barrier(const PipelineBarrier& barrier) = 0;
 
 };
 

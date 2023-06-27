@@ -41,7 +41,9 @@ VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& comma
 }
 
 VulkanCommandQueue::~VulkanCommandQueue() {
-    vkQueueWaitIdle(m_queue);
+    // other queues might be using resources from this, so we need to guarantee
+    // that every work is done before destroying this
+    vkDeviceWaitIdle(m_device);
     m_commandBuffers.clear();
     m_commandBufferPool.reset();
     vkDestroyCommandPool(m_device, m_commandPool, nullptr);
