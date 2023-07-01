@@ -91,6 +91,10 @@ private:
 
     void update_hash();
 
+    void update_descriptors_and_set(uint32_t imageIndex);
+
+    void update_descriptors(uint32_t imageIndex);
+
 private:
     VkDevice m_device;
     VulkanSamplerCache* m_samplerCache;
