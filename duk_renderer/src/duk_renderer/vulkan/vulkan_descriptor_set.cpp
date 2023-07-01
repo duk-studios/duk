@@ -146,7 +146,7 @@ VulkanDescriptorSet::VulkanDescriptorSet(const VulkanDescriptorSetCreateInfo& de
     m_descriptorSetLayout(descriptorSetCreateInfo.descriptorSetLayoutCache->get_layout(m_descriptorSetDescription)),
     m_descriptorBindings(descriptorSetCreateInfo.descriptorSetLayoutCache->get_bindings(m_descriptorSetDescription)),
     m_descriptors(m_descriptorBindings.size()),
-    m_descriptorSetHash(duk::hash::UndefinedHash),
+    m_descriptorSetHash(duk::hash::kUndefinedHash),
     m_descriptorSetHashes(descriptorSetCreateInfo.imageCount, m_descriptorSetHash) {
     create(descriptorSetCreateInfo.imageCount);
 }
@@ -189,7 +189,7 @@ void VulkanDescriptorSet::create(uint32_t imageCount) {
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate VkDescriptorSet");
     }
-    m_descriptorSetHashes.resize(imageCount, duk::hash::UndefinedHash);
+    m_descriptorSetHashes.resize(imageCount, duk::hash::kUndefinedHash);
 }
 
 void VulkanDescriptorSet::clean() {
@@ -211,7 +211,7 @@ void VulkanDescriptorSet::clean(uint32_t imageIndex) {
 }
 
 void VulkanDescriptorSet::update(uint32_t imageIndex) {
-    assert(m_descriptorSetHash != duk::hash::UndefinedHash);
+    assert(m_descriptorSetHash != duk::hash::kUndefinedHash);
 
     if (m_descriptorSetHashes[imageIndex] == m_descriptorSetHash) {
         update_descriptors(imageIndex);

@@ -10,7 +10,7 @@ VulkanComputePipeline::VulkanComputePipeline(const VulkanComputePipelineCreateIn
     m_shader(computePipelineCreateInfo.shader),
     m_pipeline(VK_NULL_HANDLE),
     m_hash(m_shader->hash()),
-    m_pipelineHash(duk::hash::UndefinedHash) {
+    m_pipelineHash(duk::hash::kUndefinedHash) {
 }
 
 VulkanComputePipeline::~VulkanComputePipeline() {

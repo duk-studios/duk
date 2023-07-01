@@ -48,7 +48,7 @@ VkAttachmentDescription convert_attachment_description(const AttachmentDescripti
 VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRenderPassCreateInfo) :
     m_colorAttachments(vulkanRenderPassCreateInfo.colorAttachments, vulkanRenderPassCreateInfo.colorAttachments + vulkanRenderPassCreateInfo.colorAttachmentCount),
     m_device(vulkanRenderPassCreateInfo.device),
-    m_hash(duk::hash::UndefinedHash) {
+    m_hash(duk::hash::kUndefinedHash) {
 
     if (vulkanRenderPassCreateInfo.depthAttachment) {
         m_depthAttachment = *vulkanRenderPassCreateInfo.depthAttachment;

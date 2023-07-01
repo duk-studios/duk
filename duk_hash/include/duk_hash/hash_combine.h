@@ -12,7 +12,7 @@ namespace duk::hash {
 
 using Hash = std::size_t;
 
-constexpr Hash UndefinedHash = Hash(-1);
+constexpr Hash kUndefinedHash = Hash(~0llu);
 
 //from boost
 template<typename T>

@@ -57,7 +57,7 @@ void VulkanFrameBuffer::update(uint32_t imageIndex) {
 
 void VulkanFrameBuffer::create(uint32_t imageCount) {
     m_frameBuffers.resize(imageCount);
-    m_frameBufferHashes.resize(imageCount, duk::hash::UndefinedHash);
+    m_frameBufferHashes.resize(imageCount, duk::hash::kUndefinedHash);
 }
 
 void VulkanFrameBuffer::clean() {

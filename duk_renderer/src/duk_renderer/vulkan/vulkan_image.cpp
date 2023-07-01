@@ -480,7 +480,7 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
         vkBindImageMemory(m_device, m_images[i], m_memories[i], 0);
     }
 
-    m_imageDataHashes.resize(imageCount, duk::hash::UndefinedHash);
+    m_imageDataHashes.resize(imageCount, duk::hash::kUndefinedHash);
 
     VkImageSubresourceRange subresourceRange = {};
     subresourceRange.layerCount = 1;

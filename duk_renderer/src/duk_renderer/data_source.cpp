@@ -8,7 +8,7 @@
 namespace duk::renderer {
 
 renderer::DataSource::DataSource() :
-    m_hash(hash::UndefinedHash) {
+    m_hash(hash::kUndefinedHash) {
 
 }
 
@@ -19,7 +19,7 @@ void DataSource::update_hash() {
 }
 
 hash::Hash DataSource::hash() const {
-    assert(m_hash != hash::UndefinedHash && "hash was not set, missing update_hash()");
+    assert(m_hash != hash::kUndefinedHash && "hash was not set, missing update_hash()");
     return m_hash;
 }
 

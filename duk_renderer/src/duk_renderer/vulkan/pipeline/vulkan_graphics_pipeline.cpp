@@ -109,7 +109,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreat
     m_topology(pipelineCreateInfo.topology),
     m_fillMode(pipelineCreateInfo.fillMode),
     m_depthTesting(pipelineCreateInfo.depthTesting),
-    m_hash(duk::hash::UndefinedHash) {
+    m_hash(duk::hash::kUndefinedHash) {
     if (!m_shader->is_graphics_shader()) {
         throw std::invalid_argument("invalid shader type for GraphicsPipeline");
     }
@@ -122,7 +122,7 @@ VulkanGraphicsPipeline::~VulkanGraphicsPipeline() {
 }
 
 void VulkanGraphicsPipeline::create(uint32_t imageCount) {
-    m_pipelineHashes.resize(imageCount, duk::hash::UndefinedHash);
+    m_pipelineHashes.resize(imageCount, duk::hash::kUndefinedHash);
     m_pipelines.resize(imageCount);
 }
 
