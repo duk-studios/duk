@@ -7,12 +7,12 @@
 namespace duk::sample {
 
 ComputeShaderDataSource::ComputeShaderDataSource() {
-    insert_spir_v_code(duk::renderer::Shader::Module::COMPUTE, Application::load_bytes("compute.comp.spv"));
+    insert_spir_v_code(duk::rhi::Shader::Module::COMPUTE, Application::load_bytes("compute.comp.spv"));
 
-    duk::renderer::DescriptorSetDescription descriptorSetDescription;
+    duk::rhi::DescriptorSetDescription descriptorSetDescription;
     auto& transformBinding = descriptorSetDescription.bindings.emplace_back();
-    transformBinding.type = renderer::DescriptorType::STORAGE_IMAGE;
-    transformBinding.moduleMask = duk::renderer::Shader::Module::COMPUTE;
+    transformBinding.type = rhi::DescriptorType::STORAGE_IMAGE;
+    transformBinding.moduleMask = duk::rhi::Shader::Module::COMPUTE;
 
     insert_descriptor_set_description(descriptorSetDescription);
 

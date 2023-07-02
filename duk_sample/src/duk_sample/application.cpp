@@ -5,8 +5,8 @@
 #include <duk_sample/color_shader_data_source.h>
 #include <duk_sample/compute_shader_data_source.h>
 #include <duk_platform/window.h>
-#include <duk_renderer/pipeline/std_shader_data_source.h>
-#include <duk_renderer/vertex_types.h>
+#include <duk_rhi/pipeline/std_shader_data_source.h>
+#include <duk_rhi/vertex_types.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -29,7 +29,7 @@ struct PixelRGBA {
     uint8_t a;
 };
 
-using PixelRGBAImageDataSource = duk::renderer::StdImageDataSource<PixelRGBA, duk::renderer::Image::PixelFormat::R8G8B8A8_UNORM>;
+using PixelRGBAImageDataSource = duk::rhi::StdImageDataSource<PixelRGBA, duk::rhi::Image::PixelFormat::R8G8B8A8_UNORM>;
 
 template<typename T>
 T lerp(T from, T to, float percent) {
@@ -102,19 +102,19 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         if (m_window->minimized()) {
             return;
         }
-        duk::renderer::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
+        duk::rhi::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
         depthImageDataSource.update_hash();
         m_depthImage->update(&depthImageDataSource);
 
 
-        duk::renderer::GraphicsPipeline::Viewport viewport = {};
+        duk::rhi::GraphicsPipeline::Viewport viewport = {};
         viewport.extent = {width, height};
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
         m_graphicsPipeline->set_viewport(viewport);
 
-        duk::renderer::GraphicsPipeline::Scissor scissor = {};
+        duk::rhi::GraphicsPipeline::Scissor scissor = {};
         scissor.extent = viewport.extent;
 
         m_graphicsPipeline->set_scissor(scissor);
@@ -122,7 +122,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         m_graphicsPipeline->flush();
     });
 
-    duk::renderer::RendererCreateInfo rendererCreateInfo = {};
+    duk::rhi::RHICreateInfo rendererCreateInfo = {};
     rendererCreateInfo.window = m_window.get();
     rendererCreateInfo.logger = &m_logger;
     rendererCreateInfo.deviceIndex = 0;
@@ -130,29 +130,29 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     rendererCreateInfo.applicationName = applicationCreateInfo.name;
     rendererCreateInfo.engineVersion = 1;
     rendererCreateInfo.engineName = "duk_sample";
-    rendererCreateInfo.api = duk::renderer::RendererAPI::VULKAN;
+    rendererCreateInfo.api = duk::rhi::API::VULKAN;
 
-    m_renderer = check_expected_result(duk::renderer::Renderer::create_renderer(rendererCreateInfo));
+    m_renderer = check_expected_result(duk::rhi::RHI::create_rhi(rendererCreateInfo));
 
     m_scheduler = check_expected_result(m_renderer->create_command_scheduler());
 
-    duk::renderer::Renderer::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
-    mainCommandQueueCreateInfo.type = duk::renderer::CommandQueue::Type::GRAPHICS;
+    duk::rhi::RHI::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
+    mainCommandQueueCreateInfo.type = duk::rhi::CommandQueue::Type::GRAPHICS;
 
     m_mainCommandQueue = check_expected_result(m_renderer->create_command_queue(mainCommandQueueCreateInfo));
 
-    duk::renderer::Renderer::CommandQueueCreateInfo computeCommandQueue = {};
-    computeCommandQueue.type = duk::renderer::CommandQueue::Type::COMPUTE;
+    duk::rhi::RHI::CommandQueueCreateInfo computeCommandQueue = {};
+    computeCommandQueue.type = duk::rhi::CommandQueue::Type::COMPUTE;
 
     m_computeQueue = check_expected_result(m_renderer->create_command_queue(computeCommandQueue));
 
-    duk::renderer::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
+    duk::rhi::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
     depthImageDataSource.update_hash();
 
-    duk::renderer::Renderer::ImageCreateInfo depthImageCreateInfo = {};
-    depthImageCreateInfo.usage = duk::renderer::Image::Usage::DEPTH_STENCIL_ATTACHMENT;
-    depthImageCreateInfo.initialLayout = duk::renderer::Image::Layout::DEPTH_ATTACHMENT;
-    depthImageCreateInfo.updateFrequency = duk::renderer::Image::UpdateFrequency::DEVICE_DYNAMIC;
+    duk::rhi::RHI::ImageCreateInfo depthImageCreateInfo = {};
+    depthImageCreateInfo.usage = duk::rhi::Image::Usage::DEPTH_STENCIL_ATTACHMENT;
+    depthImageCreateInfo.initialLayout = duk::rhi::Image::Layout::DEPTH_ATTACHMENT;
+    depthImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
     depthImageCreateInfo.imageDataSource = &depthImageDataSource;
     depthImageCreateInfo.commandQueue = m_mainCommandQueue.get();
 
@@ -160,34 +160,34 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     auto outputImage = m_renderer->present_image();
 
-    duk::renderer::AttachmentDescription colorAttachmentDescription = {};
+    duk::rhi::AttachmentDescription colorAttachmentDescription = {};
     colorAttachmentDescription.format = outputImage->format();
-    colorAttachmentDescription.initialLayout = duk::renderer::Image::Layout::UNDEFINED;
-    colorAttachmentDescription.layout = duk::renderer::Image::Layout::COLOR_ATTACHMENT;
-    colorAttachmentDescription.finalLayout = duk::renderer::Image::Layout::PRESENT_SRC;
-    colorAttachmentDescription.storeOp = duk::renderer::StoreOp::STORE;
-    colorAttachmentDescription.loadOp = duk::renderer::LoadOp::CLEAR;
+    colorAttachmentDescription.initialLayout = duk::rhi::Image::Layout::UNDEFINED;
+    colorAttachmentDescription.layout = duk::rhi::Image::Layout::COLOR_ATTACHMENT;
+    colorAttachmentDescription.finalLayout = duk::rhi::Image::Layout::PRESENT_SRC;
+    colorAttachmentDescription.storeOp = duk::rhi::StoreOp::STORE;
+    colorAttachmentDescription.loadOp = duk::rhi::LoadOp::CLEAR;
 
-    duk::renderer::AttachmentDescription depthAttachmentDescription = {};
+    duk::rhi::AttachmentDescription depthAttachmentDescription = {};
     depthAttachmentDescription.format = m_depthImage->format();
-    depthAttachmentDescription.initialLayout = duk::renderer::Image::Layout::UNDEFINED;
-    depthAttachmentDescription.layout = duk::renderer::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
-    depthAttachmentDescription.finalLayout = duk::renderer::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
-    depthAttachmentDescription.storeOp = duk::renderer::StoreOp::DONT_CARE;
-    depthAttachmentDescription.loadOp = duk::renderer::LoadOp::CLEAR;
+    depthAttachmentDescription.initialLayout = duk::rhi::Image::Layout::UNDEFINED;
+    depthAttachmentDescription.layout = duk::rhi::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
+    depthAttachmentDescription.finalLayout = duk::rhi::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
+    depthAttachmentDescription.storeOp = duk::rhi::StoreOp::DONT_CARE;
+    depthAttachmentDescription.loadOp = duk::rhi::LoadOp::CLEAR;
 
-    duk::renderer::AttachmentDescription attachmentDescriptions[] = {colorAttachmentDescription};
+    duk::rhi::AttachmentDescription attachmentDescriptions[] = {colorAttachmentDescription};
 
-    duk::renderer::Renderer::RenderPassCreateInfo renderPassCreateInfo = {};
+    duk::rhi::RHI::RenderPassCreateInfo renderPassCreateInfo = {};
     renderPassCreateInfo.colorAttachments = attachmentDescriptions;
     renderPassCreateInfo.colorAttachmentCount = std::size(attachmentDescriptions);
     renderPassCreateInfo.depthAttachment = &depthAttachmentDescription;
 
     m_renderPass = check_expected_result(m_renderer->create_render_pass(renderPassCreateInfo));
 
-    duk::renderer::Image* frameBufferAttachments[] = {outputImage, m_depthImage.get()};
+    duk::rhi::Image* frameBufferAttachments[] = {outputImage, m_depthImage.get()};
 
-    duk::renderer::Renderer::FrameBufferCreateInfo frameBufferCreateInfo = {};
+    duk::rhi::RHI::FrameBufferCreateInfo frameBufferCreateInfo = {};
     frameBufferCreateInfo.attachmentCount = std::size(frameBufferAttachments);
     frameBufferCreateInfo.attachments = frameBufferAttachments;
     frameBufferCreateInfo.renderPass = m_renderPass.get();
@@ -196,49 +196,49 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     ColorShaderDataSource colorShaderDataSource;
 
-    duk::renderer::Renderer::ShaderCreateInfo colorShaderCreateInfo = {};
+    duk::rhi::RHI::ShaderCreateInfo colorShaderCreateInfo = {};
     colorShaderCreateInfo.shaderDataSource = &colorShaderDataSource;
 
     m_colorShader = check_expected_result(m_renderer->create_shader(colorShaderCreateInfo));
 
     ComputeShaderDataSource computeShaderDataSource;
 
-    duk::renderer::Renderer::ShaderCreateInfo computeShaderCreateInfo = {};
+    duk::rhi::RHI::ShaderCreateInfo computeShaderCreateInfo = {};
     computeShaderCreateInfo.shaderDataSource = &computeShaderDataSource;
 
     m_computeShader = check_expected_result(m_renderer->create_shader(computeShaderCreateInfo));
 
-    duk::renderer::Renderer::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
+    duk::rhi::RHI::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
     pipelineCreateInfo.viewport.extent = {m_window->width(), m_window->height()};
     pipelineCreateInfo.viewport.maxDepth = 1.0f;
     pipelineCreateInfo.viewport.minDepth = 0.0f;
     pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
-    pipelineCreateInfo.cullModeMask = duk::renderer::GraphicsPipeline::CullMode::BACK;
-    pipelineCreateInfo.fillMode = duk::renderer::GraphicsPipeline::FillMode::FILL;
-    pipelineCreateInfo.topology = duk::renderer::GraphicsPipeline::Topology::TRIANGLE_LIST;
+    pipelineCreateInfo.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
+    pipelineCreateInfo.fillMode = duk::rhi::GraphicsPipeline::FillMode::FILL;
+    pipelineCreateInfo.topology = duk::rhi::GraphicsPipeline::Topology::TRIANGLE_LIST;
     pipelineCreateInfo.shader = m_colorShader.get();
     pipelineCreateInfo.renderPass = m_renderPass.get();
     pipelineCreateInfo.depthTesting = true;
 
     m_graphicsPipeline = check_expected_result(m_renderer->create_graphics_pipeline(pipelineCreateInfo));
 
-    duk::renderer::Renderer::ComputePipelineCreateInfo computePipelineCreateInfo = {};
+    duk::rhi::RHI::ComputePipelineCreateInfo computePipelineCreateInfo = {};
     computePipelineCreateInfo.shader = m_computeShader.get();
 
     m_computePipeline = check_expected_result(m_renderer->create_compute_pipeline(computePipelineCreateInfo));
 
-    std::array<duk::renderer::Vertex2DColorUV, 4> vertices = {};
+    std::array<duk::rhi::Vertex2DColorUV, 4> vertices = {};
     vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
     vertices[1] = {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
     vertices[2] = {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
     vertices[3] = {{0.5f, -0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
 
 
-    duk::renderer::Renderer::BufferCreateInfo vertexBufferCreateInfo = {};
-    vertexBufferCreateInfo.type = duk::renderer::Buffer::Type::VERTEX;
-    vertexBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::STATIC;
+    duk::rhi::RHI::BufferCreateInfo vertexBufferCreateInfo = {};
+    vertexBufferCreateInfo.type = duk::rhi::Buffer::Type::VERTEX;
+    vertexBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
     vertexBufferCreateInfo.elementCount = vertices.size();
-    vertexBufferCreateInfo.elementSize = sizeof(duk::renderer::Vertex2DColorUV);
+    vertexBufferCreateInfo.elementSize = sizeof(duk::rhi::Vertex2DColorUV);
     vertexBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
 
     m_vertexBuffer = check_expected_result(m_renderer->create_buffer(vertexBufferCreateInfo));
@@ -247,9 +247,9 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     std::array<uint16_t, 6> indices = {0, 1, 2, 2, 1, 3};
 
-    duk::renderer::Renderer::BufferCreateInfo indexBufferCreateInfo = {};
-    indexBufferCreateInfo.type = duk::renderer::Buffer::Type::INDEX_16;
-    indexBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::STATIC;
+    duk::rhi::RHI::BufferCreateInfo indexBufferCreateInfo = {};
+    indexBufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX_16;
+    indexBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
     indexBufferCreateInfo.elementCount = indices.size();
     indexBufferCreateInfo.elementSize = sizeof(uint16_t);
     indexBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
@@ -258,9 +258,9 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     m_indexBuffer->write(indices);
     m_indexBuffer->flush();
 
-    duk::renderer::Renderer::BufferCreateInfo transformUniformBufferCreateInfo = {};
-    transformUniformBufferCreateInfo.type = duk::renderer::Buffer::Type::UNIFORM;
-    transformUniformBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
+    duk::rhi::RHI::BufferCreateInfo transformUniformBufferCreateInfo = {};
+    transformUniformBufferCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
+    transformUniformBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
     transformUniformBufferCreateInfo.elementCount = 1;
     transformUniformBufferCreateInfo.elementSize = sizeof(Transform);
     transformUniformBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
@@ -268,9 +268,9 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_transformUniformBuffer = check_expected_result(m_renderer->create_buffer(transformUniformBufferCreateInfo));
 
-    duk::renderer::Renderer::BufferCreateInfo materialUniformBufferCreateInfo = {};
-    materialUniformBufferCreateInfo.type = duk::renderer::Buffer::Type::UNIFORM;
-    materialUniformBufferCreateInfo.updateFrequency = duk::renderer::Buffer::UpdateFrequency::DYNAMIC;
+    duk::rhi::RHI::BufferCreateInfo materialUniformBufferCreateInfo = {};
+    materialUniformBufferCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
+    materialUniformBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
     materialUniformBufferCreateInfo.elementCount = 1;
     materialUniformBufferCreateInfo.elementSize = sizeof(UniformBuffer);
     materialUniformBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
@@ -283,33 +283,33 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     auto imageDataSource = detail::load_image();
 
-    duk::renderer::Renderer::ImageCreateInfo imageCreateInfo = {};
+    duk::rhi::RHI::ImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageDataSource = &imageDataSource;
-    imageCreateInfo.usage = duk::renderer::Image::Usage::SAMPLED_STORAGE;
-    imageCreateInfo.initialLayout = duk::renderer::Image::Layout::GENERAL;
-    imageCreateInfo.updateFrequency = duk::renderer::Image::UpdateFrequency::DEVICE_DYNAMIC;
+    imageCreateInfo.usage = duk::rhi::Image::Usage::SAMPLED_STORAGE;
+    imageCreateInfo.initialLayout = duk::rhi::Image::Layout::GENERAL;
+    imageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
     imageCreateInfo.commandQueue = m_mainCommandQueue.get();
 
     m_image = check_expected_result(m_renderer->create_image(imageCreateInfo));
 
-    duk::renderer::Renderer::DescriptorSetCreateInfo computeDescriptorSet = {};
+    duk::rhi::RHI::DescriptorSetCreateInfo computeDescriptorSet = {};
     computeDescriptorSet.description = computeShaderDataSource.descriptor_set_descriptions().at(0);
 
     m_computeDescriptorSet = check_expected_result(m_renderer->create_descriptor_set(computeDescriptorSet));
-    m_computeDescriptorSet->set(0, duk::renderer::Descriptor::storage_image(m_image.get(), duk::renderer::Image::Layout::GENERAL));
+    m_computeDescriptorSet->set(0, duk::rhi::Descriptor::storage_image(m_image.get(), duk::rhi::Image::Layout::GENERAL));
     m_computeDescriptorSet->flush();
 
-    duk::renderer::Renderer::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
+    duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
     descriptorSetCreateInfo.description = colorShaderDataSource.descriptor_set_descriptions().at(0);
 
     m_descriptorSet = check_expected_result(m_renderer->create_descriptor_set(descriptorSetCreateInfo));
 
-    m_descriptorSet->set(0, duk::renderer::Descriptor::uniform_buffer(m_transformUniformBuffer.get()));
-    m_descriptorSet->set(1, duk::renderer::Descriptor::uniform_buffer(m_materialUniformBuffer.get()));
-    duk::renderer::Sampler sampler = {};
-    sampler.filter = duk::renderer::Sampler::Filter::NEAREST;
-    sampler.wrapMode = duk::renderer::Sampler::WrapMode::REPEAT;
-    m_descriptorSet->set(2, duk::renderer::Descriptor::image_sampler(m_image.get(), renderer::Image::Layout::SHADER_READ_ONLY, sampler));
+    m_descriptorSet->set(0, duk::rhi::Descriptor::uniform_buffer(m_transformUniformBuffer.get()));
+    m_descriptorSet->set(1, duk::rhi::Descriptor::uniform_buffer(m_materialUniformBuffer.get()));
+    duk::rhi::Sampler sampler = {};
+    sampler.filter = duk::rhi::Sampler::Filter::NEAREST;
+    sampler.wrapMode = duk::rhi::Sampler::WrapMode::REPEAT;
+    m_descriptorSet->set(2, duk::rhi::Descriptor::image_sampler(m_image.get(), rhi::Image::Layout::SHADER_READ_ONLY, sampler));
 
     m_descriptorSet->flush();
 }
@@ -365,18 +365,18 @@ void Application::draw() {
     auto presentCommand = m_scheduler->schedule(m_renderer->present_command());
 
     mainRenderPassCommand
-        .wait(acquireImageCommand, duk::renderer::PipelineStage::COLOR_ATTACHMENT_OUTPUT)
-        .wait(computePass, duk::renderer::PipelineStage::FRAGMENT_SHADER);
+        .wait(acquireImageCommand, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT)
+        .wait(computePass, duk::rhi::PipelineStage::FRAGMENT_SHADER);
 
-    reacquireComputeResources.wait(mainRenderPassCommand, duk::renderer::PipelineStage::COMPUTE_SHADER);
+    reacquireComputeResources.wait(mainRenderPassCommand, duk::rhi::PipelineStage::COMPUTE_SHADER);
     presentCommand.wait(reacquireComputeResources);
 
     m_scheduler->flush();
 
 }
 
-duk::renderer::FutureCommand Application::compute_pass() {
-    return m_computeQueue->submit([this](duk::renderer::CommandBuffer* commandBuffer) {
+duk::rhi::FutureCommand Application::compute_pass() {
+    return m_computeQueue->submit([this](duk::rhi::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
 
         commandBuffer->bind_compute_pipeline(m_computePipeline.get());
@@ -385,19 +385,19 @@ duk::renderer::FutureCommand Application::compute_pass() {
 
         commandBuffer->dispatch(m_image->width(), m_image->height(), 1);
 
-        duk::renderer::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
-        imageMemoryBarrier.srcStageMask = duk::renderer::PipelineStage::COMPUTE_SHADER;
-        imageMemoryBarrier.dstStageMask = duk::renderer::PipelineStage::TOP_OF_PIPE;
-        imageMemoryBarrier.subresourceRange = duk::renderer::Image::kFullSubresourceRange;
-        imageMemoryBarrier.oldLayout = duk::renderer::Image::Layout::GENERAL;
-        imageMemoryBarrier.newLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
-        imageMemoryBarrier.srcAccessMask = duk::renderer::Access::SHADER_WRITE;
-        imageMemoryBarrier.dstAccessMask = duk::renderer::Access::SHADER_READ;
+        duk::rhi::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
+        imageMemoryBarrier.srcStageMask = duk::rhi::PipelineStage::COMPUTE_SHADER;
+        imageMemoryBarrier.dstStageMask = duk::rhi::PipelineStage::TOP_OF_PIPE;
+        imageMemoryBarrier.subresourceRange = duk::rhi::Image::kFullSubresourceRange;
+        imageMemoryBarrier.oldLayout = duk::rhi::Image::Layout::GENERAL;
+        imageMemoryBarrier.newLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
+        imageMemoryBarrier.srcAccessMask = duk::rhi::Access::SHADER_WRITE;
+        imageMemoryBarrier.dstAccessMask = duk::rhi::Access::SHADER_READ;
         imageMemoryBarrier.srcCommandQueue = m_computeQueue.get();
         imageMemoryBarrier.dstCommandQueue = m_mainCommandQueue.get();
         imageMemoryBarrier.image = m_image.get();
 
-        duk::renderer::CommandBuffer::PipelineBarrier pipelineBarrier = {};
+        duk::rhi::CommandBuffer::PipelineBarrier pipelineBarrier = {};
         pipelineBarrier.imageMemoryBarriers = &imageMemoryBarrier;
         pipelineBarrier.imageMemoryBarrierCount = 1;
 
@@ -407,31 +407,31 @@ duk::renderer::FutureCommand Application::compute_pass() {
     });
 }
 
-duk::renderer::FutureCommand Application::main_render_pass() {
-    return m_mainCommandQueue->submit([this](duk::renderer::CommandBuffer* commandBuffer) {
+duk::rhi::FutureCommand Application::main_render_pass() {
+    return m_mainCommandQueue->submit([this](duk::rhi::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
 
         {
-            duk::renderer::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
-            imageMemoryBarrier.srcStageMask = duk::renderer::PipelineStage::BOTTOM_OF_PIPE;
-            imageMemoryBarrier.dstStageMask = duk::renderer::PipelineStage::FRAGMENT_SHADER;
-            imageMemoryBarrier.subresourceRange = duk::renderer::Image::kFullSubresourceRange;
-            imageMemoryBarrier.oldLayout = duk::renderer::Image::Layout::GENERAL;
-            imageMemoryBarrier.newLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
-            imageMemoryBarrier.srcAccessMask = duk::renderer::Access::SHADER_WRITE;
-            imageMemoryBarrier.dstAccessMask = duk::renderer::Access::SHADER_READ;
+            duk::rhi::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
+            imageMemoryBarrier.srcStageMask = duk::rhi::PipelineStage::BOTTOM_OF_PIPE;
+            imageMemoryBarrier.dstStageMask = duk::rhi::PipelineStage::FRAGMENT_SHADER;
+            imageMemoryBarrier.subresourceRange = duk::rhi::Image::kFullSubresourceRange;
+            imageMemoryBarrier.oldLayout = duk::rhi::Image::Layout::GENERAL;
+            imageMemoryBarrier.newLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
+            imageMemoryBarrier.srcAccessMask = duk::rhi::Access::SHADER_WRITE;
+            imageMemoryBarrier.dstAccessMask = duk::rhi::Access::SHADER_READ;
             imageMemoryBarrier.srcCommandQueue = m_computeQueue.get();
             imageMemoryBarrier.dstCommandQueue = m_mainCommandQueue.get();
             imageMemoryBarrier.image = m_image.get();
 
-            duk::renderer::CommandBuffer::PipelineBarrier pipelineBarrier = {};
+            duk::rhi::CommandBuffer::PipelineBarrier pipelineBarrier = {};
             pipelineBarrier.imageMemoryBarriers = &imageMemoryBarrier;
             pipelineBarrier.imageMemoryBarrierCount = 1;
 
             commandBuffer->pipeline_barrier(pipelineBarrier);
         }
 
-        duk::renderer::CommandBuffer::RenderPassBeginInfo renderPassBeginInfo = {};
+        duk::rhi::CommandBuffer::RenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.renderPass = m_renderPass.get();
         renderPassBeginInfo.frameBuffer = m_frameBuffer.get();
 
@@ -450,19 +450,19 @@ duk::renderer::FutureCommand Application::main_render_pass() {
         commandBuffer->end_render_pass();
 
         {
-            duk::renderer::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
-            imageMemoryBarrier.srcStageMask = duk::renderer::PipelineStage::FRAGMENT_SHADER;
-            imageMemoryBarrier.dstStageMask = duk::renderer::PipelineStage::TOP_OF_PIPE;
-            imageMemoryBarrier.subresourceRange = duk::renderer::Image::kFullSubresourceRange;
-            imageMemoryBarrier.oldLayout = duk::renderer::Image::Layout::UNDEFINED;
-            imageMemoryBarrier.newLayout = duk::renderer::Image::Layout::GENERAL;
-            imageMemoryBarrier.srcAccessMask = duk::renderer::Access::SHADER_READ;
-            imageMemoryBarrier.dstAccessMask = duk::renderer::Access::SHADER_WRITE;
+            duk::rhi::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
+            imageMemoryBarrier.srcStageMask = duk::rhi::PipelineStage::FRAGMENT_SHADER;
+            imageMemoryBarrier.dstStageMask = duk::rhi::PipelineStage::TOP_OF_PIPE;
+            imageMemoryBarrier.subresourceRange = duk::rhi::Image::kFullSubresourceRange;
+            imageMemoryBarrier.oldLayout = duk::rhi::Image::Layout::UNDEFINED;
+            imageMemoryBarrier.newLayout = duk::rhi::Image::Layout::GENERAL;
+            imageMemoryBarrier.srcAccessMask = duk::rhi::Access::SHADER_READ;
+            imageMemoryBarrier.dstAccessMask = duk::rhi::Access::SHADER_WRITE;
             imageMemoryBarrier.srcCommandQueue = m_mainCommandQueue.get();
             imageMemoryBarrier.dstCommandQueue = m_computeQueue.get();
             imageMemoryBarrier.image = m_image.get();
 
-            duk::renderer::CommandBuffer::PipelineBarrier pipelineBarrier = {};
+            duk::rhi::CommandBuffer::PipelineBarrier pipelineBarrier = {};
             pipelineBarrier.imageMemoryBarriers = &imageMemoryBarrier;
             pipelineBarrier.imageMemoryBarrierCount = 1;
 
@@ -473,23 +473,23 @@ duk::renderer::FutureCommand Application::main_render_pass() {
     });
 }
 
-duk::renderer::FutureCommand Application::reacquire_compute_resources() {
-    return m_computeQueue->submit([this](duk::renderer::CommandBuffer* commandBuffer) {
+duk::rhi::FutureCommand Application::reacquire_compute_resources() {
+    return m_computeQueue->submit([this](duk::rhi::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
 
-        duk::renderer::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
-        imageMemoryBarrier.srcStageMask = duk::renderer::PipelineStage::BOTTOM_OF_PIPE;
-        imageMemoryBarrier.dstStageMask = duk::renderer::PipelineStage::COMPUTE_SHADER;
-        imageMemoryBarrier.subresourceRange = duk::renderer::Image::kFullSubresourceRange;
-        imageMemoryBarrier.oldLayout = duk::renderer::Image::Layout::SHADER_READ_ONLY;
-        imageMemoryBarrier.newLayout = duk::renderer::Image::Layout::GENERAL;
-        imageMemoryBarrier.srcAccessMask = duk::renderer::Access::SHADER_READ;
-        imageMemoryBarrier.dstAccessMask = duk::renderer::Access::SHADER_WRITE;
+        duk::rhi::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
+        imageMemoryBarrier.srcStageMask = duk::rhi::PipelineStage::BOTTOM_OF_PIPE;
+        imageMemoryBarrier.dstStageMask = duk::rhi::PipelineStage::COMPUTE_SHADER;
+        imageMemoryBarrier.subresourceRange = duk::rhi::Image::kFullSubresourceRange;
+        imageMemoryBarrier.oldLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
+        imageMemoryBarrier.newLayout = duk::rhi::Image::Layout::GENERAL;
+        imageMemoryBarrier.srcAccessMask = duk::rhi::Access::SHADER_READ;
+        imageMemoryBarrier.dstAccessMask = duk::rhi::Access::SHADER_WRITE;
         imageMemoryBarrier.srcCommandQueue = m_mainCommandQueue.get();
         imageMemoryBarrier.dstCommandQueue = m_computeQueue.get();
         imageMemoryBarrier.image = m_image.get();
 
-        duk::renderer::CommandBuffer::PipelineBarrier pipelineBarrier = {};
+        duk::rhi::CommandBuffer::PipelineBarrier pipelineBarrier = {};
         pipelineBarrier.imageMemoryBarriers = &imageMemoryBarrier;
         pipelineBarrier.imageMemoryBarrierCount = 1;
 

@@ -24,7 +24,7 @@ target_include_directories(duk_sample
 
 target_link_libraries(duk_sample
         PRIVATE
-        duk_renderer
+        duk_rhi
         duk_log
         duk_task
         )
