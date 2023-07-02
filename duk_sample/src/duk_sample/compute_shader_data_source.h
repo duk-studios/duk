@@ -4,11 +4,11 @@
 #ifndef DUK_SAMPLE_COMPUTE_SHADER_DATA_SOURCE_H
 #define DUK_SAMPLE_COMPUTE_SHADER_DATA_SOURCE_H
 
-#include <duk_renderer/pipeline/std_shader_data_source.h>
+#include <duk_rhi/pipeline/std_shader_data_source.h>
 
 namespace duk::sample {
 
-class ComputeShaderDataSource : public duk::renderer::StdShaderDataSource {
+class ComputeShaderDataSource : public duk::rhi::StdShaderDataSource {
 public:
     ComputeShaderDataSource();
 };
