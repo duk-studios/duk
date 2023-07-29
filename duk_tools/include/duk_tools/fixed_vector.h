@@ -61,7 +61,7 @@ public:
         m_array[m_size++] = value;
     }
 
-    void push_back(T&& value){
+    void push_back(T&& value) {
         if (m_size >= N){
             throw std::out_of_range("push_back on a full FixedVector");
         }
@@ -69,11 +69,19 @@ public:
     }
 
     template<typename ...Args>
-    void emplace_back(Args&&... args){
+    T& emplace_back(Args&&... args) {
         if (m_size >= N){
             throw std::out_of_range("emplace_back on a full FixedVector");
         }
-        construct(m_array[m_size++], std::forward<Args>(args)...);
+        const auto index = m_size++;
+        construct(m_array[index], std::forward<Args>(args)...);
+        return at(index);
+    }
+
+    void pop_back() {
+        auto newSize = m_size - 1;
+        destroy(at(newSize));
+        m_size = newSize;
     }
 
     void clear() {
@@ -109,11 +117,29 @@ public:
     }
 
     T& operator[](size_t index) {
+        assert(index < m_size);
         return m_array[index];
     }
 
     const T& operator[](size_t index) const {
+        assert(index < m_size);
         return m_array[index];
+    }
+
+    T& back() {
+        return at(m_size - 1);
+    }
+
+    const T& back() const {
+        return at(m_size - 1);
+    }
+
+    T& front() {
+        return at(0);
+    }
+
+    const T& front() const {
+        return at(0);
     }
 
     DUK_NO_DISCARD Iterator begin() {
@@ -173,9 +199,10 @@ private:
     }
 
     void erase_at_end(size_t n){
+        assert(n <= m_size);
         //destroy excess elements
         auto newSize = m_size - n;
-        for (int i = m_size; i >= newSize; i--) {
+        for (auto i = newSize; i < m_size; i++) {
             destroy(m_array[i]);
         }
         m_size = newSize;
