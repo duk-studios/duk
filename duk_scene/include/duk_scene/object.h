@@ -47,6 +47,8 @@ public:
 
     DUK_NO_DISCARD bool valid() const;
 
+    DUK_NO_DISCARD operator bool() const;
+
     void destroy() const;
 
     template<typename T, typename ...Args>

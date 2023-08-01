@@ -28,7 +28,6 @@ bool Object::Id::operator!=(const Object::Id& rhs) const {
     return !(*this == rhs);
 }
 
-
 Object::Object() : Object(MAX_OBJECTS, 0, nullptr) {
 
 }
@@ -45,6 +44,10 @@ Object::Id Object::id() const {
 
 bool Object::valid() const {
     return m_scene != nullptr && m_scene->valid_object(m_id);
+}
+
+Object::operator bool() const {
+    return valid();
 }
 
 }
