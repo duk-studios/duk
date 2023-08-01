@@ -61,6 +61,9 @@ public:
     template<typename T>
     Component<T> component() const;
 
+    template<typename ...Ts>
+    std::tuple<Component<Ts>...> components();
+
 private:
     Id m_id;
     Scene* m_scene;

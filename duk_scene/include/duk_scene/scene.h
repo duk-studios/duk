@@ -47,7 +47,7 @@ public:
         public:
             Iterator(uint32_t index, Scene* scene, ComponentMask componentMask);
             // Dereference operator (*)
-            Object operator*() const;
+            DUK_NO_DISCARD Object operator*() const;
 
             // Pre-increment operator (++it)
             Iterator& operator++();
@@ -56,10 +56,10 @@ public:
             Iterator operator++(int);
 
             // Equality operator (it1 == it2)
-            bool operator==(const Iterator& other) const;
+            DUK_NO_DISCARD bool operator==(const Iterator& other) const;
 
             // Inequality operator (it1 != it2)
-            bool operator!=(const Iterator& other) const;
+            DUK_NO_DISCARD bool operator!=(const Iterator& other) const;
 
         private:
 
@@ -78,20 +78,18 @@ public:
 
         ObjectView(Scene* scene, ComponentMask componentMask);
 
-        Iterator begin();
+        DUK_NO_DISCARD Iterator begin();
 
-        Iterator begin() const;
+        DUK_NO_DISCARD Iterator begin() const;
 
-        Iterator end();
+        DUK_NO_DISCARD Iterator end();
 
-        Iterator end() const;
-
+        DUK_NO_DISCARD Iterator end() const;
 
     private:
         Scene* m_scene;
         ComponentMask m_componentMask;
     };
-
 
 public:
 
@@ -111,7 +109,7 @@ public:
     DUK_NO_DISCARD ObjectView objects_with_components();
 
     template<typename T, typename ...Args>
-    Component<T> add_component(const Object::Id& id, Args&& ...args);
+    void add_component(const Object::Id& id, Args&& ...args);
 
     template<typename T>
     void remove_component(const Object::Id& id);
@@ -184,12 +182,11 @@ Component<T>::operator bool() const {
 // Scene Implementation //
 
 template<typename T, typename... Args>
-Component<T> Scene::add_component(const Object::Id& id, Args&& ... args) {
+void Scene::add_component(const Object::Id& id, Args&& ... args) {
     assert(valid_object(id));
     auto componentPool = pool<T>();
     componentPool->construct(id.index(), std::forward<Args>(args)...);
     m_objectComponentMasks[id.index()].set(component_index<T>());
-    return Component<T>(id, this);
 }
 
 template<typename T>
@@ -265,7 +262,8 @@ ComponentMask Scene::component_mask() {
 
 template<typename T, typename... Args>
 Component<T> Object::add(Args&& ... args) {
-    return m_scene->template add_component<T>(m_id, std::forward<Args>(args)...);
+    m_scene->template add_component<T>(m_id, std::forward<Args>(args)...);
+    return Component<T>(m_id, m_scene);
 }
 
 template<typename T>
@@ -275,12 +273,17 @@ void Object::remove() {
 
 template<typename T>
 Component<T> Object::component() {
-    return m_scene->template component<T>(m_id);
+    return Component<T>(m_id, m_scene);
 }
 
 template<typename T>
 Component<T> Object::component() const {
-    return m_scene->template component<T>(m_id);
+    return Component<T>(m_id, m_scene);
+}
+
+template<typename... Ts>
+std::tuple<Component<Ts>...> Object::components() {
+    return std::make_tuple(component<Ts>()...);
 }
 
 }
