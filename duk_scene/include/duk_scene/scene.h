@@ -53,7 +53,7 @@ public:
             Iterator& operator++();
 
             // Post-increment operator (it++)
-            Iterator operator++(int);
+            DUK_NO_DISCARD Iterator operator++(int);
 
             // Equality operator (it1 == it2)
             DUK_NO_DISCARD bool operator==(const Iterator& other) const;

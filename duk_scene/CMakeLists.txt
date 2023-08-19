@@ -32,10 +32,4 @@ target_link_libraries(duk_scene
 
 set_target_properties(duk_scene PROPERTIES CXX_STANDARD 20)
 
-target_compile_definitions(duk_scene
-        PUBLIC
-        DUK_SCENE_IS_WINDOWS=$<PLATFORM_ID:Windows>
-        DUK_SCENE_IS_LINUX=$<PLATFORM_ID:Linux>
-        )
-
 add_subdirectory(test)
