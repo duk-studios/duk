@@ -1,0 +1,8 @@
+/// 01/08/2023
+/// phong_shader.h
+
+#ifndef DUK_RENDERER_PHONG_SHADER_H
+#define DUK_RENDERER_PHONG_SHADER_H
+
+#endif // DUK_RENDERER_PHONG_SHADER_H
+

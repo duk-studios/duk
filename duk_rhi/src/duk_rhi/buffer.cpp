@@ -3,3 +3,14 @@
 
 #include <duk_rhi/buffer.h>
 
+namespace duk::rhi {
+
+const uint8_t* Buffer::read_ptr() const {
+    return read_ptr(0);
+}
+
+uint8_t* Buffer::write_ptr() {
+    return write_ptr(0);
+}
+
+}

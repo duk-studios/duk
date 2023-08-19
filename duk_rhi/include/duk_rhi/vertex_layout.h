@@ -6,6 +6,7 @@
 #define DUK_RHI_VERTEX_LAYOUT_H
 
 #include <duk_macros/macros.h>
+#include <duk_hash/hash.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -121,5 +122,14 @@ inline VertexAttribute::Format VertexAttribute::format_of<glm::vec4>() {
 }
 
 }
-
+namespace std {
+template<>
+struct hash<duk::rhi::VertexLayout> {
+    size_t operator()(const duk::rhi::VertexLayout& vertexLayout) {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, vertexLayout.begin(), vertexLayout.end());
+        return hash;
+    }
+};
+}
 #endif //DUK_RHI_VERTEX_LAYOUT_H

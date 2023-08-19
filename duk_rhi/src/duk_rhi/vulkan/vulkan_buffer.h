@@ -120,9 +120,15 @@ public:
 
     void clean(uint32_t imageIndex);
 
+    const uint8_t* read_ptr(size_t offset) const override;
+
     void read(void* dst, size_t size, size_t offset) override;
 
+    uint8_t* write_ptr(size_t offset) override;
+
     void write(void* src, size_t size, size_t offset) override;
+
+    void copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) override;
 
     void flush() override;
 
@@ -135,6 +141,8 @@ public:
     DUK_NO_DISCARD size_t byte_size() const override;
 
     DUK_NO_DISCARD Type type() const override;
+
+    DUK_NO_DISCARD CommandQueue* command_queue() const override;
 
     DUK_NO_DISCARD duk::hash::Hash hash() const override;
 

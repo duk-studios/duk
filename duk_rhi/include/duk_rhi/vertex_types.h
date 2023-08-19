@@ -35,12 +35,11 @@ struct Vertex2DColorUV {
 template<>
 inline VertexLayout layout_of<Vertex2DColorUV>() {
     return {
-            VertexAttribute::format_of<glm::vec2>(),
-            VertexAttribute::format_of<glm::vec4>(),
-            VertexAttribute::format_of<glm::vec2>()
+        VertexAttribute::format_of<glm::vec2>(),
+        VertexAttribute::format_of<glm::vec4>(),
+        VertexAttribute::format_of<glm::vec2>()
     };
 }
-
 
 }
 

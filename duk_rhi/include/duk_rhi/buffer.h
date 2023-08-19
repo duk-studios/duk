@@ -15,6 +15,8 @@
 
 namespace duk::rhi {
 
+class CommandQueue;
+
 class Buffer : public Resource {
 public:
     enum class UpdateFrequency {
@@ -33,6 +35,10 @@ public:
 
 public:
 
+    DUK_NO_DISCARD virtual const uint8_t* read_ptr(size_t offset) const = 0;
+
+    DUK_NO_DISCARD const uint8_t* read_ptr() const;
+
     virtual void read(void* dst, size_t size, size_t offset) = 0;
 
     template<std::ranges::contiguous_range T>
@@ -48,6 +54,10 @@ public:
         assert(elementSize == element_size());
         read((void*)&dst, elementSize, elementIndex * elementSize);
     }
+
+    DUK_NO_DISCARD virtual uint8_t* write_ptr(size_t offset) = 0;
+
+    DUK_NO_DISCARD uint8_t* write_ptr();
 
     virtual void write(void* src, size_t size, size_t offset) = 0;
 
@@ -65,6 +75,8 @@ public:
         write((void*)&src, elementSize, elementIndex * elementSize);
     }
 
+    virtual void copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) = 0;
+
     /// Makes recent writes available to the GPU
     virtual void flush() = 0;
 
@@ -78,6 +90,8 @@ public:
     DUK_NO_DISCARD virtual size_t byte_size() const = 0;
 
     DUK_NO_DISCARD virtual Type type() const = 0;
+
+    DUK_NO_DISCARD virtual CommandQueue* command_queue() const = 0;
 
     DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 

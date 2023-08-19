@@ -10,7 +10,6 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/frame_buffer.h
         include/duk_rhi/image.h
         include/duk_rhi/sampler.h
-        include/duk_rhi/vertex_data_source.h
         include/duk_rhi/vertex_layout.h
         include/duk_rhi/vertex_types.h
         include/duk_rhi/pipeline/graphics_pipeline.h
@@ -28,13 +27,13 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/resource.h
         include/duk_rhi/pipeline/compute_pipeline.h
         include/duk_rhi/pipeline/pipeline_flags.h
+        include/duk_rhi/index_types.h
         )
 
 set(DUK_RHI_SOURCES
         src/duk_rhi/data_source.cpp
         src/duk_rhi/rhi.cpp
         src/duk_rhi/renderer_error.cpp
-        src/duk_rhi/vertex_data_source.cpp
         src/duk_rhi/vertex_layout.cpp
         src/duk_rhi/pipeline/graphics_pipeline.cpp
         src/duk_rhi/pipeline/pipeline_data_source.cpp
@@ -100,6 +99,7 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.cpp
         src/duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.h
         src/duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.cpp
+        src/duk_rhi/index_types.cpp
         )
 
 add_library(duk_rhi STATIC ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})

@@ -268,14 +268,35 @@ void VulkanBuffer::clean(uint32_t imageIndex) {
     }
 }
 
+const uint8_t* VulkanBuffer::read_ptr(size_t offset) const {
+    assert(offset < m_data.size());
+    return m_data.data() + offset;
+}
+
 void VulkanBuffer::read(void* dst, size_t size, size_t offset) {
     assert(offset + size <= m_data.size());
     memcpy(dst, m_data.data() + offset, size);
 }
 
+uint8_t* VulkanBuffer::write_ptr(size_t offset) {
+    assert(offset < m_data.size());
+    return m_data.data() + offset;
+}
+
 void VulkanBuffer::write(void* src, size_t size, size_t offset) {
     assert(offset + size <= m_data.size());
     memcpy(m_data.data() + offset, src, size);
+}
+
+void VulkanBuffer::copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) {
+    auto buffer = dynamic_cast<VulkanBuffer*>(srcBuffer);
+    assert(buffer);
+    assert(size + dstOffset <= m_data.size());
+    assert(size + srcOffset <= buffer->m_data.size());
+
+    auto srcPtr = buffer->m_data.data() + srcOffset;
+    auto dstPtr = m_data.data() + dstOffset;
+    memcpy(dstPtr, srcPtr, size);
 }
 
 void VulkanBuffer::flush() {
@@ -321,6 +342,10 @@ size_t VulkanBuffer::byte_size() const {
 
 Buffer::Type VulkanBuffer::type() const {
     return m_type;
+}
+
+CommandQueue* VulkanBuffer::command_queue() const {
+    return m_commandQueue;
 }
 
 duk::hash::Hash VulkanBuffer::hash() const {
