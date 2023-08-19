@@ -8,6 +8,7 @@
 #include <duk_log/sink.h>
 #include <duk_platform/window.h>
 #include <duk_rhi/rhi.h>
+#include <duk_renderer/mesh.h>
 
 #include <memory>
 
@@ -55,7 +56,7 @@ private:
     duk::log::Logger m_logger;
     duk::events::EventListener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;
-    std::shared_ptr<duk::rhi::RHI> m_renderer;
+    std::shared_ptr<duk::rhi::RHI> m_rhi;
     std::shared_ptr<duk::rhi::CommandQueue> m_mainCommandQueue;
     std::shared_ptr<duk::rhi::CommandQueue> m_computeQueue;
     std::shared_ptr<duk::rhi::CommandScheduler> m_scheduler;
@@ -65,8 +66,8 @@ private:
     std::shared_ptr<duk::rhi::Shader> m_computeShader;
     std::shared_ptr<duk::rhi::GraphicsPipeline> m_graphicsPipeline;
     std::shared_ptr<duk::rhi::ComputePipeline> m_computePipeline;
-    std::shared_ptr<duk::rhi::Buffer> m_vertexBuffer;
-    std::shared_ptr<duk::rhi::Buffer> m_indexBuffer;
+    std::shared_ptr<duk::renderer::MeshBufferPool> m_meshBufferPool;
+    std::shared_ptr<duk::renderer::Mesh> m_mesh;
     std::shared_ptr<duk::rhi::Buffer> m_materialUniformBuffer;
     std::shared_ptr<duk::rhi::Buffer> m_transformUniformBuffer;
     std::shared_ptr<duk::rhi::Image> m_image;

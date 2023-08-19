@@ -54,6 +54,28 @@ PixelRGBAImageDataSource load_image() {
     return imageDataSource;
 }
 
+using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::rhi::Vertex2DColorUV, uint32_t>;
+
+DefaultMeshDataSource quad_mesh_data_source() {
+    DefaultMeshDataSource meshDataSource;
+
+    std::array<duk::rhi::Vertex2DColorUV, 4> vertices = {};
+    vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[1] = {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[2] = {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[3] = {{0.5f, -0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+
+    meshDataSource.insert_vertices(vertices.begin(), vertices.end());
+
+    std::array<uint32_t, 6> indices = {0, 1, 2, 2, 1, 3};
+
+    meshDataSource.insert_indices(indices.begin(), indices.end());
+
+    meshDataSource.update_hash();
+
+    return meshDataSource;
+}
+
 }
 
 struct UniformBuffer {
@@ -102,7 +124,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         if (m_window->minimized()) {
             return;
         }
-        duk::rhi::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
+        duk::rhi::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_rhi->capabilities()->depth_format());
         depthImageDataSource.update_hash();
         m_depthImage->update(&depthImageDataSource);
 
@@ -132,21 +154,21 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     rendererCreateInfo.engineName = "duk_sample";
     rendererCreateInfo.api = duk::rhi::API::VULKAN;
 
-    m_renderer = check_expected_result(duk::rhi::RHI::create_rhi(rendererCreateInfo));
+    m_rhi = check_expected_result(duk::rhi::RHI::create_rhi(rendererCreateInfo));
 
-    m_scheduler = check_expected_result(m_renderer->create_command_scheduler());
+    m_scheduler = check_expected_result(m_rhi->create_command_scheduler());
 
     duk::rhi::RHI::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
     mainCommandQueueCreateInfo.type = duk::rhi::CommandQueue::Type::GRAPHICS;
 
-    m_mainCommandQueue = check_expected_result(m_renderer->create_command_queue(mainCommandQueueCreateInfo));
+    m_mainCommandQueue = check_expected_result(m_rhi->create_command_queue(mainCommandQueueCreateInfo));
 
     duk::rhi::RHI::CommandQueueCreateInfo computeCommandQueue = {};
     computeCommandQueue.type = duk::rhi::CommandQueue::Type::COMPUTE;
 
-    m_computeQueue = check_expected_result(m_renderer->create_command_queue(computeCommandQueue));
+    m_computeQueue = check_expected_result(m_rhi->create_command_queue(computeCommandQueue));
 
-    duk::rhi::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_renderer->capabilities()->depth_format());
+    duk::rhi::EmptyImageDataSource depthImageDataSource(m_window->width(), m_window->height(), m_rhi->capabilities()->depth_format());
     depthImageDataSource.update_hash();
 
     duk::rhi::RHI::ImageCreateInfo depthImageCreateInfo = {};
@@ -156,9 +178,9 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     depthImageCreateInfo.imageDataSource = &depthImageDataSource;
     depthImageCreateInfo.commandQueue = m_mainCommandQueue.get();
 
-    m_depthImage = check_expected_result(m_renderer->create_image(depthImageCreateInfo));
+    m_depthImage = check_expected_result(m_rhi->create_image(depthImageCreateInfo));
 
-    auto outputImage = m_renderer->present_image();
+    auto outputImage = m_rhi->present_image();
 
     duk::rhi::AttachmentDescription colorAttachmentDescription = {};
     colorAttachmentDescription.format = outputImage->format();
@@ -183,7 +205,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     renderPassCreateInfo.colorAttachmentCount = std::size(attachmentDescriptions);
     renderPassCreateInfo.depthAttachment = &depthAttachmentDescription;
 
-    m_renderPass = check_expected_result(m_renderer->create_render_pass(renderPassCreateInfo));
+    m_renderPass = check_expected_result(m_rhi->create_render_pass(renderPassCreateInfo));
 
     duk::rhi::Image* frameBufferAttachments[] = {outputImage, m_depthImage.get()};
 
@@ -192,21 +214,21 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     frameBufferCreateInfo.attachments = frameBufferAttachments;
     frameBufferCreateInfo.renderPass = m_renderPass.get();
 
-    m_frameBuffer = check_expected_result(m_renderer->create_frame_buffer(frameBufferCreateInfo));
+    m_frameBuffer = check_expected_result(m_rhi->create_frame_buffer(frameBufferCreateInfo));
 
     ColorShaderDataSource colorShaderDataSource;
 
     duk::rhi::RHI::ShaderCreateInfo colorShaderCreateInfo = {};
     colorShaderCreateInfo.shaderDataSource = &colorShaderDataSource;
 
-    m_colorShader = check_expected_result(m_renderer->create_shader(colorShaderCreateInfo));
+    m_colorShader = check_expected_result(m_rhi->create_shader(colorShaderCreateInfo));
 
     ComputeShaderDataSource computeShaderDataSource;
 
     duk::rhi::RHI::ShaderCreateInfo computeShaderCreateInfo = {};
     computeShaderCreateInfo.shaderDataSource = &computeShaderDataSource;
 
-    m_computeShader = check_expected_result(m_renderer->create_shader(computeShaderCreateInfo));
+    m_computeShader = check_expected_result(m_rhi->create_shader(computeShaderCreateInfo));
 
     duk::rhi::RHI::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
     pipelineCreateInfo.viewport.extent = {m_window->width(), m_window->height()};
@@ -220,43 +242,22 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     pipelineCreateInfo.renderPass = m_renderPass.get();
     pipelineCreateInfo.depthTesting = true;
 
-    m_graphicsPipeline = check_expected_result(m_renderer->create_graphics_pipeline(pipelineCreateInfo));
+    m_graphicsPipeline = check_expected_result(m_rhi->create_graphics_pipeline(pipelineCreateInfo));
 
     duk::rhi::RHI::ComputePipelineCreateInfo computePipelineCreateInfo = {};
     computePipelineCreateInfo.shader = m_computeShader.get();
 
-    m_computePipeline = check_expected_result(m_renderer->create_compute_pipeline(computePipelineCreateInfo));
+    m_computePipeline = check_expected_result(m_rhi->create_compute_pipeline(computePipelineCreateInfo));
 
-    std::array<duk::rhi::Vertex2DColorUV, 4> vertices = {};
-    vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[1] = {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[2] = {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[3] = {{0.5f, -0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+    duk::renderer::MeshBufferPoolCreateInfo meshBufferPoolCreateInfo = {};
+    meshBufferPoolCreateInfo.rhi = m_rhi.get();
+    meshBufferPoolCreateInfo.commandQueue = m_mainCommandQueue.get();
 
+    m_meshBufferPool = std::make_shared<renderer::MeshBufferPool>(meshBufferPoolCreateInfo);
 
-    duk::rhi::RHI::BufferCreateInfo vertexBufferCreateInfo = {};
-    vertexBufferCreateInfo.type = duk::rhi::Buffer::Type::VERTEX;
-    vertexBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
-    vertexBufferCreateInfo.elementCount = vertices.size();
-    vertexBufferCreateInfo.elementSize = sizeof(duk::rhi::Vertex2DColorUV);
-    vertexBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
+    auto quadDataSource = detail::quad_mesh_data_source();
 
-    m_vertexBuffer = check_expected_result(m_renderer->create_buffer(vertexBufferCreateInfo));
-    m_vertexBuffer->write(vertices);
-    m_vertexBuffer->flush();
-
-    std::array<uint16_t, 6> indices = {0, 1, 2, 2, 1, 3};
-
-    duk::rhi::RHI::BufferCreateInfo indexBufferCreateInfo = {};
-    indexBufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX_16;
-    indexBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
-    indexBufferCreateInfo.elementCount = indices.size();
-    indexBufferCreateInfo.elementSize = sizeof(uint16_t);
-    indexBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
-
-    m_indexBuffer = check_expected_result(m_renderer->create_buffer(indexBufferCreateInfo));
-    m_indexBuffer->write(indices);
-    m_indexBuffer->flush();
+    m_mesh = m_meshBufferPool->create_mesh(&quadDataSource);
 
     duk::rhi::RHI::BufferCreateInfo transformUniformBufferCreateInfo = {};
     transformUniformBufferCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
@@ -266,7 +267,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     transformUniformBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
 
 
-    m_transformUniformBuffer = check_expected_result(m_renderer->create_buffer(transformUniformBufferCreateInfo));
+    m_transformUniformBuffer = check_expected_result(m_rhi->create_buffer(transformUniformBufferCreateInfo));
 
     duk::rhi::RHI::BufferCreateInfo materialUniformBufferCreateInfo = {};
     materialUniformBufferCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
@@ -275,7 +276,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     materialUniformBufferCreateInfo.elementSize = sizeof(UniformBuffer);
     materialUniformBufferCreateInfo.commandQueue = m_mainCommandQueue.get();
 
-    m_materialUniformBuffer = check_expected_result(m_renderer->create_buffer(materialUniformBufferCreateInfo));
+    m_materialUniformBuffer = check_expected_result(m_rhi->create_buffer(materialUniformBufferCreateInfo));
     UniformBuffer uniformBuffer = {};
     uniformBuffer.color = glm::vec4(1);
     m_materialUniformBuffer->write(uniformBuffer);
@@ -290,19 +291,19 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     imageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
     imageCreateInfo.commandQueue = m_mainCommandQueue.get();
 
-    m_image = check_expected_result(m_renderer->create_image(imageCreateInfo));
+    m_image = check_expected_result(m_rhi->create_image(imageCreateInfo));
 
     duk::rhi::RHI::DescriptorSetCreateInfo computeDescriptorSet = {};
     computeDescriptorSet.description = computeShaderDataSource.descriptor_set_descriptions().at(0);
 
-    m_computeDescriptorSet = check_expected_result(m_renderer->create_descriptor_set(computeDescriptorSet));
+    m_computeDescriptorSet = check_expected_result(m_rhi->create_descriptor_set(computeDescriptorSet));
     m_computeDescriptorSet->set(0, duk::rhi::Descriptor::storage_image(m_image.get(), duk::rhi::Image::Layout::GENERAL));
     m_computeDescriptorSet->flush();
 
     duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
     descriptorSetCreateInfo.description = colorShaderDataSource.descriptor_set_descriptions().at(0);
 
-    m_descriptorSet = check_expected_result(m_renderer->create_descriptor_set(descriptorSetCreateInfo));
+    m_descriptorSet = check_expected_result(m_rhi->create_descriptor_set(descriptorSetCreateInfo));
 
     m_descriptorSet->set(0, duk::rhi::Descriptor::uniform_buffer(m_transformUniformBuffer.get()));
     m_descriptorSet->set(1, duk::rhi::Descriptor::uniform_buffer(m_materialUniformBuffer.get()));
@@ -354,15 +355,15 @@ void Application::update(double time, double deltaTime) {
 }
 
 void Application::draw() {
-    m_renderer->prepare_frame();
+    m_rhi->prepare_frame();
 
     m_scheduler->begin();
 
-    auto acquireImageCommand = m_scheduler->schedule(m_renderer->acquire_image_command());
+    auto acquireImageCommand = m_scheduler->schedule(m_rhi->acquire_image_command());
     auto computePass = m_scheduler->schedule(compute_pass());
     auto mainRenderPassCommand = m_scheduler->schedule(main_render_pass());
     auto reacquireComputeResources = m_scheduler->schedule(reacquire_compute_resources());
-    auto presentCommand = m_scheduler->schedule(m_renderer->present_command());
+    auto presentCommand = m_scheduler->schedule(m_rhi->present_command());
 
     mainRenderPassCommand
         .wait(acquireImageCommand, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT)
@@ -439,13 +440,9 @@ duk::rhi::FutureCommand Application::main_render_pass() {
 
         commandBuffer->bind_graphics_pipeline(m_graphicsPipeline.get());
 
-        commandBuffer->bind_vertex_buffer(m_vertexBuffer.get());
-
-        commandBuffer->bind_index_buffer(m_indexBuffer.get());
-
         commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 
-        commandBuffer->draw_indexed(m_indexBuffer->element_count(), 1, 0, 0, 0);
+        m_mesh->draw(commandBuffer);
 
         commandBuffer->end_render_pass();
 
