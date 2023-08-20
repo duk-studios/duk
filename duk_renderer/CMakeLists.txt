@@ -5,6 +5,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/shaders/phong_shader.h
         include/duk_renderer/mesh.h
         include/duk_renderer/mesh_data_source.h
+        include/duk_renderer/renderer.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -12,6 +13,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/shaders/phong_shader.cpp
         src/duk_renderer/mesh.cpp
         src/duk_renderer/mesh_data_source.cpp
+        src/duk_renderer/renderer.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
