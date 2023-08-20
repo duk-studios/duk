@@ -54,12 +54,12 @@ PixelRGBAImageDataSource load_image() {
     return imageDataSource;
 }
 
-using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::rhi::Vertex2DColorUV, uint32_t>;
+using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::rhi::Vertex2DColorUV, uint16_t>;
 
 DefaultMeshDataSource quad_mesh_data_source() {
     DefaultMeshDataSource meshDataSource;
 
-    std::array<duk::rhi::Vertex2DColorUV, 4> vertices = {};
+    std::array<DefaultMeshDataSource::VertexType, 4> vertices = {};
     vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
     vertices[1] = {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
     vertices[2] = {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
@@ -67,7 +67,7 @@ DefaultMeshDataSource quad_mesh_data_source() {
 
     meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
-    std::array<uint32_t, 6> indices = {0, 1, 2, 2, 1, 3};
+    std::array<DefaultMeshDataSource::IndexType, 6> indices = {0, 1, 2, 2, 1, 3};
 
     meshDataSource.insert_indices(indices.begin(), indices.end());
 

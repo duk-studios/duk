@@ -38,6 +38,10 @@ public:
 template<typename V, typename I>
 class MeshDataSourceT : public MeshDataSource {
 public:
+    using VertexType = V;
+    using IndexType = I;
+
+public:
 
     template<typename InputIterator>
     void insert_vertices(InputIterator begin, InputIterator end);
