@@ -17,7 +17,7 @@ VkShaderStageFlags convert_module_mask(Shader::Module::Mask moduleMask);
 
 struct VulkanShaderCreateInfo {
     VkDevice device;
-    ShaderDataSource* shaderDataSource;
+    const ShaderDataSource* shaderDataSource;
     VulkanDescriptorSetLayoutCache* descriptorSetLayoutCache;
 };
 
@@ -46,7 +46,7 @@ public:
 
 private:
 
-    bool create_shader_module(Shader::Module::Bits type, ShaderDataSource* shaderDataSource);
+    bool create_shader_module(Shader::Module::Bits type, const ShaderDataSource* shaderDataSource);
 
 private:
     VkDevice m_device;

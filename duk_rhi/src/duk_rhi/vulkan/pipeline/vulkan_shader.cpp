@@ -141,7 +141,7 @@ bool VulkanShader::is_compute_shader() const {
     return m_moduleMask & (Shader::Module::COMPUTE);
 }
 
-bool VulkanShader::create_shader_module(Shader::Module::Bits type, ShaderDataSource* shaderDataSource) {
+bool VulkanShader::create_shader_module(Shader::Module::Bits type, const ShaderDataSource* shaderDataSource) {
     if (!shaderDataSource->has_module(type)) {
         return false;
     }

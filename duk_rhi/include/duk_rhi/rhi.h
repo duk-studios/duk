@@ -98,7 +98,7 @@ public:
     DUK_NO_DISCARD virtual ExpectedCommandScheduler create_command_scheduler() = 0;
 
     struct ShaderCreateInfo {
-        ShaderDataSource* shaderDataSource;
+        const ShaderDataSource* shaderDataSource;
     };
 
     DUK_NO_DISCARD virtual ExpectedShader create_shader(const ShaderCreateInfo& shaderCreateInfo) = 0;
