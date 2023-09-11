@@ -2,6 +2,8 @@
 /// pipeline.cpp
 
 #include <duk_rhi/pipeline/graphics_pipeline.h>
+#include <duk_rhi/pipeline/shader.h>
+#include <duk_rhi/render_pass.h>
 
 namespace duk::rhi {
 
@@ -55,6 +57,32 @@ void GraphicsPipeline::set_blend_enabled(bool enabled) {
     auto blend = this->blend();
     blend.enabled = enabled;
     set_blend(blend);
+}
+
+duk::hash::Hash GraphicsPipeline::hash_of(GraphicsPipeline::Viewport viewport,
+                                          GraphicsPipeline::Scissor scissor,
+                                          GraphicsPipeline::Blend blend,
+                                          Shader* shader,
+                                          RenderPass* renderPass,
+                                          GraphicsPipeline::CullMode::Mask cullMode,
+                                          bool depthTesting) {
+    duk::hash::Hash hash = 0;
+    duk::hash::hash_combine(hash, viewport.offset);
+    duk::hash::hash_combine(hash, viewport.extent);
+    duk::hash::hash_combine(hash, blend.alphaBlendOp);
+    duk::hash::hash_combine(hash, blend.colorBlendOp);
+    duk::hash::hash_combine(hash, blend.dstAlphaBlendFactor);
+    duk::hash::hash_combine(hash, blend.srcAlphaBlendFactor);
+    duk::hash::hash_combine(hash, blend.dstColorBlendFactor);
+    duk::hash::hash_combine(hash, blend.srcColorBlendFactor);
+    duk::hash::hash_combine(hash, blend.enabled);
+    duk::hash::hash_combine(hash, scissor.extent);
+    duk::hash::hash_combine(hash, scissor.offset);
+    duk::hash::hash_combine(hash, shader->hash());
+    duk::hash::hash_combine(hash, renderPass->hash());
+    duk::hash::hash_combine(hash, cullMode);
+    duk::hash::hash_combine(hash, depthTesting);
+    return hash;
 }
 
 }

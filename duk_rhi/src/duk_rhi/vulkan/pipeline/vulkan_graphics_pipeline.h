@@ -92,8 +92,6 @@ public:
 
 private:
 
-    void update_graphics_pipeline(uint32_t imageIndex);
-
     void update_hash();
 
 private:

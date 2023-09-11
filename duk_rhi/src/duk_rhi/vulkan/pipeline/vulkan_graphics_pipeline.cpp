@@ -346,22 +346,7 @@ hash::Hash VulkanGraphicsPipeline::hash() const {
 }
 
 void VulkanGraphicsPipeline::update_hash() {
-    m_hash = 0;
-    duk::hash::hash_combine(m_hash, m_viewport.offset);
-    duk::hash::hash_combine(m_hash, m_viewport.extent);
-    duk::hash::hash_combine(m_hash, m_blend.alphaBlendOp);
-    duk::hash::hash_combine(m_hash, m_blend.colorBlendOp);
-    duk::hash::hash_combine(m_hash, m_blend.dstAlphaBlendFactor);
-    duk::hash::hash_combine(m_hash, m_blend.srcAlphaBlendFactor);
-    duk::hash::hash_combine(m_hash, m_blend.dstColorBlendFactor);
-    duk::hash::hash_combine(m_hash, m_blend.srcColorBlendFactor);
-    duk::hash::hash_combine(m_hash, m_blend.enabled);
-    duk::hash::hash_combine(m_hash, m_scissor.extent);
-    duk::hash::hash_combine(m_hash, m_scissor.offset);
-    duk::hash::hash_combine(m_hash, m_shader->hash());
-    duk::hash::hash_combine(m_hash, m_renderPass->hash());
-    duk::hash::hash_combine(m_hash, m_cullModeMask);
-    duk::hash::hash_combine(m_hash, m_depthTesting);
+    m_hash = hash_of(m_viewport, m_scissor, m_blend, m_shader, m_renderPass, m_cullModeMask, m_depthTesting);
 }
 
 }
