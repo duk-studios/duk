@@ -1,0 +1,32 @@
+/// 20/08/2023
+/// transform.cpp
+
+#include <duk_renderer/components/transform.h>
+#include <duk_scene/scene.h>
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
+
+namespace duk::renderer {
+
+glm::mat4 model_matrix_3d(const duk::scene::Object& object) {
+    glm::mat4 model(1);
+
+    if (auto position3D = object.component<Position3D>()) {
+        model = glm::translate(model, position3D->value);
+    }
+
+    return model;
+}
+
+glm::mat3 model_matrix_2d(const duk::scene::Object& object) {
+    glm::mat3 model(1);
+
+    if (auto position2D = object.component<Position2D>()) {
+        model = glm::translate(model, position2D->value);
+    }
+
+    return model;
+}
+
+}
