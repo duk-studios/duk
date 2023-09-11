@@ -2,6 +2,11 @@
 /// forward_renderer.cpp
 
 #include <duk_renderer/forward/forward_renderer.h>
+#include <duk_renderer/components/mesh_painter.h>
+
+#include <duk_rhi/pipeline/std_shader_data_source.h>
+
+#include <fstream>
 
 namespace duk::renderer {
 
@@ -42,7 +47,12 @@ ForwardRenderer::ForwardRenderer(const ForwardRendererCreateInfo& forwardRendere
             throw std::runtime_error("failed to create RenderPass: " + expectedRenderPass.error().description());
         }
 
-        m_renderPass = std::move(expectedRenderPass.value());
+        CanvasCreateInfo canvasCreateInfo = {};
+        canvasCreateInfo.renderPass = std::move(expectedRenderPass.value());
+        canvasCreateInfo.width = render_width();
+        canvasCreateInfo.height = render_height();
+
+        m_canvas = std::make_unique<Canvas>(canvasCreateInfo);
     }
 
     {
@@ -51,7 +61,7 @@ ForwardRenderer::ForwardRenderer(const ForwardRendererCreateInfo& forwardRendere
         duk::rhi::RHI::FrameBufferCreateInfo frameBufferCreateInfo = {};
         frameBufferCreateInfo.attachmentCount = std::size(frameBufferAttachments);
         frameBufferCreateInfo.attachments = frameBufferAttachments;
-        frameBufferCreateInfo.renderPass = m_renderPass.get();
+        frameBufferCreateInfo.renderPass = m_canvas->render_pass();
 
         auto expectedFrameBuffer = m_rhi->create_frame_buffer(frameBufferCreateInfo);
 
@@ -67,24 +77,32 @@ void ForwardRenderer::render(duk::scene::Scene* scene) {
 
     m_rhi->prepare_frame();
 
+    m_scheduler->begin();
+
     auto mainRenderPass = m_mainQueue->submit([this, scene](duk::rhi::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
 
         duk::rhi::CommandBuffer::RenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.frameBuffer = m_frameBuffer.get();
-        renderPassBeginInfo.renderPass = m_renderPass.get();
+        renderPassBeginInfo.renderPass = m_canvas->render_pass();
 
         commandBuffer->begin_render_pass(renderPassBeginInfo);
 
-        // for (auto drawGroup : drawGroups) {
-        //     bind drawGroup.vertexBuffer
-        //     bind drawGroup.indexBuffer
-        //     draw
+        for (auto object : scene->objects_with_components<MeshPainter>()) {
+            auto meshPainter = object.component<MeshPainter>();
+
+            Painter::PaintParams paintParams = {};
+            paintParams.canvas = m_canvas.get();
+            paintParams.mesh = meshPainter->mesh;
+            paintParams.instanceDescriptorSet = meshPainter->instanceDescriptorSet;
+
+            meshPainter->painter->paint(commandBuffer, paintParams);
+        }
+
+        commandBuffer->end_render_pass();
 
         commandBuffer->end();
     });
-
-    m_scheduler->begin();
 
     auto acquireImageCommand = m_scheduler->schedule(m_rhi->acquire_image_command());
     auto mainRenderPassCommand = m_scheduler->schedule(std::move(mainRenderPass));
@@ -95,6 +113,13 @@ void ForwardRenderer::render(duk::scene::Scene* scene) {
     presentCommand.wait(mainRenderPassCommand);
 
     m_scheduler->flush();
+}
+
+void ForwardRenderer::resize(uint32_t width, uint32_t height) {
+    Renderer::resize(width, height);
+    duk::rhi::EmptyImageDataSource depthImageDataSource(render_width(), render_height(), m_rhi->capabilities()->depth_format());
+    depthImageDataSource.update_hash();
+    m_depthImage->update(&depthImageDataSource);
 }
 
 }

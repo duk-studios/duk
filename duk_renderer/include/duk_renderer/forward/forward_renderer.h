@@ -6,6 +6,7 @@
 
 #include <duk_scene/scene.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/canvas.h>
 #include <duk_rhi/rhi.h>
 
 namespace duk::renderer {
@@ -21,8 +22,10 @@ public:
 
     void render(duk::scene::Scene* scene) override;
 
+    void resize(uint32_t width, uint32_t height) override;
+
 private:
-    std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
+    std::unique_ptr<Canvas> m_canvas;
     std::shared_ptr<duk::rhi::Image> m_depthImage;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
 };

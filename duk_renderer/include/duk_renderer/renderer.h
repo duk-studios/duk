@@ -26,11 +26,17 @@ public:
 
     virtual void render(duk::scene::Scene* scene) = 0;
 
+    virtual void resize(uint32_t width, uint32_t height);
+
     DUK_NO_DISCARD uint32_t render_width() const;
 
     DUK_NO_DISCARD uint32_t render_height() const;
 
     DUK_NO_DISCARD std::shared_ptr<duk::rhi::Image> create_depth_image(uint32_t width, uint32_t height);
+
+    DUK_NO_DISCARD duk::rhi::RHI* rhi() const;
+
+    DUK_NO_DISCARD duk::rhi::CommandQueue* main_command_queue() const;
 
 protected:
     duk::platform::Window* m_window;

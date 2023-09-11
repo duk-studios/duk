@@ -55,6 +55,10 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
 
 }
 
+void Renderer::resize(uint32_t width, uint32_t height) {
+
+}
+
 uint32_t Renderer::render_width() const {
     return m_window ? m_window->width() : 0;
 }
@@ -81,6 +85,14 @@ std::shared_ptr<duk::rhi::Image> Renderer::create_depth_image(uint32_t width, ui
     }
 
     return std::move(expectedDepthImage.value());
+}
+
+duk::rhi::RHI* Renderer::rhi() const {
+    return m_rhi.get();
+}
+
+duk::rhi::CommandQueue* Renderer::main_command_queue() const {
+    return m_mainQueue.get();
 }
 
 }
