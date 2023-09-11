@@ -9,6 +9,8 @@
 #include <duk_platform/window.h>
 #include <duk_rhi/rhi.h>
 #include <duk_renderer/mesh.h>
+#include <duk_renderer/forward/forward_renderer.h>
+#include <duk_renderer/painters/color/color_painter.h>
 
 #include <memory>
 
@@ -46,34 +48,18 @@ private:
 
     void draw();
 
-    duk::rhi::FutureCommand main_render_pass();
-
-    duk::rhi::FutureCommand compute_pass();
-
-    duk::rhi::FutureCommand reacquire_compute_resources();
-
 private:
     duk::log::Logger m_logger;
     duk::events::EventListener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;
-    std::shared_ptr<duk::rhi::RHI> m_rhi;
-    std::shared_ptr<duk::rhi::CommandQueue> m_mainCommandQueue;
-    std::shared_ptr<duk::rhi::CommandQueue> m_computeQueue;
-    std::shared_ptr<duk::rhi::CommandScheduler> m_scheduler;
-    std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
-    std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
-    std::shared_ptr<duk::rhi::Shader> m_colorShader;
-    std::shared_ptr<duk::rhi::Shader> m_computeShader;
-    std::shared_ptr<duk::rhi::GraphicsPipeline> m_graphicsPipeline;
-    std::shared_ptr<duk::rhi::ComputePipeline> m_computePipeline;
+    std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;
     std::shared_ptr<duk::renderer::MeshBufferPool> m_meshBufferPool;
     std::shared_ptr<duk::renderer::Mesh> m_mesh;
+    std::shared_ptr<duk::renderer::ColorPainter> m_colorPainter;
+    std::shared_ptr<duk::scene::Scene> m_scene;
     std::shared_ptr<duk::rhi::Buffer> m_materialUniformBuffer;
     std::shared_ptr<duk::rhi::Buffer> m_transformUniformBuffer;
-    std::shared_ptr<duk::rhi::Image> m_image;
-    std::shared_ptr<duk::rhi::Image> m_depthImage;
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
-    std::shared_ptr<duk::rhi::DescriptorSet> m_computeDescriptorSet;
     bool m_run;
 };
 
