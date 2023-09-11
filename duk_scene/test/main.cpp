@@ -56,9 +56,6 @@ int main() {
         std::cout << "Id: " << object.id().index() << std::endl;
 
         auto test1 = object.components<ComponentTest, ComponentTest2, ComponentTest3>();
-        auto a = test1.get<ComponentTest2>();
-        test1->a = 10;
-        test2->a = 30;
     }
 
     return 0;
