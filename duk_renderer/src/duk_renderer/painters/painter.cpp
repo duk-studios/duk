@@ -2,15 +2,24 @@
 /// painter.cpp
 
 #include <duk_renderer/painters/painter.h>
+#include <duk_renderer/mesh.h>
 
 namespace duk::renderer {
 
 
-Painter::Painter(duk::rhi::RHI* rhi) : m_rhi(rhi) {
+Painter::Painter(duk::rhi::RHI* rhi) :
+    m_rhi(rhi) {
 }
 
 Painter::~Painter() = default;
 
+void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::PaintParams& params) {
+    commandBuffer->bind_graphics_pipeline(pipeline_for_params(params));
+
+    commandBuffer->bind_descriptor_set(params.instanceDescriptorSet, 0);
+
+    params.mesh->draw(commandBuffer);
+}
 
 duk::rhi::GraphicsPipeline* Painter::pipeline_for_params(const Painter::PaintParams& params) {
 

@@ -59,15 +59,6 @@ ColorPainter::ColorPainter(const ColorPainterCreateInfo& colorPainterCreateInfo)
     init_shader(&m_shaderDataSource);
 }
 
-void ColorPainter::paint(duk::rhi::CommandBuffer* commandBuffer, const ColorPainter::PaintParams& params) {
-
-    commandBuffer->bind_graphics_pipeline(pipeline_for_params(params));
-
-    commandBuffer->bind_descriptor_set(params.instanceDescriptorSet, 0);
-
-    params.mesh->draw(commandBuffer);
-}
-
 const duk::rhi::ShaderDataSource* ColorPainter::shader_data_source() const {
     return &m_shaderDataSource;
 }

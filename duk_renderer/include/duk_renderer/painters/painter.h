@@ -29,7 +29,7 @@ public:
         rhi::DescriptorSet* instanceDescriptorSet;
     };
 
-    virtual void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params) = 0;
+    void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
 
     DUK_NO_DISCARD virtual const duk::rhi::ShaderDataSource* shader_data_source() const = 0;
 

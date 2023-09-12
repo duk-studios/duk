@@ -36,8 +36,6 @@ public:
 
     explicit ColorPainter(const ColorPainterCreateInfo& colorPainterCreateInfo);
 
-    void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params) override;
-
     DUK_NO_DISCARD const duk::rhi::ShaderDataSource* shader_data_source() const override;
 
     DUK_NO_DISCARD const duk::rhi::DescriptorSetDescription& instance_descriptor_set_description() const;
