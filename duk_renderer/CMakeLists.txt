@@ -12,6 +12,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/canvas.h
         include/duk_renderer/painters/palette.h
         include/duk_renderer/painters/color/color_palette.h
+        include/duk_renderer/painters/camera.h
         include/duk_renderer/painters/uniform_buffer.h
         include/duk_renderer/painters/storage_buffer.h
         )
@@ -28,6 +29,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/canvas.cpp
         src/duk_renderer/painters/palette.cpp
         src/duk_renderer/painters/color/color_palette.cpp
+        src/duk_renderer/painters/camera.cpp
         src/duk_renderer/painters/uniform_buffer.cpp
         src/duk_renderer/painters/storage_buffer.cpp
         )
