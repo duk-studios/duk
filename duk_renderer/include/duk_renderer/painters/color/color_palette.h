@@ -6,11 +6,17 @@
 
 #include <duk_renderer/painters/palette.h>
 #include <duk_renderer/painters/color/color_painter.h>
+#include <duk_renderer/painters/uniform_buffer.h>
+#include <duk_renderer/painters/storage_buffer.h>
+#include <duk_renderer/painters/camera.h>
+
+#include <duk_scene/limits.h>
 #include <duk_rhi/rhi.h>
 #include <duk_rhi/descriptor_set.h>
 
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
+
 
 namespace duk::renderer {
 
@@ -23,19 +29,31 @@ struct ColorPaletteCreateInfo {
 class ColorPalette : public Palette {
 public:
 
+    struct Transform {
+        glm::mat4 model;
+    };
+
+    struct Material {
+        glm::vec4 color;
+    };
+
+public:
+
     explicit ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo);
 
     void set_color(const glm::vec4& color);
 
-    void update(const UpdateParams& params) override;
+    void insert_instance(const InsertInstanceParams& params) override;
 
     void apply(duk::rhi::CommandBuffer* commandBuffer) override;
 
+    void clear() override;
+
 private:
-    ColorPainter::Transform m_transformData;
-    ColorPainter::Material m_materialData;
-    std::shared_ptr<duk::rhi::Buffer> m_transformUBO;
-    std::shared_ptr<duk::rhi::Buffer> m_materialUBO;
+    std::unique_ptr<CameraUBO> m_cameraUBO;
+    std::unique_ptr<StorageBuffer<Transform, scene::MAX_OBJECTS>> m_transformSBO;
+    std::unique_ptr<UniformBuffer<Material>> m_materialUBO;
+    std::shared_ptr<duk::rhi::DescriptorSet> m_globalDescriptorSet;
     std::shared_ptr<duk::rhi::DescriptorSet> m_instanceDescriptorSet;
 
 };

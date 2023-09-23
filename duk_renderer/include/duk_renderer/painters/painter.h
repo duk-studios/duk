@@ -29,6 +29,8 @@ public:
         Canvas* canvas;
         Mesh* mesh;
         Palette* palette;
+        size_t instanceCount;
+        size_t firstInstance;
     };
 
     void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
@@ -41,6 +43,7 @@ protected:
 
     // should be called by derived classes after loading their data sources
     void init_shader(const rhi::ShaderDataSource* shaderDataSource);
+
 protected:
     duk::rhi::RHI* m_rhi;
 private:

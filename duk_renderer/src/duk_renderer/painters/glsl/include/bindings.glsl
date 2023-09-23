@@ -1,0 +1,7 @@
+#ifndef DUK_BINDINGS_GLSL
+#define DUK_BINDINGS_GLSL
+
+#define GLOBAL_SET_INDEX 0
+#define INSTANCE_SET_INDEX 1
+
+#endif

@@ -27,19 +27,11 @@ struct ColorPainterCreateInfo {
 class ColorPainter : public Painter {
 public:
 
-    struct Transform {
-        glm::mat4 model;
-    };
-
-    struct Material {
-        glm::vec4 color;
-    };
-
-public:
-
     explicit ColorPainter(const ColorPainterCreateInfo& colorPainterCreateInfo);
 
     DUK_NO_DISCARD const duk::rhi::ShaderDataSource* shader_data_source() const override;
+
+    DUK_NO_DISCARD const duk::rhi::DescriptorSetDescription& global_descriptor_set_description() const;
 
     DUK_NO_DISCARD const duk::rhi::DescriptorSetDescription& instance_descriptor_set_description() const;
 

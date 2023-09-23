@@ -248,16 +248,16 @@ rhi::IndexType Mesh::index_type() const {
     return m_indexType;
 }
 
-void Mesh::draw(rhi::CommandBuffer* commandBuffer) {
+void Mesh::draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance) {
 
     commandBuffer->bind_vertex_buffer(m_currentBuffer->vertex_buffer()->internal_buffer());
 
     if (m_indexType != rhi::IndexType::NONE) {
         commandBuffer->bind_index_buffer(m_currentBuffer->index_buffer()->internal_buffer());
-        commandBuffer->draw_indexed(m_indexCount, 1, m_firstIndex, static_cast<int32_t>(m_firstVertex), 0);
+        commandBuffer->draw_indexed(m_indexCount, instanceCount, m_firstIndex, static_cast<int32_t>(m_firstVertex), firstInstance);
     }
     else {
-        commandBuffer->draw(m_vertexCount, m_firstVertex, 1, 0);
+        commandBuffer->draw(m_vertexCount, m_firstVertex, instanceCount, firstInstance);
     }
 }
 

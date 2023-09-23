@@ -3,3 +3,6 @@
 
 #include <duk_renderer/painters/palette.h>
 
+void duk::renderer::Palette::clear() {
+
+}

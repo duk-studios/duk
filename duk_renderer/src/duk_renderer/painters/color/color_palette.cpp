@@ -3,6 +3,8 @@
 
 #include <duk_renderer/painters/color/color_palette.h>
 #include <duk_renderer/components/transform.h>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
 namespace duk::renderer {
 
@@ -13,46 +15,40 @@ ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo)
     auto painter = colorPaletteCreateInfo.painter;
 
     {
-        duk::rhi::RHI::BufferCreateInfo transformUBOCreateInfo = {};
-        transformUBOCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
-        transformUBOCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
-        transformUBOCreateInfo.elementCount = 1;
-        transformUBOCreateInfo.elementSize = sizeof(ColorPainter::Transform);
+        StorageBufferCreateInfo transformUBOCreateInfo = {};
+        transformUBOCreateInfo.rhi = rhi;
         transformUBOCreateInfo.commandQueue = commandQueue;
-
-        auto expectedTransformUBO = rhi->create_buffer(transformUBOCreateInfo);
-
-        if (!expectedTransformUBO) {
-            throw std::runtime_error("failed to create ColorPalette::Transform UBO: " + expectedTransformUBO.error().description());
-        }
-
-        m_transformUBO = std::move(expectedTransformUBO.value());
-        m_transformData.model = glm::mat4(1);
+        m_transformSBO = std::make_unique<StorageBuffer<Transform, scene::MAX_OBJECTS>>(transformUBOCreateInfo);
     }
 
     {
-        duk::rhi::RHI::BufferCreateInfo materialUboCreateInfo = {};
-        materialUboCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
-        materialUboCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
-        materialUboCreateInfo.elementCount = 1;
-        materialUboCreateInfo.elementSize = sizeof(ColorPainter::Material);
-        materialUboCreateInfo.commandQueue = commandQueue;
-
-        auto expectedMaterialUBO = rhi->create_buffer(materialUboCreateInfo);
-
-        if (!expectedMaterialUBO) {
-            throw std::runtime_error("failed to create ColorPalette::Material UBO: " + expectedMaterialUBO.error().description());
-        }
-
-        m_materialUBO = std::move(expectedMaterialUBO.value());
-        m_materialData.color = glm::vec4(1);
+        UniformBufferCreateInfo<Material> materialUBOCreateInfo = {};
+        materialUBOCreateInfo.rhi = rhi;
+        materialUBOCreateInfo.commandQueue = commandQueue;
+        materialUBOCreateInfo.initialData = Material{glm::vec4(1)};
+        m_materialUBO = std::make_unique<UniformBuffer<Material>>(materialUBOCreateInfo);
     }
 
     {
-        duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
-        descriptorSetCreateInfo.description = painter->instance_descriptor_set_description();
+        UniformBufferCreateInfo<CameraMatrices> cameraUBOCreateInfo = {};
+        cameraUBOCreateInfo.rhi = rhi;
+        cameraUBOCreateInfo.commandQueue = commandQueue;
+        m_cameraUBO = std::make_unique<CameraUBO>(cameraUBOCreateInfo);
 
-        auto expectedInstanceDescriptorSet = rhi->create_descriptor_set(descriptorSetCreateInfo);
+        auto& cameraMatrices = m_cameraUBO->data();
+        cameraMatrices.proj = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
+        cameraMatrices.proj[1][1] *= -1;
+        cameraMatrices.view = glm::lookAt(glm::vec3(0, 0, -40), glm::vec3(0), glm::vec3(0, 1, 0));
+        cameraMatrices.vp = cameraMatrices.proj * cameraMatrices.view;
+
+        m_cameraUBO->flush();
+    }
+
+    {
+        duk::rhi::RHI::DescriptorSetCreateInfo instanceDescriptorSet = {};
+        instanceDescriptorSet.description = painter->instance_descriptor_set_description();
+
+        auto expectedInstanceDescriptorSet = rhi->create_descriptor_set(instanceDescriptorSet);
 
         if (!expectedInstanceDescriptorSet) {
             throw std::runtime_error("failed to create ColorPalette instance descriptor set: " + expectedInstanceDescriptorSet.error().description());
@@ -60,30 +56,49 @@ ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo)
 
         m_instanceDescriptorSet = std::move(expectedInstanceDescriptorSet.value());
 
-        m_instanceDescriptorSet->set(0, duk::rhi::Descriptor::uniform_buffer(m_transformUBO.get()));
-        m_instanceDescriptorSet->set(1, duk::rhi::Descriptor::uniform_buffer(m_materialUBO.get()));
-
+        m_instanceDescriptorSet->set(0, *m_transformSBO);
         m_instanceDescriptorSet->flush();
+    }
+
+    {
+        duk::rhi::RHI::DescriptorSetCreateInfo globalDescriptorSet = {};
+        globalDescriptorSet.description = painter->global_descriptor_set_description();
+
+        auto expectedGlobalDescriptorSet = rhi->create_descriptor_set(globalDescriptorSet);
+
+        if (!expectedGlobalDescriptorSet) {
+            throw std::runtime_error("failed to create ColorPalette global descriptor set: " + expectedGlobalDescriptorSet.error().description());
+        }
+
+        m_globalDescriptorSet = std::move(expectedGlobalDescriptorSet.value());
+
+        m_globalDescriptorSet->set(0, *m_cameraUBO);
+        m_globalDescriptorSet->set(1, *m_materialUBO);
+        m_globalDescriptorSet->flush();
     }
 }
 
 void ColorPalette::set_color(const glm::vec4& color) {
-    m_materialData.color = color;
+    m_materialUBO->data().color = color;
 }
 
-void ColorPalette::update(const Palette::UpdateParams& params) {
-    m_transformData.model = duk::renderer::model_matrix_3d(params.object);
+void ColorPalette::insert_instance(const Palette::InsertInstanceParams& params) {
+    auto& transform = m_transformSBO->next();
+    transform.model = duk::renderer::model_matrix_3d(params.object);
 }
 
 void ColorPalette::apply(duk::rhi::CommandBuffer* commandBuffer) {
 
-    m_transformUBO->write(m_transformData);
-    m_transformUBO->flush();
-
-    m_materialUBO->write(m_materialData);
+    m_transformSBO->flush();
+    m_cameraUBO->flush();
     m_materialUBO->flush();
 
-    commandBuffer->bind_descriptor_set(m_instanceDescriptorSet.get(), 0);
+    commandBuffer->bind_descriptor_set(m_globalDescriptorSet.get(), 0);
+    commandBuffer->bind_descriptor_set(m_instanceDescriptorSet.get(), 1);
+}
+
+void ColorPalette::clear() {
+    m_transformSBO->clear();
 }
 
 }

@@ -34,7 +34,7 @@ public:
 
     DUK_NO_DISCARD rhi::IndexType index_type() const;
 
-    void draw(rhi::CommandBuffer* commandBuffer);
+    void draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance);
 
 private:
 

@@ -12,13 +12,15 @@ namespace duk::renderer {
 class Palette {
 public:
 
-    struct UpdateParams {
+    struct InsertInstanceParams {
         duk::scene::Object object;
     };
 
-    virtual void update(const UpdateParams& params) = 0;
+    virtual void insert_instance(const InsertInstanceParams& params) = 0;
 
     virtual void apply(duk::rhi::CommandBuffer* commandBuffer) = 0;
+
+    virtual void clear();
 
 };
 

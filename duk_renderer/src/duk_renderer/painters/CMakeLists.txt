@@ -6,10 +6,14 @@ if (NOT GLSLC_EXECUTABLE)
     message(FATAL_ERROR "glslc not found. Make sure the Vulkan SDK is correctly installed and its bin directory is in your PATH.")
 endif()
 
+set(GLSLC_FLAGS
+        -I ${CMAKE_CURRENT_SOURCE_DIR}/glsl/include
+        )
+
 # Define a list of source and destination paths
 set(SHADER_SPV_GENERATE_COMMANDS
-        COMMAND ${GLSLC_EXECUTABLE} glsl/color/color.vert -o spv/color/color.vert.spv
-        COMMAND ${GLSLC_EXECUTABLE} glsl/color/color.frag -o spv/color/color.frag.spv
+        COMMAND ${GLSLC_EXECUTABLE} glsl/color/color.vert -o spv/color/color.vert.spv ${GLSLC_FLAGS}
+        COMMAND ${GLSLC_EXECUTABLE} glsl/color/color.frag -o spv/color/color.frag.spv ${GLSLC_FLAGS}
         # Add more arguments as needed
         )
 

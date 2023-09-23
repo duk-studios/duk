@@ -19,7 +19,7 @@ void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::Paint
 
     params.palette->apply(commandBuffer);
 
-    params.mesh->draw(commandBuffer);
+    params.mesh->draw(commandBuffer, params.instanceCount, params.firstInstance);
 }
 
 duk::rhi::GraphicsPipeline* Painter::pipeline_for_params(const Painter::PaintParams& params) {
