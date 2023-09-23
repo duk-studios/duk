@@ -49,16 +49,16 @@ PixelRGBAImageDataSource load_image() {
     return imageDataSource;
 }
 
-using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::rhi::Vertex2DColorUV, uint16_t>;
+using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::rhi::Vertex3DColorUV, uint16_t>;
 
 DefaultMeshDataSource quad_mesh_data_source() {
     DefaultMeshDataSource meshDataSource;
 
     std::array<DefaultMeshDataSource::VertexType, 4> vertices = {};
-    vertices[0] = {{-0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[1] = {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[2] = {{-0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[3] = {{0.5f, -0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+    vertices[0] = {{-0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[1] = {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[2] = {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[3] = {{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
 
     meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
@@ -141,37 +141,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_colorPainter = std::make_shared<duk::renderer::ColorPainter>(colorPainterCreateInfo);
 
-    duk::rhi::RHI::BufferCreateInfo transformUniformBufferCreateInfo = {};
-    transformUniformBufferCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
-    transformUniformBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
-    transformUniformBufferCreateInfo.elementCount = 1;
-    transformUniformBufferCreateInfo.elementSize = sizeof(duk::renderer::ColorPainter::Transform);
-    transformUniformBufferCreateInfo.commandQueue = m_renderer->main_command_queue();
-
-    m_transformUniformBuffer = check_expected_result(m_renderer->rhi()->create_buffer(transformUniformBufferCreateInfo));
-
-    duk::rhi::RHI::BufferCreateInfo materialUniformBufferCreateInfo = {};
-    materialUniformBufferCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
-    materialUniformBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
-    materialUniformBufferCreateInfo.elementCount = 1;
-    materialUniformBufferCreateInfo.elementSize = sizeof(duk::renderer::ColorPainter::Material);
-    materialUniformBufferCreateInfo.commandQueue = m_renderer->main_command_queue();
-
-    m_materialUniformBuffer = check_expected_result(m_renderer->rhi()->create_buffer(materialUniformBufferCreateInfo));
-    duk::renderer::ColorPainter::Material material = {};
-    material.color = glm::vec4(1);
-    m_materialUniformBuffer->write(material);
-    m_materialUniformBuffer->flush();
-
-    duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
-    descriptorSetCreateInfo.description = m_colorPainter->instance_descriptor_set_description();
-
-    m_descriptorSet = check_expected_result(m_renderer->rhi()->create_descriptor_set(descriptorSetCreateInfo));
-
-    m_descriptorSet->set(0, duk::rhi::Descriptor::uniform_buffer(m_transformUniformBuffer.get()));
-    m_descriptorSet->set(1, duk::rhi::Descriptor::uniform_buffer(m_materialUniformBuffer.get()));
-
-    m_descriptorSet->flush();
+    m_colorPalette = m_colorPainter->make_palette();
 
     m_scene = std::make_shared<duk::scene::Scene>();
 
@@ -183,7 +153,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     auto meshPainter = obj.add<duk::renderer::MeshPainter>();
     meshPainter->mesh = m_mesh.get();
     meshPainter->painter = m_colorPainter.get();
-    meshPainter->instanceDescriptorSet = m_descriptorSet.get();
+    meshPainter->palette = m_colorPalette.get();
 }
 
 Application::~Application() {
@@ -221,11 +191,6 @@ void Application::update(double time, double deltaTime) {
     for (auto object : m_scene->objects_with_components<duk::renderer::Position3D>()) {
         auto pos = object.component<duk::renderer::Position3D>();
         pos->value = glm::vec3(std::sin(time), 0, 0);
-
-        duk::renderer::ColorPainter::Transform transform = {};
-        transform.model = duk::renderer::model_matrix_3d(object);
-        m_transformUniformBuffer->write(transform);
-        m_transformUniformBuffer->flush();
     }
 
 }
