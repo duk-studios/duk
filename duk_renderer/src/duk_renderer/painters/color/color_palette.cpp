@@ -37,8 +37,7 @@ ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo)
 
         auto& cameraMatrices = m_cameraUBO->data();
         cameraMatrices.proj = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
-        cameraMatrices.proj[1][1] *= -1;
-        cameraMatrices.view = glm::lookAt(glm::vec3(0, 0, -40), glm::vec3(0), glm::vec3(0, 1, 0));
+        cameraMatrices.view = glm::lookAt(glm::vec3(0, 0, 40), glm::vec3(0), glm::vec3(0, 1, 0));
         cameraMatrices.vp = cameraMatrices.proj * cameraMatrices.view;
 
         m_cameraUBO->flush();
