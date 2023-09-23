@@ -20,6 +20,8 @@ public:
 
     explicit Canvas(const CanvasCreateInfo& canvasCreateInfo);
 
+    void resize(uint32_t width, uint32_t height);
+
     DUK_NO_DISCARD uint32_t width() const;
 
     DUK_NO_DISCARD uint32_t height() const;
