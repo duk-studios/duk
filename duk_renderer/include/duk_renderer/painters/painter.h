@@ -10,9 +10,11 @@
 #include <duk_rhi/command/command_buffer.h>
 #include <duk_rhi/rhi.h>
 
+
 namespace duk::renderer {
 
 class Mesh;
+class Palette;
 
 class Painter {
 protected:
@@ -26,7 +28,7 @@ public:
     struct PaintParams {
         Canvas* canvas;
         Mesh* mesh;
-        rhi::DescriptorSet* instanceDescriptorSet;
+        Palette* palette;
     };
 
     void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
@@ -39,9 +41,9 @@ protected:
 
     // should be called by derived classes after loading their data sources
     void init_shader(const rhi::ShaderDataSource* shaderDataSource);
-
-private:
+protected:
     duk::rhi::RHI* m_rhi;
+private:
     std::shared_ptr<duk::rhi::Shader> m_shader;
 
     struct PipelineEntry {

@@ -91,10 +91,15 @@ void ForwardRenderer::render(duk::scene::Scene* scene) {
         for (auto object : scene->objects_with_components<MeshPainter>()) {
             auto meshPainter = object.component<MeshPainter>();
 
+            Palette::UpdateParams updateParams = {};
+            updateParams.object = object;
+
+            meshPainter->palette->update(updateParams);
+
             Painter::PaintParams paintParams = {};
             paintParams.canvas = m_canvas.get();
             paintParams.mesh = meshPainter->mesh;
-            paintParams.instanceDescriptorSet = meshPainter->instanceDescriptorSet;
+            paintParams.palette = meshPainter->palette;
 
             meshPainter->painter->paint(commandBuffer, paintParams);
         }
@@ -120,6 +125,8 @@ void ForwardRenderer::resize(uint32_t width, uint32_t height) {
     duk::rhi::EmptyImageDataSource depthImageDataSource(render_width(), render_height(), m_rhi->capabilities()->depth_format());
     depthImageDataSource.update_hash();
     m_depthImage->update(&depthImageDataSource);
+
+    m_canvas->resize(width, height);
 }
 
 }

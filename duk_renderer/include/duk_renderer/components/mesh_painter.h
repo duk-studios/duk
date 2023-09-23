@@ -6,13 +6,14 @@
 
 #include <duk_renderer/mesh.h>
 #include <duk_renderer/painters/painter.h>
+#include <duk_renderer/painters/palette.h>
 
 namespace duk::renderer {
 
 struct MeshPainter {
     Mesh* mesh;
     Painter* painter;
-    duk::rhi::DescriptorSet* instanceDescriptorSet;
+    Palette* palette;
 };
 
 }

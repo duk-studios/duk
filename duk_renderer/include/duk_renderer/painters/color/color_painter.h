@@ -17,8 +17,11 @@
 
 namespace duk::renderer {
 
+class ColorPalette;
+
 struct ColorPainterCreateInfo {
     rhi::RHI* rhi;
+    rhi::CommandQueue* commandQueue;
 };
 
 class ColorPainter : public Painter {
@@ -40,7 +43,10 @@ public:
 
     DUK_NO_DISCARD const duk::rhi::DescriptorSetDescription& instance_descriptor_set_description() const;
 
+    std::shared_ptr<ColorPalette> make_palette() const;
+
 private:
+    rhi::CommandQueue* m_commandQueue;
     duk::rhi::StdShaderDataSource m_shaderDataSource;
 };
 

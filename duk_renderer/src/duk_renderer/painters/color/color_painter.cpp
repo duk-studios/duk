@@ -67,4 +67,12 @@ const duk::rhi::DescriptorSetDescription& ColorPainter::instance_descriptor_set_
     return m_shaderDataSource.descriptor_set_descriptions().at(0);
 }
 
+std::shared_ptr<ColorPalette> ColorPainter::make_palette() const {
+    duk::renderer::ColorPaletteCreateInfo colorPaletteCreateInfo = {};
+    colorPaletteCreateInfo.rhi = m_rhi;
+    colorPaletteCreateInfo.commandQueue = m_commandQueue;
+    colorPaletteCreateInfo.painter = this;
+    return std::make_shared<duk::renderer::ColorPalette>(colorPaletteCreateInfo);
+}
+
 }
