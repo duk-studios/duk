@@ -300,10 +300,12 @@ void VulkanBuffer::copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, s
 }
 
 void VulkanBuffer::flush() {
+
     update_data_hash();
 
     // static buffers updates as soon as we flush
-    if (m_updateFrequency == Buffer::UpdateFrequency::STATIC) {
+    // also check if hash changed, so we can avoid calling vkDeviceIdle unnecessarily
+    if (m_bufferHashes[0] != m_dataHash && m_updateFrequency == Buffer::UpdateFrequency::STATIC) {
 
         // this may be really expensive, we need to wait for the device to idle because it may be using this buffer while we update it
         // we could try using pipeline barriers to make sure that we only wait when necessary
