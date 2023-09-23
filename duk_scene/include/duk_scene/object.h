@@ -22,7 +22,9 @@ public:
     class Id {
     public:
 
-        explicit constexpr Id(uint32_t index, uint32_t version);
+        Id();
+
+        explicit Id(uint32_t index, uint32_t version);
 
         DUK_NO_DISCARD uint32_t index() const;
 

@@ -6,7 +6,12 @@
 
 namespace duk::scene {
 
-constexpr Object::Id::Id(uint32_t index, uint32_t version) :
+
+Object::Id::Id() : Id(MAX_OBJECTS, 0) {
+
+}
+
+Object::Id::Id(uint32_t index, uint32_t version) :
     m_index(index),
     m_version(version) {
 
