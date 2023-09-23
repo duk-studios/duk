@@ -41,6 +41,21 @@ inline VertexLayout layout_of<Vertex2DColorUV>() {
     };
 }
 
+struct Vertex3DColorUV {
+    glm::vec3 position;
+    glm::vec4 color;
+    glm::vec2 uv;
+};
+
+template<>
+inline VertexLayout layout_of<Vertex3DColorUV>() {
+    return {
+            VertexAttribute::format_of<glm::vec3>(),
+            VertexAttribute::format_of<glm::vec4>(),
+            VertexAttribute::format_of<glm::vec2>()
+    };
+}
+
 }
 
 // specialize std::hash for every vertex type
@@ -65,6 +80,18 @@ struct hash<duk::rhi::Vertex2DColorUV> {
         return hash;
     }
 };
+
+template<>
+struct hash<duk::rhi::Vertex3DColorUV> {
+    size_t operator()(const duk::rhi::Vertex3DColorUV& vertex){
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, vertex.position);
+        duk::hash::hash_combine(hash, vertex.color);
+        duk::hash::hash_combine(hash, vertex.uv);
+        return hash;
+    }
+};
+
 }
 
 #endif //DUK_RHI_VERTEX_TYPES_H

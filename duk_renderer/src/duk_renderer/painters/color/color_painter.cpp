@@ -5,6 +5,7 @@
 #include <duk_renderer/mesh.h>
 
 #include <fstream>
+#include "duk_renderer/painters/color/color_palette.h"
 
 namespace duk::renderer {
 
@@ -31,7 +32,7 @@ static duk::rhi::StdShaderDataSource color_shader_data_source() {
     shaderDataSource.insert_spir_v_code(duk::rhi::Shader::Module::VERTEX, load_bytes("spv/color/color.vert.spv"));
     shaderDataSource.insert_spir_v_code(duk::rhi::Shader::Module::FRAGMENT, load_bytes("spv/color/color.frag.spv"));
 
-    shaderDataSource.insert_vertex_attribute(duk::rhi::VertexAttribute::Format::VEC2);
+    shaderDataSource.insert_vertex_attribute(duk::rhi::VertexAttribute::Format::VEC3);
     shaderDataSource.insert_vertex_attribute(duk::rhi::VertexAttribute::Format::VEC4);
     shaderDataSource.insert_vertex_attribute(duk::rhi::VertexAttribute::Format::VEC2);
 
@@ -54,7 +55,8 @@ static duk::rhi::StdShaderDataSource color_shader_data_source() {
 }
 
 ColorPainter::ColorPainter(const ColorPainterCreateInfo& colorPainterCreateInfo) :
-    Painter(colorPainterCreateInfo.rhi) {
+    Painter(colorPainterCreateInfo.rhi),
+    m_commandQueue(colorPainterCreateInfo.commandQueue) {
     m_shaderDataSource = detail::color_shader_data_source();
     init_shader(&m_shaderDataSource);
 }
