@@ -55,14 +55,75 @@ DefaultMeshDataSource quad_mesh_data_source() {
     DefaultMeshDataSource meshDataSource;
 
     std::array<DefaultMeshDataSource::VertexType, 4> vertices = {};
-    vertices[0] = {{-0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[1] = {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[2] = {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[3] = {{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+    vertices[0] = {{0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[1] = {{-0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[2] = {{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[3] = {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
 
     meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
     std::array<DefaultMeshDataSource::IndexType, 6> indices = {0, 1, 2, 2, 1, 3};
+
+    meshDataSource.insert_indices(indices.begin(), indices.end());
+
+    meshDataSource.update_hash();
+
+    return meshDataSource;
+}
+
+DefaultMeshDataSource cube_mesh_data_source() {
+    DefaultMeshDataSource meshDataSource;
+
+    std::array<DefaultMeshDataSource::VertexType, 24> vertices = {};
+
+    // front
+    vertices[0] = {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[1] = {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[2] = {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[3] = {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}};
+
+    // back
+    vertices[4] = {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[5] = {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[6] = {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[7] = {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}};
+
+    // left
+    vertices[8] = {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[9] = {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[10] = {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[11] = {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+
+    // right
+    vertices[12] = {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[13] = {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[14] = {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[15] = {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+
+    // top
+    vertices[16] = {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[17] = {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[18] = {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[19] = {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+
+    // bottom
+    vertices[20] = {{0.5f, -0.5f, 0.5f}, {1.0f, 0.5f, 0.2f, 1.0f}, {0.0f, 0.0f}};
+    vertices[21] = {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.5f, 0.2f, 1.0f}, {1.0f, 0.0f}};
+    vertices[22] = {{0.5f, -0.5f, -0.5f}, {1.0f, 0.5f, 0.2f, 1.0f}, {0.0f, 1.0f}};
+    vertices[23] = {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.5f, 0.2f, 1.0f}, {1.0f, 1.0f}};
+
+
+
+    meshDataSource.insert_vertices(vertices.begin(), vertices.end());
+
+    std::array<DefaultMeshDataSource::IndexType, 36> indices = {
+            0, 1, 2, 2, 1, 3, // front
+            4, 5, 6, 6, 5, 7, // back
+            8, 9, 10, 10, 9, 11, // right
+            12, 13, 14, 14, 13, 15, // left
+            16, 17, 18, 18, 17, 19, // top
+            20, 21, 22, 22, 21, 23 // bottom
+    };
 
     meshDataSource.insert_indices(indices.begin(), indices.end());
 
@@ -132,9 +193,17 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_meshBufferPool = std::make_shared<renderer::MeshBufferPool>(meshBufferPoolCreateInfo);
 
-    auto quadDataSource = detail::quad_mesh_data_source();
+    {
+        auto quadDataSource = detail::quad_mesh_data_source();
 
-    m_mesh = m_meshBufferPool->create_mesh(&quadDataSource);
+        m_quadMesh = m_meshBufferPool->create_mesh(&quadDataSource);
+    }
+    {
+        auto cubeDataSource = detail::cube_mesh_data_source();
+
+        m_cubeMesh = m_meshBufferPool->create_mesh(&cubeDataSource);
+    }
+
 
     duk::renderer::ColorPainterCreateInfo colorPainterCreateInfo = {};
     colorPainterCreateInfo.rhi = m_renderer->rhi();
@@ -145,15 +214,42 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_scene = std::make_shared<duk::scene::Scene>();
 
-    auto obj = m_scene->add_object();
+    {
+        auto obj = m_scene->add_object();
 
-    auto position3D = obj.add<duk::renderer::Position3D>();
-    position3D->value = glm::vec3(0);
+        auto position3D = obj.add<duk::renderer::Position3D>();
+        position3D->value = glm::vec3(0);
 
-    auto meshPainter = obj.add<duk::renderer::MeshPainter>();
-    meshPainter->mesh = m_mesh.get();
-    meshPainter->painter = m_colorPainter.get();
-    meshPainter->palette = m_colorPalette.get();
+        auto meshPainter = obj.add<duk::renderer::MeshPainter>();
+        meshPainter->mesh = m_quadMesh.get();
+        meshPainter->painter = m_colorPainter.get();
+        meshPainter->palette = m_colorPalette.get();
+    }
+
+    {
+        auto obj = m_scene->add_object();
+
+        auto position3D = obj.add<duk::renderer::Position3D>();
+        position3D->value = glm::vec3(0, 5, 16);
+
+        auto meshPainter = obj.add<duk::renderer::MeshPainter>();
+        meshPainter->mesh = m_cubeMesh.get();
+        meshPainter->painter = m_colorPainter.get();
+        meshPainter->palette = m_colorPalette.get();
+    }
+
+    {
+        auto obj = m_scene->add_object();
+
+        auto position3D = obj.add<duk::renderer::Position3D>();
+        position3D->value = glm::vec3(10, -10, -5);
+
+        auto meshPainter = obj.add<duk::renderer::MeshPainter>();
+        meshPainter->mesh = m_cubeMesh.get();
+        meshPainter->painter = m_colorPainter.get();
+        meshPainter->palette = m_colorPalette.get();
+    }
+
 }
 
 Application::~Application() {
@@ -190,12 +286,13 @@ void Application::update(double time, double deltaTime) {
 
     for (auto object : m_scene->objects_with_components<duk::renderer::Position3D>()) {
         auto pos = object.component<duk::renderer::Position3D>();
-        pos->value = glm::vec3(std::sin(time), 0, 0);
+        pos->value.x = std::sin((float)time) * 10;
     }
 
 }
 
 void Application::draw() {
+    m_colorPalette->clear();
     m_renderer->render(m_scene.get());
 }
 

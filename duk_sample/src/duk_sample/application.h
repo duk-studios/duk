@@ -56,7 +56,8 @@ private:
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;
     std::shared_ptr<duk::renderer::MeshBufferPool> m_meshBufferPool;
-    std::shared_ptr<duk::renderer::Mesh> m_mesh;
+    std::shared_ptr<duk::renderer::Mesh> m_quadMesh;
+    std::shared_ptr<duk::renderer::Mesh> m_cubeMesh;
     std::shared_ptr<duk::renderer::ColorPainter> m_colorPainter;
     std::shared_ptr<duk::renderer::ColorPalette> m_colorPalette;
     std::shared_ptr<duk::scene::Scene> m_scene;
