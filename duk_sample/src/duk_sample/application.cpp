@@ -207,6 +207,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     duk::renderer::ColorPainterCreateInfo colorPainterCreateInfo = {};
     colorPainterCreateInfo.rhi = m_renderer->rhi();
+    colorPainterCreateInfo.commandQueue = m_renderer->main_command_queue();
 
     m_colorPainter = std::make_shared<duk::renderer::ColorPainter>(colorPainterCreateInfo);
 
