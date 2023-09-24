@@ -77,7 +77,9 @@ public:
 
     virtual void copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) = 0;
 
-    /// Makes recent writes available to the GPU
+    virtual void resize(size_t elementCount) = 0;
+
+    /// flushes data to the GPU
     virtual void flush() = 0;
 
     /// Invalidates CPU cache and fetches data from GPU

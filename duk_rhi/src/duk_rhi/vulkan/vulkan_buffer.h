@@ -120,17 +120,20 @@ public:
 
     void clean(uint32_t imageIndex);
 
-    const uint8_t* read_ptr(size_t offset) const override;
+    DUK_NO_DISCARD const uint8_t* read_ptr(size_t offset) const override;
 
     void read(void* dst, size_t size, size_t offset) override;
 
-    uint8_t* write_ptr(size_t offset) override;
+    DUK_NO_DISCARD uint8_t* write_ptr(size_t offset) override;
 
     void write(void* src, size_t size, size_t offset) override;
 
     void copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) override;
 
+    void resize(size_t elementCount) override;
+
     void flush() override;
+
 
     void invalidate() override;
 
@@ -149,6 +152,8 @@ public:
 private:
 
     void update_data_hash();
+
+    std::unique_ptr<VulkanBufferMemory> create_buffer();
 
 private:
     VkDevice m_device;
