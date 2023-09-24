@@ -16,6 +16,14 @@ glm::mat4 model_matrix_3d(const duk::scene::Object& object) {
         model = glm::translate(model, position3D->value);
     }
 
+    if (auto rotation3D = object.component<Rotation3D>()) {
+        model *= glm::mat4_cast(rotation3D->value);
+    }
+
+    if (auto scale3D = object.component<Scale3D>()) {
+        model = glm::scale(model, scale3D->value);
+    }
+
     return model;
 }
 
@@ -24,6 +32,14 @@ glm::mat3 model_matrix_2d(const duk::scene::Object& object) {
 
     if (auto position2D = object.component<Position2D>()) {
         model = glm::translate(model, position2D->value);
+    }
+
+    if (auto rotation2D = object.component<Rotation2D>()) {
+        model = glm::rotate(model, rotation2D->value);
+    }
+
+    if (auto scale2D = object.component<Scale2D>()) {
+        model = glm::scale(model, scale2D->value);
     }
 
     return model;

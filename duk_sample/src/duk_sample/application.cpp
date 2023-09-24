@@ -245,6 +245,12 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         auto position3D = obj.add<duk::renderer::Position3D>();
         position3D->value = glm::vec3(10, -10, -5);
 
+        auto rotation3D = obj.add<duk::renderer::Rotation3D>();
+        rotation3D->value = glm::vec3(glm::radians(95.f), glm::radians(50.f), glm::radians(-5.f));
+
+        auto scale3D = obj.add<duk::renderer::Scale3D>();
+        scale3D->value = glm::vec3(3, 3, 5);
+
         auto meshPainter = obj.add<duk::renderer::MeshPainter>();
         meshPainter->mesh = m_cubeMesh.get();
         meshPainter->painter = m_colorPainter.get();
