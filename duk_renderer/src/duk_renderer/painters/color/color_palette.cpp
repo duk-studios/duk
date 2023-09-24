@@ -18,7 +18,8 @@ ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo)
         StorageBufferCreateInfo transformUBOCreateInfo = {};
         transformUBOCreateInfo.rhi = rhi;
         transformUBOCreateInfo.commandQueue = commandQueue;
-        m_transformSBO = std::make_unique<StorageBuffer<Transform, scene::MAX_OBJECTS>>(transformUBOCreateInfo);
+        transformUBOCreateInfo.initialSize = 1;
+        m_transformSBO = std::make_unique<StorageBuffer<Transform>>(transformUBOCreateInfo);
     }
 
     {

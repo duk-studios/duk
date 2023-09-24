@@ -10,17 +10,21 @@
 #include <duk_tools/fixed_vector.h>
 
 #include <cstdint>
+#include <cmath>
+#include <numbers>
 
 namespace duk::renderer {
 
 struct StorageBufferCreateInfo {
     duk::rhi::RHI* rhi;
     duk::rhi::CommandQueue* commandQueue;
+    size_t initialSize;
 };
 
-template<typename T, size_t N>
+template<typename T>
 class StorageBuffer {
 public:
+    static_assert(std::is_trivially_destructible<T>::value, "StorageBuffers can only store trivially destructible types");
 
     explicit StorageBuffer(const StorageBufferCreateInfo& storageBufferCreateInfo);
 
@@ -45,80 +49,102 @@ public:
     void flush();
 
 private:
-    duk::tools::FixedVector<T, N> m_data;
+
+    T* ptr_at(size_t index);
+
+    const T* const_ptr_at(size_t index) const;
+
+private:
+    duk::rhi::RHI* m_rhi;
+    size_t m_size;
     std::shared_ptr<duk::rhi::Buffer> m_buffer;
 };
 
-template<typename T, size_t N>
-StorageBuffer<T, N>::StorageBuffer(const StorageBufferCreateInfo& storageBufferCreateInfo) {
+template<typename T>
+StorageBuffer<T>::StorageBuffer(const StorageBufferCreateInfo& storageBufferCreateInfo) :
+    m_rhi(storageBufferCreateInfo.rhi),
+    m_size(0) {
     duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
     bufferCreateInfo.commandQueue = storageBufferCreateInfo.commandQueue;
     bufferCreateInfo.type = rhi::Buffer::Type::STORAGE;
     bufferCreateInfo.elementSize = sizeof(T);
-    bufferCreateInfo.elementCount = N;
+    bufferCreateInfo.elementCount = storageBufferCreateInfo.initialSize;
     bufferCreateInfo.updateFrequency = rhi::Buffer::UpdateFrequency::DYNAMIC;
 
-    auto expectedStorageBuffer = storageBufferCreateInfo.rhi->create_buffer(bufferCreateInfo);
+    auto expectedStorageBuffer = m_rhi->create_buffer(bufferCreateInfo);
 
     if (!expectedStorageBuffer) {
-        throw std::runtime_error("failed to create StorageBuffer<T, N>: " + expectedStorageBuffer.error().description());
+        throw std::runtime_error("failed to create StorageBuffer<T>: " + expectedStorageBuffer.error().description());
     }
 
     m_buffer = std::move(expectedStorageBuffer.value());
     flush();
 }
 
-template<typename T, size_t N>
-StorageBuffer<T, N>::operator duk::rhi::Descriptor() const {
+template<typename T>
+StorageBuffer<T>::operator duk::rhi::Descriptor() const {
     return duk::rhi::Descriptor::storage_buffer(m_buffer.get());
 }
 
-template<typename T, size_t N>
-T& StorageBuffer<T, N>::at(size_t index) {
-    return m_data.at(index);
+template<typename T>
+T& StorageBuffer<T>::at(size_t index) {
+    return *ptr_at(index);
 }
 
-template<typename T, size_t N>
-const T& StorageBuffer<T, N>::at(size_t index) const {
-    return m_data.at(index);
+template<typename T>
+const T& StorageBuffer<T>::at(size_t index) const {
+    return *const_ptr_at(index);
 }
 
-template<typename T, size_t N>
-size_t StorageBuffer<T, N>::capacity() const {
-    return N;
+template<typename T>
+size_t StorageBuffer<T>::capacity() const {
+    return m_buffer->element_count();
 }
 
-template<typename T, size_t N>
-size_t StorageBuffer<T, N>::size() const {
-    return m_data.size();
+template<typename T>
+size_t StorageBuffer<T>::size() const {
+    return m_size;
 }
 
-template<typename T, size_t N>
-T& StorageBuffer<T, N>::next() {
-    return m_data.template emplace_back();
-}
-
-template<typename T, size_t N>
-void StorageBuffer<T, N>::push_back(const T& value) {
-    m_data.push_back(value);
-}
-
-template<typename T, size_t N>
-void StorageBuffer<T, N>::push_back(T&& value) {
-    m_data.push_back(std::move(value));
-}
-
-template<typename T, size_t N>
-void StorageBuffer<T, N>::clear() {
-    m_data.clear();
-}
-
-template<typename T, size_t N>
-void StorageBuffer<T, N>::flush() {
-    if (size() > 0) {
-        m_buffer->write(m_data.data(), sizeof(T) * size(), 0);
+template<typename T>
+T& StorageBuffer<T>::next() {
+    if (m_size >= m_buffer->element_count()) {
+        // create a new buffer and copy everything again
+        m_buffer->resize(std::ceil(m_size * std::numbers::phi_v<float>));
     }
+    auto ptr = ptr_at(m_size++);
+    ::new(ptr) T();
+    return *ptr;
+}
+
+template<typename T>
+void StorageBuffer<T>::push_back(const T& value) {
+    next() = value;
+}
+
+template<typename T>
+void StorageBuffer<T>::push_back(T&& value) {
+    next() = std::move(value);
+}
+
+template<typename T>
+void StorageBuffer<T>::clear() {
+    m_size = 0;
+}
+
+template<typename T>
+void StorageBuffer<T>::flush() {
     m_buffer->flush();
+}
+
+template<typename T>
+T* StorageBuffer<T>::ptr_at(size_t index) {
+    return reinterpret_cast<T*>(m_buffer->write_ptr(index * sizeof(T)));
+}
+
+template<typename T>
+const T* StorageBuffer<T>::const_ptr_at(size_t index) const {
+    return reinterpret_cast<const T*>(m_buffer->read_ptr(index * sizeof(T)));
 }
 
 }
