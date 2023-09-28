@@ -8,6 +8,7 @@
 #include <duk_renderer/components/transform.h>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/random.hpp>
 
 #include <cmath>
 #include <fstream>
@@ -215,48 +216,37 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_scene = std::make_shared<duk::scene::Scene>();
 
-    {
+    auto lerp = [](auto a, auto b, float t) -> float {
+        return (a * (1.0f - t)) + b * t;
+    };
+
+    const auto objCount = 50;
+    const auto colCount = 10;
+    const auto rowCount = objCount / std::min(colCount, objCount);
+
+    for (int i = 0; i < objCount; i++) {
+
+        const float colPercent = float(i % (colCount)) / (colCount - 1);
+        const float rowPercent = std::floor((float)i / (colCount)) / (rowCount - 1);
+
         auto obj = m_scene->add_object();
 
         auto position3D = obj.add<duk::renderer::Position3D>();
-        position3D->value = glm::vec3(0);
-
-        auto meshPainter = obj.add<duk::renderer::MeshPainter>();
-        meshPainter->mesh = m_quadMesh.get();
-        meshPainter->painter = m_colorPainter.get();
-        meshPainter->palette = m_colorPalette.get();
-    }
-
-    {
-        auto obj = m_scene->add_object();
-
-        auto position3D = obj.add<duk::renderer::Position3D>();
-        position3D->value = glm::vec3(0, 5, 16);
-
-        auto meshPainter = obj.add<duk::renderer::MeshPainter>();
-        meshPainter->mesh = m_cubeMesh.get();
-        meshPainter->painter = m_colorPainter.get();
-        meshPainter->palette = m_colorPalette.get();
-    }
-
-    {
-        auto obj = m_scene->add_object();
-
-        auto position3D = obj.add<duk::renderer::Position3D>();
-        position3D->value = glm::vec3(10, -10, -5);
+        position3D->value = glm::vec3(lerp(-20, 20, colPercent), lerp(-20, 20, rowPercent), glm::linearRand(-50.f, 10.f));
 
         auto rotation3D = obj.add<duk::renderer::Rotation3D>();
-        rotation3D->value = glm::vec3(glm::radians(95.f), glm::radians(50.f), glm::radians(-5.f));
+        rotation3D->value = glm::radians(glm::linearRand(glm::vec3(-95.f), glm::vec3(95.f)));
 
         auto scale3D = obj.add<duk::renderer::Scale3D>();
-        scale3D->value = glm::vec3(3, 3, 5);
+        scale3D->value = glm::linearRand(glm::vec3(0.02f), glm::vec3(1.3f));
 
         auto meshPainter = obj.add<duk::renderer::MeshPainter>();
-        meshPainter->mesh = m_cubeMesh.get();
+        meshPainter->mesh = glm::linearRand(-1, 2) > 0 ? m_cubeMesh.get() : m_quadMesh.get();
         meshPainter->painter = m_colorPainter.get();
         meshPainter->palette = m_colorPalette.get();
-    }
 
+
+    }
 }
 
 Application::~Application() {
@@ -291,10 +281,10 @@ void Application::run() {
 
 void Application::update(double time, double deltaTime) {
 
-    for (auto object : m_scene->objects_with_components<duk::renderer::Position3D>()) {
-        auto pos = object.component<duk::renderer::Position3D>();
-        pos->value.x = std::sin((float)time) * 10;
-    }
+//    for (auto object : m_scene->objects_with_components<duk::renderer::Position3D>()) {
+//        auto pos = object.component<duk::renderer::Position3D>();
+//        pos->value.x = std::sin((float)time) * 10;
+//    }
 
 }
 
