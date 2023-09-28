@@ -224,7 +224,7 @@ ComponentPoolT<T>* Scene::pool() {
     const auto componentIndex = component_index<T>();
     auto& pool = m_componentPools[componentIndex];
     if (!pool) {
-        pool = std::make_unique<ComponentPoolT<T>>(MAX_COMPONENTS);
+        pool = std::make_unique<ComponentPoolT<T>>(MAX_OBJECTS);
     }
 
     auto componentPool = dynamic_cast<ComponentPoolT<T>*>(pool.get());
