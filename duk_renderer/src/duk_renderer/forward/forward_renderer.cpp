@@ -201,9 +201,7 @@ void ForwardRenderer::render(duk::scene::Scene* scene) {
         }
 
         // for each painter entry
-        for (auto& painterEntry : paintEntries) {
-            auto painter = painterEntry.painter;
-            auto& params = painterEntry.params;
+        for (auto& [params, painter] : paintEntries) {
             painter->paint(commandBuffer, params);
         }
 
