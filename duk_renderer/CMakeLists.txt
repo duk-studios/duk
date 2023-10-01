@@ -15,6 +15,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/painters/camera.h
         include/duk_renderer/painters/uniform_buffer.h
         include/duk_renderer/painters/storage_buffer.h
+        include/duk_renderer/sort.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -32,6 +33,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/painters/camera.cpp
         src/duk_renderer/painters/uniform_buffer.cpp
         src/duk_renderer/painters/storage_buffer.cpp
+        src/duk_renderer/sort.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

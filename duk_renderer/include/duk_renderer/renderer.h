@@ -4,6 +4,9 @@
 #ifndef DUK_RENDERER_RENDERER_H
 #define DUK_RENDERER_RENDERER_H
 
+#include <duk_renderer/sort.h>
+#include <duk_renderer/painters/painter.h>
+
 #include <duk_rhi/rhi.h>
 #include <duk_log/logger.h>
 
@@ -20,6 +23,20 @@ struct RendererCreateInfo {
 };
 
 class Renderer {
+public:
+    struct ObjectEntry {
+        duk::scene::Object::Id objectId;
+        Mesh* mesh {};
+        Painter* painter {};
+        Palette* palette {};
+        SortKey sortKey {};
+    };
+
+    struct PaintEntry {
+        Painter::PaintParams params;
+        Painter* painter;
+    };
+
 public:
 
     explicit Renderer(const RendererCreateInfo& rendererCreateInfo);
@@ -45,6 +62,11 @@ protected:
     std::shared_ptr<duk::rhi::CommandScheduler> m_scheduler;
 };
 
+// specialization for duk_renderer/sort.h sort_key
+template<>
+inline SortKey SortKey::sort_key(const Renderer::ObjectEntry& objectEntry) {
+    return objectEntry.sortKey;
+}
 
 }
 
