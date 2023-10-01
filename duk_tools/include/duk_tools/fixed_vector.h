@@ -69,7 +69,15 @@ public:
     }
 
     template<typename ...Args>
-    T& emplace_back(Args&&... args) {
+    T& emplace_back(Args&&... args) requires std::is_trivially_constructible_v<T> {
+        if (m_size >= N){
+            throw std::out_of_range("emplace_back on a full FixedVector");
+        }
+        return at(m_size++);
+    }
+
+    template<typename ...Args>
+    T& emplace_back(Args&&... args) requires (std::is_trivially_constructible_v<T> == false) {
         if (m_size >= N){
             throw std::out_of_range("emplace_back on a full FixedVector");
         }
@@ -78,7 +86,12 @@ public:
         return at(index);
     }
 
-    void pop_back() {
+    void pop_back() requires std::is_trivially_destructible_v<T> {
+        auto newSize = m_size - 1;
+        m_size = newSize;
+    }
+
+    void pop_back() requires (std::is_trivially_destructible_v<T> == false) {
         auto newSize = m_size - 1;
         destroy(at(newSize));
         m_size = newSize;
@@ -189,7 +202,11 @@ private:
         ::new(&value) T(std::forward<Args>(args)...);
     }
 
-    void append(size_t n){
+    void append(size_t n) requires std::is_trivially_constructible_v<T> {
+        m_size += n;
+    }
+
+    void append(size_t n) requires (std::is_trivially_constructible_v<T> == false) {
         //construct new elements
         auto newSize = m_size + n;
         for (int i = m_size; i < newSize; i++) {
@@ -198,7 +215,12 @@ private:
         m_size = newSize;
     }
 
-    void erase_at_end(size_t n){
+    void erase_at_end(size_t n) requires std::is_trivially_destructible_v<T> {
+        assert(n <= m_size);
+        m_size -= n;
+    }
+
+    void erase_at_end(size_t n) requires (std::is_trivially_destructible_v<T> == false) {
         assert(n <= m_size);
         //destroy excess elements
         auto newSize = m_size - n;
