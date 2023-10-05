@@ -10,7 +10,7 @@
 
 namespace duk::renderer {
 
-struct MeshPainter {
+struct MeshDrawing {
     Mesh* mesh;
     Painter* painter;
     Palette* palette;

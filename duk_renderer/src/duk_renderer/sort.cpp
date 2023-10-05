@@ -5,7 +5,7 @@
 
 namespace duk::renderer {
 
-SortKey SortKey::calculate(const scene::Component<MeshPainter>& meshPainter) {
+SortKey SortKey::calculate(const scene::Component<MeshDrawing>& meshPainter) {
     SortKey::Flags flags = {};
     flags.painterValue = reinterpret_cast<std::intptr_t>(meshPainter->painter);
     flags.paletteValue = reinterpret_cast<std::intptr_t>(meshPainter->palette);

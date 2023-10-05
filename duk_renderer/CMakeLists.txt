@@ -5,7 +5,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/mesh.h
         include/duk_renderer/mesh_data_source.h
         include/duk_renderer/renderer.h
-        include/duk_renderer/components/mesh_painter.h
+        include/duk_renderer/components/mesh_drawing.h
         include/duk_renderer/components/transform.h
         include/duk_renderer/painters/color/color_painter.h
         include/duk_renderer/painters/painter.h
@@ -23,7 +23,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/mesh.cpp
         src/duk_renderer/mesh_data_source.cpp
         src/duk_renderer/renderer.cpp
-        src/duk_renderer/components/mesh_painter.cpp
+        src/duk_renderer/components/mesh_drawing.cpp
         src/duk_renderer/components/transform.cpp
         src/duk_renderer/painters/color/color_painter.cpp
         src/duk_renderer/painters/painter.cpp

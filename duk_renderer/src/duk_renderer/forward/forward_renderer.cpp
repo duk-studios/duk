@@ -2,7 +2,7 @@
 /// forward_renderer.cpp
 
 #include <duk_renderer/forward/forward_renderer.h>
-#include <duk_renderer/components/mesh_painter.h>
+#include <duk_renderer/components/mesh_drawing.h>
 
 #include <duk_rhi/pipeline/std_shader_data_source.h>
 
@@ -94,15 +94,15 @@ void ForwardRenderer::render(duk::scene::Scene* scene) {
         commandBuffer->begin_render_pass(renderPassBeginInfo);
 
 
-        for (auto object : scene->objects_with_components<MeshPainter>()) {
-            auto meshPainter = object.component<MeshPainter>();
+        for (auto object : scene->objects_with_components<MeshDrawing>()) {
+            auto meshDrawing = object.component<MeshDrawing>();
 
             auto& objectEntry = m_objectEntries.emplace_back();
             objectEntry.objectId = object.id();
-            objectEntry.mesh = meshPainter->mesh;
-            objectEntry.painter = meshPainter->painter;
-            objectEntry.palette = meshPainter->palette;
-            objectEntry.sortKey = SortKey::calculate(meshPainter);
+            objectEntry.mesh = meshDrawing->mesh;
+            objectEntry.painter = meshDrawing->painter;
+            objectEntry.palette = meshDrawing->palette;
+            objectEntry.sortKey = SortKey::calculate(meshDrawing);
         }
 
         SortKey::sort_indices(m_objectEntries, m_sortedObjectIndices);

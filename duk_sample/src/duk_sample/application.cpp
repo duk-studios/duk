@@ -4,7 +4,7 @@
 #include <duk_sample/application.h>
 #include <duk_platform/window.h>
 #include <duk_rhi/vertex_types.h>
-#include <duk_renderer/components/mesh_painter.h>
+#include <duk_renderer/components/mesh_drawing.h>
 #include <duk_renderer/components/transform.h>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -240,10 +240,10 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         auto scale3D = obj.add<duk::renderer::Scale3D>();
         scale3D->value = glm::linearRand(glm::vec3(0.02f), glm::vec3(1.3f));
 
-        auto meshPainter = obj.add<duk::renderer::MeshPainter>();
-        meshPainter->mesh = glm::linearRand(-1, 2) > 0 ? m_cubeMesh.get() : m_quadMesh.get();
-        meshPainter->painter = m_colorPainter.get();
-        meshPainter->palette = m_colorPalette.get();
+        auto meshDrawing = obj.add<duk::renderer::MeshDrawing>();
+        meshDrawing->mesh = glm::linearRand(-1, 2) > 0 ? m_cubeMesh.get() : m_quadMesh.get();
+        meshDrawing->painter = m_colorPainter.get();
+        meshDrawing->palette = m_colorPalette.get();
 
 
     }
