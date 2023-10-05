@@ -173,13 +173,6 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         m_run = false;
     });
 
-    m_listener.listen(m_window->window_resize_event, [this](uint32_t width, uint32_t height){
-        if (m_window->minimized()) {
-            return;
-        }
-        m_renderer->resize(width, height);
-    });
-
 
     duk::renderer::ForwardRendererCreateInfo forwardRendererCreateInfo = {};
     forwardRendererCreateInfo.rendererCreateInfo.window = m_window.get();
