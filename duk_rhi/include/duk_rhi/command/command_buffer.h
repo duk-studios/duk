@@ -34,12 +34,7 @@ public:
 
     virtual void end() = 0;
 
-    struct RenderPassBeginInfo {
-        RenderPass* renderPass;
-        FrameBuffer* frameBuffer;
-    };
-
-    virtual void begin_render_pass(const RenderPassBeginInfo& renderPassBeginInfo) = 0;
+    virtual void begin_render_pass(RenderPass* renderPass, FrameBuffer* frameBuffer) = 0;
 
     virtual void end_render_pass() = 0;
 

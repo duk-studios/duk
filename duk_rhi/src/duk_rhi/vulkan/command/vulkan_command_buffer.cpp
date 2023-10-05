@@ -77,10 +77,10 @@ void VulkanCommandBuffer::end() {
     vkEndCommandBuffer(m_currentCommandBuffer);
 }
 
-void VulkanCommandBuffer::begin_render_pass(const CommandBuffer::RenderPassBeginInfo& renderPassBeginInfo) {
+void VulkanCommandBuffer::begin_render_pass(RenderPass* renderPass, FrameBuffer* frameBuffer) {
 
-    auto vulkanFramebuffer = (VulkanFrameBuffer*)renderPassBeginInfo.frameBuffer;
-    auto vulkanRenderPass = (VulkanRenderPass*)renderPassBeginInfo.renderPass;
+    auto vulkanFramebuffer = (VulkanFrameBuffer*)frameBuffer;
+    auto vulkanRenderPass = (VulkanRenderPass*)renderPass;
 
     auto imageIndex = *m_currentImagePtr;
 

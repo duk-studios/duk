@@ -40,7 +40,7 @@ public:
 
     void end() override;
 
-    void begin_render_pass(const RenderPassBeginInfo& renderPassBeginInfo) override;
+    void begin_render_pass(RenderPass* renderPass, FrameBuffer* frameBuffer) override;
 
     void end_render_pass() override;
 
