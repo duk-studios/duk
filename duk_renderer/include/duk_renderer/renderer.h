@@ -10,11 +10,15 @@
 #include <duk_rhi/rhi.h>
 #include <duk_log/logger.h>
 
-namespace duk::scene {
+namespace duk {
+
+namespace scene {
 class Scene;
 }
 
-namespace duk::renderer {
+namespace renderer {
+
+class Pass;
 
 struct RendererCreateInfo {
     duk::platform::Window* window;
@@ -26,10 +30,10 @@ class Renderer {
 public:
     struct ObjectEntry {
         duk::scene::Object::Id objectId;
-        Mesh* mesh {};
-        Painter* painter {};
-        Palette* palette {};
-        SortKey sortKey {};
+        Mesh* mesh{};
+        Painter* painter{};
+        Palette* palette{};
+        SortKey sortKey{};
     };
 
     struct PaintEntry {
@@ -41,9 +45,9 @@ public:
 
     explicit Renderer(const RendererCreateInfo& rendererCreateInfo);
 
-    virtual void render(duk::scene::Scene* scene) = 0;
+    virtual ~Renderer();
 
-    virtual void resize(uint32_t width, uint32_t height);
+    void render(duk::scene::Scene* scene);
 
     DUK_NO_DISCARD uint32_t render_width() const;
 
@@ -60,6 +64,7 @@ protected:
     std::shared_ptr<duk::rhi::RHI> m_rhi;
     std::shared_ptr<duk::rhi::CommandQueue> m_mainQueue;
     std::shared_ptr<duk::rhi::CommandScheduler> m_scheduler;
+    std::vector<std::shared_ptr<Pass>> m_passes;
 };
 
 // specialization for duk_renderer/sort.h sort_key
@@ -68,7 +73,7 @@ inline SortKey SortKey::sort_key(const Renderer::ObjectEntry& objectEntry) {
     return objectEntry.sortKey;
 }
 
-}
+} // namespace renderer
+} // namespace duk
 
 #endif // DUK_RENDERER_RENDERER_H
-

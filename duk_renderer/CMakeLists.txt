@@ -15,6 +15,8 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/painters/uniform_buffer.h
         include/duk_renderer/painters/storage_buffer.h
         include/duk_renderer/sort.h
+        include/duk_renderer/passes/forward_pass.h
+        include/duk_renderer/passes/pass.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -32,6 +34,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/painters/uniform_buffer.cpp
         src/duk_renderer/painters/storage_buffer.cpp
         src/duk_renderer/sort.cpp
+        src/duk_renderer/passes/forward_pass.cpp
+        src/duk_renderer/passes/pass.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

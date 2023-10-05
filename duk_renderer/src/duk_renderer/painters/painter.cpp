@@ -25,7 +25,7 @@ void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::Paint
 duk::rhi::GraphicsPipeline* Painter::pipeline_for_params(const Painter::PaintParams& params) {
 
     duk::rhi::RHI::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
-    pipelineCreateInfo.viewport.extent = {params.canvas->width(), params.canvas->height()};
+    pipelineCreateInfo.viewport.extent = {params.outputWidth, params.outputHeight};
     pipelineCreateInfo.viewport.maxDepth = 1.0f;
     pipelineCreateInfo.viewport.minDepth = 0.0f;
     pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
@@ -33,7 +33,7 @@ duk::rhi::GraphicsPipeline* Painter::pipeline_for_params(const Painter::PaintPar
     pipelineCreateInfo.fillMode = duk::rhi::GraphicsPipeline::FillMode::FILL;
     pipelineCreateInfo.topology = duk::rhi::GraphicsPipeline::Topology::TRIANGLE_LIST;
     pipelineCreateInfo.shader = m_shader.get();
-    pipelineCreateInfo.renderPass = params.canvas->render_pass();
+    pipelineCreateInfo.renderPass = params.renderPass;
     pipelineCreateInfo.depthTesting = true;
 
     const auto hash = duk::rhi::GraphicsPipeline::hash_of(pipelineCreateInfo.viewport,

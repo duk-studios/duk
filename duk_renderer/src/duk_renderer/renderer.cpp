@@ -2,6 +2,7 @@
 /// renderer.cpp
 
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/passes/pass.h>
 #include <duk_platform/window.h>
 
 namespace duk::renderer {
@@ -29,7 +30,6 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
         m_rhi = std::move(expectedRHI.value());
     }
 
-
     {
         duk::rhi::RHI::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
         mainCommandQueueCreateInfo.type = rhi::CommandQueue::Type::GRAPHICS;
@@ -52,11 +52,40 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
 
         m_scheduler = std::move(expectedScheduler.value());
     }
-
 }
 
-void Renderer::resize(uint32_t width, uint32_t height) {
+Renderer::~Renderer() = default;
 
+void Renderer::render(duk::scene::Scene* scene) {
+    m_rhi->prepare_frame();
+
+    m_scheduler->begin();
+
+    auto mainPass = m_mainQueue->submit([this, scene](duk::rhi::CommandBuffer* commandBuffer) {
+        commandBuffer->begin();
+
+        Pass::RenderParams renderParams = {};
+        renderParams.commandBuffer = commandBuffer;
+        renderParams.scene = scene;
+        renderParams.outputWidth = render_width();
+        renderParams.outputHeight = render_height();
+
+        for (auto& pass : m_passes) {
+            pass->render(renderParams);
+        }
+
+        commandBuffer->end();
+    });
+
+    auto acquireImageCommand = m_scheduler->schedule(m_rhi->acquire_image_command());
+    auto mainPassCommand = m_scheduler->schedule(std::move(mainPass));
+    auto presentCommand = m_scheduler->schedule(m_rhi->present_command());
+
+    mainPassCommand.wait(acquireImageCommand, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT);
+
+    presentCommand.wait(mainPassCommand);
+
+    m_scheduler->flush();
 }
 
 uint32_t Renderer::render_width() const {

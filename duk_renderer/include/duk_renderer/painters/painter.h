@@ -4,8 +4,6 @@
 #ifndef DUK_RENDERER_PAINTER_H
 #define DUK_RENDERER_PAINTER_H
 
-#include <duk_renderer/canvas.h>
-
 #include <duk_rhi/descriptor_set.h>
 #include <duk_rhi/command/command_buffer.h>
 #include <duk_rhi/rhi.h>
@@ -26,7 +24,9 @@ public:
     virtual ~Painter();
 
     struct PaintParams {
-        Canvas* canvas;
+        uint32_t outputWidth;
+        uint32_t outputHeight;
+        duk::rhi::RenderPass* renderPass;
         Mesh* mesh;
         Palette* palette;
         size_t instanceCount;
