@@ -23,7 +23,7 @@ struct SortKey {
         uint64_t key;
     };
 
-    static SortKey calculate(const duk::scene::Component<MeshDrawing>& meshPainter);
+    static SortKey calculate(const duk::scene::Component<MeshDrawing>& meshDrawing);
 
     // specialize this method for any given type to access its SortKey object
     template<typename T>
