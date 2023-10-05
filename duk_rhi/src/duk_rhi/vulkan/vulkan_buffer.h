@@ -134,7 +134,6 @@ public:
 
     void flush() override;
 
-
     void invalidate() override;
 
     DUK_NO_DISCARD size_t element_count() const override;
