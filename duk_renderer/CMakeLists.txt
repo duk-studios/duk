@@ -9,7 +9,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/components/transform.h
         include/duk_renderer/painters/color/color_painter.h
         include/duk_renderer/painters/painter.h
-        include/duk_renderer/canvas.h
         include/duk_renderer/painters/palette.h
         include/duk_renderer/painters/color/color_palette.h
         include/duk_renderer/painters/camera.h
@@ -27,7 +26,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/components/transform.cpp
         src/duk_renderer/painters/color/color_painter.cpp
         src/duk_renderer/painters/painter.cpp
-        src/duk_renderer/canvas.cpp
         src/duk_renderer/painters/palette.cpp
         src/duk_renderer/painters/color/color_palette.cpp
         src/duk_renderer/painters/camera.cpp
