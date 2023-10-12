@@ -24,15 +24,22 @@ namespace renderer {
 class PassConnection {
 public:
 
+    PassConnection();
+
+    ~PassConnection();
+
     void update(duk::rhi::Image* image);
 
     void connect(PassConnection* connection);
+
+    void disconnect(PassConnection* connection);
 
     DUK_NO_DISCARD duk::rhi::Image* image() const;
 
 private:
     duk::rhi::Image* m_image;
-    std::list<PassConnection*> m_connections;
+    PassConnection* m_parent;
+    std::list<PassConnection*> m_children;
 };
 
 class Pass {
