@@ -24,7 +24,6 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/descriptor_set.h
         include/duk_rhi/image_data_source.h
         include/duk_rhi/renderer_capabilities.h
-        include/duk_rhi/resource.h
         include/duk_rhi/pipeline/compute_pipeline.h
         include/duk_rhi/pipeline/pipeline_flags.h
         include/duk_rhi/index_types.h
@@ -93,7 +92,6 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_descriptor_set.h
         src/duk_rhi/vulkan/vulkan_renderer_capabilities.h
         src/duk_rhi/vulkan/vulkan_renderer_capabilities.cpp
-        src/duk_rhi/resource.cpp
         src/duk_rhi/pipeline/compute_pipeline.cpp
         src/duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h
         src/duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.cpp

@@ -51,8 +51,6 @@ public:
 
     static Descriptor storage_image(Image* image, Image::Layout layout);
 
-    DUK_NO_DISCARD Resource::HashChangedEvent& hash_changed_event() const;
-
     DUK_NO_DISCARD DescriptorType type() const;
 
     DUK_NO_DISCARD duk::hash::Hash hash() const;
@@ -65,6 +63,11 @@ public:
 
     DUK_NO_DISCARD Buffer* buffer() const;
 
+    DUK_NO_DISCARD bool operator==(const Descriptor& rhs) const noexcept;
+
+private:
+
+    void update_hash();
 
 private:
     struct ImageDescriptor {
@@ -84,6 +87,7 @@ private:
 
     Data m_data;
     DescriptorType m_type;
+    duk::hash::Hash m_hash;
 };
 
 }
@@ -92,27 +96,22 @@ namespace std {
 
 template<>
 struct hash<duk::rhi::DescriptorDescription> {
-
     size_t operator()(const duk::rhi::DescriptorDescription& descriptorDescription) noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, descriptorDescription.type);
         duk::hash::hash_combine(hash, descriptorDescription.moduleMask);
         return hash;
     }
-
 };
 
 template<>
 struct hash<duk::rhi::DescriptorSetDescription> {
-
     size_t operator()(const duk::rhi::DescriptorSetDescription& descriptorSetDescription) noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
         return hash;
     }
-
 };
 
 }
 #endif // DUK_RHI_DESCRIPTOR_H
-

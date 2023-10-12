@@ -43,6 +43,7 @@ public:
     void clean(uint32_t imageIndex);
 
     DUK_NO_DISCARD VkFramebuffer handle(uint32_t frameIndex) const;
+
 private:
 
     void update_extent();
@@ -56,7 +57,6 @@ private:
     VulkanRenderPass* m_renderPass;
     std::vector<VulkanImage*> m_attachments;
     std::vector<VkFramebuffer> m_frameBuffers;
-    duk::events::EventListener m_listener;
     duk::hash::Hash m_hash;
     std::vector<duk::hash::Hash> m_frameBufferHashes;
 };

@@ -4,7 +4,6 @@
 #ifndef DUK_RHI_BUFFER_H
 #define DUK_RHI_BUFFER_H
 
-#include <duk_rhi/resource.h>
 #include <duk_macros/macros.h>
 #include <duk_hash/hash.h>
 
@@ -17,7 +16,7 @@ namespace duk::rhi {
 
 class CommandQueue;
 
-class Buffer : public Resource {
+class Buffer {
 public:
     enum class UpdateFrequency {
         STATIC,
@@ -34,6 +33,8 @@ public:
     };
 
 public:
+
+    virtual ~Buffer();
 
     DUK_NO_DISCARD virtual const uint8_t* read_ptr(size_t offset) const = 0;
 

@@ -74,4 +74,6 @@ bool Image::is_stencil_format(Image::PixelFormat format) {
     }
 }
 
+Image::~Image() = default;
+
 }

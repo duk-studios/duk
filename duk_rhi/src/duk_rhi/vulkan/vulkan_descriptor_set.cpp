@@ -124,7 +124,7 @@ const VulkanDescriptorSetLayoutCache::CacheEntry& VulkanDescriptorSetLayoutCache
     cacheEntry.descriptorSetLayout = descriptorSetLayout;
     cacheEntry.bindings = std::move(bindings);
 
-    auto[it, inserted] = m_descriptorLayoutCache.emplace(hash, std::move(cacheEntry));
+    auto [it, inserted] = m_descriptorLayoutCache.emplace(hash, std::move(cacheEntry));
 
     if (!inserted) {
         throw std::runtime_error("failed to cache VkDescriptorSetLayout");
@@ -228,17 +228,7 @@ VkDescriptorSet VulkanDescriptorSet::handle(uint32_t imageIndex) {
 
 void VulkanDescriptorSet::set(uint32_t binding, const Descriptor& descriptor) {
     assert(m_descriptorSetDescription.bindings[binding].type == descriptor.type());
-
-    auto& oldDescriptor = m_descriptors[binding];
-
-    if (oldDescriptor.type() != DescriptorType::UNDEFINED) {
-        m_listener.ignore(oldDescriptor.hash_changed_event());
-    }
-
     m_descriptors[binding] = descriptor;
-    m_listener.listen(descriptor.hash_changed_event(), [this](duk::hash::Hash hash) {
-        update_hash();
-    });
 }
 
 Image* VulkanDescriptorSet::image(uint32_t binding) {
@@ -264,9 +254,6 @@ void VulkanDescriptorSet::flush() {
 void VulkanDescriptorSet::update_hash() {
     duk::hash::Hash hash = 0;
     for (auto& descriptor : m_descriptors) {
-        if (descriptor.type() == DescriptorType::UNDEFINED) {
-            continue;
-        }
         duk::hash::hash_combine(hash, descriptor.hash());
     }
     duk::hash::hash_combine(hash, m_descriptors.size());

@@ -397,7 +397,6 @@ void VulkanMemoryImage::update(ImageDataSource* imageDataSource) {
         clean();
         create(imageCount);
     }
-    hash_changed(m_dataSourceHash);
 }
 
 Image::PixelFormat VulkanMemoryImage::format() const {
@@ -661,7 +660,6 @@ void VulkanSwapchainImage::create(VkFormat format, uint32_t width, uint32_t heig
     duk::hash::hash_combine(m_hash, m_height);
     duk::hash::hash_combine(m_hash, m_format);
     duk::hash::hash_combine(m_hash, imageCount);
-    hash_changed(m_hash);
 }
 
 void VulkanSwapchainImage::clean() {

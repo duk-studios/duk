@@ -4,8 +4,8 @@
 #ifndef DUK_RHI_IMAGE_H
 #define DUK_RHI_IMAGE_H
 
-#include <duk_rhi/resource.h>
 #include <duk_macros/macros.h>
+#include <duk_hash/hash.h>
 
 #include <cstdint>
 
@@ -13,7 +13,7 @@ namespace duk::rhi {
 
 class ImageDataSource;
 
-class Image : public Resource {
+class Image {
 public:
     enum class PixelFormat {
         UNDEFINED = 0,
@@ -80,6 +80,8 @@ public:
     };
 
 public:
+
+    virtual ~Image();
 
     virtual void update(ImageDataSource* imageDataSource) = 0;
 

@@ -13,15 +13,9 @@ VulkanFrameBuffer::VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFr
     m_device(vulkanFrameBufferCreateInfo.device),
     m_renderPass(vulkanFrameBufferCreateInfo.renderPass),
     m_attachments(vulkanFrameBufferCreateInfo.attachments, vulkanFrameBufferCreateInfo.attachments + vulkanFrameBufferCreateInfo.attachmentCount) {
-
-    for (auto& attachment : m_attachments) {
-        m_listener.listen(attachment->hash_changed_event(), [this](auto hash) {
-            update_hash();
-            update_extent();
-        });
-    }
     create(vulkanFrameBufferCreateInfo.imageCount);
     update_extent();
+    update_hash();
 }
 
 VulkanFrameBuffer::~VulkanFrameBuffer() {

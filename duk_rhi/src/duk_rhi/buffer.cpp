@@ -5,6 +5,8 @@
 
 namespace duk::rhi {
 
+Buffer::~Buffer() = default;
+
 const uint8_t* Buffer::read_ptr() const {
     return read_ptr(0);
 }

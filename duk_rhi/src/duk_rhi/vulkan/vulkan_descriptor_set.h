@@ -106,7 +106,6 @@ private:
     std::vector<VkDescriptorSet> m_descriptorSets;
     duk::hash::Hash m_descriptorSetHash;
     std::vector<duk::hash::Hash> m_descriptorSetHashes;
-    duk::events::EventListener m_listener;
 
 };
 
