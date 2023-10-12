@@ -265,7 +265,6 @@ void Application::update(double time, double deltaTime) {
 }
 
 void Application::draw() {
-    m_colorPalette->clear();
     m_renderer->render(m_scene.get());
 }
 

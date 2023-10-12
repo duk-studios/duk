@@ -86,15 +86,26 @@ void ForwardPass::render(const RenderParams& renderParams) {
     m_sortedObjectIndices.clear();
     m_paintEntries.clear();
 
-    for (auto object : renderParams.scene->objects_with_components<MeshDrawing>()) {
-        auto meshDrawing = object.component<MeshDrawing>();
+    {
+        std::set<Palette*> uniquePalettes;
 
-        auto& objectEntry = m_objectEntries.emplace_back();
-        objectEntry.objectId = object.id();
-        objectEntry.brush = meshDrawing->mesh;
-        objectEntry.painter = meshDrawing->painter;
-        objectEntry.palette = meshDrawing->palette;
-        objectEntry.sortKey = SortKey::calculate(meshDrawing);
+        for (auto object : renderParams.scene->objects_with_components<MeshDrawing>()) {
+            auto meshDrawing = object.component<MeshDrawing>();
+
+            auto& objectEntry = m_objectEntries.emplace_back();
+            objectEntry.objectId = object.id();
+            objectEntry.brush = meshDrawing->mesh;
+            objectEntry.painter = meshDrawing->painter;
+            objectEntry.palette = meshDrawing->palette;
+            objectEntry.sortKey = SortKey::calculate(meshDrawing);
+
+            uniquePalettes.insert(objectEntry.palette);
+        }
+
+        // resets all palettes that are going to be used
+        for (auto palette : uniquePalettes) {
+            palette->clear();
+        }
     }
 
     SortKey::sort_indices(m_objectEntries, m_sortedObjectIndices);
