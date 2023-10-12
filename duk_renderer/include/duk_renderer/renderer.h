@@ -30,7 +30,7 @@ class Renderer {
 public:
     struct ObjectEntry {
         duk::scene::Object::Id objectId;
-        Mesh* mesh{};
+        Brush* brush{};
         Painter* painter{};
         Palette* palette{};
         SortKey sortKey{};

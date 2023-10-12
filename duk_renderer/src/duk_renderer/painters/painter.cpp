@@ -3,10 +3,9 @@
 
 #include <duk_renderer/painters/painter.h>
 #include <duk_renderer/painters/palette.h>
-#include <duk_renderer/mesh.h>
+#include <duk_renderer/brushes/brush.h>
 
 namespace duk::renderer {
-
 
 Painter::Painter(duk::rhi::RHI* rhi) :
     m_rhi(rhi) {
@@ -19,7 +18,7 @@ void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::Paint
 
     params.palette->apply(commandBuffer);
 
-    params.mesh->draw(commandBuffer, params.instanceCount, params.firstInstance);
+    params.brush->draw(commandBuffer, params.instanceCount, params.firstInstance);
 }
 
 duk::rhi::GraphicsPipeline* Painter::pipeline_for_params(const Painter::PaintParams& params) {

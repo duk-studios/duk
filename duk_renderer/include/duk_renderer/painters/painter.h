@@ -11,7 +11,7 @@
 
 namespace duk::renderer {
 
-class Mesh;
+class Brush;
 class Palette;
 
 class Painter {
@@ -27,7 +27,7 @@ public:
         uint32_t outputWidth;
         uint32_t outputHeight;
         duk::rhi::RenderPass* renderPass;
-        Mesh* mesh;
+        Brush* brush;
         Palette* palette;
         size_t instanceCount;
         size_t firstInstance;

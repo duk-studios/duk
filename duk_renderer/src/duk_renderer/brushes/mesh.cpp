@@ -1,9 +1,12 @@
 /// 04/08/2023
 /// mesh_pool.cpp
 
-#include <duk_renderer/mesh.h>
+#include <duk_renderer/brushes/mesh.h>
 
 namespace duk::renderer {
+
+static constexpr uint32_t kInvalidBufferHandle = std::numeric_limits<uint32_t>::max();
+static constexpr size_t kBufferBlockSize = 1024;
 
 namespace detail {
 

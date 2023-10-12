@@ -4,7 +4,8 @@
 #ifndef DUK_RENDERER_MESH_POOL_H
 #define DUK_RENDERER_MESH_POOL_H
 
-#include <duk_renderer/mesh_data_source.h>
+#include <duk_renderer/brushes/mesh_data_source.h>
+#include <duk_renderer/brushes/brush.h>
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/rhi.h>
 
@@ -15,20 +16,17 @@ namespace duk::renderer {
 class MeshBuffer;
 class MeshBufferPool;
 
-static constexpr uint32_t kInvalidBufferHandle = std::numeric_limits<uint32_t>::max();
-static constexpr size_t kBufferBlockSize = 1024;
-
 struct MeshCreateInfo {
     MeshBufferPool* meshBufferPool;
     MeshDataSource* meshDataSource;
 };
 
-class Mesh {
+class Mesh : public Brush {
 public:
 
     explicit Mesh(const MeshCreateInfo& meshCreateInfo);
 
-    ~Mesh();
+    ~Mesh() override;
 
     DUK_NO_DISCARD rhi::VertexLayout vertex_layout() const;
 

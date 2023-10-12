@@ -2,8 +2,8 @@ project(duk_renderer)
 
 set(DUK_RENDERER_HEADERS
         include/duk_renderer/forward/forward_renderer.h
-        include/duk_renderer/mesh.h
-        include/duk_renderer/mesh_data_source.h
+        include/duk_renderer/brushes/mesh.h
+        include/duk_renderer/brushes/mesh_data_source.h
         include/duk_renderer/renderer.h
         include/duk_renderer/components/mesh_drawing.h
         include/duk_renderer/components/transform.h
@@ -17,12 +17,13 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/sort.h
         include/duk_renderer/passes/forward_pass.h
         include/duk_renderer/passes/pass.h
+        include/duk_renderer/brushes/brush.h
         )
 
 set(DUK_RENDERER_SOURCES
         src/duk_renderer/forward/forward_renderer.cpp
-        src/duk_renderer/mesh.cpp
-        src/duk_renderer/mesh_data_source.cpp
+        src/duk_renderer/brushes/mesh.cpp
+        src/duk_renderer/brushes/mesh_data_source.cpp
         src/duk_renderer/renderer.cpp
         src/duk_renderer/components/mesh_drawing.cpp
         src/duk_renderer/components/transform.cpp
@@ -36,6 +37,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/sort.cpp
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp
+        src/duk_renderer/brushes/brush.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

@@ -3,7 +3,6 @@
 
 #include <duk_renderer/painters/color/color_painter.h>
 #include <duk_renderer/painters/color/color_palette.h>
-#include <duk_renderer/mesh.h>
 
 #include <fstream>
 
