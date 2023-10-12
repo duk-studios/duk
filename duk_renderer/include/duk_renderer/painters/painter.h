@@ -35,6 +35,8 @@ public:
 
     void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
 
+    void clear();
+
 protected:
 
     duk::rhi::GraphicsPipeline* find_pipeline_for_params(const Painter::PaintParams& params);

@@ -88,6 +88,7 @@ void ForwardPass::render(const RenderParams& renderParams) {
 
     {
         std::set<Palette*> uniquePalettes;
+        std::set<Painter*> uniquePainters;
 
         for (auto object : renderParams.scene->objects_with_components<MeshDrawing>()) {
             auto meshDrawing = object.component<MeshDrawing>();
@@ -100,9 +101,14 @@ void ForwardPass::render(const RenderParams& renderParams) {
             objectEntry.sortKey = SortKey::calculate(meshDrawing);
 
             uniquePalettes.insert(objectEntry.palette);
+            uniquePainters.insert(objectEntry.painter);
         }
 
-        // resets all palettes that are going to be used
+        // resets all painters and palettes that are going to be used
+        for (auto painter : uniquePainters) {
+            painter->clear();
+        }
+
         for (auto palette : uniquePalettes) {
             palette->clear();
         }

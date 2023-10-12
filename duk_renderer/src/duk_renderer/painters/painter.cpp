@@ -7,6 +7,8 @@
 
 namespace duk::renderer {
 
+static constexpr int kDeleteUnusedPipelineAfterFrames = 512;
+
 Painter::Painter(duk::rhi::RHI* rhi) :
     m_rhi(rhi) {
 }
@@ -19,6 +21,23 @@ void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::Paint
     params.palette->apply(commandBuffer);
 
     params.brush->draw(commandBuffer, params.instanceCount, params.firstInstance);
+}
+
+void Painter::clear() {
+    std::vector<duk::hash::Hash> hashesToDelete;
+    hashesToDelete.reserve(m_pipelines.size());
+
+    for (auto& [hash, entry] : m_pipelines) {
+        entry.framesUnused++;
+
+        if (entry.framesUnused > kDeleteUnusedPipelineAfterFrames) {
+            hashesToDelete.push_back(hash);
+        }
+    }
+
+    for (auto hash : hashesToDelete) {
+        m_pipelines.erase(hash);
+    }
 }
 
 duk::rhi::GraphicsPipeline* Painter::find_pipeline_for_params(const Painter::PaintParams& params) {
