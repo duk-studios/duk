@@ -8,7 +8,7 @@
 #include <duk_log/sink.h>
 #include <duk_platform/window.h>
 #include <duk_rhi/rhi.h>
-#include <duk_renderer/mesh.h>
+#include <duk_renderer/brushes/mesh.h>
 #include <duk_renderer/forward/forward_renderer.h>
 #include <duk_renderer/painters/color/color_painter.h>
 #include <duk_renderer/painters/color/color_palette.h>
@@ -25,8 +25,6 @@ struct ApplicationCreateInfo {
 
 class Application {
 public:
-
-    static std::vector<uint8_t> load_bytes(const char* filepath);
 
     explicit Application(const ApplicationCreateInfo& applicationCreateInfo);
 

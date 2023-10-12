@@ -9,10 +9,6 @@ set(DUK_SAMPLE_SOURCES
         src/duk_sample/main.cpp
         src/duk_sample/application.h
         src/duk_sample/application.cpp
-        src/duk_sample/color_shader_data_source.h
-        src/duk_sample/color_shader_data_source.cpp
-        src/duk_sample/compute_shader_data_source.h
-        src/duk_sample/compute_shader_data_source.cpp
         )
 
 add_executable(duk_sample ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
