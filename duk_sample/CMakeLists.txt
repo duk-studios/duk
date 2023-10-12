@@ -26,3 +26,7 @@ target_link_libraries(duk_sample
         )
 
 set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)
+
+install(TARGETS
+        duk_sample
+        )

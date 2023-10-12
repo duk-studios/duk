@@ -26,3 +26,9 @@ add_custom_target(generate_spv_files
         )
 
 add_dependencies(duk_renderer generate_spv_files)
+
+install(DIRECTORY
+        spv
+        TYPE
+        BIN
+        )

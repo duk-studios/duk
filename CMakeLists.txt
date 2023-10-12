@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.24)
 project(duk)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/output)
+
 add_subdirectory(external)
 
 add_subdirectory(duk_macros)
