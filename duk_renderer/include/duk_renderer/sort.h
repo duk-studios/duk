@@ -39,7 +39,7 @@ struct SortKey {
 
 template<typename ObjectEntriesContainerT, typename ObjectIndicesContainerT>
 void SortKey::sort_indices(const ObjectEntriesContainerT& objectEntries, ObjectIndicesContainerT& sortedIndices) {
-    // sort objects
+
     sortedIndices.resize(std::size(objectEntries));
 
     // fill vector with 0 ... objectsEntries.size()

@@ -35,8 +35,6 @@ public:
 
     void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
 
-    DUK_NO_DISCARD virtual const duk::rhi::ShaderDataSource* shader_data_source() const = 0;
-
 protected:
 
     duk::rhi::GraphicsPipeline* pipeline_for_params(const Painter::PaintParams& params);

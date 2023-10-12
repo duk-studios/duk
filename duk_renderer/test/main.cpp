@@ -3,7 +3,7 @@
 //
 
 #include <duk_rhi/rhi.h>
-#include <duk_renderer/mesh.h>
+#include <duk_renderer/brushes/mesh.h>
 
 
 int main() {

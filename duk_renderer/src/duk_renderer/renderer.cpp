@@ -116,6 +116,26 @@ std::shared_ptr<duk::rhi::Image> Renderer::create_depth_image(uint32_t width, ui
     return std::move(expectedDepthImage.value());
 }
 
+std::shared_ptr<duk::rhi::Image> Renderer::create_color_image(uint32_t width, uint32_t height, duk::rhi::Image::PixelFormat format) {
+    duk::rhi::EmptyImageDataSource colorImageDataSource(width, height, format);
+    colorImageDataSource.update_hash();
+
+    duk::rhi::RHI::ImageCreateInfo colorImageCreateInfo = {};
+    colorImageCreateInfo.usage = duk::rhi::Image::Usage::COLOR_ATTACHMENT;
+    colorImageCreateInfo.initialLayout = duk::rhi::Image::Layout::COLOR_ATTACHMENT;
+    colorImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
+    colorImageCreateInfo.imageDataSource = &colorImageDataSource;
+    colorImageCreateInfo.commandQueue = m_mainQueue.get();
+
+    auto expectedColorImage = m_rhi->create_image(colorImageCreateInfo);
+
+    if (!expectedColorImage) {
+        throw std::runtime_error("failed to create color image: " + expectedColorImage.error().description());
+    }
+
+    return std::move(expectedColorImage.value());
+}
+
 duk::rhi::RHI* Renderer::rhi() const {
     return m_rhi.get();
 }

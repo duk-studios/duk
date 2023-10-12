@@ -14,6 +14,8 @@ set(GLSLC_FLAGS
 set(SHADER_SPV_GENERATE_COMMANDS
         COMMAND ${GLSLC_EXECUTABLE} glsl/color/color.vert -o spv/color/color.vert.spv ${GLSLC_FLAGS}
         COMMAND ${GLSLC_EXECUTABLE} glsl/color/color.frag -o spv/color/color.frag.spv ${GLSLC_FLAGS}
+        COMMAND ${GLSLC_EXECUTABLE} glsl/fullscreen/fullscreen.vert -o spv/fullscreen/fullscreen.vert.spv ${GLSLC_FLAGS}
+        COMMAND ${GLSLC_EXECUTABLE} glsl/fullscreen/fullscreen.frag -o spv/fullscreen/fullscreen.frag.spv ${GLSLC_FLAGS}
         # Add more arguments as needed
         )
 

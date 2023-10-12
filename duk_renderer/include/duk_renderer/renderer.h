@@ -55,6 +55,8 @@ public:
 
     DUK_NO_DISCARD std::shared_ptr<duk::rhi::Image> create_depth_image(uint32_t width, uint32_t height);
 
+    DUK_NO_DISCARD std::shared_ptr<duk::rhi::Image> create_color_image(uint32_t width, uint32_t height, duk::rhi::Image::PixelFormat format);
+
     DUK_NO_DISCARD duk::rhi::RHI* rhi() const;
 
     DUK_NO_DISCARD duk::rhi::CommandQueue* main_command_queue() const;

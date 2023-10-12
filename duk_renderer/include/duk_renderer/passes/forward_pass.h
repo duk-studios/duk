@@ -24,14 +24,18 @@ public:
 
     void render(const RenderParams& renderParams) override;
 
+    DUK_NO_DISCARD PassConnection* out_color();
+
 private:
     duk::tools::FixedVector<Renderer::ObjectEntry, scene::MAX_OBJECTS> m_objectEntries;
     duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> m_sortedObjectIndices;
     duk::tools::FixedVector<Renderer::PaintEntry, scene::MAX_OBJECTS> m_paintEntries;
     Renderer* m_renderer;
+    std::shared_ptr<duk::rhi::Image> m_colorImage;
     std::shared_ptr<duk::rhi::Image> m_depthImage;
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
+    PassConnection m_outColor;
 };
 
 }

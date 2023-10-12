@@ -6,15 +6,17 @@
 
 namespace duk::renderer {
 
+static constexpr auto kColorFormat = duk::rhi::Image::PixelFormat::R8G8B8A8_UNORM;
+
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
     m_renderer(forwardPassCreateInfo.renderer) {
 
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};
-        colorAttachmentDescription.format = m_renderer->rhi()->present_image()->format();
+        colorAttachmentDescription.format = kColorFormat;
         colorAttachmentDescription.initialLayout = duk::rhi::Image::Layout::UNDEFINED;
         colorAttachmentDescription.layout = duk::rhi::Image::Layout::COLOR_ATTACHMENT;
-        colorAttachmentDescription.finalLayout = duk::rhi::Image::Layout::PRESENT_SRC;
+        colorAttachmentDescription.finalLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
         colorAttachmentDescription.storeOp = duk::rhi::StoreOp::STORE;
         colorAttachmentDescription.loadOp = duk::rhi::LoadOp::CLEAR;
 
@@ -47,6 +49,15 @@ ForwardPass::~ForwardPass() = default;
 
 void ForwardPass::render(const RenderParams& renderParams) {
 
+    if (!m_colorImage || m_colorImage->width() != renderParams.outputWidth || m_colorImage->height() != renderParams.outputHeight) {
+        m_colorImage = m_renderer->create_color_image(renderParams.outputWidth, renderParams.outputHeight, kColorFormat);
+
+        // recreate frame buffer in case image was resized
+        m_frameBuffer.reset();
+
+        m_outColor.update(m_colorImage.get());
+    }
+
     if (!m_depthImage || m_depthImage->width() != renderParams.outputWidth || m_depthImage->height() != renderParams.outputHeight) {
         m_depthImage = m_renderer->create_depth_image(renderParams.outputWidth, renderParams.outputHeight);
 
@@ -55,7 +66,7 @@ void ForwardPass::render(const RenderParams& renderParams) {
     }
 
     if (!m_frameBuffer) {
-        duk::rhi::Image* frameBufferAttachments[] = {m_renderer->rhi()->present_image(), m_depthImage.get()};
+        duk::rhi::Image* frameBufferAttachments[] = {m_colorImage.get(), m_depthImage.get()};
 
         duk::rhi::RHI::FrameBufferCreateInfo frameBufferCreateInfo = {};
         frameBufferCreateInfo.attachmentCount = std::size(frameBufferAttachments);
@@ -80,7 +91,7 @@ void ForwardPass::render(const RenderParams& renderParams) {
 
         auto& objectEntry = m_objectEntries.emplace_back();
         objectEntry.objectId = object.id();
-        objectEntry.mesh = meshDrawing->mesh;
+        objectEntry.brush = meshDrawing->mesh;
         objectEntry.painter = meshDrawing->painter;
         objectEntry.palette = meshDrawing->palette;
         objectEntry.sortKey = SortKey::calculate(meshDrawing);
@@ -89,11 +100,11 @@ void ForwardPass::render(const RenderParams& renderParams) {
     SortKey::sort_indices(m_objectEntries, m_sortedObjectIndices);
 
     auto compatible_with_paint_entry = [](const Renderer::PaintEntry& paintEntry, const Renderer::ObjectEntry& objectEntry) -> bool {
-        return paintEntry.painter == objectEntry.painter && paintEntry.params.mesh == objectEntry.mesh && paintEntry.params.palette == objectEntry.palette;
+        return paintEntry.painter == objectEntry.painter && paintEntry.params.brush == objectEntry.brush && paintEntry.params.palette == objectEntry.palette;
     };
 
     auto is_valid = [](const Renderer::PaintEntry& paintEntry) {
-        return paintEntry.painter && paintEntry.params.mesh && paintEntry.params.palette && paintEntry.params.instanceCount > 0;
+        return paintEntry.painter && paintEntry.params.brush && paintEntry.params.palette && paintEntry.params.instanceCount > 0;
     };
 
     Renderer::PaintEntry paintEntry = {};
@@ -115,13 +126,13 @@ void ForwardPass::render(const RenderParams& renderParams) {
                 paintEntry.params.instanceCount = 0;
                 paintEntry.params.firstInstance = 0;
             }
-            else if (paintEntry.params.mesh != objectEntry.mesh) {
+            else if (paintEntry.params.brush != objectEntry.brush) {
                 paintEntry.params.firstInstance += paintEntry.params.instanceCount;
                 paintEntry.params.instanceCount = 0;
             }
             paintEntry.painter = objectEntry.painter;
             paintEntry.params.palette = objectEntry.palette;
-            paintEntry.params.mesh = objectEntry.mesh;
+            paintEntry.params.brush = objectEntry.brush;
         }
 
         Palette::InsertInstanceParams instanceParams = {};
@@ -143,6 +154,10 @@ void ForwardPass::render(const RenderParams& renderParams) {
     }
 
     renderParams.commandBuffer->end_render_pass();
+}
+
+PassConnection* ForwardPass::out_color() {
+    return &m_outColor;
 }
 
 }
