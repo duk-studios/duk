@@ -11,6 +11,7 @@ namespace duk::rhi {
 
 struct Sampler {
 public:
+
     enum class Filter {
         NEAREST,
         LINEAR,
@@ -25,6 +26,11 @@ public:
         MIRROR_CLAMP_TO_EDGE
     };
 
+public:
+
+    DUK_NO_DISCARD bool operator==(const Sampler& rhs) const noexcept;
+
+public:
     Filter filter;
     WrapMode wrapMode;
 };
