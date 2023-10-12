@@ -141,7 +141,7 @@ VkImageUsageFlags convert_usage(Image::Usage usage) {
         case Image::Usage::SAMPLED: converted = VK_IMAGE_USAGE_SAMPLED_BIT; break;
         case Image::Usage::STORAGE: converted = VK_IMAGE_USAGE_STORAGE_BIT; break;
         case Image::Usage::SAMPLED_STORAGE: converted = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT; break;
-        case Image::Usage::COLOR_ATTACHMENT: converted = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; break;
+        case Image::Usage::COLOR_ATTACHMENT: converted = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; break;
         case Image::Usage::DEPTH_STENCIL_ATTACHMENT: converted = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT; break;
         default:
             throw std::invalid_argument("unhandled Image::Usage for Vulkan");
