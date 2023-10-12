@@ -8,7 +8,9 @@
 
 namespace duk::renderer {
 
-PassConnection::PassConnection() :
+PassConnection::PassConnection(duk::rhi::Access::Mask accessMask, duk::rhi::PipelineStage::Mask stageMask) :
+    m_accessMask(accessMask),
+    m_stageMask(stageMask),
     m_image(nullptr),
     m_parent(nullptr) {
 
@@ -47,6 +49,39 @@ void PassConnection::disconnect(PassConnection* connection) {
 
 duk::rhi::Image* PassConnection::image() const {
     return m_image;
+}
+
+duk::rhi::Access::Mask PassConnection::access_mask() const {
+    return m_accessMask;
+}
+
+duk::rhi::PipelineStage::Mask PassConnection::stage_mask() const {
+    return m_stageMask;
+}
+
+duk::rhi::Access::Mask PassConnection::parent_access_mask() const {
+    if (m_parent) {
+        return m_parent->access_mask();
+    }
+    return duk::rhi::Access::NONE;
+}
+
+duk::rhi::PipelineStage::Mask PassConnection::parent_stage_mask() const {
+    if (m_parent) {
+        return m_parent->stage_mask();
+    }
+    return duk::rhi::PipelineStage::NONE;
+}
+
+duk::rhi::CommandBuffer::ImageMemoryBarrier PassConnection::image_memory_barrier() const {
+    duk::rhi::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
+    imageMemoryBarrier.image = m_image;
+    imageMemoryBarrier.srcStageMask = parent_stage_mask();
+    imageMemoryBarrier.dstStageMask = stage_mask();
+    imageMemoryBarrier.srcAccessMask = parent_access_mask();
+    imageMemoryBarrier.dstAccessMask = access_mask();
+    imageMemoryBarrier.subresourceRange = duk::rhi::Image::kFullSubresourceRange;
+    return imageMemoryBarrier;
 }
 
 Pass::~Pass() = default;

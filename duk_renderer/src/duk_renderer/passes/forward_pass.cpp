@@ -9,7 +9,8 @@ namespace duk::renderer {
 static constexpr auto kColorFormat = duk::rhi::Image::PixelFormat::R8G8B8A8_UNORM;
 
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
-    m_renderer(forwardPassCreateInfo.renderer) {
+    m_renderer(forwardPassCreateInfo.renderer),
+    m_outColor(duk::rhi::Access::COLOR_ATTACHMENT_WRITE, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT) {
 
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};

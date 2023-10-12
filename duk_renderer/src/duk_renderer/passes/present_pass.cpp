@@ -17,7 +17,8 @@ static void draw_fullscreen_triangle(duk::rhi::CommandBuffer* commandBuffer, siz
 
 PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
     m_renderer(presentPassCreateInfo.renderer),
-    m_fullscreenTriangleBrush(detail::draw_fullscreen_triangle) {
+    m_fullscreenTriangleBrush(detail::draw_fullscreen_triangle),
+    m_inColor(duk::rhi::Access::SHADER_READ, duk::rhi::PipelineStage::FRAGMENT_SHADER) {
 
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};
@@ -60,6 +61,10 @@ PresentPass::~PresentPass() = default;
 
 void PresentPass::render(const Pass::RenderParams& renderParams) {
 
+    if (!m_inColor.image()) {
+        return;
+    }
+
     if (!m_frameBuffer || m_frameBuffer->width() != renderParams.outputWidth || m_frameBuffer->height() != renderParams.outputHeight) {
         duk::rhi::Image* frameBufferAttachments[] = {m_renderer->rhi()->present_image()};
 
@@ -83,13 +88,7 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
 
     // use a pipeline barrier to make sure that inColor is ready
     {
-        duk::rhi::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
-        imageMemoryBarrier.image = m_inColor.image();
-        imageMemoryBarrier.srcStageMask = duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT;
-        imageMemoryBarrier.dstStageMask = duk::rhi::PipelineStage::FRAGMENT_SHADER;
-        imageMemoryBarrier.srcAccessMask = duk::rhi::Access::COLOR_ATTACHMENT_WRITE;
-        imageMemoryBarrier.dstAccessMask = duk::rhi::Access::SHADER_READ;
-        imageMemoryBarrier.subresourceRange = duk::rhi::Image::kFullSubresourceRange;
+        auto imageMemoryBarrier = m_inColor.image_memory_barrier();
 
         duk::rhi::CommandBuffer::PipelineBarrier pipelineBarrier = {};
         pipelineBarrier.imageMemoryBarrierCount = 1;

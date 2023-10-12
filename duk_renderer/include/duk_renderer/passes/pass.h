@@ -5,16 +5,14 @@
 #define DUK_RENDERER_PASS_H
 
 #include <duk_macros/macros.h>
+#include <duk_rhi/pipeline/pipeline_flags.h>
+#include <duk_rhi/command/command_buffer.h>
 
 #include <list>
 #include <cstdint>
 
 namespace duk {
 
-namespace rhi {
-class CommandBuffer;
-class Image;
-}
 namespace scene {
 class Scene;
 }
@@ -24,7 +22,7 @@ namespace renderer {
 class PassConnection {
 public:
 
-    PassConnection();
+    PassConnection(duk::rhi::Access::Mask accessMask, duk::rhi::PipelineStage::Mask stageMask);
 
     ~PassConnection();
 
@@ -36,7 +34,19 @@ public:
 
     DUK_NO_DISCARD duk::rhi::Image* image() const;
 
+    DUK_NO_DISCARD duk::rhi::Access::Mask access_mask() const;
+
+    DUK_NO_DISCARD duk::rhi::PipelineStage::Mask stage_mask() const;
+
+    DUK_NO_DISCARD duk::rhi::Access::Mask parent_access_mask() const;
+
+    DUK_NO_DISCARD duk::rhi::PipelineStage::Mask parent_stage_mask() const;
+
+    DUK_NO_DISCARD duk::rhi::CommandBuffer::ImageMemoryBarrier image_memory_barrier() const;
+
 private:
+    duk::rhi::Access::Mask m_accessMask;
+    duk::rhi::PipelineStage::Mask m_stageMask;
     duk::rhi::Image* m_image;
     PassConnection* m_parent;
     std::list<PassConnection*> m_children;

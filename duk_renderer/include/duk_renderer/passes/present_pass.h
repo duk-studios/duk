@@ -31,11 +31,11 @@ public:
 private:
     Renderer* m_renderer;
     GenericBrush m_fullscreenTriangleBrush;
+    PassConnection m_inColor;
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
     std::unique_ptr<FullscreenPainter> m_fullscreenPainter;
     std::shared_ptr<FullscreenPalette> m_fullscreenPalette;
-    PassConnection m_inColor;
 };
 
 }
