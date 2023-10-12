@@ -37,7 +37,9 @@ public:
 
 protected:
 
-    duk::rhi::GraphicsPipeline* pipeline_for_params(const Painter::PaintParams& params);
+    duk::rhi::GraphicsPipeline* find_pipeline_for_params(const Painter::PaintParams& params);
+
+    duk::hash::Hash hash_for_params(const PaintParams& params) const;
 
     // should be called by derived classes after loading their data sources
     void init_shader(const rhi::ShaderDataSource* shaderDataSource);

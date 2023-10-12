@@ -14,37 +14,32 @@ Painter::Painter(duk::rhi::RHI* rhi) :
 Painter::~Painter() = default;
 
 void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::PaintParams& params) {
-    commandBuffer->bind_graphics_pipeline(pipeline_for_params(params));
+    commandBuffer->bind_graphics_pipeline(find_pipeline_for_params(params));
 
     params.palette->apply(commandBuffer);
 
     params.brush->draw(commandBuffer, params.instanceCount, params.firstInstance);
 }
 
-duk::rhi::GraphicsPipeline* Painter::pipeline_for_params(const Painter::PaintParams& params) {
+duk::rhi::GraphicsPipeline* Painter::find_pipeline_for_params(const Painter::PaintParams& params) {
 
-    duk::rhi::RHI::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
-    pipelineCreateInfo.viewport.extent = {params.outputWidth, params.outputHeight};
-    pipelineCreateInfo.viewport.maxDepth = 1.0f;
-    pipelineCreateInfo.viewport.minDepth = 0.0f;
-    pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
-    pipelineCreateInfo.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
-    pipelineCreateInfo.fillMode = duk::rhi::GraphicsPipeline::FillMode::FILL;
-    pipelineCreateInfo.topology = duk::rhi::GraphicsPipeline::Topology::TRIANGLE_LIST;
-    pipelineCreateInfo.shader = m_shader.get();
-    pipelineCreateInfo.renderPass = params.renderPass;
-    pipelineCreateInfo.depthTesting = true;
-
-    const auto hash = duk::rhi::GraphicsPipeline::hash_of(pipelineCreateInfo.viewport,
-                                                          pipelineCreateInfo.scissor,
-                                                          pipelineCreateInfo.blend,
-                                                          pipelineCreateInfo.shader,
-                                                          pipelineCreateInfo.renderPass,
-                                                          pipelineCreateInfo.cullModeMask,
-                                                          pipelineCreateInfo.depthTesting);
+    const auto hash = hash_for_params(params);
 
     auto it = m_pipelines.find(hash);
     if (it == m_pipelines.end()) {
+
+        duk::rhi::RHI::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
+        pipelineCreateInfo.viewport.extent = {params.outputWidth, params.outputHeight};
+        pipelineCreateInfo.viewport.maxDepth = 1.0f;
+        pipelineCreateInfo.viewport.minDepth = 0.0f;
+        pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
+        pipelineCreateInfo.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
+        pipelineCreateInfo.fillMode = duk::rhi::GraphicsPipeline::FillMode::FILL;
+        pipelineCreateInfo.topology = duk::rhi::GraphicsPipeline::Topology::TRIANGLE_LIST;
+        pipelineCreateInfo.shader = m_shader.get();
+        pipelineCreateInfo.renderPass = params.renderPass;
+        pipelineCreateInfo.depthTesting = true;
+
         auto expectedPipeline = m_rhi->create_graphics_pipeline(pipelineCreateInfo);
         if (!expectedPipeline) {
             throw std::runtime_error("failed to create Pipeline: " + expectedPipeline.error().description());
@@ -65,6 +60,14 @@ duk::rhi::GraphicsPipeline* Painter::pipeline_for_params(const Painter::PaintPar
     it->second.framesUnused = 0;
 
     return it->second.pipeline.get();
+}
+
+duk::hash::Hash Painter::hash_for_params(const Painter::PaintParams& params) const {
+    hash::Hash hash = 0;
+    hash::hash_combine(hash, params.renderPass);
+    hash::hash_combine(hash, params.outputWidth);
+    hash::hash_combine(hash, params.outputHeight);
+    return hash;
 }
 
 void Painter::init_shader(const rhi::ShaderDataSource* shaderDataSource) {
