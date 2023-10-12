@@ -335,6 +335,10 @@ void VulkanMemoryImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFl
     }
     m_imageDataHashes[index] = m_dataSourceHash;
 
+    if (m_data.empty()) {
+        return;
+    }
+
     VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
     bufferMemoryCreateInfo.commandQueue = m_commandQueue;
     bufferMemoryCreateInfo.device = m_device;
