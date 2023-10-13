@@ -3,7 +3,7 @@
 
 #include <duk_sample/application.h>
 #include <duk_platform/window.h>
-#include <duk_rhi/vertex_types.h>
+#include <duk_renderer/vertex_types.h>
 #include <duk_renderer/components/mesh_drawing.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/camera_types.h>
@@ -50,7 +50,7 @@ PixelRGBAImageDataSource load_image() {
     return imageDataSource;
 }
 
-using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::rhi::Vertex3DNormalUV, uint16_t>;
+using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::renderer::Vertex3DNormalUV, uint16_t>;
 
 DefaultMeshDataSource quad_mesh_data_source() {
     DefaultMeshDataSource meshDataSource;

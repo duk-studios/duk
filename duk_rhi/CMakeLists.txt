@@ -11,7 +11,6 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/image.h
         include/duk_rhi/sampler.h
         include/duk_rhi/vertex_layout.h
-        include/duk_rhi/vertex_types.h
         include/duk_rhi/pipeline/graphics_pipeline.h
         include/duk_rhi/pipeline/pipeline_data_source.h
         include/duk_rhi/pipeline/shader.h

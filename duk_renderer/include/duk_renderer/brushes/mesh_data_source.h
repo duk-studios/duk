@@ -5,9 +5,9 @@
 #ifndef DUK_RHI_VERTEX_DATA_SOURCE_H
 #define DUK_RHI_VERTEX_DATA_SOURCE_H
 
+#include <duk_renderer/vertex_types.h>
 #include <duk_rhi/data_source.h>
 #include <duk_rhi/vertex_layout.h>
-#include <duk_rhi/vertex_types.h>
 #include <duk_rhi/index_types.h>
 
 #include <cstring>
@@ -113,7 +113,7 @@ duk::rhi::IndexType MeshDataSourceT<V, I>::index_type() const {
 
 template<typename V, typename I>
 duk::rhi::VertexLayout MeshDataSourceT<V, I>::vertex_layout() const {
-    return rhi::layout_of<V>();
+    return layout_of<V>();
 }
 
 template<typename V, typename I>

@@ -5,6 +5,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/brushes/mesh.h
         include/duk_renderer/brushes/mesh_data_source.h
         include/duk_renderer/renderer.h
+        include/duk_renderer/vertex_types.h
         include/duk_renderer/components/mesh_drawing.h
         include/duk_renderer/components/transform.h
         include/duk_renderer/painters/color/color_painter.h
