@@ -45,36 +45,21 @@ ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo)
     }
 
     {
-        duk::rhi::RHI::DescriptorSetCreateInfo instanceDescriptorSet = {};
-        instanceDescriptorSet.description = painter->instance_descriptor_set_description();
+        duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
+        descriptorSetCreateInfo.description = painter->descriptor_set_description();
 
-        auto expectedInstanceDescriptorSet = rhi->create_descriptor_set(instanceDescriptorSet);
+        auto expectedDescriptorSet = rhi->create_descriptor_set(descriptorSetCreateInfo);
 
-        if (!expectedInstanceDescriptorSet) {
-            throw std::runtime_error("failed to create ColorPalette instance descriptor set: " + expectedInstanceDescriptorSet.error().description());
+        if (!expectedDescriptorSet) {
+            throw std::runtime_error("failed to create ColorPalette descriptor set: " + expectedDescriptorSet.error().description());
         }
 
-        m_instanceDescriptorSet = std::move(expectedInstanceDescriptorSet.value());
+        m_descriptorSet = std::move(expectedDescriptorSet.value());
 
-        m_instanceDescriptorSet->set(0, *m_transformSBO);
-        m_instanceDescriptorSet->flush();
-    }
-
-    {
-        duk::rhi::RHI::DescriptorSetCreateInfo globalDescriptorSet = {};
-        globalDescriptorSet.description = painter->global_descriptor_set_description();
-
-        auto expectedGlobalDescriptorSet = rhi->create_descriptor_set(globalDescriptorSet);
-
-        if (!expectedGlobalDescriptorSet) {
-            throw std::runtime_error("failed to create ColorPalette global descriptor set: " + expectedGlobalDescriptorSet.error().description());
-        }
-
-        m_globalDescriptorSet = std::move(expectedGlobalDescriptorSet.value());
-
-        m_globalDescriptorSet->set(0, *m_cameraUBO);
-        m_globalDescriptorSet->set(1, *m_materialUBO);
-        m_globalDescriptorSet->flush();
+        m_descriptorSet->set(0, *m_cameraUBO);
+        m_descriptorSet->set(1, *m_transformSBO);
+        m_descriptorSet->set(2, *m_materialUBO);
+        m_descriptorSet->flush();
     }
 }
 
@@ -93,8 +78,7 @@ void ColorPalette::apply(duk::rhi::CommandBuffer* commandBuffer) {
     m_cameraUBO->flush();
     m_materialUBO->flush();
 
-    commandBuffer->bind_descriptor_set(m_globalDescriptorSet.get(), 0);
-    commandBuffer->bind_descriptor_set(m_instanceDescriptorSet.get(), 1);
+    commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }
 
 void ColorPalette::clear() {

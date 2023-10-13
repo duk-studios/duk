@@ -53,8 +53,7 @@ private:
     std::unique_ptr<CameraUBO> m_cameraUBO;
     std::unique_ptr<StorageBuffer<Transform>> m_transformSBO;
     std::unique_ptr<UniformBuffer<Material>> m_materialUBO;
-    std::shared_ptr<duk::rhi::DescriptorSet> m_globalDescriptorSet;
-    std::shared_ptr<duk::rhi::DescriptorSet> m_instanceDescriptorSet;
+    std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
 
 };
 

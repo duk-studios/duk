@@ -1,9 +1,7 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-#include "bindings.glsl"
-
-layout(binding = 1, set = GLOBAL_SET_INDEX) uniform Material {
+layout(binding = 2) uniform Material {
     vec4 color;
 } uMaterial;
 
