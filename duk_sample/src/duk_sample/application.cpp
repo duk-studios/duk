@@ -49,16 +49,16 @@ PixelRGBAImageDataSource load_image() {
     return imageDataSource;
 }
 
-using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::rhi::Vertex3DColorUV, uint16_t>;
+using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::rhi::Vertex3DNormalUV, uint16_t>;
 
 DefaultMeshDataSource quad_mesh_data_source() {
     DefaultMeshDataSource meshDataSource;
 
     std::array<DefaultMeshDataSource::VertexType, 4> vertices = {};
-    vertices[0] = {{0.5f, 0.5f, 0.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[1] = {{-0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[2] = {{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[3] = {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+    vertices[0] = {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[1] = {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[2] = {{0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[3] = {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}};
 
     meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
@@ -77,40 +77,40 @@ DefaultMeshDataSource cube_mesh_data_source() {
     std::array<DefaultMeshDataSource::VertexType, 24> vertices = {};
 
     // front
-    vertices[0] = {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[1] = {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[2] = {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[3] = {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}};
+    vertices[0] = {{0.5f, 0.5f, 0.5f},      {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[1] = {{-0.5f, 0.5f, 0.5f},     {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[2] = {{0.5f, -0.5f, 0.5f},     {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[3] = {{-0.5f, -0.5f, 0.5f},    {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}};
 
     // back
-    vertices[4] = {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[5] = {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[6] = {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[7] = {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 1.0f}};
+    vertices[4] = {{-0.5f, 0.5f, -0.5f},    {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}};
+    vertices[5] = {{0.5f, 0.5f, -0.5f},     {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}};
+    vertices[6] = {{-0.5f, -0.5f, -0.5f},   {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}};
+    vertices[7] = {{0.5f, -0.5f, -0.5f},    {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}};
 
     // left
-    vertices[8] = {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[9] = {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[10] = {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[11] = {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+    vertices[8] = {{-0.5f, 0.5f, 0.5f},     {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[9] = {{-0.5f, 0.5f, -0.5f},    {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[10] = {{-0.5f, -0.5f, 0.5f},   {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[11] = {{-0.5f, -0.5f, -0.5f},  {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}};
 
     // right
-    vertices[12] = {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[13] = {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[14] = {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[15] = {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+    vertices[12] = {{0.5f, 0.5f, -0.5f},    {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[13] = {{0.5f, 0.5f, 0.5f},     {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[14] = {{0.5f, -0.5f, -0.5f},   {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[15] = {{0.5f, -0.5f, 0.5f},    {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}};
 
     // top
-    vertices[16] = {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[17] = {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[18] = {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[19] = {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 1.0f, 1.0f}, {1.0f, 1.0f}};
+    vertices[16] = {{0.5f, 0.5f, -0.5f},    {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[17] = {{-0.5f, 0.5f, -0.5f},   {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[18] = {{0.5f, 0.5f, 0.5f},     {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[19] = {{-0.5f, 0.5f, 0.5f},    {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}};
 
     // bottom
-    vertices[20] = {{0.5f, -0.5f, 0.5f}, {1.0f, 0.5f, 0.2f, 1.0f}, {0.0f, 0.0f}};
-    vertices[21] = {{-0.5f, -0.5f, 0.5f}, {1.0f, 0.5f, 0.2f, 1.0f}, {1.0f, 0.0f}};
-    vertices[22] = {{0.5f, -0.5f, -0.5f}, {1.0f, 0.5f, 0.2f, 1.0f}, {0.0f, 1.0f}};
-    vertices[23] = {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.5f, 0.2f, 1.0f}, {1.0f, 1.0f}};
+    vertices[20] = {{0.5f, -0.5f, 0.5f},    {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[21] = {{-0.5f, -0.5f, 0.5f},   {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[22] = {{0.5f, -0.5f, -0.5f},   {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[23] = {{-0.5f, -0.5f, -0.5f},  {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}};
 
 
 
@@ -182,13 +182,26 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     }
 
 
-    duk::renderer::ColorPainterCreateInfo colorPainterCreateInfo = {};
-    colorPainterCreateInfo.rhi = m_renderer->rhi();
-    colorPainterCreateInfo.commandQueue = m_renderer->main_command_queue();
+    {
+        duk::renderer::ColorPainterCreateInfo colorPainterCreateInfo = {};
+        colorPainterCreateInfo.rhi = m_renderer->rhi();
+        colorPainterCreateInfo.commandQueue = m_renderer->main_command_queue();
 
-    m_colorPainter = std::make_shared<duk::renderer::ColorPainter>(colorPainterCreateInfo);
+        m_colorPainter = std::make_shared<duk::renderer::ColorPainter>(colorPainterCreateInfo);
 
-    m_colorPalette = m_colorPainter->make_palette();
+        m_colorPalette = m_colorPainter->make_palette();
+    }
+
+    {
+        duk::renderer::PhongPainterCreateInfo phongPainterCreateInfo = {};
+        phongPainterCreateInfo.rhi = m_renderer->rhi();
+        phongPainterCreateInfo.commandQueue = m_renderer->main_command_queue();
+
+        m_phongPainter = std::make_shared<duk::renderer::PhongPainter>(phongPainterCreateInfo);
+
+        m_phongPalette = m_phongPainter->make_palette();
+    }
+
 
     m_scene = std::make_shared<duk::scene::Scene>();
 
@@ -196,8 +209,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         return (a * (1.0f - t)) + b * t;
     };
 
-    const auto objCount = 50;
-    const auto colCount = 10;
+    const auto objCount = 500;
+    const auto colCount = 50;
     const auto rowCount = objCount / std::min(colCount, objCount);
 
     for (int i = 0; i < objCount; i++) {
@@ -208,7 +221,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         auto obj = m_scene->add_object();
 
         auto position3D = obj.add<duk::renderer::Position3D>();
-        position3D->value = glm::vec3(lerp(-20, 20, colPercent), lerp(-20, 20, rowPercent), glm::linearRand(-50.f, 10.f));
+        position3D->value = glm::vec3(lerp(-20, 20, colPercent), lerp(-20, 20, rowPercent), glm::linearRand(-50.f, 30.f));
 
         auto rotation3D = obj.add<duk::renderer::Rotation3D>();
         rotation3D->value = glm::radians(glm::linearRand(glm::vec3(-95.f), glm::vec3(95.f)));
@@ -218,8 +231,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
         auto meshDrawing = obj.add<duk::renderer::MeshDrawing>();
         meshDrawing->mesh = glm::linearRand(-1, 2) > 0 ? m_cubeMesh.get() : m_quadMesh.get();
-        meshDrawing->painter = m_colorPainter.get();
-        meshDrawing->palette = m_colorPalette.get();
+        meshDrawing->painter = m_phongPainter.get();
+        meshDrawing->palette = m_phongPalette.get();
 
 
     }

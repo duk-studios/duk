@@ -56,6 +56,21 @@ inline VertexLayout layout_of<Vertex3DColorUV>() {
     };
 }
 
+struct Vertex3DNormalUV {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 uv;
+};
+
+template<>
+inline VertexLayout layout_of<Vertex3DNormalUV>() {
+    return {
+            VertexAttribute::format_of<glm::vec3>(),
+            VertexAttribute::format_of<glm::vec3>(),
+            VertexAttribute::format_of<glm::vec2>()
+    };
+}
+
 }
 
 // specialize std::hash for every vertex type
@@ -87,6 +102,17 @@ struct hash<duk::rhi::Vertex3DColorUV> {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vertex.position);
         duk::hash::hash_combine(hash, vertex.color);
+        duk::hash::hash_combine(hash, vertex.uv);
+        return hash;
+    }
+};
+
+template<>
+struct hash<duk::rhi::Vertex3DNormalUV> {
+    size_t operator()(const duk::rhi::Vertex3DNormalUV& vertex){
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, vertex.position);
+        duk::hash::hash_combine(hash, vertex.normal);
         duk::hash::hash_combine(hash, vertex.uv);
         return hash;
     }

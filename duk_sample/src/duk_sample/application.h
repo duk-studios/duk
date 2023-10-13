@@ -12,6 +12,8 @@
 #include <duk_renderer/forward/forward_renderer.h>
 #include <duk_renderer/painters/color/color_painter.h>
 #include <duk_renderer/painters/color/color_palette.h>
+#include <duk_renderer/painters/phong/phong_painter.h>
+#include <duk_renderer/painters/phong/phong_palette.h>
 
 #include <memory>
 
@@ -58,6 +60,8 @@ private:
     std::shared_ptr<duk::renderer::Mesh> m_cubeMesh;
     std::shared_ptr<duk::renderer::ColorPainter> m_colorPainter;
     std::shared_ptr<duk::renderer::ColorPalette> m_colorPalette;
+    std::shared_ptr<duk::renderer::PhongPainter> m_phongPainter;
+    std::shared_ptr<duk::renderer::PhongPalette> m_phongPalette;
     std::shared_ptr<duk::scene::Scene> m_scene;
     bool m_run;
 };
