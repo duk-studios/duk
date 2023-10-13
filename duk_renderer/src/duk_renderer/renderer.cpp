@@ -66,6 +66,11 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
 Renderer::~Renderer() = default;
 
 void Renderer::render(duk::scene::Scene* scene) {
+    // if no camera is set, return
+    if (!scene->valid_object(m_mainCameraObjectId)) {
+        return;
+    }
+
     m_rhi->prepare_frame();
 
     m_scheduler->begin();
