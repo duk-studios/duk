@@ -3,6 +3,7 @@
 
 struct CameraMatrices {
     mat4 view;
+    mat4 invView;
     mat4 proj;
     mat4 vp;
 };

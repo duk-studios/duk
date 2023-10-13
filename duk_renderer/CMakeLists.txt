@@ -22,6 +22,8 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/painters/fullscreen/fullscreen_palette.h
         include/duk_renderer/brushes/brush.h
         include/duk_renderer/brushes/generic_brush.h
+        include/duk_renderer/painters/phong/phong_painter.h
+        include/duk_renderer/painters/phong/phong_palette.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -46,6 +48,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/painters/fullscreen/fullscreen_palette.cpp
         src/duk_renderer/brushes/brush.cpp
         src/duk_renderer/brushes/generic_brush.cpp
+        src/duk_renderer/painters/phong/phong_painter.cpp
+        src/duk_renderer/painters/phong/phong_palette.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

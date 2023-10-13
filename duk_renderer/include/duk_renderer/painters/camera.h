@@ -12,6 +12,7 @@ namespace duk::renderer {
 
 struct CameraMatrices {
     glm::mat4 view;
+    glm::mat4 invView;
     glm::mat4 proj;
     glm::mat4 vp;
 };
