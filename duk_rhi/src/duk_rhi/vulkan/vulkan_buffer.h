@@ -154,6 +154,8 @@ private:
 
     std::unique_ptr<VulkanBufferMemory> create_buffer();
 
+    uint32_t fix_index(uint32_t imageIndex);
+
 private:
     VkDevice m_device;
     VulkanPhysicalDevice* m_physicalDevice;

@@ -217,12 +217,12 @@ VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo) :
 VulkanBuffer::~VulkanBuffer() = default;
 
 VkBuffer VulkanBuffer::handle(uint32_t imageIndex) {
-    return m_buffers[m_updateFrequency == Buffer::UpdateFrequency::DYNAMIC ? imageIndex : 0]->handle();
+    return m_buffers[fix_index(imageIndex)]->handle();
 }
 
 void VulkanBuffer::update(uint32_t imageIndex) {
 
-    imageIndex = m_updateFrequency == Buffer::UpdateFrequency::DYNAMIC ? imageIndex : 0;
+    imageIndex = fix_index(imageIndex);
 
     auto& bufferHash = m_bufferHashes[imageIndex];
     if (bufferHash != m_dataHash) {
@@ -260,7 +260,7 @@ void VulkanBuffer::clean() {
 }
 
 void VulkanBuffer::clean(uint32_t imageIndex) {
-    auto& buffer = m_buffers[imageIndex];
+    auto& buffer = m_buffers[fix_index(imageIndex)];
     if (buffer) {
         buffer.reset();
     }
@@ -378,6 +378,10 @@ std::unique_ptr<VulkanBufferMemory> VulkanBuffer::create_buffer() {
         default:
             throw std::invalid_argument("unhandled Buffer::UpdateFrequency");
     }
+}
+
+uint32_t VulkanBuffer::fix_index(uint32_t imageIndex) {
+    return m_updateFrequency == Buffer::UpdateFrequency::DYNAMIC ? imageIndex : 0;
 }
 
 }
