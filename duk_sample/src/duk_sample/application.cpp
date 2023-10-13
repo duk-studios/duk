@@ -133,6 +133,66 @@ DefaultMeshDataSource cube_mesh_data_source() {
     return meshDataSource;
 }
 
+DefaultMeshDataSource sphere_mesh_data_source(uint32_t segments) {
+    DefaultMeshDataSource meshDataSource;
+
+    const auto rings = segments;
+
+    std::vector<DefaultMeshDataSource::VertexType> vertices;
+
+    for (int i = 0; i <= rings; ++i) {
+        float phi = static_cast<float>(i) * glm::pi<float>() / static_cast<float>(rings);
+        float sinPhi = std::sin(phi);
+        float cosPhi = std::cos(phi);
+
+        for (int j = 0; j <= segments; ++j) {
+            float theta = static_cast<float>(j) * 2.0f * glm::pi<float>() / static_cast<float>(segments);
+            float sinTheta = std::sin(theta);
+            float cosTheta = std::cos(theta);
+
+            float x = sinPhi * cosTheta;
+            float y = cosPhi;
+            float z = sinPhi * sinTheta;
+
+            glm::vec3 position(x, y, z);
+            glm::vec3 normal(x, y, z);
+            glm::vec2 uv(static_cast<float>(j) / static_cast<float>(segments), static_cast<float>(i) / static_cast<float>(rings));
+
+            vertices.push_back({position, normal, uv});
+        }
+    }
+
+    meshDataSource.insert_vertices(vertices.begin(), vertices.end());
+
+    std::vector<DefaultMeshDataSource::IndexType> indices;
+
+    for (int i = 0; i < rings; ++i) {
+        for (int j = 0; j < segments; ++j) {
+            int nextRow = i + 1;
+            int nextColumn = (j + 1) % segments;
+            int currentIdx = i * (segments + 1) + j;
+            int nextIdx = nextRow * (segments + 1) + j;
+            int nextRightIdx = nextRow * (segments + 1) + nextColumn;
+
+            // Front face (clockwise order)
+            indices.push_back(currentIdx);
+            indices.push_back(nextRightIdx);
+            indices.push_back(nextIdx);
+
+            // Back face (clockwise order)
+            indices.push_back(currentIdx);
+            indices.push_back(currentIdx + 1);
+            indices.push_back(nextRightIdx);
+        }
+    }
+
+    meshDataSource.insert_indices(indices.begin(), indices.end());
+
+    meshDataSource.update_hash();
+
+    return meshDataSource;
+}
+
 static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveCamera> perspectiveCamera, uint32_t width, uint32_t height)
 {
     perspectiveCamera->zNear = 0.1f;
@@ -233,6 +293,12 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         m_cubeMesh = m_meshBufferPool->create_mesh(&cubeDataSource);
     }
 
+    {
+        auto sphereDataSource = detail::sphere_mesh_data_source(20);
+
+        m_sphereMesh = m_meshBufferPool->create_mesh(&sphereDataSource);
+    }
+
 
     {
         duk::renderer::ColorPainterCreateInfo colorPainterCreateInfo = {};
@@ -260,8 +326,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
     detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_quadMesh.get());
 
+    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_sphereMesh.get());
     detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
-    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_quadMesh.get());
 
 //    detail::populate_scene(m_scene.get(), 250, m_colorPainter.get(), m_colorPalette.get(), m_cubeMesh.get());
 //    detail::populate_scene(m_scene.get(), 250, m_colorPainter.get(), m_colorPalette.get(), m_quadMesh.get());
