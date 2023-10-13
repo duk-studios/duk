@@ -2,6 +2,7 @@
 /// job_queue.cpp
 
 #include <duk_task/task_queue.h>
+#include <algorithm>
 
 namespace duk::task {
 
