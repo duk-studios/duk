@@ -2,11 +2,11 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 #include "duk/camera.glsl"
+#include "duk/vertex.glsl"
 
-layout(location = 0) in vec3 aPosition;
-layout(location = 1) in vec4 aColor;
-
-layout(location = 0) out vec4 vColor;
+layout(location = 0) out vec3 vPosition;
+layout(location = 1) out vec3 vNormal;
+layout(location = 2) out vec2 vTexCoord;
 
 DUK_DECLARE_CAMERA_BINDING(0, uCamera);
 
@@ -20,5 +20,4 @@ out gl_PerVertex {
 
 void main() {
     gl_Position = uCamera.matrices.vp * uTransform.model[gl_InstanceIndex] * vec4(aPosition, 1.0);
-    vColor = aColor;
 }

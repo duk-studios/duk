@@ -16,7 +16,7 @@ static duk::rhi::StdShaderDataSource fullscreen_shader_data_source() {
     shaderDataSource.insert_spir_v_code(duk::rhi::Shader::Module::FRAGMENT, duk::tools::File::load_bytes("spv/color/color.frag.spv"));
 
     shaderDataSource.insert_vertex_attribute(duk::rhi::VertexAttribute::Format::VEC3);
-    shaderDataSource.insert_vertex_attribute(duk::rhi::VertexAttribute::Format::VEC4);
+    shaderDataSource.insert_vertex_attribute(duk::rhi::VertexAttribute::Format::VEC3);
     shaderDataSource.insert_vertex_attribute(duk::rhi::VertexAttribute::Format::VEC2);
 
     {

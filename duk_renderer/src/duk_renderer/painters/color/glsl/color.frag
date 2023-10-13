@@ -5,10 +5,8 @@ layout(binding = 2) uniform Material {
     vec4 color;
 } uMaterial;
 
-layout(location = 0) in vec4 vColor;
-
 layout(location = 0) out vec4 oColor;
 
 void main() {
-    oColor = vColor * uMaterial.color;
+    oColor = uMaterial.color;
 }
