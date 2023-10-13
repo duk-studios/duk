@@ -37,14 +37,20 @@ PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo)
     }
 }
 
+void PhongPalette::clear_instances() {
+    m_transformSBO->clear();
+}
+
 void PhongPalette::insert_instance(const Palette::InsertInstanceParams& params) {
     auto& transform = m_transformSBO->next();
     transform.model = duk::renderer::model_matrix_3d(params.object);
 }
 
-void PhongPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
-    // updates instance data to gpu
+void PhongPalette::flush_instances() {
     m_transformSBO->flush();
+}
+
+void PhongPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
 
     // updates current camera UBO
     m_descriptorSet->set(0, *params.globalDescriptors->camera_ubo());
@@ -54,10 +60,6 @@ void PhongPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyPara
     m_descriptorSet->flush();
 
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
-}
-
-void PhongPalette::clear() {
-    m_transformSBO->clear();
 }
 
 }

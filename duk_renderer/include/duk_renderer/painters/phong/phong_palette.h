@@ -31,11 +31,13 @@ public:
 
     explicit PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo);
 
+    void clear_instances() override;
+
     void insert_instance(const InsertInstanceParams& params) override;
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
+    void flush_instances() override;
 
-    void clear() override;
+    void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
 
 private:
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;

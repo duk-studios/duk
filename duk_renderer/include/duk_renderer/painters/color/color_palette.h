@@ -43,11 +43,13 @@ public:
 
     void set_color(const glm::vec4& color);
 
+    void flush_instances() override;
+
     void insert_instance(const InsertInstanceParams& params) override;
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
+    void clear_instances() override;
 
-    void clear() override;
+    void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
 
 private:
     std::unique_ptr<StorageBuffer<Transform>> m_transformSBO;

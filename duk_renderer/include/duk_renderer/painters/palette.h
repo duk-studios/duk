@@ -14,11 +14,15 @@ class GlobalDescriptors;
 class Palette {
 public:
 
+    virtual void clear_instances();
+
     struct InsertInstanceParams {
         duk::scene::Object object;
     };
 
-    virtual void insert_instance(const InsertInstanceParams& params) = 0;
+    virtual void insert_instance(const InsertInstanceParams& params);
+
+    virtual void flush_instances();
 
 
     struct ApplyParams {
@@ -26,8 +30,6 @@ public:
     };
 
     virtual void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) = 0;
-
-    virtual void clear();
 
 };
 

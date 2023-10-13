@@ -26,7 +26,7 @@ void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::Paint
     params.brush->draw(commandBuffer, params.instanceCount, params.firstInstance);
 }
 
-void Painter::clear() {
+void Painter::clear_unused_pipelines() {
     std::vector<duk::hash::Hash> hashesToDelete;
     hashesToDelete.reserve(m_pipelines.size());
 

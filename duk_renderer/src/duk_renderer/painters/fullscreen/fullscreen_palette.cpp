@@ -23,16 +23,8 @@ FullscreenPalette::FullscreenPalette(const FullscreenPaletteCreateInfo& fullscre
     m_descriptorSet = std::move(expectedGlobalDescriptorSet.value());
 }
 
-void FullscreenPalette::insert_instance(const Palette::InsertInstanceParams& params) {
-
-}
-
 void FullscreenPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
-}
-
-void FullscreenPalette::clear() {
-
 }
 
 void FullscreenPalette::update(duk::rhi::Image* image, const duk::rhi::Sampler& sampler) {

@@ -50,15 +50,20 @@ void ColorPalette::set_color(const glm::vec4& color) {
     m_materialUBO->flush();
 }
 
+void ColorPalette::clear_instances() {
+    m_transformSBO->clear();
+}
+
 void ColorPalette::insert_instance(const Palette::InsertInstanceParams& params) {
     auto& transform = m_transformSBO->next();
     transform.model = duk::renderer::model_matrix_3d(params.object);
 }
 
-void ColorPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
-
-    // updates instance data to gpu
+void ColorPalette::flush_instances() {
     m_transformSBO->flush();
+}
+
+void ColorPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
 
     // updates current camera UBO
     m_descriptorSet->set(0, *params.globalDescriptors->camera_ubo());
@@ -67,10 +72,6 @@ void ColorPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyPara
     m_descriptorSet->flush();
 
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
-}
-
-void ColorPalette::clear() {
-    m_transformSBO->clear();
 }
 
 }

@@ -22,11 +22,7 @@ public:
 
     explicit FullscreenPalette(const FullscreenPaletteCreateInfo& fullscreenPaletteCreateInfo);
 
-    void insert_instance(const InsertInstanceParams& params) override;
-
     void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
-
-    void clear() override;
 
     void update(duk::rhi::Image* image, const duk::rhi::Sampler& sampler);
 

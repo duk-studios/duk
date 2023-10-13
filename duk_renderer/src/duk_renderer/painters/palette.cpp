@@ -3,6 +3,18 @@
 
 #include <duk_renderer/painters/palette.h>
 
-void duk::renderer::Palette::clear() {
+namespace duk::renderer {
+
+void Palette::clear_instances() {
+
+}
+
+void Palette::insert_instance(const Palette::InsertInstanceParams& params) {
+
+}
+
+void Palette::flush_instances() {
+
+}
 
 }

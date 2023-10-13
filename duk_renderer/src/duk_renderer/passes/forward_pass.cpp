@@ -87,32 +87,29 @@ void ForwardPass::render(const RenderParams& renderParams) {
     m_sortedObjectIndices.clear();
     m_paintEntries.clear();
 
-    {
-        std::set<Palette*> uniquePalettes;
-        std::set<Painter*> uniquePainters;
+    std::set<Palette*> uniquePalettes;
+    std::set<Painter*> uniquePainters;
 
-        for (auto object : renderParams.scene->objects_with_components<MeshDrawing>()) {
-            auto meshDrawing = object.component<MeshDrawing>();
+    for (auto object : renderParams.scene->objects_with_components<MeshDrawing>()) {
+        auto meshDrawing = object.component<MeshDrawing>();
 
-            auto& objectEntry = m_objectEntries.emplace_back();
-            objectEntry.objectId = object.id();
-            objectEntry.brush = meshDrawing->mesh;
-            objectEntry.painter = meshDrawing->painter;
-            objectEntry.palette = meshDrawing->palette;
-            objectEntry.sortKey = SortKey::calculate(meshDrawing);
+        auto& objectEntry = m_objectEntries.emplace_back();
+        objectEntry.objectId = object.id();
+        objectEntry.brush = meshDrawing->mesh;
+        objectEntry.painter = meshDrawing->painter;
+        objectEntry.palette = meshDrawing->palette;
+        objectEntry.sortKey = SortKey::calculate(meshDrawing);
 
-            uniquePalettes.insert(objectEntry.palette);
-            uniquePainters.insert(objectEntry.painter);
-        }
+        uniquePalettes.insert(objectEntry.palette);
+        uniquePainters.insert(objectEntry.painter);
+    }
 
-        // resets all painters and palettes that are going to be used
-        for (auto painter : uniquePainters) {
-            painter->clear();
-        }
+    for (auto painter : uniquePainters) {
+        painter->clear_unused_pipelines();
+    }
 
-        for (auto palette : uniquePalettes) {
-            palette->clear();
-        }
+    for (auto palette : uniquePalettes) {
+        palette->clear_instances();
     }
 
     SortKey::sort_indices(m_objectEntries, m_sortedObjectIndices);
@@ -163,6 +160,11 @@ void ForwardPass::render(const RenderParams& renderParams) {
     }
     if (is_valid(paintEntry)) {
         m_paintEntries.push_back(paintEntry);
+    }
+
+    // mark all instance buffers for gpu upload
+    for (auto palette : uniquePalettes) {
+        palette->flush_instances();
     }
 
     renderParams.commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());

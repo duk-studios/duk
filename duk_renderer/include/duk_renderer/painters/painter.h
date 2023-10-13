@@ -37,7 +37,7 @@ public:
 
     void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
 
-    void clear();
+    void clear_unused_pipelines();
 
 protected:
 
