@@ -133,13 +133,53 @@ DefaultMeshDataSource cube_mesh_data_source() {
     return meshDataSource;
 }
 
-static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveCamera> perspectiveCamera, uint32_t width, uint32_t height, float fovDegrees)
+static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveCamera> perspectiveCamera, uint32_t width, uint32_t height)
 {
     perspectiveCamera->zNear = 0.1f;
     perspectiveCamera->zFar = 1000.f;
     perspectiveCamera->aspectRatio = (float)width / (float)height;
-    perspectiveCamera->fovDegrees = fovDegrees;
+    perspectiveCamera->fovDegrees = 45.0f;
 }
+
+static void populate_scene(duk::scene::Scene* scene,
+                           uint32_t objCount,
+                           duk::renderer::Painter* painter,
+                           duk::renderer::Palette* palette,
+                           duk::renderer::Mesh* mesh
+                           ) {
+
+    const auto colCount = static_cast<uint32_t>(sqrt(static_cast<double>(objCount)));
+    const auto rowCount = objCount / std::min(colCount, objCount);
+
+    for (int i = 0; i < objCount; i++) {
+
+        const float colPercent = float(i % (colCount)) / float(colCount - 1);
+        const float rowPercent = std::floor((float)i / float(colCount)) / float(rowCount - 1);
+
+        auto obj = scene->add_object();
+
+        auto position3D = obj.add<duk::renderer::Position3D>();
+        position3D->value = glm::vec3(lerp(-20, 20, colPercent), lerp(-20, 20, rowPercent), glm::linearRand(-50.f, 30.f));
+
+        auto rotation3D = obj.add<duk::renderer::Rotation3D>();
+        rotation3D->value = glm::radians(glm::linearRand(glm::vec3(-95.f), glm::vec3(95.f)));
+
+        auto scale3D = obj.add<duk::renderer::Scale3D>();
+        scale3D->value = glm::linearRand(glm::vec3(0.02f), glm::vec3(1.3f));
+
+        auto meshDrawing = obj.add<duk::renderer::MeshDrawing>();
+        meshDrawing->mesh = mesh;
+        meshDrawing->painter = painter;
+        meshDrawing->palette = palette;
+
+    }
+}
+
+struct PivotRotator {
+    glm::vec3 pivot;
+    float distanceFromPivot;
+    float angularSpeed;
+};
 
 }
 
@@ -165,6 +205,9 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         m_run = false;
     });
 
+    m_listener.listen(m_window->window_resize_event, [this] (uint32_t width, uint32_t height) {
+        detail::update_perspective(m_camera.component<duk::renderer::PerspectiveCamera>(), width, height);
+    });
 
     duk::renderer::ForwardRendererCreateInfo forwardRendererCreateInfo = {};
     forwardRendererCreateInfo.rendererCreateInfo.window = m_window.get();
@@ -214,41 +257,27 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     m_scene = std::make_shared<duk::scene::Scene>();
 
-    auto lerp = [](auto a, auto b, float t) -> float {
-        return (a * (1.0f - t)) + b * t;
-    };
+    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
+    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_quadMesh.get());
 
-    const auto objCount = 500;
-    const auto colCount = 50;
-    const auto rowCount = objCount / std::min(colCount, objCount);
+    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
+    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_quadMesh.get());
 
-    for (int i = 0; i < objCount; i++) {
-
-        const float colPercent = float(i % (colCount)) / (colCount - 1);
-        const float rowPercent = std::floor((float)i / (colCount)) / (rowCount - 1);
-
-        auto obj = m_scene->add_object();
-
-        auto position3D = obj.add<duk::renderer::Position3D>();
-        position3D->value = glm::vec3(lerp(-20, 20, colPercent), lerp(-20, 20, rowPercent), glm::linearRand(-50.f, 30.f));
-
-        auto rotation3D = obj.add<duk::renderer::Rotation3D>();
-        rotation3D->value = glm::radians(glm::linearRand(glm::vec3(-95.f), glm::vec3(95.f)));
-
-        auto scale3D = obj.add<duk::renderer::Scale3D>();
-        scale3D->value = glm::linearRand(glm::vec3(0.02f), glm::vec3(1.3f));
-
-        auto meshDrawing = obj.add<duk::renderer::MeshDrawing>();
-        meshDrawing->mesh = glm::linearRand(-1, 2) > 0 ? m_cubeMesh.get() : m_quadMesh.get();
-        meshDrawing->painter = m_phongPainter.get();
-        meshDrawing->palette = m_phongPalette.get();
-
-    }
+//    detail::populate_scene(m_scene.get(), 250, m_colorPainter.get(), m_colorPalette.get(), m_cubeMesh.get());
+//    detail::populate_scene(m_scene.get(), 250, m_colorPainter.get(), m_colorPalette.get(), m_quadMesh.get());
 
     {
         m_camera = m_scene->add_object();
 
-        detail::update_perspective(m_camera.add<duk::renderer::PerspectiveCamera>(), m_renderer->render_width(), m_renderer->render_height(), 45.0f);
+        detail::update_perspective(m_camera.add<duk::renderer::PerspectiveCamera>(), m_renderer->render_width(), m_renderer->render_height());
+
+        m_camera.add<duk::renderer::Position3D>();
+        m_camera.add<duk::renderer::Rotation3D>();
+
+        auto pivotRotator = m_camera.add<detail::PivotRotator>();
+        pivotRotator->pivot = glm::vec3(0);
+        pivotRotator->distanceFromPivot = 50.f;
+        pivotRotator->angularSpeed = 30.f;
 
         m_renderer->use_as_camera(m_camera);
     }
@@ -287,11 +316,24 @@ void Application::run() {
 
 void Application::update(double time, double deltaTime) {
 
-//    for (auto object : m_scene->objects_with_components<duk::renderer::Position3D>()) {
-//        auto pos = object.component<duk::renderer::Position3D>();
-//        pos->value.x = std::sin((float)time) * 10;
-//    }
+    auto [position, rotation, pivotRotator] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::PivotRotator>();
 
+    const auto speed = glm::radians(pivotRotator->angularSpeed);
+
+    glm::vec3 offset = {
+            cosf((float)time * speed) * pivotRotator->distanceFromPivot,
+            5,
+            sinf((float)time * speed) * pivotRotator->distanceFromPivot
+    };
+
+    position->value = pivotRotator->pivot + offset;
+
+    // calculate rotation
+    {
+        const auto direction = -glm::normalize(offset);
+
+        rotation->value = glm::quatLookAt(direction, glm::vec3(0, 1, 0));
+    }
 }
 
 void Application::draw() {
