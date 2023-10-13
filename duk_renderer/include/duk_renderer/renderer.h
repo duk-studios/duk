@@ -19,6 +19,7 @@ class Scene;
 namespace renderer {
 
 class Pass;
+class GlobalDescriptors;
 
 struct RendererCreateInfo {
     duk::platform::Window* window;
@@ -61,12 +62,20 @@ public:
 
     DUK_NO_DISCARD duk::rhi::CommandQueue* main_command_queue() const;
 
+    void use_as_camera(const duk::scene::Object& object);
+
+private:
+
+    void update_global_descriptors(duk::scene::Scene* scene);
+
 protected:
     duk::platform::Window* m_window;
     std::shared_ptr<duk::rhi::RHI> m_rhi;
     std::shared_ptr<duk::rhi::CommandQueue> m_mainQueue;
     std::shared_ptr<duk::rhi::CommandScheduler> m_scheduler;
     std::vector<std::shared_ptr<Pass>> m_passes;
+    std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
+    duk::scene::Object::Id m_mainCameraObjectId;
 };
 
 // specialization for duk_renderer/sort.h sort_key

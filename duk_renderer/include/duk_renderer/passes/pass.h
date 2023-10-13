@@ -19,6 +19,8 @@ class Scene;
 
 namespace renderer {
 
+class GlobalDescriptors;
+
 class PassConnection {
 public:
 
@@ -60,6 +62,7 @@ public:
     struct RenderParams {
         duk::rhi::CommandBuffer* commandBuffer;
         duk::scene::Scene* scene;
+        GlobalDescriptors* globalDescriptors;
         uint32_t outputWidth;
         uint32_t outputHeight;
     };

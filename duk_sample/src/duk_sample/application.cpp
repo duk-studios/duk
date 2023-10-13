@@ -6,6 +6,7 @@
 #include <duk_rhi/vertex_types.h>
 #include <duk_renderer/components/mesh_drawing.h>
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/components/camera_types.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/random.hpp>
@@ -132,6 +133,14 @@ DefaultMeshDataSource cube_mesh_data_source() {
     return meshDataSource;
 }
 
+static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveCamera> perspectiveCamera, uint32_t width, uint32_t height, float fovDegrees)
+{
+    perspectiveCamera->zNear = 0.1f;
+    perspectiveCamera->zFar = 1000.f;
+    perspectiveCamera->aspectRatio = (float)width / (float)height;
+    perspectiveCamera->fovDegrees = fovDegrees;
+}
+
 }
 
 Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
@@ -234,8 +243,16 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         meshDrawing->painter = m_phongPainter.get();
         meshDrawing->palette = m_phongPalette.get();
 
-
     }
+
+    {
+        m_camera = m_scene->add_object();
+
+        detail::update_perspective(m_camera.add<duk::renderer::PerspectiveCamera>(), m_renderer->render_width(), m_renderer->render_height(), 45.0f);
+
+        m_renderer->use_as_camera(m_camera);
+    }
+
 }
 
 Application::~Application() {

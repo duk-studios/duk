@@ -4,6 +4,7 @@
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/passes/pass.h>
 #include <duk_platform/window.h>
+#include <duk_renderer/painters/global_descriptors.h>
 
 namespace duk::renderer {
 
@@ -52,6 +53,14 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
 
         m_scheduler = std::move(expectedScheduler.value());
     }
+
+    {
+        GlobalDescriptorsCreateInfo globalDescriptorsCreateInfo = {};
+        globalDescriptorsCreateInfo.rhi = m_rhi.get();
+        globalDescriptorsCreateInfo.commandQueue = m_mainQueue.get();
+
+        m_globalDescriptors = std::make_unique<GlobalDescriptors>(globalDescriptorsCreateInfo);
+    }
 }
 
 Renderer::~Renderer() = default;
@@ -61,12 +70,15 @@ void Renderer::render(duk::scene::Scene* scene) {
 
     m_scheduler->begin();
 
+    update_global_descriptors(scene);
+
     auto mainPass = m_mainQueue->submit([this, scene](duk::rhi::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
 
         Pass::RenderParams renderParams = {};
         renderParams.commandBuffer = commandBuffer;
         renderParams.scene = scene;
+        renderParams.globalDescriptors = m_globalDescriptors.get();
         renderParams.outputWidth = render_width();
         renderParams.outputHeight = render_height();
 
@@ -142,6 +154,16 @@ duk::rhi::RHI* Renderer::rhi() const {
 
 duk::rhi::CommandQueue* Renderer::main_command_queue() const {
     return m_mainQueue.get();
+}
+
+void Renderer::use_as_camera(const scene::Object& object) {
+    m_mainCameraObjectId = object.id();
+}
+
+void Renderer::update_global_descriptors(duk::scene::Scene* scene) {
+    if (scene->valid_object(m_mainCameraObjectId)) {
+        m_globalDescriptors->update_camera(scene->object(m_mainCameraObjectId));
+    }
 }
 
 }

@@ -9,6 +9,8 @@
 
 namespace duk::renderer {
 
+class GlobalDescriptors;
+
 class Palette {
 public:
 
@@ -18,7 +20,12 @@ public:
 
     virtual void insert_instance(const InsertInstanceParams& params) = 0;
 
-    virtual void apply(duk::rhi::CommandBuffer* commandBuffer) = 0;
+
+    struct ApplyParams {
+        GlobalDescriptors* globalDescriptors;
+    };
+
+    virtual void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) = 0;
 
     virtual void clear();
 

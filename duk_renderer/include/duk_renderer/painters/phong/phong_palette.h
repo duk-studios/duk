@@ -27,31 +27,19 @@ public:
         glm::mat4 model;
     };
 
-    struct LightValue {
-        glm::vec3 color;
-        float intensity;
-    };
-
-    struct DirectionalLight {
-        LightValue value;
-        glm::vec3 direction;
-    };
-
 public:
 
     explicit PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo);
 
     void insert_instance(const InsertInstanceParams& params) override;
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer) override;
+    void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
 
     void clear() override;
 
 private:
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
-    std::unique_ptr<CameraUBO> m_cameraUBO;
     std::unique_ptr<StorageBuffer<Transform>> m_transformSBO;
-    std::unique_ptr<UniformBuffer<DirectionalLight>> m_lightUBO;
 };
 
 }

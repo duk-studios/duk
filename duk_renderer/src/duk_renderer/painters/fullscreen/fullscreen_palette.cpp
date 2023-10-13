@@ -27,7 +27,7 @@ void FullscreenPalette::insert_instance(const Palette::InsertInstanceParams& par
 
 }
 
-void FullscreenPalette::apply(duk::rhi::CommandBuffer* commandBuffer) {
+void FullscreenPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }
 

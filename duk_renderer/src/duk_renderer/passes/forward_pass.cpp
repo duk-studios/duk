@@ -129,6 +129,7 @@ void ForwardPass::render(const RenderParams& renderParams) {
     paintEntry.params.renderPass = m_renderPass.get();
     paintEntry.params.outputWidth = renderParams.outputWidth;
     paintEntry.params.outputHeight = renderParams.outputHeight;
+    paintEntry.params.globalDescriptors = renderParams.globalDescriptors;
 
     for (auto sortedIndex : m_sortedObjectIndices) {
         auto& objectEntry = m_objectEntries[sortedIndex];

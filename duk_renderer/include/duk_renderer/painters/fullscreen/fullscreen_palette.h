@@ -24,7 +24,7 @@ public:
 
     void insert_instance(const InsertInstanceParams& params) override;
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer) override;
+    void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
 
     void clear() override;
 

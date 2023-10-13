@@ -18,7 +18,10 @@ Painter::~Painter() = default;
 void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::PaintParams& params) {
     commandBuffer->bind_graphics_pipeline(find_pipeline_for_params(params));
 
-    params.palette->apply(commandBuffer);
+    Palette::ApplyParams paletteApplyParams = {};
+    paletteApplyParams.globalDescriptors = params.globalDescriptors;
+
+    params.palette->apply(commandBuffer, paletteApplyParams);
 
     params.brush->draw(commandBuffer, params.instanceCount, params.firstInstance);
 }

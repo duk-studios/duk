@@ -24,6 +24,9 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/brushes/generic_brush.h
         include/duk_renderer/painters/phong/phong_painter.h
         include/duk_renderer/painters/phong/phong_palette.h
+        include/duk_renderer/painters/global_descriptors.h
+        include/duk_renderer/painters/lights.h
+        include/duk_renderer/components/camera_types.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -50,6 +53,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/brushes/generic_brush.cpp
         src/duk_renderer/painters/phong/phong_painter.cpp
         src/duk_renderer/painters/phong/phong_palette.cpp
+        src/duk_renderer/painters/global_descriptors.cpp
+        src/duk_renderer/painters/lights.cpp
+        src/duk_renderer/components/camera_types.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

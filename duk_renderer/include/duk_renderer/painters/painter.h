@@ -13,6 +13,7 @@ namespace duk::renderer {
 
 class Brush;
 class Palette;
+class GlobalDescriptors;
 
 class Painter {
 protected:
@@ -29,6 +30,7 @@ public:
         duk::rhi::RenderPass* renderPass;
         Brush* brush;
         Palette* palette;
+        GlobalDescriptors* globalDescriptors;
         size_t instanceCount;
         size_t firstInstance;
     };

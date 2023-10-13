@@ -3,10 +3,8 @@
 
 #include <duk_renderer/painters/phong/phong_palette.h>
 #include <duk_renderer/painters/phong/phong_painter.h>
+#include <duk_renderer/painters/global_descriptors.h>
 #include <duk_renderer/components/transform.h>
-
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
 
 namespace duk::renderer {
 
@@ -24,30 +22,6 @@ PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo)
     }
 
     {
-        UniformBufferCreateInfo<DirectionalLight> lightUboCreateInfo = {};
-        lightUboCreateInfo.rhi = rhi;
-        lightUboCreateInfo.commandQueue = commandQueue;
-        lightUboCreateInfo.initialData.value.color = glm::vec3(1);
-        lightUboCreateInfo.initialData.value.intensity = 1.0f;
-        lightUboCreateInfo.initialData.direction = glm::vec3(1);
-        m_lightUBO = std::make_unique<UniformBuffer<DirectionalLight>>(lightUboCreateInfo);
-    }
-
-    {
-        UniformBufferCreateInfo<CameraMatrices> cameraUBOCreateInfo = {};
-        cameraUBOCreateInfo.rhi = rhi;
-        cameraUBOCreateInfo.commandQueue = commandQueue;
-        m_cameraUBO = std::make_unique<CameraUBO>(cameraUBOCreateInfo);
-
-        auto& cameraMatrices = m_cameraUBO->data();
-        cameraMatrices.proj = glm::perspective(glm::radians(45.f), 16.f / 9.f, 0.1f, 1000.f);
-        cameraMatrices.view = glm::lookAt(glm::vec3(0, 0, 40), glm::vec3(0), glm::vec3(0, 1, 0));
-        cameraMatrices.vp = cameraMatrices.proj * cameraMatrices.view;
-
-        m_cameraUBO->flush();
-    }
-
-    {
         duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
         descriptorSetCreateInfo.description = painter->descriptor_set_description();
 
@@ -59,10 +33,7 @@ PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo)
 
         m_descriptorSet = std::move(expectedDescriptorSet.value());
 
-        m_descriptorSet->set(0, *m_cameraUBO);
         m_descriptorSet->set(1, *m_transformSBO);
-        m_descriptorSet->set(2, *m_lightUBO);
-        m_descriptorSet->flush();
     }
 }
 
@@ -71,10 +42,16 @@ void PhongPalette::insert_instance(const Palette::InsertInstanceParams& params) 
     transform.model = duk::renderer::model_matrix_3d(params.object);
 }
 
-void PhongPalette::apply(duk::rhi::CommandBuffer* commandBuffer) {
+void PhongPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
+    // updates instance data to gpu
     m_transformSBO->flush();
-    m_cameraUBO->flush();
-    m_lightUBO->flush();
+
+    // updates current camera UBO
+    m_descriptorSet->set(0, *params.globalDescriptors->camera_ubo());
+    m_descriptorSet->set(2, *params.globalDescriptors->lights_ubo());
+
+    // updates descriptor set in case some descriptor changed
+    m_descriptorSet->flush();
 
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }

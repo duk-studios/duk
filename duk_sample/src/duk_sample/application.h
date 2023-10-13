@@ -63,6 +63,7 @@ private:
     std::shared_ptr<duk::renderer::PhongPainter> m_phongPainter;
     std::shared_ptr<duk::renderer::PhongPalette> m_phongPalette;
     std::shared_ptr<duk::scene::Scene> m_scene;
+    duk::scene::Object m_camera;
     bool m_run;
 };
 
