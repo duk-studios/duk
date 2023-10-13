@@ -359,11 +359,6 @@ duk::hash::Hash VulkanBuffer::hash() const {
 void VulkanBuffer::update_data_hash() {
     m_dataHash = 0;
     duk::hash::hash_combine(m_dataHash, m_data.data(), m_data.size());
-
-    // include buffer hash
-    for (auto& buffer : m_buffers) {
-        duk::hash::hash_combine(m_dataHash, buffer.get());
-    }
 }
 
 std::unique_ptr<VulkanBufferMemory> VulkanBuffer::create_buffer() {
