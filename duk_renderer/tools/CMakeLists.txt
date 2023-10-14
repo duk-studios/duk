@@ -1,0 +1,1 @@
+add_subdirectory(duk_painter_generator)

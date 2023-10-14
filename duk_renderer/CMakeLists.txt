@@ -76,6 +76,9 @@ target_link_libraries(duk_renderer
 
 set_target_properties(duk_renderer PROPERTIES CXX_STANDARD 20)
 
+# adds required tools for generating painters
+add_subdirectory(tools)
+
 # used for generating spv files
 add_subdirectory(src/duk_renderer/painters)
 
