@@ -21,16 +21,16 @@ Parser::Parser(int argc, char* argv[]) {
             ("e, tese", "Tesselation Evaluation shader path", cxxopts::value<std::string>())
             ("t, tesc", "Tesselation Control shader path", cxxopts::value<std::string>())
             ("c, comp", "Compute shader path", cxxopts::value<std::string>())
-            ("n, name", "Output name prefix", cxxopts::value<std::string>())
-            ("d, directory", "Output directory", cxxopts::value<std::string>())
+            ("n, name", "Painter name", cxxopts::value<std::string>())
+            ("o, output", "Output directory", cxxopts::value<std::string>())
             ;
 
     cxxopts::ParseResult result;
     try {
         result = options.parse(argc, argv);
 
-        m_outputRootDir = result["directory"].as<std::string>();
-        m_outputName = result["name"].as<std::string>();
+        m_outputDirectory = result["output"].as<std::string>();
+        m_outputPainterName = result["name"].as<std::string>();
 
         if (result.count("vert")) {
             m_inputSpvPaths[Shader::Module::VERTEX] = result["vert"].as<std::string>();
@@ -63,12 +63,12 @@ Parser::Parser(int argc, char* argv[]) {
 
 Parser::~Parser() = default;
 
-const std::string& Parser::output_root_dir() const {
-    return m_outputRootDir;
+const std::string& Parser::output_directory() const {
+    return m_outputDirectory;
 }
 
-const std::string& Parser::output_name() const {
-    return m_outputName;
+const std::string& Parser::output_painter_name() const {
+    return m_outputPainterName;
 }
 
 const Parser::ShaderPaths& Parser::input_spv_paths() const {

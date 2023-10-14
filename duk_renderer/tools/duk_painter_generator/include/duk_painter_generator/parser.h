@@ -21,15 +21,15 @@ public:
 
     ~Parser();
 
-    DUK_NO_DISCARD const std::string& output_root_dir() const;
+    DUK_NO_DISCARD const std::string& output_directory() const;
 
-    DUK_NO_DISCARD const std::string& output_name() const;
+    DUK_NO_DISCARD const std::string& output_painter_name() const;
 
     DUK_NO_DISCARD const ShaderPaths& input_spv_paths() const;
 
 private:
-    std::string m_outputRootDir;
-    std::string m_outputName;
+    std::string m_outputDirectory;
+    std::string m_outputPainterName;
     ShaderPaths m_inputSpvPaths;
 };
 
