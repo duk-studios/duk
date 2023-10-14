@@ -7,3 +7,9 @@
 [submodule "external/grapphs/grapphs"]
 	path = external/grapphs/grapphs
 	url = git@github.com:BrunoSilvaFreire/grapphs.git
+[submodule "external/spirv-reflect/SPIRV-Reflect"]
+	path = external/spirv-reflect/SPIRV-Reflect
+	url = git@github.com:KhronosGroup/SPIRV-Reflect.git
+[submodule "external/cxxopts/cxxopts"]
+	path = external/cxxopts/cxxopts
+	url = git@github.com:jarro2783/cxxopts.git
