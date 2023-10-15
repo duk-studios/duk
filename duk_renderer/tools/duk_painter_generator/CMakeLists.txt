@@ -26,7 +26,7 @@ target_include_directories(duk_painter_generator
 
 target_link_libraries(duk_painter_generator
         PRIVATE
-        duk_renderer
+        duk_rhi
         cxxopts::cxxopts
         spirv-reflect-static
 )
