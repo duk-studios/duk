@@ -31,8 +31,8 @@ static void print_reflector(duk::painter_generator::Reflector& reflector) {
 
     const auto& sets = reflector.sets();
     for (const auto& set : sets) {
-        std::cout << "- set binding count: " << set.bindings.size() << std::endl;
-        for (const auto& [bindingIndex, binding] : set.bindings) {
+        std::cout << "- set uniform buffer count: " << set.uniformBuffers.size() << std::endl;
+        for (const auto& [bindingIndex, binding] : set.uniformBuffers) {
             std::cout << "-- type: " << binding.typeName << " name: " << binding.name << std::endl;
             std::cout << "-- binding: " << binding.binding << " set: " << binding.set << std::endl;
         }

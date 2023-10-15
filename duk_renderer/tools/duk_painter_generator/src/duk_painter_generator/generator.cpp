@@ -2,76 +2,39 @@
 /// generator.cpp
 
 #include <duk_painter_generator/generator.h>
+#include <duk_painter_generator/types.h>
 
 #include <sstream>
 #include <set>
 #include <filesystem>
 #include <fstream>
+#include <span>
 
 namespace duk::painter_generator {
 
 namespace detail {
 
-static bool is_builtin_type(const std::string& typeName) {
-    static auto builtinTypeMap = []() -> std::set<std::string> {
-        return {
-                "int",
-                "uint",
-                "float",
-                "double",
-                "vec2",
-                "vec3",
-                "vec4",
-                "dvec2",
-                "dvec3",
-                "dvec4",
-                "uvec2",
-                "uvec3",
-                "uvec4",
-                "ivec2",
-                "ivec3",
-                "ivec4",
-                "mat2x2",
-                "mat2x3",
-                "mat2x4",
-                "mat3x2",
-                "mat3x3",
-                "mat3x4",
-                "mat4x2",
-                "mat4x3",
-                "mat4x4",
-                "dmat2x2",
-                "dmat2x3",
-                "dmat2x4",
-                "dmat3x2",
-                "dmat3x3",
-                "dmat3x4",
-                "dmat4x2",
-                "dmat4x3",
-                "dmat4x4"
-        };
-    }();
-    return builtinTypeMap.find(typeName) != builtinTypeMap.end();
-}
-
-static void insert_referenced_types(std::set<std::string>& referencedTypeNames, const Reflector& reflector, const TypeReflection& type) {
+static void insert_referenced_types(std::set<std::string>& referencedTypeNames, const Reflector& reflector, const TypeReflection& type, bool insertType) {
     auto it = referencedTypeNames.find(type.name);
     if (it != referencedTypeNames.end()) {
         // already referenced
         return;
     }
 
-    if (is_builtin_type(type.name)) {
+    if (is_builtin_glsl_type(type.name)) {
         // no need to insert builtin types
         return;
     }
 
-    referencedTypeNames.insert(type.name);
+    // we do not include SBOs and UBOs into referenced types, only their members
+    if (insertType) {
+        referencedTypeNames.insert(type.name);
+    }
 
     const auto& types = reflector.type_map();
 
     for (const auto& member : type.members) {
-        insert_referenced_types(referencedTypeNames, reflector, types.at(member.typeName));
+        insert_referenced_types(referencedTypeNames, reflector, types.at(member.typeName), true);
     }
 }
 
@@ -131,26 +94,48 @@ static std::vector<TypeReflection> sort_types_by_declaration_order(const Reflect
     return sortedTypes;
 }
 
-static std::vector<TypeReflection> extract_types_for_generation(const Reflector& reflector) {
-    const auto& sets = reflector.sets();
+static void insert_referenced_types_from_bindings(std::set<std::string>& referencedTypes, const Reflector& reflector, const Reflector::Bindings& bindings, bool insertBindingType) {
     const auto& types = reflector.type_map();
+    for (auto& [index, binding] : bindings) {
+        if (is_global_binding(binding.typeName)) {
+            continue;
+        }
+        auto it = types.find(binding.typeName);
+        insert_referenced_types(referencedTypes, reflector, it->second, insertBindingType);
+    }
+}
+
+static std::vector<TypeReflection> extract_painter_types(const Reflector& reflector) {
+    const auto& sets = reflector.sets();
 
     std::set<std::string> referencedTypeNames;
 
     for (auto& set : sets) {
-        for (auto& [index, binding] : set.bindings) {
-            auto it = types.find(binding.typeName);
-            insert_referenced_types(referencedTypeNames, reflector, it->second);
-        }
+        insert_referenced_types_from_bindings(referencedTypeNames, reflector, set.uniformBuffers, false);
+        insert_referenced_types_from_bindings(referencedTypeNames, reflector, set.storageBuffers, false);
     }
 
     return sort_types_by_declaration_order(reflector, referencedTypeNames);
 }
 
+static void generate_include_directives(std::ostringstream& oss, std::span<const std::string> includes) {
+    for (const auto& include : includes) {
+        oss << "#include <" << include << '>' << std::endl;
+    }
+}
+
+static void generate_namespace_start(std::ostringstream& oss, const std::string& painterName) {
+    oss << "namespace duk::renderer::" << painterName << " {" << std::endl;
+}
+
+static void generate_namespace_end(std::ostringstream& oss, const std::string& painterName) {
+    oss << "} // namespace duk::renderer::" << painterName << std::endl;
+}
+
 static void generate_type(std::ostringstream& oss, const TypeReflection& type) {
     oss << "struct " << type.name << " {" << std::endl;
     for (auto& member : type.members) {
-        oss << "    " << member.typeName << " " << member.name;
+        oss << "    " << glsl_to_cpp(member.typeName) << " " << member.name;
         if (member.arraySize) {
             oss << '[' << member.arraySize << ']';
         }
@@ -163,31 +148,82 @@ static void generate_type(std::ostringstream& oss, const TypeReflection& type) {
     oss << "};" << std::endl;
 }
 
-static void generate_types(std::ostringstream& oss, const std::vector<TypeReflection>& types) {
+static void generate_painter_types(std::ostringstream& oss, const std::vector<TypeReflection>& types) {
     for (const auto& type : types) {
         generate_type(oss, type);
         oss << std::endl;
     }
 }
 
+static void generate_ubo_alias(std::ostringstream& oss, const Reflector& reflector, const BindingReflection& bindingReflection) {
+    const auto& types = reflector.type_map();
+    const auto& uboType = types.at(bindingReflection.typeName);
+    const auto& memberTypeName = uboType.members.at(0).typeName;
+    oss << "using " << bindingReflection.typeName << " = UniformBuffer<" << memberTypeName << ">;" << std::endl;
 }
 
-Generator::Generator(const Parser& parser, const Reflector& reflector) {
-    auto typesForGeneration = detail::extract_types_for_generation(reflector);
+static void generate_sbo_alias(std::ostringstream& oss, const Reflector& reflector, const BindingReflection& bindingReflection) {
+    const auto& types = reflector.type_map();
+    const auto& sboType = types.at(bindingReflection.typeName);
+    const auto& memberTypeName = sboType.members.at(0).typeName;
+    oss << "using " << bindingReflection.typeName << " = StorageBuffer<" << memberTypeName << ">;" << std::endl;
+}
 
-    std::ostringstream oss;
-    detail::generate_types(oss, typesForGeneration);
+static void generate_binding_alias(std::ostringstream& oss, const Reflector& reflector) {
+    const auto& sets = reflector.sets();
 
-    auto outputDir = std::filesystem::path(parser.output_directory());
-    auto bindingsFile = outputDir / (parser.output_painter_name() + "_bindings.h");
+    for (const auto& set : sets) {
+        for (const auto& [index, ubo] : set.uniformBuffers) {
+            if (is_global_binding(ubo.typeName)) {
+                continue;
+            }
+            generate_ubo_alias(oss, reflector, ubo);
+        }
+        for (const auto& [index, ubo] : set.storageBuffers) {
+            if (is_global_binding(ubo.typeName)) {
+                continue;
+            }
+            generate_sbo_alias(oss, reflector, ubo);
+        }
+    }
+}
 
-    std::ofstream file(bindingsFile);
+static const std::string kBindingsHeaderIncludes[] = {
+        "duk_renderer/painters/uniform_buffer.h",
+        "duk_renderer/painters/storage_buffer.h",
+        "glm/glm.hpp"
+};
+
+static void generate_painter_types_file(std::ostringstream& oss, const Parser& parser, const Reflector& reflector) {
+
+    generate_include_directives(oss, kBindingsHeaderIncludes);
+    oss << std::endl;
+    generate_namespace_start(oss, parser.output_painter_name());
+    oss << std::endl;
+    generate_painter_types(oss, extract_painter_types(reflector));
+    generate_binding_alias(oss, reflector);
+    oss << std::endl;
+    generate_namespace_end(oss, parser.output_painter_name());
+}
+
+static void write_file(const std::ostringstream& oss, const std::string& directory, const std::string& filename) {
+    auto filepath = std::filesystem::path(directory) / filename;
+
+    std::ofstream file(filepath);
 
     if (!file) {
-        throw std::runtime_error("failed to open file at: " + bindingsFile.string());
+        throw std::runtime_error("failed to write file at: " + filepath.string());
     }
 
     file << oss.str();
+}
+
+}
+
+Generator::Generator(const Parser& parser, const Reflector& reflector) {
+    std::ostringstream oss;
+    detail::generate_painter_types_file(oss, parser, reflector);
+    detail::write_file(oss, parser.output_directory(), parser.output_painter_name() + "_types.h");
 }
 
 Generator::~Generator() {

@@ -53,14 +53,16 @@ struct BindingReflection {
 };
 
 struct SetReflection {
+    using BindingMap = std::map<uint32_t, BindingReflection>;
     uint32_t set;
-    std::map<uint32_t, BindingReflection> bindings;
+    BindingMap uniformBuffers;
+    BindingMap storageBuffers;
 };
 
 class Reflector {
 public:
     using TypeMap = std::unordered_map<std::string, TypeReflection>;
-    using Bindings = decltype(SetReflection::bindings);
+    using Bindings = SetReflection::BindingMap;
     using Sets = std::vector<SetReflection>;
 public:
 

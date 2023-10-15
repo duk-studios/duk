@@ -194,8 +194,20 @@ void Reflector::reflect_spv(const uint8_t* code, size_t size, duk::rhi::Shader::
 
         std::vector<SpvReflectDescriptorBinding*> spvBindings(descriptorSet->bindings, descriptorSet->bindings + descriptorSet->binding_count);
         for (auto spvBinding : spvBindings) {
+            if (spvBinding->type_description->member_count > 1) {
+                throw std::runtime_error("UBOs and SBOs can only have one member");
+            }
             detail::add_types_from_block(&spvBinding->block, m_types);
-            detail::add_binding(spvBinding, set.bindings, shaderModuleBit);
+            switch (spvBinding->descriptor_type) {
+                case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+                    detail::add_binding(spvBinding, set.storageBuffers, shaderModuleBit);
+                    break;
+                case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+                    detail::add_binding(spvBinding, set.uniformBuffers, shaderModuleBit);
+                    break;
+                default:
+                    throw std::runtime_error("unsupported descriptor type found");
+            }
         }
     }
 
