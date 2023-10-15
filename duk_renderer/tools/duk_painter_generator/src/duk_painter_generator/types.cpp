@@ -51,7 +51,7 @@ const std::string& glsl_to_cpp(const std::string& glslTypeName) {
 bool is_global_binding(const std::string& typeName) {
     static const auto globalBindingSet = []() -> std::unordered_set<std::string> {
         return {
-//            "LightsUBO",
+            "LightsUBO",
             "CameraUBO"
         };
     }();
