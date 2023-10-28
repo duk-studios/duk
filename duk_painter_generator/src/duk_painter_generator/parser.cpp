@@ -22,14 +22,16 @@ Parser::Parser(int argc, char* argv[]) {
             ("t, tesc", "Tesselation Control shader path", cxxopts::value<std::string>())
             ("c, comp", "Compute shader path", cxxopts::value<std::string>())
             ("n, name", "Painter name", cxxopts::value<std::string>())
-            ("o, output", "Output directory", cxxopts::value<std::string>())
+            ("s, src", "Source output directory", cxxopts::value<std::string>())
+            ("i, inc", "Include output directory", cxxopts::value<std::string>())
             ;
 
     cxxopts::ParseResult result;
     try {
         result = options.parse(argc, argv);
 
-        m_outputDirectory = result["output"].as<std::string>();
+        m_outputSrcDirectory = result["src"].as<std::string>();
+        m_outputIncludeDirectory = result["inc"].as<std::string>();
         m_outputPainterName = result["name"].as<std::string>();
 
         if (result.count("vert")) {
@@ -63,8 +65,12 @@ Parser::Parser(int argc, char* argv[]) {
 
 Parser::~Parser() = default;
 
-const std::string& Parser::output_directory() const {
-    return m_outputDirectory;
+const std::string& Parser::output_src_directory() const {
+    return m_outputSrcDirectory;
+}
+
+const std::string& Parser::output_include_directory() const {
+    return m_outputIncludeDirectory;
 }
 
 const std::string& Parser::output_painter_name() const {

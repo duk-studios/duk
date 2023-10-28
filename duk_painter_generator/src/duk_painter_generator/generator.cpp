@@ -105,7 +105,7 @@ static void insert_referenced_types_from_bindings(std::set<std::string>& referen
     }
 }
 
-static std::vector<TypeReflection> extract_painter_types(const Reflector& reflector) {
+static std::vector<TypeReflection> extract_types(const Reflector& reflector) {
     const auto& sets = reflector.sets();
 
     std::set<std::string> referencedTypeNames;
@@ -148,7 +148,7 @@ static void generate_type(std::ostringstream& oss, const TypeReflection& type) {
     oss << "};" << std::endl;
 }
 
-static void generate_painter_types(std::ostringstream& oss, const std::vector<TypeReflection>& types) {
+static void generate_types(std::ostringstream& oss, const std::vector<TypeReflection>& types) {
     for (const auto& type : types) {
         generate_type(oss, type);
         oss << std::endl;
@@ -169,7 +169,7 @@ static void generate_sbo_alias(std::ostringstream& oss, const Reflector& reflect
     oss << "using " << bindingReflection.typeName << " = StorageBuffer<" << memberTypeName << ">;" << std::endl;
 }
 
-static void generate_binding_alias(std::ostringstream& oss, const Reflector& reflector) {
+static void generate_buffer_aliases(std::ostringstream& oss, const Reflector& reflector) {
     const auto& sets = reflector.sets();
 
     for (const auto& set : sets) {
@@ -194,19 +194,19 @@ static const std::string kBindingsHeaderIncludes[] = {
         "glm/glm.hpp"
 };
 
-static void generate_painter_types_file(std::ostringstream& oss, const Parser& parser, const Reflector& reflector) {
+static void generate_types_file_content(std::ostringstream& oss, const Parser& parser, const Reflector& reflector) {
 
     generate_include_directives(oss, kBindingsHeaderIncludes);
     oss << std::endl;
     generate_namespace_start(oss, parser.output_painter_name());
     oss << std::endl;
-    generate_painter_types(oss, extract_painter_types(reflector));
-    generate_binding_alias(oss, reflector);
+    generate_types(oss, extract_types(reflector));
+    generate_buffer_aliases(oss, reflector);
     oss << std::endl;
     generate_namespace_end(oss, parser.output_painter_name());
 }
 
-static void write_file(const std::ostringstream& oss, const std::string& directory, const std::string& filename) {
+static void write_file(const std::string& content, const std::string& directory, const std::string& filename) {
     auto filepath = std::filesystem::path(directory) / filename;
 
     std::ofstream file(filepath);
@@ -215,15 +215,19 @@ static void write_file(const std::ostringstream& oss, const std::string& directo
         throw std::runtime_error("failed to write file at: " + filepath.string());
     }
 
-    file << oss.str();
+    file << content;
+}
+
+static void write_types_file(const Parser& parser, const Reflector& reflector) {
+    std::ostringstream oss;
+    detail::generate_types_file_content(oss, parser, reflector);
+    detail::write_file(oss.str(), parser.output_include_directory(), parser.output_painter_name() + "_types.h");
 }
 
 }
 
 Generator::Generator(const Parser& parser, const Reflector& reflector) {
-    std::ostringstream oss;
-    detail::generate_painter_types_file(oss, parser, reflector);
-    detail::write_file(oss, parser.output_directory(), parser.output_painter_name() + "_types.h");
+    detail::write_types_file(parser, reflector);
 }
 
 Generator::~Generator() {
