@@ -8,6 +8,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
 
 namespace duk::painter_generator {
 
@@ -45,6 +46,18 @@ static Type::Mask convert_type_mask(SpvReflectTypeFlags typeFlags) {
 
     }
     return typeMask;
+}
+
+static duk::rhi::DescriptorType convert_descriptor_type(SpvReflectDescriptorType descriptorType) {
+    switch (descriptorType) {
+        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER: return duk::rhi::DescriptorType::IMAGE;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER: return duk::rhi::DescriptorType::IMAGE_SAMPLER;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE: return duk::rhi::DescriptorType::IMAGE;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE: return duk::rhi::DescriptorType::STORAGE_IMAGE;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER: return duk::rhi::DescriptorType::UNIFORM_BUFFER;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER: return duk::rhi::DescriptorType::STORAGE_BUFFER;
+        default: return duk::rhi::DescriptorType::UNDEFINED;
+    }
 }
 
 static std::string calculate_vector_type_name(SpvReflectTypeDescription* typeDescription) {
@@ -147,24 +160,32 @@ static void add_types_from_block(SpvReflectBlockVariable* block, Reflector::Type
 }
 
 static void add_binding(SpvReflectDescriptorBinding* spvBinding, Reflector::Bindings& bindings, duk::rhi::Shader::Module::Bits shaderModuleBit) {
-    auto it = bindings.find(spvBinding->binding);
-    if (it != bindings.end()) {
-        it->second.moduleMask |= shaderModuleBit;
-        return;
+
+    if (bindings.size() <= spvBinding->binding) {
+        bindings.resize(spvBinding->binding + 1);
     }
 
     auto& bindingReflection = bindings[spvBinding->binding];
+
+    // if already added, just set this module flag and return
+    if (bindingReflection.moduleMask) {
+        bindingReflection.moduleMask |= shaderModuleBit;
+        return;
+    }
+
     bindingReflection.name = spvBinding->name;
     bindingReflection.typeName = type_name(spvBinding->type_description);
     bindingReflection.binding = spvBinding->binding;
     bindingReflection.set = spvBinding->set;
     bindingReflection.moduleMask = shaderModuleBit;
+    bindingReflection.descriptorType = convert_descriptor_type(spvBinding->descriptor_type);
 }
 
 }
 
-Reflector::Reflector(const Parser& parser) {
-    for (const auto& [module, spvPath] : parser.input_spv_paths()) {
+Reflector::Reflector(const Parser& parser) :
+    m_parser(parser) {
+    for (const auto& [module, spvPath] : m_parser.input_spv_paths()) {
 
         const auto spvCode = duk::tools::File::load_bytes(spvPath.c_str());
 
@@ -194,24 +215,28 @@ void Reflector::reflect_spv(const uint8_t* code, size_t size, duk::rhi::Shader::
 
         std::vector<SpvReflectDescriptorBinding*> spvBindings(descriptorSet->bindings, descriptorSet->bindings + descriptorSet->binding_count);
         for (auto spvBinding : spvBindings) {
-            if (spvBinding->type_description->member_count > 1) {
-                throw std::runtime_error("UBOs and SBOs can only have one member");
-            }
-            detail::add_types_from_block(&spvBinding->block, m_types);
             switch (spvBinding->descriptor_type) {
                 case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER:
-                    detail::add_binding(spvBinding, set.storageBuffers, shaderModuleBit);
-                    break;
                 case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-                    detail::add_binding(spvBinding, set.uniformBuffers, shaderModuleBit);
+
+                    if (spvBinding->type_description->member_count > 1) {
+                        throw std::runtime_error("UBOs and SBOs can only have one member");
+                    }
+
+                    detail::add_types_from_block(&spvBinding->block, m_types);
+                    detail::add_binding(spvBinding, set.bindings, shaderModuleBit);
                     break;
                 default:
-                    throw std::runtime_error("unsupported descriptor type found");
+                    if (m_parser.print_debug_info()) {
+                        std::cout << "Skipping binding: " << spvBinding->name << std::endl;
+                    }
+                    continue;
             }
         }
     }
 
     spvReflectDestroyShaderModule(&module);
+
 }
 
 const Reflector::TypeMap& Reflector::type_map() const {

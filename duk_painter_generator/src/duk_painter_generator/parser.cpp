@@ -8,7 +8,7 @@
 
 namespace duk::painter_generator {
 
-Parser::Parser(int argc, char* argv[]) {
+Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
 
     using duk::rhi::Shader;
 
@@ -24,6 +24,7 @@ Parser::Parser(int argc, char* argv[]) {
             ("n, name", "Painter name", cxxopts::value<std::string>())
             ("s, src", "Source output directory", cxxopts::value<std::string>())
             ("i, inc", "Include output directory", cxxopts::value<std::string>())
+            ("d, debug", "Print debug information")
             ;
 
     cxxopts::ParseResult result;
@@ -52,6 +53,9 @@ Parser::Parser(int argc, char* argv[]) {
         if (result.count("comp")) {
             m_inputSpvPaths[Shader::Module::COMPUTE] = result["comp"].as<std::string>();
         }
+        if (result.count("debug")) {
+            m_printDebugInfo = true;
+        }
 
         if (m_inputSpvPaths.empty()) {
             throw std::invalid_argument("no SPIR-V sources provided");
@@ -79,6 +83,10 @@ const std::string& Parser::output_painter_name() const {
 
 const Parser::ShaderPaths& Parser::input_spv_paths() const {
     return m_inputSpvPaths;
+}
+
+bool Parser::print_debug_info() const {
+    return m_printDebugInfo;
 }
 
 }

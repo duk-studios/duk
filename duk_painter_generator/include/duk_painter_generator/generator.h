@@ -14,8 +14,6 @@ public:
     Generator(const Parser& parser, const Reflector& reflector);
 
     ~Generator();
-
-private:
 };
 
 }

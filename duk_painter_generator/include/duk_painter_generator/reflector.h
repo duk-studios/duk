@@ -6,6 +6,7 @@
 
 #include <duk_painter_generator/parser.h>
 #include <duk_rhi/pipeline/shader.h>
+#include <duk_rhi/descriptor.h>
 
 #include <cstdint>
 #include <unordered_map>
@@ -47,22 +48,22 @@ struct TypeReflection {
 struct BindingReflection {
     std::string name;
     std::string typeName;
-    uint32_t binding;
-    uint32_t set;
-    duk::rhi::Shader::Module::Mask moduleMask;
+    uint32_t binding = 0;
+    uint32_t set = 0;
+    duk::rhi::DescriptorType descriptorType = rhi::DescriptorType::UNDEFINED;
+    duk::rhi::Shader::Module::Mask moduleMask = 0;
 };
 
 struct SetReflection {
-    using BindingMap = std::map<uint32_t, BindingReflection>;
+    using Bindings = std::vector<BindingReflection>;
     uint32_t set;
-    BindingMap uniformBuffers;
-    BindingMap storageBuffers;
+    Bindings bindings;
 };
 
 class Reflector {
 public:
     using TypeMap = std::unordered_map<std::string, TypeReflection>;
-    using Bindings = SetReflection::BindingMap;
+    using Bindings = SetReflection::Bindings;
     using Sets = std::vector<SetReflection>;
 public:
 
@@ -79,6 +80,7 @@ private:
     void reflect_spv(const uint8_t* code, size_t size, duk::rhi::Shader::Module::Bits shaderModuleBit);
 
 private:
+    const Parser& m_parser;
     TypeMap m_types;
     Sets m_sets;
 

@@ -29,11 +29,14 @@ public:
 
     DUK_NO_DISCARD const ShaderPaths& input_spv_paths() const;
 
+    DUK_NO_DISCARD bool print_debug_info() const;
+
 private:
     std::string m_outputSrcDirectory;
     std::string m_outputIncludeDirectory;
     std::string m_outputPainterName;
     ShaderPaths m_inputSpvPaths;
+    bool m_printDebugInfo;
 };
 
 }

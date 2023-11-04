@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 3.24)
 project(duk_painter_generator)
 
-option(DUK_SCENE "Build duk_scene" OFF)
-option(DUK_RENDERER "Build duk_renderer" OFF)
-option(DUK_SAMPLE "Build duk_sample" OFF)
-add_subdirectory(../ ${CMAKE_BINARY_DIR}/duk)
-
 set(DUK_PAINTER_GENERATOR_HEADERS
         include/duk_painter_generator/parser.h
         include/duk_painter_generator/reflector.h
         include/duk_painter_generator/generator.h
         include/duk_painter_generator/types.h
+        include/duk_painter_generator/file_generators/file_generator.h
+        include/duk_painter_generator/file_generators/types_file_generator.h
+        include/duk_painter_generator/file_generators/global_types_file_generator.h
+        include/duk_painter_generator/file_generators/local_types_file_generator.h
         )
 
 set(DUK_PAINTER_GENERATOR_SOURCES
@@ -19,6 +18,10 @@ set(DUK_PAINTER_GENERATOR_SOURCES
         src/duk_painter_generator/reflector.cpp
         src/duk_painter_generator/generator.cpp
         src/duk_painter_generator/types.cpp
+        src/duk_painter_generator/file_generators/file_generator.cpp
+        src/duk_painter_generator/file_generators/types_file_generator.cpp
+        src/duk_painter_generator/file_generators/global_types_file_generator.cpp
+        src/duk_painter_generator/file_generators/local_types_file_generator.cpp
         )
 
 add_executable(duk_painter_generator ${DUK_PAINTER_GENERATOR_HEADERS} ${DUK_PAINTER_GENERATOR_SOURCES})
