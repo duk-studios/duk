@@ -62,7 +62,7 @@ static void insert_referenced_types(std::set<std::string>& referencedTypeNames, 
         referencedTypeNames.insert(type.name);
     }
 
-    const auto& types = reflector.type_map();
+    const auto& types = reflector.types();
 
     for (const auto& member : type.members) {
         insert_referenced_types(referencedTypeNames, reflector, types.at(member.typeName), true);
@@ -70,13 +70,13 @@ static void insert_referenced_types(std::set<std::string>& referencedTypeNames, 
 }
 
 static void insert_referenced_types_from_binding(const Reflector& reflector, std::set<std::string>& referencedTypes, const BindingReflection& binding) {
-    const auto& types = reflector.type_map();
+    const auto& types = reflector.types();
     auto it = types.find(binding.typeName);
     detail::insert_referenced_types(referencedTypes, reflector, it->second, false);
 }
 
 static void insert_referenced_types_from_bindings(const Reflector& reflector, std::set<std::string>& referencedTypes, std::span<const BindingReflection> bindings) {
-    const auto& types = reflector.type_map();
+    const auto& types = reflector.types();
     for (const auto& binding : bindings) {
         insert_referenced_types_from_binding(reflector, referencedTypes, binding);
     }
@@ -125,7 +125,7 @@ void TypesFileGenerator::generate_types(std::ostringstream& oss, const std::vect
 }
 
 void TypesFileGenerator::generate_binding_alias(std::ostringstream& oss, const BindingReflection& bindingReflection) {
-    const auto& types = m_reflector.type_map();
+    const auto& types = m_reflector.types();
     const auto& uboType = types.at(bindingReflection.typeName);
     const auto& memberTypeName = uboType.members.at(0).typeName;
     oss << "using " << bindingReflection.typeName << " = " << detail::descriptor_type_name(bindingReflection.descriptorType) << '<' << glsl_to_cpp(memberTypeName) << ">;" << std::endl;
@@ -155,7 +155,7 @@ std::vector<TypeReflection> TypesFileGenerator::extract_types(std::span<const Bi
 
 std::vector<TypeReflection> TypesFileGenerator::sort_types_by_declaration_order(const std::set<std::string>& typeNames) {
 
-    const auto& types = m_reflector.type_map();
+    const auto& types = m_reflector.types();
     // resolve references
     std::unordered_map<std::string, detail::TypeReferences> typeReferences;
 

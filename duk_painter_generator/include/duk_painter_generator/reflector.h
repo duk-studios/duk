@@ -62,7 +62,7 @@ struct SetReflection {
 
 class Reflector {
 public:
-    using TypeMap = std::unordered_map<std::string, TypeReflection>;
+    using Types = std::unordered_map<std::string, TypeReflection>;
     using Bindings = SetReflection::Bindings;
     using Sets = std::vector<SetReflection>;
 public:
@@ -71,7 +71,7 @@ public:
 
     ~Reflector();
 
-    const TypeMap& type_map() const;
+    const Types& types() const;
 
     const Sets& sets() const;
 
@@ -81,7 +81,7 @@ private:
 
 private:
     const Parser& m_parser;
-    TypeMap m_types;
+    Types m_types;
     Sets m_sets;
 
 };

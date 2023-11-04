@@ -5,7 +5,7 @@
 #include <iostream>
 
 static void print_reflector(duk::painter_generator::Reflector& reflector) {
-    const auto& typeMap = reflector.type_map();
+    const auto& typeMap = reflector.types();
 
     std::cout << "--------------------------" << std::endl;
     std::cout << "-----------types----------" << std::endl;

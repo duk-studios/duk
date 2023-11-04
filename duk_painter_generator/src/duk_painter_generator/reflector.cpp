@@ -127,7 +127,7 @@ static std::string type_name(SpvReflectTypeDescription* typeDescription) {
     return calculate_type_name(typeDescription);
 }
 
-static void add_types_from_block(SpvReflectBlockVariable* block, Reflector::TypeMap& types) {
+static void add_types_from_block(SpvReflectBlockVariable* block, Reflector::Types& types) {
     auto typeName = type_name(block->type_description);
 
     auto it = types.find(typeName);
@@ -239,7 +239,7 @@ void Reflector::reflect_spv(const uint8_t* code, size_t size, duk::rhi::Shader::
 
 }
 
-const Reflector::TypeMap& Reflector::type_map() const {
+const Reflector::Types& Reflector::types() const {
     return m_types;
 }
 
