@@ -73,7 +73,7 @@ function(add_painter_generate_command PACKED_ENTRY)
 
     unpack_generate_painter_entry(${PACKED_ENTRY} NAME GLSL_SOURCES)
 
-    set(SPV_DIR "${SRC_DIR}/spv")
+    set(SPV_DIR "${SRC_DIR}/${NAME}/spv")
     set(COMMAND_LINE)
     set(COMPILED_SPV_FILES)
 
