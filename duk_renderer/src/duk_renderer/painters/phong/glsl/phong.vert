@@ -10,16 +10,21 @@ layout(location = 2) out vec2 vTexCoord;
 
 DUK_DECLARE_CAMERA_BINDING(0, uCamera);
 
-layout(binding = 1) buffer Transform {
-    mat4 model[];
-} uTransform;
+struct Transform {
+    mat4 model;
+    mat4 invModel;
+};
+
+layout(binding = 1) buffer TransformSBO {
+    Transform transforms[];
+} uInstances;
 
 out gl_PerVertex {
     vec4 gl_Position;
 };
 
 void main() {
-    mat4 model = uTransform.model[gl_InstanceIndex];
+    mat4 model = uInstances.transforms[gl_InstanceIndex].model;
 
     vPosition = vec3(model * vec4(aPosition, 1.0)).xyz;
     vNormal = normalize(model * vec4(aNormal, 0.0)).xyz;

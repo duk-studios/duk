@@ -11,9 +11,13 @@ struct DirectionalLight {
     vec3 direction;
 };
 
+struct Lights {
+    DirectionalLight directionalLights[16];
+};
+
 #define DUK_DECLARE_LIGHTS_BINDING(bindingIndex, bindingName)   \
 layout (binding = bindingIndex) uniform LightsUBO {             \
-    DirectionalLight directionalLights[1];                      \
+    Lights lights;                                              \
 } bindingName
 
 #endif // DUK_LIGHTING_GLSL

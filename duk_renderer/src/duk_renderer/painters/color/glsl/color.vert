@@ -10,14 +10,18 @@ layout(location = 2) out vec2 vTexCoord;
 
 DUK_DECLARE_CAMERA_BINDING(0, uCamera);
 
-layout(binding = 1) buffer Transform {
-    mat4 model[];
-} uTransform;
+struct Instance {
+    mat4 model;
+};
+
+layout(binding = 1) buffer InstanceSBO {
+    Instance instances[];
+} uInstances;
 
 out gl_PerVertex {
     vec4 gl_Position;
 };
 
 void main() {
-    gl_Position = uCamera.matrices.vp * uTransform.model[gl_InstanceIndex] * vec4(aPosition, 1.0);
+    gl_Position = uCamera.matrices.vp * uInstances.instances[gl_InstanceIndex].model * vec4(aPosition, 1.0);
 }
