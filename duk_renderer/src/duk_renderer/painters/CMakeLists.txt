@@ -10,6 +10,17 @@ set(GLSLC_FLAGS
         -I ${CMAKE_CURRENT_SOURCE_DIR}/glsl/include
         )
 
+set(SRC_DIR "${DUK_RENDERER_SRC_DIR}/painters")
+set(INC_DIR "${DUK_RENDERER_INC_DIR}/painters")
+
+# add additional bindings as needed
+# in the future we might parse our glsl source ourselves and do this automatically
+set(GLOBAL_BINDING_NAMES)
+list(APPEND GLOBAL_BINDING_NAMES "CameraUBO")
+list(APPEND GLOBAL_BINDING_NAMES "LightsUBO")
+
+string(REPLACE ";" "," GLOBAL_BINDING_NAMES "${GLOBAL_BINDING_NAMES}")
+
 set(GENERATE_PAINTER_ENTRIES "" CACHE STRING "List of generate_painter_files calls" FORCE)
 set(OUTPUT_STAMPS "" CACHE STRING "List of stamps for generated painter files" FORCE)
 
@@ -62,9 +73,6 @@ function(add_painter_generate_command PACKED_ENTRY)
 
     unpack_generate_painter_entry(${PACKED_ENTRY} NAME GLSL_SOURCES)
 
-    set(SRC_DIR "${DUK_RENDERER_SRC_DIR}/painters")
-    set(INC_DIR "${DUK_RENDERER_INC_DIR}/painters")
-
     set(SPV_DIR "${SRC_DIR}/spv")
     set(COMMAND_LINE)
     set(COMPILED_SPV_FILES)
@@ -110,7 +118,10 @@ function(add_painter_generate_command PACKED_ENTRY)
     list(APPEND COMMAND_LINE "-n")
     list(APPEND COMMAND_LINE "${NAME}")
 
-#    message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
+    list(APPEND COMMAND_LINE "-l")
+    list(APPEND COMMAND_LINE "${GLOBAL_BINDING_NAMES}")
+
+    message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
 
     set(OUTPUT_STAMP "${CMAKE_CURRENT_BINARY_DIR}/stamps/${NAME}.stamp")
 
@@ -149,8 +160,11 @@ add_custom_target(generate_painter_files
         COMMENT "Generating painter files"
 )
 
-file(GLOB GENERATED_GLOBAL_FILES "${DUK_RENDERER_INC_DIR}/painters/globals/*")
-
-target_sources(duk_renderer PRIVATE ${GENERATED_GLOBAL_FILES})
+# generated global types
+target_sources(duk_renderer
+        PUBLIC
+        "${INC_DIR}/globals/lights_types.h"
+        "${INC_DIR}/globals/camera_types.h"
+    )
 
 add_dependencies(duk_renderer generate_painter_files)

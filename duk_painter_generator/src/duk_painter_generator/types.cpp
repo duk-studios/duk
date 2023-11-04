@@ -48,16 +48,6 @@ const std::string& glsl_to_cpp(const std::string& glslTypeName) {
     return it->second;
 }
 
-bool is_global_binding(const std::string& typeName) {
-    static const auto globalBindingSet = []() -> std::unordered_set<std::string> {
-        return {
-            "LightsUBO",
-            "CameraUBO"
-        };
-    }();
-    return globalBindingSet.find(typeName) != globalBindingSet.end();
-}
-
 bool is_builtin_glsl_type(const std::string& glslTypeName) {
     static auto builtinGlslTypeNameSet = []() -> std::unordered_set<std::string> {
         return {

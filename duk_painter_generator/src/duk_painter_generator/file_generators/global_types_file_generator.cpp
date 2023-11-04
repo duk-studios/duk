@@ -70,7 +70,7 @@ std::vector<BindingReflection> GlobalTypesFileGenerator::extract_global_bindings
     const auto& sets = m_reflector.sets();
     for (const auto& set : sets) {
         for (const auto& binding : set.bindings) {
-            if (is_global_binding(binding.typeName)) {
+            if (m_parser.is_global_binding(binding.typeName)) {
                 globalBindings.push_back(binding);
             }
         }

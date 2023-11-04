@@ -44,7 +44,7 @@ std::vector<BindingReflection> LocalTypesFileGenerator::extract_local_bindings()
     std::vector<BindingReflection> bindings;
     for (const auto& set : sets) {
         for (auto& binding : set.bindings) {
-            if (is_global_binding(binding.typeName)) {
+            if (m_parser.is_global_binding(binding.typeName)) {
                 continue;
             }
             bindings.push_back(binding);

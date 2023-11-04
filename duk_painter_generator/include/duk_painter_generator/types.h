@@ -10,8 +10,6 @@ namespace duk::painter_generator {
 
 const std::string& glsl_to_cpp(const std::string& glslTypeName);
 
-bool is_global_binding(const std::string& typeName);
-
 bool is_builtin_glsl_type(const std::string& glslTypeName);
 
 }

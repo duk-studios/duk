@@ -24,6 +24,7 @@ Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
             ("n, name", "Painter name", cxxopts::value<std::string>())
             ("s, src", "Source output directory", cxxopts::value<std::string>())
             ("i, inc", "Include output directory", cxxopts::value<std::string>())
+            ("l, globals", "Global bindings name list", cxxopts::value<std::vector<std::string>>())
             ("d, debug", "Print debug information")
             ;
 
@@ -56,6 +57,10 @@ Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
         if (result.count("debug")) {
             m_printDebugInfo = true;
         }
+        if (result.count("globals")) {
+            const auto& globals = result["globals"].as<std::vector<std::string>>();
+            m_globalBindings.insert(globals.begin(), globals.end());
+        }
 
         if (m_inputSpvPaths.empty()) {
             throw std::invalid_argument("no SPIR-V sources provided");
@@ -87,6 +92,10 @@ const Parser::ShaderPaths& Parser::input_spv_paths() const {
 
 bool Parser::print_debug_info() const {
     return m_printDebugInfo;
+}
+
+bool Parser::is_global_binding(const std::string& typeName) const {
+    return m_globalBindings.find(typeName) != m_globalBindings.end();
 }
 
 }

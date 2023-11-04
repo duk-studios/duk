@@ -69,11 +69,16 @@ static void insert_referenced_types(std::set<std::string>& referencedTypeNames, 
     }
 }
 
+static void insert_referenced_types_from_binding(const Reflector& reflector, std::set<std::string>& referencedTypes, const BindingReflection& binding) {
+    const auto& types = reflector.type_map();
+    auto it = types.find(binding.typeName);
+    detail::insert_referenced_types(referencedTypes, reflector, it->second, false);
+}
+
 static void insert_referenced_types_from_bindings(const Reflector& reflector, std::set<std::string>& referencedTypes, std::span<const BindingReflection> bindings) {
     const auto& types = reflector.type_map();
     for (const auto& binding : bindings) {
-        auto it = types.find(binding.typeName);
-        detail::insert_referenced_types(referencedTypes, reflector, it->second, false);
+        insert_referenced_types_from_binding(reflector, referencedTypes, binding);
     }
 }
 
@@ -135,9 +140,7 @@ void TypesFileGenerator::generate_binding_aliases(std::ostringstream& oss, std::
 std::vector<TypeReflection> TypesFileGenerator::extract_types(const BindingReflection& binding) {
     std::set<std::string> referencedTypeNames;
 
-    BindingReflection bindings[] = {binding};
-
-    detail::insert_referenced_types_from_bindings(m_reflector, referencedTypeNames, bindings);
+    detail::insert_referenced_types_from_binding(m_reflector, referencedTypeNames, binding);
 
     return sort_types_by_declaration_order(referencedTypeNames);
 }
