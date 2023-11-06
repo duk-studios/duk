@@ -201,6 +201,30 @@ static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveC
     perspectiveCamera->fovDegrees = 45.0f;
 }
 
+static void add_object(duk::scene::Scene* scene,
+                       const glm::vec3& position,
+                       const glm::quat& rotation,
+                       const glm::vec3& scale,
+                       duk::renderer::Painter* painter,
+                       duk::renderer::Palette* palette,
+                       duk::renderer::Mesh* mesh) {
+    auto obj = scene->add_object();
+
+    auto position3D = obj.add<duk::renderer::Position3D>();
+    position3D->value = position;
+
+    auto rotation3D = obj.add<duk::renderer::Rotation3D>();
+    rotation3D->value = rotation;
+
+    auto scale3D = obj.add<duk::renderer::Scale3D>();
+    scale3D->value = scale;
+
+    auto meshDrawing = obj.add<duk::renderer::MeshDrawing>();
+    meshDrawing->mesh = mesh;
+    meshDrawing->painter = painter;
+    meshDrawing->palette = palette;
+}
+
 static void populate_scene(duk::scene::Scene* scene,
                            uint32_t objCount,
                            duk::renderer::Painter* painter,
@@ -216,21 +240,14 @@ static void populate_scene(duk::scene::Scene* scene,
         const float colPercent = float(i % (colCount)) / float(colCount - 1);
         const float rowPercent = std::floor((float)i / float(colCount)) / float(rowCount - 1);
 
-        auto obj = scene->add_object();
-
-        auto position3D = obj.add<duk::renderer::Position3D>();
-        position3D->value = glm::vec3(lerp(-20, 20, colPercent), lerp(-20, 20, rowPercent), glm::linearRand(-50.f, 30.f));
-
-        auto rotation3D = obj.add<duk::renderer::Rotation3D>();
-        rotation3D->value = glm::radians(glm::linearRand(glm::vec3(-95.f), glm::vec3(95.f)));
-
-        auto scale3D = obj.add<duk::renderer::Scale3D>();
-        scale3D->value = glm::linearRand(glm::vec3(0.02f), glm::vec3(1.3f));
-
-        auto meshDrawing = obj.add<duk::renderer::MeshDrawing>();
-        meshDrawing->mesh = mesh;
-        meshDrawing->painter = painter;
-        meshDrawing->palette = palette;
+        add_object(scene,
+                   glm::vec3(lerp(-20, 20, colPercent), lerp(-20, 20, rowPercent), glm::linearRand(-50.f, 30.f)),
+                   glm::radians(glm::linearRand(glm::vec3(-95.f), glm::vec3(95.f))),
+                   glm::linearRand(glm::vec3(0.02f), glm::vec3(1.3f)),
+                   painter,
+                   palette,
+                   mesh
+                   );
 
     }
 }
@@ -328,6 +345,26 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
     detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_sphereMesh.get());
     detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
+
+//    detail::add_object(
+//            m_scene.get(),
+//            glm::vec3(15, 0, 0),
+//            glm::quat(),
+//            glm::vec3(10),
+//            m_phongPainter.get(),
+//            m_phongPalette.get(),
+//            m_cubeMesh.get()
+//    );
+//
+//    detail::add_object(
+//            m_scene.get(),
+//            glm::vec3(-15, 0, 0),
+//            glm::quat(),
+//            glm::vec3(10),
+//            m_phongPainter.get(),
+//            m_phongPalette.get(),
+//            m_sphereMesh.get()
+//    );
 
 //    detail::populate_scene(m_scene.get(), 250, m_colorPainter.get(), m_colorPalette.get(), m_cubeMesh.get());
 //    detail::populate_scene(m_scene.get(), 250, m_colorPainter.get(), m_colorPalette.get(), m_quadMesh.get());
