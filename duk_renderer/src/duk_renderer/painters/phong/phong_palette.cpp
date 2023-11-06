@@ -3,7 +3,7 @@
 
 #include <duk_renderer/painters/phong/phong_palette.h>
 #include <duk_renderer/painters/phong/phong_painter.h>
-#include <duk_renderer/painters/global_descriptors.h>
+#include <duk_renderer/painters/globals/global_descriptors.h>
 #include <duk_renderer/components/transform.h>
 
 namespace duk::renderer {
@@ -18,7 +18,7 @@ PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo)
         transformUBOCreateInfo.rhi = rhi;
         transformUBOCreateInfo.commandQueue = commandQueue;
         transformUBOCreateInfo.initialSize = 1;
-        m_transformSBO = std::make_unique<StorageBuffer<Transform>>(transformUBOCreateInfo);
+        m_transformSBO = std::make_unique<phong::TransformSBO>(transformUBOCreateInfo);
     }
 
     {

@@ -1,7 +1,7 @@
 /// 13/10/2023
 /// camera_perspective.cpp
 
-#include <duk_renderer/components/camera_types.h>
+#include <duk_renderer/components/camera.h>
 #include <duk_scene/scene.h>
 #include <glm/ext/matrix_clip_space.hpp>
 

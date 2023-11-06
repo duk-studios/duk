@@ -1,3 +1,6 @@
+#ifndef DUK_RENDERER_CAMERA_TYPES_H
+#define DUK_RENDERER_CAMERA_TYPES_H
+
 #include <duk_renderer/painters/uniform_buffer.h>
 #include <duk_renderer/painters/storage_buffer.h>
 #include <glm/glm.hpp>
@@ -14,3 +17,5 @@ struct CameraMatrices {
 using CameraUBO = UniformBuffer<CameraMatrices>;
 
 } // namespace duk::renderer::globals
+
+#endif // DUK_RENDERER_CAMERA_TYPES_H

@@ -5,7 +5,7 @@
 #define DUK_RENDERER_FULLSCREEN_PAINTER_H
 
 #include <duk_renderer/painters/painter.h>
-#include <duk_rhi/pipeline/std_shader_data_source.h>
+#include <duk_renderer/painters/fullscreen/fullscreen_shader_data_source.h>
 
 namespace duk::renderer {
 
@@ -29,7 +29,7 @@ public:
 
 private:
     rhi::CommandQueue* m_commandQueue;
-    duk::rhi::StdShaderDataSource m_shaderDataSource;
+    FullscreenShaderDataSource m_shaderDataSource;
 };
 
 }

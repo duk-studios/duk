@@ -6,9 +6,7 @@
 
 #include <duk_renderer/painters/palette.h>
 #include <duk_renderer/painters/color/color_painter.h>
-#include <duk_renderer/painters/uniform_buffer.h>
-#include <duk_renderer/painters/storage_buffer.h>
-#include <duk_renderer/painters/camera.h>
+#include <duk_renderer/painters/color/color_types.h>
 
 #include <duk_scene/limits.h>
 #include <duk_rhi/rhi.h>
@@ -29,16 +27,6 @@ struct ColorPaletteCreateInfo {
 class ColorPalette : public Palette {
 public:
 
-    struct Transform {
-        glm::mat4 model;
-    };
-
-    struct Material {
-        glm::vec4 color;
-    };
-
-public:
-
     explicit ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo);
 
     void set_color(const glm::vec4& color);
@@ -52,8 +40,8 @@ public:
     void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
 
 private:
-    std::unique_ptr<StorageBuffer<Transform>> m_transformSBO;
-    std::unique_ptr<UniformBuffer<Material>> m_materialUBO;
+    std::unique_ptr<color::InstanceSBO> m_instanceSBO;
+    std::unique_ptr<color::MaterialUBO> m_materialUBO;
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
 
 };

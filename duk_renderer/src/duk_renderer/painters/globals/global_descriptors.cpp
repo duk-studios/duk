@@ -1,8 +1,8 @@
 /// 13/10/2023
 /// global_buffers.cpp
 
-#include <duk_renderer/painters/global_descriptors.h>
-#include <duk_renderer/components/camera_types.h>
+#include <duk_renderer/painters/globals/global_descriptors.h>
+#include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
 
 namespace duk::renderer {
@@ -11,20 +11,20 @@ GlobalDescriptors::GlobalDescriptors(const GlobalDescriptorsCreateInfo& globalDe
     auto rhi = globalDescriptorsCreateInfo.rhi;
     auto commandQueue = globalDescriptorsCreateInfo.commandQueue;
     {
-        UniformBufferCreateInfo<CameraMatrices> cameraUBOCreateInfo = {};
+        UniformBufferCreateInfo<globals::CameraMatrices> cameraUBOCreateInfo = {};
         cameraUBOCreateInfo.rhi = rhi;
         cameraUBOCreateInfo.commandQueue = commandQueue;
-        m_cameraUBO = std::make_unique<CameraUBO>(cameraUBOCreateInfo);
+        m_cameraUBO = std::make_unique<globals::CameraUBO>(cameraUBOCreateInfo);
     }
 
     {
-        UniformBufferCreateInfo<Lights> lightUboCreateInfo = {};
+        UniformBufferCreateInfo<globals::Lights> lightUboCreateInfo = {};
         lightUboCreateInfo.rhi = rhi;
         lightUboCreateInfo.commandQueue = commandQueue;
-        lightUboCreateInfo.initialData.directionalLight.value.color = glm::vec3(1);
-        lightUboCreateInfo.initialData.directionalLight.value.intensity = 1.0f;
-        lightUboCreateInfo.initialData.directionalLight.direction = glm::vec3(1);
-        m_lightsUBO = std::make_unique<LightsUBO>(lightUboCreateInfo);
+        lightUboCreateInfo.initialData.directionalLights[0].value.color = glm::vec3(1);
+        lightUboCreateInfo.initialData.directionalLights[0].value.intensity = 1.0f;
+        lightUboCreateInfo.initialData.directionalLights[0].direction = glm::vec3(0, 0, -1);
+        m_lightsUBO = std::make_unique<globals::LightsUBO>(lightUboCreateInfo);
     }
 }
 
@@ -43,11 +43,11 @@ void GlobalDescriptors::update_camera(const scene::Object& cameraObject) {
     m_cameraUBO->flush();
 }
 
-CameraUBO* GlobalDescriptors::camera_ubo() {
+globals::CameraUBO* GlobalDescriptors::camera_ubo() {
     return m_cameraUBO.get();
 }
 
-LightsUBO* GlobalDescriptors::lights_ubo() {
+globals::LightsUBO* GlobalDescriptors::lights_ubo() {
     return m_lightsUBO.get();
 }
 

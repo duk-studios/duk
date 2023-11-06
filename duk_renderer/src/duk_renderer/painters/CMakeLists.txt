@@ -22,7 +22,7 @@ list(APPEND GLOBAL_BINDING_NAMES "LightsUBO")
 string(REPLACE ";" "," GLOBAL_BINDING_NAMES "${GLOBAL_BINDING_NAMES}")
 
 set(GENERATE_PAINTER_ENTRIES "" CACHE STRING "List of generate_painter_files calls" FORCE)
-set(OUTPUT_STAMPS "" CACHE STRING "List of stamps for generated painter files" FORCE)
+set(GENERATED_FILES "" CACHE STRING "List of stamps for generated painter files" FORCE)
 
 function(pack_generate_painter_entry OUT_ENTRY IN_NAME IN_GLSL_SOURCES)
     # pack glsl sources
@@ -73,7 +73,10 @@ function(add_painter_generate_command PACKED_ENTRY)
 
     unpack_generate_painter_entry(${PACKED_ENTRY} NAME GLSL_SOURCES)
 
-    set(SPV_DIR "${SRC_DIR}/${NAME}/spv")
+    set(PAINTER_SRC_DIR "${SRC_DIR}/${NAME}")
+    set(PAINTER_INC_DIR "${INC_DIR}/${NAME}")
+    set(SPV_DIR "${PAINTER_SRC_DIR}/spv")
+
     set(COMMAND_LINE)
     set(COMPILED_SPV_FILES)
 
@@ -123,22 +126,28 @@ function(add_painter_generate_command PACKED_ENTRY)
 
     message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
 
-    set(OUTPUT_STAMP "${CMAKE_CURRENT_BINARY_DIR}/stamps/${NAME}.stamp")
 
-    list(APPEND OUTPUT_STAMPS ${OUTPUT_STAMP})
-    set(OUTPUT_STAMPS "${OUTPUT_STAMPS}" CACHE STRING "" FORCE)
+    set(OUTPUT_FILES)
+    list(APPEND OUTPUT_FILES "${PAINTER_INC_DIR}/${NAME}_types.h")
+    list(APPEND OUTPUT_FILES "${PAINTER_INC_DIR}/${NAME}_shader_data_source.h")
+    list(APPEND OUTPUT_FILES "${PAINTER_SRC_DIR}/${NAME}_shader_data_source.cpp")
+
+    list(APPEND GENERATED_FILES ${OUTPUT_FILES})
+    set(GENERATED_FILES "${GENERATED_FILES}" CACHE STRING "" FORCE)
 
     add_custom_command(
-            OUTPUT ${OUTPUT_STAMP}
+            OUTPUT ${OUTPUT_FILES}
             DEPENDS ${COMPILED_SPV_FILES} duk_painter_generator
             COMMAND duk_painter_generator ${COMMAND_LINE}
-            COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT_STAMP}
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Generating painter files for ${NAME}"
     )
 
     # add generated files to target
-    target_sources(duk_renderer PUBLIC "${INC_DIR}/${NAME}/${NAME}_types.h")
+    target_sources(duk_renderer
+            PRIVATE
+            ${OUTPUT_FILES}
+    )
 
     install(
             FILES ${COMPILED_SPV_FILES}
@@ -156,7 +165,7 @@ foreach (PACKED_ENTRY ${GENERATE_PAINTER_ENTRIES})
 endforeach ()
 
 add_custom_target(generate_painter_files
-        DEPENDS duk_painter_generator ${OUTPUT_STAMPS}
+        DEPENDS duk_painter_generator ${GENERATED_FILES}
         COMMENT "Generating painter files"
 )
 

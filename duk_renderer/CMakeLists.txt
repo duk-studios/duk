@@ -15,12 +15,10 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/brushes/generic_brush.h
         include/duk_renderer/components/mesh_drawing.h
         include/duk_renderer/components/transform.h
-        include/duk_renderer/components/camera_types.h
-        include/duk_renderer/painters/global_descriptors.h
+        include/duk_renderer/components/camera.h
+        include/duk_renderer/painters/globals/global_descriptors.h
         include/duk_renderer/painters/painter.h
         include/duk_renderer/painters/palette.h
-        include/duk_renderer/painters/camera.h
-        include/duk_renderer/painters/lights.h
         include/duk_renderer/painters/uniform_buffer.h
         include/duk_renderer/painters/storage_buffer.h
         include/duk_renderer/painters/color/color_palette.h
@@ -44,24 +42,22 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/brushes/generic_brush.cpp
         src/duk_renderer/components/mesh_drawing.cpp
         src/duk_renderer/components/transform.cpp
-        src/duk_renderer/components/camera_types.cpp
-        src/duk_renderer/painters/color/color_painter.cpp
+        src/duk_renderer/components/camera.cpp
         src/duk_renderer/painters/painter.cpp
         src/duk_renderer/painters/palette.cpp
+        src/duk_renderer/painters/color/color_painter.cpp
         src/duk_renderer/painters/color/color_palette.cpp
-        src/duk_renderer/painters/camera.cpp
         src/duk_renderer/painters/uniform_buffer.cpp
         src/duk_renderer/painters/storage_buffer.cpp
         src/duk_renderer/painters/fullscreen/fullscreen_painter.cpp
         src/duk_renderer/painters/fullscreen/fullscreen_palette.cpp
         src/duk_renderer/painters/phong/phong_painter.cpp
         src/duk_renderer/painters/phong/phong_palette.cpp
-        src/duk_renderer/painters/global_descriptors.cpp
-        src/duk_renderer/painters/lights.cpp
+        src/duk_renderer/painters/globals/global_descriptors.cpp
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp
         src/duk_renderer/passes/present_pass.cpp
-        )
+)
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
 

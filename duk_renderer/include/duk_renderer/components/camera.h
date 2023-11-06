@@ -1,8 +1,8 @@
 /// 13/10/2023
 /// camera_perspective.h
 
-#ifndef DUK_RENDERER_CAMERA_TYPES_H
-#define DUK_RENDERER_CAMERA_TYPES_H
+#ifndef DUK_RENDERER_CAMERA_H
+#define DUK_RENDERER_CAMERA_H
 
 #include <duk_scene/object.h>
 

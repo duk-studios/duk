@@ -13,17 +13,6 @@ layout(location = 0) out vec4 oColor;
 DUK_DECLARE_CAMERA_BINDING(0, uCamera);
 DUK_DECLARE_LIGHTS_BINDING(2, uLights);
 
-struct Material {
-    vec3 color;
-    float shininess;
-    float value;
-    float foo;
-};
-
-layout(binding = 3) uniform MaterialUBO {
-    Material material;
-} uMaterial;
-
 vec3 calculate_directional_lighting(in DirectionalLight light) {
     vec3 result = vec3(0);
 
@@ -36,6 +25,5 @@ vec3 calculate_directional_lighting(in DirectionalLight light) {
 
 void main() {
     vec3 lighting = calculate_directional_lighting(uLights.lights.directionalLights[0]);
-    vec3 color = lighting * uMaterial.material.color;
-    oColor = vec4(color, 1.0);
+    oColor = vec4(lighting, 1.0);
 }

@@ -3,8 +3,9 @@
 
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/passes/pass.h>
+#include <duk_renderer/painters/globals/global_descriptors.h>
+
 #include <duk_platform/window.h>
-#include <duk_renderer/painters/global_descriptors.h>
 
 namespace duk::renderer {
 

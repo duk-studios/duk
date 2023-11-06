@@ -5,10 +5,10 @@
 #define DUK_RENDERER_COLOR_SHADER_H
 
 #include <duk_renderer/painters/painter.h>
+#include <duk_renderer/painters/color/color_shader_data_source.h>
 
 #include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/pipeline/graphics_pipeline.h>
-#include <duk_rhi/pipeline/std_shader_data_source.h>
 #include <duk_rhi/command/command_buffer.h>
 #include <duk_rhi/rhi.h>
 
@@ -35,7 +35,7 @@ public:
 
 private:
     rhi::CommandQueue* m_commandQueue;
-    duk::rhi::StdShaderDataSource m_shaderDataSource;
+    ColorShaderDataSource m_shaderDataSource;
 };
 
 }

@@ -2,7 +2,7 @@
 /// color_palette.cpp
 
 #include <duk_renderer/painters/color/color_palette.h>
-#include <duk_renderer/painters/global_descriptors.h>
+#include <duk_renderer/painters/globals/global_descriptors.h>
 #include <duk_renderer/components/transform.h>
 
 namespace duk::renderer {
@@ -14,19 +14,19 @@ ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo)
     auto painter = colorPaletteCreateInfo.painter;
 
     {
-        StorageBufferCreateInfo transformUBOCreateInfo = {};
-        transformUBOCreateInfo.rhi = rhi;
-        transformUBOCreateInfo.commandQueue = commandQueue;
-        transformUBOCreateInfo.initialSize = 1;
-        m_transformSBO = std::make_unique<StorageBuffer<Transform>>(transformUBOCreateInfo);
+        StorageBufferCreateInfo instanceSBOCreateInfo = {};
+        instanceSBOCreateInfo.rhi = rhi;
+        instanceSBOCreateInfo.commandQueue = commandQueue;
+        instanceSBOCreateInfo.initialSize = 1;
+        m_instanceSBO = std::make_unique<color::InstanceSBO>(instanceSBOCreateInfo);
     }
 
     {
-        UniformBufferCreateInfo<Material> materialUBOCreateInfo = {};
+        UniformBufferCreateInfo<color::Material> materialUBOCreateInfo = {};
         materialUBOCreateInfo.rhi = rhi;
         materialUBOCreateInfo.commandQueue = commandQueue;
-        materialUBOCreateInfo.initialData = Material{glm::vec4(1)};
-        m_materialUBO = std::make_unique<UniformBuffer<Material>>(materialUBOCreateInfo);
+        materialUBOCreateInfo.initialData = color::Material{glm::vec4(1)};
+        m_materialUBO = std::make_unique<color::MaterialUBO>(materialUBOCreateInfo);
     }
 
     {
@@ -40,7 +40,7 @@ ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo)
         }
 
         m_descriptorSet = std::move(expectedDescriptorSet.value());
-        m_descriptorSet->set(1, *m_transformSBO);
+        m_descriptorSet->set(1, *m_instanceSBO);
         m_descriptorSet->set(2, *m_materialUBO);
     }
 }
@@ -51,16 +51,16 @@ void ColorPalette::set_color(const glm::vec4& color) {
 }
 
 void ColorPalette::clear_instances() {
-    m_transformSBO->clear();
+    m_instanceSBO->clear();
 }
 
 void ColorPalette::insert_instance(const Palette::InsertInstanceParams& params) {
-    auto& transform = m_transformSBO->next();
+    auto& transform = m_instanceSBO->next();
     transform.model = duk::renderer::model_matrix_3d(params.object);
 }
 
 void ColorPalette::flush_instances() {
-    m_transformSBO->flush();
+    m_instanceSBO->flush();
 }
 
 void ColorPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
