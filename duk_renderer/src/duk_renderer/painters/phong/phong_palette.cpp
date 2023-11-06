@@ -44,6 +44,7 @@ void PhongPalette::clear_instances() {
 void PhongPalette::insert_instance(const Palette::InsertInstanceParams& params) {
     auto& transform = m_transformSBO->next();
     transform.model = duk::renderer::model_matrix_3d(params.object);
+    transform.invModel = glm::inverse(transform.model);
 }
 
 void PhongPalette::flush_instances() {
