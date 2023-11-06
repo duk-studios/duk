@@ -51,10 +51,9 @@ duk::rhi::GraphicsPipeline* Painter::find_pipeline_for_params(const Painter::Pai
     if (it == m_pipelines.end()) {
 
         duk::rhi::RHI::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
-        pipelineCreateInfo.viewport.extent = {params.outputWidth, params.outputHeight};
-        pipelineCreateInfo.viewport.maxDepth = 1.0f;
-        pipelineCreateInfo.viewport.minDepth = 0.0f;
-        pipelineCreateInfo.scissor.extent = pipelineCreateInfo.viewport.extent;
+        pipelineCreateInfo.viewport = viewport_for_params(params);
+        pipelineCreateInfo.scissor.extent.x = params.outputWidth;
+        pipelineCreateInfo.scissor.extent.y = params.outputHeight;
         pipelineCreateInfo.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
         pipelineCreateInfo.fillMode = duk::rhi::GraphicsPipeline::FillMode::FILL;
         pipelineCreateInfo.topology = duk::rhi::GraphicsPipeline::Topology::TRIANGLE_LIST;
@@ -104,7 +103,14 @@ void Painter::init_shader(const rhi::ShaderDataSource* shaderDataSource) {
     }
 
     m_shader = std::move(expectedColorShader.value());
+}
 
+duk::rhi::GraphicsPipeline::Viewport Painter::viewport_for_params(const Painter::PaintParams& params) {
+    duk::rhi::GraphicsPipeline::Viewport viewport = {};
+    viewport.extent = {params.outputWidth, params.outputHeight};
+    viewport.maxDepth = 1.0f;
+    viewport.minDepth = 0.0f;
+    return viewport;
 }
 
 }

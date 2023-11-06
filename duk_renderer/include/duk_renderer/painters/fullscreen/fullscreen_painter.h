@@ -27,6 +27,9 @@ public:
 
     std::shared_ptr<FullscreenPalette> make_palette() const;
 
+protected:
+    rhi::GraphicsPipeline::Viewport viewport_for_params(const PaintParams& params) override;
+
 private:
     rhi::CommandQueue* m_commandQueue;
     FullscreenShaderDataSource m_shaderDataSource;

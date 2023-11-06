@@ -48,6 +48,8 @@ protected:
     // should be called by derived classes after loading their data sources
     void init_shader(const rhi::ShaderDataSource* shaderDataSource);
 
+    virtual duk::rhi::GraphicsPipeline::Viewport viewport_for_params(const Painter::PaintParams& params);
+
 protected:
     duk::rhi::RHI* m_rhi;
 private:

@@ -182,13 +182,11 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
     inputAssembly.topology = convert_topology(m_topology);
     inputAssembly.primitiveRestartEnable = VK_FALSE;
 
-    // vulkan Y coordinates are inverted, starting from top to bottom
-    // invert height and set offset to viewport height
     VkViewport viewport = {};
     viewport.x = m_viewport.offset.x;
-    viewport.y = m_viewport.extent.y - m_viewport.offset.y;
+    viewport.y = m_viewport.offset.y;
     viewport.width = m_viewport.extent.x;
-    viewport.height = -m_viewport.extent.y;
+    viewport.height = m_viewport.extent.y;
     viewport.minDepth = m_viewport.minDepth;
     viewport.maxDepth = m_viewport.maxDepth;
 
