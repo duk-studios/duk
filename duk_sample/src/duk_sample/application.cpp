@@ -6,7 +6,7 @@
 #include <duk_renderer/vertex_types.h>
 #include <duk_renderer/components/mesh_drawing.h>
 #include <duk_renderer/components/transform.h>
-#include <duk_renderer/components/camera_types.h>
+#include <duk_renderer/components/camera.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/random.hpp>
