@@ -34,9 +34,12 @@ public:
 
     void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
 
+    void update_material(const glm::vec3& color);
+
 private:
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
     std::unique_ptr<phong::TransformSBO> m_transformSBO;
+    std::unique_ptr<phong::MaterialUBO> m_materialUBO;
 };
 
 }

@@ -14,11 +14,19 @@ PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo)
     auto painter = phongPaletteCreateInfo.painter;
 
     {
-        StorageBufferCreateInfo transformUBOCreateInfo = {};
-        transformUBOCreateInfo.rhi = rhi;
-        transformUBOCreateInfo.commandQueue = commandQueue;
-        transformUBOCreateInfo.initialSize = 1;
-        m_transformSBO = std::make_unique<phong::TransformSBO>(transformUBOCreateInfo);
+        StorageBufferCreateInfo transformSBOCreateInfo = {};
+        transformSBOCreateInfo.rhi = rhi;
+        transformSBOCreateInfo.commandQueue = commandQueue;
+        transformSBOCreateInfo.initialSize = 1;
+        m_transformSBO = std::make_unique<phong::TransformSBO>(transformSBOCreateInfo);
+    }
+
+    {
+        UniformBufferCreateInfo<phong::Material> materialUBOCreateInfo = {};
+        materialUBOCreateInfo.rhi = rhi;
+        materialUBOCreateInfo.commandQueue = commandQueue;
+        materialUBOCreateInfo.initialData.color = glm::vec3(1);
+        m_materialUBO = std::make_unique<phong::MaterialUBO>(materialUBOCreateInfo);
     }
 
     {
@@ -34,6 +42,7 @@ PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo)
         m_descriptorSet = std::move(expectedDescriptorSet.value());
 
         m_descriptorSet->set(1, *m_transformSBO);
+        m_descriptorSet->set(3, *m_materialUBO);
     }
 }
 
@@ -61,6 +70,11 @@ void PhongPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyPara
     m_descriptorSet->flush();
 
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
+}
+
+void PhongPalette::update_material(const glm::vec3& color) {
+    m_materialUBO->data().color = color;
+    m_materialUBO->flush();
 }
 
 }

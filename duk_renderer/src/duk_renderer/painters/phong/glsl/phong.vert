@@ -17,14 +17,14 @@ struct Transform {
 
 layout(binding = 1) buffer TransformSBO {
     Transform transforms[];
-} uInstances;
+} uTransform;
 
 out gl_PerVertex {
     vec4 gl_Position;
 };
 
 void main() {
-    mat4 model = uInstances.transforms[gl_InstanceIndex].model;
+    mat4 model = uTransform.transforms[gl_InstanceIndex].model;
 
     vPosition = vec3(model * vec4(aPosition, 1.0)).xyz;
     vNormal = normalize(model * vec4(aNormal, 0.0)).xyz;
