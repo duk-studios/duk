@@ -13,17 +13,23 @@ layout(location = 0) out vec4 oColor;
 DUK_DECLARE_CAMERA_BINDING(0, uCamera);
 DUK_DECLARE_LIGHTS_BINDING(2, uLights);
 
-vec3 calculate_directional_lighting(in DirectionalLight light) {
+vec3 calculate_directional_lighting(in DirectionalLight light, in vec3 normal, in vec3 view) {
     vec3 result = vec3(0);
 
-    float intensity = clamp(dot(-vNormal, light.direction), 0.0, 1.0);
+    float diffuseIntensity = max(dot(normal, light.direction), 0.0);
+    vec3 diffuse = light.value.color * (light.value.intensity * diffuseIntensity);
 
-    result = light.value.color * light.value.intensity * intensity;
+    vec3 reflectDir = reflect(-light.direction, normal);
+    float specularIntensity = pow(max(dot(view, reflectDir), 0.0), 64.0f);
+    vec3 specular = light.value.color * (light.value.intensity * specularIntensity);
 
-    return result;
+    return diffuse + specular + vec3(0.1);
 }
 
 void main() {
-    vec3 lighting = calculate_directional_lighting(uLights.lights.directionalLights[0]);
+    vec3 cameraPosition = vec3(uCamera.matrices.invView[3]);
+    vec3 view = normalize(cameraPosition - vPosition);
+    vec3 normal = normalize(vNormal);
+    vec3 lighting = calculate_directional_lighting(uLights.lights.directionalLights[0], normal, view);
     oColor = vec4(lighting, 1.0);
 }
