@@ -41,6 +41,8 @@ duk::hash::Hash StdShaderDataSource::calculate_hash() const {
         duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
     }
 
+    duk::hash::hash_combine(hash, m_vertexLayout);
+
     return hash;
 }
 
