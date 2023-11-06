@@ -71,12 +71,14 @@ static void insert_referenced_types(std::set<std::string>& referencedTypeNames, 
 
 static void insert_referenced_types_from_binding(const Reflector& reflector, std::set<std::string>& referencedTypes, const BindingReflection& binding) {
     const auto& types = reflector.types();
+    if (binding.descriptorType != duk::rhi::DescriptorType::UNIFORM_BUFFER && binding.descriptorType != duk::rhi::DescriptorType::STORAGE_BUFFER) {
+        return;
+    }
     auto it = types.find(binding.typeName);
     detail::insert_referenced_types(referencedTypes, reflector, it->second, false);
 }
 
 static void insert_referenced_types_from_bindings(const Reflector& reflector, std::set<std::string>& referencedTypes, std::span<const BindingReflection> bindings) {
-    const auto& types = reflector.types();
     for (const auto& binding : bindings) {
         insert_referenced_types_from_binding(reflector, referencedTypes, binding);
     }
@@ -96,7 +98,7 @@ TypesFileGenerator::TypesFileGenerator(const Parser& parser, const Reflector& re
 
 }
 
-void TypesFileGenerator::generate_file_header(std::ostringstream& oss) {
+void TypesFileGenerator::generate_includes(std::ostringstream& oss) {
     generate_include_directives(oss, detail::kTypesFileIncludes);
     oss << std::endl;
 }
@@ -124,11 +126,14 @@ void TypesFileGenerator::generate_types(std::ostringstream& oss, const std::vect
     }
 }
 
-void TypesFileGenerator::generate_binding_alias(std::ostringstream& oss, const BindingReflection& bindingReflection) {
+void TypesFileGenerator::generate_binding_alias(std::ostringstream& oss, const BindingReflection& binding) {
+    if (binding.descriptorType != duk::rhi::DescriptorType::UNIFORM_BUFFER && binding.descriptorType != duk::rhi::DescriptorType::STORAGE_BUFFER) {
+        return;
+    }
     const auto& types = m_reflector.types();
-    const auto& uboType = types.at(bindingReflection.typeName);
+    const auto& uboType = types.at(binding.typeName);
     const auto& memberTypeName = uboType.members.at(0).typeName;
-    oss << "using " << bindingReflection.typeName << " = " << detail::descriptor_type_name(bindingReflection.descriptorType) << '<' << glsl_to_cpp(memberTypeName) << ">;" << std::endl;
+    oss << "using " << binding.typeName << " = " << detail::descriptor_type_name(binding.descriptorType) << '<' << glsl_to_cpp(memberTypeName) << ">;" << std::endl;
 }
 
 void TypesFileGenerator::generate_binding_aliases(std::ostringstream& oss, std::span<const BindingReflection> bindingReflections) {

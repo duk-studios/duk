@@ -19,7 +19,6 @@ private:
 
     void generate_file_content(std::ostringstream& oss, const BindingReflection& binding);
 
-
 };
 
 }

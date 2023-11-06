@@ -7,6 +7,7 @@
 #include <duk_painter_generator/parser.h>
 #include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/descriptor.h>
+#include <duk_rhi/vertex_layout.h>
 
 #include <cstdint>
 #include <unordered_map>
@@ -65,6 +66,8 @@ public:
     using Types = std::unordered_map<std::string, TypeReflection>;
     using Bindings = SetReflection::Bindings;
     using Sets = std::vector<SetReflection>;
+    using Modules = std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint8_t>>;
+    using Attributes = std::vector<duk::rhi::VertexAttribute::Format>;
 public:
 
     explicit Reflector(const Parser& parser);
@@ -75,15 +78,20 @@ public:
 
     const Sets& sets() const;
 
+    const Modules& modules() const;
+
+    const Attributes& attributes() const;
+
 private:
 
-    void reflect_spv(const uint8_t* code, size_t size, duk::rhi::Shader::Module::Bits shaderModuleBit);
+    void reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::Module::Bits shaderModuleBit);
 
 private:
     const Parser& m_parser;
     Types m_types;
     Sets m_sets;
-
+    Modules m_modules;
+    Attributes m_attributes;
 };
 
 }

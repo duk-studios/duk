@@ -24,7 +24,10 @@ LocalTypesFileGenerator::LocalTypesFileGenerator(const Parser& parser, const Ref
 }
 
 void LocalTypesFileGenerator::generate_file_content(std::ostringstream& oss) {
-    generate_file_header(oss);
+    const auto fileName = m_parser.output_painter_name() + "_types";
+    generate_include_guard_start(oss, fileName);
+    oss << std::endl;
+    generate_includes(oss);
 
     generate_namespace_start(oss, m_parser.output_painter_name());
     oss << std::endl;
@@ -37,6 +40,8 @@ void LocalTypesFileGenerator::generate_file_content(std::ostringstream& oss) {
 
     oss << std::endl;
     generate_namespace_end(oss, m_parser.output_painter_name());
+    oss << std::endl;
+    generate_include_guard_end(oss, fileName);
 }
 
 std::vector<BindingReflection> LocalTypesFileGenerator::extract_local_bindings() {

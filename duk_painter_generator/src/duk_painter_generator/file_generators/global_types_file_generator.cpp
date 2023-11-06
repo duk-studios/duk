@@ -26,7 +26,7 @@ static std::string binding_name_to_file_name(const std::string& bindingName) {
         c = std::tolower(c);
     }
 
-    return fileName;
+    return fileName + "_types";
 }
 
 }
@@ -41,18 +41,19 @@ GlobalTypesFileGenerator::GlobalTypesFileGenerator(const Parser& parser, const R
         std::ostringstream oss;
         generate_file_content(oss, binding);
 
-        const auto filepath = std::filesystem::path(parser.output_include_directory()) / detail::kNamespaceName / (detail::binding_name_to_file_name(binding.typeName) + "_types.h");
+        const auto filepath = std::filesystem::path(parser.output_include_directory()) / detail::kNamespaceName / (detail::binding_name_to_file_name(binding.typeName) + ".h");
 
         std::filesystem::create_directories(filepath.parent_path());
 
         write_file(oss.str(), filepath.string());
     }
-
 }
 
 void GlobalTypesFileGenerator::generate_file_content(std::ostringstream& oss, const BindingReflection& binding) {
-
-    generate_file_header(oss);
+    const auto fileName = detail::binding_name_to_file_name(binding.typeName);
+    generate_include_guard_start(oss, fileName);
+    oss << std::endl;
+    generate_includes(oss);
 
     generate_namespace_start(oss, detail::kNamespaceName);
     oss << std::endl;
@@ -63,6 +64,8 @@ void GlobalTypesFileGenerator::generate_file_content(std::ostringstream& oss, co
 
     oss << std::endl;
     generate_namespace_end(oss, detail::kNamespaceName);
+    oss << std::endl;
+    generate_include_guard_end(oss, fileName);
 }
 
 std::vector<BindingReflection> GlobalTypesFileGenerator::extract_global_bindings() {

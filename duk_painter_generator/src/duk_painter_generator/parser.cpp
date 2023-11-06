@@ -32,7 +32,7 @@ Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
     try {
         result = options.parse(argc, argv);
 
-        m_outputSrcDirectory = result["src"].as<std::string>();
+        m_outputSourceDirectory = result["src"].as<std::string>();
         m_outputIncludeDirectory = result["inc"].as<std::string>();
         m_outputPainterName = result["name"].as<std::string>();
 
@@ -74,8 +74,8 @@ Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
 
 Parser::~Parser() = default;
 
-const std::string& Parser::output_src_directory() const {
-    return m_outputSrcDirectory;
+const std::string& Parser::output_source_directory() const {
+    return m_outputSourceDirectory;
 }
 
 const std::string& Parser::output_include_directory() const {

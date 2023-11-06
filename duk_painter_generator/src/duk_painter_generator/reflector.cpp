@@ -181,6 +181,20 @@ static void add_binding(SpvReflectDescriptorBinding* spvBinding, Reflector::Bind
     bindingReflection.descriptorType = convert_descriptor_type(spvBinding->descriptor_type);
 }
 
+static duk::rhi::VertexAttribute::Format vertex_attribute_format(SpvReflectFormat format) {
+    switch (format) {
+        case SPV_REFLECT_FORMAT_R16_UINT: return duk::rhi::VertexAttribute::Format::UINT16;
+        case SPV_REFLECT_FORMAT_R16_SINT: return duk::rhi::VertexAttribute::Format::INT16;
+        case SPV_REFLECT_FORMAT_R32_UINT: return duk::rhi::VertexAttribute::Format::UINT32;
+        case SPV_REFLECT_FORMAT_R32_SINT: return duk::rhi::VertexAttribute::Format::INT32;
+        case SPV_REFLECT_FORMAT_R32_SFLOAT: return duk::rhi::VertexAttribute::Format::FLOAT32;
+        case SPV_REFLECT_FORMAT_R32G32_SFLOAT: return duk::rhi::VertexAttribute::Format::VEC2;
+        case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT: return duk::rhi::VertexAttribute::Format::VEC3;
+        case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT: return duk::rhi::VertexAttribute::Format::VEC4;
+        default: throw std::runtime_error("unsupported vertex attribute format");
+    }
+}
+
 }
 
 Reflector::Reflector(const Parser& parser) :
@@ -189,22 +203,39 @@ Reflector::Reflector(const Parser& parser) :
 
         const auto spvCode = duk::tools::File::load_bytes(spvPath.c_str());
 
-        reflect_spv(spvCode.data(), spvCode.size(), module);
+        reflect_spv(spvCode, module);
     }
 }
 
 Reflector::~Reflector() = default;
 
-void Reflector::reflect_spv(const uint8_t* code, size_t size, duk::rhi::Shader::Module::Bits shaderModuleBit) {
+void Reflector::reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::Module::Bits shaderModuleBit) {
+
+    m_modules.emplace(shaderModuleBit, code);
 
     SpvReflectShaderModule module = {};
-    detail::check_result(spvReflectCreateShaderModule(size, code, &module));
+    detail::check_result(spvReflectCreateShaderModule(code.size(), code.data(), &module));
+
+    if (shaderModuleBit == rhi::Shader::Module::VERTEX) {
+        uint32_t inputVariableCount;
+        detail::check_result(spvReflectEnumerateEntryPointInputVariables(&module, "main", &inputVariableCount, nullptr));
+
+        std::vector<SpvReflectInterfaceVariable*> inputVariables(inputVariableCount);
+        detail::check_result(spvReflectEnumerateEntryPointInputVariables(&module, "main", &inputVariableCount, inputVariables.data()));
+
+        m_attributes.reserve(inputVariableCount - 1);
+
+        for (int i = 1; i < inputVariableCount; i++) {
+            m_attributes.push_back(detail::vertex_attribute_format(inputVariables[i]->format));
+        }
+    }
 
     uint32_t descriptorSetCount;
     detail::check_result(spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, nullptr));
 
     std::vector<SpvReflectDescriptorSet*> descriptorSets(descriptorSetCount);
     detail::check_result(spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, descriptorSets.data()));
+
 
     if (descriptorSetCount > m_sets.size()) {
         m_sets.resize(descriptorSetCount);
@@ -227,9 +258,7 @@ void Reflector::reflect_spv(const uint8_t* code, size_t size, duk::rhi::Shader::
                     detail::add_binding(spvBinding, set.bindings, shaderModuleBit);
                     break;
                 default:
-                    if (m_parser.print_debug_info()) {
-                        std::cout << "Skipping binding: " << spvBinding->name << std::endl;
-                    }
+                    detail::add_binding(spvBinding, set.bindings, shaderModuleBit);
                     continue;
             }
         }
@@ -245,6 +274,14 @@ const Reflector::Types& Reflector::types() const {
 
 const Reflector::Sets& Reflector::sets() const {
     return m_sets;
+}
+
+const Reflector::Modules& Reflector::modules() const {
+    return m_modules;
+}
+
+const Reflector::Attributes& Reflector::attributes() const {
+    return m_attributes;
 }
 
 }

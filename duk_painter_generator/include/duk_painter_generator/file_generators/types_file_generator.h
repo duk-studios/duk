@@ -17,7 +17,7 @@ public:
 
 protected:
 
-    void generate_file_header(std::ostringstream& oss);
+    void generate_includes(std::ostringstream& oss);
 
     void generate_type(std::ostringstream& oss, const TypeReflection& type);
 

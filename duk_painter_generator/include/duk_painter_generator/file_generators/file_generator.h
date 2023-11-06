@@ -19,6 +19,10 @@ public:
 
 protected:
 
+    static void generate_include_guard_start(std::ostringstream& oss, const std::string& fileName);
+
+    static void generate_include_guard_end(std::ostringstream& oss, const std::string& fileName);
+
     static void generate_include_directives(std::ostringstream& oss, std::span<const std::string> includes);
 
     static void generate_namespace_start(std::ostringstream& oss, const std::string& painterName);
