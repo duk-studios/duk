@@ -335,41 +335,96 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
         m_phongPainter = std::make_shared<duk::renderer::PhongPainter>(phongPainterCreateInfo);
 
-        m_phongPalette = m_phongPainter->make_palette();
-        m_phongPalette->update_material({0.2f, 0.6f, 0.5f});
+        m_phongGreenPalette = m_phongPainter->make_palette();
+        m_phongGreenPalette->update_material({0.0f, 1.0f, 0.0f});
+
+        m_phongBluePalette = m_phongPainter->make_palette();
+        m_phongBluePalette->update_material({0.0f, 0.0f, 1.0f});
+
+        m_phongRedPalette = m_phongPainter->make_palette();
+        m_phongRedPalette->update_material({1.0f, 0.0f, 0.0f});
+
+        m_phongYellowPalette = m_phongPainter->make_palette();
+        m_phongYellowPalette->update_material({1.0f, 1.0f, 0.0f});
+
+        m_phongWhitePalette = m_phongPainter->make_palette();
+        m_phongWhitePalette->update_material({1.0f, 1.0f, 1.0f});
+
+        m_phongUnknownPalette = m_phongPainter->make_palette();
+        m_phongUnknownPalette->update_material({0.0f, 1.0f, 1.0f});
     }
 
 
     m_scene = std::make_shared<duk::scene::Scene>();
 
-    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
-    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_quadMesh.get());
+//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
+//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_quadMesh.get());
 
-    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_sphereMesh.get());
-    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
+//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_sphereMesh.get());
+//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
 
-//    detail::add_object(
-//            m_scene.get(),
-//            glm::vec3(15, 0, 0),
-//            glm::quat(),
-//            glm::vec3(10),
-//            m_phongPainter.get(),
-//            m_phongPalette.get(),
-//            m_cubeMesh.get()
-//    );
-//
-//    detail::add_object(
-//            m_scene.get(),
-//            glm::vec3(-15, 0, 0),
-//            glm::quat(),
-//            glm::vec3(10),
-//            m_phongPainter.get(),
-//            m_phongPalette.get(),
-//            m_sphereMesh.get()
-//    );
+    const glm::vec3 scale(5);
+    const float offset = 10;
 
-//    detail::populate_scene(m_scene.get(), 250, m_colorPainter.get(), m_colorPalette.get(), m_cubeMesh.get());
-//    detail::populate_scene(m_scene.get(), 250, m_colorPainter.get(), m_colorPalette.get(), m_quadMesh.get());
+    detail::add_object(
+            m_scene.get(),
+            glm::vec3(offset, 0, 0),
+            glm::quat(),
+            scale,
+            m_phongPainter.get(),
+            m_phongGreenPalette.get(),
+            m_cubeMesh.get()
+    );
+
+    detail::add_object(
+            m_scene.get(),
+            glm::vec3(-offset, 0, 0),
+            glm::quat(),
+            scale,
+            m_phongPainter.get(),
+            m_phongBluePalette.get(),
+            m_sphereMesh.get()
+    );
+
+    detail::add_object(
+            m_scene.get(),
+            glm::vec3(0, offset, 0),
+            glm::quat(),
+            scale,
+            m_phongPainter.get(),
+            m_phongRedPalette.get(),
+            m_cubeMesh.get()
+    );
+
+    detail::add_object(
+            m_scene.get(),
+            glm::vec3(0, -offset, 0),
+            glm::quat(),
+            scale,
+            m_phongPainter.get(),
+            m_phongYellowPalette.get(),
+            m_sphereMesh.get()
+    );
+
+    detail::add_object(
+            m_scene.get(),
+            glm::vec3(0, 0, offset),
+            glm::quat(),
+            scale,
+            m_phongPainter.get(),
+            m_phongWhitePalette.get(),
+            m_cubeMesh.get()
+    );
+
+    detail::add_object(
+            m_scene.get(),
+            glm::vec3(0, 0, -offset),
+            glm::quat(),
+            scale,
+            m_phongPainter.get(),
+            m_phongUnknownPalette.get(),
+            m_sphereMesh.get()
+    );
 
     {
         m_camera = m_scene->add_object();

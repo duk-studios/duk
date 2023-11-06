@@ -62,7 +62,7 @@ private:
     std::shared_ptr<duk::renderer::ColorPainter> m_colorPainter;
     std::shared_ptr<duk::renderer::ColorPalette> m_colorPalette;
     std::shared_ptr<duk::renderer::PhongPainter> m_phongPainter;
-    std::shared_ptr<duk::renderer::PhongPalette> m_phongPalette;
+    std::shared_ptr<duk::renderer::PhongPalette> m_phongGreenPalette, m_phongBluePalette, m_phongRedPalette, m_phongWhitePalette, m_phongYellowPalette, m_phongUnknownPalette;
     std::shared_ptr<duk::scene::Scene> m_scene;
     duk::scene::Object m_camera;
     bool m_run;
