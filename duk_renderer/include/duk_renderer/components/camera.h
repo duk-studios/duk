@@ -21,5 +21,5 @@ glm::mat4 calculate_projection(const duk::scene::Object& object);
 
 }
 
-#endif // DUK_RENDERER_CAMERA_TYPES_H
+#endif // DUK_RENDERER_CAMERA_H
 

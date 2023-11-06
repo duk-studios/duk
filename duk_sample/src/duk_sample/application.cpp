@@ -7,6 +7,7 @@
 #include <duk_renderer/components/mesh_drawing.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/camera.h>
+#include <duk_renderer/components/lighting.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/random.hpp>
@@ -383,6 +384,37 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         pivotRotator->angularSpeed = 30.f;
 
         m_renderer->use_as_camera(m_camera);
+    }
+
+    // lights
+    {
+        auto object = m_scene->add_object();
+        auto directionalLight = object.add<duk::renderer::DirectionalLight>();
+        directionalLight->value.color = glm::vec3(0, 1, 0);
+        directionalLight->value.intensity = 0.25f;
+
+        auto rotation3D = object.add<duk::renderer::Rotation3D>();
+        rotation3D->value = glm::quatLookAt(glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
+    }
+
+    {
+        auto object = m_scene->add_object();
+        auto directionalLight = object.add<duk::renderer::DirectionalLight>();
+        directionalLight->value.color = glm::vec3(0, 0, 1);
+        directionalLight->value.intensity = 0.25f;
+
+        auto rotation3D = object.add<duk::renderer::Rotation3D>();
+        rotation3D->value = glm::quatLookAt(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+    }
+
+    {
+        auto object = m_scene->add_object();
+        auto directionalLight = object.add<duk::renderer::DirectionalLight>();
+        directionalLight->value.color = glm::vec3(1, 0, 0);
+        directionalLight->value.intensity = 0.25f;
+
+        auto rotation3D = object.add<duk::renderer::Rotation3D>();
+        rotation3D->value = glm::quatLookAt(glm::vec3(1, 0, 0), glm::vec3(0, 1, 0));
     }
 
 }

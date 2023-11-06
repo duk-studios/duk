@@ -29,11 +29,13 @@ public:
 
     DUK_NO_DISCARD explicit operator bool() const;
 
+    DUK_NO_DISCARD Object owner() const;
 
 private:
     Object::Id m_ownerId;
     Scene* m_scene;
 };
+
 
 using ComponentMask = duk::tools::BitBlock<MAX_COMPONENTS>;
 
@@ -172,6 +174,11 @@ T* Component<T>::operator->() const {
 template<typename T>
 bool Component<T>::valid() const {
     return m_scene->template valid_component<T>(m_ownerId);
+}
+
+template<typename T>
+Object Component<T>::owner() const {
+    return m_scene->object(m_ownerId);
 }
 
 template<typename T>

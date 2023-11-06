@@ -20,6 +20,8 @@ struct DirectionalLight {
 
 struct Lights {
     DirectionalLight directionalLights[16];
+    int directionalLightCount;
+    uint8_t _padding_directionalLightCount[12];
 };
 
 using LightsUBO = UniformBuffer<Lights>;

@@ -23,6 +23,8 @@ public:
 
     void update_camera(const duk::scene::Object& cameraObject);
 
+    void update_lights(duk::scene::Scene* scene);
+
     globals::CameraUBO* camera_ubo();
 
     globals::LightsUBO* lights_ubo();

@@ -40,6 +40,8 @@ glm::mat4 model_matrix_3d(const duk::scene::Object& object);
 
 glm::mat3 model_matrix_2d(const duk::scene::Object& object);
 
+glm::vec3 forward_direction_3d(const duk::scene::Object& object);
+
 }
 
 #endif // DUK_RENDERER_TRANSFORM_H

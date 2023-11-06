@@ -170,6 +170,8 @@ void Renderer::update_global_descriptors(duk::scene::Scene* scene) {
     if (scene->valid_object(m_mainCameraObjectId)) {
         m_globalDescriptors->update_camera(scene->object(m_mainCameraObjectId));
     }
+
+    m_globalDescriptors->update_lights(scene);
 }
 
 }

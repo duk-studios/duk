@@ -45,4 +45,8 @@ glm::mat3 model_matrix_2d(const duk::scene::Object& object) {
     return model;
 }
 
+glm::vec3 forward_direction_3d(const scene::Object& object) {
+    return glm::vec3(model_matrix_3d(object) * glm::vec4(0, 0, 1, 0));
+}
+
 }

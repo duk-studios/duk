@@ -4,6 +4,7 @@
 #include <duk_renderer/painters/globals/global_descriptors.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/components/lighting.h>
 
 namespace duk::renderer {
 
@@ -21,9 +22,7 @@ GlobalDescriptors::GlobalDescriptors(const GlobalDescriptorsCreateInfo& globalDe
         UniformBufferCreateInfo<globals::Lights> lightUboCreateInfo = {};
         lightUboCreateInfo.rhi = rhi;
         lightUboCreateInfo.commandQueue = commandQueue;
-        lightUboCreateInfo.initialData.directionalLights[0].value.color = glm::vec3(1);
-        lightUboCreateInfo.initialData.directionalLights[0].value.intensity = 1.0f;
-        lightUboCreateInfo.initialData.directionalLights[0].direction = glm::vec3(0, 0, -1);
+        lightUboCreateInfo.initialData = {};
         m_lightsUBO = std::make_unique<globals::LightsUBO>(lightUboCreateInfo);
     }
 }
@@ -41,6 +40,24 @@ void GlobalDescriptors::update_camera(const scene::Object& cameraObject) {
     camera.vp = camera.proj * camera.view;
 
     m_cameraUBO->flush();
+}
+
+void GlobalDescriptors::update_lights(duk::scene::Scene* scene) {
+    auto& lights = m_lightsUBO->data();
+    lights.directionalLightCount = 0;
+    for (auto object : scene->objects_with_components<DirectionalLight>()) {
+        auto directionalLightComponent = object.component<DirectionalLight>();
+        auto& directionalLight = lights.directionalLights[lights.directionalLightCount++];
+        directionalLight.direction = forward_direction_3d(object);
+        directionalLight.value.color = directionalLightComponent->value.color;
+        directionalLight.value.intensity = directionalLightComponent->value.intensity;
+
+        if (lights.directionalLightCount >= sizeof globals::Lights::directionalLights) {
+            break;
+        }
+    }
+
+    m_lightsUBO->flush();
 }
 
 globals::CameraUBO* GlobalDescriptors::camera_ubo() {

@@ -30,6 +30,10 @@ void main() {
     vec3 cameraPosition = vec3(uCamera.matrices.invView[3]);
     vec3 view = normalize(cameraPosition - vPosition);
     vec3 normal = normalize(vNormal);
-    vec3 lighting = calculate_directional_lighting(uLights.lights.directionalLights[0], normal, view);
+    vec3 lighting = vec3(0);
+    for (int i = 0; i < uLights.lights.directionalLightCount; i++) {
+        lighting += calculate_directional_lighting(uLights.lights.directionalLights[i], normal, view);
+    }
+
     oColor = vec4(lighting, 1.0);
 }

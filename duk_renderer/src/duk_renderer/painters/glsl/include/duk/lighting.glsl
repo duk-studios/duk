@@ -13,6 +13,7 @@ struct DirectionalLight {
 
 struct Lights {
     DirectionalLight directionalLights[16];
+    int directionalLightCount;
 };
 
 #define DUK_DECLARE_LIGHTS_BINDING(bindingIndex, bindingName)   \
