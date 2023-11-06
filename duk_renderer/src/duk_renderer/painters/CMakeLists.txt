@@ -124,8 +124,7 @@ function(add_painter_generate_command PACKED_ENTRY)
     list(APPEND COMMAND_LINE "-l")
     list(APPEND COMMAND_LINE "${GLOBAL_BINDING_NAMES}")
 
-    message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
-
+#    message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
 
     set(OUTPUT_FILES)
     list(APPEND OUTPUT_FILES "${PAINTER_INC_DIR}/${NAME}_types.h")
@@ -141,12 +140,6 @@ function(add_painter_generate_command PACKED_ENTRY)
             COMMAND duk_painter_generator ${COMMAND_LINE}
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Generating painter files for ${NAME}"
-    )
-
-    # add generated files to target
-    target_sources(duk_renderer
-            PRIVATE
-            ${OUTPUT_FILES}
     )
 
     install(
@@ -177,13 +170,6 @@ add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT_STAMP}
         COMMENT "Generating global painter files"
 )
-
-# generated global types
-target_sources(duk_renderer
-        PUBLIC
-        ${GLOBAL_FILES}
-)
-
 
 add_custom_target(generate_painter_files
         DEPENDS duk_painter_generator ${GENERATED_FILES} ${GLOBAL_FILES} ${OUTPUT_STAMP}
