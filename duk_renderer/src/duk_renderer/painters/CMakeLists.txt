@@ -164,16 +164,30 @@ foreach (PACKED_ENTRY ${GENERATE_PAINTER_ENTRIES})
     add_painter_generate_command(${PACKED_ENTRY})
 endforeach ()
 
-add_custom_target(generate_painter_files
-        DEPENDS duk_painter_generator ${GENERATED_FILES}
-        COMMENT "Generating painter files"
+# global files, we use mark them as output to painter generation commands
+set(GLOBAL_FILES)
+list(APPEND GLOBAL_FILES "${INC_DIR}/globals/lights_types.h")
+list(APPEND GLOBAL_FILES "${INC_DIR}/globals/camera_types.h")
+
+set(OUTPUT_STAMP "${CMAKE_CURRENT_BINARY_DIR}/stamps/globals.stamp")
+
+add_custom_command(
+        OUTPUT ${GLOBAL_FILES} ${OUTPUT_STAMP}
+        DEPENDS ${GENERATED_FILES}
+        COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT_STAMP}
+        COMMENT "Generating global painter files"
 )
 
 # generated global types
 target_sources(duk_renderer
         PUBLIC
-        "${INC_DIR}/globals/lights_types.h"
-        "${INC_DIR}/globals/camera_types.h"
-    )
+        ${GLOBAL_FILES}
+)
+
+
+add_custom_target(generate_painter_files
+        DEPENDS duk_painter_generator ${GENERATED_FILES} ${GLOBAL_FILES} ${OUTPUT_STAMP}
+        COMMENT "Generating painter files"
+)
 
 add_dependencies(duk_renderer generate_painter_files)
