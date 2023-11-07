@@ -24,17 +24,32 @@ layout(binding = 3) uniform MaterialUBO {
     Material material;
 } uMaterial;
 
-vec3 calculate_directional_lighting(in DirectionalLight light, in Material material, in vec3 normal, in vec3 view) {
+vec3 calculate_lighting(in LightValue light, in Material material, in vec3 normal, in vec3 view, in vec3 lightDirection, in float attenuation) {
     vec3 result = vec3(0);
 
-    float diffuseIntensity = max(dot(normal, light.direction), 0.0);
-    vec3 diffuse = (light.value.color * light.value.intensity) * (diffuseIntensity * material.diffuse);
+    vec3 lighting = light.color * light.intensity * attenuation;
 
-    vec3 reflectDir = reflect(-light.direction, normal);
+    float diffuseIntensity = max(dot(normal, lightDirection), 0.0);
+    vec3 diffuse = lighting * (diffuseIntensity * material.diffuse);
+
+    vec3 reflectDir = reflect(-lightDirection, normal);
     float specularIntensity = pow(max(dot(view, reflectDir), 0.0), material.shininess);
-    vec3 specular = (light.value.color * light.value.intensity) * (specularIntensity * material.specular);
+    vec3 specular = lighting * (specularIntensity * material.specular);
 
-    return diffuse + specular + material.ambient;
+    return diffuse + specular;
+}
+
+vec3 calculate_directional_lighting(in DirectionalLight light, in Material material, in vec3 normal, in vec3 view) {
+    return calculate_lighting(light.value, material, normal, view, light.direction, 1.0f);
+}
+
+vec3 calculate_point_lighting(in PointLight light, in Material material, in vec3 normal, in vec3 view, in vec3 position) {
+    vec3 lightDirection = light.position - position;
+    float distance = length(lightDirection);
+    float attenuation = 1.0f / (1.0f + (light.linear * distance) + (light.quadratic * (distance * distance)));
+    lightDirection = lightDirection / distance;
+
+    return calculate_lighting(light.value, material, normal, view, lightDirection, attenuation);
 }
 
 void main() {
@@ -46,6 +61,10 @@ void main() {
 
     for (int i = 0; i < uLights.lights.directionalLightCount; i++) {
         lighting += calculate_directional_lighting(uLights.lights.directionalLights[i], uMaterial.material, normal, view);
+    }
+
+    for (int i = 0; i < uLights.lights.pointLightCount; i++) {
+        lighting += calculate_point_lighting(uLights.lights.pointLights[i], uMaterial.material, normal, view, vPosition);
     }
 
     oColor = vec4(lighting, 1.0);

@@ -18,10 +18,21 @@ struct DirectionalLight {
     uint8_t _padding_direction[4];
 };
 
+struct PointLight {
+    LightValue value;
+    glm::vec3 position;
+    float linear;
+    float quadratic;
+    uint8_t _padding_quadratic[12];
+};
+
 struct Lights {
-    DirectionalLight directionalLights[16];
+    DirectionalLight directionalLights[8];
     int directionalLightCount;
     uint8_t _padding_directionalLightCount[12];
+    PointLight pointLights[32];
+    int pointLightCount;
+    uint8_t _padding_pointLightCount[12];
 };
 
 using LightsUBO = UniformBuffer<Lights>;

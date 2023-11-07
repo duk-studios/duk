@@ -11,9 +11,18 @@ struct DirectionalLight {
     vec3 direction;
 };
 
+struct PointLight {
+    LightValue value;
+    vec3 position;
+    float linear;
+    float quadratic;
+};
+
 struct Lights {
-    DirectionalLight directionalLights[16];
+    DirectionalLight directionalLights[8];
     int directionalLightCount;
+    PointLight pointLights[32];
+    int pointLightCount;
 };
 
 #define DUK_DECLARE_LIGHTS_BINDING(bindingIndex, bindingName)   \
