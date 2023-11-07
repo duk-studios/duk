@@ -79,42 +79,40 @@ DefaultMeshDataSource cube_mesh_data_source() {
     std::array<DefaultMeshDataSource::VertexType, 24> vertices = {};
 
     // front
-    vertices[0] = {{0.5f, 0.5f, 0.5f},      {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[1] = {{-0.5f, 0.5f, 0.5f},     {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
-    vertices[2] = {{0.5f, -0.5f, 0.5f},     {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[3] = {{-0.5f, -0.5f, 0.5f},    {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}};
+    vertices[0] = {{ 0.5f,  0.5f, -0.5f},   {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}};
+    vertices[1] = {{-0.5f,  0.5f, -0.5f},   {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}};
+    vertices[2] = {{ 0.5f, -0.5f, -0.5f},   {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}};
+    vertices[3] = {{-0.5f, -0.5f, -0.5f},   {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}};
 
     // back
-    vertices[4] = {{-0.5f, 0.5f, -0.5f},    {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}};
-    vertices[5] = {{0.5f, 0.5f, -0.5f},     {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}};
-    vertices[6] = {{-0.5f, -0.5f, -0.5f},   {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}};
-    vertices[7] = {{0.5f, -0.5f, -0.5f},    {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}};
+    vertices[4] = {{-0.5f,  0.5f, 0.5f},    {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
+    vertices[5] = {{ 0.5f,  0.5f, 0.5f},    {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[6] = {{-0.5f, -0.5f, 0.5f},    {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}};
+    vertices[7] = {{ 0.5f, -0.5f, 0.5f},    {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}};
 
     // left
-    vertices[8] = {{-0.5f, 0.5f, 0.5f},     {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
-    vertices[9] = {{-0.5f, 0.5f, -0.5f},    {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
-    vertices[10] = {{-0.5f, -0.5f, 0.5f},   {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
-    vertices[11] = {{-0.5f, -0.5f, -0.5f},  {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}};
+    vertices[8] =  {{-0.5f,  0.5f, -0.5f},  {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[9] =  {{-0.5f,  0.5f,  0.5f},  {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[10] = {{-0.5f, -0.5f, -0.5f},  {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[11] = {{-0.5f, -0.5f,  0.5f},  {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}};
 
     // right
-    vertices[12] = {{0.5f, 0.5f, -0.5f},    {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
-    vertices[13] = {{0.5f, 0.5f, 0.5f},     {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
-    vertices[14] = {{0.5f, -0.5f, -0.5f},   {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
-    vertices[15] = {{0.5f, -0.5f, 0.5f},    {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}};
+    vertices[12] = {{0.5f,  0.5f,  0.5f},   {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[13] = {{0.5f,  0.5f, -0.5f},   {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[14] = {{0.5f, -0.5f,  0.5f},   {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[15] = {{0.5f, -0.5f, -0.5f},   {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}};
 
     // top
-    vertices[16] = {{0.5f, 0.5f, -0.5f},    {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}};
-    vertices[17] = {{-0.5f, 0.5f, -0.5f},   {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}};
-    vertices[18] = {{0.5f, 0.5f, 0.5f},     {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}};
-    vertices[19] = {{-0.5f, 0.5f, 0.5f},    {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}};
+    vertices[16] = {{ 0.5f, 0.5f,  0.5f},   {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[17] = {{-0.5f, 0.5f,  0.5f},   {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[18] = {{ 0.5f, 0.5f, -0.5f},   {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[19] = {{-0.5f, 0.5f, -0.5f},   {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}};
 
     // bottom
-    vertices[20] = {{0.5f, -0.5f, 0.5f},    {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}};
-    vertices[21] = {{-0.5f, -0.5f, 0.5f},   {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}};
-    vertices[22] = {{0.5f, -0.5f, -0.5f},   {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}};
-    vertices[23] = {{-0.5f, -0.5f, -0.5f},  {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}};
-
-
+    vertices[20] = {{ 0.5f, -0.5f, -0.5f},  {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[21] = {{-0.5f, -0.5f, -0.5f},  {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[22] = {{ 0.5f, -0.5f,  0.5f},  {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[23] = {{-0.5f, -0.5f,  0.5f},  {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}};
 
     meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
@@ -175,15 +173,15 @@ DefaultMeshDataSource sphere_mesh_data_source(uint32_t segments) {
             int nextIdx = nextRow * (segments + 1) + j;
             int nextRightIdx = nextRow * (segments + 1) + nextColumn;
 
-            // Front face (clockwise order)
+            // Front face (counterclockwise order)
             indices.push_back(currentIdx);
-            indices.push_back(nextRightIdx);
             indices.push_back(nextIdx);
-
-            // Back face (clockwise order)
-            indices.push_back(currentIdx);
-            indices.push_back(currentIdx + 1);
             indices.push_back(nextRightIdx);
+
+            // Back face (counterclockwise order)
+            indices.push_back(currentIdx);
+            indices.push_back(nextRightIdx);
+            indices.push_back(currentIdx + 1);
         }
     }
 
