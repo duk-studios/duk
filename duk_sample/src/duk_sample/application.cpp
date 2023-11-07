@@ -336,22 +336,22 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         m_phongPainter = std::make_shared<duk::renderer::PhongPainter>(phongPainterCreateInfo);
 
         m_phongGreenPalette = m_phongPainter->make_palette();
-        m_phongGreenPalette->update_material({0.0f, 1.0f, 0.0f});
+        m_phongGreenPalette->update_material({0.0f, 1.0f, 0.0f}, {0.0, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 2);
 
         m_phongBluePalette = m_phongPainter->make_palette();
-        m_phongBluePalette->update_material({0.0f, 0.0f, 1.0f});
+        m_phongBluePalette->update_material({0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 4);
 
         m_phongRedPalette = m_phongPainter->make_palette();
-        m_phongRedPalette->update_material({1.0f, 0.0f, 0.0f});
+        m_phongRedPalette->update_material({1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 8);
 
         m_phongYellowPalette = m_phongPainter->make_palette();
-        m_phongYellowPalette->update_material({1.0f, 1.0f, 0.0f});
+        m_phongYellowPalette->update_material({1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 16);
 
         m_phongWhitePalette = m_phongPainter->make_palette();
-        m_phongWhitePalette->update_material({1.0f, 1.0f, 1.0f});
+        m_phongWhitePalette->update_material({1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 32);
 
         m_phongUnknownPalette = m_phongPainter->make_palette();
-        m_phongUnknownPalette->update_material({0.0f, 1.0f, 1.0f});
+        m_phongUnknownPalette->update_material({0.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 64);
     }
 
 

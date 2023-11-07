@@ -25,7 +25,7 @@ PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo)
         UniformBufferCreateInfo<phong::Material> materialUBOCreateInfo = {};
         materialUBOCreateInfo.rhi = rhi;
         materialUBOCreateInfo.commandQueue = commandQueue;
-        materialUBOCreateInfo.initialData.color = glm::vec3(1);
+        materialUBOCreateInfo.initialData = {};
         m_materialUBO = std::make_unique<phong::MaterialUBO>(materialUBOCreateInfo);
     }
 
@@ -72,8 +72,31 @@ void PhongPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyPara
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }
 
-void PhongPalette::update_material(const glm::vec3& color) {
-    m_materialUBO->data().color = color;
+void PhongPalette::update_diffuse(const glm::vec3& diffuse) {
+    m_materialUBO->data().diffuse = diffuse;
+    m_materialUBO->flush();
+}
+
+void PhongPalette::update_specular(const glm::vec3& specular) {
+    m_materialUBO->data().specular = specular;
+    m_materialUBO->flush();
+}
+
+void PhongPalette::update_ambient(const glm::vec3& ambient) {
+    m_materialUBO->data().ambient = ambient;
+    m_materialUBO->flush();
+}
+
+void PhongPalette::update_shininess(float shininess) {
+    m_materialUBO->data().shininess = shininess;
+    m_materialUBO->flush();
+}
+
+void PhongPalette::update_material(const glm::vec3& diffuse, const glm::vec3& specular, const glm::vec3& ambient, float shininess) {
+    m_materialUBO->data().diffuse = diffuse;
+    m_materialUBO->data().specular = specular;
+    m_materialUBO->data().ambient = ambient;
+    m_materialUBO->data().shininess = shininess;
     m_materialUBO->flush();
 }
 
