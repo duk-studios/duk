@@ -371,7 +371,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             scale,
             m_phongPainter.get(),
             m_phongGreenPalette.get(),
-            m_cubeMesh.get()
+            m_sphereMesh.get()
     );
 
     detail::add_object(
@@ -391,7 +391,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             scale,
             m_phongPainter.get(),
             m_phongRedPalette.get(),
-            m_cubeMesh.get()
+            m_sphereMesh.get()
     );
 
     detail::add_object(
@@ -411,7 +411,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             scale,
             m_phongPainter.get(),
             m_phongWhitePalette.get(),
-            m_cubeMesh.get()
+            m_sphereMesh.get()
     );
 
     detail::add_object(
@@ -441,46 +441,35 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     }
 
     // lights
-//    {
-//        auto object = m_scene->add_object();
-//        auto directionalLight = object.add<duk::renderer::DirectionalLight>();
-//        directionalLight->value.color = glm::vec3(0, 1, 0);
-//        directionalLight->value.intensity = 0.25f;
-//
-//        auto rotation3D = object.add<duk::renderer::Rotation3D>();
-//        rotation3D->value = glm::quatLookAt(glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
-//    }
-//
-//    {
-//        auto object = m_scene->add_object();
-//        auto directionalLight = object.add<duk::renderer::DirectionalLight>();
-//        directionalLight->value.color = glm::vec3(0, 0, 1);
-//        directionalLight->value.intensity = 0.25f;
-//
-//        auto rotation3D = object.add<duk::renderer::Rotation3D>();
-//        rotation3D->value = glm::quatLookAt(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
-//    }
-//
-//    {
-//        auto object = m_scene->add_object();
-//        auto directionalLight = object.add<duk::renderer::DirectionalLight>();
-//        directionalLight->value.color = glm::vec3(1, 0, 0);
-//        directionalLight->value.intensity = 0.25f;
-//
-//        auto rotation3D = object.add<duk::renderer::Rotation3D>();
-//        rotation3D->value = glm::quatLookAt(glm::vec3(1, 0, 0), glm::vec3(0, 1, 0));
-//    }
+    {
+        auto object = m_scene->add_object();
+        auto pointLight = object.add<duk::renderer::PointLight>();
+        pointLight->value.color = glm::vec3(0.5f, 1.f, 0.2f);
+        pointLight->value.intensity = 5.0f;
+
+        auto position3D = object.add<duk::renderer::Position3D>();
+        position3D->value = glm::vec3(offset * 2, 5, offset);
+    }
+
+    {
+        auto object = m_scene->add_object();
+        auto pointLight = object.add<duk::renderer::PointLight>();
+        pointLight->value.color = glm::vec3(0.9f, 0.3f, 0.459f);
+        pointLight->value.intensity = 3.0f;
+
+        auto position3D = object.add<duk::renderer::Position3D>();
+        position3D->value = glm::vec3(-offset * 2, -5, 10);
+    }
 
     {
         auto object = m_scene->add_object();
         auto directionalLight = object.add<duk::renderer::DirectionalLight>();
         directionalLight->value.color = glm::vec3(1, 1, 1);
-        directionalLight->value.intensity = 1;
+        directionalLight->value.intensity = 0.25f;
 
         auto rotation3D = object.add<duk::renderer::Rotation3D>();
         rotation3D->value = glm::quatLookAt(glm::vec3(0, -1, 0), glm::vec3(0, 1, 0));
     }
-
 }
 
 Application::~Application() {
