@@ -19,6 +19,15 @@ set(GLOBAL_BINDING_NAMES)
 list(APPEND GLOBAL_BINDING_NAMES "CameraUBO")
 list(APPEND GLOBAL_BINDING_NAMES "LightsUBO")
 
+set(GLOBAL_GLSL_FILES)
+list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/lighting.glsl")
+list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/camera.glsl")
+
+# global files, we use mark them as output to painter generation commands
+set(GLOBAL_GENERATED_FILES)
+list(APPEND GLOBAL_GENERATED_FILES "${INC_DIR}/globals/lights_types.h")
+list(APPEND GLOBAL_GENERATED_FILES "${INC_DIR}/globals/camera_types.h")
+
 string(REPLACE ";" "," GLOBAL_BINDING_NAMES "${GLOBAL_BINDING_NAMES}")
 
 set(GENERATE_PAINTER_ENTRIES "" CACHE STRING "List of generate_painter_files calls" FORCE)
@@ -91,7 +100,7 @@ function(add_painter_generate_command PACKED_ENTRY)
 
         add_custom_command(
                 OUTPUT ${OUTPUT_SPV}
-                DEPENDS ${GLSL_SOURCE}
+                DEPENDS ${GLSL_SOURCE} ${GLOBAL_GLSL_FILES}
                 COMMAND ${GLSLC_EXECUTABLE} ${GLSL_SOURCE} -o ${OUTPUT_SPV} ${GLSLC_FLAGS}
                 WORKING_DIRECTORY ${SRC_DIR}
                 COMMENT "Compiling GLSL ${GLSL_FILENAME} to SPIR-V: ${OUTPUT_SPV}"
@@ -157,22 +166,17 @@ foreach (PACKED_ENTRY ${GENERATE_PAINTER_ENTRIES})
     add_painter_generate_command(${PACKED_ENTRY})
 endforeach ()
 
-# global files, we use mark them as output to painter generation commands
-set(GLOBAL_FILES)
-list(APPEND GLOBAL_FILES "${INC_DIR}/globals/lights_types.h")
-list(APPEND GLOBAL_FILES "${INC_DIR}/globals/camera_types.h")
-
 set(OUTPUT_STAMP "${CMAKE_CURRENT_BINARY_DIR}/stamps/globals.stamp")
 
 add_custom_command(
-        OUTPUT ${GLOBAL_FILES} ${OUTPUT_STAMP}
+        OUTPUT ${GLOBAL_GENERATED_FILES} ${OUTPUT_STAMP}
         DEPENDS ${GENERATED_FILES}
         COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT_STAMP}
         COMMENT "Generating global painter files"
 )
 
 add_custom_target(generate_painter_files
-        DEPENDS duk_painter_generator ${GENERATED_FILES} ${GLOBAL_FILES} ${OUTPUT_STAMP}
+        DEPENDS duk_painter_generator ${GENERATED_FILES} ${GLOBAL_GENERATED_FILES} ${OUTPUT_STAMP}
         COMMENT "Generating painter files"
 )
 
