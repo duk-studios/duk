@@ -231,6 +231,14 @@ void VulkanDescriptorSet::set(uint32_t binding, const Descriptor& descriptor) {
     m_descriptors[binding] = descriptor;
 }
 
+Descriptor& VulkanDescriptorSet::at(uint32_t binding) {
+    return m_descriptors.at(binding);
+}
+
+const Descriptor& VulkanDescriptorSet::at(uint32_t binding) const {
+    return m_descriptors.at(binding);
+}
+
 Image* VulkanDescriptorSet::image(uint32_t binding) {
     return m_descriptors[binding].image();
 }

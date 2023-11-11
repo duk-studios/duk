@@ -77,6 +77,10 @@ public:
 
     void set(uint32_t binding, const Descriptor& descriptor) override;
 
+    DUK_NO_DISCARD Descriptor& at(uint32_t binding) override;
+
+    DUK_NO_DISCARD const Descriptor& at(uint32_t binding) const override;
+
     DUK_NO_DISCARD Image* image(uint32_t binding) override;
 
     DUK_NO_DISCARD const Image* image(uint32_t binding) const override;
