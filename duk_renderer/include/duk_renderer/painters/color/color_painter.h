@@ -29,8 +29,6 @@ public:
 
     explicit ColorPainter(const ColorPainterCreateInfo& colorPainterCreateInfo);
 
-    DUK_NO_DISCARD const duk::rhi::DescriptorSetDescription& descriptor_set_description() const;
-
     std::shared_ptr<ColorPalette> make_palette() const;
 
 private:

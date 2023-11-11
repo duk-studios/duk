@@ -23,8 +23,6 @@ public:
 
     ~FullscreenPainter() override;
 
-    const duk::rhi::DescriptorSetDescription& descriptor_set_description() const;
-
     std::shared_ptr<FullscreenPalette> make_palette() const;
 
 protected:

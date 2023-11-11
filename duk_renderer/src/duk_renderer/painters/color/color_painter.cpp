@@ -12,10 +12,6 @@ ColorPainter::ColorPainter(const ColorPainterCreateInfo& colorPainterCreateInfo)
     init_shader(&m_shaderDataSource);
 }
 
-const duk::rhi::DescriptorSetDescription& ColorPainter::descriptor_set_description() const {
-    return m_shaderDataSource.descriptor_set_descriptions().at(0);
-}
-
 std::shared_ptr<ColorPalette> ColorPainter::make_palette() const {
     ColorPaletteCreateInfo colorPaletteCreateInfo = {};
     colorPaletteCreateInfo.rhi = m_rhi;

@@ -23,8 +23,6 @@ public:
 
     ~PhongPainter() override;
 
-    const duk::rhi::DescriptorSetDescription& descriptor_set_description() const;
-
     std::shared_ptr<PhongPalette> make_palette() const;
 
 private:

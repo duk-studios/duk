@@ -15,10 +15,6 @@ PhongPainter::PhongPainter(const PhongPainterCreateInfo& phongPainterCreateInfo)
 
 PhongPainter::~PhongPainter() = default;
 
-const duk::rhi::DescriptorSetDescription& PhongPainter::descriptor_set_description() const {
-    return m_shaderDataSource.descriptor_set_descriptions().at(0);
-}
-
 std::shared_ptr<PhongPalette> PhongPainter::make_palette() const {
     PhongPaletteCreateInfo colorPaletteCreateInfo = {};
     colorPaletteCreateInfo.rhi = m_rhi;
