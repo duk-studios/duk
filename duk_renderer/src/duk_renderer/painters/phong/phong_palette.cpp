@@ -2,16 +2,15 @@
 /// phong_palette.cpp
 
 #include <duk_renderer/painters/phong/phong_palette.h>
-#include <duk_renderer/painters/phong/phong_painter.h>
 #include <duk_renderer/painters/globals/global_descriptors.h>
 #include <duk_renderer/components/transform.h>
 
 namespace duk::renderer {
 
 PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo) :
-    m_descriptorSet({phongPaletteCreateInfo.rhi, phongPaletteCreateInfo.shaderDataSource}){
-    auto rhi = phongPaletteCreateInfo.rhi;
-    auto commandQueue = phongPaletteCreateInfo.commandQueue;
+    m_descriptorSet({phongPaletteCreateInfo.renderer->rhi(), phongPaletteCreateInfo.shaderDataSource}) {
+    auto rhi = phongPaletteCreateInfo.renderer->rhi();
+    auto commandQueue = phongPaletteCreateInfo.renderer->main_command_queue();
 
     {
         StorageBufferCreateInfo transformSBOCreateInfo = {};

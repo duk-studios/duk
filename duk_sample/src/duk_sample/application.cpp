@@ -4,6 +4,7 @@
 #include <duk_sample/application.h>
 #include <duk_platform/window.h>
 #include <duk_renderer/vertex_types.h>
+#include <duk_renderer/painters/painter.h>
 #include <duk_renderer/components/mesh_drawing.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/camera.h>
@@ -317,38 +318,50 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
 
     {
-        duk::renderer::ColorPainterCreateInfo colorPainterCreateInfo = {};
-        colorPainterCreateInfo.rhi = m_renderer->rhi();
-        colorPainterCreateInfo.commandQueue = m_renderer->main_command_queue();
+        duk::renderer::ColorShaderDataSource colorShaderDataSource;
 
-        m_colorPainter = std::make_shared<duk::renderer::ColorPainter>(colorPainterCreateInfo);
+        duk::renderer::PainterCreateInfo colorPainterCreateInfo = {};
+        colorPainterCreateInfo.renderer = m_renderer.get();
+        colorPainterCreateInfo.shaderDataSource = &colorShaderDataSource;
 
-        m_colorPalette = m_colorPainter->make_palette();
+        m_colorPainter = std::make_shared<duk::renderer::Painter>(colorPainterCreateInfo);
+
+        duk::renderer::ColorPaletteCreateInfo colorPaletteCreateInfo = {};
+        colorPaletteCreateInfo.renderer = m_renderer.get();
+        colorPaletteCreateInfo.shaderDataSource = &colorShaderDataSource;
+
+        m_colorPalette = std::make_shared<duk::renderer::ColorPalette>(colorPaletteCreateInfo);
     }
 
     {
-        duk::renderer::PhongPainterCreateInfo phongPainterCreateInfo = {};
-        phongPainterCreateInfo.rhi = m_renderer->rhi();
-        phongPainterCreateInfo.commandQueue = m_renderer->main_command_queue();
+        duk::renderer::PhongShaderDataSource phongShaderDataSource;
 
-        m_phongPainter = std::make_shared<duk::renderer::PhongPainter>(phongPainterCreateInfo);
+        duk::renderer::PainterCreateInfo phongPainterCreateInfo = {};
+        phongPainterCreateInfo.renderer = m_renderer.get();
+        phongPainterCreateInfo.shaderDataSource = &phongShaderDataSource;
 
-        m_phongGreenPalette = m_phongPainter->make_palette();
+        m_phongPainter = std::make_shared<duk::renderer::Painter>(phongPainterCreateInfo);
+
+        duk::renderer::PhongPaletteCreateInfo phongPaletteCreateInfo = {};
+        phongPaletteCreateInfo.renderer = m_renderer.get();
+        phongPaletteCreateInfo.shaderDataSource = &phongShaderDataSource;
+
+        m_phongGreenPalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
         m_phongGreenPalette->update_material({0.0f, 1.0f, 0.0f}, {0.0, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 2);
 
-        m_phongBluePalette = m_phongPainter->make_palette();
+        m_phongBluePalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
         m_phongBluePalette->update_material({0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 4);
 
-        m_phongRedPalette = m_phongPainter->make_palette();
+        m_phongRedPalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
         m_phongRedPalette->update_material({1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 8);
 
-        m_phongYellowPalette = m_phongPainter->make_palette();
+        m_phongYellowPalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
         m_phongYellowPalette->update_material({1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 16);
 
-        m_phongWhitePalette = m_phongPainter->make_palette();
+        m_phongWhitePalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
         m_phongWhitePalette->update_material({1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 32);
 
-        m_phongUnknownPalette = m_phongPainter->make_palette();
+        m_phongUnknownPalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
         m_phongUnknownPalette->update_material({0.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 64);
     }
 

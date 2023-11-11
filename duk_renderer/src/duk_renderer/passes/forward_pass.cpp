@@ -2,7 +2,11 @@
 /// forward_pass.cpp
 
 #include <duk_renderer/passes/forward_pass.h>
+#include <duk_renderer/renderer.h>
 #include <duk_renderer/components/mesh_drawing.h>
+#include <duk_renderer/painters/palette.h>
+#include <duk_renderer/painters/painter.h>
+#include <duk_renderer/brushes/mesh.h>
 
 namespace duk::renderer {
 
@@ -114,15 +118,15 @@ void ForwardPass::render(const RenderParams& renderParams) {
 
     SortKey::sort_indices(m_objectEntries, m_sortedObjectIndices);
 
-    auto compatible_with_paint_entry = [](const Renderer::PaintEntry& paintEntry, const Renderer::ObjectEntry& objectEntry) -> bool {
+    auto compatible_with_paint_entry = [](const PaintEntry& paintEntry, const ObjectEntry& objectEntry) -> bool {
         return paintEntry.painter == objectEntry.painter && paintEntry.params.brush == objectEntry.brush && paintEntry.params.palette == objectEntry.palette;
     };
 
-    auto is_valid = [](const Renderer::PaintEntry& paintEntry) {
+    auto is_valid = [](const PaintEntry& paintEntry) {
         return paintEntry.painter && paintEntry.params.brush && paintEntry.params.palette && paintEntry.params.instanceCount > 0;
     };
 
-    Renderer::PaintEntry paintEntry = {};
+    PaintEntry paintEntry = {};
     paintEntry.params.renderPass = m_renderPass.get();
     paintEntry.params.outputWidth = renderParams.outputWidth;
     paintEntry.params.outputHeight = renderParams.outputHeight;

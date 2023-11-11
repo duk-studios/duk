@@ -4,11 +4,11 @@
 #ifndef DUK_RENDERER_MESH_DRAWER_H
 #define DUK_RENDERER_MESH_DRAWER_H
 
-#include <duk_renderer/brushes/mesh.h>
-#include <duk_renderer/painters/painter.h>
-#include <duk_renderer/painters/palette.h>
-
 namespace duk::renderer {
+
+class Mesh;
+class Painter;
+class Palette;
 
 struct MeshDrawing {
     Mesh* mesh;

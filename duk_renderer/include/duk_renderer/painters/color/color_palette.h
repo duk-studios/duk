@@ -5,7 +5,6 @@
 #define DUK_RENDERER_COLOR_PALETTE_H
 
 #include <duk_renderer/painters/palette.h>
-#include <duk_renderer/painters/color/color_painter.h>
 #include <duk_renderer/painters/color/color_types.h>
 #include <duk_renderer/painters/color/color_descriptor_sets.h>
 
@@ -20,8 +19,7 @@
 namespace duk::renderer {
 
 struct ColorPaletteCreateInfo {
-    duk::rhi::RHI* rhi;
-    duk::rhi::CommandQueue* commandQueue;
+    Renderer* renderer;
     const ColorShaderDataSource* shaderDataSource;
 };
 

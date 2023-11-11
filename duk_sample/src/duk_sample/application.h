@@ -10,9 +10,7 @@
 #include <duk_rhi/rhi.h>
 #include <duk_renderer/brushes/mesh.h>
 #include <duk_renderer/forward/forward_renderer.h>
-#include <duk_renderer/painters/color/color_painter.h>
 #include <duk_renderer/painters/color/color_palette.h>
-#include <duk_renderer/painters/phong/phong_painter.h>
 #include <duk_renderer/painters/phong/phong_palette.h>
 
 #include <memory>
@@ -59,9 +57,9 @@ private:
     std::shared_ptr<duk::renderer::Mesh> m_quadMesh;
     std::shared_ptr<duk::renderer::Mesh> m_cubeMesh;
     std::shared_ptr<duk::renderer::Mesh> m_sphereMesh;
-    std::shared_ptr<duk::renderer::ColorPainter> m_colorPainter;
+    std::shared_ptr<duk::renderer::Painter> m_colorPainter;
     std::shared_ptr<duk::renderer::ColorPalette> m_colorPalette;
-    std::shared_ptr<duk::renderer::PhongPainter> m_phongPainter;
+    std::shared_ptr<duk::renderer::Painter> m_phongPainter;
     std::shared_ptr<duk::renderer::PhongPalette> m_phongGreenPalette, m_phongBluePalette, m_phongRedPalette, m_phongWhitePalette, m_phongYellowPalette, m_phongUnknownPalette;
     std::shared_ptr<duk::scene::Scene> m_scene;
     duk::scene::Object m_camera;

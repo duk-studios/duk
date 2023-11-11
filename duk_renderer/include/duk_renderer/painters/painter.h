@@ -4,63 +4,67 @@
 #ifndef DUK_RENDERER_PAINTER_H
 #define DUK_RENDERER_PAINTER_H
 
-#include <duk_rhi/descriptor_set.h>
-#include <duk_rhi/command/command_buffer.h>
+#include <duk_renderer/painters/paint_entry.h>
 #include <duk_rhi/rhi.h>
-
 
 namespace duk::renderer {
 
+class Renderer;
 class Brush;
 class Palette;
 class GlobalDescriptors;
 
+struct PainterCreateInfo {
+    Renderer* renderer;
+    duk::rhi::ShaderDataSource* shaderDataSource;
+};
+
 class Painter {
-protected:
-
-    explicit Painter(duk::rhi::RHI* rhi);
-
 public:
-
-    virtual ~Painter();
-
-    struct PaintParams {
-        uint32_t outputWidth;
-        uint32_t outputHeight;
-        duk::rhi::RenderPass* renderPass;
-        Brush* brush;
-        Palette* palette;
-        GlobalDescriptors* globalDescriptors;
-        size_t instanceCount;
-        size_t firstInstance;
-    };
+    Painter(const PainterCreateInfo& painterCreateInfo);
 
     void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
 
+    void update_shader(duk::rhi::ShaderDataSource* shaderDataSource);
+
+    void invert_y(bool invert);
+
     void clear_unused_pipelines();
 
-protected:
-
-    duk::rhi::GraphicsPipeline* find_pipeline_for_params(const Painter::PaintParams& params);
-
-    duk::hash::Hash hash_for_params(const PaintParams& params) const;
-
-    // should be called by derived classes after loading their data sources
-    void init_shader(const rhi::ShaderDataSource* shaderDataSource);
-
-    virtual duk::rhi::GraphicsPipeline::Viewport viewport_for_params(const Painter::PaintParams& params);
-
-protected:
-    duk::rhi::RHI* m_rhi;
 private:
-    std::shared_ptr<duk::rhi::Shader> m_shader;
+    class PipelineCache {
+    public:
+        PipelineCache(Renderer* renderer, duk::rhi::ShaderDataSource* shaderDataSource);
 
-    struct PipelineEntry {
-        std::shared_ptr<duk::rhi::GraphicsPipeline> pipeline;
-        int framesUnused;
+        void update_shader(duk::rhi::ShaderDataSource* shaderDataSource);
+
+        duk::rhi::GraphicsPipeline* find_pipeline_for_params(const PaintParams& params);
+
+        void invert_y(bool invert);
+
+        void clear_unused_pipelines();
+
+    private:
+        duk::hash::Hash hash_for_params(const PaintParams& params) const;
+
+        duk::rhi::GraphicsPipeline::Viewport viewport_for_params(const PaintParams& params);
+
+    private:
+        struct PipelineEntry {
+            std::shared_ptr<duk::rhi::GraphicsPipeline> pipeline;
+            int framesUnused;
+        };
+
+    private:
+        std::unordered_map<duk::hash::Hash, PipelineEntry> m_pipelines;
+        Renderer* m_renderer;
+        std::shared_ptr<duk::rhi::Shader> m_shader;
+        bool m_invertY;
     };
 
-    std::unordered_map<duk::hash::Hash, PipelineEntry> m_pipelines;
+private:
+    Renderer* m_renderer;
+    PipelineCache m_pipelineCache;
 };
 
 }

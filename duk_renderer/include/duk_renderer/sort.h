@@ -5,6 +5,7 @@
 #define DUK_RENDERER_SORT_H
 
 #include <duk_renderer/components/mesh_drawing.h>
+
 #include <duk_scene/scene.h>
 
 #include <cstdint>

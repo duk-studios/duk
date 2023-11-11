@@ -2,8 +2,8 @@
 /// present_pass.cpp
 
 #include <duk_renderer/passes/present_pass.h>
-#include <duk_renderer/painters/fullscreen/fullscreen_painter.h>
 #include <duk_renderer/painters/fullscreen/fullscreen_palette.h>
+#include <duk_renderer/painters/painter.h>
 
 namespace duk::renderer {
 
@@ -45,15 +45,22 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
     }
 
     {
-        FullscreenPainterCreateInfo fullscreenPainterCreateInfo = {};
-        fullscreenPainterCreateInfo.rhi = m_renderer->rhi();
-        fullscreenPainterCreateInfo.commandQueue = m_renderer->main_command_queue();
+        FullscreenShaderDataSource fullscreenShaderDataSource;
 
-        m_fullscreenPainter = std::make_unique<FullscreenPainter>(fullscreenPainterCreateInfo);
-    }
+        PainterCreateInfo fullscreenPainterCreateInfo = {};
+        fullscreenPainterCreateInfo.renderer = m_renderer;
+        fullscreenPainterCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
 
-    {
-        m_fullscreenPalette = m_fullscreenPainter->make_palette();
+        m_fullscreenPainter = std::make_unique<Painter>(fullscreenPainterCreateInfo);
+
+        // necessary when using vulkan, need to take that into account when supporting other APIs
+        m_fullscreenPainter->invert_y(true);
+
+        FullscreenPaletteCreateInfo fullscreenPaletteCreateInfo = {};
+        fullscreenPaletteCreateInfo.renderer = m_renderer;
+        fullscreenPaletteCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
+
+        m_fullscreenPalette = std::make_unique<FullscreenPalette>(fullscreenPaletteCreateInfo);
     }
 }
 
@@ -99,7 +106,7 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
 
     commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
-    Painter::PaintParams paintParams = {};
+    PaintParams paintParams = {};
     paintParams.outputWidth = renderParams.outputWidth;
     paintParams.outputHeight = renderParams.outputHeight;
     paintParams.renderPass = m_renderPass.get();

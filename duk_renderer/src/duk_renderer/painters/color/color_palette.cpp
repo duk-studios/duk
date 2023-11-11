@@ -8,10 +8,10 @@
 namespace duk::renderer {
 
 ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo) :
-    m_descriptorSet({colorPaletteCreateInfo.rhi, colorPaletteCreateInfo.shaderDataSource}){
+    m_descriptorSet({colorPaletteCreateInfo.renderer->rhi(), colorPaletteCreateInfo.shaderDataSource}){
 
-    auto rhi = colorPaletteCreateInfo.rhi;
-    auto commandQueue = colorPaletteCreateInfo.commandQueue;
+    auto rhi = colorPaletteCreateInfo.renderer->rhi();
+    auto commandQueue = colorPaletteCreateInfo.renderer->main_command_queue();
 
     {
         StorageBufferCreateInfo instanceSBOCreateInfo = {};

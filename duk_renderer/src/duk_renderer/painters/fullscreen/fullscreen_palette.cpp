@@ -2,13 +2,12 @@
 /// fullscreen_palette.cpp
 
 #include <duk_renderer/painters/fullscreen/fullscreen_palette.h>
-#include <duk_renderer/painters/fullscreen/fullscreen_painter.h>
 
 namespace duk::renderer {
 
 
 FullscreenPalette::FullscreenPalette(const FullscreenPaletteCreateInfo& fullscreenPaletteCreateInfo) :
-    m_descriptorSet({fullscreenPaletteCreateInfo.rhi, fullscreenPaletteCreateInfo.shaderDataSource}){
+    m_descriptorSet({fullscreenPaletteCreateInfo.renderer->rhi(), fullscreenPaletteCreateInfo.shaderDataSource}){
 
 }
 

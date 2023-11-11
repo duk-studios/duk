@@ -12,8 +12,7 @@
 namespace duk::renderer {
 
 struct FullscreenPaletteCreateInfo {
-    duk::rhi::RHI* rhi;
-    duk::rhi::CommandQueue* commandQueue;
+    Renderer* renderer;
     const FullscreenShaderDataSource* shaderDataSource;
 };
 

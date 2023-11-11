@@ -4,6 +4,7 @@
 #ifndef DUK_RENDERER_PHONG_PALETTE_H
 #define DUK_RENDERER_PHONG_PALETTE_H
 
+#include <duk_renderer/renderer.h>
 #include <duk_renderer/painters/palette.h>
 #include <duk_renderer/painters/phong/phong_types.h>
 #include <duk_renderer/painters/phong/phong_shader_data_source.h>
@@ -15,11 +16,8 @@
 
 namespace duk::renderer {
 
-class PhongPainter;
-
 struct PhongPaletteCreateInfo {
-    duk::rhi::RHI* rhi;
-    duk::rhi::CommandQueue* commandQueue;
+    Renderer* renderer;
     const PhongShaderDataSource* shaderDataSource;
 };
 

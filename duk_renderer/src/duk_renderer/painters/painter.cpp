@@ -9,14 +9,14 @@ namespace duk::renderer {
 
 static constexpr int kDeleteUnusedPipelineAfterFrames = 512;
 
-Painter::Painter(duk::rhi::RHI* rhi) :
-    m_rhi(rhi) {
+Painter::Painter(const PainterCreateInfo& painterCreateInfo) :
+    m_renderer(painterCreateInfo.renderer),
+    m_pipelineCache(m_renderer, painterCreateInfo.shaderDataSource) {
+
 }
 
-Painter::~Painter() = default;
-
-void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::PaintParams& params) {
-    commandBuffer->bind_graphics_pipeline(find_pipeline_for_params(params));
+void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params) {
+    commandBuffer->bind_graphics_pipeline(m_pipelineCache.find_pipeline_for_params(params));
 
     Palette::ApplyParams paletteApplyParams = {};
     paletteApplyParams.globalDescriptors = params.globalDescriptors;
@@ -26,25 +26,41 @@ void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const Painter::Paint
     params.brush->draw(commandBuffer, params.instanceCount, params.firstInstance);
 }
 
-void Painter::clear_unused_pipelines() {
-    std::vector<duk::hash::Hash> hashesToDelete;
-    hashesToDelete.reserve(m_pipelines.size());
-
-    for (auto& [hash, entry] : m_pipelines) {
-        entry.framesUnused++;
-
-        if (entry.framesUnused > kDeleteUnusedPipelineAfterFrames) {
-            hashesToDelete.push_back(hash);
-        }
-    }
-
-    for (auto hash : hashesToDelete) {
-        m_pipelines.erase(hash);
-    }
+void Painter::update_shader(duk::rhi::ShaderDataSource* shaderDataSource) {
+    m_pipelineCache.update_shader(shaderDataSource);
 }
 
-duk::rhi::GraphicsPipeline* Painter::find_pipeline_for_params(const Painter::PaintParams& params) {
+void Painter::invert_y(bool invert) {
+    m_pipelineCache.invert_y(invert);
+}
 
+void Painter::clear_unused_pipelines() {
+    m_pipelineCache.clear_unused_pipelines();
+}
+
+//------------------------------------
+
+Painter::PipelineCache::PipelineCache(Renderer* renderer, duk::rhi::ShaderDataSource* shaderDataSource) :
+    m_renderer(renderer),
+    m_shader(nullptr),
+    m_invertY(false) {
+    update_shader(shaderDataSource);
+}
+
+void Painter::PipelineCache::update_shader(duk::rhi::ShaderDataSource* shaderDataSource) {
+    duk::rhi::RHI::ShaderCreateInfo shaderCreateInfo = {};
+    shaderCreateInfo.shaderDataSource = shaderDataSource;
+
+    auto expectedColorShader = m_renderer->rhi()->create_shader(shaderCreateInfo);
+
+    if (!expectedColorShader) {
+        throw std::runtime_error("failed to init Shader: " + expectedColorShader.error().description());
+    }
+
+    m_shader = std::move(expectedColorShader.value());
+}
+
+duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(const PaintParams& params) {
     const auto hash = hash_for_params(params);
 
     auto it = m_pipelines.find(hash);
@@ -61,7 +77,7 @@ duk::rhi::GraphicsPipeline* Painter::find_pipeline_for_params(const Painter::Pai
         pipelineCreateInfo.renderPass = params.renderPass;
         pipelineCreateInfo.depthTesting = true;
 
-        auto expectedPipeline = m_rhi->create_graphics_pipeline(pipelineCreateInfo);
+        auto expectedPipeline = m_renderer->rhi()->create_graphics_pipeline(pipelineCreateInfo);
         if (!expectedPipeline) {
             throw std::runtime_error("failed to create Pipeline: " + expectedPipeline.error().description());
         }
@@ -83,34 +99,47 @@ duk::rhi::GraphicsPipeline* Painter::find_pipeline_for_params(const Painter::Pai
     return it->second.pipeline.get();
 }
 
-duk::hash::Hash Painter::hash_for_params(const Painter::PaintParams& params) const {
+duk::hash::Hash Painter::PipelineCache::hash_for_params(const PaintParams& params) const {
     hash::Hash hash = 0;
     hash::hash_combine(hash, params.renderPass);
     hash::hash_combine(hash, params.outputWidth);
     hash::hash_combine(hash, params.outputHeight);
+    hash::hash_combine(hash, m_invertY);
+    hash::hash_combine(hash, m_shader->hash());
     return hash;
 }
 
-void Painter::init_shader(const rhi::ShaderDataSource* shaderDataSource) {
-
-    duk::rhi::RHI::ShaderCreateInfo colorShaderCreateInfo = {};
-    colorShaderCreateInfo.shaderDataSource = shaderDataSource;
-
-    auto expectedColorShader = m_rhi->create_shader(colorShaderCreateInfo);
-
-    if (!expectedColorShader) {
-        throw std::runtime_error("failed to init Shader: " + expectedColorShader.error().description());
-    }
-
-    m_shader = std::move(expectedColorShader.value());
-}
-
-duk::rhi::GraphicsPipeline::Viewport Painter::viewport_for_params(const Painter::PaintParams& params) {
+duk::rhi::GraphicsPipeline::Viewport Painter::PipelineCache::viewport_for_params(const PaintParams& params) {
     duk::rhi::GraphicsPipeline::Viewport viewport = {};
     viewport.extent = {params.outputWidth, params.outputHeight};
     viewport.maxDepth = 1.0f;
     viewport.minDepth = 0.0f;
+    if (m_invertY) {
+        viewport.offset.y = viewport.extent.y;
+        viewport.extent.y = -viewport.extent.y;
+    }
     return viewport;
+}
+
+void Painter::PipelineCache::invert_y(bool invert) {
+    m_invertY = invert;
+}
+
+void Painter::PipelineCache::clear_unused_pipelines() {
+    std::vector<duk::hash::Hash> hashesToDelete;
+    hashesToDelete.reserve(m_pipelines.size());
+
+    for (auto& [hash, entry] : m_pipelines) {
+        entry.framesUnused++;
+
+        if (entry.framesUnused > kDeleteUnusedPipelineAfterFrames) {
+            hashesToDelete.push_back(hash);
+        }
+    }
+
+    for (auto hash : hashesToDelete) {
+        m_pipelines.erase(hash);
+    }
 }
 
 }

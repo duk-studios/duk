@@ -4,6 +4,7 @@
 #ifndef DUK_RENDERER_PALETTE_H
 #define DUK_RENDERER_PALETTE_H
 
+#include <duk_renderer/renderer.h>
 #include <duk_rhi/command/command_buffer.h>
 #include <duk_scene/object.h>
 
@@ -23,7 +24,6 @@ public:
     virtual void insert_instance(const InsertInstanceParams& params);
 
     virtual void flush_instances();
-
 
     struct ApplyParams {
         GlobalDescriptors* globalDescriptors;
