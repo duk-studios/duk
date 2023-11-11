@@ -279,9 +279,12 @@ duk::hash::Hash TemplateShaderDataSource::calculate_hash() const {
 ShaderDataSourceFileGenerator::ShaderDataSourceFileGenerator(const Parser& parser, const Reflector& reflector) :
     m_parser(parser),
     m_reflector(reflector) {
-    m_fileName = detail::shader_data_source_file_name(m_parser);
-    m_className = detail::shader_data_source_class_name(m_parser);
+
     const auto& painterName = m_parser.output_painter_name();
+    m_fileName = detail::shader_data_source_file_name(m_parser);
+    m_headerIncludePath = "duk_renderer/painters/" + m_parser.output_painter_name() + '/' + m_fileName + ".h";
+    m_className = detail::shader_data_source_class_name(m_parser);
+
     {
         std::ostringstream oss;
         generate_header_file_content(oss);
@@ -318,7 +321,7 @@ void ShaderDataSourceFileGenerator::generate_header_file_content(std::ostringstr
 
 void ShaderDataSourceFileGenerator::generate_source_file_content(std::ostringstream& oss) {
     std::string includes[] = {
-            "duk_renderer/painters/" + m_parser.output_painter_name() + '/' + m_fileName + ".h"
+            m_headerIncludePath
     };
     generate_include_directives(oss, includes);
     oss << std::endl;
@@ -343,6 +346,14 @@ void ShaderDataSourceFileGenerator::generate_class_definition(std::ostringstream
     classDefinition = std::regex_replace(classDefinition, std::regex("TemplateVertexLayout"), detail::generate_vertex_layout(m_reflector));
 
     oss << classDefinition << std::endl;
+}
+
+const std::string& ShaderDataSourceFileGenerator::output_header_include_path() const {
+    return m_headerIncludePath;
+}
+
+const std::string& ShaderDataSourceFileGenerator::output_shader_data_source_class_name() const {
+    return m_className;
 }
 
 

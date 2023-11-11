@@ -5,6 +5,7 @@
 #include <duk_painter_generator/file_generators/local_types_file_generator.h>
 #include <duk_painter_generator/file_generators/global_types_file_generator.h>
 #include <duk_painter_generator/file_generators/shader_data_source_file_generator.h>
+#include <duk_painter_generator/file_generators/descriptor_set_file_generator.h>
 
 namespace duk::painter_generator {
 
@@ -12,6 +13,7 @@ Generator::Generator(const Parser& parser, const Reflector& reflector) {
     LocalTypesFileGenerator localTypesFileGenerator(parser, reflector);
     GlobalTypesFileGenerator globalTypesFileGenerator(parser, reflector);
     ShaderDataSourceFileGenerator shaderDataSourceFileGenerator(parser, reflector);
+    DescriptorSetFileGenerator descriptorSetFileGenerator(parser, reflector, shaderDataSourceFileGenerator);
 }
 
 Generator::~Generator() = default;

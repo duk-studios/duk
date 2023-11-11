@@ -11,6 +11,8 @@ set(DUK_PAINTER_GENERATOR_HEADERS
         include/duk_painter_generator/file_generators/global_types_file_generator.h
         include/duk_painter_generator/file_generators/local_types_file_generator.h
         include/duk_painter_generator/file_generators/shader_data_source_file_generator.h
+        include/duk_painter_generator/file_generators/descriptor_set_file_generator.h
+        include/duk_painter_generator/file_generators/generator_utils.h
         )
 
 set(DUK_PAINTER_GENERATOR_SOURCES
@@ -24,6 +26,8 @@ set(DUK_PAINTER_GENERATOR_SOURCES
         src/duk_painter_generator/file_generators/global_types_file_generator.cpp
         src/duk_painter_generator/file_generators/local_types_file_generator.cpp
         src/duk_painter_generator/file_generators/shader_data_source_file_generator.cpp
+        src/duk_painter_generator/file_generators/descriptor_set_file_generator.cpp
+        src/duk_painter_generator/file_generators/generator_utils.cpp
         )
 
 add_executable(duk_painter_generator ${DUK_PAINTER_GENERATOR_HEADERS} ${DUK_PAINTER_GENERATOR_SOURCES})
