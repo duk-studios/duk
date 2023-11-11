@@ -8,10 +8,10 @@
 
 namespace duk::renderer {
 
-PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo) {
+PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo) :
+    m_descriptorSet({phongPaletteCreateInfo.rhi, phongPaletteCreateInfo.shaderDataSource}){
     auto rhi = phongPaletteCreateInfo.rhi;
     auto commandQueue = phongPaletteCreateInfo.commandQueue;
-    auto painter = phongPaletteCreateInfo.painter;
 
     {
         StorageBufferCreateInfo transformSBOCreateInfo = {};
@@ -29,21 +29,8 @@ PhongPalette::PhongPalette(const PhongPaletteCreateInfo& phongPaletteCreateInfo)
         m_materialUBO = std::make_unique<phong::MaterialUBO>(materialUBOCreateInfo);
     }
 
-    {
-        duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
-        descriptorSetCreateInfo.description = painter->descriptor_set_description();
-
-        auto expectedDescriptorSet = rhi->create_descriptor_set(descriptorSetCreateInfo);
-
-        if (!expectedDescriptorSet) {
-            throw std::runtime_error("failed to create ColorPalette descriptor set: " + expectedDescriptorSet.error().description());
-        }
-
-        m_descriptorSet = std::move(expectedDescriptorSet.value());
-
-        m_descriptorSet->set(1, *m_transformSBO);
-        m_descriptorSet->set(3, *m_materialUBO);
-    }
+    m_descriptorSet.set(PhongDescriptorSet::Bindings::uTransform, *m_transformSBO);
+    m_descriptorSet.set(PhongDescriptorSet::Bindings::uMaterial, *m_materialUBO);
 }
 
 void PhongPalette::clear_instances() {
@@ -63,13 +50,13 @@ void PhongPalette::flush_instances() {
 void PhongPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
 
     // updates current camera UBO
-    m_descriptorSet->set(0, *params.globalDescriptors->camera_ubo());
-    m_descriptorSet->set(2, *params.globalDescriptors->lights_ubo());
+    m_descriptorSet.set(PhongDescriptorSet::Bindings::uCamera, *params.globalDescriptors->camera_ubo());
+    m_descriptorSet.set(PhongDescriptorSet::Bindings::uLights, *params.globalDescriptors->lights_ubo());
 
     // updates descriptor set in case some descriptor changed
-    m_descriptorSet->flush();
+    m_descriptorSet.flush();
 
-    commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
+    commandBuffer->bind_descriptor_set(m_descriptorSet.handle(), 0);
 }
 
 void PhongPalette::update_diffuse(const glm::vec3& diffuse) {

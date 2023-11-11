@@ -7,6 +7,7 @@
 #include <duk_renderer/painters/palette.h>
 #include <duk_renderer/painters/color/color_painter.h>
 #include <duk_renderer/painters/color/color_types.h>
+#include <duk_renderer/painters/color/color_descriptor_sets.h>
 
 #include <duk_scene/limits.h>
 #include <duk_rhi/rhi.h>
@@ -21,7 +22,7 @@ namespace duk::renderer {
 struct ColorPaletteCreateInfo {
     duk::rhi::RHI* rhi;
     duk::rhi::CommandQueue* commandQueue;
-    const ColorPainter* painter;
+    const ColorShaderDataSource* shaderDataSource;
 };
 
 class ColorPalette : public Palette {
@@ -42,7 +43,7 @@ public:
 private:
     std::unique_ptr<color::InstanceSBO> m_instanceSBO;
     std::unique_ptr<color::MaterialUBO> m_materialUBO;
-    std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
+    ColorDescriptorSet m_descriptorSet;
 
 };
 

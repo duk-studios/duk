@@ -23,7 +23,7 @@ std::shared_ptr<PhongPalette> PhongPainter::make_palette() const {
     PhongPaletteCreateInfo colorPaletteCreateInfo = {};
     colorPaletteCreateInfo.rhi = m_rhi;
     colorPaletteCreateInfo.commandQueue = m_commandQueue;
-    colorPaletteCreateInfo.painter = this;
+    colorPaletteCreateInfo.shaderDataSource = &m_shaderDataSource;
     return std::make_shared<PhongPalette>(colorPaletteCreateInfo);
 }
 

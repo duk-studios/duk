@@ -20,7 +20,7 @@ std::shared_ptr<ColorPalette> ColorPainter::make_palette() const {
     ColorPaletteCreateInfo colorPaletteCreateInfo = {};
     colorPaletteCreateInfo.rhi = m_rhi;
     colorPaletteCreateInfo.commandQueue = m_commandQueue;
-    colorPaletteCreateInfo.painter = this;
+    colorPaletteCreateInfo.shaderDataSource = &m_shaderDataSource;
     return std::make_shared<ColorPalette>(colorPaletteCreateInfo);
 }
 

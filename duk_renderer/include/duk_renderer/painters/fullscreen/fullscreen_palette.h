@@ -5,16 +5,16 @@
 #define DUK_RENDERER_FULLSCREEN_PALETTE_H
 
 #include <duk_renderer/painters/palette.h>
+#include <duk_renderer/painters/fullscreen/fullscreen_shader_data_source.h>
+#include <duk_renderer/painters/fullscreen/fullscreen_descriptor_sets.h>
 #include <duk_rhi/rhi.h>
 
 namespace duk::renderer {
 
-class FullscreenPainter;
-
 struct FullscreenPaletteCreateInfo {
     duk::rhi::RHI* rhi;
     duk::rhi::CommandQueue* commandQueue;
-    const FullscreenPainter* painter;
+    const FullscreenShaderDataSource* shaderDataSource;
 };
 
 class FullscreenPalette : public Palette {
@@ -27,7 +27,7 @@ public:
     void update(duk::rhi::Image* image, const duk::rhi::Sampler& sampler);
 
 private:
-    std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
+    FullscreenDescriptorSet m_descriptorSet;
 
 };
 

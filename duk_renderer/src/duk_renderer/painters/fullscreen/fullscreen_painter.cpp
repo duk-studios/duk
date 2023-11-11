@@ -22,7 +22,7 @@ std::shared_ptr<FullscreenPalette> FullscreenPainter::make_palette() const {
     FullscreenPaletteCreateInfo fullscreenPaletteCreateInfo = {};
     fullscreenPaletteCreateInfo.rhi = m_rhi;
     fullscreenPaletteCreateInfo.commandQueue = m_commandQueue;
-    fullscreenPaletteCreateInfo.painter = this;
+    fullscreenPaletteCreateInfo.shaderDataSource = &m_shaderDataSource;
     return std::make_shared<FullscreenPalette>(fullscreenPaletteCreateInfo);
 }
 

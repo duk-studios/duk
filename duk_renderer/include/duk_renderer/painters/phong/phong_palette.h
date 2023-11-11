@@ -6,6 +6,8 @@
 
 #include <duk_renderer/painters/palette.h>
 #include <duk_renderer/painters/phong/phong_types.h>
+#include <duk_renderer/painters/phong/phong_shader_data_source.h>
+#include <duk_renderer/painters/phong/phong_descriptor_sets.h>
 
 #include <duk_rhi/rhi.h>
 
@@ -18,7 +20,7 @@ class PhongPainter;
 struct PhongPaletteCreateInfo {
     duk::rhi::RHI* rhi;
     duk::rhi::CommandQueue* commandQueue;
-    const PhongPainter* painter;
+    const PhongShaderDataSource* shaderDataSource;
 };
 
 class PhongPalette : public Palette {
@@ -45,7 +47,7 @@ public:
     void update_material(const glm::vec3& diffuse, const glm::vec3& specular, const glm::vec3& ambient, float shininess);
 
 private:
-    std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
+    PhongDescriptorSet m_descriptorSet;
     std::unique_ptr<phong::TransformSBO> m_transformSBO;
     std::unique_ptr<phong::MaterialUBO> m_materialUBO;
 };

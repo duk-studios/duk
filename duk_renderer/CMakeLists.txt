@@ -25,14 +25,17 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/painters/color/color_painter.h
         include/duk_renderer/painters/color/color_shader_data_source.h
         include/duk_renderer/painters/color/color_types.h
+        include/duk_renderer/painters/color/color_descriptor_sets.h
         include/duk_renderer/painters/fullscreen/fullscreen_painter.h
         include/duk_renderer/painters/fullscreen/fullscreen_palette.h
         include/duk_renderer/painters/fullscreen/fullscreen_shader_data_source.h
         include/duk_renderer/painters/fullscreen/fullscreen_types.h
+        include/duk_renderer/painters/fullscreen/fullscreen_descriptor_sets.h
         include/duk_renderer/painters/phong/phong_painter.h
         include/duk_renderer/painters/phong/phong_palette.h
         include/duk_renderer/painters/phong/phong_shader_data_source.h
         include/duk_renderer/painters/phong/phong_types.h
+        include/duk_renderer/painters/phong/phong_descriptor_sets.h
         include/duk_renderer/painters/globals/lights_types.h
         include/duk_renderer/painters/globals/camera_types.h
         include/duk_renderer/passes/forward_pass.h
@@ -54,17 +57,20 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/components/camera.cpp
         src/duk_renderer/painters/painter.cpp
         src/duk_renderer/painters/palette.cpp
+        src/duk_renderer/painters/uniform_buffer.cpp
+        src/duk_renderer/painters/storage_buffer.cpp
         src/duk_renderer/painters/color/color_painter.cpp
         src/duk_renderer/painters/color/color_palette.cpp
         src/duk_renderer/painters/color/color_shader_data_source.cpp
-        src/duk_renderer/painters/uniform_buffer.cpp
-        src/duk_renderer/painters/storage_buffer.cpp
+        src/duk_renderer/painters/color/color_descriptor_sets.cpp
         src/duk_renderer/painters/fullscreen/fullscreen_painter.cpp
         src/duk_renderer/painters/fullscreen/fullscreen_palette.cpp
         src/duk_renderer/painters/fullscreen/fullscreen_shader_data_source.cpp
+        src/duk_renderer/painters/fullscreen/fullscreen_descriptor_sets.cpp
         src/duk_renderer/painters/phong/phong_painter.cpp
         src/duk_renderer/painters/phong/phong_palette.cpp
         src/duk_renderer/painters/phong/phong_shader_data_source.cpp
+        src/duk_renderer/painters/phong/phong_descriptor_sets.cpp
         src/duk_renderer/painters/globals/global_descriptors.cpp
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp

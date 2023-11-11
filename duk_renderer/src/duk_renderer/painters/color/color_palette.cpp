@@ -7,11 +7,11 @@
 
 namespace duk::renderer {
 
-ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo) {
+ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo) :
+    m_descriptorSet({colorPaletteCreateInfo.rhi, colorPaletteCreateInfo.shaderDataSource}){
 
     auto rhi = colorPaletteCreateInfo.rhi;
     auto commandQueue = colorPaletteCreateInfo.commandQueue;
-    auto painter = colorPaletteCreateInfo.painter;
 
     {
         StorageBufferCreateInfo instanceSBOCreateInfo = {};
@@ -29,20 +29,8 @@ ColorPalette::ColorPalette(const ColorPaletteCreateInfo& colorPaletteCreateInfo)
         m_materialUBO = std::make_unique<color::MaterialUBO>(materialUBOCreateInfo);
     }
 
-    {
-        duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
-        descriptorSetCreateInfo.description = painter->descriptor_set_description();
-
-        auto expectedDescriptorSet = rhi->create_descriptor_set(descriptorSetCreateInfo);
-
-        if (!expectedDescriptorSet) {
-            throw std::runtime_error("failed to create ColorPalette descriptor set: " + expectedDescriptorSet.error().description());
-        }
-
-        m_descriptorSet = std::move(expectedDescriptorSet.value());
-        m_descriptorSet->set(1, *m_instanceSBO);
-        m_descriptorSet->set(2, *m_materialUBO);
-    }
+    m_descriptorSet.set(ColorDescriptorSet::Bindings::uInstances, *m_instanceSBO);
+    m_descriptorSet.set(ColorDescriptorSet::Bindings::uMaterial, *m_materialUBO);
 }
 
 void ColorPalette::set_color(const glm::vec4& color) {
@@ -66,12 +54,12 @@ void ColorPalette::flush_instances() {
 void ColorPalette::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
 
     // updates current camera UBO
-    m_descriptorSet->set(0, *params.globalDescriptors->camera_ubo());
+    m_descriptorSet.set(ColorDescriptorSet::Bindings::uCamera, *params.globalDescriptors->camera_ubo());
 
     // updates descriptor set in case some descriptor changed
-    m_descriptorSet->flush();
+    m_descriptorSet.flush();
 
-    commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
+    commandBuffer->bind_descriptor_set(m_descriptorSet.handle(), 0);
 }
 
 }
