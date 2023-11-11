@@ -30,6 +30,10 @@ struct RendererCreateInfo {
 class Renderer {
 public:
 
+    using RenderStartEvent = duk::events::EventVoid;
+
+public:
+
     explicit Renderer(const RendererCreateInfo& rendererCreateInfo);
 
     virtual ~Renderer();
@@ -48,6 +52,8 @@ public:
 
     DUK_NO_DISCARD duk::rhi::CommandQueue* main_command_queue() const;
 
+    DUK_NO_DISCARD RenderStartEvent& render_start_event();
+
     void use_as_camera(const duk::scene::Object& object);
 
 private:
@@ -62,6 +68,7 @@ protected:
     std::vector<std::shared_ptr<Pass>> m_passes;
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
     duk::scene::Object::Id m_mainCameraObjectId;
+    duk::events::EventVoid m_renderStart;
 };
 
 } // namespace renderer

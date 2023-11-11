@@ -13,6 +13,9 @@ Painter::Painter(const PainterCreateInfo& painterCreateInfo) :
     m_renderer(painterCreateInfo.renderer),
     m_pipelineCache(m_renderer, painterCreateInfo.shaderDataSource) {
 
+    m_listener.listen(m_renderer->render_start_event(), [this]{
+        m_pipelineCache.clear_unused_pipelines();
+    });
 }
 
 void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params) {

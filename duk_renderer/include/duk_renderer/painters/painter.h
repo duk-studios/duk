@@ -65,6 +65,7 @@ private:
 private:
     Renderer* m_renderer;
     PipelineCache m_pipelineCache;
+    duk::events::EventListener m_listener;
 };
 
 }

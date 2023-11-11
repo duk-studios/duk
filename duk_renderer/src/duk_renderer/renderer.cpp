@@ -76,6 +76,8 @@ void Renderer::render(duk::scene::Scene* scene) {
 
     m_scheduler->begin();
 
+    m_renderStart.emit();
+
     update_global_descriptors(scene);
 
     auto mainPass = m_mainQueue->submit([this, scene](duk::rhi::CommandBuffer* commandBuffer) {
@@ -160,6 +162,10 @@ duk::rhi::RHI* Renderer::rhi() const {
 
 duk::rhi::CommandQueue* Renderer::main_command_queue() const {
     return m_mainQueue.get();
+}
+
+Renderer::RenderStartEvent& Renderer::render_start_event() {
+    return m_renderStart;
 }
 
 void Renderer::use_as_camera(const scene::Object& object) {
