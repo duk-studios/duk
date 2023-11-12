@@ -2,8 +2,8 @@
 /// present_pass.cpp
 
 #include <duk_renderer/passes/present_pass.h>
-#include <duk_renderer/painters/fullscreen/fullscreen_palette.h>
-#include <duk_renderer/painters/painter.h>
+#include <duk_renderer/materials/fullscreen/fullscreen_material.h>
+#include <duk_renderer/materials/painter.h>
 
 namespace duk::renderer {
 
@@ -56,11 +56,11 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
         // necessary when using vulkan, need to take that into account when supporting other APIs
         m_fullscreenPainter->invert_y(true);
 
-        FullscreenPaletteCreateInfo fullscreenPaletteCreateInfo = {};
-        fullscreenPaletteCreateInfo.renderer = m_renderer;
-        fullscreenPaletteCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
+        FullscreenMaterialCreateInfo fullscreenMaterialCreateInfo = {};
+        fullscreenMaterialCreateInfo.renderer = m_renderer;
+        fullscreenMaterialCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
 
-        m_fullscreenPalette = std::make_unique<FullscreenPalette>(fullscreenPaletteCreateInfo);
+        m_fullscreenMaterial = std::make_unique<FullscreenMaterial>(fullscreenMaterialCreateInfo);
     }
 }
 
@@ -89,7 +89,7 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
         m_frameBuffer = std::move(expectedFrameBuffer.value());
     }
 
-    m_fullscreenPalette->update(m_inColor.image(), duk::rhi::Sampler{duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER});
+    m_fullscreenMaterial->update(m_inColor.image(), duk::rhi::Sampler{duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER});
 
     auto commandBuffer = renderParams.commandBuffer;
 
@@ -110,7 +110,7 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
     paintParams.outputWidth = renderParams.outputWidth;
     paintParams.outputHeight = renderParams.outputHeight;
     paintParams.renderPass = m_renderPass.get();
-    paintParams.palette = m_fullscreenPalette.get();
+    paintParams.material = m_fullscreenMaterial.get();
     paintParams.brush = &m_fullscreenTriangleBrush;
 
     m_fullscreenPainter->paint(commandBuffer, paintParams);

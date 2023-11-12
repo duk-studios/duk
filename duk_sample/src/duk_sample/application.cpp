@@ -4,7 +4,7 @@
 #include <duk_sample/application.h>
 #include <duk_platform/window.h>
 #include <duk_renderer/vertex_types.h>
-#include <duk_renderer/painters/painter.h>
+#include <duk_renderer/materials/painter.h>
 #include <duk_renderer/components/mesh_drawing.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/camera.h>
@@ -206,7 +206,7 @@ static void add_object(duk::scene::Scene* scene,
                        const glm::quat& rotation,
                        const glm::vec3& scale,
                        duk::renderer::Painter* painter,
-                       duk::renderer::Palette* palette,
+                       duk::renderer::Material* material,
                        duk::renderer::Mesh* mesh) {
     auto obj = scene->add_object();
 
@@ -222,13 +222,13 @@ static void add_object(duk::scene::Scene* scene,
     auto meshDrawing = obj.add<duk::renderer::MeshDrawing>();
     meshDrawing->mesh = mesh;
     meshDrawing->painter = painter;
-    meshDrawing->palette = palette;
+    meshDrawing->material = material;
 }
 
 static void populate_scene(duk::scene::Scene* scene,
                            uint32_t objCount,
                            duk::renderer::Painter* painter,
-                           duk::renderer::Palette* palette,
+                           duk::renderer::Material* material,
                            duk::renderer::Mesh* mesh
                            ) {
 
@@ -245,7 +245,7 @@ static void populate_scene(duk::scene::Scene* scene,
                    glm::radians(glm::linearRand(glm::vec3(-95.f), glm::vec3(95.f))),
                    glm::linearRand(glm::vec3(0.02f), glm::vec3(1.3f)),
                    painter,
-                   palette,
+                   material,
                    mesh
                    );
 
@@ -326,11 +326,11 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
         m_colorPainter = std::make_shared<duk::renderer::Painter>(colorPainterCreateInfo);
 
-        duk::renderer::ColorPaletteCreateInfo colorPaletteCreateInfo = {};
-        colorPaletteCreateInfo.renderer = m_renderer.get();
-        colorPaletteCreateInfo.shaderDataSource = &colorShaderDataSource;
+        duk::renderer::ColorMaterialCreateInfo colorMaterialCreateInfo = {};
+        colorMaterialCreateInfo.renderer = m_renderer.get();
+        colorMaterialCreateInfo.shaderDataSource = &colorShaderDataSource;
 
-        m_colorPalette = std::make_shared<duk::renderer::ColorPalette>(colorPaletteCreateInfo);
+        m_colorMaterial = std::make_shared<duk::renderer::ColorMaterial>(colorMaterialCreateInfo);
     }
 
     {
@@ -342,37 +342,37 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 
         m_phongPainter = std::make_shared<duk::renderer::Painter>(phongPainterCreateInfo);
 
-        duk::renderer::PhongPaletteCreateInfo phongPaletteCreateInfo = {};
-        phongPaletteCreateInfo.renderer = m_renderer.get();
-        phongPaletteCreateInfo.shaderDataSource = &phongShaderDataSource;
+        duk::renderer::PhongMaterialCreateInfo phongMaterialCreateInfo = {};
+        phongMaterialCreateInfo.renderer = m_renderer.get();
+        phongMaterialCreateInfo.shaderDataSource = &phongShaderDataSource;
 
-        m_phongGreenPalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
-        m_phongGreenPalette->update_material({0.0f, 1.0f, 0.0f}, {0.0, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 2);
+        m_phongGreenMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
+        m_phongGreenMaterial->update_material({0.0f, 1.0f, 0.0f}, {0.0, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 2);
 
-        m_phongBluePalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
-        m_phongBluePalette->update_material({0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 4);
+        m_phongBlueMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
+        m_phongBlueMaterial->update_material({0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 4);
 
-        m_phongRedPalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
-        m_phongRedPalette->update_material({1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 8);
+        m_phongRedMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
+        m_phongRedMaterial->update_material({1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 8);
 
-        m_phongYellowPalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
-        m_phongYellowPalette->update_material({1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 16);
+        m_phongYellowMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
+        m_phongYellowMaterial->update_material({1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 16);
 
-        m_phongWhitePalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
-        m_phongWhitePalette->update_material({1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 32);
+        m_phongWhiteMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
+        m_phongWhiteMaterial->update_material({1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 32);
 
-        m_phongUnknownPalette = std::make_shared<duk::renderer::PhongPalette>(phongPaletteCreateInfo);
-        m_phongUnknownPalette->update_material({0.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 64);
+        m_phongUnknownMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
+        m_phongUnknownMaterial->update_material({0.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 64);
     }
 
 
     m_scene = std::make_shared<duk::scene::Scene>();
 
-//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
-//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_quadMesh.get());
+//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongMaterial.get(), m_cubeMesh.get());
+//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongMaterial.get(), m_quadMesh.get());
 
-//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_sphereMesh.get());
-//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongPalette.get(), m_cubeMesh.get());
+//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongMaterial.get(), m_sphereMesh.get());
+//    detail::populate_scene(m_scene.get(), 250, m_phongPainter.get(), m_phongMaterial.get(), m_cubeMesh.get());
 
     const glm::vec3 scale(5);
     const float offset = 10;
@@ -383,7 +383,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::quat(),
             scale,
             m_phongPainter.get(),
-            m_phongGreenPalette.get(),
+            m_phongGreenMaterial.get(),
             m_sphereMesh.get()
     );
 
@@ -393,7 +393,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::quat(),
             scale,
             m_phongPainter.get(),
-            m_phongBluePalette.get(),
+            m_phongBlueMaterial.get(),
             m_sphereMesh.get()
     );
 
@@ -403,7 +403,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::quat(),
             scale,
             m_phongPainter.get(),
-            m_phongRedPalette.get(),
+            m_phongRedMaterial.get(),
             m_sphereMesh.get()
     );
 
@@ -413,7 +413,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::quat(),
             scale,
             m_phongPainter.get(),
-            m_phongYellowPalette.get(),
+            m_phongYellowMaterial.get(),
             m_sphereMesh.get()
     );
 
@@ -423,7 +423,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::quat(),
             scale,
             m_phongPainter.get(),
-            m_phongWhitePalette.get(),
+            m_phongWhiteMaterial.get(),
             m_sphereMesh.get()
     );
 
@@ -433,7 +433,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::quat(),
             scale,
             m_phongPainter.get(),
-            m_phongUnknownPalette.get(),
+            m_phongUnknownMaterial.get(),
             m_sphereMesh.get()
     );
 

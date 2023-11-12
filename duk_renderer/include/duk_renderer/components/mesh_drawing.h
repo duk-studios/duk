@@ -8,12 +8,12 @@ namespace duk::renderer {
 
 class Mesh;
 class Painter;
-class Palette;
+class Material;
 
 struct MeshDrawing {
     Mesh* mesh;
     Painter* painter;
-    Palette* palette;
+    Material* material;
 };
 
 }

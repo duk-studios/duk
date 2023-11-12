@@ -152,7 +152,7 @@ void DescriptorSetFileGenerator::generate_header_file_content(std::ostringstream
 
 void DescriptorSetFileGenerator::generate_source_file_content(std::ostringstream& oss) {
     std::string includes[] = {
-            "duk_renderer/painters/" + m_parser.output_painter_name() + '/' + m_fileName + ".h"
+            "duk_renderer/materials/" + m_parser.output_painter_name() + '/' + m_fileName + ".h"
     };
     generate_include_directives(oss, includes);
     oss << std::endl;

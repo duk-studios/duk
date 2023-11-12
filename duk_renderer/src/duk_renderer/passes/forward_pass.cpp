@@ -4,8 +4,8 @@
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/components/mesh_drawing.h>
-#include <duk_renderer/painters/palette.h>
-#include <duk_renderer/painters/painter.h>
+#include <duk_renderer/materials/material.h>
+#include <duk_renderer/materials/painter.h>
 #include <duk_renderer/brushes/mesh.h>
 
 namespace duk::renderer {
@@ -91,7 +91,7 @@ void ForwardPass::render(const RenderParams& renderParams) {
     m_sortedObjectIndices.clear();
     m_paintEntries.clear();
 
-    std::set<Palette*> uniquePalettes;
+    std::set<Material*> uniqueMaterials;
 
     for (auto object : renderParams.scene->objects_with_components<MeshDrawing>()) {
         auto meshDrawing = object.component<MeshDrawing>();
@@ -100,24 +100,24 @@ void ForwardPass::render(const RenderParams& renderParams) {
         objectEntry.objectId = object.id();
         objectEntry.brush = meshDrawing->mesh;
         objectEntry.painter = meshDrawing->painter;
-        objectEntry.palette = meshDrawing->palette;
+        objectEntry.material = meshDrawing->material;
         objectEntry.sortKey = SortKey::calculate(meshDrawing);
 
-        uniquePalettes.insert(objectEntry.palette);
+        uniqueMaterials.insert(objectEntry.material);
     }
 
-    for (auto palette : uniquePalettes) {
-        palette->clear_instances();
+    for (auto material : uniqueMaterials) {
+        material->clear_instances();
     }
 
     SortKey::sort_indices(m_objectEntries, m_sortedObjectIndices);
 
     auto compatible_with_paint_entry = [](const PaintEntry& paintEntry, const ObjectEntry& objectEntry) -> bool {
-        return paintEntry.painter == objectEntry.painter && paintEntry.params.brush == objectEntry.brush && paintEntry.params.palette == objectEntry.palette;
+        return paintEntry.painter == objectEntry.painter && paintEntry.params.brush == objectEntry.brush && paintEntry.params.material == objectEntry.material;
     };
 
     auto is_valid = [](const PaintEntry& paintEntry) {
-        return paintEntry.painter && paintEntry.params.brush && paintEntry.params.palette && paintEntry.params.instanceCount > 0;
+        return paintEntry.painter && paintEntry.params.brush && paintEntry.params.material && paintEntry.params.instanceCount > 0;
     };
 
     PaintEntry paintEntry = {};
@@ -136,7 +136,7 @@ void ForwardPass::render(const RenderParams& renderParams) {
             if (is_valid(paintEntry)) {
                 m_paintEntries.push_back(paintEntry);
             }
-            if (paintEntry.params.palette != objectEntry.palette || paintEntry.painter != objectEntry.painter) {
+            if (paintEntry.params.material != objectEntry.material || paintEntry.painter != objectEntry.painter) {
                 paintEntry.params.instanceCount = 0;
                 paintEntry.params.firstInstance = 0;
             }
@@ -145,14 +145,14 @@ void ForwardPass::render(const RenderParams& renderParams) {
                 paintEntry.params.instanceCount = 0;
             }
             paintEntry.painter = objectEntry.painter;
-            paintEntry.params.palette = objectEntry.palette;
+            paintEntry.params.material = objectEntry.material;
             paintEntry.params.brush = objectEntry.brush;
         }
 
-        Palette::InsertInstanceParams instanceParams = {};
+        Material::InsertInstanceParams instanceParams = {};
         instanceParams.object = renderParams.scene->object(objectEntry.objectId);
 
-        objectEntry.palette->insert_instance(instanceParams);
+        objectEntry.material->insert_instance(instanceParams);
 
         paintEntry.params.instanceCount++;
     }
@@ -161,8 +161,8 @@ void ForwardPass::render(const RenderParams& renderParams) {
     }
 
     // mark all instance buffers for gpu upload
-    for (auto palette : uniquePalettes) {
-        palette->flush_instances();
+    for (auto material : uniqueMaterials) {
+        material->flush_instances();
     }
 
     renderParams.commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());

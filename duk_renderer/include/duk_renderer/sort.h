@@ -16,7 +16,7 @@ namespace duk::renderer {
 struct SortKey {
     struct Flags {
         uint32_t painterValue;
-        uint16_t paletteValue;
+        uint16_t materialValue;
         uint16_t meshValue;
     };
     union {

@@ -5,7 +5,7 @@
 #define DUK_RENDERER_FORWARD_PASS_H
 
 #include <duk_renderer/passes/pass.h>
-#include <duk_renderer/painters/paint_entry.h>
+#include <duk_renderer/materials/paint_entry.h>
 
 #include <duk_tools/fixed_vector.h>
 

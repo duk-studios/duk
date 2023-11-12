@@ -10,7 +10,7 @@
 
 namespace duk::renderer {
 
-class FullscreenPalette;
+class FullscreenMaterial;
 
 struct PresentPassCreateInfo {
     Renderer* renderer;
@@ -34,7 +34,7 @@ private:
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
     std::unique_ptr<Painter> m_fullscreenPainter;
-    std::unique_ptr<FullscreenPalette> m_fullscreenPalette;
+    std::unique_ptr<FullscreenMaterial> m_fullscreenMaterial;
 };
 
 }

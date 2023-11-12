@@ -85,8 +85,8 @@ static void insert_referenced_types_from_bindings(const Reflector& reflector, st
 }
 
 static const std::string kTypesFileIncludes[] = {
-        "duk_renderer/painters/uniform_buffer.h",
-        "duk_renderer/painters/storage_buffer.h",
+        "duk_renderer/materials/uniform_buffer.h",
+        "duk_renderer/materials/storage_buffer.h",
         "glm/glm.hpp"
 };
 
