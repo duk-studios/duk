@@ -57,9 +57,7 @@ private:
     std::shared_ptr<duk::renderer::Mesh> m_quadMesh;
     std::shared_ptr<duk::renderer::Mesh> m_cubeMesh;
     std::shared_ptr<duk::renderer::Mesh> m_sphereMesh;
-    std::shared_ptr<duk::renderer::Painter> m_colorPainter;
     std::shared_ptr<duk::renderer::ColorMaterial> m_colorMaterial;
-    std::shared_ptr<duk::renderer::Painter> m_phongPainter;
     std::shared_ptr<duk::renderer::PhongMaterial> m_phongGreenMaterial, m_phongBlueMaterial, m_phongRedMaterial, m_phongWhiteMaterial, m_phongYellowMaterial, m_phongUnknownMaterial;
     std::shared_ptr<duk::scene::Scene> m_scene;
     duk::scene::Object m_camera;

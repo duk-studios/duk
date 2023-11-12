@@ -47,20 +47,14 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
     {
         FullscreenShaderDataSource fullscreenShaderDataSource;
 
-        PainterCreateInfo fullscreenPainterCreateInfo = {};
-        fullscreenPainterCreateInfo.renderer = m_renderer;
-        fullscreenPainterCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
-
-        m_fullscreenPainter = std::make_unique<Painter>(fullscreenPainterCreateInfo);
-
-        // necessary when using vulkan, need to take that into account when supporting other APIs
-        m_fullscreenPainter->invert_y(true);
-
         FullscreenMaterialCreateInfo fullscreenMaterialCreateInfo = {};
         fullscreenMaterialCreateInfo.renderer = m_renderer;
         fullscreenMaterialCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
 
         m_fullscreenMaterial = std::make_unique<FullscreenMaterial>(fullscreenMaterialCreateInfo);
+
+        // necessary when using vulkan, need to take that into account when supporting other APIs
+        m_fullscreenMaterial->painter()->invert_y(true);
     }
 }
 
@@ -110,10 +104,9 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
     paintParams.outputWidth = renderParams.outputWidth;
     paintParams.outputHeight = renderParams.outputHeight;
     paintParams.renderPass = m_renderPass.get();
-    paintParams.material = m_fullscreenMaterial.get();
     paintParams.brush = &m_fullscreenTriangleBrush;
 
-    m_fullscreenPainter->paint(commandBuffer, paintParams);
+    m_fullscreenMaterial->paint(commandBuffer, paintParams);
 
     commandBuffer->end_render_pass();
 }

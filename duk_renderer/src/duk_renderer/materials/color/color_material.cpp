@@ -8,6 +8,7 @@
 namespace duk::renderer {
 
 ColorMaterial::ColorMaterial(const ColorMaterialCreateInfo& colorMaterialCreateInfo) :
+    Material(colorMaterialCreateInfo.renderer, colorMaterialCreateInfo.shaderDataSource),
     m_descriptorSet({colorMaterialCreateInfo.renderer->rhi(), colorMaterialCreateInfo.shaderDataSource}){
 
     auto rhi = colorMaterialCreateInfo.renderer->rhi();
@@ -52,7 +53,6 @@ void ColorMaterial::flush_instances() {
 }
 
 void ColorMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
-
     // updates current camera UBO
     m_descriptorSet.set(ColorDescriptorSet::Bindings::uCamera, *params.globalDescriptors->camera_ubo());
 

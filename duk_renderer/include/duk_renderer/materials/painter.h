@@ -16,14 +16,14 @@ class GlobalDescriptors;
 
 struct PainterCreateInfo {
     Renderer* renderer;
-    duk::rhi::ShaderDataSource* shaderDataSource;
+    const duk::rhi::ShaderDataSource* shaderDataSource;
 };
 
 class Painter {
 public:
     Painter(const PainterCreateInfo& painterCreateInfo);
 
-    void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
+    void use(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
 
     void update_shader(duk::rhi::ShaderDataSource* shaderDataSource);
 
@@ -34,9 +34,9 @@ public:
 private:
     class PipelineCache {
     public:
-        PipelineCache(Renderer* renderer, duk::rhi::ShaderDataSource* shaderDataSource);
+        PipelineCache(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource);
 
-        void update_shader(duk::rhi::ShaderDataSource* shaderDataSource);
+        void update_shader(const duk::rhi::ShaderDataSource* shaderDataSource);
 
         duk::rhi::GraphicsPipeline* find_pipeline_for_params(const PaintParams& params);
 

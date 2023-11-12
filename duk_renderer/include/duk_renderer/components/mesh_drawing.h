@@ -7,12 +7,10 @@
 namespace duk::renderer {
 
 class Mesh;
-class Painter;
 class Material;
 
 struct MeshDrawing {
     Mesh* mesh;
-    Painter* painter;
     Material* material;
 };
 

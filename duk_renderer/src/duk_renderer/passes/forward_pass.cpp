@@ -99,7 +99,6 @@ void ForwardPass::render(const RenderParams& renderParams) {
         auto& objectEntry = m_objectEntries.emplace_back();
         objectEntry.objectId = object.id();
         objectEntry.brush = meshDrawing->mesh;
-        objectEntry.painter = meshDrawing->painter;
         objectEntry.material = meshDrawing->material;
         objectEntry.sortKey = SortKey::calculate(meshDrawing);
 
@@ -113,11 +112,11 @@ void ForwardPass::render(const RenderParams& renderParams) {
     SortKey::sort_indices(m_objectEntries, m_sortedObjectIndices);
 
     auto compatible_with_paint_entry = [](const PaintEntry& paintEntry, const ObjectEntry& objectEntry) -> bool {
-        return paintEntry.painter == objectEntry.painter && paintEntry.params.brush == objectEntry.brush && paintEntry.params.material == objectEntry.material;
+        return paintEntry.params.brush == objectEntry.brush && paintEntry.material == objectEntry.material;
     };
 
     auto is_valid = [](const PaintEntry& paintEntry) {
-        return paintEntry.painter && paintEntry.params.brush && paintEntry.params.material && paintEntry.params.instanceCount > 0;
+        return paintEntry.params.brush && paintEntry.material && paintEntry.params.instanceCount > 0;
     };
 
     PaintEntry paintEntry = {};
@@ -136,7 +135,7 @@ void ForwardPass::render(const RenderParams& renderParams) {
             if (is_valid(paintEntry)) {
                 m_paintEntries.push_back(paintEntry);
             }
-            if (paintEntry.params.material != objectEntry.material || paintEntry.painter != objectEntry.painter) {
+            if (paintEntry.material != objectEntry.material) {
                 paintEntry.params.instanceCount = 0;
                 paintEntry.params.firstInstance = 0;
             }
@@ -144,8 +143,7 @@ void ForwardPass::render(const RenderParams& renderParams) {
                 paintEntry.params.firstInstance += paintEntry.params.instanceCount;
                 paintEntry.params.instanceCount = 0;
             }
-            paintEntry.painter = objectEntry.painter;
-            paintEntry.params.material = objectEntry.material;
+            paintEntry.material = objectEntry.material;
             paintEntry.params.brush = objectEntry.brush;
         }
 
@@ -167,9 +165,9 @@ void ForwardPass::render(const RenderParams& renderParams) {
 
     renderParams.commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
-    // for each painter entry
-    for (auto& [params, painter] : m_paintEntries) {
-        painter->paint(renderParams.commandBuffer, params);
+    // for each paint entry
+    for (auto& entry : m_paintEntries) {
+        entry.material->paint(renderParams.commandBuffer, entry.params);
     }
 
     renderParams.commandBuffer->end_render_pass();

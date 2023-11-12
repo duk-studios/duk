@@ -18,15 +18,8 @@ Painter::Painter(const PainterCreateInfo& painterCreateInfo) :
     });
 }
 
-void Painter::paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params) {
+void Painter::use(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params) {
     commandBuffer->bind_graphics_pipeline(m_pipelineCache.find_pipeline_for_params(params));
-
-    Material::ApplyParams materialApplyParams = {};
-    materialApplyParams.globalDescriptors = params.globalDescriptors;
-
-    params.material->apply(commandBuffer, materialApplyParams);
-
-    params.brush->draw(commandBuffer, params.instanceCount, params.firstInstance);
 }
 
 void Painter::update_shader(duk::rhi::ShaderDataSource* shaderDataSource) {
@@ -43,14 +36,14 @@ void Painter::clear_unused_pipelines() {
 
 //------------------------------------
 
-Painter::PipelineCache::PipelineCache(Renderer* renderer, duk::rhi::ShaderDataSource* shaderDataSource) :
+Painter::PipelineCache::PipelineCache(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource) :
     m_renderer(renderer),
     m_shader(nullptr),
     m_invertY(false) {
     update_shader(shaderDataSource);
 }
 
-void Painter::PipelineCache::update_shader(duk::rhi::ShaderDataSource* shaderDataSource) {
+void Painter::PipelineCache::update_shader(const duk::rhi::ShaderDataSource* shaderDataSource) {
     duk::rhi::RHI::ShaderCreateInfo shaderCreateInfo = {};
     shaderCreateInfo.shaderDataSource = shaderDataSource;
 

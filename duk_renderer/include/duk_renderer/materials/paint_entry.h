@@ -18,7 +18,6 @@ struct PaintParams {
     uint32_t outputHeight;
     duk::rhi::RenderPass* renderPass;
     Brush* brush;
-    Material* material;
     GlobalDescriptors* globalDescriptors;
     size_t instanceCount;
     size_t firstInstance;
@@ -27,14 +26,13 @@ struct PaintParams {
 struct ObjectEntry {
     duk::scene::Object::Id objectId;
     Brush* brush{};
-    Painter* painter{};
     Material* material{};
     SortKey sortKey{};
 };
 
 struct PaintEntry {
     PaintParams params;
-    Painter* painter;
+    Material* material;
 };
 
 // specialization for duk_renderer/sort.h sort_key
