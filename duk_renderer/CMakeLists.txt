@@ -16,6 +16,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/components/mesh_drawing.h
         include/duk_renderer/components/transform.h
         include/duk_renderer/components/camera.h
+        include/duk_renderer/components/lighting.h
         include/duk_renderer/materials/globals/global_descriptors.h
         include/duk_renderer/materials/painter.h
         include/duk_renderer/materials/material.h
@@ -39,7 +40,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/passes/forward_pass.h
         include/duk_renderer/passes/pass.h
         include/duk_renderer/passes/present_pass.h
-        include/duk_renderer/components/lighting.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -53,6 +53,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/components/mesh_drawing.cpp
         src/duk_renderer/components/transform.cpp
         src/duk_renderer/components/camera.cpp
+        src/duk_renderer/components/lighting.cpp
         src/duk_renderer/materials/painter.cpp
         src/duk_renderer/materials/material.cpp
         src/duk_renderer/materials/uniform_buffer.cpp
@@ -70,7 +71,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp
         src/duk_renderer/passes/present_pass.cpp
-        src/duk_renderer/components/lighting.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
