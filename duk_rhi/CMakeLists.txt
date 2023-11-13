@@ -9,6 +9,7 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/render_pass.h
         include/duk_rhi/frame_buffer.h
         include/duk_rhi/image.h
+        include/duk_rhi/pixel.h
         include/duk_rhi/sampler.h
         include/duk_rhi/vertex_layout.h
         include/duk_rhi/pipeline/graphics_pipeline.h
@@ -40,6 +41,7 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/render_pass.cpp
         src/duk_rhi/frame_buffer.cpp
         src/duk_rhi/image.cpp
+        src/duk_rhi/pixel.cpp
         src/duk_rhi/sampler.cpp
         src/duk_rhi/command/command_scheduler.cpp
         src/duk_rhi/pipeline/shader_data_source.cpp

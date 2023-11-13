@@ -26,7 +26,7 @@ static VkMemoryPropertyFlags memory_properties_from_update_frequency(Image::Upda
     return converted;
 }
 
-static VkImageAspectFlags image_aspect(Image::Usage usage, Image::PixelFormat format) {
+static VkImageAspectFlags image_aspect(Image::Usage usage, PixelFormat format) {
     VkImageAspectFlags aspectFlags = 0;
     switch (usage) {
         case Image::Usage::COLOR_ATTACHMENT:
@@ -36,9 +36,9 @@ static VkImageAspectFlags image_aspect(Image::Usage usage, Image::PixelFormat fo
         case Image::Usage::STORAGE:
         case Image::Usage::SAMPLED_STORAGE:
         case Image::Usage::DEPTH_STENCIL_ATTACHMENT:
-            if (Image::is_depth_format(format)) {
+            if (format.is_depth()) {
                 aspectFlags |= VK_IMAGE_ASPECT_DEPTH_BIT;
-                if (Image::is_stencil_format(format)) {
+                if (format.is_stencil()) {
                     aspectFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;
                 }
             }
@@ -54,32 +54,29 @@ static VkImageAspectFlags image_aspect(Image::Usage usage, Image::PixelFormat fo
 
 }
 
-VkFormat convert_pixel_format(Image::PixelFormat format) {
+VkFormat convert_pixel_format(PixelFormat format) {
     VkFormat converted;
     switch (format){
-        case Image::PixelFormat::UNDEFINED: converted = VK_FORMAT_UNDEFINED; break;
-        case Image::PixelFormat::R8_UNORM: converted = VK_FORMAT_R8_UNORM; break;
-        case Image::PixelFormat::R8_SNORM: converted = VK_FORMAT_R8_SNORM; break;
-        case Image::PixelFormat::R8_SRGB: converted = VK_FORMAT_R8_SRGB; break;
-        case Image::PixelFormat::R8G8_UNORM: converted = VK_FORMAT_R8G8_UNORM; break;
-        case Image::PixelFormat::R8G8_SNORM: converted = VK_FORMAT_R8G8_SNORM; break;
-        case Image::PixelFormat::R8G8_SRGB: converted = VK_FORMAT_R8G8_SRGB; break;
-        case Image::PixelFormat::R8G8B8_UNORM: converted = VK_FORMAT_R8G8B8_UNORM; break;
-        case Image::PixelFormat::R8G8B8_SNORM: converted = VK_FORMAT_R8G8B8_SNORM; break;
-        case Image::PixelFormat::R8G8B8_SRGB: converted = VK_FORMAT_R8G8B8_SRGB; break;
-        case Image::PixelFormat::B8G8R8_UNORM: converted = VK_FORMAT_B8G8R8_UNORM; break;
-        case Image::PixelFormat::B8G8R8_SNORM: converted = VK_FORMAT_B8G8R8_SNORM; break;
-        case Image::PixelFormat::B8G8R8_SRGB: converted = VK_FORMAT_B8G8R8_SRGB; break;
-        case Image::PixelFormat::R8G8B8A8_UNORM: converted = VK_FORMAT_R8G8B8A8_UNORM; break;
-        case Image::PixelFormat::R8G8B8A8_SNORM: converted = VK_FORMAT_R8G8B8A8_SNORM; break;
-        case Image::PixelFormat::R8G8B8A8_SRGB: converted = VK_FORMAT_R8G8B8A8_SRGB; break;
-        case Image::PixelFormat::B8G8R8A8_UNORM: converted = VK_FORMAT_B8G8R8A8_UNORM; break;
-        case Image::PixelFormat::B8G8R8A8_SNORM: converted = VK_FORMAT_B8G8R8A8_SNORM; break;
-        case Image::PixelFormat::B8G8R8A8_SRGB: converted = VK_FORMAT_B8G8R8A8_SRGB; break;
-        case Image::PixelFormat::D32_SFLOAT: converted = VK_FORMAT_D32_SFLOAT; break;
-        case Image::PixelFormat::D16_UNORM_S8_UINT: converted = VK_FORMAT_D16_UNORM_S8_UINT; break;
-        case Image::PixelFormat::D24_UNORM_S8_UINT: converted = VK_FORMAT_D24_UNORM_S8_UINT; break;
-        case Image::PixelFormat::D32_SFLOAT_S8_UINT: converted = VK_FORMAT_D32_SFLOAT_S8_UINT; break;
+        case PixelFormat::UNDEFINED: converted = VK_FORMAT_UNDEFINED; break;
+        case PixelFormat::R8U: converted = VK_FORMAT_R8_UNORM; break;
+        case PixelFormat::R8S: converted = VK_FORMAT_R8_SNORM; break;
+        case PixelFormat::RG8U: converted = VK_FORMAT_R8G8_UNORM; break;
+        case PixelFormat::RG8S: converted = VK_FORMAT_R8G8_SNORM; break;
+        case PixelFormat::RGB8U: converted = VK_FORMAT_R8G8B8_UNORM; break;
+        case PixelFormat::RGB8S: converted = VK_FORMAT_R8G8B8_SNORM; break;
+        case PixelFormat::BGR8U: converted = VK_FORMAT_B8G8R8_UNORM; break;
+        case PixelFormat::BGR8S: converted = VK_FORMAT_B8G8R8_SNORM; break;
+        case PixelFormat::RGBA8U: converted = VK_FORMAT_R8G8B8A8_UNORM; break;
+        case PixelFormat::RGBA8S: converted = VK_FORMAT_R8G8B8A8_SNORM; break;
+        case PixelFormat::BGRA8U: converted = VK_FORMAT_B8G8R8A8_UNORM; break;
+        case PixelFormat::BGRA8S: converted = VK_FORMAT_B8G8R8A8_SNORM; break;
+        case PixelFormat::RGBA32U: converted = VK_FORMAT_R32G32B32A32_UINT; break;
+        case PixelFormat::RGBA32S: converted = VK_FORMAT_R32G32B32A32_SINT; break;
+        case PixelFormat::RGBA32F: converted = VK_FORMAT_R32G32B32A32_SFLOAT; break;
+        case PixelFormat::D32_SFLOAT: converted = VK_FORMAT_D32_SFLOAT; break;
+        case PixelFormat::D16_UNORM_S8_UINT: converted = VK_FORMAT_D16_UNORM_S8_UINT; break;
+        case PixelFormat::D24_UNORM_S8_UINT: converted = VK_FORMAT_D24_UNORM_S8_UINT; break;
+        case PixelFormat::D32_SFLOAT_S8_UINT: converted = VK_FORMAT_D32_SFLOAT_S8_UINT; break;
         default:
             throw std::invalid_argument("unhandled Image::Format for Vulkan");
 
@@ -87,32 +84,29 @@ VkFormat convert_pixel_format(Image::PixelFormat format) {
     return converted;
 }
 
-Image::PixelFormat convert_pixel_format(VkFormat format) {
-    Image::PixelFormat converted;
+PixelFormat convert_pixel_format(VkFormat format) {
+    PixelFormat converted;
     switch (format){
-        case VK_FORMAT_UNDEFINED: converted = Image::PixelFormat::UNDEFINED; break;
-        case VK_FORMAT_R8_UNORM: converted = Image::PixelFormat::R8_UNORM; break;
-        case VK_FORMAT_R8_SNORM: converted = Image::PixelFormat::R8_SNORM; break;
-        case VK_FORMAT_R8_SRGB: converted = Image::PixelFormat::R8_SRGB; break;
-        case VK_FORMAT_R8G8_UNORM: converted = Image::PixelFormat::R8G8_UNORM; break;
-        case VK_FORMAT_R8G8_SNORM: converted = Image::PixelFormat::R8G8_SNORM; break;
-        case VK_FORMAT_R8G8_SRGB: converted = Image::PixelFormat::R8G8_SRGB; break;
-        case VK_FORMAT_R8G8B8_UNORM: converted = Image::PixelFormat::R8G8B8_UNORM; break;
-        case VK_FORMAT_R8G8B8_SNORM: converted = Image::PixelFormat::R8G8B8_SNORM; break;
-        case VK_FORMAT_R8G8B8_SRGB: converted = Image::PixelFormat::R8G8B8_SRGB; break;
-        case VK_FORMAT_B8G8R8_UNORM: converted = Image::PixelFormat::B8G8R8_UNORM; break;
-        case VK_FORMAT_B8G8R8_SNORM: converted = Image::PixelFormat::B8G8R8_SNORM; break;
-        case VK_FORMAT_B8G8R8_SRGB: converted = Image::PixelFormat::B8G8R8_SRGB; break;
-        case VK_FORMAT_R8G8B8A8_UNORM: converted = Image::PixelFormat::R8G8B8A8_UNORM; break;
-        case VK_FORMAT_R8G8B8A8_SNORM: converted = Image::PixelFormat::R8G8B8A8_SNORM; break;
-        case VK_FORMAT_R8G8B8A8_SRGB: converted = Image::PixelFormat::R8G8B8A8_SRGB; break;
-        case VK_FORMAT_B8G8R8A8_UNORM: converted = Image::PixelFormat::B8G8R8A8_UNORM; break;
-        case VK_FORMAT_B8G8R8A8_SNORM: converted = Image::PixelFormat::B8G8R8A8_SNORM; break;
-        case VK_FORMAT_B8G8R8A8_SRGB: converted = Image::PixelFormat::B8G8R8A8_SRGB; break;
-        case VK_FORMAT_D32_SFLOAT: converted = Image::PixelFormat::D32_SFLOAT; break;
-        case VK_FORMAT_D16_UNORM_S8_UINT: converted = Image::PixelFormat::D16_UNORM_S8_UINT; break;
-        case VK_FORMAT_D24_UNORM_S8_UINT: converted = Image::PixelFormat::D24_UNORM_S8_UINT; break;
-        case VK_FORMAT_D32_SFLOAT_S8_UINT: converted = Image::PixelFormat::D32_SFLOAT_S8_UINT; break;
+        case VK_FORMAT_UNDEFINED: converted = PixelFormat::UNDEFINED; break;
+        case VK_FORMAT_R8_UNORM: converted = PixelFormat::R8U; break;
+        case VK_FORMAT_R8_SNORM: converted = PixelFormat::R8S; break;
+        case VK_FORMAT_R8G8_UNORM: converted = PixelFormat::RG8U; break;
+        case VK_FORMAT_R8G8_SNORM: converted = PixelFormat::RG8S; break;
+        case VK_FORMAT_R8G8B8_UNORM: converted = PixelFormat::RGB8U; break;
+        case VK_FORMAT_R8G8B8_SNORM: converted = PixelFormat::RGB8S; break;
+        case VK_FORMAT_B8G8R8_UNORM: converted = PixelFormat::BGR8U; break;
+        case VK_FORMAT_B8G8R8_SNORM: converted = PixelFormat::BGR8S; break;
+        case VK_FORMAT_R8G8B8A8_UNORM: converted = PixelFormat::RGBA8U; break;
+        case VK_FORMAT_R8G8B8A8_SNORM: converted = PixelFormat::RGBA8S; break;
+        case VK_FORMAT_B8G8R8A8_UNORM: converted = PixelFormat::BGRA8U; break;
+        case VK_FORMAT_B8G8R8A8_SNORM: converted = PixelFormat::BGRA8S; break;
+        case VK_FORMAT_R32G32B32A32_UINT: converted = PixelFormat::RGBA32U; break;
+        case VK_FORMAT_R32G32B32A32_SINT: converted = PixelFormat::RGBA32S; break;
+        case VK_FORMAT_R32G32B32A32_SFLOAT: converted = PixelFormat::RGBA32F; break;
+        case VK_FORMAT_D32_SFLOAT: converted = PixelFormat::D32_SFLOAT; break;
+        case VK_FORMAT_D16_UNORM_S8_UINT: converted = PixelFormat::D16_UNORM_S8_UINT; break;
+        case VK_FORMAT_D24_UNORM_S8_UINT: converted = PixelFormat::D24_UNORM_S8_UINT; break;
+        case VK_FORMAT_D32_SFLOAT_S8_UINT: converted = PixelFormat::D32_SFLOAT_S8_UINT; break;
         default:
             throw std::invalid_argument("unhandled VkFormat for duk");
     }
@@ -344,7 +338,7 @@ void VulkanMemoryImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFl
     bufferMemoryCreateInfo.device = m_device;
     bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
     bufferMemoryCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    bufferMemoryCreateInfo.size = m_width * m_height * pixel_format_size(m_format);
+    bufferMemoryCreateInfo.size = m_width * m_height * m_format.size();
 
     VulkanBufferHostMemory bufferHostMemory(bufferMemoryCreateInfo);
     bufferHostMemory.write(m_data.data(), m_data.size(), 0);
@@ -403,7 +397,7 @@ void VulkanMemoryImage::update(ImageDataSource* imageDataSource) {
     }
 }
 
-Image::PixelFormat VulkanMemoryImage::format() const {
+PixelFormat VulkanMemoryImage::format() const {
     return m_format;
 }
 
@@ -499,7 +493,7 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
         bufferMemoryCreateInfo.device = m_device;
         bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
         bufferMemoryCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        bufferMemoryCreateInfo.size = m_width * m_height * pixel_format_size(m_format);
+        bufferMemoryCreateInfo.size = m_width * m_height * m_format.size();
 
         VulkanBufferHostMemory bufferHostMemory(bufferMemoryCreateInfo);
         bufferHostMemory.write(m_data.data(), m_data.size(), 0);
@@ -603,7 +597,7 @@ uint32_t VulkanSwapchainImage::image_count() const {
     return m_images.size();
 }
 
-Image::PixelFormat VulkanSwapchainImage::format() const {
+PixelFormat VulkanSwapchainImage::format() const {
     return convert_pixel_format(m_format);
 }
 

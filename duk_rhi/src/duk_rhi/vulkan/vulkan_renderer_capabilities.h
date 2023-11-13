@@ -21,7 +21,7 @@ public:
 
     ~VulkanRendererCapabilities() override;
 
-    Image::PixelFormat depth_format() override;
+    PixelFormat depth_format() override;
 
 private:
     VulkanPhysicalDevice* m_physicalDevice;

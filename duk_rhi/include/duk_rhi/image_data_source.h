@@ -15,15 +15,15 @@ namespace duk::rhi {
 class ImageDataSource : public DataSource {
 public:
 
-    DUK_NO_DISCARD virtual Image::PixelFormat pixel_format() const = 0;
+    DUK_NO_DISCARD virtual PixelFormat pixel_format() const = 0;
 
     DUK_NO_DISCARD virtual size_t pixel_count() const = 0;
 
     DUK_NO_DISCARD virtual size_t byte_count() const = 0;
 
-    DUK_NO_DISCARD virtual size_t width() const = 0;
+    DUK_NO_DISCARD virtual uint32_t width() const = 0;
 
-    DUK_NO_DISCARD virtual size_t height() const = 0;
+    DUK_NO_DISCARD virtual uint32_t height() const = 0;
 
     DUK_NO_DISCARD virtual bool has_data() const = 0;
 
@@ -31,37 +31,71 @@ public:
 
     template<typename PixelType>
     void read_pixels(PixelType* dst, size_t pixelCount, size_t pixelOffset) {
-        const auto pixelByteSize = Image::pixel_format_size(pixel_format());
+        const auto format = pixel_format();
+        const auto pixelByteSize = format;
         assert(pixelByteSize == sizeof(PixelType));
         assert(pixel_count() >= pixelCount + pixelOffset);
         read_bytes((void*)dst, pixelCount * pixelByteSize, pixelOffset * pixelByteSize);
     }
 };
 
-template<typename PixelType, Image::PixelFormat PixelFormat>
-class StdImageDataSource : public ImageDataSource {
+template<typename PixelType>
+class ImageDataSourceT : public ImageDataSource {
 public:
-    StdImageDataSource(uint32_t width, uint32_t height) :
+    ImageDataSourceT(uint32_t width, uint32_t height) :
+        m_pixels(width * height),
         m_width(width),
-        m_height(height),
-        m_pixels(width * height) {
-
+        m_height(height) {
+        assert(width * height == m_pixels.size());
     }
 
-    void write_pixel(uint32_t x, uint32_t y, const PixelType& pixel) {
-        assert(x < m_width);
-        assert(y < m_height);
-        m_pixels[x + (y * m_width)] = pixel;
+    ImageDataSourceT(std::vector<PixelType>&& pixels, uint32_t width, uint32_t height) :
+        m_pixels(std::move(pixels)),
+        m_width(width),
+        m_height(height) {
+        assert(width * height == m_pixels.size());
     }
 
-    void resize(uint32_t width, uint32_t height) {
-        m_width = width;
-        m_height = height;
-        m_pixels.resize(m_width * m_height);
+    ImageDataSourceT(const std::vector<PixelType>& pixels, uint32_t width, uint32_t height) :
+        m_pixels(pixels),
+        m_width(width),
+        m_height(height) {
+        assert(width * height == m_pixels.size());
     }
 
-    DUK_NO_DISCARD Image::PixelFormat pixel_format() const override {
-        return PixelFormat;
+    ImageDataSourceT(const PixelType* pixels, uint32_t width, uint32_t height) :
+        m_pixels(pixels, pixels + (width * height)),
+        m_width(width),
+        m_height(height) {
+        assert(width * height == m_pixels.size());
+    }
+
+    DUK_NO_DISCARD PixelType* data() {
+        return m_pixels.data();
+    }
+
+    DUK_NO_DISCARD const PixelType* data() const {
+        return m_pixels.data();
+    }
+
+    DUK_NO_DISCARD PixelType& operator[](size_t index) {
+        return m_pixels[index];
+    }
+
+    DUK_NO_DISCARD const PixelType& operator[](size_t index) const {
+        return m_pixels[index];
+    }
+
+    DUK_NO_DISCARD PixelType& at(uint32_t column, uint32_t row) {
+        return m_pixels[column + (row * m_width)];
+    }
+
+    DUK_NO_DISCARD const PixelType& at(uint32_t column, uint32_t row) const {
+        return m_pixels[column + (row * m_width)];
+    }
+
+    DUK_NO_DISCARD PixelFormat pixel_format() const override {
+        return PixelType::format();
     }
 
     DUK_NO_DISCARD size_t pixel_count() const override {
@@ -72,11 +106,11 @@ public:
         return m_pixels.size() * sizeof(PixelType);
     }
 
-    DUK_NO_DISCARD size_t width() const override {
+    DUK_NO_DISCARD uint32_t width() const override {
         return m_width;
     }
 
-    DUK_NO_DISCARD size_t height() const override {
+    DUK_NO_DISCARD uint32_t height() const override {
         return m_height;
     }
 
@@ -97,26 +131,36 @@ protected:
         duk::hash::hash_combine(hash, m_pixels.data(), byte_count());
         duk::hash::hash_combine(hash, m_width);
         duk::hash::hash_combine(hash, m_height);
-        duk::hash::hash_combine(hash, PixelFormat);
+        duk::hash::hash_combine(hash, PixelType::format());
         return hash;
     }
 
 private:
+    std::vector<PixelType> m_pixels;
     uint32_t m_width;
     uint32_t m_height;
-    std::vector<PixelType> m_pixels;
 };
 
-class EmptyImageDataSource : public ImageDataSource {
+using ImageDataSourceR8S = ImageDataSourceT<duk::rhi::PixelR8S>;
+using ImageDataSourceR8U = ImageDataSourceT<duk::rhi::PixelR8U>;
+using ImageDataSourceRG8S = ImageDataSourceT<duk::rhi::PixelRG8S>;
+using ImageDataSourceRG8U = ImageDataSourceT<duk::rhi::PixelRG8U>;
+using ImageDataSourceRGBA8S = ImageDataSourceT<duk::rhi::PixelRGBA8S>;
+using ImageDataSourceRGBA8U = ImageDataSourceT<duk::rhi::PixelRGBA8U>;
+using ImageDataSourceRGBA32S = ImageDataSourceT<duk::rhi::PixelRGBA32S>;
+using ImageDataSourceRGBA32U = ImageDataSourceT<duk::rhi::PixelRGBA32U>;
+using ImageDataSourceRGBA32F = ImageDataSourceT<duk::rhi::PixelRGBA32F>;
+
+class ImageDataSourceEmpty : public ImageDataSource {
 public:
-    EmptyImageDataSource(uint32_t width, uint32_t height, Image::PixelFormat pixelFormat) :
+    ImageDataSourceEmpty(uint32_t width, uint32_t height, PixelFormat pixelFormat) :
         m_width(width),
         m_height(height),
         m_pixelFormat(pixelFormat) {
 
     }
 
-    DUK_NO_DISCARD Image::PixelFormat pixel_format() const override {
+    DUK_NO_DISCARD PixelFormat pixel_format() const override {
         return m_pixelFormat;
     }
 
@@ -125,14 +169,14 @@ public:
     }
 
     DUK_NO_DISCARD size_t byte_count() const override {
-        return pixel_count() * Image::pixel_format_size(m_pixelFormat);
+        return pixel_count() * m_pixelFormat.size();
     }
 
-    DUK_NO_DISCARD size_t width() const override {
+    DUK_NO_DISCARD uint32_t width() const override {
         return m_width;
     }
 
-    DUK_NO_DISCARD size_t height() const override {
+    DUK_NO_DISCARD uint32_t height() const override {
         return m_height;
     }
 
@@ -141,7 +185,7 @@ public:
     }
 
     void read_bytes(void* dst, size_t size, size_t offset) const override {
-        throw std::logic_error("tried to read from an EmptyImageDataSource");
+        throw std::logic_error("tried to read from an ImageDataSourceEmpty");
     }
 
 protected:
@@ -157,7 +201,7 @@ protected:
 private:
     uint32_t m_width;
     uint32_t m_height;
-    Image::PixelFormat m_pixelFormat;
+    PixelFormat m_pixelFormat;
 };
 
 }

@@ -117,7 +117,7 @@ uint32_t Renderer::render_height() const {
 }
 
 std::shared_ptr<duk::rhi::Image> Renderer::create_depth_image(uint32_t width, uint32_t height) {
-    duk::rhi::EmptyImageDataSource depthImageDataSource(width, height, m_rhi->capabilities()->depth_format());
+    duk::rhi::ImageDataSourceEmpty depthImageDataSource(width, height, m_rhi->capabilities()->depth_format());
     depthImageDataSource.update_hash();
 
     duk::rhi::RHI::ImageCreateInfo depthImageCreateInfo = {};
@@ -136,8 +136,8 @@ std::shared_ptr<duk::rhi::Image> Renderer::create_depth_image(uint32_t width, ui
     return std::move(expectedDepthImage.value());
 }
 
-std::shared_ptr<duk::rhi::Image> Renderer::create_color_image(uint32_t width, uint32_t height, duk::rhi::Image::PixelFormat format) {
-    duk::rhi::EmptyImageDataSource colorImageDataSource(width, height, format);
+std::shared_ptr<duk::rhi::Image> Renderer::create_color_image(uint32_t width, uint32_t height, duk::rhi::PixelFormat format) {
+    duk::rhi::ImageDataSourceEmpty colorImageDataSource(width, height, format);
     colorImageDataSource.update_hash();
 
     duk::rhi::RHI::ImageCreateInfo colorImageCreateInfo = {};

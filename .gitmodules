@@ -13,3 +13,6 @@
 [submodule "external/cxxopts/cxxopts"]
 	path = external/cxxopts/cxxopts
 	url = git@github.com:jarro2783/cxxopts.git
+[submodule "external/stb/stb"]
+	path = external/stb/stb
+	url = git@github.com:nothings/stb.git

@@ -14,7 +14,7 @@ VulkanRendererCapabilities::VulkanRendererCapabilities(const VulkanRendererCapab
 
 VulkanRendererCapabilities::~VulkanRendererCapabilities() = default;
 
-Image::PixelFormat VulkanRendererCapabilities::depth_format() {
+PixelFormat VulkanRendererCapabilities::depth_format() {
     VkFormat depthFormats[] = {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT};
     return convert_pixel_format(m_physicalDevice->select_depth_format(depthFormats));
 }

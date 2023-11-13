@@ -13,7 +13,7 @@ public:
 
     virtual ~RendererCapabilities() = default;
 
-    virtual Image::PixelFormat depth_format() = 0;
+    virtual PixelFormat depth_format() = 0;
 };
 
 }

@@ -6,6 +6,7 @@
 
 #include <duk_macros/macros.h>
 #include <duk_hash/hash.h>
+#include <duk_rhi/pixel.h>
 
 #include <cstdint>
 
@@ -15,31 +16,6 @@ class ImageDataSource;
 
 class Image {
 public:
-    enum class PixelFormat {
-        UNDEFINED = 0,
-        R8_UNORM,
-        R8_SNORM,
-        R8_SRGB,
-        R8G8_UNORM,
-        R8G8_SNORM,
-        R8G8_SRGB,
-        R8G8B8_UNORM,
-        R8G8B8_SNORM,
-        R8G8B8_SRGB,
-        B8G8R8_UNORM,
-        B8G8R8_SNORM,
-        B8G8R8_SRGB,
-        R8G8B8A8_UNORM,
-        R8G8B8A8_SNORM,
-        R8G8B8A8_SRGB,
-        B8G8R8A8_UNORM,
-        B8G8R8A8_SNORM,
-        B8G8R8A8_SRGB,
-        D32_SFLOAT,
-        D16_UNORM_S8_UINT,
-        D24_UNORM_S8_UINT,
-        D32_SFLOAT_S8_UINT
-    };
 
     enum class Layout {
         UNDEFINED = 0,
@@ -92,12 +68,6 @@ public:
     DUK_NO_DISCARD virtual uint32_t height() const = 0;
 
     DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
-
-    DUK_NO_DISCARD static size_t pixel_format_size(PixelFormat format);
-
-    DUK_NO_DISCARD static bool is_depth_format(PixelFormat format);
-
-    DUK_NO_DISCARD static bool is_stencil_format(PixelFormat format);
 
 };
 

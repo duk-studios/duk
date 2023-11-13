@@ -10,7 +10,7 @@
 
 namespace duk::renderer {
 
-static constexpr auto kColorFormat = duk::rhi::Image::PixelFormat::R8G8B8A8_UNORM;
+static constexpr auto kColorFormat = duk::rhi::PixelFormat::RGBA8U;
 
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
     m_renderer(forwardPassCreateInfo.renderer),

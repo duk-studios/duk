@@ -20,36 +20,9 @@ namespace duk::sample {
 
 namespace detail {
 
-struct PixelRGBA {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    uint8_t a;
-};
-
-using PixelRGBAImageDataSource = duk::rhi::StdImageDataSource<PixelRGBA, duk::rhi::Image::PixelFormat::R8G8B8A8_UNORM>;
-
 template<typename T>
 T lerp(T from, T to, float percent) {
     return (from * (1 - percent)) + (to * percent);
-}
-
-PixelRGBAImageDataSource load_image() {
-    PixelRGBAImageDataSource imageDataSource(64, 64);
-    for (int x = 0; x < 64; x++) {
-        for (int y = 0; y < 64; y++) {
-            auto xPercent = (float)x / 63;
-            auto yPercent = (float)x / 63;
-
-            auto r = lerp<uint8_t>(0, 255, xPercent);
-            auto g = lerp<uint8_t>(0, 255, yPercent);
-            auto b = lerp<uint8_t>(0, 255, xPercent * yPercent);
-
-            imageDataSource.write_pixel(x, y, {r, g, b, 255});
-        }
-    }
-    imageDataSource.update_hash();
-    return imageDataSource;
 }
 
 using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::renderer::Vertex3DNormalUV, uint16_t>;

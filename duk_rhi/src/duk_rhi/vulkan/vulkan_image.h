@@ -17,9 +17,9 @@
 
 namespace duk::rhi {
 
-VkFormat convert_pixel_format(Image::PixelFormat format);
+VkFormat convert_pixel_format(PixelFormat format);
 
-Image::PixelFormat convert_pixel_format(VkFormat format);
+PixelFormat convert_pixel_format(VkFormat format);
 
 VkImageLayout convert_layout(Image::Layout layout);
 
@@ -84,7 +84,7 @@ public:
 
     void update(ImageDataSource* imageDataSource) override;
 
-    DUK_NO_DISCARD Image::PixelFormat format() const override;
+    DUK_NO_DISCARD PixelFormat format() const override;
 
     DUK_NO_DISCARD VkImage image(uint32_t imageIndex) const override;
 
@@ -144,7 +144,7 @@ public:
 
     void update(ImageDataSource* imageDataSource) override;
 
-    DUK_NO_DISCARD Image::PixelFormat format() const override;
+    DUK_NO_DISCARD PixelFormat format() const override;
 
     DUK_NO_DISCARD uint32_t width() const override;
 
