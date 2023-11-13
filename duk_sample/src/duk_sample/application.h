@@ -54,11 +54,12 @@ private:
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;
     std::shared_ptr<duk::renderer::MeshBufferPool> m_meshBufferPool;
+    std::shared_ptr<duk::rhi::Image> m_image;
     std::shared_ptr<duk::renderer::Mesh> m_quadMesh;
     std::shared_ptr<duk::renderer::Mesh> m_cubeMesh;
     std::shared_ptr<duk::renderer::Mesh> m_sphereMesh;
     std::shared_ptr<duk::renderer::ColorMaterial> m_colorMaterial;
-    std::shared_ptr<duk::renderer::PhongMaterial> m_phongGreenMaterial, m_phongBlueMaterial, m_phongRedMaterial, m_phongWhiteMaterial, m_phongYellowMaterial, m_phongUnknownMaterial;
+    std::shared_ptr<duk::renderer::PhongMaterial> m_phongGreenMaterial, m_phongBlueMaterial, m_phongRedMaterial, m_phongWhiteMaterial, m_phongYellowMaterial, m_phongCyanMaterial;
     std::shared_ptr<duk::scene::Scene> m_scene;
     duk::scene::Object m_camera;
     bool m_run;

@@ -59,18 +59,12 @@ void PhongMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyPar
     commandBuffer->bind_descriptor_set(m_descriptorSet.handle(), 0);
 }
 
-void PhongMaterial::update_diffuse(const glm::vec3& diffuse) {
-    m_materialUBO->data().diffuse = diffuse;
-    m_materialUBO->flush();
+void PhongMaterial::update_base_color_image(duk::rhi::Image* image, const duk::rhi::Sampler& sampler) {
+    m_descriptorSet.set(PhongDescriptorSet::Bindings::uBaseColor, duk::rhi::Descriptor::image_sampler(image, duk::rhi::Image::Layout::SHADER_READ_ONLY, sampler));
 }
 
-void PhongMaterial::update_specular(const glm::vec3& specular) {
-    m_materialUBO->data().specular = specular;
-    m_materialUBO->flush();
-}
-
-void PhongMaterial::update_ambient(const glm::vec3& ambient) {
-    m_materialUBO->data().ambient = ambient;
+void PhongMaterial::update_base_color(const glm::vec3& color) {
+    m_materialUBO->data().color = color;
     m_materialUBO->flush();
 }
 
@@ -79,12 +73,6 @@ void PhongMaterial::update_shininess(float shininess) {
     m_materialUBO->flush();
 }
 
-void PhongMaterial::update_material(const glm::vec3& diffuse, const glm::vec3& specular, const glm::vec3& ambient, float shininess) {
-    m_materialUBO->data().diffuse = diffuse;
-    m_materialUBO->data().specular = specular;
-    m_materialUBO->data().ambient = ambient;
-    m_materialUBO->data().shininess = shininess;
-    m_materialUBO->flush();
-}
+
 
 }

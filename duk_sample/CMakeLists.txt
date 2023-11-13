@@ -23,6 +23,7 @@ target_link_libraries(duk_sample
         duk_renderer
         duk_log
         duk_task
+        duk_import
         )
 
 set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)
@@ -30,3 +31,7 @@ set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)
 install(TARGETS
         duk_sample
         )
+
+install(DIRECTORY
+        resources/
+        TYPE BIN)

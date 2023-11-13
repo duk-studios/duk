@@ -9,6 +9,7 @@
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>
+#include <duk_import/importer.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/random.hpp>
@@ -237,6 +238,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         applicationCreateInfo.sink->flush_from(m_logger);
     }
 
+    duk::import::Importer::create();
+
     duk::platform::WindowCreateInfo windowCreateInfo = {};
     windowCreateInfo.windowTitle = applicationCreateInfo.name;
     windowCreateInfo.width = 1280;
@@ -285,6 +288,24 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         m_sphereMesh = m_meshBufferPool->create_mesh(&sphereDataSource);
     }
 
+    {
+        auto imageDataSource = duk::import::Importer::instance()->load_image("images/uv.jpg", duk::rhi::PixelFormat::RGBA8U);
+
+        duk::rhi::RHI::ImageCreateInfo imageCreateInfo = {};
+        imageCreateInfo.commandQueue = m_renderer->main_command_queue();
+        imageCreateInfo.initialLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
+        imageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::STATIC;
+        imageCreateInfo.usage = duk::rhi::Image::Usage::SAMPLED;
+        imageCreateInfo.imageDataSource = imageDataSource.get();
+
+        auto result = m_renderer->rhi()->create_image(imageCreateInfo);
+
+        if (!result) {
+            throw std::runtime_error("failed to create uv image: " + result.error().description());
+        }
+
+        m_image = std::move(result.value());
+    }
 
     {
         duk::renderer::ColorShaderDataSource colorShaderDataSource;
@@ -303,23 +324,37 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         phongMaterialCreateInfo.renderer = m_renderer.get();
         phongMaterialCreateInfo.shaderDataSource = &phongShaderDataSource;
 
+        const duk::rhi::Sampler sampler = {.filter = duk::rhi::Sampler::Filter::LINEAR, .wrapMode = duk::rhi::Sampler::WrapMode::REPEAT};
+
         m_phongGreenMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
-        m_phongGreenMaterial->update_material({0.0f, 1.0f, 0.0f}, {0.0, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 2);
+        m_phongGreenMaterial->update_base_color({0.0f, 1.0f, 0.0f});
+        m_phongGreenMaterial->update_shininess(2);
+        m_phongGreenMaterial->update_base_color_image(m_image.get(), sampler);
 
         m_phongBlueMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
-        m_phongBlueMaterial->update_material({0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 4);
+        m_phongBlueMaterial->update_base_color({0.0f, 0.0f, 1.0f});
+        m_phongBlueMaterial->update_shininess(4);
+        m_phongBlueMaterial->update_base_color_image(m_image.get(), sampler);
 
         m_phongRedMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
-        m_phongRedMaterial->update_material({1.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 8);
+        m_phongRedMaterial->update_base_color({1.0f, 0.0f, 0.0f});
+        m_phongRedMaterial->update_shininess(8);
+        m_phongRedMaterial->update_base_color_image(m_image.get(), sampler);
 
         m_phongYellowMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
-        m_phongYellowMaterial->update_material({1.0f, 1.0f, 0.0f}, {1.0f, 1.0f, 0.0f}, {0.1f, 0.1f, 0.1f}, 16);
+        m_phongYellowMaterial->update_base_color({1.0f, 1.0f, 0.0f});
+        m_phongYellowMaterial->update_shininess(16);
+        m_phongYellowMaterial->update_base_color_image(m_image.get(), sampler);
 
         m_phongWhiteMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
-        m_phongWhiteMaterial->update_material({1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 32);
+        m_phongWhiteMaterial->update_base_color({1.0f, 1.0f, 1.0f});
+        m_phongWhiteMaterial->update_shininess(32);
+        m_phongWhiteMaterial->update_base_color_image(m_image.get(), sampler);
 
-        m_phongUnknownMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
-        m_phongUnknownMaterial->update_material({0.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0f}, {0.1f, 0.1f, 0.1f}, 64);
+        m_phongCyanMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
+        m_phongCyanMaterial->update_base_color({0.0f, 1.0f, 1.0f});
+        m_phongCyanMaterial->update_shininess(64);
+        m_phongCyanMaterial->update_base_color_image(m_image.get(), sampler);
     }
 
 
@@ -339,7 +374,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::vec3(offset, 0, 0),
             glm::quat(),
             scale,
-            m_phongGreenMaterial.get(),
+            m_phongWhiteMaterial.get(),
             m_sphereMesh.get()
     );
 
@@ -348,8 +383,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::vec3(-offset, 0, 0),
             glm::quat(),
             scale,
-            m_phongBlueMaterial.get(),
-            m_sphereMesh.get()
+            m_phongWhiteMaterial.get(),
+            m_cubeMesh.get()
     );
 
     detail::add_object(
@@ -357,7 +392,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::vec3(0, offset, 0),
             glm::quat(),
             scale,
-            m_phongRedMaterial.get(),
+            m_phongWhiteMaterial.get(),
             m_sphereMesh.get()
     );
 
@@ -366,8 +401,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::vec3(0, -offset, 0),
             glm::quat(),
             scale,
-            m_phongYellowMaterial.get(),
-            m_sphereMesh.get()
+            m_phongWhiteMaterial.get(),
+            m_cubeMesh.get()
     );
 
     detail::add_object(
@@ -384,8 +419,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
             glm::vec3(0, 0, -offset),
             glm::quat(),
             scale,
-            m_phongUnknownMaterial.get(),
-            m_sphereMesh.get()
+            m_phongWhiteMaterial.get(),
+            m_cubeMesh.get()
     );
 
     {
@@ -419,7 +454,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         auto object = m_scene->add_object();
         auto pointLight = object.add<duk::renderer::PointLight>();
         pointLight->value.color = glm::vec3(0.9f, 0.3f, 0.459f);
-        pointLight->value.intensity = 3.0f;
+        pointLight->value.intensity = 8.0f;
 
         auto position3D = object.add<duk::renderer::Position3D>();
         position3D->value = glm::vec3(-offset * 2, -5, 10);
@@ -429,7 +464,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         auto object = m_scene->add_object();
         auto directionalLight = object.add<duk::renderer::DirectionalLight>();
         directionalLight->value.color = glm::vec3(1, 1, 1);
-        directionalLight->value.intensity = 0.25f;
+        directionalLight->value.intensity = 0.85f;
 
         auto rotation3D = object.add<duk::renderer::Rotation3D>();
         rotation3D->value = glm::quatLookAt(glm::vec3(0, -1, 0), glm::vec3(0, 1, 0));
@@ -437,7 +472,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
 }
 
 Application::~Application() {
-
+    duk::import::Importer::destroy();
 }
 
 void Application::run() {

@@ -34,15 +34,11 @@ public:
 
     void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
 
-    void update_diffuse(const glm::vec3& diffuse);
+    void update_base_color_image(duk::rhi::Image* image, const duk::rhi::Sampler& sampler);
 
-    void update_specular(const glm::vec3& specular);
-
-    void update_ambient(const glm::vec3& ambient);
+    void update_base_color(const glm::vec3& color);
 
     void update_shininess(float shininess);
-
-    void update_material(const glm::vec3& diffuse, const glm::vec3& specular, const glm::vec3& ambient, float shininess);
 
 private:
     PhongDescriptorSet m_descriptorSet;

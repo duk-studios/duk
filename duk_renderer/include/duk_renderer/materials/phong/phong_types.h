@@ -8,11 +8,7 @@
 namespace duk::renderer::phong {
 
 struct Material {
-    glm::vec3 ambient;
-    uint8_t _padding_ambient[4];
-    glm::vec3 diffuse;
-    uint8_t _padding_diffuse[4];
-    glm::vec3 specular;
+    glm::vec3 color;
     float shininess;
 };
 

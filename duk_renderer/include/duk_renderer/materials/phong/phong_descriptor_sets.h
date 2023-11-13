@@ -18,7 +18,8 @@ public:
         uCamera = 0,
         uTransform = 1,
         uLights = 2,
-        uMaterial = 3
+        uMaterial = 3,
+        uBaseColor = 4
     };
 
 public:
