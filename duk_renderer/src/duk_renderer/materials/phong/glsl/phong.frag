@@ -23,6 +23,7 @@ layout(binding = 3) uniform MaterialUBO {
 } uMaterial;
 
 layout(binding = 4) uniform sampler2D uBaseColor;
+layout(binding = 5) uniform sampler2D uSpecular;
 
 vec3 calculate_lighting(in LightValue light, in float shininess, in vec3 normal, in vec3 view, in vec3 lightDirection, in float attenuation) {
     vec3 result = vec3(0);
@@ -53,18 +54,19 @@ vec3 calculate_point_lighting(in PointLight light, in float shininess, in vec3 n
 }
 
 void main() {
-
     vec3 cameraPosition = vec3(uCamera.matrices.invView[3]);
     vec3 view = normalize(cameraPosition - vPosition);
     vec3 normal = normalize(vNormal);
     vec3 lighting = vec3(0);
 
+    float shininess = max(1, (uMaterial.material.shininess * texture(uSpecular, vTexCoord).r));
+
     for (int i = 0; i < uLights.lights.directionalLightCount; i++) {
-        lighting += calculate_directional_lighting(uLights.lights.directionalLights[i], uMaterial.material.shininess, normal, view);
+        lighting += calculate_directional_lighting(uLights.lights.directionalLights[i], shininess, normal, view);
     }
 
     for (int i = 0; i < uLights.lights.pointLightCount; i++) {
-        lighting += calculate_point_lighting(uLights.lights.pointLights[i], uMaterial.material.shininess, normal, view, vPosition);
+        lighting += calculate_point_lighting(uLights.lights.pointLights[i], shininess, normal, view, vPosition);
     }
 
     vec4 color = texture(uBaseColor, vTexCoord) * vec4(uMaterial.material.color, 1.0f);

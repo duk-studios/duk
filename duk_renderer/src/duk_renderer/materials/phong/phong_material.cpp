@@ -68,11 +68,13 @@ void PhongMaterial::update_base_color(const glm::vec3& color) {
     m_materialUBO->flush();
 }
 
+void PhongMaterial::update_shininess_image(duk::rhi::Image* image, const rhi::Sampler& sampler) {
+    m_descriptorSet.set(PhongDescriptorSet::Bindings::uSpecular, duk::rhi::Descriptor::image_sampler(image, duk::rhi::Image::Layout::SHADER_READ_ONLY, sampler));
+}
+
 void PhongMaterial::update_shininess(float shininess) {
     m_materialUBO->data().shininess = shininess;
     m_materialUBO->flush();
 }
-
-
 
 }

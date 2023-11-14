@@ -289,22 +289,52 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     }
 
     {
-        auto imageDataSource = duk::import::Importer::instance()->load_image("images/uv.jpg", duk::rhi::PixelFormat::RGBA8U);
+        auto baseColorImageDataSource = duk::import::Importer::instance()->load_image("images/gold_basecolor.png", duk::rhi::PixelFormat::RGBA8U);
+        auto specularImageDataSource = duk::import::Importer::instance()->load_image("images/gold_specular.png", duk::rhi::PixelFormat::R8U);
 
         duk::rhi::RHI::ImageCreateInfo imageCreateInfo = {};
         imageCreateInfo.commandQueue = m_renderer->main_command_queue();
         imageCreateInfo.initialLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
         imageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::STATIC;
         imageCreateInfo.usage = duk::rhi::Image::Usage::SAMPLED;
-        imageCreateInfo.imageDataSource = imageDataSource.get();
 
-        auto result = m_renderer->rhi()->create_image(imageCreateInfo);
+        {
+            imageCreateInfo.imageDataSource = baseColorImageDataSource.get();
+            auto result = m_renderer->rhi()->create_image(imageCreateInfo);
 
-        if (!result) {
-            throw std::runtime_error("failed to create uv image: " + result.error().description());
+            if (!result) {
+                throw std::runtime_error("failed to create uv image: " + result.error().description());
+            }
+
+            m_baseColorImage = std::move(result.value());
         }
 
-        m_image = std::move(result.value());
+        {
+            imageCreateInfo.imageDataSource = specularImageDataSource.get();
+            auto result = m_renderer->rhi()->create_image(imageCreateInfo);
+
+            if (!result) {
+                throw std::runtime_error("failed to create uv image: " + result.error().description());
+            }
+
+            m_specularImage = std::move(result.value());
+        }
+
+        {
+            duk::rhi::ImageDataSourceRGBA8U whiteImageDataSource(1, 1);
+            whiteImageDataSource[0] = {255, 255, 255, 255};
+            whiteImageDataSource.update_hash();
+
+            imageCreateInfo.imageDataSource = &whiteImageDataSource;
+            auto result = m_renderer->rhi()->create_image(imageCreateInfo);
+
+            if (!result) {
+                throw std::runtime_error("failed to create uv image: " + result.error().description());
+            }
+
+            m_whiteImage = std::move(result.value());
+        }
+
     }
 
     {
@@ -324,37 +354,43 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
         phongMaterialCreateInfo.renderer = m_renderer.get();
         phongMaterialCreateInfo.shaderDataSource = &phongShaderDataSource;
 
-        const duk::rhi::Sampler sampler = {.filter = duk::rhi::Sampler::Filter::LINEAR, .wrapMode = duk::rhi::Sampler::WrapMode::REPEAT};
+        const duk::rhi::Sampler sampler = {.filter = duk::rhi::Sampler::Filter::NEAREST, .wrapMode = duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER};
 
         m_phongGreenMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongGreenMaterial->update_base_color({0.0f, 1.0f, 0.0f});
         m_phongGreenMaterial->update_shininess(2);
-        m_phongGreenMaterial->update_base_color_image(m_image.get(), sampler);
+        m_phongGreenMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
+        m_phongGreenMaterial->update_shininess_image(m_specularImage.get(), sampler);
 
         m_phongBlueMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongBlueMaterial->update_base_color({0.0f, 0.0f, 1.0f});
         m_phongBlueMaterial->update_shininess(4);
-        m_phongBlueMaterial->update_base_color_image(m_image.get(), sampler);
+        m_phongBlueMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
+        m_phongBlueMaterial->update_shininess_image(m_specularImage.get(), sampler);
 
         m_phongRedMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongRedMaterial->update_base_color({1.0f, 0.0f, 0.0f});
         m_phongRedMaterial->update_shininess(8);
-        m_phongRedMaterial->update_base_color_image(m_image.get(), sampler);
+        m_phongRedMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
+        m_phongRedMaterial->update_shininess_image(m_specularImage.get(), sampler);
 
         m_phongYellowMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongYellowMaterial->update_base_color({1.0f, 1.0f, 0.0f});
         m_phongYellowMaterial->update_shininess(16);
-        m_phongYellowMaterial->update_base_color_image(m_image.get(), sampler);
+        m_phongYellowMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
+        m_phongYellowMaterial->update_shininess_image(m_specularImage.get(), sampler);
 
         m_phongWhiteMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
-        m_phongWhiteMaterial->update_base_color({1.0f, 1.0f, 1.0f});
-        m_phongWhiteMaterial->update_shininess(32);
-        m_phongWhiteMaterial->update_base_color_image(m_image.get(), sampler);
+        m_phongWhiteMaterial->update_base_color({0.3f, 0.3f, 0.3f});
+        m_phongWhiteMaterial->update_shininess(4);
+        m_phongWhiteMaterial->update_base_color_image(m_whiteImage.get(), sampler);
+        m_phongWhiteMaterial->update_shininess_image(m_specularImage.get(), sampler);
 
         m_phongCyanMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongCyanMaterial->update_base_color({0.0f, 1.0f, 1.0f});
         m_phongCyanMaterial->update_shininess(64);
-        m_phongCyanMaterial->update_base_color_image(m_image.get(), sampler);
+        m_phongCyanMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
+        m_phongCyanMaterial->update_shininess_image(m_specularImage.get(), sampler);
     }
 
 

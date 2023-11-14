@@ -19,7 +19,8 @@ public:
         uTransform = 1,
         uLights = 2,
         uMaterial = 3,
-        uBaseColor = 4
+        uBaseColor = 4,
+        uSpecular = 5
     };
 
 public:

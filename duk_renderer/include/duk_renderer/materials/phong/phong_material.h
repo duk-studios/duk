@@ -38,6 +38,8 @@ public:
 
     void update_base_color(const glm::vec3& color);
 
+    void update_shininess_image(duk::rhi::Image* image, const duk::rhi::Sampler& sampler);
+
     void update_shininess(float shininess);
 
 private:
