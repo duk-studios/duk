@@ -110,27 +110,30 @@ DefaultMeshDataSource cube_mesh_data_source() {
 DefaultMeshDataSource sphere_mesh_data_source(uint32_t segments) {
     DefaultMeshDataSource meshDataSource;
 
-    const auto rings = segments;
+    const auto rows = segments;
+    const auto columns = segments;
 
     std::vector<DefaultMeshDataSource::VertexType> vertices;
 
-    for (int i = 0; i <= rings; ++i) {
-        float phi = static_cast<float>(i) * glm::pi<float>() / static_cast<float>(rings);
-        float sinPhi = std::sin(phi);
-        float cosPhi = std::cos(phi);
+    for (int row = 0; row <= rows; ++row) {
+        float rowAngle = static_cast<float>(row) * glm::pi<float>() / static_cast<float>(rows);
+        float rowSin = std::sin(rowAngle);
+        float rowCos = std::cos(rowAngle);
 
-        for (int j = 0; j <= segments; ++j) {
-            float theta = static_cast<float>(j) * 2.0f * glm::pi<float>() / static_cast<float>(segments);
-            float sinTheta = std::sin(theta);
-            float cosTheta = std::cos(theta);
+        for (int column = 0; column <= columns; ++column) {
+            float columnAngle = static_cast<float>(column) * 2.0f * glm::pi<float>() / static_cast<float>(columns);
+            float columnSin = std::sin(columnAngle);
+            float columnCos = std::cos(columnAngle);
 
-            float x = sinPhi * cosTheta;
-            float y = cosPhi;
-            float z = sinPhi * sinTheta;
+            float x = rowSin * columnCos;
+            float y = rowCos;
+            float z = rowSin * columnSin;
+            float u = 1 - (static_cast<float>(column) / static_cast<float>(columns));
+            float v = static_cast<float>(row) / static_cast<float>(rows);
 
             glm::vec3 position(x, y, z);
             glm::vec3 normal(x, y, z);
-            glm::vec2 uv(static_cast<float>(j) / static_cast<float>(segments), static_cast<float>(i) / static_cast<float>(rings));
+            glm::vec2 uv(u, v);
 
             vertices.push_back({position, normal, uv});
         }
@@ -140,23 +143,20 @@ DefaultMeshDataSource sphere_mesh_data_source(uint32_t segments) {
 
     std::vector<DefaultMeshDataSource::IndexType> indices;
 
-    for (int i = 0; i < rings; ++i) {
-        for (int j = 0; j < segments; ++j) {
-            int nextRow = i + 1;
-            int nextColumn = (j + 1) % segments;
-            int currentIdx = i * (segments + 1) + j;
-            int nextIdx = nextRow * (segments + 1) + j;
-            int nextRightIdx = nextRow * (segments + 1) + nextColumn;
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
+            int firstVertexIndex = column + (row * (columns + 1));
+            int secondVertexIndex = firstVertexIndex + 1;
+            int thirdVertexIndex = column + ((row + 1) * (columns + 1));
+            int fourthVertexIndex = thirdVertexIndex + 1;
 
-            // Front face (counterclockwise order)
-            indices.push_back(currentIdx);
-            indices.push_back(nextIdx);
-            indices.push_back(nextRightIdx);
+            indices.push_back(firstVertexIndex);
+            indices.push_back(thirdVertexIndex);
+            indices.push_back(secondVertexIndex);
 
-            // Back face (counterclockwise order)
-            indices.push_back(currentIdx);
-            indices.push_back(nextRightIdx);
-            indices.push_back(currentIdx + 1);
+            indices.push_back(thirdVertexIndex);
+            indices.push_back(fourthVertexIndex);
+            indices.push_back(secondVertexIndex);
         }
     }
 
@@ -283,7 +283,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) :
     }
 
     {
-        auto sphereDataSource = detail::sphere_mesh_data_source(20);
+        auto sphereDataSource = detail::sphere_mesh_data_source(32);
 
         m_sphereMesh = m_meshBufferPool->create_mesh(&sphereDataSource);
     }
