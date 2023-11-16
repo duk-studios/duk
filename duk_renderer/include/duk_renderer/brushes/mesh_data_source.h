@@ -29,9 +29,15 @@ public:
 
     DUK_NO_DISCARD virtual duk::rhi::VertexLayout vertex_layout() const = 0;
 
-    virtual void read_vertices(uint8_t* dst, size_t size, size_t offset) const = 0;
+    DUK_NO_DISCARD virtual const VertexAttributes& vertex_attributes() const = 0;
 
-    virtual void read_indices(uint8_t* dst, size_t size, size_t offset) const = 0;
+    DUK_NO_DISCARD virtual bool has_vertex_attribute(VertexAttributes::Type vertexAttribute) const = 0;
+
+    virtual void read_vertices(void* dst, uint32_t count, uint32_t offset) const = 0;
+
+    virtual void read_vertices_attribute(VertexAttributes::Type attribute, void* dst, uint32_t count, uint32_t offset) const = 0;
+
+    virtual void read_indices(void* dst, uint32_t count, uint32_t offset) const = 0;
 
 };
 
@@ -42,6 +48,8 @@ public:
     using IndexType = I;
 
 public:
+
+    MeshDataSourceT();
 
     template<typename InputIterator>
     void insert_vertices(InputIterator begin, InputIterator end);
@@ -61,18 +69,31 @@ public:
 
     DUK_NO_DISCARD duk::rhi::VertexLayout vertex_layout() const override;
 
-    void read_vertices(uint8_t* dst, size_t size, size_t offset) const override;
+    DUK_NO_DISCARD const VertexAttributes& vertex_attributes() const override;
 
-    void read_indices(uint8_t* dst, size_t size, size_t offset) const override;
+    DUK_NO_DISCARD bool has_vertex_attribute(VertexAttributes::Type vertexAttribute) const override;
+
+    void read_vertices(void* dst, uint32_t count, uint32_t offset) const override;
+
+    void read_vertices_attribute(VertexAttributes::Type attribute, void* dst, uint32_t count, uint32_t offset) const override;
+
+    void read_indices(void* dst, uint32_t size, uint32_t offset) const override;
 
 protected:
 
     DUK_NO_DISCARD hash::Hash calculate_hash() const override;
 
 private:
+    VertexAttributes m_vertexAttributes;
     std::vector<V> m_vertices;
     std::vector<I> m_indices;
 };
+
+template<typename V, typename I>
+MeshDataSourceT<V, I>::MeshDataSourceT() :
+    m_vertexAttributes(VertexAttributes::create<V>()){
+
+}
 
 template<typename V, typename I>
 template<typename InputIterator>
@@ -113,21 +134,45 @@ duk::rhi::IndexType MeshDataSourceT<V, I>::index_type() const {
 
 template<typename V, typename I>
 duk::rhi::VertexLayout MeshDataSourceT<V, I>::vertex_layout() const {
-    return layout_of<V>();
+    return m_vertexAttributes.vertex_layout();
 }
 
 template<typename V, typename I>
-void MeshDataSourceT<V, I>::read_vertices(uint8_t* dst, size_t size, size_t offset) const {
-    assert(vertex_byte_count() >= offset + size);
-    uint8_t* src = (uint8_t*)m_vertices.data() + offset;
-    std::memcpy(dst, src, size);
+const VertexAttributes& MeshDataSourceT<V, I>::vertex_attributes() const {
+    return m_vertexAttributes;
 }
 
 template<typename V, typename I>
-void MeshDataSourceT<V, I>::read_indices(uint8_t* dst, size_t size, size_t offset) const {
-    assert(index_byte_count() >= offset + size);
-    uint8_t* src = (uint8_t*)m_indices.data() + offset;
-    std::memcpy(dst, src, size);
+bool MeshDataSourceT<V, I>::has_vertex_attribute(VertexAttributes::Type vertexAttribute) const {
+    return m_vertexAttributes.has_attribute(vertexAttribute);
+}
+
+template<typename V, typename I>
+void MeshDataSourceT<V, I>::read_vertices(void* dst, uint32_t count, uint32_t offset) const {
+    assert(vertex_count() >= offset + count);
+    const auto* src = m_vertices.data() + offset;
+    std::memcpy(dst, src, count * sizeof(V));
+}
+
+template<typename V, typename I>
+void MeshDataSourceT<V, I>::read_vertices_attribute(VertexAttributes::Type attribute, void* dst, uint32_t count, uint32_t offset) const {
+    assert(vertex_count() >= offset + count);
+    const auto* src = (uint8_t*)m_vertices.data();
+    const auto attributeSize = duk::rhi::VertexInput::size_of(VertexAttributes::format_of(attribute));
+    const auto attributeOffset = m_vertexAttributes.offset_of(attribute);
+    const auto stride = sizeof(V);
+    for (int i = 0; i < count; i++) {
+        const auto currentVertexByteOffset = (i + offset) * stride;
+        const auto* srcAttribute = src + currentVertexByteOffset + attributeOffset;
+        std::memcpy(dst, srcAttribute, attributeSize);
+    }
+}
+
+template<typename V, typename I>
+void MeshDataSourceT<V, I>::read_indices(void* dst, uint32_t count, uint32_t offset) const {
+    assert(index_count() >= offset + count);
+    const auto* src = m_indices.data() + offset;
+    std::memcpy(dst, src, count * sizeof(I));
 }
 
 template<typename V, typename I>

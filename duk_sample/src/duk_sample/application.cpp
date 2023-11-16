@@ -26,7 +26,7 @@ T lerp(T from, T to, float percent) {
     return (from * (1 - percent)) + (to * percent);
 }
 
-using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::renderer::Vertex3DNormalUV, uint16_t>;
+using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::renderer::VertexNormalUV, uint16_t>;
 
 DefaultMeshDataSource quad_mesh_data_source() {
     DefaultMeshDataSource meshDataSource;

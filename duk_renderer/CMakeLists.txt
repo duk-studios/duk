@@ -71,6 +71,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp
         src/duk_renderer/passes/present_pass.cpp
+        src/duk_renderer/vertex_types.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

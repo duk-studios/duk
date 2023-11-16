@@ -2,6 +2,7 @@
 /// mesh_pool.cpp
 
 #include <duk_renderer/brushes/mesh.h>
+#include <duk_tools/fixed_vector.h>
 
 namespace duk::renderer {
 
@@ -244,7 +245,7 @@ Mesh::~Mesh() {
 }
 
 rhi::VertexLayout Mesh::vertex_layout() const {
-    return m_vertexLayout;
+    return m_vertexAttributes.vertex_layout();
 }
 
 rhi::IndexType Mesh::index_type() const {
@@ -253,7 +254,19 @@ rhi::IndexType Mesh::index_type() const {
 
 void Mesh::draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance) {
 
-    commandBuffer->bind_vertex_buffer(m_currentBuffer->vertex_buffer()->internal_buffer());
+    auto& vertexBuffers = m_currentBuffer->vertex_buffers();
+
+    duk::tools::FixedVector<duk::rhi::Buffer*, static_cast<uint32_t>(VertexAttributes::Type::COUNT)> buffers;
+
+    for (auto& vertexBuffer : vertexBuffers) {
+        duk::rhi::Buffer* buffer = nullptr;
+        if (vertexBuffer) {
+            buffer = vertexBuffer->internal_buffer();
+        }
+        buffers.push_back(buffer);
+    }
+
+    commandBuffer->bind_vertex_buffer(buffers.data(), buffers.size());
 
     if (m_indexType != rhi::IndexType::NONE) {
         commandBuffer->bind_index_buffer(m_currentBuffer->index_buffer()->internal_buffer());
@@ -266,24 +279,33 @@ void Mesh::draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t 
 
 void Mesh::create(MeshDataSource* meshDataSource) {
 
-    m_vertexLayout = meshDataSource->vertex_layout();
+    m_vertexAttributes = meshDataSource->vertex_attributes();
     m_indexType = meshDataSource->index_type();
 
-    m_currentBuffer = m_meshBufferPool->find_buffer(m_vertexLayout, m_indexType);
+    m_currentBuffer = m_meshBufferPool->find_buffer(m_vertexAttributes, m_indexType);
 
     // allocate vertex buffer
     {
-        auto vertexBuffer = m_currentBuffer->vertex_buffer();
+        auto& vertexBuffers = m_currentBuffer->vertex_buffers();
 
-        m_vertexBufferHandle = vertexBuffer->allocate(meshDataSource->vertex_byte_count());
-        meshDataSource->read_vertices(vertexBuffer->write_ptr(m_vertexBufferHandle), meshDataSource->vertex_byte_count(), 0);
+        for (auto attribute : m_vertexAttributes) {
+            const auto attributeIndex = static_cast<uint32_t>(attribute);
+            const auto attributeSize = duk::rhi::VertexInput::size_of(VertexAttributes::format_of(attribute));
+            auto& vertexBuffer = vertexBuffers[attributeIndex];
+            if (!vertexBuffer) {
+                throw std::logic_error("invalid MeshBuffer for mesh data source");
+            }
+            m_vertexBufferHandle = vertexBuffer->allocate(meshDataSource->vertex_count());
+            meshDataSource->read_vertices_attribute(attribute, vertexBuffer->write_ptr(m_vertexBufferHandle), meshDataSource->vertex_count(), 0);
 
-        const auto vertexBlock = vertexBuffer->at(m_vertexBufferHandle);
-        const auto vertexByteSize = m_vertexLayout.byte_size();
-        m_firstVertex = vertexBlock.offset / vertexByteSize;
-        m_vertexCount = vertexBlock.size / vertexByteSize;
+            if (attribute == VertexAttributes::Type::POSITION) {
+                const auto vertexBlock = vertexBuffer->at(m_vertexBufferHandle);
+                m_firstVertex = vertexBlock.offset / attributeSize;
+                m_vertexCount = vertexBlock.size / attributeSize;
+            }
 
-        vertexBuffer->internal_buffer()->flush();
+            vertexBuffer->internal_buffer()->flush();
+        }
     }
 
     // allocate index buffer
@@ -304,15 +326,17 @@ void Mesh::create(MeshDataSource* meshDataSource) {
 
 MeshBuffer::MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo)  {
 
-    {
+    for (auto attribute : meshBufferCreateInfo.vertexAttributes) {
         ManagedBufferCreateInfo vertexBufferCreateInfo = {};
         vertexBufferCreateInfo.rhi = meshBufferCreateInfo.rhi;
         vertexBufferCreateInfo.commandQueue = meshBufferCreateInfo.commandQueue;
-        vertexBufferCreateInfo.elementSize = meshBufferCreateInfo.vertexLayout.byte_size();
+        vertexBufferCreateInfo.elementSize = duk::rhi::VertexInput::size_of(VertexAttributes::format_of(attribute));
         vertexBufferCreateInfo.elementCount = kBufferBlockSize / vertexBufferCreateInfo.elementSize;
         vertexBufferCreateInfo.type = rhi::Buffer::Type::VERTEX;
 
-        m_vertexBuffer = std::make_unique<ManagedBuffer>(vertexBufferCreateInfo);
+        uint32_t bindingIndex = static_cast<uint32_t>(attribute);
+
+        m_vertexBuffers[bindingIndex] = std::make_unique<ManagedBuffer>(vertexBufferCreateInfo);
     }
 
     if (meshBufferCreateInfo.indexType != rhi::IndexType::NONE) {
@@ -327,8 +351,8 @@ MeshBuffer::MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo)  {
     }
 }
 
-MeshBuffer::ManagedBuffer* MeshBuffer::vertex_buffer() {
-    return m_vertexBuffer.get();
+MeshBuffer::VertexBuffers& MeshBuffer::vertex_buffers() {
+    return m_vertexBuffers;
 }
 
 MeshBuffer::ManagedBuffer* MeshBuffer::index_buffer() {
@@ -348,8 +372,8 @@ std::shared_ptr<Mesh> MeshBufferPool::create_mesh(MeshDataSource* meshDataSource
     return std::make_shared<Mesh>(meshCreateInfo);
 }
 
-MeshBuffer* MeshBufferPool::find_buffer(const rhi::VertexLayout& vertexLayout, rhi::IndexType indexType) {
-    auto hash = detail::calculate_hash(vertexLayout, indexType);
+MeshBuffer* MeshBufferPool::find_buffer(const VertexAttributes& vertexAttributes, rhi::IndexType indexType) {
+    auto hash = detail::calculate_hash(vertexAttributes.vertex_layout(), indexType);
 
     auto it = m_meshBuffers.find(hash);
     if (it == m_meshBuffers.end()) {
@@ -358,7 +382,7 @@ MeshBuffer* MeshBufferPool::find_buffer(const rhi::VertexLayout& vertexLayout, r
         meshBufferCreateInfo.rhi = m_rhi;
         meshBufferCreateInfo.commandQueue = m_commandQueue;
         meshBufferCreateInfo.indexType = indexType;
-        meshBufferCreateInfo.vertexLayout = vertexLayout;
+        meshBufferCreateInfo.vertexAttributes = vertexAttributes;
 
         auto [result, inserted] = m_meshBuffers.emplace(hash, std::make_unique<MeshBuffer>(meshBufferCreateInfo));
         if (!inserted) {

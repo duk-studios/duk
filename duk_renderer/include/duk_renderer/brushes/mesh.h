@@ -48,7 +48,7 @@ private:
     size_t m_firstIndex;
     size_t m_indexCount;
     rhi::IndexType m_indexType;
-    rhi::VertexLayout m_vertexLayout;
+    VertexAttributes m_vertexAttributes;
 
 };
 
@@ -56,7 +56,7 @@ struct MeshBufferCreateInfo {
     duk::rhi::RHI* rhi;
     duk::rhi::CommandQueue* commandQueue;
     duk::rhi::IndexType indexType;
-    duk::rhi::VertexLayout vertexLayout;
+    VertexAttributes vertexAttributes;
 };
 
 class MeshBuffer {
@@ -112,16 +112,18 @@ private:
         uint32_t m_allocationCounter;
     };
 
+    using VertexBuffers = std::array<std::unique_ptr<ManagedBuffer>, static_cast<size_t>(VertexAttributes::Type::COUNT)>;
+
 public:
 
     explicit MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo);
 
-    DUK_NO_DISCARD ManagedBuffer* vertex_buffer();
+    DUK_NO_DISCARD VertexBuffers& vertex_buffers();
 
     DUK_NO_DISCARD ManagedBuffer* index_buffer();
 
 private:
-    std::unique_ptr<ManagedBuffer> m_vertexBuffer;
+    VertexBuffers m_vertexBuffers;
     std::unique_ptr<ManagedBuffer> m_indexBuffer;
 };
 
@@ -137,7 +139,7 @@ public:
 
     std::shared_ptr<Mesh> create_mesh(MeshDataSource* meshDataSource);
 
-    MeshBuffer* find_buffer(const rhi::VertexLayout& vertexLayout, rhi::IndexType indexType);
+    MeshBuffer* find_buffer(const VertexAttributes& vertexAttributes, rhi::IndexType indexType);
 
 private:
     duk::rhi::RHI* m_rhi;
