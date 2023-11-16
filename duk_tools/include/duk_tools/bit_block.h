@@ -24,6 +24,64 @@ public:
     static constexpr size_t kMaxBlockValue = std::numeric_limits<Block>::max();
     using Container = std::array<Block, kBlockCount>;
 
+    template<bool Set>
+    class BitBlockIterator {
+    public:
+
+        BitBlockIterator(const BitBlock& block, size_t i) : m_block(block), m_i(i) {
+            next();
+        }
+
+        void next() {
+            if (m_i < N) {
+                if constexpr (Set) {
+                    m_i += m_block.countr_zero(m_i);
+                }
+                else {
+                    m_i += m_block.countr_one(m_i);
+                }
+            }
+        }
+
+        BitBlockIterator& operator++() {
+            m_i++;
+            next();
+            return *this;
+        }
+
+        size_t operator*() const {
+            return m_i;
+        }
+
+        bool operator==(const BitBlockIterator& rhs) const {
+            return m_i == rhs.m_i && &m_block == &rhs.m_block;
+        }
+
+    private:
+        const BitBlock& m_block;
+        size_t m_i;
+    };
+
+    template<bool Set>
+    class BitBlockView {
+    public:
+
+        using Iterator = BitBlockIterator<Set>;
+
+        BitBlockView(const BitBlock& block) : m_block(block) {}
+
+        Iterator begin() const {
+            return Iterator(m_block, 0);
+        }
+
+        Iterator end() const {
+            return Iterator(m_block, N);
+        }
+
+    private:
+        const BitBlock& m_block;
+    };
+
 public:
 
     BitBlock();
@@ -58,13 +116,25 @@ public:
 
     BitBlock& reset();
 
-    size_t countr_zero(size_t startIndex = 0);
+    size_t countr_zero(size_t startIndex = 0) const;
 
-    size_t countr_one(size_t startIndex = 0);
+    size_t countr_one(size_t startIndex = 0) const;
+
+    template<bool Set>
+    BitBlockView<Set> bits();
+
+    template<bool Set>
+    const BitBlockView<Set> bits() const;
 
 private:
     Container m_container;
 };
+
+template<size_t N>
+template<bool Set>
+const BitBlock<N>::BitBlockView<Set> BitBlock<N>::bits() const {
+    return BitBlock::BitBlockView<Set>(*this);
+}
 
 template<size_t N>
 BitBlock<N>::BitBlock() {
@@ -197,7 +267,7 @@ BitBlock<N>& BitBlock<N>::reset() {
 }
 
 template<size_t N>
-size_t BitBlock<N>::countr_zero(size_t startIndex) {
+size_t BitBlock<N>::countr_zero(size_t startIndex) const {
     if constexpr (N > 64) {
         size_t blockIndex = startIndex / 64;
         size_t indexInBlock = startIndex % 64;
@@ -228,9 +298,15 @@ size_t BitBlock<N>::countr_zero(size_t startIndex) {
 }
 
 template<size_t N>
-size_t BitBlock<N>::countr_one(size_t startIndex) {
+size_t BitBlock<N>::countr_one(size_t startIndex) const {
     BitBlock<N> inverted = ~(*this);
     return inverted.countr_zero(startIndex);
+}
+
+template<size_t N>
+template<bool Set>
+BitBlock<N>::BitBlockView<Set> BitBlock<N>::bits() {
+    return BitBlockView<Set>(*this);
 }
 
 template<bool Set, size_t N, typename Predicate>
