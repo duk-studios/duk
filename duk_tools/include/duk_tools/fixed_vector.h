@@ -30,6 +30,13 @@ public:
         resize(initialSize);
     }
 
+    FixedVector(size_t initialSize, const T& initialValue) :
+        m_size(0) {
+        for (int i = 0; i < initialSize; i++) {
+            push_back(initialValue);
+        }
+    }
+
     FixedVector(const FixedVector& other) {
         *this = other;
     }
@@ -73,7 +80,7 @@ public:
         if (m_size >= N){
             throw std::out_of_range("emplace_back on a full FixedVector");
         }
-        return at(m_size++);
+        return at(m_size++) = T(std::forward<Args>(args)...);
     }
 
     template<typename ...Args>
