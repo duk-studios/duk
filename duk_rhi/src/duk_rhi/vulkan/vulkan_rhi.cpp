@@ -2,7 +2,7 @@
 // Created by Ricardo on 04/02/2023.
 //
 
-#include <duk_rhi/vulkan/vulkan_renderer.h>
+#include <duk_rhi/vulkan/vulkan_rhi.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
@@ -47,7 +47,7 @@ static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT           
 }
 
 static std::vector<const char*> query_device_extensions() {
-    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME};
+    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, VK_EXT_ROBUSTNESS_2_EXTENSION_NAME};
 }
 
 static uint32_t find_present_queue_index(VulkanPhysicalDevice* physicalDevice, VkSurfaceKHR surface){
@@ -448,10 +448,15 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
     vulkan13EnabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
     vulkan13EnabledFeatures.synchronization2 = VK_TRUE;
 
+    VkPhysicalDeviceRobustness2FeaturesEXT physicalDeviceRobustness2 = {};
+    physicalDeviceRobustness2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
+    physicalDeviceRobustness2.nullDescriptor = VK_TRUE;
+    physicalDeviceRobustness2.pNext = &vulkan13EnabledFeatures;
+
     VkPhysicalDeviceFeatures2 enabledFeatures = {};
     enabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     enabledFeatures.features.fillModeNonSolid = VK_TRUE;
-    enabledFeatures.pNext = &vulkan13EnabledFeatures;
+    enabledFeatures.pNext = &physicalDeviceRobustness2;
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
