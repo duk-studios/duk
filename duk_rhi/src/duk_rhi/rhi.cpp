@@ -3,7 +3,7 @@
 //
 
 #include <duk_rhi/rhi.h>
-#include <duk_rhi/vulkan/vulkan_renderer.h>
+#include <duk_rhi/vulkan/vulkan_rhi.h>
 
 #include <sstream>
 

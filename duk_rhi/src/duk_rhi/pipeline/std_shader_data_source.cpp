@@ -67,11 +67,11 @@ void StdShaderDataSource::insert_spir_v_code(Shader::Module::Bits type, std::vec
     module.spirVCode = std::move(data);
 }
 
-void StdShaderDataSource::insert_vertex_attribute(VertexAttribute::Format format) {
+void StdShaderDataSource::insert_vertex_attribute(VertexInput::Format format) {
     m_vertexLayout.insert(format);
 }
 
-void StdShaderDataSource::insert_vertex_attributes(const std::initializer_list<VertexAttribute::Format>& formats) {
+void StdShaderDataSource::insert_vertex_attributes(const std::initializer_list<VertexInput::Format>& formats) {
     m_vertexLayout.insert(formats);
 }
 

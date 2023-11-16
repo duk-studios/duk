@@ -78,25 +78,21 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
     auto& vertexLayout = shaderDataSource->vertex_layout();
 
     m_inputAttributes.reserve(vertexLayout.size());
+    m_inputBindings.reserve(vertexLayout.size());
 
-    uint32_t attributeOffset = 0;
     for (auto& format : vertexLayout) {
         VkVertexInputAttributeDescription inputAttributeDescription = {};
-        inputAttributeDescription.binding = 0;
-        inputAttributeDescription.location = m_inputAttributes.size();
-        inputAttributeDescription.offset = attributeOffset;
+        inputAttributeDescription.binding = m_inputAttributes.size();
+        inputAttributeDescription.location = 0;
+        inputAttributeDescription.offset = 0;
         inputAttributeDescription.format = convert_vertex_attribute_format(format);
 
-        attributeOffset += VertexAttribute::size_of(format);
-
         m_inputAttributes.push_back(inputAttributeDescription);
-    }
 
-    if (!m_inputAttributes.empty()) {
         VkVertexInputBindingDescription inputBindingDescription = {};
-        inputBindingDescription.binding = 0;
+        inputBindingDescription.binding = inputAttributeDescription.binding;
         inputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        inputBindingDescription.stride = attributeOffset;
+        inputBindingDescription.stride = VertexInput::size_of(format);
 
         m_inputBindings.push_back(inputBindingDescription);
     }

@@ -17,7 +17,7 @@
 
 namespace duk::rhi {
 
-class VertexAttribute {
+class VertexInput {
 public:
     enum class Format : uint32_t {
         UNDEFINED = 0,
@@ -42,15 +42,15 @@ public:
 class VertexLayout {
 public:
 
-    using Container = std::vector<VertexAttribute::Format>;
+    using Container = std::vector<VertexInput::Format>;
 
     VertexLayout();
 
-    VertexLayout(const std::initializer_list<VertexAttribute::Format>& attributes);
+    VertexLayout(const std::initializer_list<VertexInput::Format>& formats);
 
-    void insert(VertexAttribute::Format attributes);
+    void insert(VertexInput::Format format);
 
-    void insert(const std::initializer_list<VertexAttribute::Format>& attributes);
+    void insert(const std::initializer_list<VertexInput::Format>& formats);
 
     DUK_NO_DISCARD size_t size() const;
 
@@ -64,61 +64,61 @@ public:
 
     DUK_NO_DISCARD Container::const_iterator end() const;
 
-    DUK_NO_DISCARD VertexAttribute::Format format_at(uint32_t location) const;
+    DUK_NO_DISCARD VertexInput::Format format_at(uint32_t location) const;
 
 private:
-    std::vector<VertexAttribute::Format> m_attributes;
+    std::vector<VertexInput::Format> m_formats;
 };
 
 //UINT8,
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<uint8_t>() {
-    return VertexAttribute::Format::UINT8;
+inline VertexInput::Format VertexInput::format_of<uint8_t>() {
+    return VertexInput::Format::UINT8;
 }
 //INT8,
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<int8_t>() {
-    return VertexAttribute::Format::INT8;
+inline VertexInput::Format VertexInput::format_of<int8_t>() {
+    return VertexInput::Format::INT8;
 }
 //UINT16,
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<uint16_t>() {
-    return VertexAttribute::Format::UINT16;
+inline VertexInput::Format VertexInput::format_of<uint16_t>() {
+    return VertexInput::Format::UINT16;
 }
 //INT16,
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<int16_t>() {
-    return VertexAttribute::Format::INT16;
+inline VertexInput::Format VertexInput::format_of<int16_t>() {
+    return VertexInput::Format::INT16;
 }
 //UINT32,
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<uint32_t>() {
-    return VertexAttribute::Format::UINT32;
+inline VertexInput::Format VertexInput::format_of<uint32_t>() {
+    return VertexInput::Format::UINT32;
 }
 //INT32,
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<int32_t>() {
-    return VertexAttribute::Format::INT32;
+inline VertexInput::Format VertexInput::format_of<int32_t>() {
+    return VertexInput::Format::INT32;
 }
 //FLOAT,
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<float>() {
-    return VertexAttribute::Format::FLOAT32;
+inline VertexInput::Format VertexInput::format_of<float>() {
+    return VertexInput::Format::FLOAT32;
 }
 //VEC2,
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<glm::vec2>() {
-    return VertexAttribute::Format::VEC2;
+inline VertexInput::Format VertexInput::format_of<glm::vec2>() {
+    return VertexInput::Format::VEC2;
 }
 //VEC3,
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<glm::vec3>() {
-    return VertexAttribute::Format::VEC3;
+inline VertexInput::Format VertexInput::format_of<glm::vec3>() {
+    return VertexInput::Format::VEC3;
 }
 //VEC4
 template<>
-inline VertexAttribute::Format VertexAttribute::format_of<glm::vec4>() {
-    return VertexAttribute::Format::VEC4;
+inline VertexInput::Format VertexInput::format_of<glm::vec4>() {
+    return VertexInput::Format::VEC4;
 }
 
 }

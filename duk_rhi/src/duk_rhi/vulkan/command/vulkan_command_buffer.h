@@ -48,7 +48,7 @@ public:
 
     void bind_compute_pipeline(ComputePipeline* pipeline) override;
 
-    void bind_vertex_buffer(Buffer* buffer) override;
+    void bind_vertex_buffer(Buffer** buffers, uint32_t bufferCount) override;
 
     void bind_index_buffer(Buffer* buffer) override;
 

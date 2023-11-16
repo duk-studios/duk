@@ -67,7 +67,7 @@ public:
     using Bindings = SetReflection::Bindings;
     using Sets = std::vector<SetReflection>;
     using Modules = std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint8_t>>;
-    using Attributes = std::vector<duk::rhi::VertexAttribute::Format>;
+    using Attributes = std::vector<duk::rhi::VertexInput::Format>;
 public:
 
     explicit Reflector(const Parser& parser);

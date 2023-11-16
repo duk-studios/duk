@@ -45,21 +45,21 @@ static std::string descriptor_type_name(duk::rhi::DescriptorType type) {
     throw std::runtime_error("Unknown descriptor type");
 }
 
-static std::string vertex_attribute_format_name(duk::rhi::VertexAttribute::Format format) {
+static std::string vertex_attribute_format_name(duk::rhi::VertexInput::Format format) {
     switch (format) {
-        case duk::rhi::VertexAttribute::Format::UNDEFINED: return "duk::rhi::VertexAttribute::Format::UNDEFINED";
-        case duk::rhi::VertexAttribute::Format::INT8: return "duk::rhi::VertexAttribute::Format::INT8";
-        case duk::rhi::VertexAttribute::Format::UINT8: return "duk::rhi::VertexAttribute::Format::UINT8";
-        case duk::rhi::VertexAttribute::Format::INT16: return "duk::rhi::VertexAttribute::Format::INT16";
-        case duk::rhi::VertexAttribute::Format::UINT16: return "duk::rhi::VertexAttribute::Format::UINT16";
-        case duk::rhi::VertexAttribute::Format::INT32: return "duk::rhi::VertexAttribute::Format::INT32";
-        case duk::rhi::VertexAttribute::Format::UINT32: return "duk::rhi::VertexAttribute::Format::UINT32";
-        case duk::rhi::VertexAttribute::Format::FLOAT32: return "duk::rhi::VertexAttribute::Format::FLOAT32";
-        case duk::rhi::VertexAttribute::Format::VEC2: return "duk::rhi::VertexAttribute::Format::VEC2";
-        case duk::rhi::VertexAttribute::Format::VEC3: return "duk::rhi::VertexAttribute::Format::VEC3";
-        case duk::rhi::VertexAttribute::Format::VEC4: return "duk::rhi::VertexAttribute::Format::VEC4";
+        case duk::rhi::VertexInput::Format::UNDEFINED: return "duk::rhi::VertexInput::Format::UNDEFINED";
+        case duk::rhi::VertexInput::Format::INT8: return "duk::rhi::VertexInput::Format::INT8";
+        case duk::rhi::VertexInput::Format::UINT8: return "duk::rhi::VertexInput::Format::UINT8";
+        case duk::rhi::VertexInput::Format::INT16: return "duk::rhi::VertexInput::Format::INT16";
+        case duk::rhi::VertexInput::Format::UINT16: return "duk::rhi::VertexInput::Format::UINT16";
+        case duk::rhi::VertexInput::Format::INT32: return "duk::rhi::VertexInput::Format::INT32";
+        case duk::rhi::VertexInput::Format::UINT32: return "duk::rhi::VertexInput::Format::UINT32";
+        case duk::rhi::VertexInput::Format::FLOAT32: return "duk::rhi::VertexInput::Format::FLOAT32";
+        case duk::rhi::VertexInput::Format::VEC2: return "duk::rhi::VertexInput::Format::VEC2";
+        case duk::rhi::VertexInput::Format::VEC3: return "duk::rhi::VertexInput::Format::VEC3";
+        case duk::rhi::VertexInput::Format::VEC4: return "duk::rhi::VertexInput::Format::VEC4";
     }
-    throw std::runtime_error("unknown VertexAttribute::Format");
+    throw std::runtime_error("unknown VertexInput::Format");
 }
 
 static std::string generate_module_mask(const Reflector& reflector) {
@@ -172,9 +172,9 @@ static std::string generate_descriptor_sets_description(const Reflector& reflect
 }
 
 duk::rhi::VertexLayout vertexLayout = {
-        duk::rhi::VertexAttribute::Format::VEC2,
-        duk::rhi::VertexAttribute::Format::VEC3,
-        duk::rhi::VertexAttribute::Format::VEC4
+        duk::rhi::VertexInput::Format::VEC2,
+        duk::rhi::VertexInput::Format::VEC3,
+        duk::rhi::VertexInput::Format::VEC4
 };
 
 static std::string generate_vertex_layout(const Reflector& reflector) {

@@ -8,9 +8,9 @@
 
 namespace duk::rhi {
 
-/// VertexAttribute ///
+/// VertexInput ///
 
-size_t VertexAttribute::size_of(VertexAttribute::Format type) {
+size_t VertexInput::size_of(VertexInput::Format type) {
     size_t result;
     switch (type) {
         case Format::UNDEFINED: result = 0; break;
@@ -32,49 +32,49 @@ size_t VertexAttribute::size_of(VertexAttribute::Format type) {
 
 VertexLayout::VertexLayout() = default;
 
-VertexLayout::VertexLayout(const std::initializer_list<VertexAttribute::Format>& attributes) :
-    m_attributes(attributes) {
+VertexLayout::VertexLayout(const std::initializer_list<VertexInput::Format>& formats) :
+    m_formats(formats) {
 
 }
 
-void VertexLayout::insert(VertexAttribute::Format format) {
-    m_attributes.push_back(format);
+void VertexLayout::insert(VertexInput::Format format) {
+    m_formats.push_back(format);
 }
 
-void VertexLayout::insert(const std::initializer_list<VertexAttribute::Format>& attributes) {
-    m_attributes.insert(m_attributes.end(), attributes);
+void VertexLayout::insert(const std::initializer_list<VertexInput::Format>& formats) {
+    m_formats.insert(m_formats.end(), formats);
 }
 
 size_t VertexLayout::size() const {
-    return m_attributes.size();
+    return m_formats.size();
 }
 
 size_t VertexLayout::byte_size() const {
     size_t size = 0;
-    for (auto& attribute : m_attributes){
-        size += VertexAttribute::size_of(attribute);
+    for (auto& attribute : m_formats){
+        size += VertexInput::size_of(attribute);
     }
     return size;
 }
 
-VertexAttribute::Format VertexLayout::format_at(uint32_t location) const {
-    return m_attributes[location];
+VertexInput::Format VertexLayout::format_at(uint32_t location) const {
+    return m_formats[location];
 }
 
-std::vector<VertexAttribute::Format>::iterator VertexLayout::begin() {
-    return m_attributes.begin();
+std::vector<VertexInput::Format>::iterator VertexLayout::begin() {
+    return m_formats.begin();
 }
 
-std::vector<VertexAttribute::Format>::iterator VertexLayout::end() {
-    return m_attributes.end();
+std::vector<VertexInput::Format>::iterator VertexLayout::end() {
+    return m_formats.end();
 }
 
-std::vector<VertexAttribute::Format>::const_iterator VertexLayout::begin() const {
-    return m_attributes.cbegin();
+std::vector<VertexInput::Format>::const_iterator VertexLayout::begin() const {
+    return m_formats.cbegin();
 }
 
-std::vector<VertexAttribute::Format>::const_iterator VertexLayout::end() const {
-    return m_attributes.cend();
+std::vector<VertexInput::Format>::const_iterator VertexLayout::end() const {
+    return m_formats.cend();
 }
 
 }

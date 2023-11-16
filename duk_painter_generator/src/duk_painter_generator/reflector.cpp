@@ -181,16 +181,16 @@ static void add_binding(SpvReflectDescriptorBinding* spvBinding, Reflector::Bind
     bindingReflection.descriptorType = convert_descriptor_type(spvBinding->descriptor_type);
 }
 
-static duk::rhi::VertexAttribute::Format vertex_attribute_format(SpvReflectFormat format) {
+static duk::rhi::VertexInput::Format vertex_attribute_format(SpvReflectFormat format) {
     switch (format) {
-        case SPV_REFLECT_FORMAT_R16_UINT: return duk::rhi::VertexAttribute::Format::UINT16;
-        case SPV_REFLECT_FORMAT_R16_SINT: return duk::rhi::VertexAttribute::Format::INT16;
-        case SPV_REFLECT_FORMAT_R32_UINT: return duk::rhi::VertexAttribute::Format::UINT32;
-        case SPV_REFLECT_FORMAT_R32_SINT: return duk::rhi::VertexAttribute::Format::INT32;
-        case SPV_REFLECT_FORMAT_R32_SFLOAT: return duk::rhi::VertexAttribute::Format::FLOAT32;
-        case SPV_REFLECT_FORMAT_R32G32_SFLOAT: return duk::rhi::VertexAttribute::Format::VEC2;
-        case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT: return duk::rhi::VertexAttribute::Format::VEC3;
-        case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT: return duk::rhi::VertexAttribute::Format::VEC4;
+        case SPV_REFLECT_FORMAT_R16_UINT: return duk::rhi::VertexInput::Format::UINT16;
+        case SPV_REFLECT_FORMAT_R16_SINT: return duk::rhi::VertexInput::Format::INT16;
+        case SPV_REFLECT_FORMAT_R32_UINT: return duk::rhi::VertexInput::Format::UINT32;
+        case SPV_REFLECT_FORMAT_R32_SINT: return duk::rhi::VertexInput::Format::INT32;
+        case SPV_REFLECT_FORMAT_R32_SFLOAT: return duk::rhi::VertexInput::Format::FLOAT32;
+        case SPV_REFLECT_FORMAT_R32G32_SFLOAT: return duk::rhi::VertexInput::Format::VEC2;
+        case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT: return duk::rhi::VertexInput::Format::VEC3;
+        case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT: return duk::rhi::VertexInput::Format::VEC4;
         default: throw std::runtime_error("unsupported vertex attribute format");
     }
 }

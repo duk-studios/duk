@@ -9,7 +9,7 @@
 
 namespace duk::rhi {
 
-VkFormat convert_vertex_attribute_format(VertexAttribute::Format format);
+VkFormat convert_vertex_attribute_format(VertexInput::Format format);
 
 }
 

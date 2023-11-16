@@ -59,8 +59,8 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_physical_device.h
         src/duk_rhi/vulkan/vulkan_physical_device.cpp
         src/duk_rhi/vulkan/vulkan_query_error.h
-        src/duk_rhi/vulkan/vulkan_renderer.h
-        src/duk_rhi/vulkan/vulkan_renderer.cpp
+        src/duk_rhi/vulkan/vulkan_rhi.h
+        src/duk_rhi/vulkan/vulkan_rhi.cpp
         src/duk_rhi/vulkan/vulkan_swapchain.h
         src/duk_rhi/vulkan/vulkan_swapchain.cpp
         src/duk_rhi/vulkan/command/vulkan_command_buffer.h

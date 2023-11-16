@@ -42,7 +42,7 @@ public:
 
     virtual void bind_compute_pipeline(ComputePipeline* pipeline) = 0;
 
-    virtual void bind_vertex_buffer(Buffer* buffer) = 0;
+    virtual void bind_vertex_buffer(Buffer** buffers, uint32_t bufferCount) = 0;
 
     virtual void bind_index_buffer(Buffer* buffer) = 0;
 

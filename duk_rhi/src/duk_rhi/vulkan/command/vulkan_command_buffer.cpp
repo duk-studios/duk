@@ -4,13 +4,14 @@
 #include <duk_rhi/vulkan/command/vulkan_command_buffer.h>
 #include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 #include <duk_rhi/vulkan/command/vulkan_command.h>
-#include <duk_rhi/vulkan/vulkan_renderer.h>
+#include <duk_rhi/vulkan/vulkan_rhi.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.h>
+#include "duk_tools/fixed_vector.h"
 
 namespace duk::rhi {
 
@@ -129,16 +130,24 @@ void VulkanCommandBuffer::bind_compute_pipeline(ComputePipeline* pipeline) {
     m_currentPipelineBindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
 }
 
-void VulkanCommandBuffer::bind_vertex_buffer(Buffer* buffer) {
-    assert(buffer->type() == Buffer::Type::VERTEX);
+void VulkanCommandBuffer::bind_vertex_buffer(Buffer** buffers, uint32_t bufferCount) {
+    static constexpr auto kMaxBufferCount = 32;
+    assert(bufferCount < kMaxBufferCount);
 
-    auto vulkanBuffer = dynamic_cast<VulkanBuffer*>(buffer);
-    vulkanBuffer->update(*m_currentImagePtr);
+    duk::tools::FixedVector<VkBuffer, kMaxBufferCount> bufferHandles;
+    duk::tools::FixedVector<VkDeviceSize, kMaxBufferCount> offsets(bufferCount, 0);
 
-    VkDeviceSize offsets[] = {0};
-    VkBuffer buffers[] = {vulkanBuffer->handle(*m_currentImagePtr)};
+    for (int i = 0; i < bufferCount; i++) {
+        auto vulkanBuffer = dynamic_cast<VulkanBuffer*>(buffers[i]);
+        VkBuffer handle = VK_NULL_HANDLE;
+        if (vulkanBuffer) {
+            vulkanBuffer->update(*m_currentImagePtr);
+            handle = vulkanBuffer->handle(*m_currentImagePtr);
+        }
+        bufferHandles.push_back(handle);
+    }
 
-    vkCmdBindVertexBuffers(m_currentCommandBuffer, 0, 1, buffers, offsets);
+    vkCmdBindVertexBuffers(m_currentCommandBuffer, 0, bufferHandles.size(), bufferHandles.data(), offsets.data());
 }
 
 void VulkanCommandBuffer::bind_index_buffer(Buffer* buffer) {

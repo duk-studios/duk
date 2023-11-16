@@ -24,9 +24,9 @@ public:
 
     void insert_descriptor_set_description(DescriptorSetDescription&& descriptorSetDescription);
 
-    void insert_vertex_attribute(VertexAttribute::Format format);
+    void insert_vertex_attribute(VertexInput::Format format);
 
-    void insert_vertex_attributes(const std::initializer_list<VertexAttribute::Format>& formats);
+    void insert_vertex_attributes(const std::initializer_list<VertexInput::Format>& formats);
 
     // overrides
     Shader::Module::Mask module_mask() const override;
