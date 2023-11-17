@@ -115,8 +115,6 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo) :
     if (!m_hwnd) {
         throw std::runtime_error("failed to create WindowWin32");
     }
-
-    ShowWindow(m_hwnd, SW_NORMAL);
 }
 
 WindowWin32::~WindowWin32() {
