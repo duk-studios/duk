@@ -27,6 +27,8 @@ public:
         s_instance = nullptr;
     }
 
+    virtual ~Singleton() = default;
+
 private:
 
     static T* s_instance;

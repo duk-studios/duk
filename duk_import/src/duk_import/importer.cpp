@@ -10,6 +10,8 @@ Importer::Importer() {
     m_imageImporters.emplace_back(std::make_unique<ImageImporterStb>());
 }
 
+Importer::~Importer() = default;
+
 std::unique_ptr<duk::rhi::ImageDataSource> Importer::load_image(const std::filesystem::path& path, duk::rhi::PixelFormat desiredFormat) {
     for (auto& importer : m_imageImporters) {
         if (importer->accepts(path, desiredFormat)) {

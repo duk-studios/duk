@@ -14,6 +14,8 @@ public:
 
     Importer();
 
+    ~Importer() override;
+
     std::unique_ptr<duk::rhi::ImageDataSource> load_image(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat);
 
 private:
