@@ -21,6 +21,7 @@ list(APPEND GLOBAL_BINDING_NAMES "LightsUBO")
 
 set(GLOBAL_GLSL_FILES)
 list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/lighting.glsl")
+list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/phong_lighting.glsl")
 list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/camera.glsl")
 list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/vertex.glsl")
 
