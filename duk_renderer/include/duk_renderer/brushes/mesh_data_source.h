@@ -77,7 +77,7 @@ public:
 
     void read_vertices_attribute(VertexAttributes::Type attribute, void* dst, uint32_t count, uint32_t offset) const override;
 
-    void read_indices(void* dst, uint32_t size, uint32_t offset) const override;
+    void read_indices(void* dst, uint32_t count, uint32_t offset) const override;
 
 protected:
 
@@ -158,13 +158,13 @@ template<typename V, typename I>
 void MeshDataSourceT<V, I>::read_vertices_attribute(VertexAttributes::Type attribute, void* dst, uint32_t count, uint32_t offset) const {
     assert(vertex_count() >= offset + count);
     const auto* src = (uint8_t*)m_vertices.data();
-    const auto attributeSize = duk::rhi::VertexInput::size_of(VertexAttributes::format_of(attribute));
+    const auto attributeSize = VertexAttributes::size_of(attribute);
     const auto attributeOffset = m_vertexAttributes.offset_of(attribute);
     const auto stride = sizeof(V);
     for (int i = 0; i < count; i++) {
         const auto currentVertexByteOffset = (i + offset) * stride;
         const auto* srcAttribute = src + currentVertexByteOffset + attributeOffset;
-        std::memcpy(dst, srcAttribute, attributeSize);
+        std::memcpy((uint8_t*)dst + (attributeSize * i), srcAttribute, attributeSize);
     }
 }
 

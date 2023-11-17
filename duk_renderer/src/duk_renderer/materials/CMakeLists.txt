@@ -22,6 +22,7 @@ list(APPEND GLOBAL_BINDING_NAMES "LightsUBO")
 set(GLOBAL_GLSL_FILES)
 list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/lighting.glsl")
 list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/camera.glsl")
+list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/vertex.glsl")
 
 # global files, we use mark them as output to painter generation commands
 set(GLOBAL_GENERATED_FILES)

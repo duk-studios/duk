@@ -40,7 +40,7 @@ private:
 
 private:
     MeshBufferPool* m_meshBufferPool;
-    uint32_t m_vertexBufferHandle;
+    std::array<uint32_t, static_cast<uint32_t>(VertexAttributes::Type::COUNT)> m_vertexBufferHandles;
     uint32_t m_indexBufferHandle;
     MeshBuffer* m_currentBuffer;
     size_t m_firstVertex;

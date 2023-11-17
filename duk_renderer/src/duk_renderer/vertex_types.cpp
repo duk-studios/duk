@@ -16,24 +16,25 @@ duk::rhi::VertexInput::Format VertexAttributes::format_of(VertexAttributes::Type
     }
 }
 
-VertexAttributes::VertexAttributes() {
-
+size_t VertexAttributes::size_of(VertexAttributes::Type attributeType) {
+    return duk::rhi::VertexInput::size_of(format_of(attributeType));
 }
 
-VertexAttributes::VertexAttributes(std::vector<VertexAttributes::Type>&& attributes) :
-    m_attributes(std::move(attributes)) {
-    for (auto attribute : m_attributes) {
+VertexAttributes::VertexAttributes() : m_attributeOffset({}) {}
+
+VertexAttributes::VertexAttributes(const std::span<VertexAttributes::Type>& attributes) {
+    size_t offset = 0;
+    for (auto attribute : attributes) {
+        const auto attributeIndex = static_cast<uint32_t>(attribute);
+        m_attributes.set(attributeIndex);
         m_layout.insert(format_of(attribute));
+        m_attributeOffset[attributeIndex] = offset;
+        offset += duk::rhi::VertexInput::size_of(format_of(attribute));
     }
 }
 
 bool VertexAttributes::has_attribute(VertexAttributes::Type attributeType) const {
-    for (auto attribute : m_attributes) {
-        if (attribute == attributeType) {
-            return true;
-        }
-    }
-    return false;
+    return m_attributes.test(static_cast<uint32_t>(attributeType));
 }
 
 const rhi::VertexLayout& VertexAttributes::vertex_layout() const {
@@ -41,22 +42,18 @@ const rhi::VertexLayout& VertexAttributes::vertex_layout() const {
 }
 
 size_t VertexAttributes::offset_of(VertexAttributes::Type attributeType) const {
-    size_t offset = 0;
-    for (auto attribute : m_attributes) {
-        if (attribute == attributeType) {
-            return offset;
-        }
-        offset += duk::rhi::VertexInput::size_of(format_of(attribute));
+    if (!has_attribute(attributeType)) {
+        throw std::invalid_argument("VertexAttributes::Type is not present");
     }
-    throw std::invalid_argument("VertexAttributes::Type is not present");
+    return m_attributeOffset[static_cast<uint32_t>(attributeType)];
 }
 
 VertexAttributes::ConstIterator VertexAttributes::begin() const {
-    return m_attributes.begin();
+    return m_attributes.bits<true>().begin();
 }
 
 VertexAttributes::ConstIterator VertexAttributes::end() const {
-    return m_attributes.end();
+    return m_attributes.bits<true>().end();
 }
 
 }

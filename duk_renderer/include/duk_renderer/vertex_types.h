@@ -7,7 +7,7 @@
 
 #include <duk_rhi/vertex_layout.h>
 #include <duk_tools/bit_block.h>
-#include <bitset>
+#include <span>
 
 namespace duk::renderer {
 
@@ -21,30 +21,33 @@ public:
         COLOR,
         COUNT
     };
-
-    using ConstIterator = std::vector<Type>::const_iterator;
+    using Mask = duk::tools::BitBlock<static_cast<uint32_t>(Type::COUNT)>;
+    using ConstIterator = Mask::BitBlockIterator<true>;
 
     template<typename T>
     static VertexAttributes create() = delete;
 
     static duk::rhi::VertexInput::Format format_of(Type attributeType);
 
+    static size_t size_of(Type attributeType);
+
     VertexAttributes();
 
-    VertexAttributes(std::vector<VertexAttributes::Type>&& attributes);
+    explicit VertexAttributes(const std::span<VertexAttributes::Type>& attributes);
 
-    bool has_attribute(Type attributeType) const;
+    DUK_NO_DISCARD bool has_attribute(Type attributeType) const;
 
-    const rhi::VertexLayout& vertex_layout() const;
+    DUK_NO_DISCARD const rhi::VertexLayout& vertex_layout() const;
 
-    size_t offset_of(Type attributeType) const;
+    DUK_NO_DISCARD size_t offset_of(Type attributeType) const;
 
-    ConstIterator begin() const;
+    DUK_NO_DISCARD ConstIterator begin() const;
 
-    ConstIterator end() const;
+    DUK_NO_DISCARD ConstIterator end() const;
 
 private:
-    std::vector<VertexAttributes::Type> m_attributes;
+    Mask m_attributes;
+    std::array<size_t, static_cast<uint32_t>(Type::COUNT)> m_attributeOffset;
     duk::rhi::VertexLayout m_layout;
 };
 
@@ -57,8 +60,11 @@ struct VertexColorUV {
 };
 
 template<>
-VertexAttributes VertexAttributes::create<VertexColorUV>() {
-    return VertexAttributes({VertexAttributes::Type::POSITION, VertexAttributes::Type::COLOR, VertexAttributes::Type::UV});
+inline VertexAttributes VertexAttributes::create<VertexColorUV>() {
+    VertexAttributes::Type attributes[] = {
+        VertexAttributes::Type::POSITION, VertexAttributes::Type::COLOR, VertexAttributes::Type::UV
+    };
+    return VertexAttributes(attributes);
 }
 
 // ---------------------------
@@ -70,8 +76,11 @@ struct VertexNormalUV {
 };
 
 template<>
-VertexAttributes VertexAttributes::create<VertexNormalUV>() {
-    return VertexAttributes({VertexAttributes::Type::POSITION, VertexAttributes::Type::NORMAL, VertexAttributes::Type::UV});
+inline VertexAttributes VertexAttributes::create<VertexNormalUV>() {
+    VertexAttributes::Type attributes[] = {
+            VertexAttributes::Type::POSITION, VertexAttributes::Type::NORMAL, VertexAttributes::Type::UV
+    };
+    return VertexAttributes(attributes);
 }
 
 }

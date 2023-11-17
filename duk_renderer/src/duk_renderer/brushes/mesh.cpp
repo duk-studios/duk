@@ -219,7 +219,7 @@ MeshBuffer::ManagedBuffer::Block MeshBuffer::ManagedBuffer::at(uint32_t handle) 
 
 Mesh::Mesh(const MeshCreateInfo& meshCreateInfo) :
         m_meshBufferPool(meshCreateInfo.meshBufferPool),
-        m_vertexBufferHandle(kInvalidBufferHandle),
+        m_vertexBufferHandles({}),
         m_indexBufferHandle(kInvalidBufferHandle),
         m_currentBuffer(nullptr),
         m_firstVertex(~0),
@@ -227,15 +227,20 @@ Mesh::Mesh(const MeshCreateInfo& meshCreateInfo) :
         m_firstIndex(~0),
         m_indexCount(~0),
         m_indexType(rhi::IndexType::NONE) {
-
+    m_vertexBufferHandles.fill(kInvalidBufferHandle);
     create(meshCreateInfo.meshDataSource);
 }
 
 Mesh::~Mesh() {
 
-    if (m_vertexBufferHandle != kInvalidBufferHandle) {
-        m_currentBuffer->vertex_buffer()->free(m_vertexBufferHandle);
-        m_vertexBufferHandle = kInvalidBufferHandle;
+    auto& vertexBuffers = m_currentBuffer->vertex_buffers();
+    for (auto i = 0; i < m_vertexBufferHandles.size(); i++) {
+        auto& vertexBufferHandle = m_vertexBufferHandles[i];
+        if (vertexBufferHandle != kInvalidBufferHandle) {
+            auto& vertexBuffer = vertexBuffers.at(i);
+            vertexBuffer->free(vertexBufferHandle);
+            vertexBufferHandle = kInvalidBufferHandle;
+        }
     }
 
     if (m_indexBufferHandle != kInvalidBufferHandle) {
@@ -288,18 +293,19 @@ void Mesh::create(MeshDataSource* meshDataSource) {
     {
         auto& vertexBuffers = m_currentBuffer->vertex_buffers();
 
-        for (auto attribute : m_vertexAttributes) {
-            const auto attributeIndex = static_cast<uint32_t>(attribute);
-            const auto attributeSize = duk::rhi::VertexInput::size_of(VertexAttributes::format_of(attribute));
+        for (auto attributeIndex : m_vertexAttributes) {
+            const auto attribute = static_cast<VertexAttributes::Type>(attributeIndex);
+            const auto attributeSize = VertexAttributes::size_of(attribute);
             auto& vertexBuffer = vertexBuffers[attributeIndex];
             if (!vertexBuffer) {
-                throw std::logic_error("invalid MeshBuffer for mesh data source");
+                throw std::invalid_argument("invalid MeshBuffer for provided MeshDataSource");
             }
-            m_vertexBufferHandle = vertexBuffer->allocate(meshDataSource->vertex_count());
-            meshDataSource->read_vertices_attribute(attribute, vertexBuffer->write_ptr(m_vertexBufferHandle), meshDataSource->vertex_count(), 0);
+            auto& vertexBufferHandle = m_vertexBufferHandles[attributeIndex];
+            vertexBufferHandle = vertexBuffer->allocate(meshDataSource->vertex_count() * attributeSize);
+            meshDataSource->read_vertices_attribute(attribute, vertexBuffer->write_ptr(vertexBufferHandle), meshDataSource->vertex_count(), 0);
 
             if (attribute == VertexAttributes::Type::POSITION) {
-                const auto vertexBlock = vertexBuffer->at(m_vertexBufferHandle);
+                const auto vertexBlock = vertexBuffer->at(vertexBufferHandle);
                 m_firstVertex = vertexBlock.offset / attributeSize;
                 m_vertexCount = vertexBlock.size / attributeSize;
             }
@@ -313,7 +319,7 @@ void Mesh::create(MeshDataSource* meshDataSource) {
         auto indexBuffer = m_currentBuffer->index_buffer();
 
         m_indexBufferHandle = indexBuffer->allocate(meshDataSource->index_byte_count());
-        meshDataSource->read_indices(indexBuffer->write_ptr(m_indexBufferHandle), meshDataSource->index_byte_count(), 0);
+        meshDataSource->read_indices(indexBuffer->write_ptr(m_indexBufferHandle), meshDataSource->index_count(), 0);
 
         const auto indexBlock = indexBuffer->at(m_indexBufferHandle);
         const auto indexByteSize = rhi::index_size(m_indexType);
@@ -326,17 +332,16 @@ void Mesh::create(MeshDataSource* meshDataSource) {
 
 MeshBuffer::MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo)  {
 
-    for (auto attribute : meshBufferCreateInfo.vertexAttributes) {
+    for (auto attributeIndex : meshBufferCreateInfo.vertexAttributes) {
+        auto attribute = static_cast<VertexAttributes::Type>(attributeIndex);
         ManagedBufferCreateInfo vertexBufferCreateInfo = {};
         vertexBufferCreateInfo.rhi = meshBufferCreateInfo.rhi;
         vertexBufferCreateInfo.commandQueue = meshBufferCreateInfo.commandQueue;
-        vertexBufferCreateInfo.elementSize = duk::rhi::VertexInput::size_of(VertexAttributes::format_of(attribute));
+        vertexBufferCreateInfo.elementSize = VertexAttributes::size_of(attribute);
         vertexBufferCreateInfo.elementCount = kBufferBlockSize / vertexBufferCreateInfo.elementSize;
         vertexBufferCreateInfo.type = rhi::Buffer::Type::VERTEX;
 
-        uint32_t bindingIndex = static_cast<uint32_t>(attribute);
-
-        m_vertexBuffers[bindingIndex] = std::make_unique<ManagedBuffer>(vertexBufferCreateInfo);
+        m_vertexBuffers[attributeIndex] = std::make_unique<ManagedBuffer>(vertexBufferCreateInfo);
     }
 
     if (meshBufferCreateInfo.indexType != rhi::IndexType::NONE) {
