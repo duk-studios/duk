@@ -83,7 +83,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
     for (auto& format : vertexLayout) {
         VkVertexInputAttributeDescription inputAttributeDescription = {};
         inputAttributeDescription.binding = m_inputAttributes.size();
-        inputAttributeDescription.location = 0;
+        inputAttributeDescription.location = inputAttributeDescription.binding;
         inputAttributeDescription.offset = 0;
         inputAttributeDescription.format = convert_vertex_attribute_format(format);
 
