@@ -5,6 +5,7 @@
 #define DUK_IMPORT_PIXEL_H
 
 #include <duk_hash/hash.h>
+#include <duk_macros/macros.h>
 
 #include <array>
 #include <cstdint>
@@ -83,25 +84,25 @@ public:
 
     PixelFormat(uint32_t mask);
 
-    PixelFormat& operator=(uint32_t mask);
+    DUK_NO_DISCARD PixelFormat& operator=(uint32_t mask);
 
-    PixelFormat operator&(uint32_t mask) const;
+    DUK_NO_DISCARD PixelFormat operator&(uint32_t mask) const;
 
-    PixelFormat operator|(uint32_t mask) const;
+    DUK_NO_DISCARD PixelFormat operator|(uint32_t mask) const;
 
-    operator uint32_t() const;
+    DUK_NO_DISCARD operator uint32_t() const;
 
-    uint32_t channel_count() const;
+    DUK_NO_DISCARD uint32_t channel_count() const;
 
-    size_t channel_size() const;
+    DUK_NO_DISCARD size_t channel_size() const;
 
-    size_t size() const;
+    DUK_NO_DISCARD size_t size() const;
 
-    uint32_t mask() const;
+    DUK_NO_DISCARD uint32_t mask() const;
 
-    bool is_depth() const;
+    DUK_NO_DISCARD bool is_depth() const;
 
-    bool is_stencil() const;
+    DUK_NO_DISCARD bool is_stencil() const;
 
 private:
     Mask m_mask;

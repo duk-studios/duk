@@ -6,7 +6,7 @@
 #define DUK_RHI_VERTEX_DATA_SOURCE_H
 
 #include <duk_renderer/vertex_types.h>
-#include <duk_rhi/data_source.h>
+#include <duk_hash/data_source.h>
 #include <duk_rhi/vertex_layout.h>
 #include <duk_rhi/index_types.h>
 
@@ -14,7 +14,7 @@
 
 namespace duk::renderer {
 
-class MeshDataSource : public duk::rhi::DataSource {
+class MeshDataSource : public duk::hash::DataSource {
 public:
 
     DUK_NO_DISCARD virtual size_t vertex_byte_count() const = 0;

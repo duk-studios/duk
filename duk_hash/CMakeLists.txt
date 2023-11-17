@@ -6,15 +6,20 @@ set(DUK_HASH_HEADERS
         include/duk_hash/common_hashes.h
         )
 
-add_library(duk_hash INTERFACE ${DUK_HASH_HEADERS})
+set(DUK_HASH_SOURCES
+        src/duk_hash/data_source.cpp
+        )
+
+add_library(duk_hash STATIC ${DUK_HASH_HEADERS} ${DUK_HASH_SOURCES})
 
 target_include_directories(duk_hash
-        INTERFACE
+        PUBLIC
         include
         )
 
 target_link_libraries(duk_hash
-        INTERFACE
+        PUBLIC
+        duk_macros
         glm::glm
         )
 

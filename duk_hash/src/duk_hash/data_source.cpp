@@ -2,17 +2,17 @@
 // Created by Ricardo on 07/04/2023.
 //
 
-#include <duk_rhi/data_source.h>
+#include <duk_hash/data_source.h>
 #include <cassert>
 
-namespace duk::rhi {
+namespace duk::hash {
 
-rhi::DataSource::DataSource() :
+DataSource::DataSource() :
     m_hash(hash::kUndefinedHash) {
 
 }
 
-rhi::DataSource::~DataSource() = default;
+DataSource::~DataSource() = default;
 
 void DataSource::update_hash() {
     m_hash = calculate_hash();

@@ -1,7 +1,6 @@
 project(duk_rhi)
 
 set(DUK_RHI_HEADERS
-        include/duk_rhi/data_source.h
         include/duk_rhi/rhi.h
         include/duk_rhi/renderer_error.h
         include/duk_rhi/command/command_queue.h
@@ -13,7 +12,6 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/sampler.h
         include/duk_rhi/vertex_layout.h
         include/duk_rhi/pipeline/graphics_pipeline.h
-        include/duk_rhi/pipeline/pipeline_data_source.h
         include/duk_rhi/pipeline/shader.h
         include/duk_rhi/command/command_scheduler.h
         include/duk_rhi/command/command.h
@@ -30,12 +28,10 @@ set(DUK_RHI_HEADERS
         )
 
 set(DUK_RHI_SOURCES
-        src/duk_rhi/data_source.cpp
         src/duk_rhi/rhi.cpp
         src/duk_rhi/renderer_error.cpp
         src/duk_rhi/vertex_layout.cpp
         src/duk_rhi/pipeline/graphics_pipeline.cpp
-        src/duk_rhi/pipeline/pipeline_data_source.cpp
         src/duk_rhi/pipeline/shader.cpp
         src/duk_rhi/command/command_queue.cpp
         src/duk_rhi/render_pass.cpp

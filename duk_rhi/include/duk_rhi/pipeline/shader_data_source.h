@@ -4,21 +4,20 @@
 #ifndef DUK_RHI_SHADER_DATA_SOURCE_H
 #define DUK_RHI_SHADER_DATA_SOURCE_H
 
-#include <duk_rhi/data_source.h>
 #include <duk_rhi/descriptor.h>
 #include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/vertex_layout.h>
 
-#include <duk_macros/macros.h>
+#include <duk_hash/data_source.h>
 
 #include <vector>
 
 namespace duk::rhi {
 
-class ShaderDataSource : public DataSource {
+class ShaderDataSource : public duk::hash::DataSource {
 public:
 
-    virtual ~ShaderDataSource();
+    ~ShaderDataSource() override;
 
     DUK_NO_DISCARD virtual Shader::Module::Mask module_mask() const = 0;
 

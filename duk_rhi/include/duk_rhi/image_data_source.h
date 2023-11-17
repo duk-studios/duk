@@ -4,7 +4,7 @@
 #ifndef DUK_RHI_IMAGE_DATA_SOURCE_H
 #define DUK_RHI_IMAGE_DATA_SOURCE_H
 
-#include <duk_rhi/data_source.h>
+#include <duk_hash/data_source.h>
 #include <duk_rhi/image.h>
 
 #include <cstring>
@@ -12,7 +12,7 @@
 
 namespace duk::rhi {
 
-class ImageDataSource : public DataSource {
+class ImageDataSource : public duk::hash::DataSource {
 public:
 
     DUK_NO_DISCARD virtual PixelFormat pixel_format() const = 0;

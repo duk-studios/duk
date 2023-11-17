@@ -8,7 +8,7 @@
 #include <duk_hash/hash.h>
 #include <duk_macros/macros.h>
 
-namespace duk::rhi {
+namespace duk::hash {
 
 class DataSource {
 public:
@@ -19,14 +19,14 @@ public:
 
     void update_hash();
 
-    DUK_NO_DISCARD hash::Hash hash() const;
+    DUK_NO_DISCARD Hash hash() const;
 
 protected:
 
-    DUK_NO_DISCARD virtual hash::Hash calculate_hash() const = 0;
+    DUK_NO_DISCARD virtual Hash calculate_hash() const = 0;
 
 private:
-    hash::Hash m_hash;
+    Hash m_hash;
 };
 
 }
