@@ -8,10 +8,12 @@ set(DUK_TOOLS_HEADERS
         include/duk_tools/fixed_allocator.h
         include/duk_tools/bit_block.h
         include/duk_tools/file.h
+        include/duk_tools/timer.h
         )
 
 set(DUK_TOOLS_SOURCES
         src/duk_tools/file.cpp
+        src/duk_tools/timer.cpp
         )
 
 add_library(duk_tools STATIC ${DUK_TOOLS_HEADERS} ${DUK_TOOLS_SOURCES})
@@ -22,6 +24,11 @@ target_include_directories(duk_tools
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
      )
+
+target_link_libraries(duk_tools
+        PUBLIC
+        duk_macros
+        )
 
 set_target_properties(duk_tools PROPERTIES CXX_STANDARD 20)
 
