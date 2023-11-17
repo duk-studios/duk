@@ -11,7 +11,7 @@ namespace duk::painter_generator {
 
 namespace detail {
 
-static constexpr std::string kNamespaceName = "globals";
+static const std::string kNamespaceName = "globals";
 
 static std::string binding_name_to_file_name(const std::string& bindingName) {
     // Remove "UBO" or "SSBO" if present in the input string.
