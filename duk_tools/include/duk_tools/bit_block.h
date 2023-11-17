@@ -24,38 +24,19 @@ public:
     static constexpr size_t kMaxBlockValue = std::numeric_limits<Block>::max();
     using Container = std::array<Block, kBlockCount>;
 
-    template<bool Set>
+    template<bool>
     class BitBlockIterator {
     public:
 
-        BitBlockIterator(const BitBlock& block, size_t i) : m_block(block), m_i(i) {
-            next();
-        }
+        BitBlockIterator(const BitBlock& block, size_t i);
 
-        void next() {
-            if (m_i < N) {
-                if constexpr (Set) {
-                    m_i += m_block.countr_zero(m_i);
-                }
-                else {
-                    m_i += m_block.countr_one(m_i);
-                }
-            }
-        }
+        void next();
 
-        BitBlockIterator& operator++() {
-            m_i++;
-            next();
-            return *this;
-        }
+        BitBlockIterator& operator++();
 
-        size_t operator*() const {
-            return m_i;
-        }
+        size_t operator*() const;
 
-        bool operator==(const BitBlockIterator& rhs) const {
-            return m_i == rhs.m_i && &m_block == &rhs.m_block;
-        }
+        bool operator==(const BitBlockIterator& rhs) const;
 
     private:
         const BitBlock& m_block;
@@ -68,15 +49,11 @@ public:
 
         using Iterator = BitBlockIterator<Set>;
 
-        BitBlockView(const BitBlock& block) : m_block(block) {}
+        explicit BitBlockView(const BitBlock& block) : m_block(block) {}
 
-        Iterator begin() const {
-            return Iterator(m_block, 0);
-        }
+        Iterator begin() const;
 
-        Iterator end() const {
-            return Iterator(m_block, N);
-        }
+        Iterator end() const;
 
     private:
         const BitBlock& m_block;
@@ -124,7 +101,7 @@ public:
     BitBlockView<Set> bits();
 
     template<bool Set>
-    const BitBlockView<Set> bits() const;
+    BitBlockView<Set> bits() const;
 
 private:
     Container m_container;
@@ -132,7 +109,60 @@ private:
 
 template<size_t N>
 template<bool Set>
-const BitBlock<N>::BitBlockView<Set> BitBlock<N>::bits() const {
+BitBlock<N>::BitBlockIterator<Set>::BitBlockIterator(const BitBlock &block, size_t i) :
+    m_block(block),
+    m_i(i) {
+    next();
+}
+
+template<size_t N>
+template<bool Set>
+void BitBlock<N>::BitBlockIterator<Set>::next() {
+    if (m_i < N) {
+        if constexpr (Set) {
+            m_i += m_block.countr_zero(m_i);
+        }
+        else {
+            m_i += m_block.countr_one(m_i);
+        }
+    }
+}
+
+template<size_t N>
+template<bool Set>
+BitBlock<N>::BitBlockIterator<Set> &BitBlock<N>::BitBlockIterator<Set>::operator++() {
+    m_i++;
+    next();
+    return *this;
+}
+
+template<size_t N>
+template<bool Set>
+size_t BitBlock<N>::BitBlockIterator<Set>::operator*() const {
+    return m_i;
+}
+
+template<size_t N>
+template<bool Set>
+bool BitBlock<N>::BitBlockIterator<Set>::operator==(const BitBlock<N>::BitBlockIterator<Set> &rhs) const {
+    return m_i == rhs.m_i && &m_block == &rhs.m_block;
+}
+
+template<size_t N>
+template<bool Set>
+BitBlock<N>::BitBlockView<Set>::Iterator BitBlock<N>::BitBlockView<Set>::begin() const {
+    return Iterator(m_block, 0);
+}
+
+template<size_t N>
+template<bool Set>
+BitBlock<N>::BitBlockView<Set>::Iterator BitBlock<N>::BitBlockView<Set>::end() const {
+    return Iterator(m_block, N);
+}
+
+template<size_t N>
+template<bool Set>
+BitBlock<N>::BitBlockView<Set> BitBlock<N>::bits() const {
     return BitBlock::BitBlockView<Set>(*this);
 }
 
@@ -310,17 +340,9 @@ BitBlock<N>::BitBlockView<Set> BitBlock<N>::bits() {
 }
 
 template<bool Set, size_t N, typename Predicate>
-void for_each_bit(duk::tools::BitBlock<N> bitBlock, const Predicate& predicate) {
-    if constexpr (!Set) {
-        bitBlock = ~bitBlock;
-    }
-    size_t index = 0;
-    while (index < N) {
-        index += bitBlock.countr_zero(index);
-        if (bitBlock.test(index)) {
-            predicate(index);
-        }
-        index++;
+void for_each_bit(const duk::tools::BitBlock<N>& bitBlock, const Predicate& predicate) {
+    for (auto bit : bitBlock.template bits<Set>()){
+        predicate(bit);
     }
 }
 
