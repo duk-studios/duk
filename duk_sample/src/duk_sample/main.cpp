@@ -12,7 +12,6 @@ int main() {
 
     duk::sample::ApplicationCreateInfo applicationCreateInfo = {};
     applicationCreateInfo.name = "Quacker";
-    applicationCreateInfo.sink = &consoleSink;
 
     try {
         duk::sample::Application application(applicationCreateInfo);

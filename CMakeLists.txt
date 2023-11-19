@@ -18,5 +18,6 @@ add_subdirectory(duk_painter_generator)
 add_subdirectory(duk_scene)
 add_subdirectory(duk_renderer)
 add_subdirectory(duk_import)
+add_subdirectory(duk_engine)
 add_subdirectory(duk_sample)
 
