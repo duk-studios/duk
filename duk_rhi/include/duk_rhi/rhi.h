@@ -142,7 +142,7 @@ public:
     DUK_NO_DISCARD virtual ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) = 0;
 
     struct ImageCreateInfo {
-        ImageDataSource* imageDataSource;
+        const ImageDataSource* imageDataSource;
         Image::Layout initialLayout;
         Image::Usage usage;
         Image::UpdateFrequency updateFrequency;

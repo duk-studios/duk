@@ -246,36 +246,6 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
         m_sphereMesh = m_meshBufferPool->create_mesh(&sphereDataSource);
     }
 
-    {
-        auto baseColorImageDataSource = duk::import::Importer::instance()->load_image("images/gold_basecolor.png", duk::rhi::PixelFormat::RGBA8U);
-        auto specularImageDataSource = duk::import::Importer::instance()->load_image("images/gold_specular.png", duk::rhi::PixelFormat::R8U);
-
-        duk::rhi::RHI::ImageCreateInfo imageCreateInfo = {};
-        imageCreateInfo.commandQueue = renderer->main_command_queue();
-        imageCreateInfo.initialLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
-        imageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::STATIC;
-        imageCreateInfo.usage = duk::rhi::Image::Usage::SAMPLED;
-
-        {
-            imageCreateInfo.imageDataSource = baseColorImageDataSource.get();
-            m_baseColorImage = check_expected_result(renderer->rhi()->create_image(imageCreateInfo));
-        }
-
-        {
-            imageCreateInfo.imageDataSource = specularImageDataSource.get();
-            m_specularImage = check_expected_result(renderer->rhi()->create_image(imageCreateInfo));
-        }
-
-        {
-            duk::rhi::ImageDataSourceRGBA8U whiteImageDataSource(1, 1);
-            whiteImageDataSource[0] = {255, 255, 255, 255};
-            whiteImageDataSource.update_hash();
-
-            imageCreateInfo.imageDataSource = &whiteImageDataSource;
-            m_whiteImage = check_expected_result(renderer->rhi()->create_image(imageCreateInfo));
-        }
-
-    }
 
     {
         duk::renderer::ColorShaderDataSource colorShaderDataSource;
@@ -288,6 +258,10 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     }
 
     {
+        auto imagePool = m_engine->image_pool();
+        auto goldColorImage = imagePool->load("images/gold_basecolor.png", duk::rhi::PixelFormat::RGBA8U);
+        auto goldSpecularImage = imagePool->load("images/gold_specular.png", duk::rhi::PixelFormat::R8U);
+
         duk::renderer::PhongShaderDataSource phongShaderDataSource;
 
         duk::renderer::PhongMaterialCreateInfo phongMaterialCreateInfo = {};
@@ -299,38 +273,38 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
         m_phongGreenMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongGreenMaterial->update_base_color({0.0f, 1.0f, 0.0f});
         m_phongGreenMaterial->update_shininess(2);
-        m_phongGreenMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
-        m_phongGreenMaterial->update_shininess_image(m_specularImage.get(), sampler);
+        m_phongGreenMaterial->update_base_color_image(goldColorImage.get(), sampler);
+        m_phongGreenMaterial->update_shininess_image(goldSpecularImage.get(), sampler);
 
         m_phongBlueMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongBlueMaterial->update_base_color({0.0f, 0.0f, 1.0f});
         m_phongBlueMaterial->update_shininess(4);
-        m_phongBlueMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
-        m_phongBlueMaterial->update_shininess_image(m_specularImage.get(), sampler);
+        m_phongBlueMaterial->update_base_color_image(goldColorImage.get(), sampler);
+        m_phongBlueMaterial->update_shininess_image(goldSpecularImage.get(), sampler);
 
         m_phongRedMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongRedMaterial->update_base_color({1.0f, 0.0f, 0.0f});
         m_phongRedMaterial->update_shininess(8);
-        m_phongRedMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
-        m_phongRedMaterial->update_shininess_image(m_specularImage.get(), sampler);
+        m_phongRedMaterial->update_base_color_image(goldColorImage.get(), sampler);
+        m_phongRedMaterial->update_shininess_image(goldSpecularImage.get(), sampler);
 
         m_phongYellowMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongYellowMaterial->update_base_color({1.0f, 1.0f, 0.0f});
         m_phongYellowMaterial->update_shininess(16);
-        m_phongYellowMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
-        m_phongYellowMaterial->update_shininess_image(m_specularImage.get(), sampler);
+        m_phongYellowMaterial->update_base_color_image(goldColorImage.get(), sampler);
+        m_phongYellowMaterial->update_shininess_image(goldSpecularImage.get(), sampler);
 
         m_phongWhiteMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongWhiteMaterial->update_base_color({0.3f, 0.3f, 0.3f});
         m_phongWhiteMaterial->update_shininess(4);
-        m_phongWhiteMaterial->update_base_color_image(m_whiteImage.get(), sampler);
-        m_phongWhiteMaterial->update_shininess_image(m_specularImage.get(), sampler);
+        m_phongWhiteMaterial->update_base_color_image(goldColorImage.get(), sampler);
+        m_phongWhiteMaterial->update_shininess_image(goldSpecularImage.get(), sampler);
 
         m_phongCyanMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongCyanMaterial->update_base_color({0.0f, 1.0f, 1.0f});
         m_phongCyanMaterial->update_shininess(64);
-        m_phongCyanMaterial->update_base_color_image(m_baseColorImage.get(), sampler);
-        m_phongCyanMaterial->update_shininess_image(m_specularImage.get(), sampler);
+        m_phongCyanMaterial->update_base_color_image(goldColorImage.get(), sampler);
+        m_phongCyanMaterial->update_shininess_image(goldSpecularImage.get(), sampler);
     }
 
 

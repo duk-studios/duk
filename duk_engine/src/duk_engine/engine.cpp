@@ -44,6 +44,13 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
 
     duk::import::Importer::create();
 
+    {
+        ImagePoolCreateInfo imagePoolCreateInfo = {};
+        imagePoolCreateInfo.renderer = m_renderer.get();
+
+        m_imagePool = std::make_unique<ImagePool>(imagePoolCreateInfo);
+    }
+
     m_scene = std::make_unique<duk::scene::Scene>();
 }
 
@@ -92,6 +99,10 @@ duk::scene::Scene* Engine::scene() {
 
 const duk::tools::Timer *Engine::timer() const {
     return &m_timer;
+}
+
+ImagePool* Engine::image_pool() {
+    return m_imagePool.get();
 }
 
 }

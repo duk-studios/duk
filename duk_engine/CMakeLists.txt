@@ -8,12 +8,18 @@ set(DUK_ENGINE_HEADERS
         include/duk_engine/engine.h
         include/duk_engine/systems/system.h
         include/duk_engine/systems/render_system.h
+        include/duk_engine/pools/resource.h
+        include/duk_engine/pools/pool.h
+        include/duk_engine/pools/image_pool.h
         )
 
 set(DUK_ENGINE_SOURCES
         src/duk_engine/engine.cpp
         src/duk_engine/systems/system.cpp
         src/duk_engine/systems/render_system.cpp
+        src/duk_engine/pools/resource.cpp
+        src/duk_engine/pools/pool.cpp
+        src/duk_engine/pools/image_pool.cpp
         )
 
 add_library(duk_engine STATIC ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})

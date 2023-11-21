@@ -70,7 +70,7 @@ struct VulkanMemoryImageCreateInfo {
     Image::UpdateFrequency updateFrequency;
     Image::Layout initialLayout;
     VulkanCommandQueue* commandQueue;
-    ImageDataSource* imageDataSource;
+    const ImageDataSource* imageDataSource;
 };
 
 class VulkanMemoryImage : public VulkanImage {

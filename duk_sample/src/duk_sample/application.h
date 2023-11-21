@@ -39,7 +39,6 @@ private:
 private:
     std::unique_ptr<duk::engine::Engine> m_engine;
     std::shared_ptr<duk::renderer::MeshBufferPool> m_meshBufferPool;
-    std::shared_ptr<duk::rhi::Image> m_baseColorImage, m_specularImage, m_whiteImage;
     std::shared_ptr<duk::renderer::Mesh> m_quadMesh;
     std::shared_ptr<duk::renderer::Mesh> m_cubeMesh;
     std::shared_ptr<duk::renderer::Mesh> m_sphereMesh;
