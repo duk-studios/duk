@@ -35,7 +35,11 @@ template<typename T>
 class Resource {
 public:
 
+    Resource();
+
     Resource(ResourceId id, const std::shared_ptr<T>& resource);
+
+    void reset();
 
     DUK_NO_DISCARD T* get();
 
@@ -53,16 +57,30 @@ public:
 
     DUK_NO_DISCARD size_t use_count() const;
 
+    DUK_NO_DISCARD bool valid() const;
+
 private:
     ResourceId m_id;
     std::shared_ptr<T> m_resource;
 };
 
 template<typename T>
+Resource<T>::Resource() :
+    Resource(ResourceId(0), nullptr) {
+
+}
+
+template<typename T>
 Resource<T>::Resource(ResourceId id, const std::shared_ptr<T>& resource) :
         m_id(id),
         m_resource(resource) {
 
+}
+
+template<typename T>
+void Resource<T>::reset() {
+    m_resource.reset();
+    m_id = ResourceId(0);
 }
 
 template<typename T>
@@ -104,6 +122,12 @@ template<typename T>
 size_t Resource<T>::use_count() const {
     return m_resource.use_count();
 }
+
+template<typename T>
+bool Resource<T>::valid() const {
+    return m_resource && m_id.value() != 0;
+}
+
 
 }
 
