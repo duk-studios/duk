@@ -92,7 +92,7 @@ namespace std {
 
 template<>
 struct hash<duk::renderer::VertexColorUV> {
-    size_t operator()(const duk::renderer::VertexColorUV& vertex){
+    size_t operator()(const duk::renderer::VertexColorUV& vertex) const {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vertex.position);
         duk::hash::hash_combine(hash, vertex.color);
@@ -105,7 +105,7 @@ struct hash<duk::renderer::VertexColorUV> {
 
 template<>
 struct hash<duk::renderer::VertexNormalUV> {
-    size_t operator()(const duk::renderer::VertexNormalUV& vertex){
+    size_t operator()(const duk::renderer::VertexNormalUV& vertex) const {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vertex.position);
         duk::hash::hash_combine(hash, vertex.normal);
