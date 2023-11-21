@@ -297,7 +297,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
         m_phongWhiteMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);
         m_phongWhiteMaterial->update_base_color({0.3f, 0.3f, 0.3f});
         m_phongWhiteMaterial->update_shininess(4);
-        m_phongWhiteMaterial->update_base_color_image(goldColorImage.get(), sampler);
+        m_phongWhiteMaterial->update_base_color_image(imagePool->white_image().get(), sampler);
         m_phongWhiteMaterial->update_shininess_image(goldSpecularImage.get(), sampler);
 
         m_phongCyanMaterial = std::make_shared<duk::renderer::PhongMaterial>(phongMaterialCreateInfo);

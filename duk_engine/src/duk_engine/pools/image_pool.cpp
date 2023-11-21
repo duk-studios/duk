@@ -9,7 +9,18 @@ namespace duk::engine {
 
 ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo) :
     m_renderer(imagePoolCreateInfo.renderer) {
-
+    {
+        duk::rhi::ImageDataSourceRGBA8U whiteImageDataSource(1, 1);
+        whiteImageDataSource.at(0, 0) = {255, 255, 255, 255};
+        whiteImageDataSource.update_hash();
+        m_whiteImage = create(&whiteImageDataSource);
+    }
+    {
+        duk::rhi::ImageDataSourceRGBA8U blackImageDataSource(1, 1);
+        blackImageDataSource.at(0, 0) = {0, 0, 0, 255};
+        blackImageDataSource.update_hash();
+        m_blackImage = create(&blackImageDataSource);
+    }
 }
 
 ImagePool::ResourceHandle ImagePool::create(const duk::rhi::ImageDataSource* imageDataSource) {
@@ -32,6 +43,14 @@ ImagePool::ResourceHandle ImagePool::create(const duk::rhi::ImageDataSource* ima
 ImagePool::ResourceHandle ImagePool::load(const std::string& path, duk::rhi::PixelFormat format) {
     const auto imageDataSource = duk::import::Importer::instance()->load_image(path, format);
     return create(imageDataSource.get());
+}
+
+ImagePool::ResourceHandle ImagePool::white_image() const {
+    return m_whiteImage;
+}
+
+ImagePool::ResourceHandle ImagePool::black_image() const {
+    return m_blackImage;
 }
 
 

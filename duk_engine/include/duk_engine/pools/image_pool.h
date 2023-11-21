@@ -23,8 +23,14 @@ public:
 
     DUK_NO_DISCARD ResourceHandle load(const std::string& path, duk::rhi::PixelFormat format);
 
+    DUK_NO_DISCARD ResourceHandle white_image() const;
+
+    DUK_NO_DISCARD ResourceHandle black_image() const;
+
 private:
     duk::renderer::Renderer* m_renderer;
+    ResourceHandle m_whiteImage;
+    ResourceHandle m_blackImage;
 
 };
 
