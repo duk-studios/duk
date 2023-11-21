@@ -13,7 +13,6 @@ namespace duk::renderer {
 
 struct FullscreenMaterialCreateInfo {
     Renderer* renderer;
-    const FullscreenShaderDataSource* shaderDataSource;
 };
 
 class FullscreenMaterial : public Material {

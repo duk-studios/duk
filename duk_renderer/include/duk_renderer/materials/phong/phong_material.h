@@ -18,7 +18,6 @@ namespace duk::renderer {
 
 struct PhongMaterialCreateInfo {
     Renderer* renderer;
-    const PhongShaderDataSource* shaderDataSource;
 };
 
 class PhongMaterial : public Material {

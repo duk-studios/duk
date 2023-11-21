@@ -5,9 +5,11 @@
 
 namespace duk::renderer {
 
+static const FullscreenShaderDataSource kFullscreenShaderDataSource;
+
 FullscreenMaterial::FullscreenMaterial(const FullscreenMaterialCreateInfo& fullscreenMaterialCreateInfo) :
-    Material(fullscreenMaterialCreateInfo.renderer, fullscreenMaterialCreateInfo.shaderDataSource),
-    m_descriptorSet({fullscreenMaterialCreateInfo.renderer->rhi(), fullscreenMaterialCreateInfo.shaderDataSource}) {
+    Material(fullscreenMaterialCreateInfo.renderer, &kFullscreenShaderDataSource),
+    m_descriptorSet({fullscreenMaterialCreateInfo.renderer->rhi(), &kFullscreenShaderDataSource}) {
 
 }
 

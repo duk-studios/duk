@@ -7,9 +7,11 @@
 
 namespace duk::renderer {
 
+static const PhongShaderDataSource kPhongShaderDataSource;
+
 PhongMaterial::PhongMaterial(const PhongMaterialCreateInfo& phongMaterialCreateInfo) :
-    Material(phongMaterialCreateInfo.renderer, phongMaterialCreateInfo.shaderDataSource),
-    m_descriptorSet({phongMaterialCreateInfo.renderer->rhi(), phongMaterialCreateInfo.shaderDataSource}) {
+    Material(phongMaterialCreateInfo.renderer, &kPhongShaderDataSource),
+    m_descriptorSet({phongMaterialCreateInfo.renderer->rhi(), &kPhongShaderDataSource}) {
     auto rhi = phongMaterialCreateInfo.renderer->rhi();
     auto commandQueue = phongMaterialCreateInfo.renderer->main_command_queue();
 

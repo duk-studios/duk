@@ -7,9 +7,11 @@
 
 namespace duk::renderer {
 
+static const ColorShaderDataSource kColorShaderDataSource;
+
 ColorMaterial::ColorMaterial(const ColorMaterialCreateInfo& colorMaterialCreateInfo) :
-    Material(colorMaterialCreateInfo.renderer, colorMaterialCreateInfo.shaderDataSource),
-    m_descriptorSet({colorMaterialCreateInfo.renderer->rhi(), colorMaterialCreateInfo.shaderDataSource}){
+    Material(colorMaterialCreateInfo.renderer, &kColorShaderDataSource),
+    m_descriptorSet({colorMaterialCreateInfo.renderer->rhi(), &kColorShaderDataSource}){
 
     auto rhi = colorMaterialCreateInfo.renderer->rhi();
     auto commandQueue = colorMaterialCreateInfo.renderer->main_command_queue();

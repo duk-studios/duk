@@ -20,7 +20,6 @@ namespace duk::renderer {
 
 struct ColorMaterialCreateInfo {
     Renderer* renderer;
-    const ColorShaderDataSource* shaderDataSource;
 };
 
 class ColorMaterial : public Material {

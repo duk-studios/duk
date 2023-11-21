@@ -83,11 +83,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     auto renderer = m_engine->renderer();
 
     {
-        duk::renderer::ColorShaderDataSource colorShaderDataSource;
-
         duk::renderer::ColorMaterialCreateInfo colorMaterialCreateInfo = {};
         colorMaterialCreateInfo.renderer = renderer;
-        colorMaterialCreateInfo.shaderDataSource = &colorShaderDataSource;
 
         m_colorMaterial = std::make_shared<duk::renderer::ColorMaterial>(colorMaterialCreateInfo);
     }
@@ -97,11 +94,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
         auto goldColorImage = imagePool->load("images/gold_basecolor.png", duk::rhi::PixelFormat::RGBA8U);
         auto goldSpecularImage = imagePool->load("images/gold_specular.png", duk::rhi::PixelFormat::R8U);
 
-        duk::renderer::PhongShaderDataSource phongShaderDataSource;
-
         duk::renderer::PhongMaterialCreateInfo phongMaterialCreateInfo = {};
         phongMaterialCreateInfo.renderer = renderer;
-        phongMaterialCreateInfo.shaderDataSource = &phongShaderDataSource;
 
         const duk::rhi::Sampler sampler = {.filter = duk::rhi::Sampler::Filter::NEAREST, .wrapMode = duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER};
 

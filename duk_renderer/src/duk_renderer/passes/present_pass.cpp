@@ -45,11 +45,8 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
     }
 
     {
-        FullscreenShaderDataSource fullscreenShaderDataSource;
-
         FullscreenMaterialCreateInfo fullscreenMaterialCreateInfo = {};
         fullscreenMaterialCreateInfo.renderer = m_renderer;
-        fullscreenMaterialCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
 
         m_fullscreenMaterial = std::make_unique<FullscreenMaterial>(fullscreenMaterialCreateInfo);
 
