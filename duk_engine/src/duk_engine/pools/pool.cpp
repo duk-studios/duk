@@ -5,10 +5,4 @@
 
 namespace duk::engine {
 
-Pool::~Pool() = default;
-
-bool Pool::empty() const {
-    return size() == 0;
-}
-
 }

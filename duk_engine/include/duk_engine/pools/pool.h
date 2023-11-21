@@ -14,28 +14,18 @@
 
 namespace duk::engine {
 
-class Pool {
-public:
-
-    virtual ~Pool();
-
-    virtual void clean() = 0;
-
-    DUK_NO_DISCARD virtual size_t size() const = 0;
-
-    DUK_NO_DISCARD bool empty() const;
-};
-
 template<typename T>
-class PoolT : public Pool {
+class Pool {
 public:
     using ResourceHandle = Resource<T>;
 
-    ~PoolT() override;
+    virtual ~Pool();
 
-    void clean() final;
+    void clean();
 
-    DUK_NO_DISCARD size_t size() const final;
+    DUK_NO_DISCARD size_t size() const;
+
+    DUK_NO_DISCARD bool empty() const;
 
     DUK_NO_DISCARD ResourceHandle find(ResourceId id) const;
 
@@ -49,7 +39,7 @@ private:
 };
 
 template<typename T>
-PoolT<T>::ResourceHandle PoolT<T>::find(ResourceId id) const {
+Pool<T>::ResourceHandle Pool<T>::find(ResourceId id) const {
     auto it = m_objects.find(id);
     if (it == m_objects.end()) {
         return nullptr;
@@ -58,13 +48,13 @@ PoolT<T>::ResourceHandle PoolT<T>::find(ResourceId id) const {
 }
 
 template<typename T>
-PoolT<T>::~PoolT() {
+Pool<T>::~Pool() {
     clean();
     assert(empty() && "some resources are still in use");
 }
 
 template<typename T>
-void PoolT<T>::clean() {
+void Pool<T>::clean() {
     for (auto it = m_objects.cbegin(); it != m_objects.cend();) {
         const ResourceHandle& ptr = it->second;
         if (ptr.use_count() == 1) {
@@ -76,12 +66,17 @@ void PoolT<T>::clean() {
 }
 
 template<typename T>
-size_t PoolT<T>::size() const {
+size_t Pool<T>::size() const {
     return m_objects.size();
 }
 
 template<typename T>
-PoolT<T>::ResourceHandle PoolT<T>::insert(const std::shared_ptr<T>& resource) {
+bool Pool<T>::empty() const {
+    return size() == 0;
+}
+
+template<typename T>
+Pool<T>::ResourceHandle Pool<T>::insert(const std::shared_ptr<T>& resource) {
 
     auto id = ResourceId::generate();
 

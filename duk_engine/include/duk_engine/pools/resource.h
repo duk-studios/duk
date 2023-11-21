@@ -39,6 +39,12 @@ public:
 
     Resource(ResourceId id, const std::shared_ptr<T>& resource);
 
+    template<typename U>
+    Resource(const Resource<U>& other) requires std::is_base_of_v<T, U>;
+
+    template<typename U>
+    Resource<U> as() requires std::is_base_of_v<T, U>;
+
     void reset();
 
     DUK_NO_DISCARD T* get();
@@ -60,6 +66,8 @@ public:
     DUK_NO_DISCARD bool valid() const;
 
 private:
+    template<typename U>
+    friend class Resource;
     ResourceId m_id;
     std::shared_ptr<T> m_resource;
 };
@@ -75,6 +83,19 @@ Resource<T>::Resource(ResourceId id, const std::shared_ptr<T>& resource) :
         m_id(id),
         m_resource(resource) {
 
+}
+
+template<typename T>
+template<typename U>
+Resource<T>::Resource(const Resource<U>& other) requires std::is_base_of_v<T, U> {
+    m_resource = other.m_resource;
+    m_id = other.m_id;
+}
+
+template<typename T>
+template<typename U>
+Resource<U> Resource<T>::as() requires std::is_base_of_v<T, U> {
+    return Resource<U>(m_id, std::dynamic_pointer_cast<U>(m_resource));
 }
 
 template<typename T>
@@ -127,7 +148,6 @@ template<typename T>
 bool Resource<T>::valid() const {
     return m_resource && m_id.value() != 0;
 }
-
 
 }
 

@@ -15,7 +15,7 @@ struct MeshPoolCreateInfo {
     duk::renderer::Renderer* renderer;
 };
 
-class MeshPool : public PoolT<duk::renderer::Mesh> {
+class MeshPool : public Pool<duk::renderer::Mesh> {
 public:
 
     explicit MeshPool(const MeshPoolCreateInfo& meshPoolCreateInfo);

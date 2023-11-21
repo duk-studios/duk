@@ -184,7 +184,7 @@ MeshPool::~MeshPool() {
     m_quad.reset();
     m_cube.reset();
     m_sphere.reset();
-    PoolT<duk::renderer::Mesh>::clean();
+    clean();
     m_meshBufferPool.reset();
 }
 

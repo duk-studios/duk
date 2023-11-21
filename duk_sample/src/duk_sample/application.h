@@ -38,9 +38,6 @@ private:
 
 private:
     std::unique_ptr<duk::engine::Engine> m_engine;
-    std::shared_ptr<duk::renderer::ColorMaterial> m_colorMaterial;
-    std::shared_ptr<duk::renderer::PhongMaterial> m_phongGreenMaterial, m_phongBlueMaterial, m_phongRedMaterial, m_phongWhiteMaterial, m_phongYellowMaterial, m_phongCyanMaterial;
-
 };
 
 }
