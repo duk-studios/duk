@@ -50,6 +50,12 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
 
         m_imagePool = std::make_unique<ImagePool>(imagePoolCreateInfo);
     }
+    {
+        MeshPoolCreateInfo meshPoolCreateInfo = {};
+        meshPoolCreateInfo.renderer = m_renderer.get();
+
+        m_meshPool = std::make_unique<MeshPool>(meshPoolCreateInfo);
+    }
 
     m_scene = std::make_unique<duk::scene::Scene>();
 }
@@ -103,6 +109,10 @@ const duk::tools::Timer *Engine::timer() const {
 
 ImagePool* Engine::image_pool() {
     return m_imagePool.get();
+}
+
+MeshPool* Engine::mesh_pool() {
+    return m_meshPool.get();
 }
 
 }

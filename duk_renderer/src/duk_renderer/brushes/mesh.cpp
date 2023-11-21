@@ -282,7 +282,7 @@ void Mesh::draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t 
     }
 }
 
-void Mesh::create(MeshDataSource* meshDataSource) {
+void Mesh::create(const MeshDataSource* meshDataSource) {
 
     m_vertexAttributes = meshDataSource->vertex_attributes();
     m_indexType = meshDataSource->index_type();
@@ -370,7 +370,7 @@ MeshBufferPool::MeshBufferPool(const MeshBufferPoolCreateInfo& meshBufferPoolCre
 
 }
 
-std::shared_ptr<Mesh> MeshBufferPool::create_mesh(MeshDataSource* meshDataSource) {
+std::shared_ptr<Mesh> MeshBufferPool::create_mesh(const MeshDataSource* meshDataSource) {
     MeshCreateInfo meshCreateInfo = {};
     meshCreateInfo.meshDataSource = meshDataSource;
     meshCreateInfo.meshBufferPool = this;

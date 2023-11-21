@@ -18,7 +18,7 @@ class MeshBufferPool;
 
 struct MeshCreateInfo {
     MeshBufferPool* meshBufferPool;
-    MeshDataSource* meshDataSource;
+    const MeshDataSource* meshDataSource;
 };
 
 class Mesh : public Brush {
@@ -32,11 +32,11 @@ public:
 
     DUK_NO_DISCARD rhi::IndexType index_type() const;
 
-    void draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance);
+    void draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance) override;
 
 private:
 
-    void create(MeshDataSource* meshDataSource);
+    void create(const MeshDataSource* meshDataSource);
 
 private:
     MeshBufferPool* m_meshBufferPool;
@@ -137,7 +137,7 @@ public:
 
     explicit MeshBufferPool(const MeshBufferPoolCreateInfo& meshBufferPoolCreateInfo);
 
-    std::shared_ptr<Mesh> create_mesh(MeshDataSource* meshDataSource);
+    std::shared_ptr<Mesh> create_mesh(const MeshDataSource* meshDataSource);
 
     MeshBuffer* find_buffer(const VertexAttributes& vertexAttributes, rhi::IndexType indexType);
 

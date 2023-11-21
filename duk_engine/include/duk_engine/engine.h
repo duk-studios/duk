@@ -7,6 +7,7 @@
 
 #include <duk_engine/systems/system.h>
 #include <duk_engine/pools/image_pool.h>
+#include <duk_engine/pools/mesh_pool.h>
 
 #include <duk_platform/window.h>
 #include <duk_log/sink_std_console.h>
@@ -42,6 +43,8 @@ public:
 
     DUK_NO_DISCARD ImagePool* image_pool();
 
+    DUK_NO_DISCARD MeshPool* mesh_pool();
+
 private:
     duk::log::Logger m_logger;
     duk::log::SinkStdConsole m_sink;
@@ -52,6 +55,7 @@ private:
     Systems m_systems;
     duk::tools::Timer m_timer;
     std::unique_ptr<ImagePool> m_imagePool;
+    std::unique_ptr<MeshPool> m_meshPool;
     bool m_run;
 };
 

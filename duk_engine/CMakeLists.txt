@@ -11,6 +11,7 @@ set(DUK_ENGINE_HEADERS
         include/duk_engine/pools/resource.h
         include/duk_engine/pools/pool.h
         include/duk_engine/pools/image_pool.h
+        include/duk_engine/pools/mesh_pool.h
         )
 
 set(DUK_ENGINE_SOURCES
@@ -20,6 +21,7 @@ set(DUK_ENGINE_SOURCES
         src/duk_engine/pools/resource.cpp
         src/duk_engine/pools/pool.cpp
         src/duk_engine/pools/image_pool.cpp
+        src/duk_engine/pools/mesh_pool.cpp
         )
 
 add_library(duk_engine STATIC ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})
