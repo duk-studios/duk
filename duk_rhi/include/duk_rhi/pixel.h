@@ -84,7 +84,7 @@ public:
 
     PixelFormat(uint32_t mask);
 
-    DUK_NO_DISCARD PixelFormat& operator=(uint32_t mask);
+    PixelFormat& operator=(uint32_t mask);
 
     DUK_NO_DISCARD PixelFormat operator&(uint32_t mask) const;
 
