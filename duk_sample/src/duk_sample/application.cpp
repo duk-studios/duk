@@ -117,7 +117,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(-offset, 0, 0),
             glm::quat(),
             scale,
-            whitePhongMaterial.get(),
+            greenPhongMaterial.get(),
             meshPool->cube().get()
     );
 
@@ -135,7 +135,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, -offset, 0),
             glm::quat(),
             scale,
-            whitePhongMaterial.get(),
+            greenPhongMaterial.get(),
             meshPool->cube().get()
     );
 
@@ -144,7 +144,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, 0, offset),
             glm::quat(),
             scale,
-            whitePhongMaterial.get(),
+            greenPhongMaterial.get(),
             meshPool->sphere().get()
     );
 
