@@ -19,6 +19,12 @@ public:
 
 private:
     duk::hash::Hash calculate_hash() const override;
+
+private:
+    duk::rhi::Shader::Module::Mask m_moduleMask;
+    std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint8_t>> m_moduleSpirVCode;
+    std::vector<duk::rhi::DescriptorSetDescription> m_descriptorSetDescriptions;
+    duk::rhi::VertexLayout m_vertexLayout;
 };
 
 } // namespace duk::renderer

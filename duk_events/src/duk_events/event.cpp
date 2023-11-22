@@ -7,7 +7,7 @@
 namespace duk::events {
 
 Event::Handle::Handle(Event& owner) :
-        m_owner(owner) {
+    m_owner(owner) {
     m_controlBlock = m_owner.m_controlBlock;
 }
 

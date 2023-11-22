@@ -171,12 +171,6 @@ static std::string generate_descriptor_sets_description(const Reflector& reflect
     return oss.str();
 }
 
-duk::rhi::VertexLayout vertexLayout = {
-        duk::rhi::VertexInput::Format::VEC2,
-        duk::rhi::VertexInput::Format::VEC3,
-        duk::rhi::VertexInput::Format::VEC4
-};
-
 static std::string generate_vertex_layout(const Reflector& reflector) {
     std::ostringstream oss;
 
@@ -221,58 +215,64 @@ public:
 
 private:
     duk::hash::Hash calculate_hash() const override;
+
+private:
+    duk::rhi::Shader::Module::Mask m_moduleMask;
+    std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint8_t>> m_moduleSpirVCode;
+    std::vector<duk::rhi::DescriptorSetDescription> m_descriptorSetDescriptions;
+    duk::rhi::VertexLayout m_vertexLayout;
 };)";
 /// ---------------------------------------------------
 
 /// source file template-------------------------------
 const char* kClassDefinitionTemplate = R"(
-static constexpr duk::rhi::Shader::Module::Mask kModuleMask = TemplateModuleMask;
-
-static const std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint8_t>> kModuleSpirVCode = TemplateModuleSpirVCode;
-
-static const std::vector<duk::rhi::DescriptorSetDescription> kDescriptorSetDescriptions = TemplateModuleDescriptorSetDescriptions;
-
-static const duk::rhi::VertexLayout kVertexLayout = TemplateVertexLayout;
 
 TemplateShaderDataSource::TemplateShaderDataSource() {
+    m_moduleMask = TemplateModuleMask;
+
+    m_moduleSpirVCode = TemplateModuleSpirVCode;
+
+    m_descriptorSetDescriptions = TemplateModuleDescriptorSetDescriptions;
+
+    m_vertexLayout = TemplateVertexLayout;
+
     update_hash();
 }
 
 duk::rhi::Shader::Module::Mask TemplateShaderDataSource::module_mask() const {
-    return kModuleMask;
+    return m_moduleMask;
 }
 
 const std::vector<uint8_t>& TemplateShaderDataSource::shader_module_spir_v_code(duk::rhi::Shader::Module::Bits type) const {
-    return kModuleSpirVCode.at(type);
+    return m_moduleSpirVCode.at(type);
 }
 
 const std::vector<duk::rhi::DescriptorSetDescription>& TemplateShaderDataSource::descriptor_set_descriptions() const {
-    return kDescriptorSetDescriptions;
+    return m_descriptorSetDescriptions;
 }
 
 const rhi::VertexLayout& TemplateShaderDataSource::vertex_layout() const {
-    return kVertexLayout;
+    return m_vertexLayout;
 }
 
 duk::hash::Hash TemplateShaderDataSource::calculate_hash() const {
     duk::hash::Hash hash = 0;
 
-    duk::hash::hash_combine(hash, kModuleMask);
-    for (const auto&[type, module] : kModuleSpirVCode) {
+    duk::hash::hash_combine(hash, m_moduleMask);
+    for (const auto&[type, module] : m_moduleSpirVCode) {
         duk::hash::hash_combine(hash, type);
         duk::hash::hash_combine(hash, module.data(), module.size());
     }
 
-    for (const auto& descriptorSetDescription : kDescriptorSetDescriptions) {
+    for (const auto& descriptorSetDescription : m_descriptorSetDescriptions) {
         duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
     }
 
-    duk::hash::hash_combine(hash, kVertexLayout);
+    duk::hash::hash_combine(hash, m_vertexLayout);
 
     return hash;
 })";
 /// ---------------------------------------------------
-
 
 }
 

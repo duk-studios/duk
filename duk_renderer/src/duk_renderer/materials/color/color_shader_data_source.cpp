@@ -2,9 +2,11 @@
 
 namespace duk::renderer {
 
-static constexpr duk::rhi::Shader::Module::Mask kModuleMask = duk::rhi::Shader::Module::VERTEX | duk::rhi::Shader::Module::FRAGMENT;
 
-static const std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint8_t>> kModuleSpirVCode = {
+ColorShaderDataSource::ColorShaderDataSource() {
+    m_moduleMask = duk::rhi::Shader::Module::VERTEX | duk::rhi::Shader::Module::FRAGMENT;
+
+    m_moduleSpirVCode = {
     {
         duk::rhi::Shader::Module::VERTEX, {
         0x03,0x02,0x23,0x07,0x00,0x00,0x01,0x00,0x0b,0x00,0x0d,0x00,0x38,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x11,0x00,0x02,0x00,0x01,
@@ -134,7 +136,7 @@ static const std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint
     }
 };
 
-static const std::vector<duk::rhi::DescriptorSetDescription> kDescriptorSetDescriptions = {
+    m_descriptorSetDescriptions = {
     {
         {
             {
@@ -153,47 +155,46 @@ static const std::vector<duk::rhi::DescriptorSetDescription> kDescriptorSetDescr
     }
 };
 
-static const duk::rhi::VertexLayout kVertexLayout = {
+    m_vertexLayout = {
     duk::rhi::VertexInput::Format::VEC3,
     duk::rhi::VertexInput::Format::VEC3,
     duk::rhi::VertexInput::Format::VEC2,
     duk::rhi::VertexInput::Format::VEC4
 };
 
-ColorShaderDataSource::ColorShaderDataSource() {
     update_hash();
 }
 
 duk::rhi::Shader::Module::Mask ColorShaderDataSource::module_mask() const {
-    return kModuleMask;
+    return m_moduleMask;
 }
 
 const std::vector<uint8_t>& ColorShaderDataSource::shader_module_spir_v_code(duk::rhi::Shader::Module::Bits type) const {
-    return kModuleSpirVCode.at(type);
+    return m_moduleSpirVCode.at(type);
 }
 
 const std::vector<duk::rhi::DescriptorSetDescription>& ColorShaderDataSource::descriptor_set_descriptions() const {
-    return kDescriptorSetDescriptions;
+    return m_descriptorSetDescriptions;
 }
 
 const rhi::VertexLayout& ColorShaderDataSource::vertex_layout() const {
-    return kVertexLayout;
+    return m_vertexLayout;
 }
 
 duk::hash::Hash ColorShaderDataSource::calculate_hash() const {
     duk::hash::Hash hash = 0;
 
-    duk::hash::hash_combine(hash, kModuleMask);
-    for (const auto&[type, module] : kModuleSpirVCode) {
+    duk::hash::hash_combine(hash, m_moduleMask);
+    for (const auto&[type, module] : m_moduleSpirVCode) {
         duk::hash::hash_combine(hash, type);
         duk::hash::hash_combine(hash, module.data(), module.size());
     }
 
-    for (const auto& descriptorSetDescription : kDescriptorSetDescriptions) {
+    for (const auto& descriptorSetDescription : m_descriptorSetDescriptions) {
         duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
     }
 
-    duk::hash::hash_combine(hash, kVertexLayout);
+    duk::hash::hash_combine(hash, m_vertexLayout);
 
     return hash;
 }
