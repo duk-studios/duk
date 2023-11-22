@@ -28,5 +28,6 @@ target_link_libraries(duk_import
         duk_rhi
         PRIVATE
         stb_image
-
 )
+
+set_target_properties(duk_import PROPERTIES CXX_STANDARD 20)

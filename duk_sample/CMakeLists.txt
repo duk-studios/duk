@@ -1,6 +1,8 @@
 project(duk_sample)
 
-set(CMAKE_EXE_LINKER_FLAGS "-static")
+if (NOT MSVC)
+    set(CMAKE_EXE_LINKER_FLAGS "-static")
+endif ()
 
 set(DUK_SAMPLE_HEADERS
         )

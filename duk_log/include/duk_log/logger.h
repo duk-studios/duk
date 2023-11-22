@@ -64,7 +64,7 @@ public:
             return;
         }
 
-        m_printQueue.template enqueue([this](const std::string& format, Args&&... args){
+        m_printQueue.enqueue([this](const std::string& format, Args&&... args){
             auto formatted = duk::tools::format(format, std::forward<Args>(args)...);
             std::lock_guard<std::mutex> lock(m_printMutex);
             m_print_event(formatted);

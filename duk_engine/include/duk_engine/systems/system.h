@@ -10,6 +10,8 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <algorithm>
+#include <stdexcept>
 
 namespace duk::engine {
 

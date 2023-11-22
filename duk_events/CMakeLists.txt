@@ -16,3 +16,5 @@ target_include_directories(duk_events
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
+
+set_target_properties(duk_events PROPERTIES CXX_STANDARD 20)

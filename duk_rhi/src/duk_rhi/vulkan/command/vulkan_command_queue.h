@@ -75,7 +75,7 @@ public:
             submission();
         }
         else {
-            m_taskQueue.template enqueue(submission).wait();
+            m_taskQueue.enqueue(submission).wait();
         }
     }
 

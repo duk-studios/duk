@@ -6,6 +6,8 @@
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
 #include <duk_rhi/vulkan/vulkan_flags.h>
 
+#include <stdexcept>
+
 namespace duk::rhi {
 
 VkCullModeFlagBits convert_cull_mode(GraphicsPipeline::CullMode::Bits cullModeBit) {

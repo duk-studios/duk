@@ -6,6 +6,7 @@
 
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_events.h>
+#include <duk_rhi/vulkan/vulkan_frame_buffer.h>
 
 #include <duk_macros/macros.h>
 

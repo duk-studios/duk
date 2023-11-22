@@ -3,6 +3,8 @@
 
 #include <duk_rhi/index_types.h>
 
+#include <stdexcept>
+
 namespace duk::rhi {
 
 bool is_index_buffer(Buffer::Type type) {
