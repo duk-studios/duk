@@ -4,6 +4,8 @@ project(duk)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/output)
 set(DUK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
+option(BUILD_DUK_SAMPLE "Enables building of duk_sample" ON)
+
 add_subdirectory(external)
 
 add_subdirectory(duk_macros)
@@ -19,5 +21,6 @@ add_subdirectory(duk_scene)
 add_subdirectory(duk_renderer)
 add_subdirectory(duk_import)
 add_subdirectory(duk_engine)
-add_subdirectory(duk_sample)
-
+if (BUILD_DUK_SAMPLE)
+    add_subdirectory(duk_sample)
+endif ()
