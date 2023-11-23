@@ -48,7 +48,3 @@ target_link_libraries(duk_painter_generator
 )
 
 set_target_properties(duk_painter_generator PROPERTIES CXX_STANDARD 20)
-
-set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/install)
-
-install(TARGETS duk_painter_generator)
