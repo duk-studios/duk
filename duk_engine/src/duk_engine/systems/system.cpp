@@ -17,7 +17,7 @@ const std::string& System::name() {
     return m_name;
 }
 
-Engine *System::engine() {
+Engine* System::engine() {
     return &m_engine;
 }
 

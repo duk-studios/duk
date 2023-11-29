@@ -6,8 +6,7 @@
 
 namespace duk::engine {
 
-RenderSystem::RenderSystem(Engine &engine) :
-    System(engine, "RenderSystem") {
+void RenderSystem::init() {
 
 }
 
@@ -30,6 +29,5 @@ void RenderSystem::update() {
 
     renderer->render(scene);
 }
-
 
 }

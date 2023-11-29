@@ -190,8 +190,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     }
 
     auto systems = m_engine->systems();
-    systems->add_system<CameraSystem>(*m_engine);
-    systems->add_system<duk::engine::RenderSystem>(*m_engine);
+    systems->add_system<CameraSystem>(*m_engine, "CameraSystem");
+    systems->add_system<duk::engine::RenderSystem>(*m_engine, "RenderSystem");
 }
 
 Application::~Application() {

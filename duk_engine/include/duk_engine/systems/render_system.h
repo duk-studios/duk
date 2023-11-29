@@ -12,7 +12,9 @@ namespace duk::engine {
 class RenderSystem : public System {
 public:
 
-    explicit RenderSystem(Engine& engine);
+    using duk::engine::System::System;
+
+    void init() override;
 
     void update() override;
 

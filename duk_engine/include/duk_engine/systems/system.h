@@ -24,6 +24,8 @@ public:
 
     virtual ~System();
 
+    virtual void init() = 0;
+
     virtual void update() = 0;
 
     const std::string& name();
@@ -70,14 +72,15 @@ Systems::Iterator Systems::add_system(Args &&... args) {
 
 template<typename T, typename... Args>
 Systems::Iterator Systems::add_system(Systems::Iterator position, Args &&... args) {
-    auto newSystem = std::make_unique<T>(std::forward<Args>(args)...);
-    const auto alreadyPresent = std::any_of(begin(), end(), [&newSystem](const auto& system) {
-        return newSystem->name() == system->name();
+    auto system = std::make_unique<T>(std::forward<Args>(args)...);
+    const auto alreadyPresent = std::any_of(begin(), end(), [&system](const auto& sys) {
+        return system->name() == sys->name();
     });
     if (alreadyPresent) {
-        throw std::logic_error(newSystem->name() + "is already present");
+        throw std::logic_error(system->name() + "is already present");
     }
-    return m_container.insert(position, std::move(newSystem));
+    system->init();
+    return m_container.insert(position, std::move(system));
 }
 
 }
