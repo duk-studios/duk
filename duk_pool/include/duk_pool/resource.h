@@ -35,6 +35,8 @@ template<typename T>
 class Resource {
 public:
 
+    using Type = T;
+
     Resource();
 
     Resource(ResourceId id, const std::shared_ptr<T>& resource);

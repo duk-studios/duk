@@ -2,10 +2,11 @@
 // Created by rov on 11/19/2023.
 //
 
-#include <duk_engine/pools/image_pool.h>
+#include <duk_renderer/pools/image_pool.h>
+#include <duk_renderer/renderer.h>
 #include <duk_import/importer.h>
 
-namespace duk::engine {
+namespace duk::renderer {
 
 ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo) :
     m_renderer(imagePoolCreateInfo.renderer) {
@@ -23,7 +24,7 @@ ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo) :
     }
 }
 
-ImagePool::ResourceHandle ImagePool::create(const duk::rhi::ImageDataSource* imageDataSource) {
+ImageResource ImagePool::create(const duk::rhi::ImageDataSource* imageDataSource) {
     duk::rhi::RHI::ImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.commandQueue = m_renderer->main_command_queue();
     imageCreateInfo.initialLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
@@ -40,16 +41,16 @@ ImagePool::ResourceHandle ImagePool::create(const duk::rhi::ImageDataSource* ima
     return insert(result.value());
 }
 
-ImagePool::ResourceHandle ImagePool::load(const std::string& path, duk::rhi::PixelFormat format) {
+ImageResource ImagePool::load(const std::string& path, duk::rhi::PixelFormat format) {
     const auto imageDataSource = duk::import::Importer::instance()->load_image(path, format);
     return create(imageDataSource.get());
 }
 
-ImagePool::ResourceHandle ImagePool::white_image() const {
+ImageResource ImagePool::white_image() const {
     return m_whiteImage;
 }
 
-ImagePool::ResourceHandle ImagePool::black_image() const {
+ImageResource ImagePool::black_image() const {
     return m_blackImage;
 }
 

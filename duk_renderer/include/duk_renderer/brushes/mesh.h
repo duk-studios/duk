@@ -1,8 +1,8 @@
 /// 04/08/2023
 /// mesh_pool.h
 
-#ifndef DUK_RENDERER_MESH_POOL_H
-#define DUK_RENDERER_MESH_POOL_H
+#ifndef DUK_RENDERER_MESH_H
+#define DUK_RENDERER_MESH_H
 
 #include <duk_renderer/brushes/mesh_data_source.h>
 #include <duk_renderer/brushes/brush.h>
@@ -149,5 +149,5 @@ private:
 
 }
 
-#endif // DUK_RENDERER_MESH_POOL_H
+#endif // DUK_RENDERER_MESH_H
 

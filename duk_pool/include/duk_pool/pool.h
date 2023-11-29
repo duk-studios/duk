@@ -15,10 +15,11 @@
 
 namespace duk::pool {
 
-template<typename T>
+template<typename ResourceT>
 class Pool {
 public:
-    using ResourceHandle = Resource<T>;
+
+    using ResourceType = typename ResourceT::Type;
 
     virtual ~Pool();
 
@@ -28,19 +29,19 @@ public:
 
     DUK_NO_DISCARD bool empty() const;
 
-    DUK_NO_DISCARD ResourceHandle find(ResourceId id) const;
+    DUK_NO_DISCARD ResourceT find(ResourceId id) const;
 
 protected:
 
-    ResourceHandle insert(const std::shared_ptr<T>& resource);
+    ResourceT insert(const std::shared_ptr<ResourceType>& resource);
 
 private:
-    std::unordered_map<ResourceId, ResourceHandle> m_objects;
+    std::unordered_map<ResourceId, ResourceT> m_objects;
 
 };
 
-template<typename T>
-Pool<T>::ResourceHandle Pool<T>::find(ResourceId id) const {
+template<typename ResourceT>
+ResourceT Pool<ResourceT>::find(ResourceId id) const {
     auto it = m_objects.find(id);
     if (it == m_objects.end()) {
         return nullptr;
@@ -48,17 +49,17 @@ Pool<T>::ResourceHandle Pool<T>::find(ResourceId id) const {
     return *it;
 }
 
-template<typename T>
-Pool<T>::~Pool() {
+template<typename ResourceT>
+Pool<ResourceT>::~Pool() {
     clean();
     assert(empty() && "some resources are still in use");
 }
 
-template<typename T>
-void Pool<T>::clean() {
+template<typename ResourceT>
+void Pool<ResourceT>::clean() {
     for (auto it = m_objects.cbegin(); it != m_objects.cend();) {
-        const ResourceHandle& ptr = it->second;
-        if (ptr.use_count() == 1) {
+        const auto& object = it->second;
+        if (object.use_count() == 1) {
             m_objects.erase(it++);
             continue;
         }
@@ -66,22 +67,22 @@ void Pool<T>::clean() {
     }
 }
 
-template<typename T>
-size_t Pool<T>::size() const {
+template<typename ResourceT>
+size_t Pool<ResourceT>::size() const {
     return m_objects.size();
 }
 
-template<typename T>
-bool Pool<T>::empty() const {
+template<typename ResourceT>
+bool Pool<ResourceT>::empty() const {
     return size() == 0;
 }
 
-template<typename T>
-Pool<T>::ResourceHandle Pool<T>::insert(const std::shared_ptr<T>& resource) {
+template<typename ResourceT>
+ResourceT Pool<ResourceT>::insert(const std::shared_ptr<ResourceType>& resource) {
 
     auto id = ResourceId::generate();
 
-    auto [it, inserted] = m_objects.emplace(id, ResourceHandle(id, resource));
+    auto [it, inserted] = m_objects.emplace(id, ResourceT(id, resource));
 
     if (!inserted) {
         throw std::runtime_error("failed to insert resource into pool");

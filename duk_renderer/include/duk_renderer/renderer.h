@@ -20,6 +20,9 @@ namespace renderer {
 class Pass;
 class Painter;
 class GlobalDescriptors;
+class ImagePool;
+class MaterialPool;
+class MeshPool;
 
 struct RendererCreateInfo {
     duk::platform::Window* window;
@@ -54,6 +57,12 @@ public:
 
     DUK_NO_DISCARD RenderStartEvent& render_start_event();
 
+    DUK_NO_DISCARD ImagePool* image_pool();
+
+    DUK_NO_DISCARD MeshPool* mesh_pool();
+
+    DUK_NO_DISCARD MaterialPool* material_pool();
+
     void use_as_camera(const duk::scene::Object& object);
 
 private:
@@ -67,6 +76,9 @@ protected:
     std::shared_ptr<duk::rhi::CommandScheduler> m_scheduler;
     std::vector<std::shared_ptr<Pass>> m_passes;
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
+    std::unique_ptr<ImagePool> m_imagePool;
+    std::unique_ptr<MeshPool> m_meshPool;
+    std::unique_ptr<MaterialPool> m_materialPool;
     duk::scene::Object::Id m_mainCameraObjectId;
     duk::events::EventVoid m_renderStart;
 };

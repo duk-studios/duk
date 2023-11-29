@@ -40,6 +40,9 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/passes/forward_pass.h
         include/duk_renderer/passes/pass.h
         include/duk_renderer/passes/present_pass.h
+        include/duk_renderer/pools/image_pool.h
+        include/duk_renderer/pools/mesh_pool.h
+        include/duk_renderer/pools/material_pool.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -72,6 +75,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/passes/pass.cpp
         src/duk_renderer/passes/present_pass.cpp
         src/duk_renderer/vertex_types.cpp
+        src/duk_renderer/pools/image_pool.cpp
+        src/duk_renderer/pools/mesh_pool.cpp
+        src/duk_renderer/pools/material_pool.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
@@ -88,6 +94,7 @@ target_link_libraries(duk_renderer
         duk_scene
         duk_rhi
         duk_pool
+        duk_import
         )
 
 set_target_properties(duk_renderer PROPERTIES CXX_STANDARD 20)

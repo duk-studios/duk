@@ -2,11 +2,12 @@
 // Created by rov on 11/21/2023.
 //
 
-#include <duk_engine/pools/mesh_pool.h>
+#include <duk_renderer/pools/mesh_pool.h>
+#include <duk_renderer/brushes/mesh_data_source.h>
 #include <glm/ext/scalar_constants.hpp>
 #include <cmath>
 
-namespace duk::engine {
+namespace duk::renderer {
 
 namespace detail {
 
@@ -188,25 +189,25 @@ MeshPool::~MeshPool() {
     m_meshBufferPool.reset();
 }
 
-MeshPool::ResourceHandle MeshPool::create(const duk::renderer::MeshDataSource* meshDataSource) {
+MeshResource MeshPool::create(const duk::renderer::MeshDataSource* meshDataSource) {
     return insert(m_meshBufferPool->create_mesh(meshDataSource));
 }
 
-MeshPool::ResourceHandle MeshPool::load(const std::string& path) {
+MeshResource MeshPool::load(const std::string& path) {
     assert(false && "not implemented");
     return {};
 }
 
-MeshPool::ResourceHandle MeshPool::quad() const {
+MeshResource MeshPool::quad() const {
     return m_quad;
 }
 
-MeshPool::ResourceHandle MeshPool::cube() const {
+MeshResource MeshPool::cube() const {
     return m_cube;
 }
 
-MeshPool::ResourceHandle MeshPool::sphere() const {
+MeshResource MeshPool::sphere() const {
     return m_sphere;
 }
 
-} // duk::engine
+} // duk::renderer

@@ -35,35 +35,14 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
         m_run = false;
     });
 
+    duk::import::Importer::create();
+
     duk::renderer::ForwardRendererCreateInfo forwardRendererCreateInfo = {};
     forwardRendererCreateInfo.rendererCreateInfo.window = m_window.get();
     forwardRendererCreateInfo.rendererCreateInfo.logger = &m_logger;
     forwardRendererCreateInfo.rendererCreateInfo.api = rhi::API::VULKAN;
 
     m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
-
-    duk::import::Importer::create();
-
-    {
-        ImagePoolCreateInfo imagePoolCreateInfo = {};
-        imagePoolCreateInfo.renderer = m_renderer.get();
-
-        m_imagePool = std::make_unique<ImagePool>(imagePoolCreateInfo);
-    }
-    {
-        MaterialPoolCreateInfo materialPoolCreateInfo = {};
-        materialPoolCreateInfo.renderer = m_renderer.get();
-        materialPoolCreateInfo.imagePool = m_imagePool.get();
-
-        m_materialPool = std::make_unique<MaterialPool>(materialPoolCreateInfo);
-    }
-    {
-        MeshPoolCreateInfo meshPoolCreateInfo = {};
-        meshPoolCreateInfo.renderer = m_renderer.get();
-
-        m_meshPool = std::make_unique<MeshPool>(meshPoolCreateInfo);
-    }
-
 
     m_scene = std::make_unique<duk::scene::Scene>();
 }
@@ -113,18 +92,6 @@ duk::scene::Scene* Engine::scene() {
 
 const duk::tools::Timer *Engine::timer() const {
     return &m_timer;
-}
-
-ImagePool* Engine::image_pool() {
-    return m_imagePool.get();
-}
-
-MeshPool* Engine::mesh_pool() {
-    return m_meshPool.get();
-}
-
-MaterialPool* Engine::material_pool() {
-    return m_materialPool.get();
 }
 
 }
