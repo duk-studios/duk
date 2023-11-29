@@ -2,10 +2,10 @@
 // Created by rov on 11/19/2023.
 //
 
-#ifndef DUK_ENGINE_POOL_H
-#define DUK_ENGINE_POOL_H
+#ifndef DUK_POOL_POOL_H
+#define DUK_POOL_POOL_H
 
-#include <duk_engine/pools/resource.h>
+#include <duk_pool/resource.h>
 
 #include <memory>
 #include <unordered_map>
@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <cassert>
 
-namespace duk::engine {
+namespace duk::pool {
 
 template<typename T>
 class Pool {
@@ -92,4 +92,4 @@ Pool<T>::ResourceHandle Pool<T>::insert(const std::shared_ptr<T>& resource) {
 
 }
 
-#endif //DUK_ENGINE_POOL_H
+#endif //DUK_POOL_POOL_H

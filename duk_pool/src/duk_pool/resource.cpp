@@ -2,10 +2,10 @@
 // Created by rov on 11/20/2023.
 //
 
-#include <duk_engine/pools/resource.h>
+#include <duk_pool/resource.h>
 #include <random>
 
-namespace duk::engine {
+namespace duk::pool {
 
 ResourceId ResourceId::generate() {
     static std::random_device              rd;

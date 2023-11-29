@@ -5,7 +5,7 @@
 #ifndef DUK_MATERIAL_POOL_H
 #define DUK_MATERIAL_POOL_H
 
-#include <duk_engine/pools/pool.h>
+#include <duk_pool/pool.h>
 #include <duk_engine/pools/image_pool.h>
 #include <duk_renderer/materials/material.h>
 #include <duk_renderer/materials/phong/phong_material.h>
@@ -19,16 +19,16 @@ struct MaterialPoolCreateInfo {
     ImagePool* imagePool;
 };
 
-class MaterialPool : public Pool<duk::renderer::Material> {
+class MaterialPool : public duk::pool::Pool<duk::renderer::Material> {
 public:
 
     explicit MaterialPool(const MaterialPoolCreateInfo& materialPoolCreateInfo);
 
-    DUK_NO_DISCARD Resource<duk::renderer::PhongMaterial> create_phong_material();
+    DUK_NO_DISCARD duk::pool::Resource<duk::renderer::PhongMaterial> create_phong_material();
 
-    DUK_NO_DISCARD Resource<duk::renderer::ColorMaterial> create_color_material();
+    DUK_NO_DISCARD duk::pool::Resource<duk::renderer::ColorMaterial> create_color_material();
 
-    DUK_NO_DISCARD Resource<duk::renderer::FullscreenMaterial> create_fullscreen_material();
+    DUK_NO_DISCARD duk::pool::Resource<duk::renderer::FullscreenMaterial> create_fullscreen_material();
 
 private:
     duk::renderer::Renderer* m_renderer;

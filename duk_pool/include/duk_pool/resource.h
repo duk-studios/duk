@@ -2,15 +2,15 @@
 // Created by rov on 11/20/2023.
 //
 
-#ifndef DUK_ENGINE_RESOURCE_H
-#define DUK_ENGINE_RESOURCE_H
+#ifndef DUK_POOL_RESOURCE_H
+#define DUK_POOL_RESOURCE_H
 
 #include <duk_macros/macros.h>
 #include <duk_hash/hash_combine.h>
 
 #include <memory>
 
-namespace duk::engine {
+namespace duk::pool {
 
 class ResourceId {
 public:
@@ -154,12 +154,12 @@ bool Resource<T>::valid() const {
 namespace std {
 
 template<>
-struct hash<duk::engine::ResourceId> {
-    size_t operator()(const duk::engine::ResourceId& resourceId) const {
+struct hash<duk::pool::ResourceId> {
+    size_t operator()(const duk::pool::ResourceId& resourceId) const {
         return resourceId.value();
     }
 };
 
 }
 
-#endif //DUK_ENGINE_RESOURCE_H
+#endif //DUK_POOL_RESOURCE_H

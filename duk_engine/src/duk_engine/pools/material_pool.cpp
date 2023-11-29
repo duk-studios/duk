@@ -12,7 +12,7 @@ MaterialPool::MaterialPool(const MaterialPoolCreateInfo& materialPoolCreateInfo)
 
 }
 
-Resource<duk::renderer::PhongMaterial> MaterialPool::create_phong_material() {
+duk::pool::Resource<duk::renderer::PhongMaterial> MaterialPool::create_phong_material() {
     duk::renderer::PhongMaterialCreateInfo phongMaterialCreateInfo = {};
     phongMaterialCreateInfo.renderer = m_renderer;
 
@@ -26,7 +26,7 @@ Resource<duk::renderer::PhongMaterial> MaterialPool::create_phong_material() {
     return insert(material).as<duk::renderer::PhongMaterial>();
 }
 
-Resource<duk::renderer::ColorMaterial> MaterialPool::create_color_material() {
+duk::pool::Resource<duk::renderer::ColorMaterial> MaterialPool::create_color_material() {
     duk::renderer::ColorMaterialCreateInfo colorMaterialCreateInfo = {};
     colorMaterialCreateInfo.renderer = m_renderer;
 
@@ -35,7 +35,7 @@ Resource<duk::renderer::ColorMaterial> MaterialPool::create_color_material() {
     return insert(material).as<duk::renderer::ColorMaterial>();
 }
 
-Resource<duk::renderer::FullscreenMaterial> MaterialPool::create_fullscreen_material() {
+duk::pool::Resource<duk::renderer::FullscreenMaterial> MaterialPool::create_fullscreen_material() {
     duk::renderer::FullscreenMaterialCreateInfo fullscreenMaterialCreateInfo = {};
     fullscreenMaterialCreateInfo.renderer = m_renderer;
 

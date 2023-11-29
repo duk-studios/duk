@@ -5,7 +5,7 @@
 #ifndef DUK_ENGINE_MESH_POOL_H
 #define DUK_ENGINE_MESH_POOL_H
 
-#include <duk_engine/pools/pool.h>
+#include <duk_pool/pool.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/brushes/mesh.h>
 
@@ -15,7 +15,7 @@ struct MeshPoolCreateInfo {
     duk::renderer::Renderer* renderer;
 };
 
-class MeshPool : public Pool<duk::renderer::Mesh> {
+class MeshPool : public duk::pool::Pool<duk::renderer::Mesh> {
 public:
 
     explicit MeshPool(const MeshPoolCreateInfo& meshPoolCreateInfo);

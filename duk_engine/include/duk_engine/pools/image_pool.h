@@ -5,7 +5,7 @@
 #ifndef DUK_ENGINE_IMAGE_POOL_H
 #define DUK_ENGINE_IMAGE_POOL_H
 
-#include <duk_engine/pools/pool.h>
+#include <duk_pool/pool.h>
 #include <duk_renderer/renderer.h>
 
 namespace duk::engine {
@@ -14,7 +14,7 @@ struct ImagePoolCreateInfo {
     duk::renderer::Renderer* renderer;
 };
 
-class ImagePool : public Pool<duk::rhi::Image> {
+class ImagePool : public duk::pool::Pool<duk::rhi::Image> {
 public:
 
     explicit ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo);
