@@ -4,6 +4,7 @@
 
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/brushes/mesh_data_source.h>
+#include <duk_renderer/renderer.h>
 #include <glm/ext/scalar_constants.hpp>
 #include <cmath>
 

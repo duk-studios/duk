@@ -98,9 +98,9 @@ void ForwardPass::render(const RenderParams& renderParams) {
 
         auto& objectEntry = m_objectEntries.emplace_back();
         objectEntry.objectId = object.id();
-        objectEntry.brush = meshDrawing->mesh;
-        objectEntry.material = meshDrawing->material;
-        objectEntry.sortKey = SortKey::calculate(meshDrawing);
+        objectEntry.brush = meshDrawing->mesh.get();
+        objectEntry.material = meshDrawing->material.get();
+        objectEntry.sortKey = SortKey::calculate(*meshDrawing);
 
         uniqueMaterials.insert(objectEntry.material);
     }

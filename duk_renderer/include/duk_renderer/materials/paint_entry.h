@@ -11,6 +11,7 @@
 namespace duk::renderer {
 
 class Brush;
+class Material;
 class GlobalDescriptors;
 
 struct PaintParams {

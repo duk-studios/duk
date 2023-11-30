@@ -6,10 +6,11 @@
 #define DUK_RENDERER_MESH_POOL_H
 
 #include <duk_pool/pool.h>
-#include <duk_renderer/renderer.h>
 #include <duk_renderer/brushes/mesh.h>
 
 namespace duk::renderer {
+
+class Renderer;
 
 using MeshResource = duk::pool::Resource<Mesh>;
 

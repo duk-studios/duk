@@ -4,8 +4,6 @@
 #ifndef DUK_RENDERER_SORT_H
 #define DUK_RENDERER_SORT_H
 
-#include <duk_renderer/components/mesh_drawing.h>
-
 #include <duk_scene/scene.h>
 
 #include <cstdint>
@@ -23,7 +21,8 @@ struct SortKey {
         uint32_t key;
     };
 
-    static SortKey calculate(const duk::scene::Component<MeshDrawing>& meshDrawing);
+    template<typename T>
+    static SortKey calculate(const T& param) = delete;
 
     // specialize this method for any given type to access its SortKey object
     template<typename T>

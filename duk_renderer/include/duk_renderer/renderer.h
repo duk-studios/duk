@@ -13,6 +13,7 @@ namespace duk {
 
 namespace scene {
 class Scene;
+class Object;
 }
 
 namespace renderer {
