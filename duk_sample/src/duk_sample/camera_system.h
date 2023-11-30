@@ -14,7 +14,9 @@ namespace duk::sample {
 class CameraSystem : public duk::engine::System {
 public:
 
-    explicit CameraSystem(duk::engine::Engine& engine);
+    using duk::engine::System::System;
+
+    void init() override;
 
     void update() override;
 

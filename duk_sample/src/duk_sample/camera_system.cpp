@@ -28,8 +28,7 @@ static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveC
 
 }
 
-CameraSystem::CameraSystem(duk::engine::Engine &engine) :
-    duk::engine::System(engine, "CameraSystem") {
+void CameraSystem::init() {
 
     auto window = duk::engine::System::engine()->window();
     auto scene = duk::engine::System::engine()->scene();
@@ -75,7 +74,8 @@ void CameraSystem::update() {
         const auto direction = -glm::normalize(offset);
 
         rotation->value = glm::quatLookAt(direction, glm::vec3(0, 1, 0));
-    }}
+    }
+}
 
 }
 

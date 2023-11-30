@@ -9,6 +9,9 @@
 #include <duk_renderer/components/mesh_drawing.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/lighting.h>
+#include <duk_renderer/pools/image_pool.h>
+#include <duk_renderer/pools/material_pool.h>
+#include <duk_renderer/pools/mesh_pool.h>
 #include <duk_import/importer.h>
 
 #include <glm/gtc/random.hpp>
@@ -28,8 +31,8 @@ static void add_object(duk::scene::Scene* scene,
                        const glm::vec3& position,
                        const glm::quat& rotation,
                        const glm::vec3& scale,
-                       duk::renderer::Material* material,
-                       duk::renderer::Mesh* mesh) {
+                       const duk::renderer::MaterialResource& material,
+                       const duk::renderer::MeshResource& mesh) {
     auto obj = scene->add_object();
 
     auto position3D = obj.add<duk::renderer::Position3D>();
@@ -48,8 +51,8 @@ static void add_object(duk::scene::Scene* scene,
 
 static void populate_scene(duk::scene::Scene* scene,
                            uint32_t objCount,
-                           duk::renderer::Material* material,
-                           duk::renderer::Mesh* mesh
+                           const duk::renderer::MaterialResource& material,
+                           const duk::renderer::MeshResource& mesh
                            ) {
 
     const auto colCount = static_cast<uint32_t>(sqrt(static_cast<double>(objCount)));
@@ -80,11 +83,12 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
-    auto imagePool = m_engine->image_pool();
+    auto renderer = m_engine->renderer();
+    auto imagePool = renderer->image_pool();
     auto goldColorImage = imagePool->load("images/gold_basecolor.png", duk::rhi::PixelFormat::RGBA8U);
     auto goldSpecularImage = imagePool->load("images/gold_specular.png", duk::rhi::PixelFormat::R8U);
 
-    auto materialPool = m_engine->material_pool();
+    auto materialPool = renderer->material_pool();
 
     const duk::rhi::Sampler sampler = {.filter = duk::rhi::Sampler::Filter::NEAREST, .wrapMode = duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER};
 
@@ -99,7 +103,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
     auto scene = m_engine->scene();
 
-    auto meshPool = m_engine->mesh_pool();
+    auto meshPool = renderer->mesh_pool();
     const glm::vec3 scale(5);
     const float offset = 10;
 
@@ -108,8 +112,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(offset, 0, 0),
             glm::quat(),
             scale,
-            whitePhongMaterial.get(),
-            meshPool->sphere().get()
+            whitePhongMaterial,
+            meshPool->sphere()
     );
 
     detail::add_object(
@@ -117,8 +121,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(-offset, 0, 0),
             glm::quat(),
             scale,
-            greenPhongMaterial.get(),
-            meshPool->cube().get()
+            greenPhongMaterial,
+            meshPool->cube()
     );
 
     detail::add_object(
@@ -126,8 +130,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, offset, 0),
             glm::quat(),
             scale,
-            whitePhongMaterial.get(),
-            meshPool->sphere().get()
+            whitePhongMaterial,
+            meshPool->sphere()
     );
 
     detail::add_object(
@@ -135,8 +139,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, -offset, 0),
             glm::quat(),
             scale,
-            greenPhongMaterial.get(),
-            meshPool->cube().get()
+            greenPhongMaterial,
+            meshPool->cube()
     );
 
     detail::add_object(
@@ -144,8 +148,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, 0, offset),
             glm::quat(),
             scale,
-            greenPhongMaterial.get(),
-            meshPool->sphere().get()
+            greenPhongMaterial,
+            meshPool->sphere()
     );
 
     detail::add_object(
@@ -153,8 +157,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, 0, -offset),
             glm::quat(),
             scale,
-            whitePhongMaterial.get(),
-            meshPool->cube().get()
+            whitePhongMaterial,
+            meshPool->cube()
     );
 
 
