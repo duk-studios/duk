@@ -1,0 +1,7 @@
+option(RAPIDJSON_BUILD_DOC "Build rapidjson documentation." OFF)
+option(RAPIDJSON_BUILD_EXAMPLES "Build rapidjson examples." OFF)
+option(RAPIDJSON_BUILD_TESTS "Build rapidjson perftests and unittests." OFF)
+option(RAPIDJSON_BUILD_CXX11 "Build rapidjson with C++11" OFF)
+option(RAPIDJSON_BUILD_CXX17 "Build rapidjson with C++17" ON)
+option(RAPIDJSON_HAS_STDSTRING "" ON)
+add_subdirectory(rapidjson)

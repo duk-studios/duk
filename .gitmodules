@@ -16,3 +16,6 @@
 [submodule "external/stb/stb"]
 	path = external/stb/stb
 	url = git@github.com:nothings/stb.git
+[submodule "external/rapidjson/rapidjson"]
+	path = external/rapidjson/rapidjson
+	url = git@github.com:Tencent/rapidjson.git
