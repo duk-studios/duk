@@ -11,7 +11,10 @@ set(DUK_POOL_SOURCES
 
 add_library(duk_pool STATIC ${DUK_POOL_HEADERS} ${DUK_POOL_SOURCES})
 
-target_link_libraries(duk_pool PUBLIC duk_hash)
+target_link_libraries(duk_pool
+        PUBLIC
+        duk_macros
+        )
 
 target_include_directories(duk_pool
         PUBLIC

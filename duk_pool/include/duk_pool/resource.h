@@ -6,7 +6,6 @@
 #define DUK_POOL_RESOURCE_H
 
 #include <duk_macros/macros.h>
-#include <duk_hash/hash_combine.h>
 
 #include <memory>
 
@@ -66,6 +65,7 @@ public:
     DUK_NO_DISCARD size_t use_count() const;
 
     DUK_NO_DISCARD bool valid() const;
+
 
 private:
     template<typename U>

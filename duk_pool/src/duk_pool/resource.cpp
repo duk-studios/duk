@@ -8,8 +8,8 @@
 namespace duk::pool {
 
 ResourceId ResourceId::generate() {
-    static std::random_device              rd;
-    static std::mt19937_64                  gen(rd());
+    static std::random_device rd;
+    static std::mt19937_64 gen(rd());
     static std::uniform_int_distribution<uint64_t> dis(0, std::numeric_limits<uint64_t>::max());
     return ResourceId{dis(gen)};
 }
