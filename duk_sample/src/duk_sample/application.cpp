@@ -84,9 +84,13 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
     auto renderer = m_engine->renderer();
+    auto importer = m_engine->importer();
     auto imagePool = renderer->image_pool();
-    auto goldColorImage = imagePool->load("images/gold_basecolor.png", duk::rhi::PixelFormat::RGBA8U);
-    auto goldSpecularImage = imagePool->load("images/gold_specular.png", duk::rhi::PixelFormat::R8U);
+    auto goldColorImageDataSource = importer->load_image("images/gold_basecolor.png", duk::rhi::PixelFormat::RGBA8U);
+    auto goldColorImage = imagePool->create(goldColorImageDataSource.get());
+
+    auto goldSpecularImageDataSource = importer->load_image("images/gold_specular.png", duk::rhi::PixelFormat::R8U);
+    auto goldSpecularImage = imagePool->create(goldSpecularImageDataSource.get());
 
     auto materialPool = renderer->material_pool();
 

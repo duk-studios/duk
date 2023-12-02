@@ -35,8 +35,6 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
         m_run = false;
     });
 
-    duk::import::Importer::create();
-
     duk::renderer::ForwardRendererCreateInfo forwardRendererCreateInfo = {};
     forwardRendererCreateInfo.rendererCreateInfo.window = m_window.get();
     forwardRendererCreateInfo.rendererCreateInfo.logger = &m_logger;
@@ -44,12 +42,12 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
 
     m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
 
+    m_importer = std::make_unique<duk::import::Importer>();
+
     m_scene = std::make_unique<duk::scene::Scene>();
 }
 
-Engine::~Engine() {
-    duk::import::Importer::destroy();
-}
+Engine::~Engine() = default;
 
 void Engine::run() {
     m_run = true;
@@ -84,6 +82,10 @@ duk::platform::Window* Engine::window() {
 
 duk::renderer::Renderer* Engine::renderer() {
     return m_renderer.get();
+}
+
+duk::import::Importer* Engine::importer() {
+    return m_importer.get();
 }
 
 duk::scene::Scene* Engine::scene() {

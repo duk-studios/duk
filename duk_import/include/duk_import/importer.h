@@ -9,12 +9,12 @@
 
 namespace duk::import {
 
-class Importer : public duk::tools::Singleton<Importer> {
+class Importer {
 public:
 
     Importer();
 
-    ~Importer() override;
+    ~Importer();
 
     std::unique_ptr<duk::rhi::ImageDataSource> load_image(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat);
 

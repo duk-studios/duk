@@ -5,6 +5,8 @@
 
 namespace duk::import {
 
+ImageImporter::~ImageImporter() = default;
+
 std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height) {
     switch (format) {
         case duk::rhi::PixelFormat::R8S:
@@ -29,4 +31,5 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* dat
             throw std::invalid_argument("failed to create Image: invalid PixelFormat");
     }
 }
+
 }

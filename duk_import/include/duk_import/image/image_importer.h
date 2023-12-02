@@ -13,6 +13,8 @@ namespace duk::import {
 class ImageImporter {
 public:
 
+    virtual ~ImageImporter();
+
     virtual bool accepts(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat) = 0;
 
     virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat) = 0;
