@@ -5,7 +5,9 @@
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/brushes/mesh_data_source.h>
 #include <duk_renderer/renderer.h>
+
 #include <glm/ext/scalar_constants.hpp>
+
 #include <cmath>
 
 namespace duk::renderer {
@@ -192,11 +194,6 @@ MeshPool::~MeshPool() {
 
 MeshResource MeshPool::create(const duk::renderer::MeshDataSource* meshDataSource) {
     return insert(m_meshBufferPool->create_mesh(meshDataSource));
-}
-
-MeshResource MeshPool::load(const std::string& path) {
-    assert(false && "not implemented");
-    return {};
 }
 
 MeshResource MeshPool::quad() const {

@@ -4,7 +4,6 @@
 
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/renderer.h>
-#include <duk_import/importer.h>
 
 namespace duk::renderer {
 
@@ -39,11 +38,6 @@ ImageResource ImagePool::create(const duk::rhi::ImageDataSource* imageDataSource
     }
 
     return insert(result.value());
-}
-
-ImageResource ImagePool::load(const std::string& path, duk::rhi::PixelFormat format) {
-    const auto imageDataSource = duk::import::Importer::instance()->load_image(path, format);
-    return create(imageDataSource.get());
 }
 
 ImageResource ImagePool::white_image() const {

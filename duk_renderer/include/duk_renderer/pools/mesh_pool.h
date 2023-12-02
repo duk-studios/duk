@@ -27,8 +27,6 @@ public:
 
     DUK_NO_DISCARD MeshResource create(const MeshDataSource* meshDataSource);
 
-    DUK_NO_DISCARD MeshResource load(const std::string& path);
-
     DUK_NO_DISCARD MeshResource quad() const;
 
     DUK_NO_DISCARD MeshResource cube() const;

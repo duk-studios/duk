@@ -25,8 +25,6 @@ public:
 
     DUK_NO_DISCARD ImageResource create(const duk::rhi::ImageDataSource* imageDataSource);
 
-    DUK_NO_DISCARD ImageResource load(const std::string& path, duk::rhi::PixelFormat format);
-
     DUK_NO_DISCARD ImageResource white_image() const;
 
     DUK_NO_DISCARD ImageResource black_image() const;
