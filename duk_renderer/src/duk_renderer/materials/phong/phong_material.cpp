@@ -9,11 +9,34 @@ namespace duk::renderer {
 
 static const PhongShaderDataSource kPhongShaderDataSource;
 
+duk::hash::Hash PhongMaterialDataSource::calculate_hash() const {
+    duk::hash::Hash hash = 0;
+    duk::hash::hash_combine(hash, baseColor);
+    duk::hash::hash_combine(hash, baseColorImage.id().value());
+    duk::hash::hash_combine(hash, baseColorSampler);
+    duk::hash::hash_combine(hash, shininess);
+    duk::hash::hash_combine(hash, shininessImage.id().value());
+    duk::hash::hash_combine(hash, shininessSampler);
+    return hash;
+}
+
+PhongMaterialDataSource::PhongMaterialDataSource() :
+    MaterialDataSource(MaterialType::PHONG),
+    baseColor(),
+    baseColorSampler(),
+    shininess(1),
+    shininessSampler() {
+
+}
+
 PhongMaterial::PhongMaterial(const PhongMaterialCreateInfo& phongMaterialCreateInfo) :
     Material(phongMaterialCreateInfo.renderer, &kPhongShaderDataSource),
-    m_descriptorSet({phongMaterialCreateInfo.renderer->rhi(), &kPhongShaderDataSource}) {
+    m_descriptorSet({phongMaterialCreateInfo.renderer->rhi(), &kPhongShaderDataSource}),
+    m_baseColorSampler(),
+    m_shininessSampler() {
     auto rhi = phongMaterialCreateInfo.renderer->rhi();
     auto commandQueue = phongMaterialCreateInfo.renderer->main_command_queue();
+    auto materialDataSource = phongMaterialCreateInfo.phongMaterialDataSource;
 
     {
         StorageBufferCreateInfo transformSBOCreateInfo = {};
@@ -27,12 +50,17 @@ PhongMaterial::PhongMaterial(const PhongMaterialCreateInfo& phongMaterialCreateI
         UniformBufferCreateInfo<phong::Material> materialUBOCreateInfo = {};
         materialUBOCreateInfo.rhi = rhi;
         materialUBOCreateInfo.commandQueue = commandQueue;
-        materialUBOCreateInfo.initialData = {};
+        materialUBOCreateInfo.initialData.color = materialDataSource->baseColor;
+        materialUBOCreateInfo.initialData.shininess = materialDataSource->shininess;
         m_materialUBO = std::make_unique<phong::MaterialUBO>(materialUBOCreateInfo);
+
+        update_base_color_image(materialDataSource->baseColorImage, materialDataSource->baseColorSampler);
+        update_shininess_image(materialDataSource->shininessImage, materialDataSource->shininessSampler);
     }
 
     m_descriptorSet.set(PhongDescriptorSet::Bindings::uTransform, *m_transformSBO);
     m_descriptorSet.set(PhongDescriptorSet::Bindings::uMaterial, *m_materialUBO);
+
 }
 
 void PhongMaterial::clear_instances() {
@@ -61,8 +89,10 @@ void PhongMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyPar
     commandBuffer->bind_descriptor_set(m_descriptorSet.handle(), 0);
 }
 
-void PhongMaterial::update_base_color_image(duk::rhi::Image* image, const duk::rhi::Sampler& sampler) {
-    m_descriptorSet.set(PhongDescriptorSet::Bindings::uBaseColor, duk::rhi::Descriptor::image_sampler(image, duk::rhi::Image::Layout::SHADER_READ_ONLY, sampler));
+void PhongMaterial::update_base_color_image(const ImageResource& baseColorImage, const duk::rhi::Sampler& sampler) {
+    m_baseColorImage = baseColorImage;
+    m_baseColorSampler = sampler;
+    m_descriptorSet.set(PhongDescriptorSet::Bindings::uBaseColor, duk::rhi::Descriptor::image_sampler(m_baseColorImage.get(), duk::rhi::Image::Layout::SHADER_READ_ONLY, m_baseColorSampler));
 }
 
 void PhongMaterial::update_base_color(const glm::vec3& color) {
@@ -70,8 +100,10 @@ void PhongMaterial::update_base_color(const glm::vec3& color) {
     m_materialUBO->flush();
 }
 
-void PhongMaterial::update_shininess_image(duk::rhi::Image* image, const rhi::Sampler& sampler) {
-    m_descriptorSet.set(PhongDescriptorSet::Bindings::uSpecular, duk::rhi::Descriptor::image_sampler(image, duk::rhi::Image::Layout::SHADER_READ_ONLY, sampler));
+void PhongMaterial::update_shininess_image(const ImageResource& shininessImage, const rhi::Sampler& sampler) {
+    m_shininessImage = shininessImage;
+    m_shininessSampler = sampler;
+    m_descriptorSet.set(PhongDescriptorSet::Bindings::uSpecular, duk::rhi::Descriptor::image_sampler(m_shininessImage.get(), duk::rhi::Image::Layout::SHADER_READ_ONLY, m_shininessSampler));
 }
 
 void PhongMaterial::update_shininess(float shininess) {

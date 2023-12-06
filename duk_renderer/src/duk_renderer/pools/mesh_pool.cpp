@@ -170,17 +170,17 @@ MeshPool::MeshPool(const MeshPoolCreateInfo& meshPoolCreateInfo) {
 
     {
         auto quadDataSource = detail::quad_mesh_data_source();
-        m_quad = create(&quadDataSource);
+        m_quad = create(duk::pool::ResourceId(1), &quadDataSource);
     }
 
     {
         auto cubeDataSource = detail::cube_mesh_data_source();
-        m_cube = create(&cubeDataSource);
+        m_cube = create(duk::pool::ResourceId(2), &cubeDataSource);
     }
 
     {
         auto sphereDataSource = detail::sphere_mesh_data_source(32);
-        m_sphere = create(&sphereDataSource);
+        m_sphere = create(duk::pool::ResourceId(3), &sphereDataSource);
     }
 }
 
@@ -192,8 +192,8 @@ MeshPool::~MeshPool() {
     m_meshBufferPool.reset();
 }
 
-MeshResource MeshPool::create(const duk::renderer::MeshDataSource* meshDataSource) {
-    return insert(m_meshBufferPool->create_mesh(meshDataSource));
+MeshResource MeshPool::create(duk::pool::ResourceId resourceId, const duk::renderer::MeshDataSource* meshDataSource) {
+    return insert(resourceId, m_meshBufferPool->create_mesh(meshDataSource));
 }
 
 MeshResource MeshPool::quad() const {

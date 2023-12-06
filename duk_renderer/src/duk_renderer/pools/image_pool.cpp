@@ -13,17 +13,17 @@ ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo) :
         duk::rhi::ImageDataSourceRGBA8U whiteImageDataSource(1, 1);
         whiteImageDataSource.at(0, 0) = {255, 255, 255, 255};
         whiteImageDataSource.update_hash();
-        m_whiteImage = create(&whiteImageDataSource);
+        m_whiteImage = create(duk::pool::ResourceId(1), &whiteImageDataSource);
     }
     {
         duk::rhi::ImageDataSourceRGBA8U blackImageDataSource(1, 1);
         blackImageDataSource.at(0, 0) = {0, 0, 0, 255};
         blackImageDataSource.update_hash();
-        m_blackImage = create(&blackImageDataSource);
+        m_blackImage = create(duk::pool::ResourceId(2), &blackImageDataSource);
     }
 }
 
-ImageResource ImagePool::create(const duk::rhi::ImageDataSource* imageDataSource) {
+ImageResource ImagePool::create(duk::pool::ResourceId resourceId, const duk::rhi::ImageDataSource* imageDataSource) {
     duk::rhi::RHI::ImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.commandQueue = m_renderer->main_command_queue();
     imageCreateInfo.initialLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
@@ -37,7 +37,7 @@ ImageResource ImagePool::create(const duk::rhi::ImageDataSource* imageDataSource
         throw std::runtime_error("failed to create image for image pool");
     }
 
-    return insert(result.value());
+    return insert(resourceId, result.value());
 }
 
 ImageResource ImagePool::white_image() const {

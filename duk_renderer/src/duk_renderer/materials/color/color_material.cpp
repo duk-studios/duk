@@ -9,6 +9,18 @@ namespace duk::renderer {
 
 static const ColorShaderDataSource kColorShaderDataSource;
 
+ColorMaterialDataSource::ColorMaterialDataSource() :
+    MaterialDataSource(MaterialType::COLOR),
+    color() {
+
+}
+
+duk::hash::Hash ColorMaterialDataSource::calculate_hash() const {
+    duk::hash::Hash hash = 0;
+    duk::hash::hash_combine(hash, color);
+    return hash;
+}
+
 ColorMaterial::ColorMaterial(const ColorMaterialCreateInfo& colorMaterialCreateInfo) :
     Material(colorMaterialCreateInfo.renderer, &kColorShaderDataSource),
     m_descriptorSet({colorMaterialCreateInfo.renderer->rhi(), &kColorShaderDataSource}){
@@ -28,7 +40,7 @@ ColorMaterial::ColorMaterial(const ColorMaterialCreateInfo& colorMaterialCreateI
         UniformBufferCreateInfo<color::Material> materialUBOCreateInfo = {};
         materialUBOCreateInfo.rhi = rhi;
         materialUBOCreateInfo.commandQueue = commandQueue;
-        materialUBOCreateInfo.initialData = color::Material{glm::vec4(1)};
+        materialUBOCreateInfo.initialData.color = colorMaterialCreateInfo.colorMaterialDataSource->color;
         m_materialUBO = std::make_unique<color::MaterialUBO>(materialUBOCreateInfo);
     }
 

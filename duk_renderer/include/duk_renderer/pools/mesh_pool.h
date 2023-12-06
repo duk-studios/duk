@@ -25,7 +25,7 @@ public:
 
     ~MeshPool() override;
 
-    DUK_NO_DISCARD MeshResource create(const MeshDataSource* meshDataSource);
+    DUK_NO_DISCARD MeshResource create(duk::pool::ResourceId resourceId, const MeshDataSource* meshDataSource);
 
     DUK_NO_DISCARD MeshResource quad() const;
 

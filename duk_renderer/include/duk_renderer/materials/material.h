@@ -15,6 +15,32 @@ namespace duk::renderer {
 
 class GlobalDescriptors;
 
+enum class MaterialType {
+    UNDEFINED = 0,
+    COLOR,
+    PHONG,
+    FULLSCREEN
+};
+
+class MaterialDataSource : public duk::hash::DataSource {
+protected:
+
+    explicit MaterialDataSource(MaterialType type);
+
+public:
+
+    DUK_NO_DISCARD MaterialType type() const;
+
+    template<typename T>
+    T* as() requires std::is_base_of_v<MaterialDataSource, T>;
+
+    template<typename T>
+    const T* as() const requires std::is_base_of_v<MaterialDataSource, T>;
+
+private:
+    MaterialType m_type;
+};
+
 class Material {
 protected:
 
@@ -48,6 +74,16 @@ private:
     Painter m_painter;
 
 };
+
+template<typename T>
+T* MaterialDataSource::as() requires std::is_base_of_v<MaterialDataSource, T> {
+    return dynamic_cast<T*>(this);
+}
+
+template<typename T>
+const T* MaterialDataSource::as() const requires std::is_base_of_v<MaterialDataSource, T> {
+    return dynamic_cast<const T*>(this);
+}
 
 }
 

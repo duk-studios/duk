@@ -18,8 +18,20 @@
 
 namespace duk::renderer {
 
+class ColorMaterialDataSource : public MaterialDataSource {
+public:
+    ColorMaterialDataSource();
+
+public:
+    glm::vec4 color;
+
+protected:
+    DUK_NO_DISCARD duk::hash::Hash calculate_hash() const override;
+};
+
 struct ColorMaterialCreateInfo {
     Renderer* renderer;
+    const ColorMaterialDataSource* colorMaterialDataSource;
 };
 
 class ColorMaterial : public Material {

@@ -22,4 +22,5 @@ void FullscreenMaterial::update(duk::rhi::Image* image, const duk::rhi::Sampler&
     m_descriptorSet.flush();
 }
 
+
 }

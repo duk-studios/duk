@@ -6,6 +6,15 @@
 
 namespace duk::renderer {
 
+MaterialDataSource::MaterialDataSource(MaterialType type) :
+        m_type(type) {
+
+}
+
+MaterialType MaterialDataSource::type() const {
+    return m_type;
+}
+
 Material::Material(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource) :
     m_painter({.renderer = renderer, .shaderDataSource = shaderDataSource}) {
 }

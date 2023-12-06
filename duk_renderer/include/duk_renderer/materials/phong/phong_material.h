@@ -5,6 +5,7 @@
 #define DUK_RENDERER_PHONG_MATERIAL_H
 
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/materials/material.h>
 #include <duk_renderer/materials/phong/phong_types.h>
 #include <duk_renderer/materials/phong/phong_shader_data_source.h>
@@ -16,8 +17,25 @@
 
 namespace duk::renderer {
 
+class PhongMaterialDataSource : public MaterialDataSource {
+public:
+    PhongMaterialDataSource();
+
+public:
+    glm::vec4 baseColor;
+    ImageResource baseColorImage;
+    duk::rhi::Sampler baseColorSampler;
+    float shininess;
+    ImageResource shininessImage;
+    duk::rhi::Sampler shininessSampler;
+
+protected:
+    DUK_NO_DISCARD duk::hash::Hash calculate_hash() const override;
+};
+
 struct PhongMaterialCreateInfo {
     Renderer* renderer;
+    const PhongMaterialDataSource* phongMaterialDataSource;
 };
 
 class PhongMaterial : public Material {
@@ -33,11 +51,11 @@ public:
 
     void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
 
-    void update_base_color_image(duk::rhi::Image* image, const duk::rhi::Sampler& sampler);
+    void update_base_color_image(const ImageResource& baseColorImage, const duk::rhi::Sampler& sampler);
 
     void update_base_color(const glm::vec3& color);
 
-    void update_shininess_image(duk::rhi::Image* image, const duk::rhi::Sampler& sampler);
+    void update_shininess_image(const ImageResource& shininessImage, const duk::rhi::Sampler& sampler);
 
     void update_shininess(float shininess);
 
@@ -45,6 +63,10 @@ private:
     PhongDescriptorSet m_descriptorSet;
     std::unique_ptr<phong::TransformSBO> m_transformSBO;
     std::unique_ptr<phong::MaterialUBO> m_materialUBO;
+    ImageResource m_baseColorImage;
+    duk::rhi::Sampler m_baseColorSampler;
+    ImageResource m_shininessImage;
+    duk::rhi::Sampler m_shininessSampler;
 };
 
 }

@@ -30,11 +30,17 @@ public:
 
     explicit MaterialPool(const MaterialPoolCreateInfo& materialPoolCreateInfo);
 
-    DUK_NO_DISCARD PhongMaterialResource create_phong_material();
+    DUK_NO_DISCARD MaterialResource create(duk::pool::ResourceId resourceId, const MaterialDataSource* materialDataSource);
 
-    DUK_NO_DISCARD ColorMaterialResource create_color_material();
+    DUK_NO_DISCARD PhongMaterialResource create_phong(duk::pool::ResourceId resourceId);
 
-    DUK_NO_DISCARD FullscreenMaterialResource create_fullscreen_material();
+    DUK_NO_DISCARD PhongMaterialResource create_phong(duk::pool::ResourceId resourceId, const PhongMaterialDataSource* phongMaterialDataSource);
+
+    DUK_NO_DISCARD ColorMaterialResource create_color(duk::pool::ResourceId resourceId);
+
+    DUK_NO_DISCARD ColorMaterialResource create_color(duk::pool::ResourceId resourceId, const ColorMaterialDataSource* colorMaterialDataSource);
+
+    DUK_NO_DISCARD FullscreenMaterialResource create_fullscreen(duk::pool::ResourceId resourceId);
 
 private:
     duk::renderer::Renderer* m_renderer;
