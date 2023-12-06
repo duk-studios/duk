@@ -143,6 +143,18 @@ inline PixelFormat PixelRG8U::format() {
     return PixelFormat::RG8U;
 }
 
+using PixelRGB8S = Pixel<int8_t, 3>;
+template<>
+inline PixelFormat PixelRGB8S::format() {
+    return PixelFormat::RGB8S;
+}
+
+using PixelRGB8U = Pixel<uint8_t, 3>;
+template<>
+inline PixelFormat PixelRGB8U::format() {
+    return PixelFormat::RGB8U;
+}
+
 using PixelRGBA8S = Pixel<int8_t, 4>;
 template<>
 inline PixelFormat PixelRGBA8S::format() {
