@@ -85,25 +85,12 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
     auto renderer = m_engine->renderer();
     auto importer = m_engine->importer();
-    auto imagePool = renderer->image_pool();
-    auto goldColorImageDataSource = importer->load_image("images/gold_basecolor.png", duk::rhi::PixelFormat::RGBA8U);
-    auto goldColorImage = imagePool->create(goldColorImageDataSource.get());
+    auto goldColorImage = importer->load_image(duk::pool::ResourceId(3), "images/gold_basecolor.png");
+    auto goldSpecularImage = importer->load_image(duk::pool::ResourceId(4), "images/gold_specular.png");
+    auto uvImage = importer->load_image(duk::pool::ResourceId(5), "images/uv.jpg");
 
-    auto goldSpecularImageDataSource = importer->load_image("images/gold_specular.png", duk::rhi::PixelFormat::R8U);
-    auto goldSpecularImage = imagePool->create(goldSpecularImageDataSource.get());
-
-    auto materialPool = renderer->material_pool();
-
-    const duk::rhi::Sampler sampler = {.filter = duk::rhi::Sampler::Filter::NEAREST, .wrapMode = duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER};
-
-    auto greenPhongMaterial = materialPool->create_phong_material();
-    greenPhongMaterial->update_base_color({0.0f, 1.0f, 0.0f});
-    greenPhongMaterial->update_base_color_image(goldColorImage.get(), sampler);
-    greenPhongMaterial->update_shininess_image(goldSpecularImage.get(), sampler);
-
-    auto whitePhongMaterial = materialPool->create_phong_material();
-    whitePhongMaterial->update_shininess(64);
-    whitePhongMaterial->update_shininess_image(goldSpecularImage.get(), sampler);
+    auto greenColorMaterial = importer->load_material(duk::pool::ResourceId(1), "materials/color.mat.json");
+    auto phongMaterial = importer->load_material(duk::pool::ResourceId(2), "materials/phong.mat.json");
 
     auto scene = m_engine->scene();
 
@@ -116,7 +103,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(offset, 0, 0),
             glm::quat(),
             scale,
-            whitePhongMaterial,
+            phongMaterial,
             meshPool->sphere()
     );
 
@@ -125,7 +112,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(-offset, 0, 0),
             glm::quat(),
             scale,
-            greenPhongMaterial,
+            greenColorMaterial,
             meshPool->cube()
     );
 
@@ -134,7 +121,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, offset, 0),
             glm::quat(),
             scale,
-            whitePhongMaterial,
+            phongMaterial,
             meshPool->sphere()
     );
 
@@ -143,7 +130,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, -offset, 0),
             glm::quat(),
             scale,
-            greenPhongMaterial,
+            greenColorMaterial,
             meshPool->cube()
     );
 
@@ -152,7 +139,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, 0, offset),
             glm::quat(),
             scale,
-            greenPhongMaterial,
+            greenColorMaterial,
             meshPool->sphere()
     );
 
@@ -161,7 +148,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
             glm::vec3(0, 0, -offset),
             glm::quat(),
             scale,
-            whitePhongMaterial,
+            phongMaterial,
             meshPool->cube()
     );
 
