@@ -33,7 +33,7 @@ public:
 
 protected:
 
-    ResourceT insert(const std::shared_ptr<ResourceType>& resource);
+    ResourceT insert(duk::pool::ResourceId id, const std::shared_ptr<ResourceType>& resource);
 
 private:
     std::unordered_map<ResourceId, ResourceT> m_objects;
@@ -44,9 +44,9 @@ template<typename ResourceT>
 ResourceT Pool<ResourceT>::find(ResourceId id) const {
     auto it = m_objects.find(id);
     if (it == m_objects.end()) {
-        return nullptr;
+        return ResourceT(id);
     }
-    return *it;
+    return it->second;
 }
 
 template<typename ResourceT>
@@ -78,9 +78,7 @@ bool Pool<ResourceT>::empty() const {
 }
 
 template<typename ResourceT>
-ResourceT Pool<ResourceT>::insert(const std::shared_ptr<ResourceType>& resource) {
-
-    auto id = ResourceId::generate();
+ResourceT Pool<ResourceT>::insert(duk::pool::ResourceId id, const std::shared_ptr<ResourceType>& resource) {
 
     auto [it, inserted] = m_objects.emplace(id, ResourceT(id, resource));
 

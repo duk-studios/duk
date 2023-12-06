@@ -14,8 +14,6 @@ namespace duk::pool {
 class ResourceId {
 public:
 
-    static ResourceId generate();
-
     ResourceId();
 
     explicit ResourceId(uint64_t id);
@@ -37,6 +35,8 @@ public:
     using Type = T;
 
     Resource();
+
+    Resource(ResourceId id);
 
     Resource(ResourceId id, const std::shared_ptr<T>& resource);
 
@@ -81,9 +81,15 @@ Resource<T>::Resource() :
 }
 
 template<typename T>
+Resource<T>::Resource(ResourceId id) :
+    m_id(id) {
+
+}
+
+template<typename T>
 Resource<T>::Resource(ResourceId id, const std::shared_ptr<T>& resource) :
-        m_id(id),
-        m_resource(resource) {
+    m_id(id),
+    m_resource(resource) {
 
 }
 
