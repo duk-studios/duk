@@ -11,9 +11,9 @@ namespace duk::import {
 class ImageImporterStb : public ImageImporter {
 public:
 
-    bool accepts(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat) override;
+    bool accepts(const std::filesystem::path& path) override;
 
-    std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat) override;
+    std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) override;
 
 };
 

@@ -15,9 +15,9 @@ public:
 
     virtual ~ImageImporter();
 
-    virtual bool accepts(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat) = 0;
+    virtual bool accepts(const std::filesystem::path& path) = 0;
 
-    virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat) = 0;
+    virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) = 0;
 
     static std::unique_ptr<duk::rhi::ImageDataSource> create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height);
 

@@ -38,11 +38,14 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
     duk::renderer::ForwardRendererCreateInfo forwardRendererCreateInfo = {};
     forwardRendererCreateInfo.rendererCreateInfo.window = m_window.get();
     forwardRendererCreateInfo.rendererCreateInfo.logger = &m_logger;
-    forwardRendererCreateInfo.rendererCreateInfo.api = rhi::API::VULKAN;
+    forwardRendererCreateInfo.rendererCreateInfo.api = duk::rhi::API::VULKAN;
 
     m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
 
-    m_importer = std::make_unique<duk::import::Importer>();
+    duk::import::ImporterCreateInfo importerCreateInfo = {};
+    importerCreateInfo.renderer = m_renderer.get();
+
+    m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
 
     m_scene = std::make_unique<duk::scene::Scene>();
 }

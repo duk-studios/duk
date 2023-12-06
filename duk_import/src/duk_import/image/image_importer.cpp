@@ -17,6 +17,10 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* dat
             return std::make_unique<duk::rhi::ImageDataSourceRG8S>(reinterpret_cast<const duk::rhi::PixelRG8S*>(data), width, height);
         case duk::rhi::PixelFormat::RG8U:
             return std::make_unique<duk::rhi::ImageDataSourceRG8U>(reinterpret_cast<const duk::rhi::PixelRG8U*>(data), width, height);
+        case duk::rhi::PixelFormat::RGB8S:
+            return std::make_unique<duk::rhi::ImageDataSourceRGB8S>(reinterpret_cast<const duk::rhi::PixelRGB8S*>(data), width, height);
+        case duk::rhi::PixelFormat::RGB8U:
+            return std::make_unique<duk::rhi::ImageDataSourceRGB8U>(reinterpret_cast<const duk::rhi::PixelRGB8U*>(data), width, height);
         case duk::rhi::PixelFormat::RGBA8S:
             return std::make_unique<duk::rhi::ImageDataSourceRGBA8S>(reinterpret_cast<const duk::rhi::PixelRGBA8S*>(data), width, height);
         case duk::rhi::PixelFormat::RGBA8U:

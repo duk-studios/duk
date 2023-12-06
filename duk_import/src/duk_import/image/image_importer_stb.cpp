@@ -4,55 +4,61 @@
 #include <duk_import/image/image_importer_stb.h>
 #include <stb_image.h>
 #include <stdexcept>
+#include <fstream>
 
 namespace duk::import {
 
-bool ImageImporterStb::accepts(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat) {
+namespace detail {
+
+duk::rhi::PixelFormat build_pixel_format(int channelCount) {
+    switch (channelCount) {
+        case 1: return duk::rhi::PixelFormat::R8U;
+        case 2: return duk::rhi::PixelFormat::RG8U;
+        case 3: return duk::rhi::PixelFormat::RGB8U;
+        case 4: return duk::rhi::PixelFormat::RGBA8U;
+        default: throw std::invalid_argument("unsupported channel count");
+    }
+}
+
+}
+
+bool ImageImporterStb::accepts(const std::filesystem::path& path) {
     const auto extension = path.extension().string();
     if (extension != ".png" && extension != ".jpg" && extension != ".jpeg") {
         return false;
     }
-
-    const bool isUnsignedInt8 = desiredPixelFormat & duk::rhi::PixelFlags::UINT8;
-    const bool isUnsignedInt16 = desiredPixelFormat & duk::rhi::PixelFlags::UINT16;
-    const bool isFloat = desiredPixelFormat & duk::rhi::PixelFlags::FLOAT32;
-
-    if (!isUnsignedInt8 && !isUnsignedInt16 && !isFloat) {
-        return false;
-    }
-
     return true;
 }
 
-std::unique_ptr<duk::rhi::ImageDataSource> ImageImporterStb::load(const std::filesystem::path& path, duk::rhi::PixelFormat desiredPixelFormat) {
+std::unique_ptr<duk::rhi::ImageDataSource> ImageImporterStb::load(const std::filesystem::path& path) {
 
     const auto pathStr = path.string();
     if (!std::filesystem::exists(path)) {
-        throw std::runtime_error("failed to load image: file does not exist: " + pathStr);
+        throw std::runtime_error("file does not exist: " + pathStr);
     }
 
-    void* data;
+    std::ifstream file(path, std::ios::ate | std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("failed to open file");
+    }
+    auto size = file.tellg();
+    file.seekg(0);
+
+    std::vector<uint8_t> buffer(size);
+    file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
+
     int width, height, channelCount;
-    int desiredChannels = desiredPixelFormat.channel_count();
+    if (!stbi_info_from_memory(buffer.data(), static_cast<int>(buffer.size()), &width, &height, &channelCount)) {
+        throw std::runtime_error("failed to read image memory");
+    }
 
-    if (desiredPixelFormat & duk::rhi::PixelFlags::UINT8) {
-        data = stbi_load(pathStr.c_str(), &width, &height, &channelCount, desiredChannels);
-    }
-    else if (desiredPixelFormat & duk::rhi::PixelFlags::UINT16) {
-        data = stbi_load_16(pathStr.c_str(), &width, &height, &channelCount, desiredChannels);
-    }
-    else if (desiredPixelFormat & duk::rhi::PixelFlags::FLOAT32) {
-        data = stbi_loadf(pathStr.c_str(), &width, &height, &channelCount, desiredChannels);
-    }
-    else {
-        throw std::invalid_argument("failed to load image: unsupported image format");
-    }
+    void* data = stbi_load_from_memory(buffer.data(), static_cast<int>(buffer.size()), &width, &height, &channelCount, channelCount);
 
     if (!data) {
-        throw std::runtime_error("failed to load image: failed to decode image: " + std::string(stbi_failure_reason()));
+        throw std::runtime_error("failed to decode image: " + std::string(stbi_failure_reason()));
     }
 
-    auto image = ImageImporter::create(data, desiredPixelFormat, width, height);
+    auto image = ImageImporter::create(data, detail::build_pixel_format(channelCount), width, height);
 
     image->update_hash();
 
