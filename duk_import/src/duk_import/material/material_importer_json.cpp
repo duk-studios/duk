@@ -4,6 +4,7 @@
 
 #include <duk_import/material/material_importer_json.h>
 #include <duk_import/json/types.h>
+#include <duk_tools/file.h>
 
 #include <fstream>
 #include <regex>
@@ -66,28 +67,12 @@ MaterialImporterJson::MaterialImporterJson(const duk::renderer::ImagePool* image
 bool MaterialImporterJson::accepts(const std::filesystem::path& path) {
     std::regex pattern("\\.mat\\.json$");
     auto filename = path.filename().string();
-    if (!std::regex_search(filename, pattern)) {
-        return false;
-    }
-    return true;
+    return std::regex_search(filename, pattern);
 }
 
 std::unique_ptr<duk::renderer::MaterialDataSource> MaterialImporterJson::load(const std::filesystem::path& path) {
 
-    if (!std::filesystem::exists(path)) {
-        throw std::runtime_error("path does not exist: " + path.string());
-    }
-
-    std::ifstream file(path, std::ios_base::ate | std::ios_base::in);
-
-    if (!file.is_open()) {
-        throw std::runtime_error("failed to open file: " + path.string());
-    }
-
-    const auto size = file.tellg();
-    std::vector<char> content(static_cast<std::streamsize>(size));
-    file.seekg(0);
-    file.read(content.data(), size);
+    auto content = duk::tools::File::load_text(path.string().c_str());
 
     rapidjson::Document document;
 

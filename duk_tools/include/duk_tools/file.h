@@ -13,6 +13,8 @@ class File {
 public:
     static std::vector<uint8_t> load_bytes(const char* filepath);
 
+    static std::vector<char> load_text(const char* filepath);
+
 };
 
 }

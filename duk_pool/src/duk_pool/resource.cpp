@@ -24,7 +24,12 @@ bool ResourceId::operator!=(const ResourceId& rhs) const {
     return m_id != rhs.m_id;
 }
 
+bool ResourceId::operator<(const ResourceId& rhs) const {
+    return m_id < rhs.m_id;
+}
+
 uint64_t ResourceId::value() const {
     return m_id;
 }
+
 }

@@ -12,11 +12,12 @@ namespace duk::import {
 class MaterialImporterJson : public MaterialImporter {
 public:
 
-    MaterialImporterJson(const duk::renderer::ImagePool* imagePool);
+    explicit MaterialImporterJson(const duk::renderer::ImagePool* imagePool);
 
     bool accepts(const std::filesystem::path& path) override;
 
     std::unique_ptr<duk::renderer::MaterialDataSource> load(const std::filesystem::path& path) override;
+
 private:
     const duk::renderer::ImagePool* m_imagePool;
 

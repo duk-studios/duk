@@ -22,6 +22,8 @@ public:
 
     DUK_NO_DISCARD bool operator!=(const ResourceId& rhs) const;
 
+    DUK_NO_DISCARD bool operator<(const ResourceId& rhs) const;
+
     DUK_NO_DISCARD uint64_t value() const;
 
 private:

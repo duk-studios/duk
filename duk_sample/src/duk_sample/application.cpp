@@ -85,12 +85,10 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
     auto renderer = m_engine->renderer();
     auto importer = m_engine->importer();
-    auto goldColorImage = importer->load_image(duk::pool::ResourceId(3), "images/gold_basecolor.png");
-    auto goldSpecularImage = importer->load_image(duk::pool::ResourceId(4), "images/gold_specular.png");
-    auto uvImage = importer->load_image(duk::pool::ResourceId(5), "images/uv.jpg");
+    importer->load_resources("resources.json");
 
-    auto greenColorMaterial = importer->load_material(duk::pool::ResourceId(1), "materials/color.mat.json");
-    auto phongMaterial = importer->load_material(duk::pool::ResourceId(2), "materials/phong.mat.json");
+    auto greenColorMaterial = importer->find_material(duk::pool::ResourceId(1));
+    auto phongMaterial = importer->find_material(duk::pool::ResourceId(2));
 
     auto scene = m_engine->scene();
 
