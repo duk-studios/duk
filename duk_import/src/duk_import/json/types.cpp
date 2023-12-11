@@ -86,5 +86,12 @@ duk::rhi::Sampler to_sampler(const rapidjson::Value& member) {
     return sampler;
 }
 
+duk::renderer::LightValue to_light_value(const rapidjson::Value& member) {
+    duk::renderer::LightValue lightValue = {};
+    lightValue.color = to_vec3(member["color"]);
+    lightValue.intensity = member["intensity"].GetFloat();
+    return lightValue;
+}
+
 
 }

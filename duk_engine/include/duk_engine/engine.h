@@ -42,6 +42,8 @@ public:
 
     DUK_NO_DISCARD const duk::tools::Timer* timer() const;
 
+    void use_scene(duk::scene::Scene* scene);
+
 private:
     duk::log::Logger m_logger;
     duk::log::SinkStdConsole m_sink;
@@ -49,7 +51,7 @@ private:
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;
     std::unique_ptr<duk::import::Importer> m_importer;
-    std::unique_ptr<duk::scene::Scene> m_scene;
+    duk::scene::Scene* m_scene;
     Systems m_systems;
     duk::tools::Timer m_timer;
     bool m_run;

@@ -47,7 +47,16 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
 
     m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
 
-    m_scene = std::make_unique<duk::scene::Scene>();
+    m_importer->register_component<duk::renderer::Position3D>("Position3D");
+    m_importer->register_component<duk::renderer::Position2D>("Position2D");
+    m_importer->register_component<duk::renderer::Rotation3D>("Rotation3D");
+    m_importer->register_component<duk::renderer::Rotation2D>("Rotation2D");
+    m_importer->register_component<duk::renderer::Scale2D>("Scale2D");
+    m_importer->register_component<duk::renderer::Scale3D>("Scale3D");
+    m_importer->register_component<duk::renderer::MeshDrawing>("MeshDrawing");
+    m_importer->register_component<duk::renderer::DirectionalLight>("DirectionalLight");
+    m_importer->register_component<duk::renderer::PointLight>("PointLight");
+    m_importer->register_component<duk::renderer::PerspectiveCamera>("PerspectiveCamera");
 }
 
 Engine::~Engine() = default;
@@ -92,11 +101,15 @@ duk::import::Importer* Engine::importer() {
 }
 
 duk::scene::Scene* Engine::scene() {
-    return m_scene.get();
+    return m_scene;
 }
 
 const duk::tools::Timer *Engine::timer() const {
     return &m_timer;
+}
+
+void Engine::use_scene(duk::scene::Scene* scene) {
+    m_scene = scene;
 }
 
 }

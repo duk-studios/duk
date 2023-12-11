@@ -5,6 +5,7 @@
 #include <duk_import/image/image_importer_stb.h>
 #include <duk_import/material/material_importer_json.h>
 #include <duk_import/resource/resource_importer_json.h>
+#include <duk_import/scene/scene_importer_json.h>
 
 namespace duk::import {
 
@@ -16,6 +17,22 @@ Importer::Importer(const ImporterCreateInfo& importerCreateInfo) :
     m_imageImporters.emplace_back(std::make_unique<ImageImporterStb>());
     m_materialImporters.emplace_back(std::make_unique<MaterialImporterJson>(imagePool));
     m_resourceImporter = std::make_unique<ResourceImporterJson>();
+
+    {
+        ComponentParserCreateInfo componentParserCreateInfo = {};
+        componentParserCreateInfo.meshPool = m_renderer->mesh_pool();
+        componentParserCreateInfo.imagePool = m_renderer->image_pool();
+        componentParserCreateInfo.materialPool = m_renderer->material_pool();
+
+        m_componentParser = std::make_unique<ComponentJsonParser>(componentParserCreateInfo);
+    }
+
+    {
+        SceneImporterJsonCreateInfo sceneImporterJsonCreateInfo = {};
+        sceneImporterJsonCreateInfo.componentParser = m_componentParser.get();
+
+        m_sceneImporter = std::make_unique<SceneImporterJson>(sceneImporterJsonCreateInfo);
+    }
 }
 
 Importer::~Importer() = default;
@@ -50,7 +67,7 @@ duk::renderer::ImageResource Importer::load_image(duk::pool::ResourceId resource
     return m_renderer->image_pool()->create(resourceId, dataSource.get());
 }
 
-duk::renderer::ImageResource Importer::find_image(duk::pool::ResourceId resourceId) {
+duk::renderer::ImageResource Importer::find_image(duk::pool::ResourceId resourceId) const {
     return m_renderer->image_pool()->find(resourceId);
 }
 
@@ -68,10 +85,13 @@ duk::renderer::MaterialResource Importer::load_material(duk::pool::ResourceId re
     return  m_renderer->material_pool()->create(resourceId, dataSource.get());
 }
 
-duk::renderer::MaterialResource Importer::find_material(duk::pool::ResourceId resourceId) {
+duk::renderer::MaterialResource Importer::find_material(duk::pool::ResourceId resourceId) const {
     return m_renderer->material_pool()->find(resourceId);
 }
 
+std::unique_ptr<duk::scene::Scene> Importer::load_scene(const std::filesystem::path& path) {
+    return m_sceneImporter->load(path);
+}
 
 
 }

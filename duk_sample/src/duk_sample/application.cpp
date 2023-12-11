@@ -4,77 +4,8 @@
 #include <duk_sample/application.h>
 #include <duk_sample/camera_system.h>
 #include <duk_engine/systems/render_system.h>
-#include <duk_renderer/vertex_types.h>
-#include <duk_renderer/materials/painter.h>
-#include <duk_renderer/components/mesh_drawing.h>
-#include <duk_renderer/components/transform.h>
-#include <duk_renderer/components/lighting.h>
-#include <duk_renderer/pools/image_pool.h>
-#include <duk_renderer/pools/material_pool.h>
-#include <duk_renderer/pools/mesh_pool.h>
-#include <duk_import/importer.h>
-
-#include <glm/gtc/random.hpp>
-
-#include <cmath>
 
 namespace duk::sample {
-
-namespace detail {
-
-template<typename T>
-T lerp(T from, T to, float percent) {
-    return (from * (1 - percent)) + (to * percent);
-}
-
-static void add_object(duk::scene::Scene* scene,
-                       const glm::vec3& position,
-                       const glm::quat& rotation,
-                       const glm::vec3& scale,
-                       const duk::renderer::MaterialResource& material,
-                       const duk::renderer::MeshResource& mesh) {
-    auto obj = scene->add_object();
-
-    auto position3D = obj.add<duk::renderer::Position3D>();
-    position3D->value = position;
-
-    auto rotation3D = obj.add<duk::renderer::Rotation3D>();
-    rotation3D->value = rotation;
-
-    auto scale3D = obj.add<duk::renderer::Scale3D>();
-    scale3D->value = scale;
-
-    auto meshDrawing = obj.add<duk::renderer::MeshDrawing>();
-    meshDrawing->mesh = mesh;
-    meshDrawing->material = material;
-}
-
-static void populate_scene(duk::scene::Scene* scene,
-                           uint32_t objCount,
-                           const duk::renderer::MaterialResource& material,
-                           const duk::renderer::MeshResource& mesh
-                           ) {
-
-    const auto colCount = static_cast<uint32_t>(sqrt(static_cast<double>(objCount)));
-    const auto rowCount = objCount / std::min(colCount, objCount);
-
-    for (int i = 0; i < objCount; i++) {
-
-        const float colPercent = float(i % (colCount)) / float(colCount - 1);
-        const float rowPercent = std::floor((float)i / float(colCount)) / float(rowCount - 1);
-
-        add_object(scene,
-                   glm::vec3(lerp(-20, 20, colPercent), lerp(-20, 20, rowPercent), glm::linearRand(-50.f, 30.f)),
-                   glm::radians(glm::linearRand(glm::vec3(-95.f), glm::vec3(95.f))),
-                   glm::linearRand(glm::vec3(0.02f), glm::vec3(1.3f)),
-                   material,
-                   mesh
-                   );
-
-    }
-}
-
-}
 
 Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
@@ -83,104 +14,12 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
-    auto renderer = m_engine->renderer();
     auto importer = m_engine->importer();
     importer->load_resources("resources.json");
 
-    auto greenColorMaterial = importer->find_material(duk::pool::ResourceId(1));
-    auto phongMaterial = importer->find_material(duk::pool::ResourceId(2));
+    m_scene = importer->load_scene("scenes/scene.scn.json");
 
-    auto scene = m_engine->scene();
-
-    auto meshPool = renderer->mesh_pool();
-    const glm::vec3 scale(5);
-    const float offset = 10;
-
-    detail::add_object(
-            scene,
-            glm::vec3(offset, 0, 0),
-            glm::quat(),
-            scale,
-            phongMaterial,
-            meshPool->sphere()
-    );
-
-    detail::add_object(
-            scene,
-            glm::vec3(-offset, 0, 0),
-            glm::quat(),
-            scale,
-            greenColorMaterial,
-            meshPool->cube()
-    );
-
-    detail::add_object(
-            scene,
-            glm::vec3(0, offset, 0),
-            glm::quat(),
-            scale,
-            phongMaterial,
-            meshPool->sphere()
-    );
-
-    detail::add_object(
-            scene,
-            glm::vec3(0, -offset, 0),
-            glm::quat(),
-            scale,
-            greenColorMaterial,
-            meshPool->cube()
-    );
-
-    detail::add_object(
-            scene,
-            glm::vec3(0, 0, offset),
-            glm::quat(),
-            scale,
-            greenColorMaterial,
-            meshPool->sphere()
-    );
-
-    detail::add_object(
-            scene,
-            glm::vec3(0, 0, -offset),
-            glm::quat(),
-            scale,
-            phongMaterial,
-            meshPool->cube()
-    );
-
-
-    // lights
-    {
-        auto object = scene->add_object();
-        auto pointLight = object.add<duk::renderer::PointLight>();
-        pointLight->value.color = glm::vec3(0.5f, 1.f, 0.2f);
-        pointLight->value.intensity = 5.0f;
-
-        auto position3D = object.add<duk::renderer::Position3D>();
-        position3D->value = glm::vec3(offset * 2, 5, offset);
-    }
-
-    {
-        auto object = scene->add_object();
-        auto pointLight = object.add<duk::renderer::PointLight>();
-        pointLight->value.color = glm::vec3(0.9f, 0.3f, 0.459f);
-        pointLight->value.intensity = 8.0f;
-
-        auto position3D = object.add<duk::renderer::Position3D>();
-        position3D->value = glm::vec3(-offset * 2, -5, 10);
-    }
-
-    {
-        auto object = scene->add_object();
-        auto directionalLight = object.add<duk::renderer::DirectionalLight>();
-        directionalLight->value.color = glm::vec3(1, 1, 1);
-        directionalLight->value.intensity = 0.85f;
-
-        auto rotation3D = object.add<duk::renderer::Rotation3D>();
-        rotation3D->value = glm::quatLookAt(glm::vec3(0, -1, 0), glm::vec3(0, 1, 0));
-    }
+    m_engine->use_scene(m_scene.get());
 
     auto systems = m_engine->systems();
     systems->add_system<CameraSystem>(*m_engine, "CameraSystem");

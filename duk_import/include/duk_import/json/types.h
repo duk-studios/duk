@@ -7,6 +7,10 @@
 
 #include <duk_pool/resource.h>
 #include <duk_rhi/sampler.h>
+#include <duk_tools/singleton.h>
+#include <duk_renderer/components/transform.h>
+#include <duk_renderer/components/mesh_drawing.h>
+#include <duk_renderer/components/lighting.h>
 
 #include <rapidjson/document.h>
 #include <glm/glm.hpp>
@@ -26,6 +30,8 @@ duk::rhi::Sampler::WrapMode to_wrap_mode(const rapidjson::Value& member);
 duk::rhi::Sampler::Filter to_filter(const rapidjson::Value& member);
 
 duk::rhi::Sampler to_sampler(const rapidjson::Value& member);
+
+duk::renderer::LightValue to_light_value(const rapidjson::Value& member);
 
 }
 

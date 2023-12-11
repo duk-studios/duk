@@ -38,6 +38,7 @@ private:
 
 private:
     std::unique_ptr<duk::engine::Engine> m_engine;
+    std::unique_ptr<duk::scene::Scene> m_scene;
 };
 
 }

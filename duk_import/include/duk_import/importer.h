@@ -7,6 +7,8 @@
 #include <duk_import/image/image_importer.h>
 #include <duk_import/material/material_importer.h>
 #include <duk_import/resource/resource_importer.h>
+#include <duk_import/scene/scene_importer.h>
+#include "duk_import/scene/component_json_parser.h"
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/pools/material_pool.h>
 
@@ -29,19 +31,26 @@ public:
 
     duk::renderer::ImageResource load_image(duk::pool::ResourceId resourceId, const std::filesystem::path& path);
 
-    duk::renderer::ImageResource find_image(duk::pool::ResourceId resourceId);
+    DUK_NO_DISCARD duk::renderer::ImageResource find_image(duk::pool::ResourceId resourceId) const;
 
     std::unique_ptr<duk::renderer::MaterialDataSource> load_material_data_source(const std::filesystem::path& path);
 
     duk::renderer::MaterialResource load_material(duk::pool::ResourceId resourceId, const std::filesystem::path& path);
 
-    duk::renderer::MaterialResource find_material(duk::pool::ResourceId resourceId);
+    DUK_NO_DISCARD duk::renderer::MaterialResource find_material(duk::pool::ResourceId resourceId) const;
 
+    DUK_NO_DISCARD std::unique_ptr<duk::scene::Scene> load_scene(const std::filesystem::path& path);
 
+    template<typename T>
+    void register_component(const std::string& name) {
+         m_componentParser->register_component<T>(name);
+    }
 
 private:
     duk::renderer::Renderer* m_renderer;
     std::unique_ptr<ResourceImporter> m_resourceImporter;
+    std::unique_ptr<ComponentJsonParser> m_componentParser;
+    std::unique_ptr<SceneImporter> m_sceneImporter;
     std::vector<std::unique_ptr<ImageImporter>> m_imageImporters;
     std::vector<std::unique_ptr<MaterialImporter>> m_materialImporters;
 };
