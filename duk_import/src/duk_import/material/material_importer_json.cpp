@@ -65,9 +65,7 @@ MaterialImporterJson::MaterialImporterJson(const duk::renderer::ImagePool* image
 }
 
 bool MaterialImporterJson::accepts(const std::filesystem::path& path) {
-    std::regex pattern("\\.mat\\.json$");
-    auto filename = path.filename().string();
-    return std::regex_search(filename, pattern);
+    return path.extension() == ".mat";
 }
 
 std::unique_ptr<duk::renderer::MaterialDataSource> MaterialImporterJson::load(const std::filesystem::path& path) {

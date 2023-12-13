@@ -22,15 +22,42 @@ ResourceType parse_resource_type(const char* typeName) {
     if (strcmp(typeName, "mat") == 0) {
         return ResourceType::MAT;
     }
-    throw std::runtime_error("invalid resource type");
+    if (strcmp(typeName, "scn") == 0) {
+        return ResourceType::SCN;
+    }
+    throw std::invalid_argument("invalid resource type");
 }
 
-ResourceDescription parse_resource_description(const std::filesystem::path& directory, const rapidjson::Value& object) {
+ResourceDescription parse_resource_description(const std::filesystem::path& path, const rapidjson::Value& object) {
     ResourceDescription resourceDescription = {};
     resourceDescription.type = parse_resource_type(object["type"].GetString());
-    resourceDescription.path = (directory / object["path"].GetString()).string();
+    resourceDescription.path = (path.parent_path() / object["file"].GetString()).string();
     resourceDescription.id = json::to_resource_id(object["id"]);
+    auto dependenciesMember = object.FindMember("dependencies");
+    if (dependenciesMember != object.MemberEnd()) {
+        auto dependencies = dependenciesMember->value.GetArray();
+        for (auto& dependency : dependencies) {
+            resourceDescription.dependencies.insert(json::to_resource_id(dependency));
+        }
+    }
+    auto aliasesMember = object.FindMember("aliases");
+    if (aliasesMember != object.MemberEnd()) {
+        auto aliases = aliasesMember->value.GetArray();
+        for (auto& alias : aliases) {
+            resourceDescription.aliases.insert(alias.GetString());
+        }
+    }
     return resourceDescription;
+}
+
+ResourceDescription load_resource_description(const std::filesystem::path& path) {
+    auto content = duk::tools::File::load_text(path.string().c_str());
+
+    rapidjson::Document document;
+
+    auto& result = document.Parse(content.data());
+
+    return parse_resource_description(path, result.GetObject());
 }
 
 ResourceSet parse_resource_set(const std::filesystem::path& directory, const rapidjson::Value& object) {
@@ -39,19 +66,18 @@ ResourceSet parse_resource_set(const std::filesystem::path& directory, const rap
     ResourceSet resourceSet;
 
     for (auto& resource : resources) {
-        auto resourceDescription = detail::parse_resource_description(directory, resource.GetObject());
-
-        switch (resourceDescription.type) {
-            case ResourceType::RES: resourceSet.resourceSets.insert(resourceDescription); break;
-            case ResourceType::IMG: resourceSet.images.insert(resourceDescription); break;
-            case ResourceType::MAT: resourceSet.materials.insert(resourceDescription); break;
+        auto resourcePath = directory / resource.GetString();
+        auto resourceDescription = load_resource_description(resourcePath);
+        for (auto& alias : resourceDescription.aliases) {
+            resourceSet.aliases.emplace(alias, resourceDescription.id);
         }
+        resourceSet.resources.emplace(resourceDescription.id, std::move(resourceDescription));
     }
 
     return resourceSet;
 }
 
-ResourceSet load(const std::filesystem::path& filepath) {
+ResourceSet load_resources(const std::filesystem::path& filepath) {
     auto content = duk::tools::File::load_text(filepath.string().c_str());
 
     rapidjson::Document document;
@@ -63,27 +89,17 @@ ResourceSet load(const std::filesystem::path& filepath) {
     auto directory = filepath.parent_path();
     auto rootResourceSet = detail::parse_resource_set(directory, root);
 
-    for (const auto& childResourceSetDescription : rootResourceSet.resourceSets) {
-        auto childPath = directory / childResourceSetDescription.path;
-
-        auto child = load(childPath);
-
-        rootResourceSet.images.insert(child.images.begin(), child.images.end());
-        rootResourceSet.materials.insert(child.materials.begin(), child.materials.end());
-    }
-
     return rootResourceSet;
 }
 
 }
 
 bool ResourceImporterJson::accept(const std::filesystem::path& path) const {
-    auto filename = path.filename();
-    return filename == "resources.json";
+    return path.filename() == "resources.json";
 }
 
 ResourceSet ResourceImporterJson::load(const std::filesystem::path& path) const {
-    return detail::load(path);
+    return detail::load_resources(path);
 }
 
 }

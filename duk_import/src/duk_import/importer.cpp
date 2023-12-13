@@ -42,15 +42,7 @@ void Importer::load_resources(const std::filesystem::path& path) {
         throw std::invalid_argument("invalid resource file path");
     }
 
-    auto resourceSet = m_resourceImporter->load(path);
-
-    for (auto& imageDescription : resourceSet.images) {
-        load_image(imageDescription.id, imageDescription.path);
-    }
-
-    for (auto& materialDescription : resourceSet.materials) {
-        load_material(materialDescription.id, materialDescription.path);
-    }
+    m_resourceSet = m_resourceImporter->load(path);
 }
 
 std::unique_ptr<duk::rhi::ImageDataSource> Importer::load_image_data_source(const std::filesystem::path& path) {
@@ -62,13 +54,16 @@ std::unique_ptr<duk::rhi::ImageDataSource> Importer::load_image_data_source(cons
     throw std::runtime_error("failed to load image data source: could not find suitable importer");
 }
 
-duk::renderer::ImageResource Importer::load_image(duk::pool::ResourceId resourceId, const std::filesystem::path& path) {
+duk::renderer::ImageResource Importer::load_image(duk::pool::ResourceId id, const std::filesystem::path& path) {
+    if (auto img = find_image(id)) {
+        return img;
+    }
     auto dataSource = load_image_data_source(path);
-    return m_renderer->image_pool()->create(resourceId, dataSource.get());
+    return m_renderer->image_pool()->create(id, dataSource.get());
 }
 
-duk::renderer::ImageResource Importer::find_image(duk::pool::ResourceId resourceId) const {
-    return m_renderer->image_pool()->find(resourceId);
+duk::renderer::ImageResource Importer::find_image(duk::pool::ResourceId id) const {
+    return m_renderer->image_pool()->find(id);
 }
 
 std::unique_ptr<duk::renderer::MaterialDataSource> Importer::load_material_data_source(const std::filesystem::path& path) {
@@ -80,18 +75,76 @@ std::unique_ptr<duk::renderer::MaterialDataSource> Importer::load_material_data_
     throw std::runtime_error("failed to load material: could not find suitable importer");
 }
 
-duk::renderer::MaterialResource Importer::load_material(duk::pool::ResourceId resourceId, const std::filesystem::path& path) {
+duk::renderer::MaterialResource Importer::load_material(duk::pool::ResourceId id, const std::filesystem::path& path) {
+    if (auto mat = find_material(id)) {
+        return mat;
+    }
     auto dataSource = load_material_data_source(path);
-    return  m_renderer->material_pool()->create(resourceId, dataSource.get());
+    return  m_renderer->material_pool()->create(id, dataSource.get());
 }
 
-duk::renderer::MaterialResource Importer::find_material(duk::pool::ResourceId resourceId) const {
-    return m_renderer->material_pool()->find(resourceId);
+duk::renderer::MaterialResource Importer::find_material(duk::pool::ResourceId id) const {
+    return m_renderer->material_pool()->find(id);
 }
 
-std::unique_ptr<duk::scene::Scene> Importer::load_scene(const std::filesystem::path& path) {
-    return m_sceneImporter->load(path);
+std::unique_ptr<duk::scene::Scene> Importer::load_scene(duk::pool::ResourceId id) {
+
+    auto& resources = m_resourceSet.resources;
+
+    auto it = resources.find(id);
+    if (it == resources.end()) {
+        throw std::invalid_argument("scene id not found");
+    }
+
+    // load dependencies
+    const auto& sceneDescription = it->second;
+    if (sceneDescription.type != ResourceType::SCN) {
+        throw std::invalid_argument("scene id does not correspond to a scene resource");
+    }
+
+    for (const auto& dependencyId : sceneDescription.dependencies) {
+        load_resource(dependencyId);
+    }
+
+    return m_sceneImporter->load(sceneDescription.path);
 }
 
+std::unique_ptr<duk::scene::Scene> Importer::load_scene(const std::string& alias) {
+
+    auto& aliases = m_resourceSet.aliases;
+    auto it = aliases.find(alias);
+    if (it == aliases.end()) {
+        throw std::invalid_argument("alias \"" + alias + "\" was not found");
+    }
+
+    return load_scene(it->second);
+}
+
+void Importer::load_resource(duk::pool::ResourceId id) {
+    auto& resources = m_resourceSet.resources;
+
+    auto it = resources.find(id);
+    if (it == resources.end()) {
+        throw std::invalid_argument("resource id not found");
+    }
+
+    const auto& resourceDescription = it->second;
+
+    for (const auto& dependencyId : resourceDescription.dependencies) {
+        load_resource(dependencyId);
+    }
+
+    switch (resourceDescription.type) {
+        case ResourceType::IMG:
+            load_image(resourceDescription.id, resourceDescription.path);
+            break;
+        case ResourceType::MAT:
+            load_material(resourceDescription.id, resourceDescription.path);
+            break;
+        default:
+            throw std::logic_error("loading unsupported resource type");
+    }
+
+}
 
 }

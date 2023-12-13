@@ -68,6 +68,8 @@ public:
 
     DUK_NO_DISCARD bool valid() const;
 
+    DUK_NO_DISCARD operator bool() const;
+
 
 private:
     template<typename U>
@@ -157,6 +159,11 @@ size_t Resource<T>::use_count() const {
 template<typename T>
 bool Resource<T>::valid() const {
     return m_resource && m_id.value() != 0;
+}
+
+template<typename T>
+Resource<T>::operator bool() const {
+    return valid();
 }
 
 }

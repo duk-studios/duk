@@ -29,22 +29,28 @@ public:
 
     std::unique_ptr<duk::rhi::ImageDataSource> load_image_data_source(const std::filesystem::path& path);
 
-    duk::renderer::ImageResource load_image(duk::pool::ResourceId resourceId, const std::filesystem::path& path);
+    duk::renderer::ImageResource load_image(duk::pool::ResourceId id, const std::filesystem::path& path);
 
-    DUK_NO_DISCARD duk::renderer::ImageResource find_image(duk::pool::ResourceId resourceId) const;
+    DUK_NO_DISCARD duk::renderer::ImageResource find_image(duk::pool::ResourceId id) const;
 
     std::unique_ptr<duk::renderer::MaterialDataSource> load_material_data_source(const std::filesystem::path& path);
 
-    duk::renderer::MaterialResource load_material(duk::pool::ResourceId resourceId, const std::filesystem::path& path);
+    duk::renderer::MaterialResource load_material(duk::pool::ResourceId id, const std::filesystem::path& path);
 
-    DUK_NO_DISCARD duk::renderer::MaterialResource find_material(duk::pool::ResourceId resourceId) const;
+    DUK_NO_DISCARD duk::renderer::MaterialResource find_material(duk::pool::ResourceId id) const;
 
-    DUK_NO_DISCARD std::unique_ptr<duk::scene::Scene> load_scene(const std::filesystem::path& path);
+    DUK_NO_DISCARD std::unique_ptr<duk::scene::Scene> load_scene(duk::pool::ResourceId id);
+
+    DUK_NO_DISCARD std::unique_ptr<duk::scene::Scene> load_scene(const std::string& alias);
 
     template<typename T>
     void register_component(const std::string& name) {
          m_componentParser->register_component<T>(name);
     }
+
+private:
+
+    void load_resource(duk::pool::ResourceId id);
 
 private:
     duk::renderer::Renderer* m_renderer;
@@ -53,6 +59,7 @@ private:
     std::unique_ptr<SceneImporter> m_sceneImporter;
     std::vector<std::unique_ptr<ImageImporter>> m_imageImporters;
     std::vector<std::unique_ptr<MaterialImporter>> m_materialImporters;
+    ResourceSet m_resourceSet;
 };
 
 }

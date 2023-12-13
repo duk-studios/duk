@@ -16,13 +16,16 @@ namespace duk::import {
 enum class ResourceType {
     RES,
     IMG,
-    MAT
+    MAT,
+    SCN
 };
 
 struct ResourceDescription {
     ResourceType type;
     std::string path;
     duk::pool::ResourceId id;
+    std::set<duk::pool::ResourceId> dependencies;
+    std::set<std::string> aliases;
 };
 
 bool operator==(const ResourceDescription& lhs, const ResourceDescription& rhs);
@@ -30,9 +33,8 @@ bool operator==(const ResourceDescription& lhs, const ResourceDescription& rhs);
 bool operator<(const ResourceDescription& lhs, const ResourceDescription& rhs);
 
 struct ResourceSet {
-    std::set<ResourceDescription> resourceSets;
-    std::set<ResourceDescription> images;
-    std::set<ResourceDescription> materials;
+    std::unordered_map<duk::pool::ResourceId, ResourceDescription> resources;
+    std::unordered_map<std::string, duk::pool::ResourceId> aliases;
 };
 
 class ResourceImporter {

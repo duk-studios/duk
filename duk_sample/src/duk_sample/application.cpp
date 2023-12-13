@@ -17,7 +17,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     auto importer = m_engine->importer();
     importer->load_resources("resources.json");
 
-    m_scene = importer->load_scene("scenes/scene.scn.json");
+    m_scene = importer->load_scene("main");
 
     m_engine->use_scene(m_scene.get());
 

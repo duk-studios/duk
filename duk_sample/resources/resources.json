@@ -1,29 +1,10 @@
 {
   "resources": [
-    {
-      "type": "mat",
-      "path": "materials/color.mat.json",
-      "id": 1
-    },
-    {
-      "type": "mat",
-      "path": "materials/phong.mat.json",
-      "id": 2
-    },
-    {
-      "type": "img",
-      "path": "images/gold_basecolor.png",
-      "id": 3
-    },
-    {
-      "type": "img",
-      "path": "images/gold_specular.png",
-      "id": 4
-    },
-    {
-      "type": "img",
-      "path": "images/uv.jpg",
-      "id": 5
-    }
+    "images/gold_basecolor.res",
+    "images/gold_specular.res",
+    "images/uv.res",
+    "materials/color.res",
+    "materials/phong.res",
+    "scenes/scene.res"
   ]
 }
