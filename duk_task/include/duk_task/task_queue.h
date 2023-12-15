@@ -79,7 +79,7 @@ public:
         {
             std::unique_lock<std::mutex> lock(m_taskQueueMutex);
             m_taskQueue.emplace(std::move(task));
-            m_condition.notify_one();
+            m_awakeCondition.notify_one();
         }
 
         return future;
@@ -89,13 +89,17 @@ public:
 
     void stop();
 
+    void wait();
+
     DUK_NO_DISCARD bool owns_current_thread() const;
 
 private:
     std::vector<std::thread> m_threads;
+    std::vector<bool> m_workingThreads;
     std::queue<std::unique_ptr<detail::Task>> m_taskQueue;
     std::mutex m_taskQueueMutex;
-    std::condition_variable m_condition;
+    std::condition_variable m_awakeCondition;
+    std::condition_variable m_idleCondition;
     bool m_running;
 
 };

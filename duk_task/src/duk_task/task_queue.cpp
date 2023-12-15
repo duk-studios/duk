@@ -12,6 +12,7 @@ TaskQueue::TaskQueue() : TaskQueue(1) {
 
 TaskQueue::TaskQueue(size_t threadCount) :
     m_threads(threadCount),
+    m_workingThreads(threadCount, false),
     m_running(false) {
 
 }
@@ -30,13 +31,16 @@ void TaskQueue::start() {
         m_running = true;
     }
 
+    int index = 0;
     for (auto& thread : m_threads){
-        thread = std::thread([this](){
-            while (m_running){
+        thread = std::thread([this, index](){
+            while (m_running) {
+
+                m_idleCondition.notify_all();
 
                 // waits until asked to quit or have some task available
-                std::unique_lock<std::mutex> lock(m_taskQueueMutex);
-                m_condition.wait(lock, [this]() -> bool {
+                std::unique_lock lock(m_taskQueueMutex);
+                m_awakeCondition.wait(lock, [this]() -> bool {
                     return !m_running || !m_taskQueue.empty();
                 });
 
@@ -44,6 +48,8 @@ void TaskQueue::start() {
                 if (!m_running) {
                     return;
                 }
+
+                m_workingThreads[index] = true;
 
                 // gets next task
                 auto task = std::move(m_taskQueue.front());
@@ -53,8 +59,12 @@ void TaskQueue::start() {
                 lock.unlock();
 
                 (*task)();
+
+                lock.lock();
+                m_workingThreads[index] = false;
             }
         });
+        index++;
     }
 }
 
@@ -64,13 +74,32 @@ void TaskQueue::stop() {
         std::unique_lock<std::mutex> lock(m_taskQueueMutex);
         m_running = false;
     }
-    m_condition.notify_all();
+    m_awakeCondition.notify_all();
 
     for (auto& thread : m_threads){
         if (thread.joinable()){
             thread.join();
         }
     }
+}
+
+void TaskQueue::wait() {
+    std::unique_lock lock(m_taskQueueMutex);
+    m_idleCondition.wait(lock, [this]() -> bool {
+        if (!m_taskQueue.empty()) {
+            return false;
+        }
+
+        const bool hasWorkingThread = std::any_of(m_workingThreads.begin(), m_workingThreads.end(), [](bool working) -> bool {
+            return working;
+        });
+
+        if (hasWorkingThread) {
+            return false;
+        }
+
+        return true;
+    });
 }
 
 bool TaskQueue::owns_current_thread() const {
