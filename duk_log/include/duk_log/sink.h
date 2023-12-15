@@ -13,14 +13,17 @@ namespace duk::log {
 class Sink {
 public:
 
+    explicit Sink(Level minimumLevel);
+
     virtual ~Sink();
 
     void flush_from(Logger& logger);
 
-    virtual void flush(const std::string& message) = 0;
+    virtual void flush(Level level, const std::string& message) = 0;
 
 protected:
     events::EventListener m_listener;
+    Level m_level;
 };
 
 }

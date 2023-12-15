@@ -5,12 +5,20 @@
 
 namespace duk::log {
 
-void Sink::flush_from(Logger& logger) {
-    logger.listen_to_print(m_listener,[this](const auto& message){
-        flush(message);
-    });
+Sink::Sink(Level minimumLevel) :
+    m_level(minimumLevel) {
+
 }
 
 Sink::~Sink() = default;
+
+void Sink::flush_from(Logger& logger) {
+    logger.add_print_listener(m_listener, [this](Level level, const auto& message) {
+        if (level < m_level) {
+            return;
+        }
+        flush(level, message);
+    });
+}
 
 }
