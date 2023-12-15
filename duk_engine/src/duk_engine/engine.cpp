@@ -66,6 +66,8 @@ void Engine::run() {
     // assume 60fps for the first frame
     m_timer.add_duration(std::chrono::milliseconds(16));
 
+    m_systems.init();
+
     while (m_run) {
         m_timer.start();
         m_window->pool_events();

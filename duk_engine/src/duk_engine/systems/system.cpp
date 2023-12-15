@@ -13,6 +13,7 @@ System::System(Engine &engine, std::string name) :
 
 System::~System() = default;
 
+
 const std::string& System::name() {
     return m_name;
 }
@@ -23,6 +24,12 @@ Engine* System::engine() {
 
 Engine* System::engine() const {
     return &m_engine;
+}
+
+void Systems::init() {
+    for (auto& system : m_container) {
+        system->init();
+    }
 }
 
 Systems::Iterator Systems::begin() {
@@ -40,5 +47,6 @@ Systems::Iterator Systems::end() {
 Systems::ConstIterator Systems::end() const {
     return m_container.end();
 }
+
 
 }

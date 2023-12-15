@@ -53,6 +53,8 @@ public:
     template<typename T, typename ...Args>
     Iterator add_system(Iterator position, Args&&... args);
 
+    void init();
+
     DUK_NO_DISCARD Iterator begin();
 
     DUK_NO_DISCARD ConstIterator begin() const;
@@ -79,7 +81,6 @@ Systems::Iterator Systems::add_system(Systems::Iterator position, Args &&... arg
     if (alreadyPresent) {
         throw std::logic_error(system->name() + "is already present");
     }
-    system->init();
     return m_container.insert(position, std::move(system));
 }
 
