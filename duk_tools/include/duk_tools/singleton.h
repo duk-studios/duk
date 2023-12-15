@@ -10,19 +10,27 @@ template<typename T>
 class Singleton {
 public:
 
-    static T* instance() {
-        assert(s_instance);
+    static bool valid() {
+        return s_instance != nullptr;
+    }
+
+    static T* instance(bool createIfInvalid = false) {
+        if (createIfInvalid && !valid()) {
+            create();
+        }
+        assert(valid());
         return s_instance;
     }
 
-    template<typename ...Args>
-    static void create(Args&&... args) {
-        assert(!s_instance);
-        s_instance = new T(std::forward<Args>(args)...);
+    static void create() {
+        if (valid()) {
+            destroy();
+        }
+        s_instance = new T();
     }
 
     static void destroy() {
-        assert(s_instance);
+        assert(valid());
         delete s_instance;
         s_instance = nullptr;
     }
