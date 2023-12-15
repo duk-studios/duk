@@ -45,7 +45,7 @@ void VulkanDebugMessenger::log(VkDebugUtilsMessageSeverityFlagBitsEXT messageSev
         return;
     }
 
-    logger->log(detail::level_from_severity(messageSeverity)) << pCallbackData->pMessage;
+    logger->print(detail::level_from_severity(messageSeverity), "Vulkan validation: {}", std::string(pCallbackData->pMessage));
 }
 
 } // duk::rhi

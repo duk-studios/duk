@@ -9,7 +9,6 @@
 
 #include <duk_platform/window.h>
 #include <duk_import/importer.h>
-#include <duk_log/sink_std_console.h>
 #include <duk_renderer/forward/forward_renderer.h>
 #include <duk_tools/timer.h>
 
@@ -28,8 +27,6 @@ public:
 
     void run();
 
-    DUK_NO_DISCARD duk::log::Logger* logger();
-
     DUK_NO_DISCARD Systems* systems();
 
     DUK_NO_DISCARD duk::platform::Window* window();
@@ -45,8 +42,6 @@ public:
     void use_scene(duk::scene::Scene* scene);
 
 private:
-    duk::log::Logger m_logger;
-    duk::log::SinkStdConsole m_sink;
     duk::events::EventListener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;

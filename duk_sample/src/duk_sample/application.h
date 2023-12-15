@@ -25,18 +25,6 @@ public:
     void run();
 
 private:
-
-    template<typename T>
-    auto check_expected_result(T&& expectedResult) {
-        if (!expectedResult) {
-            auto errorDescription = expectedResult.error().description();
-            m_engine->logger()->log_fatal() << "Unexpected result: " << errorDescription;
-            std::terminate();
-        }
-        return std::move(expectedResult.value());
-    }
-
-private:
     std::unique_ptr<duk::engine::Engine> m_engine;
     std::unique_ptr<duk::scene::Scene> m_scene;
 };

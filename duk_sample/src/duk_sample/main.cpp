@@ -4,11 +4,9 @@
 
 #include <duk_sample/application.h>
 
-#include <duk_log/sink_std_console.h>
+#include <duk_log/log.h>
 
 int main() {
-
-    duk::log::SinkStdConsole consoleSink;
 
     duk::sample::ApplicationCreateInfo applicationCreateInfo = {};
     applicationCreateInfo.name = "Quacker";
@@ -18,7 +16,8 @@ int main() {
 
         application.run();
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
+        duk::log::fatal("exception caught: {}", e.what()).wait();
         return 1;
     }
     return 0;

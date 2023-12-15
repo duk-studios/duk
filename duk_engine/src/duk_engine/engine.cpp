@@ -4,14 +4,12 @@
 
 #include <duk_engine/engine.h>
 #include <duk_import/importer.h>
+#include <duk_log/log.h>
 
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
-    m_logger(duk::log::Level::DEBUG),
     m_run(false) {
-
-    m_sink.flush_from(m_logger);
 
     duk::platform::WindowCreateInfo windowCreateInfo = {};
     windowCreateInfo.windowTitle = engineCreateInfo.applicationName;
@@ -37,7 +35,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
 
     duk::renderer::ForwardRendererCreateInfo forwardRendererCreateInfo = {};
     forwardRendererCreateInfo.rendererCreateInfo.window = m_window.get();
-    forwardRendererCreateInfo.rendererCreateInfo.logger = &m_logger;
+    forwardRendererCreateInfo.rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
     forwardRendererCreateInfo.rendererCreateInfo.api = duk::rhi::API::VULKAN;
 
     m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
@@ -78,10 +76,6 @@ void Engine::run() {
 
         m_timer.stop();
     }
-}
-
-duk::log::Logger* Engine::logger() {
-    return &m_logger;
 }
 
 Systems* Engine::systems() {
