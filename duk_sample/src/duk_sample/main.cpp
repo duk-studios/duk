@@ -17,7 +17,10 @@ int main() {
         application.run();
     }
     catch (const std::exception& e) {
-        duk::log::fatal("exception caught: {}", e.what()).wait();
+        duk::log::fatal("exception caught: {}", e.what());
+
+        // guarantees that every log is printed
+        duk::log::wait();
         return 1;
     }
     return 0;

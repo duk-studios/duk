@@ -26,9 +26,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     systems->add_system<duk::engine::RenderSystem>(*m_engine, "RenderSystem");
 }
 
-Application::~Application() {
-
-}
+Application::~Application() = default;
 
 void Application::run() {
     m_engine->run();
