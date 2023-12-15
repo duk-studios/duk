@@ -5,6 +5,7 @@
     "images/uv.res",
     "materials/color.res",
     "materials/phong.res",
+    "materials/light.res",
     "scenes/scene.res"
   ]
 }

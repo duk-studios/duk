@@ -28,7 +28,7 @@ duk::renderer::MaterialType parse_material_type(const char* typeStr) {
 
 std::unique_ptr<duk::renderer::ColorMaterialDataSource> parse_color_material(const rapidjson::Value& object) {
     auto material = std::make_unique<duk::renderer::ColorMaterialDataSource>();
-    material->color = json::to_vec4(object["color"]);
+    material->color = json::to_vec4(object["base-color"]);
     material->update_hash();
     return material;
 }
