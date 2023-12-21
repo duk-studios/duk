@@ -3,6 +3,7 @@
 //
 #include <duk_log/log.h>
 #include <duk_log/sink_fmt.h>
+#include <duk_log/sink_cout.h>
 
 namespace duk::log {
 

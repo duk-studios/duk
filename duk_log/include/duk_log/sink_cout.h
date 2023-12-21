@@ -11,6 +11,8 @@ namespace duk::log {
 class SinkCout : public Sink {
 public:
 
+    explicit SinkCout(Level level);
+
     void flush(Level level, const std::string& message) override;
 
 };
