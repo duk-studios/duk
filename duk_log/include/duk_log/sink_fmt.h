@@ -7,6 +7,7 @@
 
 #include <duk_log/sink.h>
 #include <fmt/color.h>
+#include <array>
 
 namespace duk::log {
 

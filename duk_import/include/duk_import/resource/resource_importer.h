@@ -9,6 +9,7 @@
 
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <filesystem>
 
 namespace duk::import {
