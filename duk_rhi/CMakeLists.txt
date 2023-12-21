@@ -122,8 +122,6 @@ target_link_libraries(duk_rhi
 
         grapphs::grapphs
 
-        PRIVATE
-
         Vulkan::Vulkan
         )
 
