@@ -1,9 +1,9 @@
-
 # Try to find the glslc executable from the Vulkan SDK
 find_program(GLSLC_EXECUTABLE glslc HINTS ENV VULKAN_SDK PATH_SUFFIXES "Bin")
 
 if (NOT GLSLC_EXECUTABLE)
-    message(FATAL_ERROR "glslc not found. Make sure the Vulkan SDK is correctly installed and its bin directory is in your PATH.")
+    message(WARNING "glslc not found. Make sure the Vulkan SDK is correctly installed and its bin directory is in your PATH. Skipping material generation...")
+    return()
 endif()
 
 set(GLSLC_FLAGS
