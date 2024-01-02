@@ -5,45 +5,39 @@
 #ifndef DUK_CLI_JSON_PARSER_GENERATOR_H
 #define DUK_CLI_JSON_PARSER_GENERATOR_H
 
-#include <duk_cli/parser.h>
+#include <duk_cli/command_line.h>
 
 #include <vector>
 
 namespace duk::cli {
 
-enum class ReflectedType {
-    INT8,
-    UINT8,
-    INT16,
-    UINT16,
-    INT32,
-    UINT32,
-    INT64,
-    UINT64,
-    FLOAT,
-    DOUBLE,
-    BOOL,
-    STRING,
-    RESOURCE_ID
+struct ReflectedMemberDescription {
+    std::string type;
+    std::string name;
 };
 
-std::string reflected_type_cpp_name(ReflectedType reflectedType);
-
-struct ReflectedTypeDescription {
-    ReflectedType type;
+struct ReflectedClassDescription {
+    std::vector<ReflectedMemberDescription> members;
     std::string name;
 };
 
 class Reflector {
 public:
 
-    explicit Reflector(const Parser& parser);
+    explicit Reflector(const std::string& content);
 
-    DUK_NO_DISCARD const std::vector<ReflectedTypeDescription>& reflected_types() const;
+    DUK_NO_DISCARD const std::vector<ReflectedClassDescription>& reflected_types() const;
 
 private:
-    std::vector<ReflectedTypeDescription> m_reflectedTypes;
+    std::vector<ReflectedClassDescription> m_reflectedClasses;
 };
+
+struct GenerateJsonParserInfo {
+    std::string inputFilepath;
+    std::string outputFilepath;
+};
+
+void generate_json_parser(const GenerateJsonParserInfo& generateJsonParserInfo);
 
 }
 
