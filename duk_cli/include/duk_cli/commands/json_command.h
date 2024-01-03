@@ -7,8 +7,6 @@
 
 #include <duk_cli/command_line.h>
 
-#include <vector>
-
 namespace duk::cli {
 
 struct ReflectedMemberDescription {
@@ -32,14 +30,25 @@ private:
     std::vector<ReflectedClassDescription> m_reflectedClasses;
 };
 
-struct GenerateJsonParserInfo {
+struct JsonCommandCreateInfo {
     std::string inputFilepath;
     std::string outputFilepath;
     std::string nameSpace;
     std::vector<std::string> additionalIncludes;
 };
 
-void generate_json_parser(const GenerateJsonParserInfo& generateJsonParserInfo);
+class JsonCommand : public Command {
+public:
+    explicit JsonCommand(const JsonCommandCreateInfo& jsonCommandCreateInfo);
+
+    void execute() override;
+
+private:
+    std::string m_inputFilepath;
+    std::string m_outputFilepath;
+    std::string m_nameSpace;
+    std::vector<std::string> m_additionalIncludes;
+};
 
 }
 

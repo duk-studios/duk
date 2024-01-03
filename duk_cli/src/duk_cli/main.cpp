@@ -3,29 +3,16 @@
 //
 
 #include <duk_cli/command_line.h>
-#include <duk_cli/commands/json_parser_generator.h>
+#include <duk_cli/commands/json_command.h>
 
 #include <duk_log/log.h>
 
 int main(int argc, const char* argv[]) {
     try {
+        // skip executable path argument
         duk::cli::CommandLine commandLine(argc, argv);
 
-        switch (commandLine.command()) {
-            case duk::cli::Command::JSON_PARSER_GENERATOR:
-            {
-                duk::cli::GenerateJsonParserInfo generateJsonParserInfo = {};
-                generateJsonParserInfo.inputFilepath = commandLine.input_filepath();
-                generateJsonParserInfo.outputFilepath = commandLine.output_filepath();
-                generateJsonParserInfo.nameSpace = commandLine.output_namespace();
-                generateJsonParserInfo.additionalIncludes = commandLine.additional_includes();
-
-                duk::cli::generate_json_parser(generateJsonParserInfo);
-            }
-                break;
-            default:
-                throw std::invalid_argument("unknown command type");
-        }
+       commandLine.command()->execute();
     }
     catch (const std::exception& e) {
         duk::log::fatal("exception caught: {}", e.what()).wait();

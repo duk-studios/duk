@@ -2,7 +2,7 @@
 // Created by rov on 12/16/2023.
 //
 
-#include <duk_cli/commands/json_parser_generator.h>
+#include <duk_cli/commands/json_command.h>
 #include <duk_cli/file_generator.h>
 #include <duk_tools/file.h>
 #include <duk_log/log.h>
@@ -228,20 +228,27 @@ const std::vector<ReflectedClassDescription>& Reflector::reflected_types() const
     return m_reflectedClasses;
 }
 
-void generate_json_parser(const GenerateJsonParserInfo& generateJsonParserInfo) {
-    auto buffer = duk::tools::File::load_text(generateJsonParserInfo.inputFilepath.c_str());
+JsonCommand::JsonCommand(const JsonCommandCreateInfo& jsonCommandCreateInfo) :
+    m_inputFilepath(jsonCommandCreateInfo.inputFilepath),
+    m_outputFilepath(jsonCommandCreateInfo.outputFilepath),
+    m_nameSpace(jsonCommandCreateInfo.nameSpace),
+    m_additionalIncludes(jsonCommandCreateInfo.additionalIncludes) {
+
+}
+
+void JsonCommand::execute() {
+    auto buffer = duk::tools::File::load_text(m_inputFilepath.c_str());
     std::string srcContent(buffer.begin(), buffer.end());
     Reflector reflector(srcContent);
 
-    auto filename = std::filesystem::path(generateJsonParserInfo.inputFilepath).filename().stem().string();
+    auto filename = std::filesystem::path(m_inputFilepath).filename().stem().string();
 
     const auto generatedContent = detail::generate_from_json_file(reflector,
-                                                                  generateJsonParserInfo.nameSpace,
+                                                                  m_nameSpace,
                                                                   filename,
-                                                                  generateJsonParserInfo.additionalIncludes
-                                                                  );
+                                                                  m_additionalIncludes
+    );
 
-    write_file(generatedContent, generateJsonParserInfo.outputFilepath);
+    write_file(generatedContent, m_outputFilepath);
 }
-
 }
