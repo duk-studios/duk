@@ -3,7 +3,7 @@
 
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/components/mesh_drawing.h>
+#include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/materials/material.h>
 #include <duk_renderer/materials/painter.h>
 #include <duk_renderer/brushes/mesh.h>
@@ -93,14 +93,14 @@ void ForwardPass::render(const RenderParams& renderParams) {
 
     std::set<Material*> uniqueMaterials;
 
-    for (auto object : renderParams.scene->objects_with_components<MeshDrawing>()) {
-        auto meshDrawing = object.component<MeshDrawing>();
+    for (auto object : renderParams.scene->objects_with_components<MeshRenderer>()) {
+        auto meshRenderer = object.component<MeshRenderer>();
 
         auto& objectEntry = m_objectEntries.emplace_back();
         objectEntry.objectId = object.id();
-        objectEntry.brush = meshDrawing->mesh.get();
-        objectEntry.material = meshDrawing->material.get();
-        objectEntry.sortKey = SortKey::calculate(*meshDrawing);
+        objectEntry.brush = meshRenderer->mesh.get();
+        objectEntry.material = meshRenderer->material.get();
+        objectEntry.sortKey = SortKey::calculate(*meshRenderer);
 
         uniqueMaterials.insert(objectEntry.material);
     }

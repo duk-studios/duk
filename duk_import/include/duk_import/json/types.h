@@ -9,7 +9,7 @@
 #include <duk_rhi/sampler.h>
 #include <duk_tools/singleton.h>
 #include <duk_renderer/components/transform.h>
-#include <duk_renderer/components/mesh_drawing.h>
+#include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/lighting.h>
 
 #include <rapidjson/document.h>

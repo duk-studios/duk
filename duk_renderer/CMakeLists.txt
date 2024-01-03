@@ -13,7 +13,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/brushes/mesh_data_source.h
         include/duk_renderer/brushes/brush.h
         include/duk_renderer/brushes/generic_brush.h
-        include/duk_renderer/components/mesh_drawing.h
+        include/duk_renderer/components/mesh_renderer.h
         include/duk_renderer/components/transform.h
         include/duk_renderer/components/camera.h
         include/duk_renderer/components/lighting.h
@@ -53,7 +53,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/brushes/mesh_data_source.cpp
         src/duk_renderer/brushes/brush.cpp
         src/duk_renderer/brushes/generic_brush.cpp
-        src/duk_renderer/components/mesh_drawing.cpp
+        src/duk_renderer/components/mesh_renderer.cpp
         src/duk_renderer/components/transform.cpp
         src/duk_renderer/components/camera.cpp
         src/duk_renderer/components/lighting.cpp

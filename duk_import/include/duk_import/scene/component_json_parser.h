@@ -114,12 +114,12 @@ ComponentJsonParser::to_component<duk::renderer::PerspectiveCamera>(const rapidj
 }
 
 template<>
-inline duk::renderer::MeshDrawing
-ComponentJsonParser::to_component<duk::renderer::MeshDrawing>(const rapidjson::Value& member) {
-    duk::renderer::MeshDrawing meshDrawing = {};
-    meshDrawing.mesh = m_meshPool->find(json::to_resource_id(member["mesh"]));
-    meshDrawing.material = m_materialPool->find(json::to_resource_id(member["material"]));
-    return meshDrawing;
+inline duk::renderer::MeshRenderer
+ComponentJsonParser::to_component<duk::renderer::MeshRenderer>(const rapidjson::Value& member) {
+    duk::renderer::MeshRenderer meshRenderer = {};
+    meshRenderer.mesh = m_meshPool->find(json::to_resource_id(member["mesh"]));
+    meshRenderer.material = m_materialPool->find(json::to_resource_id(member["material"]));
+    return meshRenderer;
 }
 
 }
