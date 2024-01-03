@@ -17,6 +17,8 @@ int main(int argc, const char* argv[]) {
                 duk::cli::GenerateJsonParserInfo generateJsonParserInfo = {};
                 generateJsonParserInfo.inputFilepath = commandLine.input_filepath();
                 generateJsonParserInfo.outputFilepath = commandLine.output_filepath();
+                generateJsonParserInfo.nameSpace = commandLine.output_namespace();
+                generateJsonParserInfo.additionalIncludes = commandLine.additional_includes();
 
                 duk::cli::generate_json_parser(generateJsonParserInfo);
             }

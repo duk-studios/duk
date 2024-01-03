@@ -8,6 +8,7 @@
 #include <duk_macros/macros.h>
 
 #include <string>
+#include <vector>
 
 namespace duk::cli {
 
@@ -27,10 +28,16 @@ public:
 
     DUK_NO_DISCARD const std::string& output_filepath() const;
 
+    DUK_NO_DISCARD const std::string& output_namespace() const;
+
+    DUK_NO_DISCARD const std::vector<std::string>& additional_includes() const;
+
 private:
     Command m_command;
     std::string m_inputFilepath;
     std::string m_outputFilepath;
+    std::string m_outputNamespace;
+    std::vector<std::string> m_additionalIncludes;
 };
 
 }

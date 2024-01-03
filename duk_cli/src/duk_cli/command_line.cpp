@@ -27,6 +27,8 @@ CommandLine::CommandLine(int argc, const char* argv[]) {
     options.add_options("json")
             ("i, input", "File containing types to generate", cxxopts::value<std::string>())
             ("o, output", "Output file with generated content", cxxopts::value<std::string>())
+            ("n, namespace", "Namespace for generated file", cxxopts::value<std::string>())
+            ("e, includes", "Additional includes for generated file", cxxopts::value<std::vector<std::string>>())
             ;
 
     cxxopts::ParseResult result;
@@ -38,7 +40,8 @@ CommandLine::CommandLine(int argc, const char* argv[]) {
     m_command = detail::parse_command(result["command"].as<std::string>());
     m_inputFilepath = result["input"].as<std::string>();
     m_outputFilepath = result["output"].as<std::string>();
-
+    m_outputNamespace = result["namespace"].as<std::string>();
+    m_additionalIncludes = result["includes"].as<std::vector<std::string>>();
 }
 
 Command CommandLine::command() const {
@@ -51,6 +54,14 @@ const std::string& CommandLine::input_filepath() const {
 
 const std::string& CommandLine::output_filepath() const {
     return m_outputFilepath;
+}
+
+const std::string& CommandLine::output_namespace() const {
+    return m_outputNamespace;
+}
+
+const std::vector<std::string>& CommandLine::additional_includes() const {
+    return m_additionalIncludes;
 }
 
 }

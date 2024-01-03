@@ -3,12 +3,15 @@
 //
 
 #include <duk_cli/commands/json_parser_generator.h>
+#include <duk_cli/file_generator.h>
 #include <duk_tools/file.h>
 #include <duk_log/log.h>
 #include <rapidjson/document.h>
+
 #include <string>
 #include <regex>
 #include <fstream>
+#include <filesystem>
 
 namespace duk::cli {
 
@@ -17,7 +20,7 @@ namespace detail {
 const char kSerializeResourceToken[] = "DUK_SERIALIZE_RESOURCE";
 const char* kTokenLimitChars = " \n;,";
 
-std::vector<std::string_view> extract_classes_with_token_content(const std::string& content, const char* token) {
+static std::vector<std::string_view> extract_classes_with_token_content(const std::string& content, const char* token) {
     std::vector<std::string_view> classesContent;
     auto tokenLength = strlen(token);
     auto resourceTokenStart = content.find(token);
@@ -37,7 +40,7 @@ std::vector<std::string_view> extract_classes_with_token_content(const std::stri
     return classesContent;
 }
 
-std::vector<std::string_view> extract_tokens_from_class(const std::string_view& classContent) {
+static std::vector<std::string_view> extract_tokens_from_class(const std::string_view& classContent) {
     std::vector<std::string_view> tokens;
 
     auto tokenStart = classContent.find_first_not_of(" \n");
@@ -80,7 +83,7 @@ enum class TokenType {
     COLON,
 };
 
-TokenType parse_token_type(const std::string_view& token) {
+static TokenType parse_token_type(const std::string_view& token) {
     if (token == "class" || token == "struct") {
         return TokenType::TYPE_KEYWORD;
     }
@@ -99,62 +102,80 @@ TokenType parse_token_type(const std::string_view& token) {
     return TokenType::SYMBOL;
 }
 
-void assert_token_type(const std::string_view& token, TokenType expectedTokenType) {
+static void assert_token_type(const std::string_view& token, TokenType expectedTokenType) {
     auto actualTokenType = detail::parse_token_type(token);
     if (actualTokenType != expectedTokenType) {
         throw std::runtime_error("unexpected token: " + std::string(token));
     }
 }
-class Foo {
-public:
-    uint8_t a;
-    float f;
-};
-
-template<typename T>
-void from_json(const rapidjson::Value& jsonObject, T& object) = delete;
-
-template<typename T>
-T from_json(const rapidjson::Value& jsonObject) {
-    T object = {};
-    from_json<T>(jsonObject, object);
-    return object;
-}
-
-template<>
-void from_json<Foo>(const rapidjson::Value& jsonObject, Foo& object) {
-    object.a = jsonObject["a"].GetUint();
-    object.a = jsonObject["a"].GetInt();
-    object.f = jsonObject["f"].GetFloat();
-}
 
 const char* kFromJsonTemplate = R"(
 template<>
 void from_json<TemplateTypeName>(const rapidjson::Value& jsonObject, TemplateTypeName& object) {
-TemplateMethodDefinition
-}
+    TemplateMethodDefinition
+})";
 
-)";
-
-std::string generate_from_json_member_access(const ReflectedMemberDescription& memberDescription) {
+static std::string generate_from_json_member_access(const ReflectedMemberDescription& memberDescription) {
     std::ostringstream oss;
     oss << "from_json<" << memberDescription.type << ">(jsonObject[\"" << memberDescription.name << "\"])";
     return oss.str();
 }
 
-std::string generate_from_json_method_content(const ReflectedClassDescription& classDescription) {
-
-    std::ostringstream oss;
-    for (auto& member : classDescription.members) {
-        oss << "    object." << member.name << " = " << generate_from_json_member_access(member) << ";" << std::endl;
-    }
-    return oss.str();
+static std::string generate_from_json_method_content(const ReflectedClassDescription& classDescription) {
+    return generate_for_each(classDescription.members, [](const ReflectedMemberDescription& member) {
+        std::ostringstream oss;
+        oss << "object." << member.name << " = " << generate_from_json_member_access(member) << ';';
+        return oss.str();
+    }, "\n    ", false);
 }
 
-std::string generate_from_json_method(const ReflectedClassDescription& classDescription) {
+static std::string generate_from_json_method(const ReflectedClassDescription& classDescription) {
     auto content = std::regex_replace(kFromJsonTemplate, std::regex("TemplateTypeName"), classDescription.name);
     content = std::regex_replace(content, std::regex("TemplateMethodDefinition"), generate_from_json_method_content(classDescription));
     return content;
+}
+
+static std::string toupper_str(std::string str) {
+    for (auto& c : str) {
+        c = std::toupper(c);
+    }
+    return str;
+}
+
+static std::string generate_include_guard_name(const std::string& nameSpace, const std::string& fileName) {
+    std::ostringstream oss;
+    oss << std::regex_replace(nameSpace, std::regex("::"), "_");
+    oss << '_' << toupper_str(fileName);
+    return oss.str();
+}
+
+static std::string generate_from_json_file(const Reflector& reflector, const std::string& nameSpace, const std::string& fileName, const std::vector<std::string>& additionalIncludes) {
+    std::ostringstream oss;
+
+    const auto includeGuardName = generate_include_guard_name(nameSpace, fileName);
+
+    generate_include_guard_start(oss, includeGuardName);
+    oss << std::endl;
+
+    std::vector<std::string> includes {
+        "duk_import/json/types.h"
+    };
+
+    includes.insert(includes.end(), additionalIncludes.begin(), additionalIncludes.end());
+
+    generate_include_directives(oss, includes);
+    oss << std::endl;
+    generate_namespace_start(oss, nameSpace);
+
+    for (const auto& classDescription : reflector.reflected_types()) {
+        oss << detail::generate_from_json_method(classDescription) << std::endl;
+    }
+    oss << std::endl;
+    generate_namespace_end(oss, nameSpace);
+    oss << std::endl;
+    generate_include_guard_end(oss, includeGuardName);
+
+    return oss.str();
 }
 
 }
@@ -209,16 +230,18 @@ const std::vector<ReflectedClassDescription>& Reflector::reflected_types() const
 
 void generate_json_parser(const GenerateJsonParserInfo& generateJsonParserInfo) {
     auto buffer = duk::tools::File::load_text(generateJsonParserInfo.inputFilepath.c_str());
-    std::string content(buffer.begin(), buffer.end());
-    Reflector reflector(content);
+    std::string srcContent(buffer.begin(), buffer.end());
+    Reflector reflector(srcContent);
 
-    std::ostringstream oss;
-    for (const auto& classDescription : reflector.reflected_types()) {
-        oss << detail::generate_from_json_method(classDescription) << std::endl;
-    }
+    auto filename = std::filesystem::path(generateJsonParserInfo.inputFilepath).filename().stem().string();
 
-    std::ofstream file(generateJsonParserInfo.outputFilepath);
-    file << oss.str();
+    const auto generatedContent = detail::generate_from_json_file(reflector,
+                                                                  generateJsonParserInfo.nameSpace,
+                                                                  filename,
+                                                                  generateJsonParserInfo.additionalIncludes
+                                                                  );
+
+    write_file(generatedContent, generateJsonParserInfo.outputFilepath);
 }
 
 }

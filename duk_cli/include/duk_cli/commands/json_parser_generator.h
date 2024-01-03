@@ -35,6 +35,8 @@ private:
 struct GenerateJsonParserInfo {
     std::string inputFilepath;
     std::string outputFilepath;
+    std::string nameSpace;
+    std::vector<std::string> additionalIncludes;
 };
 
 void generate_json_parser(const GenerateJsonParserInfo& generateJsonParserInfo);
