@@ -223,10 +223,11 @@ void Reflector::reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::
         std::vector<SpvReflectInterfaceVariable*> inputVariables(inputVariableCount);
         detail::check_result(spvReflectEnumerateEntryPointInputVariables(&module, "main", &inputVariableCount, inputVariables.data()));
 
-        m_attributes.reserve(inputVariableCount - 1);
+        m_attributes.resize(inputVariableCount - 1);
 
         for (int i = 1; i < inputVariableCount; i++) {
-            m_attributes.push_back(detail::vertex_attribute_format(inputVariables[i]->format));
+            auto inputVariable = inputVariables[i];
+            m_attributes[inputVariable->location] = (detail::vertex_attribute_format(inputVariable->format));
         }
     }
 
