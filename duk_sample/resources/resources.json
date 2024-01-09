@@ -2,10 +2,13 @@
   "resources": [
     "images/gold_basecolor.res",
     "images/gold_specular.res",
+    "images/safeson.res",
     "images/uv.res",
     "materials/color.res",
     "materials/phong.res",
     "materials/light.res",
-    "scenes/scene.res"
+    "materials/safeson.res",
+    "scenes/scene.res",
+    "scenes/sprite-test.res"
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "objects": [
+    {
+      "components": [
+        {
+          "type": "Scale3D",
+          "value": "5;5;5"
+        },
+        {
+          "type": "MeshRenderer",
+          "mesh": 1,
+          "material": 104
+        }
+      ]
+    }
+  ]
+}
