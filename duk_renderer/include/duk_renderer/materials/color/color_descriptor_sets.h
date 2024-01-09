@@ -17,7 +17,8 @@ public:
     enum class Bindings : uint32_t {
         uCamera = 0,
         uInstances = 1,
-        uMaterial = 2
+        uMaterial = 2,
+        uBaseColor = 3
     };
 
 public:

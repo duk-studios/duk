@@ -7,6 +7,7 @@
 #include <duk_renderer/materials/material.h>
 #include <duk_renderer/materials/color/color_types.h>
 #include <duk_renderer/materials/color/color_descriptor_sets.h>
+#include <duk_renderer/pools/image_pool.h>
 
 #include <duk_scene/limits.h>
 #include <duk_rhi/rhi.h>
@@ -24,6 +25,8 @@ public:
 
 public:
     glm::vec4 color;
+    ImageResource baseColorImage;
+    duk::rhi::Sampler baseColorSampler;
 
 protected:
     DUK_NO_DISCARD duk::hash::Hash calculate_hash() const override;

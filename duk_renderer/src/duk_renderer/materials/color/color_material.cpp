@@ -11,13 +11,17 @@ static const ColorShaderDataSource kColorShaderDataSource;
 
 ColorMaterialDataSource::ColorMaterialDataSource() :
     MaterialDataSource(MaterialType::COLOR),
-    color() {
+    color(),
+    baseColorImage(),
+    baseColorSampler(rhi::Sampler::Filter::NEAREST, rhi::Sampler::WrapMode::REPEAT) {
 
 }
 
 duk::hash::Hash ColorMaterialDataSource::calculate_hash() const {
     duk::hash::Hash hash = 0;
     duk::hash::hash_combine(hash, color);
+    duk::hash::hash_combine(hash, baseColorImage.id());
+    duk::hash::hash_combine(hash, baseColorSampler);
     return hash;
 }
 
@@ -36,16 +40,19 @@ ColorMaterial::ColorMaterial(const ColorMaterialCreateInfo& colorMaterialCreateI
         m_instanceSBO = std::make_unique<color::InstanceSBO>(instanceSBOCreateInfo);
     }
 
+    auto dataSource = colorMaterialCreateInfo.colorMaterialDataSource;
+
     {
         UniformBufferCreateInfo<color::Material> materialUBOCreateInfo = {};
         materialUBOCreateInfo.rhi = rhi;
         materialUBOCreateInfo.commandQueue = commandQueue;
-        materialUBOCreateInfo.initialData.color = colorMaterialCreateInfo.colorMaterialDataSource->color;
+        materialUBOCreateInfo.initialData.color = dataSource->color;
         m_materialUBO = std::make_unique<color::MaterialUBO>(materialUBOCreateInfo);
     }
 
     m_descriptorSet.set(ColorDescriptorSet::Bindings::uInstances, *m_instanceSBO);
     m_descriptorSet.set(ColorDescriptorSet::Bindings::uMaterial, *m_materialUBO);
+    m_descriptorSet.set(ColorDescriptorSet::Bindings::uBaseColor, duk::rhi::Descriptor::image_sampler(dataSource->baseColorImage.get(), duk::rhi::Image::Layout::SHADER_READ_ONLY, dataSource->baseColorSampler));
 }
 
 void ColorMaterial::set_color(const glm::vec4& color) {

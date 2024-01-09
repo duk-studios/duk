@@ -7,6 +7,8 @@
 layout(location = 0) out vec3 vPosition;
 layout(location = 1) out vec3 vNormal;
 layout(location = 2) out vec2 vTexCoord;
+layout(location = 3) out vec4 vColor;
+
 
 DUK_DECLARE_CAMERA_BINDING(0, uCamera);
 
@@ -24,4 +26,7 @@ out gl_PerVertex {
 
 void main() {
     gl_Position = uCamera.matrices.vp * uInstances.instances[gl_InstanceIndex].model * vec4(aPosition, 1.0);
+    vTexCoord = aTexCoord;
+    vNormal = aNormal;
+    vColor = aColor;
 }
