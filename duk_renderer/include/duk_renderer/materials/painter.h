@@ -29,6 +29,8 @@ public:
 
     void invert_y(bool invert);
 
+    void cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask);
+
     void clear_unused_pipelines();
 
 private:
@@ -41,6 +43,8 @@ private:
         duk::rhi::GraphicsPipeline* find_pipeline_for_params(const PaintParams& params);
 
         void invert_y(bool invert);
+
+        void cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask);
 
         void clear_unused_pipelines();
 
@@ -59,6 +63,7 @@ private:
         std::unordered_map<duk::hash::Hash, PipelineEntry> m_pipelines;
         Renderer* m_renderer;
         std::shared_ptr<duk::rhi::Shader> m_shader;
+        duk::rhi::GraphicsPipeline::CullMode::Mask m_cullModeMask;
         bool m_invertY;
     };
 

@@ -30,6 +30,10 @@ void Painter::invert_y(bool invert) {
     m_pipelineCache.invert_y(invert);
 }
 
+void Painter::cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask) {
+    m_pipelineCache.cull_mode_mask(cullModeMask);
+}
+
 void Painter::clear_unused_pipelines() {
     m_pipelineCache.clear_unused_pipelines();
 }
@@ -39,7 +43,8 @@ void Painter::clear_unused_pipelines() {
 Painter::PipelineCache::PipelineCache(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource) :
     m_renderer(renderer),
     m_shader(nullptr),
-    m_invertY(false) {
+    m_invertY(false),
+    m_cullModeMask(duk::rhi::GraphicsPipeline::CullMode::BACK) {
     update_shader(shaderDataSource);
 }
 
@@ -66,7 +71,7 @@ duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(con
         pipelineCreateInfo.viewport = viewport_for_params(params);
         pipelineCreateInfo.scissor.extent.x = params.outputWidth;
         pipelineCreateInfo.scissor.extent.y = params.outputHeight;
-        pipelineCreateInfo.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
+        pipelineCreateInfo.cullModeMask = m_cullModeMask;
         pipelineCreateInfo.fillMode = duk::rhi::GraphicsPipeline::FillMode::FILL;
         pipelineCreateInfo.topology = duk::rhi::GraphicsPipeline::Topology::TRIANGLE_LIST;
         pipelineCreateInfo.shader = m_shader.get();
@@ -101,6 +106,7 @@ duk::hash::Hash Painter::PipelineCache::hash_for_params(const PaintParams& param
     hash::hash_combine(hash, params.outputWidth);
     hash::hash_combine(hash, params.outputHeight);
     hash::hash_combine(hash, m_invertY);
+    hash::hash_combine(hash, m_cullModeMask);
     hash::hash_combine(hash, m_shader->hash());
     return hash;
 }
@@ -119,6 +125,10 @@ duk::rhi::GraphicsPipeline::Viewport Painter::PipelineCache::viewport_for_params
 
 void Painter::PipelineCache::invert_y(bool invert) {
     m_invertY = invert;
+}
+
+void Painter::PipelineCache::cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask) {
+    m_cullModeMask = cullModeMask;
 }
 
 void Painter::PipelineCache::clear_unused_pipelines() {
