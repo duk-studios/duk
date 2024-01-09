@@ -38,6 +38,13 @@ void from_json(const rapidjson::Value& jsonObject, T& object) {
     object = jsonObject.Get<T>();
 }
 
+template<typename T>
+T from_json(const rapidjson::Value& jsonObject) {
+    T object = {};
+    from_json<T>(jsonObject, object);
+    return object;
+}
+
 template<>
 inline void from_json<glm::vec2>(const rapidjson::Value& jsonObject, glm::vec2& object) {
     object = to_vec2(jsonObject);
