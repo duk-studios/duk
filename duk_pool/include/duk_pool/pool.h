@@ -31,6 +31,8 @@ public:
 
     DUK_NO_DISCARD ResourceT find(ResourceId id) const;
 
+    DUK_NO_DISCARD ResourceT find_or_default(ResourceId id, const ResourceT& def) const;
+
 protected:
 
     ResourceT insert(duk::pool::ResourceId id, const std::shared_ptr<ResourceType>& resource);
@@ -47,6 +49,15 @@ ResourceT Pool<ResourceT>::find(ResourceId id) const {
         return ResourceT(id);
     }
     return it->second;
+}
+
+template<typename ResourceT>
+ResourceT Pool<ResourceT>::find_or_default(ResourceId id, const ResourceT& def) const {
+    auto it = find(id);
+    if (it.valid()) {
+        return it;
+    }
+    return def;
 }
 
 template<typename ResourceT>
