@@ -1,1 +1,2 @@
-find_package(Vulkan REQUIRED GLOBAL)
+set(DUK_VULKAN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/1.2.198.1" CACHE INTERNAL "Path to vulkan" FORCE)
+set(DUK_GLSLC_PATH "${DUK_VULKAN_ROOT}/Bin/glslc.exe" CACHE INTERNAL "Path to glslc executable" FORCE)

@@ -12,7 +12,6 @@
 #include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
 
-
 #if DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/window_win_32.h>
 #endif
@@ -47,7 +46,7 @@ static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT           
 }
 
 static std::vector<const char*> query_device_extensions() {
-    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, VK_EXT_ROBUSTNESS_2_EXTENSION_NAME};
+    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_ROBUSTNESS_2_EXTENSION_NAME};
 }
 
 static uint32_t find_present_queue_index(VulkanPhysicalDevice* physicalDevice, VkSurfaceKHR surface){
@@ -97,6 +96,8 @@ VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& vulkanRendererCreateInfo) :
     m_maxFramesInFlight(vulkanRendererCreateInfo.maxFramesInFlight),
     m_currentFrame(0) {
 
+    volkInitialize();
+
     create_vk_instance(vulkanRendererCreateInfo);
     if (vulkanRendererCreateInfo.renderHardwareInterfaceCreateInfo.window) {
         create_vk_surface(vulkanRendererCreateInfo);
@@ -122,6 +123,8 @@ VulkanRHI::~VulkanRHI() {
         vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
     }
     vkDestroyInstance(m_instance, nullptr);
+
+    volkFinalize();
 }
 
 void VulkanRHI::prepare_frame() {
@@ -363,6 +366,8 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
     if (result != VK_SUCCESS){
         throw std::runtime_error("failed to create VkInstance");
     }
+
+    volkLoadInstanceOnly(m_instance);
 }
 
 void VulkanRHI::select_vk_physical_device(uint32_t deviceIndex) {
@@ -474,6 +479,8 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
     }
 
     auto result = vkCreateDevice(m_physicalDevice->handle(), &deviceCreateInfo, nullptr, &m_device);
+
+    volkLoadDevice(m_device);
 
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkDevice");
