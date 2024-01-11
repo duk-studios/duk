@@ -1,1 +1,1 @@
-add_subdirectory(1.3.261.1)
+find_package(Vulkan REQUIRED GLOBAL)

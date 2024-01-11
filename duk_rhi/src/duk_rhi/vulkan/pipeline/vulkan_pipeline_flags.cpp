@@ -11,7 +11,7 @@ namespace duk::rhi {
 VkPipelineStageFlagBits convert_pipeline_stage(PipelineStage::Bits pipelineStage) {
     VkPipelineStageFlagBits converted;
     switch (pipelineStage) {
-        case PipelineStage::NONE: converted = VK_PIPELINE_STAGE_NONE; break;
+        case PipelineStage::NONE: converted = VK_PIPELINE_STAGE_NONE_KHR; break;
         case PipelineStage::TOP_OF_PIPE: converted = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT; break;
         case PipelineStage::DRAW_INDIRECT: converted = VK_PIPELINE_STAGE_DRAW_INDIRECT_BIT; break;
         case PipelineStage::VERTEX_INPUT: converted = VK_PIPELINE_STAGE_VERTEX_INPUT_BIT; break;
@@ -42,7 +42,7 @@ VkPipelineStageFlags convert_pipeline_stage_mask(PipelineStage::Mask pipelineSta
 VkAccessFlagBits convert_access(Access::Bits access) {
     VkAccessFlagBits converted;
     switch (access) {
-        case Access::NONE: converted = VK_ACCESS_NONE; break;
+        case Access::NONE: converted = VK_ACCESS_NONE_KHR; break;
         case Access::INDIRECT_COMMAND_READ: converted = VK_ACCESS_INDIRECT_COMMAND_READ_BIT; break;
         case Access::INDEX_READ: converted = VK_ACCESS_INDEX_READ_BIT; break;
         case Access::VERTEX_ATTRIBUTE_READ: converted = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT; break;

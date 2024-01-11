@@ -11,7 +11,6 @@ VkAttachmentStoreOp convert_store_op(StoreOp storeOp) {
     switch (storeOp){
         case StoreOp::STORE: converted = VK_ATTACHMENT_STORE_OP_STORE; break;
         case StoreOp::DONT_CARE: converted = VK_ATTACHMENT_STORE_OP_DONT_CARE; break;
-        case StoreOp::NONE: converted = VK_ATTACHMENT_STORE_OP_NONE; break;
         default:
             throw std::invalid_argument("unhandled StoreOp for Vulkan");
     }
@@ -24,7 +23,6 @@ VkAttachmentLoadOp convert_load_op(LoadOp loadOp) {
         case LoadOp::LOAD: converted = VK_ATTACHMENT_LOAD_OP_LOAD; break;
         case LoadOp::CLEAR: converted = VK_ATTACHMENT_LOAD_OP_CLEAR; break;
         case LoadOp::DONT_CARE: converted = VK_ATTACHMENT_LOAD_OP_DONT_CARE; break;
-        case LoadOp::NONE: converted = VK_ATTACHMENT_LOAD_OP_NONE_EXT; break;
         default:
             throw std::invalid_argument("unhandled StoreOp for Vulkan");
     }
