@@ -22,7 +22,7 @@ There are many modules, each one exposing a specific set of features:
 Requirements:
 - C++ 20 compiler
 - CMake 3.24+
-- Vulkan 1.3+ SDK
+- Python 3
 
 Duk development is mainly done with MinGW, GCC and MSVC _should_ also work (minor issues might arise, PRs are welcome).
 
