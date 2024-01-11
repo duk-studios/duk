@@ -18,3 +18,5 @@ target_include_directories(duk_events
         )
 
 set_target_properties(duk_events PROPERTIES CXX_STANDARD 20)
+
+add_subdirectory(test)
