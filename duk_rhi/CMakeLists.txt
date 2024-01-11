@@ -122,7 +122,7 @@ target_link_libraries(duk_rhi
 
         grapphs::grapphs
 
-        Vulkan::Vulkan
+        volk::volk
         )
 
 set_target_properties(duk_rhi PROPERTIES CXX_STANDARD 20)
