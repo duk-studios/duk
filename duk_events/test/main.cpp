@@ -1,8 +1,6 @@
-# duk_events
-- Defines event objects that can be used to invoke callbacks on n-listeners
+﻿#include <iostream>
+#include <duk_events/event.h>
 
-# Usage
-```cpp
 int main() {
     int myInt = 0;
     
@@ -21,5 +19,3 @@ int main() {
 
     return 0;
 }
-
-```
