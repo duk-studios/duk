@@ -15,15 +15,13 @@ namespace duk::rhi {
 
 enum class StoreOp {
     STORE = 0,
-    DONT_CARE,
-    NONE,
+    DONT_CARE
 };
 
 enum class LoadOp {
     LOAD = 0,
     CLEAR,
-    DONT_CARE,
-    NONE,
+    DONT_CARE
 };
 
 struct AttachmentDescription {

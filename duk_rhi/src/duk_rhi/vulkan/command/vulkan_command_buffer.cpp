@@ -189,19 +189,16 @@ void VulkanCommandBuffer::dispatch(uint32_t groupCountX, uint32_t groupCountY, u
 void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier& barrier) {
 
     auto imageIndex = *m_currentImagePtr;
-
-    std::vector<VkBufferMemoryBarrier2> bufferMemoryBarriers(barrier.bufferMemoryBarrierCount);
+    
     for (int i = 0; i < barrier.bufferMemoryBarrierCount; i++) {
-        auto& vkBufferMemoryBarrier = bufferMemoryBarriers[i];
+        VkBufferMemoryBarrier vkBufferMemoryBarrier = {};
         auto& dukBufferMemoryBarrier = barrier.bufferMemoryBarriers[i];
-        vkBufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2;
+        vkBufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR;
         vkBufferMemoryBarrier.size = dukBufferMemoryBarrier.size;
         vkBufferMemoryBarrier.offset = dukBufferMemoryBarrier.offset;
         vkBufferMemoryBarrier.buffer = dynamic_cast<VulkanBuffer*>(dukBufferMemoryBarrier.buffer)->handle(imageIndex);
         vkBufferMemoryBarrier.srcAccessMask = convert_access_mask(dukBufferMemoryBarrier.srcAccessMask);
         vkBufferMemoryBarrier.dstAccessMask = convert_access_mask(dukBufferMemoryBarrier.dstAccessMask);
-        vkBufferMemoryBarrier.srcStageMask = convert_pipeline_stage_mask(dukBufferMemoryBarrier.srcStageMask);
-        vkBufferMemoryBarrier.dstStageMask = convert_pipeline_stage_mask(dukBufferMemoryBarrier.dstStageMask);
         vkBufferMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         vkBufferMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         if (dukBufferMemoryBarrier.srcCommandQueue && dukBufferMemoryBarrier.dstCommandQueue) {
@@ -212,14 +209,24 @@ void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier&
                 vkBufferMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
             }
         }
-    }
 
-    std::vector<VkImageMemoryBarrier2> imageMemoryBarriers(barrier.imageMemoryBarrierCount);
+        vkCmdPipelineBarrier(m_currentCommandBuffer,
+                    convert_pipeline_stage_mask(dukBufferMemoryBarrier.srcStageMask),
+                    convert_pipeline_stage_mask(dukBufferMemoryBarrier.dstStageMask),
+                    0,
+                    0,
+                    nullptr,
+                    1,
+                    &vkBufferMemoryBarrier,
+                    0,
+                    nullptr);        
+    }
+    
     for (int i = 0; i < barrier.imageMemoryBarrierCount; i++) {
-        auto& vkImageMemoryBarrier = imageMemoryBarriers[i];
+        VkImageMemoryBarrier vkImageMemoryBarrier = {};
         auto& dukImageMemoryBarrier = barrier.imageMemoryBarriers[i];
         auto vulkanImage = dynamic_cast<VulkanImage*>(dukImageMemoryBarrier.image);
-        vkImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+        vkImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2_KHR;
         vkImageMemoryBarrier.image = vulkanImage->image(imageIndex);
         vkImageMemoryBarrier.oldLayout = convert_layout(dukImageMemoryBarrier.oldLayout);
         vkImageMemoryBarrier.newLayout = convert_layout(dukImageMemoryBarrier.newLayout);
@@ -230,8 +237,6 @@ void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier&
         vkImageMemoryBarrier.subresourceRange.levelCount = dukImageMemoryBarrier.subresourceRange.levelCount;
         vkImageMemoryBarrier.srcAccessMask = convert_access_mask(dukImageMemoryBarrier.srcAccessMask);
         vkImageMemoryBarrier.dstAccessMask = convert_access_mask(dukImageMemoryBarrier.dstAccessMask);
-        vkImageMemoryBarrier.srcStageMask = convert_pipeline_stage_mask(dukImageMemoryBarrier.srcStageMask);
-        vkImageMemoryBarrier.dstStageMask = convert_pipeline_stage_mask(dukImageMemoryBarrier.dstStageMask);
         vkImageMemoryBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         vkImageMemoryBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
         if (dukImageMemoryBarrier.srcCommandQueue && dukImageMemoryBarrier.dstCommandQueue) {
@@ -242,17 +247,18 @@ void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier&
                 vkImageMemoryBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex;
             }
         }
+
+        vkCmdPipelineBarrier(m_currentCommandBuffer,
+            convert_pipeline_stage_mask(dukImageMemoryBarrier.srcStageMask),
+            convert_pipeline_stage_mask(dukImageMemoryBarrier.dstStageMask),
+            0,
+            0,
+            nullptr,
+            0,
+            nullptr,
+            1,
+            &vkImageMemoryBarrier);
     }
-
-
-    VkDependencyInfo dependencyInfo = {};
-    dependencyInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-    dependencyInfo.bufferMemoryBarrierCount = bufferMemoryBarriers.size();
-    dependencyInfo.pBufferMemoryBarriers = bufferMemoryBarriers.data();
-    dependencyInfo.imageMemoryBarrierCount = imageMemoryBarriers.size();
-    dependencyInfo.pImageMemoryBarriers = imageMemoryBarriers.data();
-
-    vkCmdPipelineBarrier2(m_currentCommandBuffer, &dependencyInfo);
 }
 
 Submitter* VulkanCommandBuffer::submitter_ptr() {

@@ -321,7 +321,7 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
     applicationInfo.applicationVersion = rendererCreateInfo.applicationVersion;
     applicationInfo.pEngineName = rendererCreateInfo.engineName;
     applicationInfo.engineVersion = VK_MAKE_VERSION(rendererCreateInfo.engineVersion, 0, 0);
-    applicationInfo.apiVersion = VK_API_VERSION_1_3;
+    applicationInfo.apiVersion = VK_API_VERSION_1_2;
 
     VkInstanceCreateInfo instanceCreateInfo = {};
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -444,14 +444,9 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
         queueCreateInfos.push_back(graphicsQueueCreateInfo);
     }
 
-    VkPhysicalDeviceVulkan13Features vulkan13EnabledFeatures = {};
-    vulkan13EnabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-    vulkan13EnabledFeatures.synchronization2 = VK_TRUE;
-
     VkPhysicalDeviceRobustness2FeaturesEXT physicalDeviceRobustness2 = {};
     physicalDeviceRobustness2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
     physicalDeviceRobustness2.nullDescriptor = VK_TRUE;
-    physicalDeviceRobustness2.pNext = &vulkan13EnabledFeatures;
 
     VkPhysicalDeviceFeatures2 enabledFeatures = {};
     enabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
