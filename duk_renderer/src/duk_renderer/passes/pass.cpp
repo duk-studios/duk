@@ -8,9 +8,10 @@
 
 namespace duk::renderer {
 
-PassConnection::PassConnection(duk::rhi::Access::Mask accessMask, duk::rhi::PipelineStage::Mask stageMask) :
+PassConnection::PassConnection(duk::rhi::Access::Mask accessMask, duk::rhi::PipelineStage::Mask stageMask, duk::rhi::Image::Layout imageLayout) :
     m_accessMask(accessMask),
     m_stageMask(stageMask),
+    m_imageLayout(imageLayout),
     m_image(nullptr),
     m_parent(nullptr) {
 
@@ -59,6 +60,10 @@ duk::rhi::PipelineStage::Mask PassConnection::stage_mask() const {
     return m_stageMask;
 }
 
+duk::rhi::Image::Layout PassConnection::image_layout() const {
+    return m_imageLayout;
+}
+
 duk::rhi::Access::Mask PassConnection::parent_access_mask() const {
     if (m_parent) {
         return m_parent->access_mask();
@@ -73,6 +78,13 @@ duk::rhi::PipelineStage::Mask PassConnection::parent_stage_mask() const {
     return duk::rhi::PipelineStage::NONE;
 }
 
+duk::rhi::Image::Layout PassConnection::parent_image_layout() const {
+    if (m_parent) {
+        return m_parent->image_layout();
+    }
+    return rhi::Image::Layout::UNDEFINED;
+}
+
 duk::rhi::CommandBuffer::ImageMemoryBarrier PassConnection::image_memory_barrier() const {
     duk::rhi::CommandBuffer::ImageMemoryBarrier imageMemoryBarrier = {};
     imageMemoryBarrier.image = m_image;
@@ -80,11 +92,12 @@ duk::rhi::CommandBuffer::ImageMemoryBarrier PassConnection::image_memory_barrier
     imageMemoryBarrier.dstStageMask = stage_mask();
     imageMemoryBarrier.srcAccessMask = parent_access_mask();
     imageMemoryBarrier.dstAccessMask = access_mask();
+    imageMemoryBarrier.oldLayout = parent_image_layout();
+    imageMemoryBarrier.newLayout = image_layout();
     imageMemoryBarrier.subresourceRange = duk::rhi::Image::kFullSubresourceRange;
     return imageMemoryBarrier;
 }
 
 Pass::~Pass() = default;
-
 
 }
