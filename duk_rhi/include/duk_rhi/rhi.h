@@ -6,7 +6,7 @@
 #define DUK_RHI_RENDERER_H
 
 #include <duk_rhi/renderer_error.h>
-#include <duk_rhi/renderer_capabilities.h>
+#include <duk_rhi/rhi_capabilities.h>
 #include <duk_rhi/command/command_queue.h>
 #include <duk_rhi/command/command_scheduler.h>
 #include <duk_rhi/render_pass.h>
@@ -87,7 +87,7 @@ public:
     DUK_NO_DISCARD virtual Image* present_image() = 0;
 
     /// returns an object that can be used to check for limits and capabilities of this rhi
-    DUK_NO_DISCARD virtual RendererCapabilities* capabilities() const = 0;
+    DUK_NO_DISCARD virtual RHICapabilities* capabilities() const = 0;
 
     struct CommandQueueCreateInfo {
         CommandQueue::Type::Bits type;

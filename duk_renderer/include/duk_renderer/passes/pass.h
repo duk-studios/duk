@@ -24,7 +24,7 @@ class GlobalDescriptors;
 class PassConnection {
 public:
 
-    PassConnection(duk::rhi::Access::Mask accessMask, duk::rhi::PipelineStage::Mask stageMask);
+    PassConnection(duk::rhi::Access::Mask accessMask, duk::rhi::PipelineStage::Mask stageMask, duk::rhi::Image::Layout imageLayout);
 
     ~PassConnection();
 
@@ -40,15 +40,20 @@ public:
 
     DUK_NO_DISCARD duk::rhi::PipelineStage::Mask stage_mask() const;
 
+    DUK_NO_DISCARD duk::rhi::Image::Layout image_layout() const;
+
     DUK_NO_DISCARD duk::rhi::Access::Mask parent_access_mask() const;
 
     DUK_NO_DISCARD duk::rhi::PipelineStage::Mask parent_stage_mask() const;
+
+    DUK_NO_DISCARD duk::rhi::Image::Layout parent_image_layout() const;
 
     DUK_NO_DISCARD duk::rhi::CommandBuffer::ImageMemoryBarrier image_memory_barrier() const;
 
 private:
     duk::rhi::Access::Mask m_accessMask;
     duk::rhi::PipelineStage::Mask m_stageMask;
+    duk::rhi::Image::Layout m_imageLayout;
     duk::rhi::Image* m_image;
     PassConnection* m_parent;
     std::list<PassConnection*> m_children;

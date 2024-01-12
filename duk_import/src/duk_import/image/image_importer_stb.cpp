@@ -22,6 +22,11 @@ duk::rhi::PixelFormat build_pixel_format(int channelCount) {
 
 }
 
+ImageImporterStb::ImageImporterStb(const duk::rhi::RHICapabilities* rhiCapabilities) :
+    m_rhiCapabilities(rhiCapabilities) {
+
+}
+
 bool ImageImporterStb::accepts(const std::filesystem::path& path) {
     const auto extension = path.extension().string();
     if (extension != ".png" && extension != ".jpg" && extension != ".jpeg") {
@@ -52,13 +57,23 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageImporterStb::load(const std::fil
         throw std::runtime_error("failed to read image memory");
     }
 
+    auto format = detail::build_pixel_format(channelCount);
+
+    // it would be better to allow the image to be created on whatever format it currently has
+    // and later on convert it manually if needed
+    if (!m_rhiCapabilities->is_format_supported(format, duk::rhi::Image::Usage::SAMPLED)) {
+        // we assume that at least RGBA8U is supported
+        channelCount = 4;
+        format = detail::build_pixel_format(channelCount);
+    }
+
     void* data = stbi_load_from_memory(buffer.data(), static_cast<int>(buffer.size()), &width, &height, &channelCount, channelCount);
 
     if (!data) {
         throw std::runtime_error("failed to decode image: " + std::string(stbi_failure_reason()));
     }
 
-    auto image = ImageImporter::create(data, detail::build_pixel_format(channelCount), width, height);
+    auto image = ImageImporter::create(data, format, width, height);
 
     image->update_hash();
 

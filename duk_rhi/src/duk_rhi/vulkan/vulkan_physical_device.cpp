@@ -10,14 +10,22 @@ namespace duk::rhi {
 
 namespace detail {
 
+bool is_format_supported(VkPhysicalDevice physicalDevice, VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features) {
+    VkFormatProperties props;
+    vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+
+    if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+        return true;
+    }
+    if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+        return true;
+    }
+    return false;
+}
+
 VkFormat find_supported_format(VkPhysicalDevice physicalDevice, std::span<VkFormat> candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
     for (VkFormat format : candidates) {
-        VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
-
-        if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
-            return format;
-        } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+        if (is_format_supported(physicalDevice, format, tiling, features)) {
             return format;
         }
     }
@@ -25,7 +33,6 @@ VkFormat find_supported_format(VkPhysicalDevice physicalDevice, std::span<VkForm
 }
 
 }
-
 
 VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo& physicalDeviceCreateInfo) :
     m_physicalDevice(VK_NULL_HANDLE){
@@ -128,6 +135,10 @@ uint32_t VulkanPhysicalDevice::find_memory_type(uint32_t typeFilter, VkMemoryPro
         }
     }
     throw std::runtime_error("failed to find suitable memory type");
+}
+
+bool VulkanPhysicalDevice::is_format_supported(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features) const {
+    return detail::is_format_supported(m_physicalDevice, format, tiling, features);
 }
 
 VkFormat VulkanPhysicalDevice::select_depth_format(std::span<VkFormat> formats) const {

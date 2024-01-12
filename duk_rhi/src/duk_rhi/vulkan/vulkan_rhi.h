@@ -7,7 +7,7 @@
 
 #include <duk_rhi/rhi.h>
 #include <duk_rhi/vulkan/vulkan_debug_messenger.h>
-#include <duk_rhi/vulkan/vulkan_renderer_capabilities.h>
+#include <duk_rhi/vulkan/vulkan_rhi_capabilities.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
 #include <duk_rhi/vulkan/command/vulkan_command_queue.h>
@@ -40,7 +40,7 @@ public:
 
     DUK_NO_DISCARD Image* present_image() override;
 
-    DUK_NO_DISCARD RendererCapabilities* capabilities() const override;
+    DUK_NO_DISCARD RHICapabilities* capabilities() const override;
 
     DUK_NO_DISCARD ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
 

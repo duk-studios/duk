@@ -46,7 +46,7 @@ static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT           
 }
 
 static std::vector<const char*> query_device_extensions() {
-    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_ROBUSTNESS_2_EXTENSION_NAME};
+    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, VK_EXT_ROBUSTNESS_2_EXTENSION_NAME};
 }
 
 static uint32_t find_present_queue_index(VulkanPhysicalDevice* physicalDevice, VkSurfaceKHR surface){
@@ -153,7 +153,7 @@ Image* VulkanRHI::present_image() {
     return m_swapchain->image();
 }
 
-RendererCapabilities* VulkanRHI::capabilities() const {
+RHICapabilities* VulkanRHI::capabilities() const {
     return m_rendererCapabilities.get();
 }
 
@@ -453,10 +453,15 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
     physicalDeviceRobustness2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
     physicalDeviceRobustness2.nullDescriptor = VK_TRUE;
 
+    VkPhysicalDeviceSynchronization2FeaturesKHR synchronization2 = {};
+    synchronization2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
+    synchronization2.synchronization2 = VK_TRUE;
+    synchronization2.pNext = &physicalDeviceRobustness2;
+
     VkPhysicalDeviceFeatures2 enabledFeatures = {};
     enabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     enabledFeatures.features.fillModeNonSolid = VK_TRUE;
-    enabledFeatures.pNext = &physicalDeviceRobustness2;
+    enabledFeatures.pNext = &synchronization2;
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
