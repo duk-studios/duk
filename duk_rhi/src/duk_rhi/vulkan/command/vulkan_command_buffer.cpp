@@ -193,7 +193,7 @@ void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier&
     for (int i = 0; i < barrier.bufferMemoryBarrierCount; i++) {
         VkBufferMemoryBarrier vkBufferMemoryBarrier = {};
         auto& dukBufferMemoryBarrier = barrier.bufferMemoryBarriers[i];
-        vkBufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2_KHR;
+        vkBufferMemoryBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
         vkBufferMemoryBarrier.size = dukBufferMemoryBarrier.size;
         vkBufferMemoryBarrier.offset = dukBufferMemoryBarrier.offset;
         vkBufferMemoryBarrier.buffer = dynamic_cast<VulkanBuffer*>(dukBufferMemoryBarrier.buffer)->handle(imageIndex);
@@ -226,7 +226,7 @@ void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier&
         VkImageMemoryBarrier vkImageMemoryBarrier = {};
         auto& dukImageMemoryBarrier = barrier.imageMemoryBarriers[i];
         auto vulkanImage = dynamic_cast<VulkanImage*>(dukImageMemoryBarrier.image);
-        vkImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2_KHR;
+        vkImageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
         vkImageMemoryBarrier.image = vulkanImage->image(imageIndex);
         vkImageMemoryBarrier.oldLayout = convert_layout(dukImageMemoryBarrier.oldLayout);
         vkImageMemoryBarrier.newLayout = convert_layout(dukImageMemoryBarrier.newLayout);
