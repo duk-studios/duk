@@ -14,7 +14,7 @@ Importer::Importer(const ImporterCreateInfo& importerCreateInfo) :
 
     auto imagePool = m_renderer->image_pool();
 
-    m_imageImporters.emplace_back(std::make_unique<ImageImporterStb>());
+    m_imageImporters.emplace_back(std::make_unique<ImageImporterStb>(m_renderer->rhi()->capabilities()));
     m_materialImporters.emplace_back(std::make_unique<MaterialImporterJson>(imagePool));
     m_resourceImporter = std::make_unique<ResourceImporterJson>();
 
