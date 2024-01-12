@@ -1,10 +1,6 @@
-# duk_platform
-- Abstracts away most platform specific code (e.g. window).
-- Currently only supports windows.
-- Exposes DUK_PLATFORM_IS_WINDOWS and other platform specific macros.
-- 
-# Usage
-```cpp
+﻿#include <iostream>
+#include "duk_platform/window.h"
+
 int main() {
     bool m_run = false;
     
@@ -43,6 +39,8 @@ int main() {
     m_listener.listen(m_myWindow->window_resize_event, [](uint32_t width, uint32_t height) {
         std::cout<< "My window height: " << height << ", my window width: " << width << std::endl;
     });
+
+    m_myWindow->show();
     
     while (m_run) {
         m_myWindow->pool_events();
@@ -50,4 +48,3 @@ int main() {
     
     return 0;
 }
-```
