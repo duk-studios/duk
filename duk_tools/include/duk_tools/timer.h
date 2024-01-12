@@ -17,6 +17,8 @@ public:
     using Clock = std::chrono::high_resolution_clock;
     using Duration = std::chrono::duration<float>;
 
+    Timer();
+
     void start();
 
     void stop();
