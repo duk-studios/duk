@@ -8,14 +8,14 @@
 
 namespace duk::rhi {
 
-class RendererCapabilities {
+class RHICapabilities {
 public:
 
-    virtual ~RendererCapabilities() = default;
+    virtual ~RHICapabilities() = default;
 
-    virtual PixelFormat depth_format() = 0;
+    DUK_NO_DISCARD virtual PixelFormat depth_format() const = 0;
 
-    virtual bool is_format_supported(PixelFormat format, Image::Usage usage) = 0;
+    DUK_NO_DISCARD virtual bool is_format_supported(PixelFormat format, Image::Usage usage) const = 0;
 
 };
 

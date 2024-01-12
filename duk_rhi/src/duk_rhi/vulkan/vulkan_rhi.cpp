@@ -153,7 +153,7 @@ Image* VulkanRHI::present_image() {
     return m_swapchain->image();
 }
 
-RendererCapabilities* VulkanRHI::capabilities() const {
+RHICapabilities* VulkanRHI::capabilities() const {
     return m_rendererCapabilities.get();
 }
 
