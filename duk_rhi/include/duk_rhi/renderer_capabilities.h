@@ -14,6 +14,9 @@ public:
     virtual ~RendererCapabilities() = default;
 
     virtual PixelFormat depth_format() = 0;
+
+    virtual bool is_format_supported(PixelFormat format, Image::Usage usage) = 0;
+
 };
 
 }

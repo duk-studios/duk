@@ -19,4 +19,9 @@ PixelFormat VulkanRendererCapabilities::depth_format() {
     return convert_pixel_format(m_physicalDevice->select_depth_format(depthFormats));
 }
 
+bool VulkanRendererCapabilities::is_format_supported(PixelFormat format, Image::Usage usage) {
+    auto vkFormat = convert_pixel_format(format);
+    return m_physicalDevice->is_format_supported(vkFormat, VK_IMAGE_TILING_OPTIMAL, usage_format_features(usage));
+}
+
 }

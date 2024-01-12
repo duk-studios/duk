@@ -51,6 +51,8 @@ public:
 
     DUK_NO_DISCARD uint32_t find_memory_type(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 
+    DUK_NO_DISCARD bool is_format_supported(VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features) const;
+
     DUK_NO_DISCARD VkFormat select_depth_format(std::span<VkFormat> formats) const;
 
 private:

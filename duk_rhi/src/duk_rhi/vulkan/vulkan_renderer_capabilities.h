@@ -23,6 +23,8 @@ public:
 
     PixelFormat depth_format() override;
 
+    bool is_format_supported(PixelFormat format, Image::Usage usage) override;
+
 private:
     VulkanPhysicalDevice* m_physicalDevice;
 };
