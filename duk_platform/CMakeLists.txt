@@ -44,3 +44,5 @@ if (MSVC)
             NOMINMAX
             )
 endif ()
+
+add_subdirectory(test)

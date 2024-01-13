@@ -1,12 +1,4 @@
-# duk_platform
-- Abstracts away most platform specific code (e.g. window).
-- Currently only supports windows.
-- Exposes DUK_PLATFORM_IS_WINDOWS and other platform specific macros.
-
-
-# Usage
-```cpp
-#include <iostream>
+﻿#include <iostream>
 #include <duk_platform/window.h>
 
 int main() {
@@ -56,4 +48,3 @@ int main() {
     
     return 0;
 }
-```
