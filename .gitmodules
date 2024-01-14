@@ -22,3 +22,6 @@
 [submodule "external/fmt/fmt"]
 	path = external/fmt/fmt
 	url = git@github.com:fmtlib/fmt.git
+[submodule "external/volk/volk"]
+	path = external/volk/volk
+	url = git@github.com:zeux/volk.git

@@ -14,7 +14,7 @@ static constexpr auto kColorFormat = duk::rhi::PixelFormat::RGBA8U;
 
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
     m_renderer(forwardPassCreateInfo.renderer),
-    m_outColor(duk::rhi::Access::COLOR_ATTACHMENT_WRITE, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT) {
+    m_outColor(duk::rhi::Access::COLOR_ATTACHMENT_WRITE, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
 
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};

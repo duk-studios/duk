@@ -143,6 +143,28 @@ VkImageUsageFlags convert_usage(Image::Usage usage) {
     return converted;
 }
 
+VkFormatFeatureFlags usage_format_features(Image::Usage usage) {
+    VkFormatFeatureFlags features = 0;
+    switch (usage) {
+        case Image::Usage::SAMPLED:
+            features |= VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
+            break;
+        case Image::Usage::STORAGE:
+            features |= VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
+            break;
+        case Image::Usage::SAMPLED_STORAGE:
+            features |= VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT | VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT;
+            break;
+        case Image::Usage::COLOR_ATTACHMENT:
+            features |= VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
+            break;
+        case Image::Usage::DEPTH_STENCIL_ATTACHMENT:
+            features |= VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
+            break;
+    }
+    return features;
+}
+
 void VulkanImage::transition_image_layout(VkCommandBuffer commandBuffer, const TransitionImageLayoutInfo& transitionImageLayoutInfo) {
     VkImageMemoryBarrier imageMemoryBarrier = {};
     imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -435,6 +457,12 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
         imageCount = 1;
     }
 
+    auto format = convert_pixel_format(m_format);
+
+    if (!m_physicalDevice->is_format_supported(format, VK_IMAGE_TILING_OPTIMAL, usage_format_features(m_usage))) {
+        throw std::invalid_argument("unsupported image format requested");
+    }
+
     VkImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -443,7 +471,7 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     imageCreateInfo.extent.depth = 1;
     imageCreateInfo.mipLevels = 1;
     imageCreateInfo.arrayLayers = 1;
-    imageCreateInfo.format = convert_pixel_format(m_format);
+    imageCreateInfo.format = format;
     imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageCreateInfo.usage = convert_usage(m_usage) | (m_data.empty() ? 0 : VK_IMAGE_USAGE_TRANSFER_DST_BIT);

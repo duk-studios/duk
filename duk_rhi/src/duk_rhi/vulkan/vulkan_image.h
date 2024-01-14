@@ -25,6 +25,8 @@ VkImageLayout convert_layout(Image::Layout layout);
 
 VkImageUsageFlags convert_usage(Image::Usage usage);
 
+VkFormatFeatureFlags usage_format_features(Image::Usage usage);
+
 class VulkanImage : public Image {
 public:
 

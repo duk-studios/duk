@@ -12,7 +12,6 @@
 #include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
 
-
 #if DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/window_win_32.h>
 #endif
@@ -97,6 +96,8 @@ VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& vulkanRendererCreateInfo) :
     m_maxFramesInFlight(vulkanRendererCreateInfo.maxFramesInFlight),
     m_currentFrame(0) {
 
+    volkInitialize();
+
     create_vk_instance(vulkanRendererCreateInfo);
     if (vulkanRendererCreateInfo.renderHardwareInterfaceCreateInfo.window) {
         create_vk_surface(vulkanRendererCreateInfo);
@@ -122,6 +123,8 @@ VulkanRHI::~VulkanRHI() {
         vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
     }
     vkDestroyInstance(m_instance, nullptr);
+
+    volkFinalize();
 }
 
 void VulkanRHI::prepare_frame() {
@@ -150,7 +153,7 @@ Image* VulkanRHI::present_image() {
     return m_swapchain->image();
 }
 
-RendererCapabilities* VulkanRHI::capabilities() const {
+RHICapabilities* VulkanRHI::capabilities() const {
     return m_rendererCapabilities.get();
 }
 
@@ -321,7 +324,7 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
     applicationInfo.applicationVersion = rendererCreateInfo.applicationVersion;
     applicationInfo.pEngineName = rendererCreateInfo.engineName;
     applicationInfo.engineVersion = VK_MAKE_VERSION(rendererCreateInfo.engineVersion, 0, 0);
-    applicationInfo.apiVersion = VK_API_VERSION_1_3;
+    applicationInfo.apiVersion = VK_API_VERSION_1_2;
 
     VkInstanceCreateInfo instanceCreateInfo = {};
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -363,6 +366,8 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
     if (result != VK_SUCCESS){
         throw std::runtime_error("failed to create VkInstance");
     }
+
+    volkLoadInstanceOnly(m_instance);
 }
 
 void VulkanRHI::select_vk_physical_device(uint32_t deviceIndex) {
@@ -444,19 +449,19 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
         queueCreateInfos.push_back(graphicsQueueCreateInfo);
     }
 
-    VkPhysicalDeviceVulkan13Features vulkan13EnabledFeatures = {};
-    vulkan13EnabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES;
-    vulkan13EnabledFeatures.synchronization2 = VK_TRUE;
-
     VkPhysicalDeviceRobustness2FeaturesEXT physicalDeviceRobustness2 = {};
     physicalDeviceRobustness2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT;
     physicalDeviceRobustness2.nullDescriptor = VK_TRUE;
-    physicalDeviceRobustness2.pNext = &vulkan13EnabledFeatures;
+
+    VkPhysicalDeviceSynchronization2FeaturesKHR synchronization2 = {};
+    synchronization2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES_KHR;
+    synchronization2.synchronization2 = VK_TRUE;
+    synchronization2.pNext = &physicalDeviceRobustness2;
 
     VkPhysicalDeviceFeatures2 enabledFeatures = {};
     enabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     enabledFeatures.features.fillModeNonSolid = VK_TRUE;
-    enabledFeatures.pNext = &physicalDeviceRobustness2;
+    enabledFeatures.pNext = &synchronization2;
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -479,6 +484,8 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
     }
 
     auto result = vkCreateDevice(m_physicalDevice->handle(), &deviceCreateInfo, nullptr, &m_device);
+
+    volkLoadDevice(m_device);
 
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkDevice");

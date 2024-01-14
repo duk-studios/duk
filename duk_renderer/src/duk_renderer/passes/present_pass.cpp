@@ -18,7 +18,7 @@ static void draw_fullscreen_triangle(duk::rhi::CommandBuffer* commandBuffer, siz
 PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
     m_renderer(presentPassCreateInfo.renderer),
     m_fullscreenTriangleBrush(detail::draw_fullscreen_triangle),
-    m_inColor(duk::rhi::Access::SHADER_READ, duk::rhi::PipelineStage::FRAGMENT_SHADER) {
+    m_inColor(duk::rhi::Access::SHADER_READ, duk::rhi::PipelineStage::FRAGMENT_SHADER, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
 
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};

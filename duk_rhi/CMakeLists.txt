@@ -21,7 +21,7 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/buffer.h
         include/duk_rhi/descriptor_set.h
         include/duk_rhi/image_data_source.h
-        include/duk_rhi/renderer_capabilities.h
+        include/duk_rhi/rhi_capabilities.h
         include/duk_rhi/pipeline/compute_pipeline.h
         include/duk_rhi/pipeline/pipeline_flags.h
         include/duk_rhi/index_types.h
@@ -87,8 +87,8 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/descriptor_set.cpp
         src/duk_rhi/vulkan/vulkan_descriptor_set.cpp
         src/duk_rhi/vulkan/vulkan_descriptor_set.h
-        src/duk_rhi/vulkan/vulkan_renderer_capabilities.h
-        src/duk_rhi/vulkan/vulkan_renderer_capabilities.cpp
+        src/duk_rhi/vulkan/vulkan_rhi_capabilities.h
+        src/duk_rhi/vulkan/vulkan_rhi_capabilities.cpp
         src/duk_rhi/pipeline/compute_pipeline.cpp
         src/duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h
         src/duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.cpp
@@ -122,7 +122,7 @@ target_link_libraries(duk_rhi
 
         grapphs::grapphs
 
-        Vulkan::Vulkan
+        volk::volk
         )
 
 set_target_properties(duk_rhi PROPERTIES CXX_STANDARD 20)

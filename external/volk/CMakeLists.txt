@@ -1,0 +1,7 @@
+if (WIN32)
+    set(VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR)
+endif()
+
+set(VULKAN_HEADERS_INSTALL_DIR ${DUK_VULKAN_ROOT})
+
+add_subdirectory(volk)
