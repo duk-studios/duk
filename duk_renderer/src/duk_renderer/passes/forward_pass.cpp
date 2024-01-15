@@ -10,7 +10,98 @@
 
 namespace duk::renderer {
 
+namespace detail {
+
 static constexpr auto kColorFormat = duk::rhi::PixelFormat::RGBA8U;
+
+static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, PaintData& paintData) {
+    paintData.clear();
+
+    std::set<Material*> uniqueMaterials;
+
+    for (auto object : renderParams.scene->objects_with_components<MeshRenderer>()) {
+        auto meshRenderer = object.component<MeshRenderer>();
+
+        auto& objectEntry = paintData.objects.emplace_back();
+        objectEntry.objectId = object.id();
+        objectEntry.brush = meshRenderer->mesh.get();
+        objectEntry.material = meshRenderer->material.get();
+        objectEntry.sortKey = SortKey::calculate(*meshRenderer);
+
+        uniqueMaterials.insert(objectEntry.material);
+    }
+
+    for (auto material : uniqueMaterials) {
+        material->clear_instances();
+    }
+
+    SortKey::sort_indices(paintData.objects, paintData.sortedObjects);
+
+    auto compatible_with_paint_entry = [](const PaintEntry& paintEntry, const ObjectEntry& objectEntry) -> bool {
+        return paintEntry.params.brush == objectEntry.brush && paintEntry.material == objectEntry.material;
+    };
+
+    auto is_valid = [](const PaintEntry& paintEntry) {
+        return paintEntry.params.brush && paintEntry.material && paintEntry.params.instanceCount > 0;
+    };
+
+    PaintEntry paintEntry = {};
+    paintEntry.params.renderPass = renderPass;
+    paintEntry.params.outputWidth = renderParams.outputWidth;
+    paintEntry.params.outputHeight = renderParams.outputHeight;
+    paintEntry.params.globalDescriptors = renderParams.globalDescriptors;
+
+    for (auto sortedIndex : paintData.sortedObjects) {
+        auto& objectEntry = paintData.objects[sortedIndex];
+
+        // if this object belongs to another paint entry
+        if (!compatible_with_paint_entry(paintEntry, objectEntry)) {
+
+            // if this entry has an actual painter
+            if (is_valid(paintEntry)) {
+                paintData.paintEntries.push_back(paintEntry);
+            }
+            if (paintEntry.material != objectEntry.material) {
+                paintEntry.params.instanceCount = 0;
+                paintEntry.params.firstInstance = 0;
+            }
+            else if (paintEntry.params.brush != objectEntry.brush) {
+                paintEntry.params.firstInstance += paintEntry.params.instanceCount;
+                paintEntry.params.instanceCount = 0;
+            }
+            paintEntry.material = objectEntry.material;
+            paintEntry.params.brush = objectEntry.brush;
+        }
+
+        Material::InsertInstanceParams instanceParams = {};
+        instanceParams.object = renderParams.scene->object(objectEntry.objectId);
+
+        objectEntry.material->insert_instance(instanceParams);
+
+        paintEntry.params.instanceCount++;
+    }
+    if (is_valid(paintEntry)) {
+        paintData.paintEntries.push_back(paintEntry);
+    }
+
+    // mark all instance buffers for gpu upload
+    for (auto material : uniqueMaterials) {
+        material->flush_instances();
+    }
+
+    // for each paint entry
+    for (auto& entry : paintData.paintEntries) {
+        entry.material->paint(renderParams.commandBuffer, entry.params);
+    }
+}
+
+}
+
+void PaintData::clear() {
+    objects.clear();
+    sortedObjects.clear();
+    paintEntries.clear();
+}
 
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
     m_renderer(forwardPassCreateInfo.renderer),
@@ -18,7 +109,7 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
 
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};
-        colorAttachmentDescription.format = kColorFormat;
+        colorAttachmentDescription.format = detail::kColorFormat;
         colorAttachmentDescription.initialLayout = duk::rhi::Image::Layout::UNDEFINED;
         colorAttachmentDescription.layout = duk::rhi::Image::Layout::COLOR_ATTACHMENT;
         colorAttachmentDescription.finalLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
@@ -55,7 +146,7 @@ ForwardPass::~ForwardPass() = default;
 void ForwardPass::render(const RenderParams& renderParams) {
 
     if (!m_colorImage || m_colorImage->width() != renderParams.outputWidth || m_colorImage->height() != renderParams.outputHeight) {
-        m_colorImage = m_renderer->create_color_image(renderParams.outputWidth, renderParams.outputHeight, kColorFormat);
+        m_colorImage = m_renderer->create_color_image(renderParams.outputWidth, renderParams.outputHeight, detail::kColorFormat);
 
         // recreate frame buffer in case image was resized
         m_frameBuffer.reset();
@@ -87,88 +178,9 @@ void ForwardPass::render(const RenderParams& renderParams) {
         m_frameBuffer = std::move(expectedFrameBuffer.value());
     }
 
-    m_objectEntries.clear();
-    m_sortedObjectIndices.clear();
-    m_paintEntries.clear();
-
-    std::set<Material*> uniqueMaterials;
-
-    for (auto object : renderParams.scene->objects_with_components<MeshRenderer>()) {
-        auto meshRenderer = object.component<MeshRenderer>();
-
-        auto& objectEntry = m_objectEntries.emplace_back();
-        objectEntry.objectId = object.id();
-        objectEntry.brush = meshRenderer->mesh.get();
-        objectEntry.material = meshRenderer->material.get();
-        objectEntry.sortKey = SortKey::calculate(*meshRenderer);
-
-        uniqueMaterials.insert(objectEntry.material);
-    }
-
-    for (auto material : uniqueMaterials) {
-        material->clear_instances();
-    }
-
-    SortKey::sort_indices(m_objectEntries, m_sortedObjectIndices);
-
-    auto compatible_with_paint_entry = [](const PaintEntry& paintEntry, const ObjectEntry& objectEntry) -> bool {
-        return paintEntry.params.brush == objectEntry.brush && paintEntry.material == objectEntry.material;
-    };
-
-    auto is_valid = [](const PaintEntry& paintEntry) {
-        return paintEntry.params.brush && paintEntry.material && paintEntry.params.instanceCount > 0;
-    };
-
-    PaintEntry paintEntry = {};
-    paintEntry.params.renderPass = m_renderPass.get();
-    paintEntry.params.outputWidth = renderParams.outputWidth;
-    paintEntry.params.outputHeight = renderParams.outputHeight;
-    paintEntry.params.globalDescriptors = renderParams.globalDescriptors;
-
-    for (auto sortedIndex : m_sortedObjectIndices) {
-        auto& objectEntry = m_objectEntries[sortedIndex];
-
-        // if this object belongs to another paint entry
-        if (!compatible_with_paint_entry(paintEntry, objectEntry)) {
-
-            // if this entry has an actual painter
-            if (is_valid(paintEntry)) {
-                m_paintEntries.push_back(paintEntry);
-            }
-            if (paintEntry.material != objectEntry.material) {
-                paintEntry.params.instanceCount = 0;
-                paintEntry.params.firstInstance = 0;
-            }
-            else if (paintEntry.params.brush != objectEntry.brush) {
-                paintEntry.params.firstInstance += paintEntry.params.instanceCount;
-                paintEntry.params.instanceCount = 0;
-            }
-            paintEntry.material = objectEntry.material;
-            paintEntry.params.brush = objectEntry.brush;
-        }
-
-        Material::InsertInstanceParams instanceParams = {};
-        instanceParams.object = renderParams.scene->object(objectEntry.objectId);
-
-        objectEntry.material->insert_instance(instanceParams);
-
-        paintEntry.params.instanceCount++;
-    }
-    if (is_valid(paintEntry)) {
-        m_paintEntries.push_back(paintEntry);
-    }
-
-    // mark all instance buffers for gpu upload
-    for (auto material : uniqueMaterials) {
-        material->flush_instances();
-    }
-
     renderParams.commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
-    // for each paint entry
-    for (auto& entry : m_paintEntries) {
-        entry.material->paint(renderParams.commandBuffer, entry.params);
-    }
+    detail::render_meshes(renderParams, m_renderPass.get(), m_paintData);
 
     renderParams.commandBuffer->end_render_pass();
 }

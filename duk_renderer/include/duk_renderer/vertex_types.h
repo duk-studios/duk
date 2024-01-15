@@ -6,6 +6,7 @@
 #define DUK_RHI_VERTEX_TYPES_H
 
 #include <duk_rhi/vertex_layout.h>
+#include <duk_rhi/buffer.h>
 #include <duk_tools/bit_block.h>
 #include <span>
 

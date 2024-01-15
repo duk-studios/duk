@@ -13,6 +13,14 @@ namespace duk::renderer {
 
 class Renderer;
 
+struct PaintData {
+    duk::tools::FixedVector<ObjectEntry, scene::MAX_OBJECTS> objects;
+    duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> sortedObjects;
+    duk::tools::FixedVector<PaintEntry, scene::MAX_OBJECTS> paintEntries;
+
+    void clear();
+};
+
 struct ForwardPassCreateInfo {
     Renderer* renderer;
 };
@@ -29,9 +37,7 @@ public:
     DUK_NO_DISCARD PassConnection* out_color();
 
 private:
-    duk::tools::FixedVector<ObjectEntry, scene::MAX_OBJECTS> m_objectEntries;
-    duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> m_sortedObjectIndices;
-    duk::tools::FixedVector<PaintEntry, scene::MAX_OBJECTS> m_paintEntries;
+    PaintData m_paintData;
     Renderer* m_renderer;
     std::shared_ptr<duk::rhi::Image> m_colorImage;
     std::shared_ptr<duk::rhi::Image> m_depthImage;
