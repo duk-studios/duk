@@ -14,14 +14,14 @@ namespace duk::renderer {
 class VertexAttributes {
 public:
 
-    enum class Type {
+    enum Type {
         POSITION = 0,
         NORMAL,
         UV,
         COLOR,
         COUNT
     };
-    using Mask = duk::tools::BitBlock<static_cast<uint32_t>(Type::COUNT)>;
+    using Mask = duk::tools::BitBlock<COUNT>;
     using ConstIterator = Mask::BitBlockIterator<true>;
 
     template<typename T>
@@ -47,9 +47,11 @@ public:
 
 private:
     Mask m_attributes;
-    std::array<size_t, static_cast<uint32_t>(Type::COUNT)> m_attributeOffset;
+    std::array<size_t, COUNT> m_attributeOffset;
     duk::rhi::VertexLayout m_layout;
 };
+
+using VertexBufferArray = std::array<std::shared_ptr<duk::rhi::Buffer>, VertexAttributes::COUNT>;
 
 // ---------------------------
 
@@ -62,7 +64,7 @@ struct VertexColorUV {
 template<>
 inline VertexAttributes VertexAttributes::create<VertexColorUV>() {
     VertexAttributes::Type attributes[] = {
-        VertexAttributes::Type::POSITION, VertexAttributes::Type::COLOR, VertexAttributes::Type::UV
+        VertexAttributes::POSITION, VertexAttributes::COLOR, VertexAttributes::UV
     };
     return VertexAttributes(attributes);
 }
@@ -78,7 +80,7 @@ struct VertexNormalUV {
 template<>
 inline VertexAttributes VertexAttributes::create<VertexNormalUV>() {
     VertexAttributes::Type attributes[] = {
-            VertexAttributes::Type::POSITION, VertexAttributes::Type::NORMAL, VertexAttributes::Type::UV
+            VertexAttributes::POSITION, VertexAttributes::NORMAL, VertexAttributes::UV
     };
     return VertexAttributes(attributes);
 }

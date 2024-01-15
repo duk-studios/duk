@@ -48,6 +48,7 @@ set(DUK_RENDERER_HEADERS
 set(DUK_RENDERER_SOURCES
         src/duk_renderer/renderer.cpp
         src/duk_renderer/sort.cpp
+        src/duk_renderer/vertex_types.cpp
         src/duk_renderer/forward/forward_renderer.cpp
         src/duk_renderer/brushes/mesh.cpp
         src/duk_renderer/brushes/mesh_data_source.cpp
@@ -74,7 +75,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp
         src/duk_renderer/passes/present_pass.cpp
-        src/duk_renderer/vertex_types.cpp
         src/duk_renderer/pools/image_pool.cpp
         src/duk_renderer/pools/mesh_pool.cpp
         src/duk_renderer/pools/material_pool.cpp
