@@ -214,7 +214,8 @@ void Scene::add_component(const Object::Id& id, Args&& ... args) {
 
 template<typename T>
 void Scene::remove_component(const Object::Id& id) {
-    assert(contains<T>(id));
+    assert(valid_component<T>(id));
+    //assert(contains<T>(id));
     remove_component(id.index(), component_index<T>());
     m_objectComponentMasks[id.index()].reset(component_index<T>());
 }
