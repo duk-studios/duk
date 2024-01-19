@@ -35,3 +35,5 @@ target_link_libraries(duk_log
         )
 
 set_target_properties(duk_log PROPERTIES CXX_STANDARD 20)
+
+add_subdirectory(test)
