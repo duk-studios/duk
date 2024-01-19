@@ -5,8 +5,8 @@
 #ifndef DUK_MATERIAL_IMPORTER_H
 #define DUK_MATERIAL_IMPORTER_H
 
-#include <duk_renderer/materials/phong/phong_material.h>
-#include <duk_renderer/materials/color/color_material.h>
+#include <duk_renderer/resources/materials/phong/phong_material.h>
+#include <duk_renderer/resources/materials/color/color_material.h>
 
 #include <filesystem>
 

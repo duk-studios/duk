@@ -3,7 +3,7 @@
 
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/passes/pass.h>
-#include <duk_renderer/materials/globals/global_descriptors.h>
+#include <duk_renderer/resources/materials/globals/global_descriptors.h>
 
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/mesh_pool.h>

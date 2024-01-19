@@ -282,7 +282,7 @@ ShaderDataSourceFileGenerator::ShaderDataSourceFileGenerator(const Parser& parse
 
     const auto& painterName = m_parser.output_painter_name();
     m_fileName = detail::shader_data_source_file_name(m_parser);
-    m_headerIncludePath = "duk_renderer/materials/" + m_parser.output_painter_name() + '/' + m_fileName + ".h";
+    m_headerIncludePath = "duk_renderer/resources/materials/" + m_parser.output_painter_name() + '/' + m_fileName + ".h";
     m_className = detail::shader_data_source_class_name(m_parser);
 
     {

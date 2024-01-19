@@ -2,8 +2,8 @@
 /// present_pass.cpp
 
 #include <duk_renderer/passes/present_pass.h>
-#include <duk_renderer/materials/fullscreen/fullscreen_material.h>
-#include <duk_renderer/materials/painter.h>
+#include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
+#include <duk_renderer/resources/materials/painter.h>
 
 namespace duk::renderer {
 

@@ -4,8 +4,8 @@
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/components/mesh_renderer.h>
-#include <duk_renderer/materials/material.h>
-#include <duk_renderer/materials/painter.h>
+#include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/resources/materials/painter.h>
 #include <duk_renderer/brushes/mesh.h>
 
 namespace duk::renderer {
@@ -14,15 +14,19 @@ namespace detail {
 
 static constexpr auto kColorFormat = duk::rhi::PixelFormat::RGBA8U;
 
-static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, PaintData& paintData) {
-    paintData.clear();
+static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, DrawData* drawData) {
+
+    drawData->clear();
+    auto& objects = drawData->objects;
+    auto& sortedObjects = drawData->sortedObjects;
+    auto& paintEntries = drawData->paintEntries;
 
     std::set<Material*> uniqueMaterials;
 
     for (auto object : renderParams.scene->objects_with_components<MeshRenderer>()) {
         auto meshRenderer = object.component<MeshRenderer>();
 
-        auto& objectEntry = paintData.objects.emplace_back();
+        auto& objectEntry = objects.emplace_back();
         objectEntry.objectId = object.id();
         objectEntry.brush = meshRenderer->mesh.get();
         objectEntry.material = meshRenderer->material.get();
@@ -35,7 +39,7 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
         material->clear_instances();
     }
 
-    SortKey::sort_indices(paintData.objects, paintData.sortedObjects);
+    SortKey::sort_indices(objects, sortedObjects);
 
     auto compatible_with_paint_entry = [](const PaintEntry& paintEntry, const ObjectEntry& objectEntry) -> bool {
         return paintEntry.params.brush == objectEntry.brush && paintEntry.material == objectEntry.material;
@@ -51,15 +55,15 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
     paintEntry.params.outputHeight = renderParams.outputHeight;
     paintEntry.params.globalDescriptors = renderParams.globalDescriptors;
 
-    for (auto sortedIndex : paintData.sortedObjects) {
-        auto& objectEntry = paintData.objects[sortedIndex];
+    for (auto sortedIndex : sortedObjects) {
+        auto& objectEntry = objects[sortedIndex];
 
         // if this object belongs to another paint entry
         if (!compatible_with_paint_entry(paintEntry, objectEntry)) {
 
             // if this entry has an actual painter
             if (is_valid(paintEntry)) {
-                paintData.paintEntries.push_back(paintEntry);
+                paintEntries.push_back(paintEntry);
             }
             if (paintEntry.material != objectEntry.material) {
                 paintEntry.params.instanceCount = 0;
@@ -81,7 +85,7 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
         paintEntry.params.instanceCount++;
     }
     if (is_valid(paintEntry)) {
-        paintData.paintEntries.push_back(paintEntry);
+        paintEntries.push_back(paintEntry);
     }
 
     // mark all instance buffers for gpu upload
@@ -90,14 +94,16 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
     }
 
     // for each paint entry
-    for (auto& entry : paintData.paintEntries) {
+    for (auto& entry : paintEntries) {
         entry.material->paint(renderParams.commandBuffer, entry.params);
     }
 }
 
 }
 
-void PaintData::clear() {
+}
+
+void DrawData::clear() {
     objects.clear();
     sortedObjects.clear();
     paintEntries.clear();
@@ -180,7 +186,7 @@ void ForwardPass::render(const RenderParams& renderParams) {
 
     renderParams.commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
-    detail::render_meshes(renderParams, m_renderPass.get(), m_paintData);
+    detail::render_meshes(renderParams, m_renderPass.get(), &m_drawData);
 
     renderParams.commandBuffer->end_render_pass();
 }
