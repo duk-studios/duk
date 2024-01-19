@@ -30,7 +30,7 @@ PhongMaterialDataSource::PhongMaterialDataSource() :
 }
 
 PhongMaterial::PhongMaterial(const PhongMaterialCreateInfo& phongMaterialCreateInfo) :
-    Material(phongMaterialCreateInfo.renderer, &kPhongShaderDataSource),
+    MeshMaterial(phongMaterialCreateInfo.renderer, &kPhongShaderDataSource),
     m_descriptorSet({phongMaterialCreateInfo.renderer->rhi(), &kPhongShaderDataSource}),
     m_baseColorSampler(),
     m_shininessSampler() {
@@ -67,7 +67,7 @@ void PhongMaterial::clear_instances() {
     m_transformSBO->clear();
 }
 
-void PhongMaterial::insert_instance(const Material::InsertInstanceParams& params) {
+void PhongMaterial::insert_instance(const InsertInstanceParams& params) {
     auto& transform = m_transformSBO->next();
     transform.model = duk::renderer::model_matrix_3d(params.object);
     transform.invModel = glm::inverse(transform.model);

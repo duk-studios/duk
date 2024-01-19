@@ -22,6 +22,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/resources/materials/globals/global_descriptors.h
         include/duk_renderer/resources/materials/painter.h
         include/duk_renderer/resources/materials/material.h
+        include/duk_renderer/resources/materials/mesh_material.h
         include/duk_renderer/resources/materials/uniform_buffer.h
         include/duk_renderer/resources/materials/storage_buffer.h
         include/duk_renderer/resources/materials/color/color_material.h
@@ -65,6 +66,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/resources/sprite_data_source.cpp
         src/duk_renderer/resources/materials/painter.cpp
         src/duk_renderer/resources/materials/material.cpp
+        src/duk_renderer/resources/materials/mesh_material.cpp
         src/duk_renderer/resources/materials/uniform_buffer.cpp
         src/duk_renderer/resources/materials/storage_buffer.cpp
         src/duk_renderer/resources/materials/color/color_material.cpp

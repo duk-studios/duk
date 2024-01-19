@@ -26,7 +26,7 @@ duk::hash::Hash ColorMaterialDataSource::calculate_hash() const {
 }
 
 ColorMaterial::ColorMaterial(const ColorMaterialCreateInfo& colorMaterialCreateInfo) :
-    Material(colorMaterialCreateInfo.renderer, &kColorShaderDataSource),
+    MeshMaterial(colorMaterialCreateInfo.renderer, &kColorShaderDataSource),
     m_descriptorSet({colorMaterialCreateInfo.renderer->rhi(), &kColorShaderDataSource}){
 
     auto rhi = colorMaterialCreateInfo.renderer->rhi();
@@ -64,7 +64,7 @@ void ColorMaterial::clear_instances() {
     m_instanceSBO->clear();
 }
 
-void ColorMaterial::insert_instance(const Material::InsertInstanceParams& params) {
+void ColorMaterial::insert_instance(const InsertInstanceParams& params) {
     auto& transform = m_instanceSBO->next();
     transform.model = duk::renderer::model_matrix_3d(params.object);
 }

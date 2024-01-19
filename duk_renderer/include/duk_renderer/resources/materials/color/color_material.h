@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_COLOR_MATERIAL_H
 #define DUK_RENDERER_COLOR_MATERIAL_H
 
-#include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/resources/materials/mesh_material.h>
 #include <duk_renderer/resources/materials/color/color_types.h>
 #include <duk_renderer/resources/materials/color/color_descriptor_sets.h>
 #include <duk_renderer/pools/image_pool.h>
@@ -37,7 +37,7 @@ struct ColorMaterialCreateInfo {
     const ColorMaterialDataSource* colorMaterialDataSource;
 };
 
-class ColorMaterial : public Material {
+class ColorMaterial : public MeshMaterial {
 public:
 
     explicit ColorMaterial(const ColorMaterialCreateInfo& colorMaterialCreateInfo);

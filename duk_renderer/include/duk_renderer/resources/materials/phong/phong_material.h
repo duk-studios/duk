@@ -6,7 +6,7 @@
 
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/pools/image_pool.h>
-#include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/resources/materials/mesh_material.h>
 #include <duk_renderer/resources/materials/phong/phong_types.h>
 #include <duk_renderer/resources/materials/phong/phong_shader_data_source.h>
 #include <duk_renderer/resources/materials/phong/phong_descriptor_sets.h>
@@ -38,7 +38,7 @@ struct PhongMaterialCreateInfo {
     const PhongMaterialDataSource* phongMaterialDataSource;
 };
 
-class PhongMaterial : public Material {
+class PhongMaterial : public MeshMaterial {
 public:
 
     explicit PhongMaterial(const PhongMaterialCreateInfo& phongMaterialCreateInfo);

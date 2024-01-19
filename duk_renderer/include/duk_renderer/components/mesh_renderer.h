@@ -14,7 +14,7 @@ class Material;
 
 struct MeshRenderer {
     MeshResource mesh;
-    MaterialResource material;
+    MeshMaterialResource material;
 };
 
 template<>

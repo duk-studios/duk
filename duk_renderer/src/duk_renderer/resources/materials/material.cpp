@@ -19,18 +19,6 @@ Material::Material(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderD
     m_painter({.renderer = renderer, .shaderDataSource = shaderDataSource}) {
 }
 
-void Material::clear_instances() {
-
-}
-
-void Material::insert_instance(const Material::InsertInstanceParams& params) {
-
-}
-
-void Material::flush_instances() {
-
-}
-
 void Material::paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params) {
     m_painter.use(commandBuffer, params);
 

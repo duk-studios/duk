@@ -21,18 +21,20 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
     auto& sortedObjects = drawData->sortedObjects;
     auto& paintEntries = drawData->paintEntries;
 
-    std::set<Material*> uniqueMaterials;
+    std::set<MeshMaterial*> uniqueMaterials;
 
     for (auto object : renderParams.scene->objects_with_components<MeshRenderer>()) {
         auto meshRenderer = object.component<MeshRenderer>();
 
+        auto material = meshRenderer->material.get();
+
         auto& objectEntry = objects.emplace_back();
         objectEntry.objectId = object.id();
         objectEntry.brush = meshRenderer->mesh.get();
-        objectEntry.material = meshRenderer->material.get();
+        objectEntry.material = material;
         objectEntry.sortKey = SortKey::calculate(*meshRenderer);
 
-        uniqueMaterials.insert(objectEntry.material);
+        uniqueMaterials.insert(material);
     }
 
     for (auto material : uniqueMaterials) {
@@ -77,10 +79,11 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
             paintEntry.params.brush = objectEntry.brush;
         }
 
-        Material::InsertInstanceParams instanceParams = {};
+        MeshMaterial::InsertInstanceParams instanceParams = {};
         instanceParams.object = renderParams.scene->object(objectEntry.objectId);
 
-        objectEntry.material->insert_instance(instanceParams);
+        // maybe get rid of this cast
+        reinterpret_cast<MeshMaterial*>(objectEntry.material)->insert_instance(instanceParams);
 
         paintEntry.params.instanceCount++;
     }

@@ -49,16 +49,6 @@ protected:
 
 public:
 
-    virtual void clear_instances();
-
-    struct InsertInstanceParams {
-        duk::scene::Object object;
-    };
-
-    virtual void insert_instance(const InsertInstanceParams& params);
-
-    virtual void flush_instances();
-
     struct ApplyParams {
         GlobalDescriptors* globalDescriptors;
     };
@@ -73,7 +63,6 @@ public:
 
 private:
     Painter m_painter;
-
 };
 
 using MaterialResource = duk::pool::Resource<Material>;
