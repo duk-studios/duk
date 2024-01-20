@@ -49,7 +49,7 @@ public:
 
     void flush_instances() override;
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
+    void apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) override;
 
     void update_base_color_image(const ImageResource& baseColorImage, const duk::rhi::Sampler& sampler);
 

@@ -29,7 +29,6 @@ public:
 
 private:
     Renderer* m_renderer;
-    GenericBrush m_fullscreenTriangleBrush;
     PassConnection m_inColor;
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;

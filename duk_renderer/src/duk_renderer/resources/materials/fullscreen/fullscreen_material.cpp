@@ -13,7 +13,8 @@ FullscreenMaterial::FullscreenMaterial(const FullscreenMaterialCreateInfo& fulls
 
 }
 
-void FullscreenMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
+void FullscreenMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
+    painter()->use(commandBuffer, params);
     commandBuffer->bind_descriptor_set(m_descriptorSet.handle(), 0);
 }
 

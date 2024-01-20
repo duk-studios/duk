@@ -20,7 +20,7 @@ public:
 
     explicit FullscreenMaterial(const FullscreenMaterialCreateInfo& fullscreenMaterialCreateInfo);
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
+    void apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params);
 
     void update(duk::rhi::Image* image, const duk::rhi::Sampler& sampler);
 

@@ -47,15 +47,9 @@ protected:
 
     Material(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource);
 
+    virtual ~Material();
+
 public:
-
-    struct ApplyParams {
-        GlobalDescriptors* globalDescriptors;
-    };
-
-    virtual void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) = 0;
-
-    virtual void paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
 
     DUK_NO_DISCARD Painter* painter();
 

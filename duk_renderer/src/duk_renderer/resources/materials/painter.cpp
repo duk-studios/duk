@@ -18,7 +18,7 @@ Painter::Painter(const PainterCreateInfo& painterCreateInfo) :
     });
 }
 
-void Painter::use(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params) {
+void Painter::use(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
     commandBuffer->bind_graphics_pipeline(m_pipelineCache.find_pipeline_for_params(params));
 }
 
@@ -61,7 +61,7 @@ void Painter::PipelineCache::update_shader(const duk::rhi::ShaderDataSource* sha
     m_shader = std::move(expectedColorShader.value());
 }
 
-duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(const PaintParams& params) {
+duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(const DrawParams& params) {
     const auto hash = hash_for_params(params);
 
     auto it = m_pipelines.find(hash);
@@ -100,7 +100,7 @@ duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(con
     return it->second.pipeline.get();
 }
 
-duk::hash::Hash Painter::PipelineCache::hash_for_params(const PaintParams& params) const {
+duk::hash::Hash Painter::PipelineCache::hash_for_params(const DrawParams& params) const {
     hash::Hash hash = 0;
     hash::hash_combine(hash, params.renderPass);
     hash::hash_combine(hash, params.outputWidth);
@@ -111,7 +111,7 @@ duk::hash::Hash Painter::PipelineCache::hash_for_params(const PaintParams& param
     return hash;
 }
 
-duk::rhi::GraphicsPipeline::Viewport Painter::PipelineCache::viewport_for_params(const PaintParams& params) {
+duk::rhi::GraphicsPipeline::Viewport Painter::PipelineCache::viewport_for_params(const DrawParams& params) {
     duk::rhi::GraphicsPipeline::Viewport viewport = {};
     viewport.extent = {params.outputWidth, params.outputHeight};
     viewport.maxDepth = 1.0f;

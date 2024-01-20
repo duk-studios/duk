@@ -50,7 +50,7 @@ public:
 
     void clear_instances() override;
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) override;
+    void apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) override;
 
 private:
     std::unique_ptr<color::InstanceSBO> m_instanceSBO;

@@ -11,17 +11,16 @@
 namespace duk::renderer {
 
 class Brush;
+class Mesh;
 class Material;
+class MeshMaterial;
 class GlobalDescriptors;
 
-struct PaintParams {
+struct DrawParams {
     uint32_t outputWidth;
     uint32_t outputHeight;
     duk::rhi::RenderPass* renderPass;
-    Brush* brush;
     GlobalDescriptors* globalDescriptors;
-    size_t instanceCount;
-    size_t firstInstance;
 };
 
 struct ObjectEntry {
@@ -31,9 +30,12 @@ struct ObjectEntry {
     SortKey sortKey{};
 };
 
-struct PaintEntry {
-    PaintParams params;
-    Material* material;
+struct MeshDrawEntry {
+    DrawParams params;
+    MeshMaterial* material;
+    Mesh* mesh;
+    uint32_t instanceCount;
+    uint32_t firstInstance;
 };
 
 // specialization for duk_renderer/sort.h sort_key

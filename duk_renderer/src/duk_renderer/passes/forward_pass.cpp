@@ -19,7 +19,7 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
     drawData->clear();
     auto& objects = drawData->objects;
     auto& sortedObjects = drawData->sortedObjects;
-    auto& paintEntries = drawData->paintEntries;
+    auto& drawEntries = drawData->drawEntries;
 
     std::set<MeshMaterial*> uniqueMaterials;
 
@@ -43,52 +43,50 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
 
     SortKey::sort_indices(objects, sortedObjects);
 
-    auto compatible_with_paint_entry = [](const PaintEntry& paintEntry, const ObjectEntry& objectEntry) -> bool {
-        return paintEntry.params.brush == objectEntry.brush && paintEntry.material == objectEntry.material;
+    auto compatible_with_draw_entry = [](const MeshDrawEntry& drawEntry, const ObjectEntry& objectEntry) -> bool {
+        return drawEntry.mesh == objectEntry.brush && drawEntry.material == objectEntry.material;
     };
 
-    auto is_valid = [](const PaintEntry& paintEntry) {
-        return paintEntry.params.brush && paintEntry.material && paintEntry.params.instanceCount > 0;
+    auto is_valid = [](const MeshDrawEntry& drawEntry) {
+        return drawEntry.mesh && drawEntry.material && drawEntry.instanceCount > 0;
     };
 
-    PaintEntry paintEntry = {};
-    paintEntry.params.renderPass = renderPass;
-    paintEntry.params.outputWidth = renderParams.outputWidth;
-    paintEntry.params.outputHeight = renderParams.outputHeight;
-    paintEntry.params.globalDescriptors = renderParams.globalDescriptors;
+    MeshDrawEntry drawEntry = {};
+    drawEntry.params.renderPass = renderPass;
+    drawEntry.params.outputWidth = renderParams.outputWidth;
+    drawEntry.params.outputHeight = renderParams.outputHeight;
+    drawEntry.params.globalDescriptors = renderParams.globalDescriptors;
 
     for (auto sortedIndex : sortedObjects) {
         auto& objectEntry = objects[sortedIndex];
 
-        // if this object belongs to another paint entry
-        if (!compatible_with_paint_entry(paintEntry, objectEntry)) {
+        // if this object belongs to another draw entry
+        if (!compatible_with_draw_entry(drawEntry, objectEntry)) {
 
-            // if this entry has an actual painter
-            if (is_valid(paintEntry)) {
-                paintEntries.push_back(paintEntry);
+            if (is_valid(drawEntry)) {
+                drawEntries.push_back(drawEntry);
             }
-            if (paintEntry.material != objectEntry.material) {
-                paintEntry.params.instanceCount = 0;
-                paintEntry.params.firstInstance = 0;
+            if (drawEntry.material != objectEntry.material) {
+                drawEntry.instanceCount = 0;
+                drawEntry.firstInstance = 0;
             }
-            else if (paintEntry.params.brush != objectEntry.brush) {
-                paintEntry.params.firstInstance += paintEntry.params.instanceCount;
-                paintEntry.params.instanceCount = 0;
+            else if (drawEntry.mesh != objectEntry.brush) {
+                drawEntry.firstInstance += drawEntry.instanceCount;
+                drawEntry.instanceCount = 0;
             }
-            paintEntry.material = objectEntry.material;
-            paintEntry.params.brush = objectEntry.brush;
+            drawEntry.material = reinterpret_cast<MeshMaterial*>(objectEntry.material);
+            drawEntry.mesh = reinterpret_cast<Mesh*>(objectEntry.brush);
         }
 
         MeshMaterial::InsertInstanceParams instanceParams = {};
         instanceParams.object = renderParams.scene->object(objectEntry.objectId);
 
-        // maybe get rid of this cast
-        reinterpret_cast<MeshMaterial*>(objectEntry.material)->insert_instance(instanceParams);
+        drawEntry.material->insert_instance(instanceParams);
 
-        paintEntry.params.instanceCount++;
+        drawEntry.instanceCount++;
     }
-    if (is_valid(paintEntry)) {
-        paintEntries.push_back(paintEntry);
+    if (is_valid(drawEntry)) {
+        drawEntries.push_back(drawEntry);
     }
 
     // mark all instance buffers for gpu upload
@@ -96,9 +94,14 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
         material->flush_instances();
     }
 
-    // for each paint entry
-    for (auto& entry : paintEntries) {
-        entry.material->paint(renderParams.commandBuffer, entry.params);
+    // for each draw entry
+    MeshMaterial* currentMaterial = nullptr;
+    for (auto& entry : drawEntries) {
+        if (currentMaterial != entry.material) {
+            currentMaterial = entry.material;
+            entry.material->apply(renderParams.commandBuffer, entry.params);
+        }
+        entry.mesh->draw(renderParams.commandBuffer, entry.instanceCount, entry.firstInstance);
     }
 }
 
@@ -109,7 +112,7 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
 void DrawData::clear() {
     objects.clear();
     sortedObjects.clear();
-    paintEntries.clear();
+    drawEntries.clear();
 }
 
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :

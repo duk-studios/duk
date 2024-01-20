@@ -19,16 +19,7 @@ Material::Material(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderD
     m_painter({.renderer = renderer, .shaderDataSource = shaderDataSource}) {
 }
 
-void Material::paint(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params) {
-    m_painter.use(commandBuffer, params);
-
-    ApplyParams applyParams = {};
-    applyParams.globalDescriptors = params.globalDescriptors;
-
-    apply(commandBuffer, applyParams);
-
-    params.brush->draw(commandBuffer, params.instanceCount, params.firstInstance);
-}
+Material::~Material() = default;
 
 Painter* Material::painter() {
     return &m_painter;

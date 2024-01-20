@@ -77,7 +77,8 @@ void PhongMaterial::flush_instances() {
     m_transformSBO->flush();
 }
 
-void PhongMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const ApplyParams& params) {
+void PhongMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
+    painter()->use(commandBuffer, params);
 
     // updates current camera UBO
     m_descriptorSet.set(PhongDescriptorSet::Bindings::uCamera, *params.globalDescriptors->camera_ubo());

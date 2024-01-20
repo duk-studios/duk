@@ -21,9 +21,9 @@ struct PainterCreateInfo {
 
 class Painter {
 public:
-    Painter(const PainterCreateInfo& painterCreateInfo);
+    explicit Painter(const PainterCreateInfo& painterCreateInfo);
 
-    void use(duk::rhi::CommandBuffer* commandBuffer, const PaintParams& params);
+    void use(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params);
 
     void update_shader(duk::rhi::ShaderDataSource* shaderDataSource);
 
@@ -40,7 +40,7 @@ private:
 
         void update_shader(const duk::rhi::ShaderDataSource* shaderDataSource);
 
-        duk::rhi::GraphicsPipeline* find_pipeline_for_params(const PaintParams& params);
+        duk::rhi::GraphicsPipeline* find_pipeline_for_params(const DrawParams& params);
 
         void invert_y(bool invert);
 
@@ -49,9 +49,9 @@ private:
         void clear_unused_pipelines();
 
     private:
-        duk::hash::Hash hash_for_params(const PaintParams& params) const;
+        duk::hash::Hash hash_for_params(const DrawParams& params) const;
 
-        duk::rhi::GraphicsPipeline::Viewport viewport_for_params(const PaintParams& params);
+        duk::rhi::GraphicsPipeline::Viewport viewport_for_params(const DrawParams& params);
 
     private:
         struct PipelineEntry {

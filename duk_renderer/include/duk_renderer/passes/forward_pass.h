@@ -16,7 +16,7 @@ class Renderer;
 struct DrawData {
     duk::tools::FixedVector<ObjectEntry, scene::MAX_OBJECTS> objects;
     duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> sortedObjects;
-    duk::tools::FixedVector<PaintEntry, scene::MAX_OBJECTS> paintEntries;
+    duk::tools::FixedVector<MeshDrawEntry, scene::MAX_OBJECTS> drawEntries;
 
     void clear();
 };

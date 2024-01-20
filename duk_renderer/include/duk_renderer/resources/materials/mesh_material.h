@@ -23,6 +23,8 @@ public:
     virtual void insert_instance(const InsertInstanceParams& params);
 
     virtual void flush_instances();
+
+    virtual void apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) = 0;
 };
 
 using MeshMaterialResource = duk::pool::Resource<MeshMaterial>;
