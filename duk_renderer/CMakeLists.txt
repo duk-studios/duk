@@ -11,9 +11,11 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/forward/forward_renderer.h
         include/duk_renderer/brushes/mesh.h
         include/duk_renderer/brushes/mesh_data_source.h
+        include/duk_renderer/brushes/sprite_brush.h
         include/duk_renderer/brushes/brush.h
         include/duk_renderer/brushes/generic_brush.h
         include/duk_renderer/components/mesh_renderer.h
+        include/duk_renderer/components/sprite_renderer.h
         include/duk_renderer/components/transform.h
         include/duk_renderer/components/camera.h
         include/duk_renderer/components/lighting.h
@@ -23,6 +25,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/resources/materials/painter.h
         include/duk_renderer/resources/materials/material.h
         include/duk_renderer/resources/materials/mesh_material.h
+        include/duk_renderer/resources/materials/sprite_material.h
         include/duk_renderer/resources/materials/uniform_buffer.h
         include/duk_renderer/resources/materials/storage_buffer.h
         include/duk_renderer/resources/materials/color/color_material.h
@@ -39,7 +42,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/resources/materials/phong/phong_descriptor_sets.h
         include/duk_renderer/resources/materials/globals/lights_types.h
         include/duk_renderer/resources/materials/globals/camera_types.h
-        include/duk_renderer/resources/materials/paint_entry.h
+        include/duk_renderer/resources/materials/draw_entry.h
         include/duk_renderer/passes/forward_pass.h
         include/duk_renderer/passes/pass.h
         include/duk_renderer/passes/present_pass.h
@@ -56,9 +59,11 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/forward/forward_renderer.cpp
         src/duk_renderer/brushes/mesh.cpp
         src/duk_renderer/brushes/mesh_data_source.cpp
+        src/duk_renderer/brushes/sprite_brush.cpp
         src/duk_renderer/brushes/brush.cpp
         src/duk_renderer/brushes/generic_brush.cpp
         src/duk_renderer/components/mesh_renderer.cpp
+        src/duk_renderer/components/sprite_renderer.cpp
         src/duk_renderer/components/transform.cpp
         src/duk_renderer/components/camera.cpp
         src/duk_renderer/components/lighting.cpp
@@ -67,6 +72,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/resources/materials/painter.cpp
         src/duk_renderer/resources/materials/material.cpp
         src/duk_renderer/resources/materials/mesh_material.cpp
+        src/duk_renderer/resources/materials/sprite_material.cpp
         src/duk_renderer/resources/materials/uniform_buffer.cpp
         src/duk_renderer/resources/materials/storage_buffer.cpp
         src/duk_renderer/resources/materials/color/color_material.cpp

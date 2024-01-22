@@ -5,7 +5,7 @@
 #define DUK_RENDERER_MATERIAL_H
 
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/resources/materials/paint_entry.h>
+#include <duk_renderer/resources/materials/draw_entry.h>
 #include <duk_renderer/resources/materials/painter.h>
 
 #include <duk_pool/resource.h>

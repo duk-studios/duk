@@ -9,6 +9,7 @@
 #include <duk_rhi/buffer.h>
 #include <duk_tools/bit_block.h>
 #include <span>
+#include <memory>
 
 namespace duk::renderer {
 

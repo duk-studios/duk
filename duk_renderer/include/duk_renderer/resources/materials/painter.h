@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_PAINTER_H
 #define DUK_RENDERER_PAINTER_H
 
-#include <duk_renderer/resources/materials/paint_entry.h>
+#include <duk_renderer/resources/materials/draw_entry.h>
 #include <duk_rhi/rhi.h>
 
 namespace duk::renderer {

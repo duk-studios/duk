@@ -5,7 +5,8 @@
 #define DUK_RENDERER_FORWARD_PASS_H
 
 #include <duk_renderer/passes/pass.h>
-#include <duk_renderer/resources/materials/paint_entry.h>
+#include <duk_renderer/resources/materials/draw_entry.h>
+#include <duk_renderer/brushes/sprite_brush.h>
 
 #include <duk_tools/fixed_vector.h>
 
@@ -16,9 +17,18 @@ class Renderer;
 struct DrawData {
     duk::tools::FixedVector<ObjectEntry, scene::MAX_OBJECTS> objects;
     duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> sortedObjects;
+
+    void clear();
+};
+
+struct MeshDrawData {
     duk::tools::FixedVector<MeshDrawEntry, scene::MAX_OBJECTS> drawEntries;
 
     void clear();
+};
+
+struct SpriteDrawData {
+    std::unique_ptr<SpriteBrushPool> spriteBrushPool;
 };
 
 struct ForwardPassCreateInfo {
@@ -44,6 +54,7 @@ private:
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
     PassConnection m_outColor;
     DrawData m_drawData;
+    MeshDrawData m_meshDrawData;
 };
 
 }
