@@ -3,6 +3,6 @@ generate_painter_files(
         ${CMAKE_CURRENT_SOURCE_DIR}/glsl/fullscreen.vert
         ${CMAKE_CURRENT_SOURCE_DIR}/glsl/fullscreen.frag
         NAME "fullscreen"
-        INC_DIR ${DUK_RENDERER_INC_DIR}/materials/fullscreen
-        SRC_DIR ${DUK_RENDERER_SRC_DIR}/materials/fullscreen
+        INC_DIR ${DUK_MATERIAL_INC_DIR}/fullscreen
+        SRC_DIR ${DUK_MATERIAL_SRC_DIR}/fullscreen
 )

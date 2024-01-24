@@ -3,6 +3,6 @@ generate_painter_files(
         ${CMAKE_CURRENT_SOURCE_DIR}/glsl/phong.vert
         ${CMAKE_CURRENT_SOURCE_DIR}/glsl/phong.frag
         NAME "phong"
-        INC_DIR ${DUK_RENDERER_INC_DIR}/materials/phong
-        SRC_DIR ${DUK_RENDERER_SRC_DIR}/materials/phong
+        INC_DIR ${DUK_MATERIAL_INC_DIR}/phong
+        SRC_DIR ${DUK_MATERIAL_SRC_DIR}/phong
 )

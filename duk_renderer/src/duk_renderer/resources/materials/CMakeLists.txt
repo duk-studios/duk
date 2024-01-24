@@ -10,8 +10,8 @@ set(GLSLC_FLAGS
         -I ${CMAKE_CURRENT_SOURCE_DIR}/glsl/include
         )
 
-set(SRC_DIR "${DUK_RENDERER_SRC_DIR}/resources/materials")
-set(INC_DIR "${DUK_RENDERER_INC_DIR}/resources/materials")
+set(DUK_MATERIAL_SRC_DIR "${DUK_RENDERER_SRC_DIR}/resources/materials")
+set(DUK_MATERIAL_INC_DIR "${DUK_RENDERER_INC_DIR}/resources/materials")
 
 # add additional bindings as needed
 # in the future we might parse our glsl source ourselves and do this automatically
@@ -20,28 +20,30 @@ list(APPEND GLOBAL_BINDING_NAMES "CameraUBO")
 list(APPEND GLOBAL_BINDING_NAMES "LightsUBO")
 
 set(GLOBAL_GLSL_FILES)
-list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/lighting.glsl")
-list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/phong_lighting.glsl")
-list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/camera.glsl")
-list(APPEND GLOBAL_GLSL_FILES "${SRC_DIR}/glsl/include/duk/vertex.glsl")
+list(APPEND GLOBAL_GLSL_FILES "${DUK_MATERIAL_SRC_DIR}/glsl/include/duk/lighting.glsl")
+list(APPEND GLOBAL_GLSL_FILES "${DUK_MATERIAL_SRC_DIR}/glsl/include/duk/phong_lighting.glsl")
+list(APPEND GLOBAL_GLSL_FILES "${DUK_MATERIAL_SRC_DIR}/glsl/include/duk/camera.glsl")
+list(APPEND GLOBAL_GLSL_FILES "${DUK_MATERIAL_SRC_DIR}/glsl/include/duk/vertex.glsl")
 
 # global files, we use mark them as output to painter generation commands
 set(GLOBAL_GENERATED_FILES)
-list(APPEND GLOBAL_GENERATED_FILES "${INC_DIR}/globals/lights_types.h")
-list(APPEND GLOBAL_GENERATED_FILES "${INC_DIR}/globals/camera_types.h")
+list(APPEND GLOBAL_GENERATED_FILES "${DUK_MATERIAL_INC_DIR}/globals/lights_types.h")
+list(APPEND GLOBAL_GENERATED_FILES "${DUK_MATERIAL_INC_DIR}/globals/camera_types.h")
 
 string(REPLACE ";" "," GLOBAL_BINDING_NAMES "${GLOBAL_BINDING_NAMES}")
 
 set(GENERATE_PAINTER_ENTRIES "" CACHE STRING "List of generate_painter_files calls" FORCE)
 set(GENERATED_FILES "" CACHE STRING "List of stamps for generated painter files" FORCE)
 
-function(pack_generate_painter_entry OUT_ENTRY IN_NAME IN_GLSL_SOURCES)
+function(pack_generate_painter_entry OUT_ENTRY IN_NAME IN_GLSL_SOURCES IN_INC_DIR IN_SRC_DIR)
     # pack glsl sources
     string(REPLACE ";" "###" PACKED_GLSL_SOURCES "${IN_GLSL_SOURCES}")
 
     set(PACKED_ENTRY)
     list(APPEND PACKED_ENTRY ${IN_NAME})
     list(APPEND PACKED_ENTRY ${PACKED_GLSL_SOURCES})
+    list(APPEND PACKED_ENTRY ${IN_INC_DIR})
+    list(APPEND PACKED_ENTRY ${IN_SRC_DIR})
 
     #pack entry
     string(REPLACE ";" "@@@" PACKED_ENTRY "${PACKED_ENTRY}")
@@ -49,22 +51,28 @@ function(pack_generate_painter_entry OUT_ENTRY IN_NAME IN_GLSL_SOURCES)
     set(${OUT_ENTRY} ${PACKED_ENTRY} PARENT_SCOPE)
 endfunction()
 
-function(unpack_generate_painter_entry IN_ENTRY OUT_NAME OUT_GLSL_SOURCES)
+function(unpack_generate_painter_entry IN_ENTRY OUT_NAME OUT_GLSL_SOURCES OUT_INC_DIR OUT_SRC_DIR)
+    message(STATUS "packaged entry: ${IN_ENTRY}")
     string(REPLACE "@@@" ";" PACKED_ENTRY ${IN_ENTRY})
     list(GET PACKED_ENTRY 0 NAME)
     list(GET PACKED_ENTRY 1 PACKED_GLSL_SOURCES)
+    list(GET PACKED_ENTRY 2 INC_DIR)
+    list(GET PACKED_ENTRY 3 SRC_DIR)
 
     set(${OUT_NAME} ${NAME} PARENT_SCOPE)
 
     #unpack glsl sources
     string(REPLACE "###" ";" UNPACKED_GLSL_SOURCES "${PACKED_GLSL_SOURCES}")
     set(${OUT_GLSL_SOURCES} ${UNPACKED_GLSL_SOURCES} PARENT_SCOPE)
+
+    set(${OUT_INC_DIR} ${INC_DIR} PARENT_SCOPE)
+    set(${OUT_SRC_DIR} ${SRC_DIR} PARENT_SCOPE)
 endfunction()
 
 function(generate_painter_files)
 
     set(options)
-    set(oneValueArgs NAME)
+    set(oneValueArgs NAME INC_DIR SRC_DIR GLOBALS_INC GLOBALS_SRC)
     set(multiValueArgs GLSL_SOURCES)
 
     cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -73,7 +81,7 @@ function(generate_painter_files)
         message(FATAL_ERROR "NAME must be provided to generate_painter_files")
     endif ()
 
-    pack_generate_painter_entry(PACKED_ENTRY ${ARGS_NAME} "${ARGS_GLSL_SOURCES}")
+    pack_generate_painter_entry(PACKED_ENTRY ${ARGS_NAME} "${ARGS_GLSL_SOURCES}" "${ARGS_INC_DIR}" "${ARGS_SRC_DIR}")
 
     list(APPEND GENERATE_PAINTER_ENTRIES "${PACKED_ENTRY}")
     set(GENERATE_PAINTER_ENTRIES "${GENERATE_PAINTER_ENTRIES}" CACHE STRING "" FORCE)
@@ -82,10 +90,8 @@ endfunction()
 
 function(add_painter_generate_command PACKED_ENTRY)
 
-    unpack_generate_painter_entry(${PACKED_ENTRY} NAME GLSL_SOURCES)
+    unpack_generate_painter_entry(${PACKED_ENTRY} NAME GLSL_SOURCES PAINTER_INC_DIR PAINTER_SRC_DIR)
 
-    set(PAINTER_SRC_DIR "${SRC_DIR}/${NAME}")
-    set(PAINTER_INC_DIR "${INC_DIR}/${NAME}")
     set(SPV_DIR "${PAINTER_SRC_DIR}/spv")
 
     set(COMMAND_LINE)
@@ -104,7 +110,7 @@ function(add_painter_generate_command PACKED_ENTRY)
                 OUTPUT ${OUTPUT_SPV}
                 DEPENDS ${GLSL_SOURCE} ${GLOBAL_GLSL_FILES}
                 COMMAND ${GLSLC_EXECUTABLE} ${GLSL_SOURCE} -o ${OUTPUT_SPV} ${GLSLC_FLAGS}
-                WORKING_DIRECTORY ${SRC_DIR}
+                WORKING_DIRECTORY ${DUK_MATERIAL_SRC_DIR}
                 COMMENT "Compiling GLSL ${GLSL_FILENAME} to SPIR-V: ${OUTPUT_SPV}"
         )
 
@@ -124,10 +130,10 @@ function(add_painter_generate_command PACKED_ENTRY)
     endforeach ()
 
     list(APPEND COMMAND_LINE "-s")
-    list(APPEND COMMAND_LINE "${SRC_DIR}")
+    list(APPEND COMMAND_LINE "${PAINTER_SRC_DIR}")
 
     list(APPEND COMMAND_LINE "-i")
-    list(APPEND COMMAND_LINE "${INC_DIR}")
+    list(APPEND COMMAND_LINE "${PAINTER_INC_DIR}")
 
     list(APPEND COMMAND_LINE "-n")
     list(APPEND COMMAND_LINE "${NAME}")
@@ -135,7 +141,14 @@ function(add_painter_generate_command PACKED_ENTRY)
     list(APPEND COMMAND_LINE "-l")
     list(APPEND COMMAND_LINE "${GLOBAL_BINDING_NAMES}")
 
-#    message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
+    list(APPEND COMMAND_LINE "-j")
+    list(APPEND COMMAND_LINE "${DUK_MATERIAL_INC_DIR}/globals")
+
+    list(APPEND COMMAND_LINE "-h")
+    list(APPEND COMMAND_LINE "${DUK_MATERIAL_SRC_DIR}/globals")
+
+
+    message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
 
     set(OUTPUT_FILES)
     list(APPEND OUTPUT_FILES "${PAINTER_INC_DIR}/${NAME}_types.h")
@@ -163,6 +176,7 @@ endfunction()
 add_subdirectory(color)
 add_subdirectory(fullscreen)
 add_subdirectory(phong)
+add_subdirectory(sprites/sprite_color)
 
 foreach (PACKED_ENTRY ${GENERATE_PAINTER_ENTRIES})
     add_painter_generate_command(${PACKED_ENTRY})
