@@ -8,11 +8,13 @@ set(DUK_TOOLS_HEADERS
         include/duk_tools/fixed_allocator.h
         include/duk_tools/bit_block.h
         include/duk_tools/file.h
+        include/duk_tools/string.h
         include/duk_tools/timer.h
         )
 
 set(DUK_TOOLS_SOURCES
         src/duk_tools/file.cpp
+        src/duk_tools/string.cpp
         src/duk_tools/timer.cpp
         )
 
