@@ -32,6 +32,16 @@ static std::string generate_bindings(const Reflector::Bindings& bindings) {
     return oss.str();
 }
 
+static std::string descriptor_set_header_include_path(const Parser& parser, const std::string& fileName) {
+    auto absoluteIncludeDirectory = parser.output_include_directory();
+    auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/resources/materials/");
+    auto relativeIncludeDirectory = absoluteIncludeDirectory.substr(startIncludePos);
+    std::ostringstream oss;
+    oss << relativeIncludeDirectory << '/' << fileName << ".h";
+    return oss.str();
+}
+
+
 const char* kDescriptorSetClassDeclarationTemplate = R"(
 struct TemplateClassNameCreateInfo {
     duk::rhi::RHI* rhi;
@@ -150,7 +160,7 @@ void DescriptorSetFileGenerator::generate_header_file_content(std::ostringstream
 
 void DescriptorSetFileGenerator::generate_source_file_content(std::ostringstream& oss) {
     std::string includes[] = {
-            "duk_renderer/resources/materials/" + m_parser.output_painter_name() + '/' + m_fileName + ".h"
+            detail::descriptor_set_header_include_path(m_parser, m_fileName),
     };
     generate_include_directives(oss, includes);
     oss << std::endl;
