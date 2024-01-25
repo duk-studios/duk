@@ -17,14 +17,6 @@ struct MeshRenderer {
     MeshMaterialResource material;
 };
 
-template<>
-inline SortKey SortKey::calculate<MeshRenderer>(const MeshRenderer& param) {
-    SortKey::Flags flags = {};
-    flags.materialValue = reinterpret_cast<std::intptr_t>(param.material.get());
-    flags.meshValue = reinterpret_cast<std::intptr_t>(param.mesh.get());
-    return SortKey{flags};
-}
-
 }
 
 #endif // DUK_RENDERER_MESH_RENDERER_H

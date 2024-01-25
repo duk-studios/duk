@@ -14,21 +14,21 @@ namespace duk::renderer {
 
 class Renderer;
 
-struct DrawData {
-    duk::tools::FixedVector<ObjectEntry, scene::MAX_OBJECTS> objects;
-    duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> sortedObjects;
-
-    void clear();
-};
-
 struct MeshDrawData {
+    duk::tools::FixedVector<MeshEntry, scene::MAX_OBJECTS> meshes;
+    duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> sortedMeshes;
     duk::tools::FixedVector<MeshDrawEntry, scene::MAX_OBJECTS> drawEntries;
 
     void clear();
 };
 
 struct SpriteDrawData {
-    std::unique_ptr<SpriteBrushPool> spriteBrushPool;
+    duk::tools::FixedVector<SpriteEntry, scene::MAX_OBJECTS> sprites;
+    duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> sortedSprites;
+    duk::tools::FixedVector<SpriteDrawEntry, scene::MAX_OBJECTS> drawEntries;
+    std::unique_ptr<SpriteBrush> brush;
+
+    void clear();
 };
 
 struct ForwardPassCreateInfo {
@@ -53,8 +53,8 @@ private:
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
     PassConnection m_outColor;
-    DrawData m_drawData;
     MeshDrawData m_meshDrawData;
+    SpriteDrawData m_spriteDrawData;
 };
 
 }

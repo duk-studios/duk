@@ -82,14 +82,11 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
     }
 }
 
-void SpriteBrush::push(const SpriteEntry& entry) {
+void SpriteBrush::push(const Sprite* sprite, const glm::mat4& model) {
     const auto currentSpriteIndex = m_spriteCount++;
     if (m_spriteCount >= m_spriteCapacity) {
         resize(static_cast<uint32_t>(static_cast<double>(m_spriteCapacity) * std::numbers::phi_v<double>));
     }
-
-    auto sprite = entry.sprite;
-    auto object = entry.object;
 
     glm::vec2 halfSize = {
             static_cast<float>(sprite->width()) / detail::kPixelsPerUnit / 2,
@@ -98,8 +95,6 @@ void SpriteBrush::push(const SpriteEntry& entry) {
 
     // position
     {
-        const auto model = model_matrix_3d(object);
-
         std::array<glm::vec3, 4> positions = {};
         positions[0] = model * glm::vec4(-halfSize.x, -halfSize.y, 0.0f, 1.0f);
         positions[1] = model * glm::vec4(halfSize.x, -halfSize.y, 0.0f, 1.0f);
@@ -163,6 +158,7 @@ void SpriteBrush::resize(uint32_t spriteCapacity) {
 }
 
 void SpriteBrush::draw(duk::rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance) {
+    assert(firstInstance + instanceCount <= m_spriteCount);
     duk::tools::FixedVector<duk::rhi::Buffer*, VertexAttributes::COUNT> buffers;
 
     for (auto& vertexBuffer : m_vertexBuffers) {
@@ -173,9 +169,12 @@ void SpriteBrush::draw(duk::rhi::CommandBuffer* commandBuffer, size_t instanceCo
         buffers.push_back(buffer);
     }
 
+    uint32_t indexCount = instanceCount * detail::kIndicesPerSprite;
+    uint32_t firstIndex = firstInstance * detail::kIndicesPerSprite;
+
     commandBuffer->bind_vertex_buffer(buffers.data(), buffers.size());
     commandBuffer->bind_index_buffer(m_indexBuffer.get());
-    commandBuffer->draw_indexed(m_spriteCount * detail::kIndicesPerSprite, 1, 0, 0, 0);
+    commandBuffer->draw_indexed(indexCount, 1, firstIndex, 0, 0);
 }
 
 SpriteBrushPool::SpriteBrushPool(const SpriteBrushPoolCreateInfo& spriteBrushPoolCreateInfo) :

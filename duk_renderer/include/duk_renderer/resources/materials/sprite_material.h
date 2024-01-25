@@ -20,7 +20,7 @@ public:
     virtual void apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params, uint32_t spriteHandle) = 0;
 
     struct PushSpriteParams {
-        const duk::scene::Object& object;
+        duk::scene::Object object;
         Sprite* sprite = nullptr;
     };
 
@@ -42,7 +42,7 @@ private:
     size_t m_usedDescriptorSets;
 };
 
-using SpriteMaterialResource = duk::pool::Resource<Material>;
+using SpriteMaterialResource = duk::pool::Resource<SpriteMaterial>;
 
 }
 

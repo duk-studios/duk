@@ -8,14 +8,9 @@
 #include <duk_renderer/brushes/brush.h>
 #include <duk_renderer/resources/sprite.h>
 #include <duk_renderer/vertex_types.h>
-#include <duk_scene/object.h>
+#include <glm/mat4x4.hpp>
 
 namespace duk::renderer {
-
-struct SpriteEntry {
-    Sprite* sprite{};
-    duk::scene::Object object;
-};
 
 struct SpriteBrushCreateInfo {
     Renderer* renderer;
@@ -27,7 +22,7 @@ public:
 
     explicit SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo);
 
-    void push(const SpriteEntry& entry);
+    void push(const Sprite* sprite, const glm::mat4& model);
 
     void clear();
 

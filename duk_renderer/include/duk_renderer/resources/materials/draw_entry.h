@@ -12,6 +12,7 @@ namespace duk::renderer {
 
 class Brush;
 class Mesh;
+class Sprite;
 class SpriteBrush;
 class Material;
 class MeshMaterial;
@@ -25,10 +26,10 @@ struct DrawParams {
     GlobalDescriptors* globalDescriptors;
 };
 
-struct ObjectEntry {
+struct MeshEntry {
     duk::scene::Object::Id objectId;
-    Brush* brush{};
-    Material* material{};
+    Mesh* mesh{};
+    MeshMaterial* material{};
     SortKey sortKey{};
 };
 
@@ -40,17 +41,31 @@ struct MeshDrawEntry {
     uint32_t firstInstance;
 };
 
+struct SpriteEntry {
+    duk::scene::Object::Id objectId;
+    SpriteMaterial* material{};
+    Sprite* sprite{};
+    SortKey sortKey{};
+    uint32_t materialIndex;
+};
+
 struct SpriteDrawEntry {
-    DrawParams params;
-    SpriteMaterial* material;
     SpriteBrush* brush;
-    uint32_t spriteHandle;
+    SpriteMaterial* material;
+    uint32_t materialIndex;
+    size_t instanceCount;
+    size_t firstInstance;
 };
 
 // specialization for duk_renderer/sort.h sort_key
 template<>
-inline SortKey SortKey::sort_key(const ObjectEntry& objectEntry) {
-    return objectEntry.sortKey;
+inline SortKey SortKey::sort_key(const MeshEntry& meshEntry) {
+    return meshEntry.sortKey;
+}
+
+template<>
+inline SortKey SortKey::sort_key(const SpriteEntry& spriteEntry) {
+    return spriteEntry.sortKey;
 }
 
 }
