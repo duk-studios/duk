@@ -5,6 +5,7 @@
 #include <duk_platform/win32/window_win_32.h>
 
 #include <duk_hash/hash_combine.h>
+#include <windowsx.h>
 
 #include <sstream>
 
@@ -141,6 +142,17 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             m_height = HIWORD(lParam);
             window_resize_event(m_width, m_height);
             return 0;
+        }
+        case WM_MOUSEMOVE: {
+            m_mousePositionX = GET_X_LPARAM(lParam);
+            m_mousePositionY = GET_Y_LPARAM(lParam);
+            mouse_movement_event(m_mousePositionX, m_mousePositionY);     
+        }
+        case WM_LBUTTONDOWN: {
+            mouse_left_button_down();     
+        }
+        case WM_LBUTTONUP: {
+            mouse_left_button_up();     
         }
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);

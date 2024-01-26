@@ -32,6 +32,9 @@ public:
     using CloseEvent = duk::events::EventVoid;
     using DestroyEvent = duk::events::EventVoid;
     using ResizeEvent = duk::events::EventT<uint32_t, uint32_t>;
+    using MouseMovement = duk::events::EventT<uint32_t, uint32_t>;
+    using MouseLeftButtonDown = duk::events::EventT<>;
+    using MouseLeftButtonUp = duk::events::EventT<>;
 
 public:
 
@@ -44,6 +47,10 @@ public:
     DUK_NO_DISCARD uint32_t width() const;
 
     DUK_NO_DISCARD uint32_t height() const;
+
+    DUK_NO_DISCARD uint32_t MousePositionX();
+
+    DUK_NO_DISCARD uint32_t MousePositionY();
 
     virtual void show() = 0;
 
@@ -64,11 +71,18 @@ public:
     DestroyEvent window_destroy_event;
 
     ResizeEvent window_resize_event;
+    
+    MouseMovement mouse_movement_event;
+    
+    MouseLeftButtonDown mouse_left_button_down;
+    
+    MouseLeftButtonUp mouse_left_button_up;
 
 protected:
     uint32_t m_width;
     uint32_t m_height;
-
+    uint32_t m_mousePositionX;
+    uint32_t m_mousePositionY;
 };
 
 }

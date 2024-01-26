@@ -53,4 +53,11 @@ uint32_t Window::height() const {
     return m_height;
 }
 
+uint32_t Window::MousePositionX() {
+    return m_mousePositionY;
+}
+
+uint32_t Window::MousePositionY() {
+    return m_mousePositionY;
+}
 }
