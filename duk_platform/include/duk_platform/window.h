@@ -6,7 +6,7 @@
 #define DUK_PLATFORM_WINDOW_H
 
 #include <duk_platform/window_error.h>
-
+#include <duk_platform/key_codes.h>
 #include <duk_events/event.h>
 
 #include <tl/expected.hpp>
@@ -33,8 +33,9 @@ public:
     using DestroyEvent = duk::events::EventVoid;
     using ResizeEvent = duk::events::EventT<uint32_t, uint32_t>;
     using MouseMovement = duk::events::EventT<uint32_t, uint32_t>;
-    using MouseLeftButtonDown = duk::events::EventT<>;
-    using MouseLeftButtonUp = duk::events::EventT<>;
+    using MouseWheelMovementEvent = duk::events::EventT<uint32_t, uint32_t>;
+    using MouseButtonDownEvent = duk::events::EventT<MouseButton>;
+    using MouseButtonUpEvent = duk::events::EventT<MouseButton>;
 
 public:
 
@@ -47,10 +48,6 @@ public:
     DUK_NO_DISCARD uint32_t width() const;
 
     DUK_NO_DISCARD uint32_t height() const;
-
-    DUK_NO_DISCARD uint32_t MousePositionX();
-
-    DUK_NO_DISCARD uint32_t MousePositionY();
 
     virtual void show() = 0;
 
@@ -74,15 +71,15 @@ public:
     
     MouseMovement mouse_movement_event;
     
-    MouseLeftButtonDown mouse_left_button_down;
+    MouseButtonDownEvent mouse_button_down_event;
     
-    MouseLeftButtonUp mouse_left_button_up;
+    MouseButtonUpEvent mouse_button_up_event;
+    
+    MouseWheelMovementEvent mouse_wheel_movement_event;
 
 protected:
     uint32_t m_width;
     uint32_t m_height;
-    uint32_t m_mousePositionX;
-    uint32_t m_mousePositionY;
 };
 
 }

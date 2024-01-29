@@ -40,6 +40,23 @@ int main() {
         std::cout<< "My window height: " << height << ", my window width: " << width << std::endl;
     });
 
+    listener.listen(window->mouse_movement_event, [](uint32_t width, uint32_t height) {
+        std::cout<< "My mouse x: " << height << ", my mouse y: " << width << std::endl;
+    });
+
+    listener.listen(window->mouse_button_down_event, [](duk::platform::MouseButton mouseButton) {
+        std::cout<< "My mouse is pressed!" << std::endl;
+    });
+    
+    listener.listen(window->mouse_button_up_event, [](duk::platform::MouseButton mouseButton) {
+        std::cout<< "My mouse is not pressed! " << std::endl;
+    });
+
+    listener.listen(window->mouse_wheel_movement_event, [](uint32_t fwKeys, uint32_t zDelta){
+        std::cout<< "My mouse wheel fwKeys: " << fwKeys << ", my mouse wheel zDelta: " << zDelta << std::endl;
+    });
+    
+    
     window->show();
     
     while (run) {
