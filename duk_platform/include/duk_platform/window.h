@@ -6,7 +6,7 @@
 #define DUK_PLATFORM_WINDOW_H
 
 #include <duk_platform/window_error.h>
-
+#include <duk_platform/key_codes.h>
 #include <duk_events/event.h>
 
 #include <tl/expected.hpp>
@@ -32,6 +32,10 @@ public:
     using CloseEvent = duk::events::EventVoid;
     using DestroyEvent = duk::events::EventVoid;
     using ResizeEvent = duk::events::EventT<uint32_t, uint32_t>;
+    using MouseMovement = duk::events::EventT<uint32_t, uint32_t>;
+    using MouseWheelMovementEvent = duk::events::EventT<uint32_t, uint32_t>;
+    using MouseButtonDownEvent = duk::events::EventT<MouseButton>;
+    using MouseButtonUpEvent = duk::events::EventT<MouseButton>;
 
 public:
 
@@ -64,11 +68,18 @@ public:
     DestroyEvent window_destroy_event;
 
     ResizeEvent window_resize_event;
+    
+    MouseMovement mouse_movement_event;
+    
+    MouseButtonDownEvent mouse_button_down_event;
+    
+    MouseButtonUpEvent mouse_button_up_event;
+    
+    MouseWheelMovementEvent mouse_wheel_movement_event;
 
 protected:
     uint32_t m_width;
     uint32_t m_height;
-
 };
 
 }
