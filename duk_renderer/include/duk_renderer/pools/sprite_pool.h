@@ -20,8 +20,11 @@ public:
 
     DUK_NO_DISCARD SpriteResource create(duk::pool::ResourceId resourceId, const duk::renderer::SpriteDataSource* spriteDataSource);
 
+    DUK_NO_DISCARD SpriteResource white_square() const;
+
 private:
     ImagePool* m_imagePool;
+    SpriteResource m_whiteRectSprite;
 };
 
 }
