@@ -58,6 +58,8 @@ public:
 
     void close() override;
 
+    static Keys convert_window_key(int windowsKeyCode);
+
     DUK_NO_DISCARD bool minimized() const override;
 
 private:
