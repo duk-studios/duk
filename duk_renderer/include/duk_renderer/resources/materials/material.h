@@ -20,7 +20,8 @@ enum class MaterialType {
     UNDEFINED = 0,
     COLOR,
     PHONG,
-    FULLSCREEN
+    FULLSCREEN,
+    SPRITE_COLOR,
 };
 
 class MaterialDataSource : public duk::hash::DataSource {

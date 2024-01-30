@@ -10,6 +10,7 @@
 #include <duk_renderer/resources/materials/phong/phong_material.h>
 #include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
 #include <duk_renderer/resources/materials/color/color_material.h>
+#include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_material.h>
 
 namespace duk::renderer {
 
@@ -36,6 +37,10 @@ public:
     DUK_NO_DISCARD ColorMaterialResource create_color(duk::pool::ResourceId resourceId, const ColorMaterialDataSource* colorMaterialDataSource);
 
     DUK_NO_DISCARD FullscreenMaterialResource create_fullscreen(duk::pool::ResourceId resourceId);
+
+    DUK_NO_DISCARD SpriteColorMaterialResource create_sprite_color(duk::pool::ResourceId resourceId);
+
+    DUK_NO_DISCARD SpriteColorMaterialResource create_sprite_color(duk::pool::ResourceId resourceId, const SpriteColorMaterialDataSource* spriteColorMaterialDataSource);
 
 private:
     duk::renderer::Renderer* m_renderer;

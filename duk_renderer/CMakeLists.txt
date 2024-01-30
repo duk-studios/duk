@@ -40,6 +40,10 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/resources/materials/phong/phong_shader_data_source.h
         include/duk_renderer/resources/materials/phong/phong_types.h
         include/duk_renderer/resources/materials/phong/phong_descriptor_sets.h
+        include/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_material.h
+        include/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_shader_data_source.h
+        include/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_types.h
+        include/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptor_sets.h
         include/duk_renderer/resources/materials/globals/lights_types.h
         include/duk_renderer/resources/materials/globals/camera_types.h
         include/duk_renderer/resources/materials/draw_entry.h
@@ -84,6 +88,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/resources/materials/phong/phong_material.cpp
         src/duk_renderer/resources/materials/phong/phong_shader_data_source.cpp
         src/duk_renderer/resources/materials/phong/phong_descriptor_sets.cpp
+        src/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_material.cpp
+        src/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_shader_data_source.cpp
+        src/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptor_sets.cpp
         src/duk_renderer/resources/materials/globals/global_descriptors.cpp
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp

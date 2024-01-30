@@ -69,4 +69,18 @@ FullscreenMaterialResource MaterialPool::create_fullscreen(duk::pool::ResourceId
     return insert(resourceId, material).as<FullscreenMaterial>();
 }
 
+SpriteColorMaterialResource MaterialPool::create_sprite_color(duk::pool::ResourceId resourceId) {
+    SpriteColorMaterialDataSource spriteColorMaterialDataSource = {};
+    spriteColorMaterialDataSource.color = glm::vec4(1);
+    return create_sprite_color(resourceId, &spriteColorMaterialDataSource);
+}
+
+SpriteColorMaterialResource MaterialPool::create_sprite_color(duk::pool::ResourceId resourceId, const SpriteColorMaterialDataSource* spriteColorMaterialDataSource) {
+    SpriteColorMaterialCreateInfo spriteColorMaterialCreateInfo = {};
+    spriteColorMaterialCreateInfo.renderer = m_renderer;
+    spriteColorMaterialCreateInfo.spriteColorMaterialDataSource = spriteColorMaterialDataSource;
+
+    return insert(resourceId, std::make_shared<SpriteColorMaterial>(spriteColorMaterialCreateInfo)).as<SpriteColorMaterial>();
+}
+
 }
