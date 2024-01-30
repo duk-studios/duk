@@ -52,7 +52,7 @@ function(pack_generate_painter_entry OUT_ENTRY IN_NAME IN_GLSL_SOURCES IN_INC_DI
 endfunction()
 
 function(unpack_generate_painter_entry IN_ENTRY OUT_NAME OUT_GLSL_SOURCES OUT_INC_DIR OUT_SRC_DIR)
-    message(STATUS "packaged entry: ${IN_ENTRY}")
+#    message(STATUS "packaged entry: ${IN_ENTRY}")
     string(REPLACE "@@@" ";" PACKED_ENTRY ${IN_ENTRY})
     list(GET PACKED_ENTRY 0 NAME)
     list(GET PACKED_ENTRY 1 PACKED_GLSL_SOURCES)
@@ -148,7 +148,7 @@ function(add_painter_generate_command PACKED_ENTRY)
     list(APPEND COMMAND_LINE "${DUK_MATERIAL_SRC_DIR}/globals")
 
 
-    message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
+    #message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
 
     set(OUTPUT_FILES)
     list(APPEND OUTPUT_FILES "${PAINTER_INC_DIR}/${NAME}_types.h")
