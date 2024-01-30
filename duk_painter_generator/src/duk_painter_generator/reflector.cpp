@@ -195,6 +195,12 @@ static duk::rhi::VertexInput::Format vertex_attribute_format(SpvReflectFormat fo
     }
 }
 
+static void remove_unsupported_attributes(std::vector<SpvReflectInterfaceVariable*>& attributes) {
+    std::erase_if(attributes, [&attributes](SpvReflectInterfaceVariable* attribute) -> bool {
+        return attribute->location > attributes.size();
+    });
+}
+
 }
 
 Reflector::Reflector(const Parser& parser) :
@@ -223,11 +229,13 @@ void Reflector::reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::
         std::vector<SpvReflectInterfaceVariable*> inputVariables(inputVariableCount);
         detail::check_result(spvReflectEnumerateEntryPointInputVariables(&module, "main", &inputVariableCount, inputVariables.data()));
 
-        m_attributes.resize(inputVariableCount - 1);
+        detail::remove_unsupported_attributes(inputVariables);
 
-        for (int i = 1; i < inputVariableCount; i++) {
+        m_attributes.resize(inputVariables.size());
+
+        for (int i = 0; i < inputVariables.size(); i++) {
             auto inputVariable = inputVariables[i];
-            m_attributes[inputVariable->location] = (detail::vertex_attribute_format(inputVariable->format));
+            m_attributes.at(inputVariable->location) = (detail::vertex_attribute_format(inputVariable->format));
         }
     }
 
@@ -236,7 +244,6 @@ void Reflector::reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::
 
     std::vector<SpvReflectDescriptorSet*> descriptorSets(descriptorSetCount);
     detail::check_result(spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, descriptorSets.data()));
-
 
     if (descriptorSetCount > m_sets.size()) {
         m_sets.resize(descriptorSetCount);
