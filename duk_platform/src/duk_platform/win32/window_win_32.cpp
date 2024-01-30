@@ -5,6 +5,7 @@
 #include <duk_platform/win32/window_win_32.h>
 
 #include <duk_hash/hash_combine.h>
+#include <windowsx.h>
 
 #include <sstream>
 
@@ -141,6 +142,42 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             m_height = HIWORD(lParam);
             window_resize_event(m_width, m_height);
             return 0;
+        }
+        case WM_MOUSEMOVE: {
+            auto posX = GET_X_LPARAM(lParam);
+            auto posY = GET_Y_LPARAM(lParam);
+            mouse_movement_event(posX, posY);
+            return 0;
+        }
+        case WM_LBUTTONDOWN: {
+            mouse_button_down_event(MouseButton::LEFT);
+            return 0;
+        }
+        case WM_LBUTTONUP: {
+            mouse_button_up_event(MouseButton::LEFT);
+            return 0;
+        }
+        case WM_RBUTTONDOWN: {
+            mouse_button_down_event(MouseButton::RIGHT);
+            return 0;
+        }
+        case WM_RBUTTONUP: {
+            mouse_button_up_event(MouseButton::RIGHT);
+            return 0;
+        }
+        case WM_MBUTTONDOWN: {
+            mouse_button_down_event(MouseButton::MIDDLE);
+            return 0;
+        }
+        case WM_MBUTTONUP: {
+            mouse_button_up_event(MouseButton::MIDDLE);
+            return 0;
+        }
+        case WM_MOUSEWHEEL: {
+            auto fwKeys = GET_KEYSTATE_WPARAM(wParam);
+            auto zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+            mouse_wheel_movement_event(fwKeys, zDelta);
+            return 0;  
         }
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);

@@ -52,5 +52,4 @@ uint32_t Window::width() const {
 uint32_t Window::height() const {
     return m_height;
 }
-
 }
