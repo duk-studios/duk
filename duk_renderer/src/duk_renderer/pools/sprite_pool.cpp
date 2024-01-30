@@ -17,7 +17,7 @@ SpritePool::SpritePool(const SpritePoolCreateInfo& spritePoolCreateInfo) :
 
         SpriteDataSource spriteDataSource(spriteDataSourceCreateInfo);
 
-        m_whiteRectSprite = create(duk::pool::ResourceId(10001), &spriteDataSource);
+        m_whiteSquareSprite = create(duk::pool::ResourceId(10001), &spriteDataSource);
     }
 
 }
@@ -30,7 +30,7 @@ SpriteResource SpritePool::create(duk::pool::ResourceId resourceId, const duk::r
 }
 
 SpriteResource SpritePool::white_square() const {
-    return m_whiteRectSprite;
+    return m_whiteSquareSprite;
 }
 
 }

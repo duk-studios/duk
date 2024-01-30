@@ -24,7 +24,7 @@ public:
 
 private:
     ImagePool* m_imagePool;
-    SpriteResource m_whiteRectSprite;
+    SpriteResource m_whiteSquareSprite;
 };
 
 }
