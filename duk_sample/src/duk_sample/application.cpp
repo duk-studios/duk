@@ -3,6 +3,7 @@
 
 #include <duk_sample/application.h>
 #include <duk_sample/camera_system.h>
+#include <duk_sample/sprite_system.h>
 #include <duk_engine/systems/render_system.h>
 
 namespace duk::sample {
@@ -23,7 +24,9 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
     auto systems = m_engine->systems();
     systems->add_system<CameraSystem>(*m_engine, "CameraSystem");
+    systems->add_system<SpriteSystem>(*m_engine, "SpriteSystem");
     systems->add_system<duk::engine::RenderSystem>(*m_engine, "RenderSystem");
+
 }
 
 Application::~Application() = default;

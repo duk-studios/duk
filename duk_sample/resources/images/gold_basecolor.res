@@ -1,5 +1,5 @@
 {
   "type": "img",
-  "id": 1,
+  "id": 51,
   "file": "gold_basecolor.png"
 }

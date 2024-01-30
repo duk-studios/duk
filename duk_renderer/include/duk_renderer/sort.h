@@ -13,16 +13,13 @@ namespace duk::renderer {
 
 struct SortKey {
     struct Flags {
-        uint16_t meshValue;
-        uint16_t materialValue;
+        uint16_t lower16Bits;
+        uint16_t higher16Bits;
     };
     union {
         Flags flags;
         uint32_t key;
     };
-
-    template<typename T>
-    static SortKey calculate(const T& param) = delete;
 
     // specialize this method for any given type to access its SortKey object
     template<typename T>

@@ -41,7 +41,7 @@ GlobalTypesFileGenerator::GlobalTypesFileGenerator(const Parser& parser, const R
         std::ostringstream oss;
         generate_file_content(oss, binding);
 
-        const auto filepath = std::filesystem::path(parser.output_include_directory()) / detail::kNamespaceName / (detail::binding_name_to_file_name(binding.typeName) + ".h");
+        const auto filepath = std::filesystem::path(parser.output_globals_include_directory()) / (detail::binding_name_to_file_name(binding.typeName) + ".h");
 
         std::filesystem::create_directories(filepath.parent_path());
 

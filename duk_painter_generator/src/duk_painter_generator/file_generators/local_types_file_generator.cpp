@@ -17,7 +17,7 @@ LocalTypesFileGenerator::LocalTypesFileGenerator(const Parser& parser, const Ref
 
     const auto& painterName = parser.output_painter_name();
 
-    const auto filepath = std::filesystem::path(parser.output_include_directory()) / painterName / (painterName + "_types.h");
+    auto filepath = std::filesystem::path(parser.output_include_directory()) / (painterName + "_types.h");
 
     write_file(oss.str(), filepath.string());
 

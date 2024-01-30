@@ -29,6 +29,10 @@ public:
 
     T& operator*() const;
 
+    T* get();
+
+    T* get() const;
+
     DUK_NO_DISCARD bool valid() const;
 
     DUK_NO_DISCARD explicit operator bool() const;
@@ -185,6 +189,18 @@ template<typename T>
 T& Component<T>::operator*() const {
     assert(valid());
     return *m_scene->template component<T>(m_ownerId);
+}
+
+template<typename T>
+T* Component<T>::get() {
+    assert(valid());
+    return m_scene->template component<T>(m_ownerId);
+}
+
+template<typename T>
+T* Component<T>::get() const {
+    assert(valid());
+    return m_scene->template component<T>(m_ownerId);
 }
 
 template<typename T>

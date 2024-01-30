@@ -37,7 +37,7 @@ public:
 
     template<typename ...Args>
     auto print(Level level, const std::string& format, Args&&... args) {
-        return m_printQueue.enqueue([this](Level level, const std::string& format, Args&&... args) -> void {
+        return m_printQueue.enqueue([this](Level level, const std::string& format, Args... args) -> void {
             if (level < m_minimumLevel) {
                 return;
             }

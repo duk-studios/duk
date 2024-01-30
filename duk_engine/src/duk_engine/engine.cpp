@@ -51,7 +51,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
     m_importer->register_component<duk::renderer::Rotation2D>("Rotation2D");
     m_importer->register_component<duk::renderer::Scale2D>("Scale2D");
     m_importer->register_component<duk::renderer::Scale3D>("Scale3D");
-    m_importer->register_component<duk::renderer::MeshDrawing>("MeshDrawing");
+    m_importer->register_component<duk::renderer::MeshRenderer>("MeshRenderer");
     m_importer->register_component<duk::renderer::DirectionalLight>("DirectionalLight");
     m_importer->register_component<duk::renderer::PointLight>("PointLight");
     m_importer->register_component<duk::renderer::PerspectiveCamera>("PerspectiveCamera");

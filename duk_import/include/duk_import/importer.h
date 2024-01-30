@@ -8,7 +8,7 @@
 #include <duk_import/material/material_importer.h>
 #include <duk_import/resource/resource_importer.h>
 #include <duk_import/scene/scene_importer.h>
-#include "duk_import/scene/component_json_parser.h"
+#include <duk_import/scene/component_json_parser.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/pools/material_pool.h>
 

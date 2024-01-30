@@ -10,10 +10,10 @@
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>
-#include <duk_renderer/components/mesh_drawing.h>
+#include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/forward/forward_renderer.h>
-#include <duk_renderer/materials/globals/global_descriptors.h>
+#include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_tools/timer.h>
 #include <duk_log/log.h>
@@ -99,9 +99,9 @@ int main() {
     //Our cube has the Mesh Drawing component, that specifies what mesh type and material we are going to use.
     //Also our position and scale and rotation values.
     duk::scene::Object cubeObject = scene->add_object();
-    auto cubeMeshDrawing = cubeObject.add<duk::renderer::MeshDrawing>();
-    cubeMeshDrawing->mesh = renderer->mesh_pool()->cube();
-    cubeMeshDrawing->material = renderer->material_pool()->create_phong(duk::pool::ResourceId(666));
+    auto cubeMeshRenderer = cubeObject.add<duk::renderer::MeshRenderer>();
+    cubeMeshRenderer->mesh = renderer->mesh_pool()->cube();
+    cubeMeshRenderer->material = renderer->material_pool()->create_phong(duk::pool::ResourceId(666));
     auto cubePosition = cubeObject.add<duk::renderer::Position3D>();
     cubePosition->value = glm::vec3(0,0,-10);
     auto cubeScale = cubeObject.add<duk::renderer::Scale3D>();

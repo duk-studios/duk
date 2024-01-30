@@ -5,9 +5,6 @@
 #define DUK_SAMPLE_APPLICATION_H
 
 #include <duk_engine/engine.h>
-#include <duk_renderer/brushes/mesh.h>
-#include <duk_renderer/materials/color/color_material.h>
-#include <duk_renderer/materials/phong/phong_material.h>
 
 namespace duk::sample {
 

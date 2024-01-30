@@ -26,9 +26,11 @@ duk::renderer::MaterialType parse_material_type(const char* typeStr) {
     return renderer::MaterialType::UNDEFINED;
 }
 
-std::unique_ptr<duk::renderer::ColorMaterialDataSource> parse_color_material(const rapidjson::Value& object) {
+std::unique_ptr<duk::renderer::ColorMaterialDataSource> parse_color_material(const rapidjson::Value& object, const duk::renderer::ImagePool* imagePool) {
     auto material = std::make_unique<duk::renderer::ColorMaterialDataSource>();
     material->color = json::to_vec4(object["base-color"]);
+    material->baseColorImage = imagePool->find(json::to_resource_id(object["base-color-image"]));
+    material->baseColorSampler = json::to_sampler(object["base-color-sampler"]);
     material->update_hash();
     return material;
 }
@@ -36,10 +38,10 @@ std::unique_ptr<duk::renderer::ColorMaterialDataSource> parse_color_material(con
 std::unique_ptr<duk::renderer::PhongMaterialDataSource> parse_phong_material(const rapidjson::Value& object, const duk::renderer::ImagePool* imagePool) {
     auto material = std::make_unique<duk::renderer::PhongMaterialDataSource>();
     material->baseColor = json::to_vec4(object["base-color"]);
-    material->baseColorImage = imagePool->find(json::to_resource_id(object["base-color-image"]));
+    material->baseColorImage = imagePool->find_or_default(json::from_json<duk::pool::ResourceId>(object["base-color-image"]), imagePool->white_image());
     material->baseColorSampler = json::to_sampler(object["base-color-sampler"]);
     material->shininess = object["shininess"].GetFloat();
-    material->shininessImage = imagePool->find(json::to_resource_id(object["shininess-image"]));
+    material->shininessImage = imagePool->find_or_default(json::from_json<duk::pool::ResourceId>(object["shininess-image"]), imagePool->black_image());
     material->shininessSampler = json::to_sampler(object["shininess-sampler"]);
     material->update_hash();
     return material;
@@ -49,7 +51,7 @@ std::unique_ptr<duk::renderer::MaterialDataSource> parse_material(const rapidjso
     const auto type = detail::parse_material_type(object["type"].GetString());
     switch (type) {
         case duk::renderer::MaterialType::COLOR:
-            return parse_color_material(object);
+            return parse_color_material(object, imagePool);
         case duk::renderer::MaterialType::PHONG:
             return parse_phong_material(object, imagePool);
         default:
