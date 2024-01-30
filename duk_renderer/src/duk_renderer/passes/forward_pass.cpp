@@ -133,7 +133,7 @@ static bool compatible(const SpriteEntry& spriteEntry, const SpriteDrawEntry& dr
 }
 
 static bool valid(const SpriteDrawEntry& drawEntry) {
-    return drawEntry.material != nullptr && drawEntry.materialIndex != 0 && drawEntry.instanceCount > 0;
+    return drawEntry.material != nullptr && drawEntry.instanceCount > 0;
 }
 
 void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, SpriteDrawData* drawData) {
@@ -144,16 +144,20 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
     auto& drawEntries = drawData->drawEntries;
     auto& brush = drawData->brush;
 
+    std::set<SpriteMaterial*> usedMaterials;
+
     for (auto object : renderParams.scene->objects_with_components<SpriteRenderer>()) {
         auto spriteRenderer = object.component<SpriteRenderer>();
         auto material = spriteRenderer->material.get();
         auto sprite = spriteRenderer->sprite.get();
 
+        usedMaterials.insert(material);
+
         SpriteMaterial::PushSpriteParams pushSpriteParams = {};
         pushSpriteParams.object = object;
         pushSpriteParams.sprite = sprite;
 
-        auto spriteMaterialIndex = material->push_sprite(pushSpriteParams);
+        auto spriteMaterialIndex = material->get_sub_material_index(pushSpriteParams);
 
         SpriteEntry spriteEntry = {};
         spriteEntry.objectId = object.id();
@@ -215,6 +219,10 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
             currentMaterialIndex = entry.materialIndex;
         }
         entry.brush->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
+    }
+
+    for (auto material : usedMaterials) {
+        material->clear_sub_materials();
     }
 }
 

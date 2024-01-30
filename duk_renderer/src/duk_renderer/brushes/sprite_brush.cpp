@@ -165,9 +165,11 @@ void SpriteBrush::draw(duk::rhi::CommandBuffer* commandBuffer, size_t instanceCo
         duk::rhi::Buffer* buffer = nullptr;
         if (vertexBuffer) {
             buffer = vertexBuffer.get();
+            buffer->flush();
         }
         buffers.push_back(buffer);
     }
+    m_indexBuffer->flush();
 
     uint32_t indexCount = instanceCount * detail::kIndicesPerSprite;
     uint32_t firstIndex = firstInstance * detail::kIndicesPerSprite;
