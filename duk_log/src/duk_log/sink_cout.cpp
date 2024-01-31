@@ -11,6 +11,7 @@ SinkCout::SinkCout(Level level) : Sink(level) {
 }
 
 void SinkCout::flush(Level level, const std::string& message) {
+    std::lock_guard lock(m_mutex);
     std::cout << message << std::endl;
 }
 

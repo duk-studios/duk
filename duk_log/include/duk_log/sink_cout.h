@@ -14,7 +14,8 @@ public:
     explicit SinkCout(Level level);
 
     void flush(Level level, const std::string& message) override;
-
+private:
+    std::mutex m_mutex;
 };
 
 }
