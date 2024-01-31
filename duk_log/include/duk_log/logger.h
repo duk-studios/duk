@@ -36,7 +36,7 @@ public:
     ~Logger();
 
     template<typename ...Args>
-    auto print(Level level, const std::string& format, Args&... args) {
+    auto print(Level level, const std::string& format, Args&&... args) {
         return m_printQueue.enqueue([this](Level level, const std::string& format, fmt::format_args args) -> void {
             if (level < m_minimumLevel) {
                 return;
