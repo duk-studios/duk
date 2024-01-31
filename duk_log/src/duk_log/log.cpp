@@ -9,7 +9,7 @@ namespace duk::log {
 
 Logging::Logging() {
     m_defaultLogger = add_logger(std::make_unique<Logger>(Level::VERBOSE));
-    m_defaultSink = add_sink(std::make_unique<SinkFmt>(Level::VERBOSE));
+    m_defaultSink = add_sink(std::make_unique<SinkCout>(Level::VERBOSE));
 }
 
 Logging::~Logging() {
