@@ -74,6 +74,107 @@ static void destroy_window_class_entry(std::shared_ptr<WindowClassEntry>& entry)
     entry.reset();
 }
 
+static Keys convert_window_key(int windowsKeyCode, bool is_shift_pressed) {
+   switch (windowsKeyCode) {
+   case 0x08: return Keys::BACKSPACE;
+   case 0x09: return Keys::TAB;
+   case 0x0C: return Keys::CLEAR;
+   case 0x0D: return Keys::ENTER;
+   case 0x10: return Keys::SHIFT;
+   case 0x11: return Keys::CTRL;
+   case 0x12: return Keys::ALT;
+   case 0x13: return Keys::PAUSE;
+   case 0x14: return Keys::CAPS_LOCK;
+   case 0x1B: return Keys::ESC;
+   case 0x20: return Keys::SPACE_BAR;
+   case 0x21: return Keys::PAGE_UP;
+   case 0x22: return Keys::PAGE_DOWN;
+   case 0x23: return Keys::END;
+   case 0x24: return Keys::HOME;
+   case 0x25: return Keys::LEFT_ARROW;
+   case 0x26: return Keys::UP_ARROW;
+   case 0x27: return Keys::RIGHT_ARROW;
+   case 0x28: return Keys::DOWN_ARROW;
+   case 0x30: return Keys::NUM_0;
+   case 0x31: return Keys::NUM_1;
+   case 0x32: return Keys::NUM_2;
+   case 0x33: return Keys::NUM_3;
+   case 0x34: return Keys::NUM_4;
+   case 0x35: return Keys::NUM_5;
+   case 0x36: return Keys::NUM_6;
+   case 0x37: return Keys::NUM_7;
+   case 0x38: return Keys::NUM_8;
+   case 0x39: return Keys::NUM_9;
+   case 0x41: return Keys::A;
+   case 0x42: return Keys::B;
+   case 0x43: return Keys::C;
+   case 0x44: return Keys::D;
+   case 0x45: return Keys::E;
+   case 0x46: return Keys::F;
+   case 0x47: return Keys::G;
+   case 0x48: return Keys::H;
+   case 0x49: return Keys::I;
+   case 0x4A: return Keys::J;
+   case 0x4B: return Keys::K;
+   case 0x4C: return Keys::L;
+   case 0x4D: return Keys::M;
+   case 0x4E: return Keys::N;
+   case 0x4F: return Keys::O;
+   case 0x50: return Keys::P;
+   case 0x51: return Keys::Q;
+   case 0x52: return Keys::R;
+   case 0x53: return Keys::S;
+   case 0x54: return Keys::T;
+   case 0x55: return Keys::U;
+   case 0x56: return Keys::V;
+   case 0x57: return Keys::W;
+   case 0x58: return Keys::X;
+   case 0x59: return Keys::Y;
+   case 0x5A: return Keys::Z;
+   case 0x5B: return Keys::LWIN;
+   case 0x5C: return Keys::RWIN;
+   case 0x60: return Keys::NUMPAD_0;
+   case 0x61: return Keys::NUMPAD_1;
+   case 0x62: return Keys::NUMPAD_2;
+   case 0x63: return Keys::NUMPAD_3;
+   case 0x64: return Keys::NUMPAD_4;
+   case 0x65: return Keys::NUMPAD_5;
+   case 0x66: return Keys::NUMPAD_6;
+   case 0x67: return Keys::NUMPAD_7;
+   case 0x68: return Keys::NUMPAD_8;
+   case 0x69: return Keys::NUMPAD_9;
+   case 0x6A: return Keys::MULTIPLY;
+   case 0x6B: return Keys::ADD;
+   case 0x6C: return Keys::SEPARATOR;
+   case 0x6D: return Keys::SUBTRACT;
+   case 0x6E: return Keys::DECIMAL;
+   case 0x6F: return Keys::DIVIDE;
+   case 0x70: return Keys::F1;
+   case 0x71: return Keys::F2;
+   case 0x72: return Keys::F3;
+   case 0x73: return Keys::F4;
+   case 0x74: return Keys::F5;
+   case 0x75: return Keys::F6;
+   case 0x76: return Keys::F7;
+   case 0x77: return Keys::F8;
+   case 0x78: return Keys::F9;
+   case 0x79: return Keys::F10;
+   case 0x7A: return Keys::F11;
+   case 0x7B: return Keys::F12;
+   case 0xBF:
+       if(is_shift_pressed) return Keys::SEMICOLON;
+       else return Keys::COLON;
+   //case 0xBF: return Keys::SEMICOLON;
+   //case 0xBF: return Keys::COLON;
+   //  COMMA, //0xBC
+   //  DASH, //0xBD
+   //  DOT, //0xBE
+   //  SLASH, //0xBF
+   //  QUESTION_MARK, //0xBF
+   default: ;
+   }
+}
+    
 WindowClassEntry::WindowClassEntry(const WindowWin32CreateInfo& windowWin32CreateInfo, const std::string& className) :
         className(className),
         windowClass({}),
@@ -177,24 +278,22 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             auto fwKeys = GET_KEYSTATE_WPARAM(wParam);
             auto zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
             mouse_wheel_movement_event(fwKeys, zDelta);
-            return 0;  
+            return 0;   
         }
         case WM_KEYDOWN: {
             auto keyCode = GET_KEYSTATE_WPARAM(wParam);
-            keyboard_key_down_event(convert_window_key(keyCode));
-            return 0;
-        }
-        case WM_SYSKEYDOWN: {
-                
+            if(wParam == VK_SHIFT) {
+                m_is_shift_pressed = true;
+            }
+            keyboard_key_down_event(detail::convert_window_key(keyCode, m_is_shift_pressed));
             return 0;
         }
         case WM_KEYUP: {
             auto keyCode = GET_KEYSTATE_WPARAM(wParam);
-            keyboard_key_down_event(convert_window_key(keyCode));
-            return 0;
-        }
-        case WM_SYSKEYUP: {
-                
+            if(wParam == VK_SHIFT) {
+                m_is_shift_pressed = false;
+            }
+            keyboard_key_down_event(detail::convert_window_key(keyCode, m_is_shift_pressed));
             return 0;
         }
         default:
@@ -240,95 +339,5 @@ void WindowWin32::close() {
 bool WindowWin32::minimized() const {
     return m_width == 0 || m_height == 0;
 }
-
-Keys WindowWin32::convert_window_key(int windowsKeyCode) {
-   switch (windowsKeyCode) {
-        case 0x08: return Keys::KEY_BACKSPACE;
-        case 0x09: return Keys::KEY_TAB;
-        case 0x0C: return Keys::KEY_CLEAR;
-        case 0x0D: return Keys::KEY_ENTER;
-        case 0x10: return Keys::KEY_SHIFT;
-        case 0x11: return Keys::KEY_CTRL;
-        case 0x12: return Keys::KEY_ALT;
-        case 0x13: return Keys::KEY_PAUSE;
-        case 0x14: return Keys::KEY_CAPS_LOCK;
-        case 0x1B: return Keys::KEY_ESC;
-        case 0x20: return Keys::KEY_SPACE_BAR;
-        case 0x21: return Keys::KEY_PAGE_UP;
-        case 0x22: return Keys::KEY_PAGE_DOWN;
-        case 0x23: return Keys::KEY_END;
-        case 0x24: return Keys::KEY_HOME;
-        case 0x25: return Keys::KEY_LEFT_ARROW;
-        case 0x26: return Keys::KEY_UP_ARROW;
-        case 0x27: return Keys::KEY_RIGHT_ARROW;
-        case 0x28: return Keys::KEY_DOWN_ARROW;
-        case 0x30: return Keys::KEY_NUM_0;
-        case 0x31: return Keys::KEY_NUM_1;
-        case 0x32: return Keys::KEY_NUM_2;
-        case 0x33: return Keys::KEY_NUM_3;
-        case 0x34: return Keys::KEY_NUM_4;
-        case 0x35: return Keys::KEY_NUM_5;
-        case 0x36: return Keys::KEY_NUM_6;
-        case 0x37: return Keys::KEY_NUM_7;
-        case 0x38: return Keys::KEY_NUM_8;
-        case 0x39: return Keys::KEY_NUM_9;
-        case 0x41: return Keys::KEY_A;
-        case 0x42: return Keys::KEY_B;
-        case 0x43: return Keys::KEY_C;
-        case 0x44: return Keys::KEY_D;
-        case 0x45: return Keys::KEY_E;
-        case 0x46: return Keys::KEY_F;
-        case 0x47: return Keys::KEY_G;
-        case 0x48: return Keys::KEY_H;
-        case 0x49: return Keys::KEY_I;
-        case 0x4A: return Keys::KEY_J;
-        case 0x4B: return Keys::KEY_K;
-        case 0x4C: return Keys::KEY_L;
-        case 0x4D: return Keys::KEY_M;
-        case 0x4E: return Keys::KEY_N;
-        case 0x4F: return Keys::KEY_O;
-        case 0x50: return Keys::KEY_P;
-        case 0x51: return Keys::KEY_Q;
-        case 0x52: return Keys::KEY_R;
-        case 0x53: return Keys::KEY_S;
-        case 0x54: return Keys::KEY_T;
-        case 0x55: return Keys::KEY_U;
-        case 0x56: return Keys::KEY_V;
-        case 0x57: return Keys::KEY_W;
-        case 0x58: return Keys::KEY_X;
-        case 0x59: return Keys::KEY_Y;
-        case 0x5A: return Keys::KEY_Z;
-        case 0x5B: return Keys::KEY_LWIN;
-        case 0x5C: return Keys::KEY_RWIN;
-        case 0x60: return Keys::KEY_NUMPAD_0;
-        case 0x61: return Keys::KEY_NUMPAD_1;
-        case 0x62: return Keys::KEY_NUMPAD_2;
-        case 0x63: return Keys::KEY_NUMPAD_3;
-        case 0x64: return Keys::KEY_NUMPAD_4;
-        case 0x65: return Keys::KEY_NUMPAD_5;
-        case 0x66: return Keys::KEY_NUMPAD_6;
-        case 0x67: return Keys::KEY_NUMPAD_7;
-        case 0x68: return Keys::KEY_NUMPAD_8;
-        case 0x69: return Keys::KEY_NUMPAD_9;
-        case 0x6A: return Keys::KEY_MULTIPLY;
-        case 0x6B: return Keys::KEY_ADD;
-        case 0x6C: return Keys::KEY_SEPARATOR;
-        case 0x6D: return Keys::KEY_SUBTRACT;
-        case 0x6E: return Keys::KEY_DECIMAL;
-        case 0x6F: return Keys::KEY_DIVIDE;
-        case 0x70: return Keys::KEY_F1;
-        case 0x71: return Keys::KEY_F2;
-        case 0x72: return Keys::KEY_F3;
-        case 0x73: return Keys::KEY_F4;
-        case 0x74: return Keys::KEY_F5;
-        case 0x75: return Keys::KEY_F6;
-        case 0x76: return Keys::KEY_F7;
-        case 0x77: return Keys::KEY_F8;
-        case 0x78: return Keys::KEY_F9;
-        case 0x79: return Keys::KEY_F10;
-        case 0x7A: return Keys::KEY_F11;
-        case 0x7B: return Keys::KEY_F12;
-       
-   }
-} 
+    
 }

@@ -58,13 +58,12 @@ public:
 
     void close() override;
 
-    static Keys convert_window_key(int windowsKeyCode);
-
     DUK_NO_DISCARD bool minimized() const override;
-
+    
 private:
     std::shared_ptr<detail::WindowClassEntry> m_windowClassEntry;
     HWND m_hwnd;
+    bool m_is_shift_pressed;
 };
 
 }
