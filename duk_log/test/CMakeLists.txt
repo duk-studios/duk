@@ -4,6 +4,10 @@ set(DUK_LOG_TEST_SOURCES
         main.cpp
         )
 
+if (NOT MSVC)
+        set(CMAKE_EXE_LINKER_FLAGS "-static")
+endif ()
+
 add_executable(duk_log_test ${DUK_LOG_TEST_SOURCES})
 
 target_include_directories(duk_log_test
