@@ -31,7 +31,9 @@ target_link_libraries(duk_log
         duk_events
         duk_task
         duk_tools
+        duk_platform
         fmt::fmt
+        termcolor::termcolor
         )
 
 set_target_properties(duk_log PROPERTIES CXX_STANDARD 20)
