@@ -26,6 +26,7 @@ enum class KeyAction : int {
 };
     
 enum class Keys {
+    UNDEFINED,
     BACKSPACE,
     TAB,
     CLEAR,

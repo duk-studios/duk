@@ -9,8 +9,6 @@
 
 #include <sstream>
 
-#include "../../../../external/fmt/fmt/include/fmt/chrono.h"
-
 namespace duk::platform {
 
 namespace detail {
@@ -75,8 +73,8 @@ static void destroy_window_class_entry(std::shared_ptr<WindowClassEntry>& entry)
     // and unregister this window class
     entry.reset();
 }
-static int get_key_mod() {
-    int mods = 0;
+static KeyModifiers::Mask get_key_mod() {
+    KeyModifiers::Mask mods = 1;
 
     if (GetKeyState(VK_SHIFT) & 0x8000)
         mods |= KeyModifiers::SHIFT;
@@ -176,12 +174,8 @@ static Keys convert_key(int windowsKeyCode) {
    case 0x7A: return Keys::F11;
    case 0x7B: return Keys::F12;
    case 0xBF: return Keys::SEMICOLON;
-   // case 0xBF: return Keys::COLON;
-   //   COMMA, //0xBC
-   //   DASH, //0xBD
-   //   DOT, //0xBE
-   //   SLASH, //0xC1
-   //   QUESTION_MARK, //0xC1
+   default:
+       return Keys::UNDEFINED;
    }
 }
     
@@ -261,27 +255,27 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             return 0;
         }
         case WM_LBUTTONDOWN: {
-            mouse_button_down_event(MouseButton::LEFT);
+            mouse_button_event(MouseButton::LEFT, KeyAction::PRESS);
             return 0;
         }
         case WM_LBUTTONUP: {
-            mouse_button_up_event(MouseButton::LEFT);
+            mouse_button_event(MouseButton::LEFT, KeyAction::RELEASE);
             return 0;
         }
         case WM_RBUTTONDOWN: {
-            mouse_button_down_event(MouseButton::RIGHT);
+            mouse_button_event(MouseButton::RIGHT, KeyAction::PRESS);
             return 0;
         }
         case WM_RBUTTONUP: {
-            mouse_button_up_event(MouseButton::RIGHT);
+            mouse_button_event(MouseButton::RIGHT, KeyAction::RELEASE);
             return 0;
         }
         case WM_MBUTTONDOWN: {
-            mouse_button_down_event(MouseButton::MIDDLE);
+            mouse_button_event(MouseButton::MIDDLE, KeyAction::PRESS);
             return 0;
         }
         case WM_MBUTTONUP: {
-            mouse_button_up_event(MouseButton::MIDDLE);
+            mouse_button_event(MouseButton::MIDDLE, KeyAction::RELEASE);
             return 0;
         }
         case WM_MOUSEWHEEL: {
