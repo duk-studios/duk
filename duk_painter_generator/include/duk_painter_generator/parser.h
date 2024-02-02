@@ -24,7 +24,11 @@ public:
 
     DUK_NO_DISCARD const std::string& output_source_directory() const;
 
+    DUK_NO_DISCARD const std::string& output_globals_source_directory() const;
+
     DUK_NO_DISCARD const std::string& output_include_directory() const;
+
+    DUK_NO_DISCARD const std::string& output_globals_include_directory() const;
 
     DUK_NO_DISCARD const std::string& output_painter_name() const;
 
@@ -36,7 +40,9 @@ public:
 
 private:
     std::string m_outputSourceDirectory;
+    std::string m_outputGlobalsSourceDirectory;
     std::string m_outputIncludeDirectory;
+    std::string m_outputGlobalsIncludeDirectory;
     std::string m_outputPainterName;
     ShaderPaths m_inputSpvPaths;
     std::unordered_set<std::string> m_globalBindings;

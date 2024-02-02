@@ -25,6 +25,8 @@ Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
             ("s, src", "Source output directory", cxxopts::value<std::string>())
             ("i, inc", "Include output directory", cxxopts::value<std::string>())
             ("l, globals", "Global bindings name list", cxxopts::value<std::vector<std::string>>())
+            ("j, globals-include", "Globals include output directory", cxxopts::value<std::string>())
+            ("h, globals-source", "Globals source output directory", cxxopts::value<std::string>())
             ("d, debug", "Print debug information")
             ;
 
@@ -61,6 +63,12 @@ Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
             const auto& globals = result["globals"].as<std::vector<std::string>>();
             m_globalBindings.insert(globals.begin(), globals.end());
         }
+        if (result.count("globals-source")) {
+            m_outputGlobalsSourceDirectory = result["globals-source"].as<std::string>();
+        }
+        if (result.count("globals-include")) {
+            m_outputGlobalsIncludeDirectory = result["globals-include"].as<std::string>();
+        }
 
         if (m_inputSpvPaths.empty()) {
             throw std::invalid_argument("no SPIR-V sources provided");
@@ -78,8 +86,16 @@ const std::string& Parser::output_source_directory() const {
     return m_outputSourceDirectory;
 }
 
+const std::string& Parser::output_globals_source_directory() const {
+    return m_outputGlobalsSourceDirectory;
+}
+
 const std::string& Parser::output_include_directory() const {
     return m_outputIncludeDirectory;
+}
+
+const std::string& Parser::output_globals_include_directory() const {
+    return m_outputGlobalsIncludeDirectory;
 }
 
 const std::string& Parser::output_painter_name() const {

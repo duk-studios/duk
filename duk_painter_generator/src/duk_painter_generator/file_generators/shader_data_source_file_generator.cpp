@@ -2,7 +2,7 @@
 /// shader_data_source_generator.cpp
 
 #include <duk_painter_generator/file_generators/shader_data_source_file_generator.h>
-#include "duk_rhi/pipeline/shader_data_source.h"
+#include <duk_tools/string.h>
 
 #include <filesystem>
 #include <regex>
@@ -15,10 +15,17 @@ static std::string shader_data_source_file_name(const Parser& parser) {
     return parser.output_painter_name() + "_shader_data_source";
 }
 
+static std::string shader_header_include_path(const Parser& parser, const std::string& fileName) {
+    auto absoluteIncludeDirectory = parser.output_include_directory();
+    auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/resources/materials/");
+    auto relativeIncludeDirectory = absoluteIncludeDirectory.substr(startIncludePos);
+    std::ostringstream oss;
+    oss << relativeIncludeDirectory << '/' << fileName << ".h";
+    return oss.str();
+}
+
 static std::string shader_data_source_class_name(const Parser& parser) {
-    auto painterName = parser.output_painter_name();
-    painterName[0] = std::toupper(painterName[0]);
-    return painterName + "ShaderDataSource";
+    return duk::tools::snake_to_pascal(parser.output_painter_name()) + "ShaderDataSource";
 }
 
 static std::string module_name(duk::rhi::Shader::Module::Bits moduleBit) {
@@ -280,16 +287,15 @@ ShaderDataSourceFileGenerator::ShaderDataSourceFileGenerator(const Parser& parse
     m_parser(parser),
     m_reflector(reflector) {
 
-    const auto& painterName = m_parser.output_painter_name();
     m_fileName = detail::shader_data_source_file_name(m_parser);
-    m_headerIncludePath = "duk_renderer/materials/" + m_parser.output_painter_name() + '/' + m_fileName + ".h";
+    m_headerIncludePath = detail::shader_header_include_path(m_parser, m_fileName);
     m_className = detail::shader_data_source_class_name(m_parser);
 
     {
         std::ostringstream oss;
         generate_header_file_content(oss);
 
-        const auto filePath = std::filesystem::path(m_parser.output_include_directory()) / painterName / (m_fileName + ".h");
+        const auto filePath = std::filesystem::path(m_parser.output_include_directory()) / (m_fileName + ".h");
 
         write_file(oss.str(), filePath.string());
     }
@@ -298,7 +304,7 @@ ShaderDataSourceFileGenerator::ShaderDataSourceFileGenerator(const Parser& parse
         std::ostringstream oss;
         generate_source_file_content(oss);
 
-        const auto filePath = std::filesystem::path(m_parser.output_source_directory()) / painterName / (m_fileName + ".cpp");
+        const auto filePath = std::filesystem::path(m_parser.output_source_directory()) / (m_fileName + ".cpp");
 
         write_file(oss.str(), filePath.string());
     }

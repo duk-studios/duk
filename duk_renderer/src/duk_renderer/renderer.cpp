@@ -3,11 +3,12 @@
 
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/passes/pass.h>
-#include <duk_renderer/materials/globals/global_descriptors.h>
+#include <duk_renderer/resources/materials/globals/global_descriptors.h>
 
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/material_pool.h>
+#include <duk_renderer/pools/sprite_pool.h>
 
 #include <duk_platform/window.h>
 
@@ -87,6 +88,13 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
         meshPoolCreateInfo.renderer = this;
 
         m_meshPool = std::make_unique<MeshPool>(meshPoolCreateInfo);
+    }
+
+    {
+        SpritePoolCreateInfo spritePoolCreateInfo = {};
+        spritePoolCreateInfo.imagePool = m_imagePool.get();
+
+        m_spritePool = std::make_unique<SpritePool>(spritePoolCreateInfo);
     }
 }
 
@@ -204,6 +212,10 @@ MeshPool* Renderer::mesh_pool() {
 
 MaterialPool* Renderer::material_pool() {
     return m_materialPool.get();
+}
+
+SpritePool* Renderer::sprite_pool() {
+    return m_spritePool.get();
 }
 
 void Renderer::use_as_camera(const scene::Object& object) {

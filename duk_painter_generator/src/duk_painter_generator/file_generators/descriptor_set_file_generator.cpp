@@ -3,6 +3,7 @@
 
 #include <duk_painter_generator/file_generators/descriptor_set_file_generator.h>
 #include <duk_painter_generator/file_generators/generator_utils.h>
+#include <duk_tools/string.h>
 
 #include <filesystem>
 #include <regex>
@@ -11,17 +12,15 @@ namespace duk::painter_generator {
 
 namespace detail {
 
-std::string descriptor_set_file_name(const Parser& parser) {
+static std::string descriptor_set_file_name(const Parser& parser) {
     return parser.output_painter_name() + "_descriptor_sets";
 }
 
-std::string descriptor_set_class_name(const Parser& parser) {
-    auto painterName = parser.output_painter_name();
-    painterName[0] = std::toupper(painterName[0]);
-    return painterName + "DescriptorSet";
+static std::string descriptor_set_class_name(const Parser& parser) {
+    return duk::tools::snake_to_pascal(parser.output_painter_name()) + "DescriptorSet";
 }
 
-std::string generate_bindings(const Reflector::Bindings& bindings) {
+static std::string generate_bindings(const Reflector::Bindings& bindings) {
     std::ostringstream oss;
     oss << '{' << std::endl;
     oss << utils::generate_for_each(bindings, [](const BindingReflection& binding) -> std::string {
@@ -32,6 +31,16 @@ std::string generate_bindings(const Reflector::Bindings& bindings) {
     oss << std::endl << "    }";
     return oss.str();
 }
+
+static std::string descriptor_set_header_include_path(const Parser& parser, const std::string& fileName) {
+    auto absoluteIncludeDirectory = parser.output_include_directory();
+    auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/resources/materials/");
+    auto relativeIncludeDirectory = absoluteIncludeDirectory.substr(startIncludePos);
+    std::ostringstream oss;
+    oss << relativeIncludeDirectory << '/' << fileName << ".h";
+    return oss.str();
+}
+
 
 const char* kDescriptorSetClassDeclarationTemplate = R"(
 struct TemplateClassNameCreateInfo {
@@ -108,13 +117,12 @@ DescriptorSetFileGenerator::DescriptorSetFileGenerator(const Parser& parser, con
 
     m_fileName = detail::descriptor_set_file_name(m_parser);
     m_className = detail::descriptor_set_class_name(m_parser);
-    const auto& painterName = m_parser.output_painter_name();
 
     {
         std::ostringstream oss;
         generate_header_file_content(oss);
 
-        const auto filePath = std::filesystem::path(m_parser.output_include_directory()) / painterName / (m_fileName + ".h");
+        const auto filePath = std::filesystem::path(m_parser.output_include_directory()) / (m_fileName + ".h");
 
         write_file(oss.str(), filePath.string());
     }
@@ -123,7 +131,7 @@ DescriptorSetFileGenerator::DescriptorSetFileGenerator(const Parser& parser, con
         std::ostringstream oss;
         generate_source_file_content(oss);
 
-        const auto filePath = std::filesystem::path(m_parser.output_source_directory()) / painterName / (m_fileName + ".cpp");
+        const auto filePath = std::filesystem::path(m_parser.output_source_directory()) / (m_fileName + ".cpp");
 
         write_file(oss.str(), filePath.string());
     }
@@ -152,7 +160,7 @@ void DescriptorSetFileGenerator::generate_header_file_content(std::ostringstream
 
 void DescriptorSetFileGenerator::generate_source_file_content(std::ostringstream& oss) {
     std::string includes[] = {
-            "duk_renderer/materials/" + m_parser.output_painter_name() + '/' + m_fileName + ".h"
+            detail::descriptor_set_header_include_path(m_parser, m_fileName),
     };
     generate_include_directives(oss, includes);
     oss << std::endl;

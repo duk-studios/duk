@@ -5,9 +5,10 @@
   "dependencies": [
     101,
     102,
-    103
+    103,
+    104
   ],
   "aliases": [
-    "main"
+    "old-main"
   ]
 }

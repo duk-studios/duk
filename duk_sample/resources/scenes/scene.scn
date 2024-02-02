@@ -1,5 +1,4 @@
 {
-  "dependencies": [],
   "objects": [
     {
       "components": [
@@ -12,9 +11,9 @@
           "value": "5;5;5"
         },
         {
-          "type": "MeshDrawing",
+          "type": "MeshRenderer",
           "mesh": 2,
-          "material": 101
+          "material": 102
         }
       ]
     },
@@ -29,9 +28,26 @@
           "value": "5;5;5"
         },
         {
-          "type": "MeshDrawing",
+          "type": "MeshRenderer",
           "mesh": 3,
           "material": 101
+        }
+      ]
+    },
+    {
+      "components": [
+        {
+          "type": "Position3D",
+          "value": "0;6;0"
+        },
+        {
+          "type": "Scale3D",
+          "value": "3;3;3"
+        },
+        {
+          "type": "MeshRenderer",
+          "mesh": 1,
+          "material": 104
         }
       ]
     },
@@ -56,7 +72,7 @@
           "type": "PointLight",
           "value": {
             "color": "1;1;1",
-            "intensity": 1
+            "intensity": 10
           },
           "radius": 400
         },
@@ -65,7 +81,7 @@
           "value": "5;5;4"
         },
         {
-          "type": "MeshDrawing",
+          "type": "MeshRenderer",
           "mesh": 3,
           "material": 103
         },

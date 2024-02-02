@@ -1,0 +1,9 @@
+{
+  "type": "Color",
+  "base-color": "1;1;1;1",
+  "base-color-image": 54,
+  "base-color-sampler": {
+    "wrap": "clamp-edge",
+    "filter": "nearest"
+  }
+}

@@ -1,5 +1,5 @@
 {
   "type": "img",
-  "id": 2,
+  "id": 52,
   "file": "gold_specular.png"
 }

@@ -2,22 +2,13 @@
 /// present_pass.cpp
 
 #include <duk_renderer/passes/present_pass.h>
-#include <duk_renderer/materials/fullscreen/fullscreen_material.h>
-#include <duk_renderer/materials/painter.h>
+#include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
+#include <duk_renderer/resources/materials/painter.h>
 
 namespace duk::renderer {
 
-namespace detail {
-
-static void draw_fullscreen_triangle(duk::rhi::CommandBuffer* commandBuffer, size_t, size_t) {
-    commandBuffer->draw(3, 0, 1, 0);
-}
-
-}
-
 PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
     m_renderer(presentPassCreateInfo.renderer),
-    m_fullscreenTriangleBrush(detail::draw_fullscreen_triangle),
     m_inColor(duk::rhi::Access::SHADER_READ, duk::rhi::PipelineStage::FRAGMENT_SHADER, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
 
     {
@@ -97,13 +88,16 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
 
     commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
-    PaintParams paintParams = {};
-    paintParams.outputWidth = renderParams.outputWidth;
-    paintParams.outputHeight = renderParams.outputHeight;
-    paintParams.renderPass = m_renderPass.get();
-    paintParams.brush = &m_fullscreenTriangleBrush;
+    DrawParams drawParams = {};
+    drawParams.globalDescriptors = renderParams.globalDescriptors;
+    drawParams.outputWidth = renderParams.outputWidth;
+    drawParams.outputHeight = renderParams.outputHeight;
+    drawParams.renderPass = m_renderPass.get();
 
-    m_fullscreenMaterial->paint(commandBuffer, paintParams);
+    m_fullscreenMaterial->apply(commandBuffer, drawParams);
+
+    // a single triangle that will cover the entire screen
+    commandBuffer->draw(3, 0, 1, 0);
 
     commandBuffer->end_render_pass();
 }

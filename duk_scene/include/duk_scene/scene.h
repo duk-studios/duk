@@ -29,6 +29,10 @@ public:
 
     T& operator*() const;
 
+    T* get();
+
+    T* get() const;
+
     DUK_NO_DISCARD bool valid() const;
 
     DUK_NO_DISCARD explicit operator bool() const;
@@ -188,6 +192,18 @@ T& Component<T>::operator*() const {
 }
 
 template<typename T>
+T* Component<T>::get() {
+    assert(valid());
+    return m_scene->template component<T>(m_ownerId);
+}
+
+template<typename T>
+T* Component<T>::get() const {
+    assert(valid());
+    return m_scene->template component<T>(m_ownerId);
+}
+
+template<typename T>
 bool Component<T>::valid() const {
     return m_scene->template valid_component<T>(m_ownerId);
 }
@@ -214,7 +230,7 @@ void Scene::add_component(const Object::Id& id, Args&& ... args) {
 
 template<typename T>
 void Scene::remove_component(const Object::Id& id) {
-    assert(contains<T>(id));
+    assert(valid_component<T>(id));
     remove_component(id.index(), component_index<T>());
     m_objectComponentMasks[id.index()].reset(component_index<T>());
 }

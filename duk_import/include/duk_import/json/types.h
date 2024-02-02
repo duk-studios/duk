@@ -9,7 +9,7 @@
 #include <duk_rhi/sampler.h>
 #include <duk_tools/singleton.h>
 #include <duk_renderer/components/transform.h>
-#include <duk_renderer/components/mesh_drawing.h>
+#include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/lighting.h>
 
 #include <rapidjson/document.h>
@@ -36,6 +36,13 @@ duk::renderer::LightValue to_light_value(const rapidjson::Value& member);
 template<typename T>
 void from_json(const rapidjson::Value& jsonObject, T& object) {
     object = jsonObject.Get<T>();
+}
+
+template<typename T>
+T from_json(const rapidjson::Value& jsonObject) {
+    T object = {};
+    from_json<T>(jsonObject, object);
+    return object;
 }
 
 template<>

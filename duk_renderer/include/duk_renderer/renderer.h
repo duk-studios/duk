@@ -24,6 +24,7 @@ class GlobalDescriptors;
 class ImagePool;
 class MaterialPool;
 class MeshPool;
+class SpritePool;
 
 struct RendererCreateInfo {
     duk::platform::Window* window;
@@ -64,6 +65,8 @@ public:
 
     DUK_NO_DISCARD MaterialPool* material_pool();
 
+    DUK_NO_DISCARD SpritePool* sprite_pool();
+
     void use_as_camera(const duk::scene::Object& object);
 
 private:
@@ -80,6 +83,7 @@ protected:
     std::unique_ptr<ImagePool> m_imagePool;
     std::unique_ptr<MeshPool> m_meshPool;
     std::unique_ptr<MaterialPool> m_materialPool;
+    std::unique_ptr<SpritePool> m_spritePool;
     duk::scene::Object::Id m_mainCameraObjectId;
     duk::events::EventVoid m_renderStart;
 };
