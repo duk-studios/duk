@@ -73,7 +73,112 @@ static void destroy_window_class_entry(std::shared_ptr<WindowClassEntry>& entry)
     // and unregister this window class
     entry.reset();
 }
+static KeyModifiers::Mask get_key_mod() {
+    KeyModifiers::Mask mods = 1;
 
+    if (GetKeyState(VK_SHIFT) & 0x8000)
+        mods |= KeyModifiers::SHIFT;
+    if (GetKeyState(VK_CONTROL) & 0x8000)
+        mods |= KeyModifiers::CTRL;
+    if (GetKeyState(VK_MENU) & 0x8000)
+        mods |= KeyModifiers::ALT;
+
+    return mods;
+}
+
+static Keys convert_key(int windowsKeyCode) {
+   switch (windowsKeyCode) {
+   case 0x08: return Keys::BACKSPACE;
+   case 0x09: return Keys::TAB;
+   case 0x0C: return Keys::CLEAR;
+   case 0x0D: return Keys::ENTER;
+   case 0x10: return Keys::SHIFT;
+   case 0x11: return Keys::CTRL;
+   case 0x12: return Keys::ALT;
+   case 0x13: return Keys::PAUSE;
+   case 0x14: return Keys::CAPS_LOCK;
+   case 0x1B: return Keys::ESC;
+   case 0x20: return Keys::SPACE_BAR;
+   case 0x21: return Keys::PAGE_UP;
+   case 0x22: return Keys::PAGE_DOWN;
+   case 0x23: return Keys::END;
+   case 0x24: return Keys::HOME;
+   case 0x25: return Keys::LEFT_ARROW;
+   case 0x26: return Keys::UP_ARROW;
+   case 0x27: return Keys::RIGHT_ARROW;
+   case 0x28: return Keys::DOWN_ARROW;
+   case 0x30: return Keys::NUM_0;
+   case 0x31: return Keys::NUM_1;
+   case 0x32: return Keys::NUM_2;
+   case 0x33: return Keys::NUM_3;
+   case 0x34: return Keys::NUM_4;
+   case 0x35: return Keys::NUM_5;
+   case 0x36: return Keys::NUM_6;
+   case 0x37: return Keys::NUM_7;
+   case 0x38: return Keys::NUM_8;
+   case 0x39: return Keys::NUM_9;
+   case 0x41: return Keys::A;
+   case 0x42: return Keys::B;
+   case 0x43: return Keys::C;
+   case 0x44: return Keys::D;
+   case 0x45: return Keys::E;
+   case 0x46: return Keys::F;
+   case 0x47: return Keys::G;
+   case 0x48: return Keys::H;
+   case 0x49: return Keys::I;
+   case 0x4A: return Keys::J;
+   case 0x4B: return Keys::K;
+   case 0x4C: return Keys::L;
+   case 0x4D: return Keys::M;
+   case 0x4E: return Keys::N;
+   case 0x4F: return Keys::O;
+   case 0x50: return Keys::P;
+   case 0x51: return Keys::Q;
+   case 0x52: return Keys::R;
+   case 0x53: return Keys::S;
+   case 0x54: return Keys::T;
+   case 0x55: return Keys::U;
+   case 0x56: return Keys::V;
+   case 0x57: return Keys::W;
+   case 0x58: return Keys::X;
+   case 0x59: return Keys::Y;
+   case 0x5A: return Keys::Z;
+   case 0x5B: return Keys::LWIN;
+   case 0x5C: return Keys::RWIN;
+   case 0x60: return Keys::NUMPAD_0;
+   case 0x61: return Keys::NUMPAD_1;
+   case 0x62: return Keys::NUMPAD_2;
+   case 0x63: return Keys::NUMPAD_3;
+   case 0x64: return Keys::NUMPAD_4;
+   case 0x65: return Keys::NUMPAD_5;
+   case 0x66: return Keys::NUMPAD_6;
+   case 0x67: return Keys::NUMPAD_7;
+   case 0x68: return Keys::NUMPAD_8;
+   case 0x69: return Keys::NUMPAD_9;
+   case 0x6A: return Keys::MULTIPLY;
+   case 0x6B: return Keys::ADD;
+   case 0x6C: return Keys::SEPARATOR;
+   case 0x6D: return Keys::SUBTRACT;
+   case 0x6E: return Keys::DECIMAL;
+   case 0x6F: return Keys::DIVIDE;
+   case 0x70: return Keys::F1;
+   case 0x71: return Keys::F2;
+   case 0x72: return Keys::F3;
+   case 0x73: return Keys::F4;
+   case 0x74: return Keys::F5;
+   case 0x75: return Keys::F6;
+   case 0x76: return Keys::F7;
+   case 0x77: return Keys::F8;
+   case 0x78: return Keys::F9;
+   case 0x79: return Keys::F10;
+   case 0x7A: return Keys::F11;
+   case 0x7B: return Keys::F12;
+   case 0xBF: return Keys::SEMICOLON;
+   default:
+       return Keys::UNDEFINED;
+   }
+}
+    
 WindowClassEntry::WindowClassEntry(const WindowWin32CreateInfo& windowWin32CreateInfo, const std::string& className) :
         className(className),
         windowClass({}),
@@ -150,34 +255,43 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             return 0;
         }
         case WM_LBUTTONDOWN: {
-            mouse_button_down_event(MouseButton::LEFT);
+            mouse_button_event(MouseButton::LEFT, KeyAction::PRESS);
             return 0;
         }
         case WM_LBUTTONUP: {
-            mouse_button_up_event(MouseButton::LEFT);
+            mouse_button_event(MouseButton::LEFT, KeyAction::RELEASE);
             return 0;
         }
         case WM_RBUTTONDOWN: {
-            mouse_button_down_event(MouseButton::RIGHT);
+            mouse_button_event(MouseButton::RIGHT, KeyAction::PRESS);
             return 0;
         }
         case WM_RBUTTONUP: {
-            mouse_button_up_event(MouseButton::RIGHT);
+            mouse_button_event(MouseButton::RIGHT, KeyAction::RELEASE);
             return 0;
         }
         case WM_MBUTTONDOWN: {
-            mouse_button_down_event(MouseButton::MIDDLE);
+            mouse_button_event(MouseButton::MIDDLE, KeyAction::PRESS);
             return 0;
         }
         case WM_MBUTTONUP: {
-            mouse_button_up_event(MouseButton::MIDDLE);
+            mouse_button_event(MouseButton::MIDDLE, KeyAction::RELEASE);
             return 0;
         }
         case WM_MOUSEWHEEL: {
             auto fwKeys = GET_KEYSTATE_WPARAM(wParam);
             auto zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
             mouse_wheel_movement_event(fwKeys, zDelta);
-            return 0;  
+            return 0;   
+        }
+        case WM_KEYDOWN:
+        case WM_KEYUP: {
+            KeyAction action = (HIWORD(lParam) & KF_UP) ? KeyAction::RELEASE : KeyAction::PRESS;
+            auto keyCode = GET_KEYSTATE_WPARAM(wParam);
+
+            const uint32_t mods = detail::get_key_mod();  
+            key_event(detail::convert_key(keyCode), mods, action);
+            return 0;
         }
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -222,5 +336,5 @@ void WindowWin32::close() {
 bool WindowWin32::minimized() const {
     return m_width == 0 || m_height == 0;
 }
-
+    
 }
