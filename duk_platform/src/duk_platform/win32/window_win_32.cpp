@@ -9,6 +9,8 @@
 
 #include <sstream>
 
+#include "../../../../external/fmt/fmt/include/fmt/chrono.h"
+
 namespace duk::platform {
 
 namespace detail {
@@ -73,8 +75,20 @@ static void destroy_window_class_entry(std::shared_ptr<WindowClassEntry>& entry)
     // and unregister this window class
     entry.reset();
 }
+static int get_key_mod() {
+    int mods = 0;
 
-static Keys convert_window_key(int windowsKeyCode, bool is_shift_pressed) {
+    if (GetKeyState(VK_SHIFT) & 0x8000)
+        mods |= KeyModifiers::SHIFT;
+    if (GetKeyState(VK_CONTROL) & 0x8000)
+        mods |= KeyModifiers::CTRL;
+    if (GetKeyState(VK_MENU) & 0x8000)
+        mods |= KeyModifiers::ALT;
+
+    return mods;
+}
+
+static Keys convert_key(int windowsKeyCode) {
    switch (windowsKeyCode) {
    case 0x08: return Keys::BACKSPACE;
    case 0x09: return Keys::TAB;
@@ -161,17 +175,13 @@ static Keys convert_window_key(int windowsKeyCode, bool is_shift_pressed) {
    case 0x79: return Keys::F10;
    case 0x7A: return Keys::F11;
    case 0x7B: return Keys::F12;
-   case 0xBF:
-       if(is_shift_pressed) return Keys::SEMICOLON;
-       else return Keys::COLON;
-   //case 0xBF: return Keys::SEMICOLON;
-   //case 0xBF: return Keys::COLON;
-   //  COMMA, //0xBC
-   //  DASH, //0xBD
-   //  DOT, //0xBE
-   //  SLASH, //0xBF
-   //  QUESTION_MARK, //0xBF
-   default: ;
+   case 0xBF: return Keys::SEMICOLON;
+   // case 0xBF: return Keys::COLON;
+   //   COMMA, //0xBC
+   //   DASH, //0xBD
+   //   DOT, //0xBE
+   //   SLASH, //0xC1
+   //   QUESTION_MARK, //0xC1
    }
 }
     
@@ -280,20 +290,13 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             mouse_wheel_movement_event(fwKeys, zDelta);
             return 0;   
         }
-        case WM_KEYDOWN: {
-            auto keyCode = GET_KEYSTATE_WPARAM(wParam);
-            if(wParam == VK_SHIFT) {
-                m_is_shift_pressed = true;
-            }
-            keyboard_key_down_event(detail::convert_window_key(keyCode, m_is_shift_pressed));
-            return 0;
-        }
+        case WM_KEYDOWN:
         case WM_KEYUP: {
+            KeyAction action = (HIWORD(lParam) & KF_UP) ? KeyAction::RELEASE : KeyAction::PRESS;
             auto keyCode = GET_KEYSTATE_WPARAM(wParam);
-            if(wParam == VK_SHIFT) {
-                m_is_shift_pressed = false;
-            }
-            keyboard_key_down_event(detail::convert_window_key(keyCode, m_is_shift_pressed));
+
+            const uint32_t mods = detail::get_key_mod();  
+            key_event(detail::convert_key(keyCode), mods, action);
             return 0;
         }
         default:

@@ -3,10 +3,26 @@
 
 namespace duk::platform {
 
+struct KeyModifiers {
+    enum Bits : uint8_t {
+        CTRL = 1,
+        SHIFT = 2,
+        ALT = 4,
+    };
+
+    static constexpr uint32_t kCount = 3;
+    using Mask = uint8_t;
+};
+    
 enum class MouseButton {
     LEFT,
     MIDDLE,
     RIGHT
+};
+    
+enum class KeyAction : int {
+    PRESS = 0,
+    RELEASE = 1
 };
     
 enum class Keys {

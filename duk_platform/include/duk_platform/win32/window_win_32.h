@@ -63,7 +63,6 @@ public:
 private:
     std::shared_ptr<detail::WindowClassEntry> m_windowClassEntry;
     HWND m_hwnd;
-    bool m_is_shift_pressed;
 };
 
 }

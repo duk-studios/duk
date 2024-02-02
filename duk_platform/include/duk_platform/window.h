@@ -36,8 +36,7 @@ public:
     using MouseWheelMovementEvent = duk::events::EventT<uint32_t, uint32_t>;
     using MouseButtonDownEvent = duk::events::EventT<MouseButton>;
     using MouseButtonUpEvent = duk::events::EventT<MouseButton>;
-    using KeyboardKeyDownEvent = duk::events::EventT<Keys>;
-    using KeyboardKeyUpEvent = duk::events::EventT<Keys>;
+    using KeyEvent = duk::events::EventT<Keys, KeyModifiers::Mask, KeyAction>;
 
 public:
 
@@ -79,9 +78,8 @@ public:
     
     MouseWheelMovementEvent mouse_wheel_movement_event;
     
-    KeyboardKeyDownEvent keyboard_key_down_event;
+    KeyEvent key_event;
     
-    KeyboardKeyUpEvent keyboard_key_up_event;
 
 protected:
     uint32_t m_width;
