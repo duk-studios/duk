@@ -15,6 +15,7 @@
 #include <duk_renderer/forward/forward_renderer.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_renderer/pools/mesh_pool.h>
+#include <duk_renderer/pools/material_pool.h>
 #include <duk_tools/timer.h>
 #include <duk_log/log.h>
 

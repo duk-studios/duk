@@ -3,7 +3,7 @@
 //
 
 #include <duk_import/resource/resource_importer_json.h>
-#include <duk_import/json/types.h>
+#include <duk_json/types.h>
 #include <duk_tools/file.h>
 
 #include <rapidjson/document.h>
@@ -32,12 +32,12 @@ ResourceDescription parse_resource_description(const std::filesystem::path& path
     ResourceDescription resourceDescription = {};
     resourceDescription.type = parse_resource_type(object["type"].GetString());
     resourceDescription.path = (path.parent_path() / object["file"].GetString()).string();
-    resourceDescription.id = json::to_resource_id(object["id"]);
+    resourceDescription.id = json::from_json<duk::pool::ResourceId>(object["id"]);
     auto dependenciesMember = object.FindMember("dependencies");
     if (dependenciesMember != object.MemberEnd()) {
         auto dependencies = dependenciesMember->value.GetArray();
         for (auto& dependency : dependencies) {
-            resourceDescription.dependencies.insert(json::to_resource_id(dependency));
+            resourceDescription.dependencies.insert(json::from_json<duk::pool::ResourceId>(dependency));
         }
     }
     auto aliasesMember = object.FindMember("aliases");

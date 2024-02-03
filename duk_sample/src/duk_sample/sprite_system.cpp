@@ -7,6 +7,7 @@
 
 #include <duk_renderer/pools/sprite_pool.h>
 #include <duk_renderer/components/sprite_renderer.h>
+#include <duk_renderer/components/transform.h>
 
 namespace duk::sample {
 

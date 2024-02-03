@@ -6,9 +6,7 @@
 #define DUK_IMPORT_SCENE_IMPORTER_JSON_H
 
 #include <duk_import/scene/scene_importer.h>
-#include "component_json_parser.h"
-
-#include <rapidjson/document.h>
+#include <duk_scene/component_builder.h>
 
 #include <functional>
 #include <span>
@@ -17,7 +15,7 @@
 namespace duk::import {
 
 struct SceneImporterJsonCreateInfo {
-    ComponentJsonParser* componentParser;
+    duk::scene::ComponentBuilder* componentBuilder;
 };
 
 class SceneImporterJson : public SceneImporter {
@@ -30,7 +28,7 @@ public:
     std::unique_ptr<duk::scene::Scene> load(const std::filesystem::path& path) override;
 
 private:
-    ComponentJsonParser* m_componentParser;
+    duk::scene::ComponentBuilder* m_componentBuilder;
 };
 
 }

@@ -19,17 +19,8 @@ Importer::Importer(const ImporterCreateInfo& importerCreateInfo) :
     m_resourceImporter = std::make_unique<ResourceImporterJson>();
 
     {
-        ComponentParserCreateInfo componentParserCreateInfo = {};
-        componentParserCreateInfo.meshPool = m_renderer->mesh_pool();
-        componentParserCreateInfo.imagePool = m_renderer->image_pool();
-        componentParserCreateInfo.materialPool = m_renderer->material_pool();
-
-        m_componentParser = std::make_unique<ComponentJsonParser>(componentParserCreateInfo);
-    }
-
-    {
         SceneImporterJsonCreateInfo sceneImporterJsonCreateInfo = {};
-        sceneImporterJsonCreateInfo.componentParser = m_componentParser.get();
+        sceneImporterJsonCreateInfo.componentBuilder = importerCreateInfo.componentBuilder;
 
         m_sceneImporter = std::make_unique<SceneImporterJson>(sceneImporterJsonCreateInfo);
     }

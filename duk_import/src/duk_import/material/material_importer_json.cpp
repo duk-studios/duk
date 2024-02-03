@@ -3,8 +3,9 @@
 //
 
 #include <duk_import/material/material_importer_json.h>
-#include <duk_import/json/types.h>
+#include <duk_json/types.h>
 #include <duk_tools/file.h>
+#include <duk_renderer/pools/material_pool.h>
 
 #include <fstream>
 #include <regex>
@@ -28,21 +29,21 @@ duk::renderer::MaterialType parse_material_type(const char* typeStr) {
 
 std::unique_ptr<duk::renderer::ColorMaterialDataSource> parse_color_material(const rapidjson::Value& object, const duk::renderer::ImagePool* imagePool) {
     auto material = std::make_unique<duk::renderer::ColorMaterialDataSource>();
-    material->color = json::to_vec4(object["base-color"]);
-    material->baseColorImage = imagePool->find(json::to_resource_id(object["base-color-image"]));
-    material->baseColorSampler = json::to_sampler(object["base-color-sampler"]);
+    material->color = json::from_json<glm::vec4>(object["base-color"]);
+    material->baseColorImage = imagePool->find(json::from_json<duk::pool::ResourceId>(object["base-color-image"]));
+    material->baseColorSampler = json::from_json<duk::rhi::Sampler>(object["base-color-sampler"]);
     material->update_hash();
     return material;
 }
 
 std::unique_ptr<duk::renderer::PhongMaterialDataSource> parse_phong_material(const rapidjson::Value& object, const duk::renderer::ImagePool* imagePool) {
     auto material = std::make_unique<duk::renderer::PhongMaterialDataSource>();
-    material->baseColor = json::to_vec4(object["base-color"]);
+    material->baseColor = json::from_json<glm::vec4>(object["base-color"]);
     material->baseColorImage = imagePool->find_or_default(json::from_json<duk::pool::ResourceId>(object["base-color-image"]), imagePool->white_image());
-    material->baseColorSampler = json::to_sampler(object["base-color-sampler"]);
-    material->shininess = object["shininess"].GetFloat();
+    material->baseColorSampler = json::from_json<duk::rhi::Sampler>(object["base-color-sampler"]);
+    material->shininess = json::from_json<float>(object["shininess"]);
     material->shininessImage = imagePool->find_or_default(json::from_json<duk::pool::ResourceId>(object["shininess-image"]), imagePool->black_image());
-    material->shininessSampler = json::to_sampler(object["shininess-sampler"]);
+    material->shininessSampler = json::from_json<duk::rhi::Sampler>(object["shininess-sampler"]);
     material->update_hash();
     return material;
 }

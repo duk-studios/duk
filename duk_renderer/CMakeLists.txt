@@ -54,6 +54,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/pools/mesh_pool.h
         include/duk_renderer/pools/material_pool.h
         include/duk_renderer/pools/sprite_pool.h
+        include/duk_renderer/components/register_components.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -99,6 +100,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/pools/mesh_pool.cpp
         src/duk_renderer/pools/material_pool.cpp
         src/duk_renderer/pools/sprite_pool.cpp
+        src/duk_renderer/components/register_components.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

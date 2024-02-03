@@ -8,14 +8,16 @@
 #include <duk_import/material/material_importer.h>
 #include <duk_import/resource/resource_importer.h>
 #include <duk_import/scene/scene_importer.h>
-#include <duk_import/scene/component_json_parser.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/material_pool.h>
+#include <duk_scene/component_builder.h>
 
 namespace duk::import {
 
 struct ImporterCreateInfo {
     duk::renderer::Renderer* renderer;
+    duk::scene::ComponentBuilder* componentBuilder;
 };
 
 class Importer {
@@ -43,11 +45,6 @@ public:
 
     DUK_NO_DISCARD std::unique_ptr<duk::scene::Scene> load_scene(const std::string& alias);
 
-    template<typename T>
-    void register_component(const std::string& name) {
-         m_componentParser->register_component<T>(name);
-    }
-
 private:
 
     void load_resource(duk::pool::ResourceId id);
@@ -55,7 +52,6 @@ private:
 private:
     duk::renderer::Renderer* m_renderer;
     std::unique_ptr<ResourceImporter> m_resourceImporter;
-    std::unique_ptr<ComponentJsonParser> m_componentParser;
     std::unique_ptr<SceneImporter> m_sceneImporter;
     std::vector<std::unique_ptr<ImageImporter>> m_imageImporters;
     std::vector<std::unique_ptr<MaterialImporter>> m_materialImporters;
