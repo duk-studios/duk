@@ -2,10 +2,10 @@
 // Created by rov on 11/19/2023.
 //
 
-#ifndef DUK_POOL_POOL_H
-#define DUK_POOL_POOL_H
+#ifndef DUK_RESOURCE_POOL_H
+#define DUK_RESOURCE_POOL_H
 
-#include <duk_pool/resource.h>
+#include <duk_resource/resource.h>
 
 #include <memory>
 #include <unordered_map>
@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <cassert>
 
-namespace duk::pool {
+namespace duk::resource {
 
 template<typename ResourceT>
 class Pool {
@@ -29,21 +29,21 @@ public:
 
     DUK_NO_DISCARD bool empty() const;
 
-    DUK_NO_DISCARD ResourceT find(ResourceId id) const;
+    DUK_NO_DISCARD ResourceT find(Id id) const;
 
-    DUK_NO_DISCARD ResourceT find_or_default(ResourceId id, const ResourceT& def) const;
+    DUK_NO_DISCARD ResourceT find_or_default(Id id, const ResourceT& def) const;
 
 protected:
 
-    ResourceT insert(duk::pool::ResourceId id, const std::shared_ptr<ResourceType>& resource);
+    ResourceT insert(duk::resource::Id id, const std::shared_ptr<ResourceType>& resource);
 
 private:
-    std::unordered_map<ResourceId, ResourceT> m_objects;
+    std::unordered_map<Id, ResourceT> m_objects;
 
 };
 
 template<typename ResourceT>
-ResourceT Pool<ResourceT>::find(ResourceId id) const {
+ResourceT Pool<ResourceT>::find(Id id) const {
     auto it = m_objects.find(id);
     if (it == m_objects.end()) {
         return ResourceT(id);
@@ -52,7 +52,7 @@ ResourceT Pool<ResourceT>::find(ResourceId id) const {
 }
 
 template<typename ResourceT>
-ResourceT Pool<ResourceT>::find_or_default(ResourceId id, const ResourceT& def) const {
+ResourceT Pool<ResourceT>::find_or_default(Id id, const ResourceT& def) const {
     auto it = find(id);
     if (it.valid()) {
         return it;
@@ -89,7 +89,7 @@ bool Pool<ResourceT>::empty() const {
 }
 
 template<typename ResourceT>
-ResourceT Pool<ResourceT>::insert(duk::pool::ResourceId id, const std::shared_ptr<ResourceType>& resource) {
+ResourceT Pool<ResourceT>::insert(duk::resource::Id id, const std::shared_ptr<ResourceType>& resource) {
 
     auto [it, inserted] = m_objects.emplace(id, ResourceT(id, resource));
 
@@ -102,4 +102,4 @@ ResourceT Pool<ResourceT>::insert(duk::pool::ResourceId id, const std::shared_pt
 
 }
 
-#endif //DUK_POOL_POOL_H
+#endif //DUK_RESOURCE_POOL_H

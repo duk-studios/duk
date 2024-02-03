@@ -5,7 +5,7 @@
 #ifndef DUK_IMPORT_RESOURCE_IMPORTER_H
 #define DUK_IMPORT_RESOURCE_IMPORTER_H
 
-#include <duk_pool/resource.h>
+#include <duk_resource/resource.h>
 
 #include <set>
 #include <string>
@@ -24,8 +24,8 @@ enum class ResourceType {
 struct ResourceDescription {
     ResourceType type;
     std::string path;
-    duk::pool::ResourceId id;
-    std::set<duk::pool::ResourceId> dependencies;
+    duk::resource::Id id;
+    std::set<duk::resource::Id> dependencies;
     std::set<std::string> aliases;
 };
 
@@ -34,8 +34,8 @@ bool operator==(const ResourceDescription& lhs, const ResourceDescription& rhs);
 bool operator<(const ResourceDescription& lhs, const ResourceDescription& rhs);
 
 struct ResourceSet {
-    std::unordered_map<duk::pool::ResourceId, ResourceDescription> resources;
-    std::unordered_map<std::string, duk::pool::ResourceId> aliases;
+    std::unordered_map<duk::resource::Id, ResourceDescription> resources;
+    std::unordered_map<std::string, duk::resource::Id> aliases;
 };
 
 class ResourceImporter {

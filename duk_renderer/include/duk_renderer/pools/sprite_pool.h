@@ -13,12 +13,12 @@ struct SpritePoolCreateInfo {
     ImagePool* imagePool;
 };
 
-class SpritePool : public duk::pool::Pool<SpriteResource> {
+class SpritePool : public duk::resource::Pool<SpriteResource> {
 public:
 
     explicit SpritePool(const SpritePoolCreateInfo& spritePoolCreateInfo);
 
-    DUK_NO_DISCARD SpriteResource create(duk::pool::ResourceId resourceId, const duk::renderer::SpriteDataSource* spriteDataSource);
+    DUK_NO_DISCARD SpriteResource create(duk::resource::Id resourceId, const duk::renderer::SpriteDataSource* spriteDataSource);
 
     DUK_NO_DISCARD SpriteResource white_square() const;
 

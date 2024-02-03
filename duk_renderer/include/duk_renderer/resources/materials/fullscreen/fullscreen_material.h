@@ -29,7 +29,7 @@ private:
 
 };
 
-using FullscreenMaterialResource = duk::pool::Resource<FullscreenMaterial>;
+using FullscreenMaterialResource = duk::resource::Resource<FullscreenMaterial>;
 
 }
 

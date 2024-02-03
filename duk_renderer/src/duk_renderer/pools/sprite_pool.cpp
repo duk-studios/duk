@@ -17,12 +17,12 @@ SpritePool::SpritePool(const SpritePoolCreateInfo& spritePoolCreateInfo) :
 
         SpriteDataSource spriteDataSource(spriteDataSourceCreateInfo);
 
-        m_whiteSquareSprite = create(duk::pool::ResourceId(10001), &spriteDataSource);
+        m_whiteSquareSprite = create(duk::resource::Id(10001), &spriteDataSource);
     }
 
 }
 
-SpriteResource SpritePool::create(duk::pool::ResourceId resourceId, const duk::renderer::SpriteDataSource* spriteDataSource) {
+SpriteResource SpritePool::create(duk::resource::Id resourceId, const duk::renderer::SpriteDataSource* spriteDataSource) {
     SpriteCreateInfo spriteCreateInfo = {};
     spriteCreateInfo.spriteDataSource = spriteDataSource;
     spriteCreateInfo.imagePool = m_imagePool;

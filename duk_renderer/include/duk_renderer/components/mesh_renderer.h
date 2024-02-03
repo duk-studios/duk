@@ -20,8 +20,8 @@ namespace duk::json {
 
 template<>
 inline void from_json<duk::renderer::MeshRenderer>(const rapidjson::Value& jsonObject, duk::renderer::MeshRenderer& object) {
-    object.mesh = from_json<duk::pool::ResourceId>(jsonObject["mesh"]);
-    object.material = from_json<duk::pool::ResourceId>(jsonObject["material"]);
+    object.mesh = from_json<duk::resource::Id>(jsonObject["mesh"]);
+    object.material = from_json<duk::resource::Id>(jsonObject["material"]);
 }
 
 }

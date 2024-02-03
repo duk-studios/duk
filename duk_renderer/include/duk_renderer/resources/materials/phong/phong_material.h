@@ -69,7 +69,7 @@ private:
     duk::rhi::Sampler m_shininessSampler;
 };
 
-using PhongMaterialResource = duk::pool::Resource<PhongMaterial>;
+using PhongMaterialResource = duk::resource::Resource<PhongMaterial>;
 
 }
 

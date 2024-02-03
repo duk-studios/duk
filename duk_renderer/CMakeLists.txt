@@ -116,7 +116,7 @@ target_link_libraries(duk_renderer
         PUBLIC
         duk_scene
         duk_rhi
-        duk_pool
+        duk_resource
         )
 
 set_target_properties(duk_renderer PROPERTIES CXX_STANDARD 20)

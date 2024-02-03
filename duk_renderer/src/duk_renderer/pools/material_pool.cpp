@@ -13,7 +13,7 @@ MaterialPool::MaterialPool(const MaterialPoolCreateInfo& materialPoolCreateInfo)
 
 }
 
-MaterialResource MaterialPool::create(duk::pool::ResourceId resourceId, const MaterialDataSource* materialDataSource) {
+MaterialResource MaterialPool::create(duk::resource::Id resourceId, const MaterialDataSource* materialDataSource) {
     switch (materialDataSource->type()) {
         case MaterialType::COLOR: return create_color(resourceId, materialDataSource->as<ColorMaterialDataSource>());
         case MaterialType::PHONG: return create_phong(resourceId, materialDataSource->as<PhongMaterialDataSource>());
@@ -21,7 +21,7 @@ MaterialResource MaterialPool::create(duk::pool::ResourceId resourceId, const Ma
     }
 }
 
-PhongMaterialResource MaterialPool::create_phong(duk::pool::ResourceId resourceId) {
+PhongMaterialResource MaterialPool::create_phong(duk::resource::Id resourceId) {
 
     const duk::rhi::Sampler kSampler = {.filter = duk::rhi::Sampler::Filter::LINEAR, .wrapMode = duk::rhi::Sampler::WrapMode::REPEAT};
 
@@ -36,7 +36,7 @@ PhongMaterialResource MaterialPool::create_phong(duk::pool::ResourceId resourceI
     return create_phong(resourceId, &phongMaterialDataSource);
 }
 
-PhongMaterialResource MaterialPool::create_phong(duk::pool::ResourceId resourceId, const PhongMaterialDataSource* phongMaterialDataSource) {
+PhongMaterialResource MaterialPool::create_phong(duk::resource::Id resourceId, const PhongMaterialDataSource* phongMaterialDataSource) {
     PhongMaterialCreateInfo phongMaterialCreateInfo = {};
     phongMaterialCreateInfo.renderer = m_renderer;
     phongMaterialCreateInfo.phongMaterialDataSource = phongMaterialDataSource;
@@ -44,13 +44,13 @@ PhongMaterialResource MaterialPool::create_phong(duk::pool::ResourceId resourceI
     return insert(resourceId, std::make_shared<PhongMaterial>(phongMaterialCreateInfo)).as<PhongMaterial>();
 }
 
-ColorMaterialResource MaterialPool::create_color(duk::pool::ResourceId resourceId) {
+ColorMaterialResource MaterialPool::create_color(duk::resource::Id resourceId) {
     ColorMaterialDataSource colorMaterialDataSource = {};
     colorMaterialDataSource.color = glm::vec4(1.0f);
     return create_color(resourceId, &colorMaterialDataSource);
 }
 
-ColorMaterialResource MaterialPool::create_color(duk::pool::ResourceId resourceId, const ColorMaterialDataSource* colorMaterialDataSource) {
+ColorMaterialResource MaterialPool::create_color(duk::resource::Id resourceId, const ColorMaterialDataSource* colorMaterialDataSource) {
     ColorMaterialCreateInfo colorMaterialCreateInfo = {};
     colorMaterialCreateInfo.renderer = m_renderer;
     colorMaterialCreateInfo.colorMaterialDataSource = colorMaterialDataSource;
@@ -58,7 +58,7 @@ ColorMaterialResource MaterialPool::create_color(duk::pool::ResourceId resourceI
     return insert(resourceId, std::make_shared<ColorMaterial>(colorMaterialCreateInfo)).as<ColorMaterial>();
 }
 
-FullscreenMaterialResource MaterialPool::create_fullscreen(duk::pool::ResourceId resourceId) {
+FullscreenMaterialResource MaterialPool::create_fullscreen(duk::resource::Id resourceId) {
     FullscreenMaterialCreateInfo fullscreenMaterialCreateInfo = {};
     fullscreenMaterialCreateInfo.renderer = m_renderer;
 
@@ -69,13 +69,13 @@ FullscreenMaterialResource MaterialPool::create_fullscreen(duk::pool::ResourceId
     return insert(resourceId, material).as<FullscreenMaterial>();
 }
 
-SpriteColorMaterialResource MaterialPool::create_sprite_color(duk::pool::ResourceId resourceId) {
+SpriteColorMaterialResource MaterialPool::create_sprite_color(duk::resource::Id resourceId) {
     SpriteColorMaterialDataSource spriteColorMaterialDataSource = {};
     spriteColorMaterialDataSource.color = glm::vec4(1);
     return create_sprite_color(resourceId, &spriteColorMaterialDataSource);
 }
 
-SpriteColorMaterialResource MaterialPool::create_sprite_color(duk::pool::ResourceId resourceId, const SpriteColorMaterialDataSource* spriteColorMaterialDataSource) {
+SpriteColorMaterialResource MaterialPool::create_sprite_color(duk::resource::Id resourceId, const SpriteColorMaterialDataSource* spriteColorMaterialDataSource) {
     SpriteColorMaterialCreateInfo spriteColorMaterialCreateInfo = {};
     spriteColorMaterialCreateInfo.renderer = m_renderer;
     spriteColorMaterialCreateInfo.spriteColorMaterialDataSource = spriteColorMaterialDataSource;

@@ -12,7 +12,7 @@ SpriteDataSource::SpriteDataSource(const SpriteDataSourceCreateInfo& spriteDataS
 
 }
 
-duk::pool::ResourceId SpriteDataSource::image_id() const {
+duk::resource::Id SpriteDataSource::image_id() const {
     return m_imageId;
 }
 

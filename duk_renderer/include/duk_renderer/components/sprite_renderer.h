@@ -21,8 +21,8 @@ namespace duk::json {
 
 template<>
 inline void from_json<duk::renderer::SpriteRenderer>(const rapidjson::Value& jsonObject, duk::renderer::SpriteRenderer& object) {
-    object.sprite = from_json<duk::pool::ResourceId>(jsonObject["sprite"]);
-    object.material = from_json<duk::pool::ResourceId>(jsonObject["material"]);
+    object.sprite = from_json<duk::resource::Id>(jsonObject["sprite"]);
+    object.material = from_json<duk::resource::Id>(jsonObject["material"]);
 }
 
 }

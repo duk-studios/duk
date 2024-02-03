@@ -103,7 +103,7 @@ int main() {
     duk::scene::Object cubeObject = scene->add_object();
     auto cubeMeshDrawing = cubeObject.add<duk::renderer::MeshDrawing>();
     cubeMeshDrawing->mesh = renderer->mesh_pool()->cube();
-    cubeMeshDrawing->material = renderer->material_pool()->create_phong(duk::pool::ResourceId(666));
+    cubeMeshDrawing->material = renderer->material_pool()->create_phong(duk::pool::Id(666));
     auto cubePosition = cubeObject.add<duk::renderer::Position3D>();
     cubePosition->value = glm::vec3(0,0,-10);
     auto cubeScale = cubeObject.add<duk::renderer::Scale3D>();

@@ -45,7 +45,7 @@ std::unique_ptr<duk::rhi::ImageDataSource> Importer::load_image_data_source(cons
     throw std::runtime_error("failed to load image data source: could not find suitable importer");
 }
 
-duk::renderer::ImageResource Importer::load_image(duk::pool::ResourceId id, const std::filesystem::path& path) {
+duk::renderer::ImageResource Importer::load_image(duk::resource::Id id, const std::filesystem::path& path) {
     if (auto img = find_image(id)) {
         return img;
     }
@@ -53,7 +53,7 @@ duk::renderer::ImageResource Importer::load_image(duk::pool::ResourceId id, cons
     return m_renderer->image_pool()->create(id, dataSource.get());
 }
 
-duk::renderer::ImageResource Importer::find_image(duk::pool::ResourceId id) const {
+duk::renderer::ImageResource Importer::find_image(duk::resource::Id id) const {
     return m_renderer->image_pool()->find(id);
 }
 
@@ -66,7 +66,7 @@ std::unique_ptr<duk::renderer::MaterialDataSource> Importer::load_material_data_
     throw std::runtime_error("failed to load material: could not find suitable importer");
 }
 
-duk::renderer::MaterialResource Importer::load_material(duk::pool::ResourceId id, const std::filesystem::path& path) {
+duk::renderer::MaterialResource Importer::load_material(duk::resource::Id id, const std::filesystem::path& path) {
     if (auto mat = find_material(id)) {
         return mat;
     }
@@ -74,11 +74,11 @@ duk::renderer::MaterialResource Importer::load_material(duk::pool::ResourceId id
     return  m_renderer->material_pool()->create(id, dataSource.get());
 }
 
-duk::renderer::MaterialResource Importer::find_material(duk::pool::ResourceId id) const {
+duk::renderer::MaterialResource Importer::find_material(duk::resource::Id id) const {
     return m_renderer->material_pool()->find(id);
 }
 
-std::unique_ptr<duk::scene::Scene> Importer::load_scene(duk::pool::ResourceId id) {
+std::unique_ptr<duk::scene::Scene> Importer::load_scene(duk::resource::Id id) {
 
     auto& resources = m_resourceSet.resources;
 
@@ -111,7 +111,7 @@ std::unique_ptr<duk::scene::Scene> Importer::load_scene(const std::string& alias
     return load_scene(it->second);
 }
 
-void Importer::load_resource(duk::pool::ResourceId id) {
+void Importer::load_resource(duk::resource::Id id) {
     auto& resources = m_resourceSet.resources;
 
     auto it = resources.find(id);

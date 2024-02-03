@@ -30,7 +30,7 @@ duk::renderer::MaterialType parse_material_type(const char* typeStr) {
 std::unique_ptr<duk::renderer::ColorMaterialDataSource> parse_color_material(const rapidjson::Value& object, const duk::renderer::ImagePool* imagePool) {
     auto material = std::make_unique<duk::renderer::ColorMaterialDataSource>();
     material->color = json::from_json<glm::vec4>(object["base-color"]);
-    material->baseColorImage = imagePool->find(json::from_json<duk::pool::ResourceId>(object["base-color-image"]));
+    material->baseColorImage = imagePool->find(json::from_json<duk::resource::Id>(object["base-color-image"]));
     material->baseColorSampler = json::from_json<duk::rhi::Sampler>(object["base-color-sampler"]);
     material->update_hash();
     return material;
@@ -39,10 +39,10 @@ std::unique_ptr<duk::renderer::ColorMaterialDataSource> parse_color_material(con
 std::unique_ptr<duk::renderer::PhongMaterialDataSource> parse_phong_material(const rapidjson::Value& object, const duk::renderer::ImagePool* imagePool) {
     auto material = std::make_unique<duk::renderer::PhongMaterialDataSource>();
     material->baseColor = json::from_json<glm::vec4>(object["base-color"]);
-    material->baseColorImage = imagePool->find_or_default(json::from_json<duk::pool::ResourceId>(object["base-color-image"]), imagePool->white_image());
+    material->baseColorImage = imagePool->find_or_default(json::from_json<duk::resource::Id>(object["base-color-image"]), imagePool->white_image());
     material->baseColorSampler = json::from_json<duk::rhi::Sampler>(object["base-color-sampler"]);
     material->shininess = json::from_json<float>(object["shininess"]);
-    material->shininessImage = imagePool->find_or_default(json::from_json<duk::pool::ResourceId>(object["shininess-image"]), imagePool->black_image());
+    material->shininessImage = imagePool->find_or_default(json::from_json<duk::resource::Id>(object["shininess-image"]), imagePool->black_image());
     material->shininessSampler = json::from_json<duk::rhi::Sampler>(object["shininess-sampler"]);
     material->update_hash();
     return material;

@@ -8,7 +8,7 @@
 #include <duk_renderer/resources/materials/draw_entry.h>
 #include <duk_renderer/resources/materials/painter.h>
 
-#include <duk_pool/resource.h>
+#include <duk_resource/resource.h>
 #include <duk_rhi/command/command_buffer.h>
 #include <duk_scene/object.h>
 
@@ -60,7 +60,7 @@ private:
     Painter m_painter;
 };
 
-using MaterialResource = duk::pool::Resource<Material>;
+using MaterialResource = duk::resource::Resource<Material>;
 
 template<typename T>
 T* MaterialDataSource::as() requires std::is_base_of_v<MaterialDataSource, T> {
