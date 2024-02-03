@@ -6,6 +6,7 @@
 #define DUK_POOL_RESOURCE_H
 
 #include <duk_macros/macros.h>
+#include <duk_json/types.h>
 
 #include <memory>
 
@@ -164,6 +165,15 @@ bool Resource<T>::valid() const {
 template<typename T>
 Resource<T>::operator bool() const {
     return valid();
+}
+
+}
+
+namespace duk::json {
+
+template<>
+inline void from_json<duk::pool::ResourceId>(const rapidjson::Value& jsonObject, duk::pool::ResourceId& object) {
+    object = duk::pool::ResourceId(from_json<uint64_t>(jsonObject));
 }
 
 }

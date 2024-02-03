@@ -5,6 +5,7 @@
 #define DUK_RENDERER_TRANSFORM_H
 
 #include <duk_scene/object.h>
+#include <duk_json/types.h>
 
 #include <glm/matrix.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -44,5 +45,38 @@ glm::vec3 forward_direction_3d(const duk::scene::Object& object);
 
 }
 
-#endif // DUK_RENDERER_TRANSFORM_H
+namespace duk::json {
 
+template<>
+inline void from_json<duk::renderer::Position3D>(const rapidjson::Value& jsonObject, duk::renderer::Position3D& object) {
+    object.value = from_json<glm::vec3>(jsonObject["value"]);
+}
+
+template<>
+inline void from_json<duk::renderer::Position2D>(const rapidjson::Value& jsonObject, duk::renderer::Position2D& object) {
+    object.value = from_json<glm::vec2>(jsonObject["value"]);
+}
+
+template<>
+inline void from_json<duk::renderer::Rotation3D>(const rapidjson::Value& jsonObject, duk::renderer::Rotation3D& object) {
+    object.value = glm::radians(from_json<glm::vec3>(jsonObject["value"])); // euler
+}
+
+template<>
+inline void from_json<duk::renderer::Rotation2D>(const rapidjson::Value& jsonObject, duk::renderer::Rotation2D& object) {
+    object.value = from_json<float>(jsonObject["value"]);
+}
+
+template<>
+inline void from_json<duk::renderer::Scale3D>(const rapidjson::Value& jsonObject, duk::renderer::Scale3D& object) {
+    object.value = glm::radians(from_json<glm::vec3>(jsonObject["value"])); // euler
+}
+
+template<>
+inline void from_json<duk::renderer::Scale2D>(const rapidjson::Value& jsonObject, duk::renderer::Scale2D& object) {
+    object.value = from_json<glm::vec2>(jsonObject["value"]);
+}
+
+}
+
+#endif // DUK_RENDERER_TRANSFORM_H
