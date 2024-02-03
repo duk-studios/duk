@@ -223,6 +223,7 @@ Component<T>::operator bool() const {
 template<typename T, typename... Args>
 void Scene::add_component(const Object::Id& id, Args&& ... args) {
     assert(valid_object(id));
+    assert(!valid_component<T>(id));
     auto componentPool = pool<T>();
     componentPool->construct(id.index(), std::forward<Args>(args)...);
     m_objectComponentMasks[id.index()].set(component_index<T>());
