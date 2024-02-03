@@ -55,7 +55,7 @@ private:
     size_t m_usedDescriptorSets;
 };
 
-using SpriteColorMaterialResource = duk::resource::Resource<SpriteColorMaterial>;
+using SpriteColorMaterialResource = duk::resource::ResourceT<SpriteColorMaterial>;
 
 }
 

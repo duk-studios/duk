@@ -9,6 +9,7 @@
 #include <duk_json/types.h>
 
 #include <memory>
+#include <typeindex>
 
 namespace duk::resource {
 
@@ -32,24 +33,55 @@ private:
 };
 
 template<typename T>
+class ResourceT;
+
 class Resource {
+public:
+
+    DUK_NO_DISCARD Id id() const;
+
+    template<typename T>
+    DUK_NO_DISCARD ResourceT<T> as();
+
+    template<typename T>
+    DUK_NO_DISCARD bool is() const;
+
+    DUK_NO_DISCARD size_t use_count() const;
+
+    DUK_NO_DISCARD bool valid() const;
+
+    DUK_NO_DISCARD operator bool() const;
+
+    void reset();
+
+protected:
+
+    template<typename T>
+    Resource(Id id, const std::shared_ptr<T>& resource);
+
+    template<typename U>
+    friend class ResourceT;
+
+    Id m_id;
+    std::shared_ptr<void> m_resource;
+    // used for safe casting
+    std::type_index m_type;
+};
+
+template<typename T>
+class ResourceT : public Resource {
 public:
 
     using Type = T;
 
-    Resource();
+    ResourceT();
 
-    Resource(Id id);
+    ResourceT(Id id);
 
-    Resource(Id id, const std::shared_ptr<T>& resource);
-
-    template<typename U>
-    Resource(const Resource<U>& other) requires std::is_base_of_v<T, U>;
+    ResourceT(Id id, const std::shared_ptr<T>& resource);
 
     template<typename U>
-    Resource<U> as() requires std::is_base_of_v<T, U>;
-
-    void reset();
+    ResourceT(const ResourceT<U>& other) requires std::is_base_of_v<T, U>;
 
     DUK_NO_DISCARD T* get();
 
@@ -63,108 +95,79 @@ public:
 
     DUK_NO_DISCARD T& operator*() const;
 
-    DUK_NO_DISCARD Id id() const;
-
-    DUK_NO_DISCARD size_t use_count() const;
-
-    DUK_NO_DISCARD bool valid() const;
-
-    DUK_NO_DISCARD operator bool() const;
-
-
-private:
-    template<typename U>
-    friend class Resource;
-    Id m_id;
-    std::shared_ptr<T> m_resource;
 };
 
 template<typename T>
-Resource<T>::Resource() :
-    Resource(Id(0), nullptr) {
-
-}
-
-template<typename T>
-Resource<T>::Resource(Id id) :
-    m_id(id) {
-
-}
-
-template<typename T>
-Resource<T>::Resource(Id id, const std::shared_ptr<T>& resource) :
+Resource::Resource(Id id, const std::shared_ptr<T>& resource) :
     m_id(id),
-    m_resource(resource) {
+    m_resource(resource),
+    m_type(typeid(T)) {
+
+}
+
+template<typename T>
+ResourceT<T> Resource::as() {
+    return ResourceT<T>(m_id, std::reinterpret_pointer_cast<T>(m_resource));
+}
+
+template<typename T>
+bool Resource::is() const {
+    return m_type == typeid(T);
+}
+
+template<typename T>
+ResourceT<T>::ResourceT() :
+    ResourceT(Id(0), nullptr) {
+
+}
+
+template<typename T>
+ResourceT<T>::ResourceT(Id id) :
+    Resource(id, std::shared_ptr<T>()) {
+
+}
+
+template<typename T>
+ResourceT<T>::ResourceT(Id id, const std::shared_ptr<T>& resource) :
+    Resource(id, resource) {
 
 }
 
 template<typename T>
 template<typename U>
-Resource<T>::Resource(const Resource<U>& other) requires std::is_base_of_v<T, U> {
-    m_resource = other.m_resource;
-    m_id = other.m_id;
+ResourceT<T>::ResourceT(const ResourceT<U>& other) requires std::is_base_of_v<T, U> :
+    Resource(other.id(), other.m_resource) {
+
 }
 
 template<typename T>
-template<typename U>
-Resource<U> Resource<T>::as() requires std::is_base_of_v<T, U> {
-    return Resource<U>(m_id, std::dynamic_pointer_cast<U>(m_resource));
+T* ResourceT<T>::get() {
+    return reinterpret_cast<T*>(m_resource.get());
 }
 
 template<typename T>
-void Resource<T>::reset() {
-    m_resource.reset();
-    m_id = Id(0);
+T* ResourceT<T>::get() const {
+    return reinterpret_cast<T*>(m_resource.get());
 }
 
 template<typename T>
-T* Resource<T>::get() {
-    return m_resource.get();
+T* ResourceT<T>::operator->() {
+    return get();
 }
 
 template<typename T>
-T* Resource<T>::get() const {
-    return m_resource.get();
+T* ResourceT<T>::operator->() const {
+    return get();
 }
 
 template<typename T>
-T* Resource<T>::operator->() {
-    return m_resource.get();
+T& ResourceT<T>::operator*() {
+    return *get();
 }
 
 template<typename T>
-T* Resource<T>::operator->() const {
-    return m_resource.get();
-}
-
-template<typename T>
-T& Resource<T>::operator*() {
-    return *m_resource;
-}
-
-template<typename T>
-T& Resource<T>::operator*() const {
-    return *m_resource;
-}
-
-template<typename T>
-Id Resource<T>::id() const {
-    return m_id;
-}
-
-template<typename T>
-size_t Resource<T>::use_count() const {
-    return m_resource.use_count();
-}
-
-template<typename T>
-bool Resource<T>::valid() const {
-    return m_resource && m_id.value() != 0;
-}
-
-template<typename T>
-Resource<T>::operator bool() const {
-    return valid();
+T& ResourceT<T>::operator*() const {
+    return *get();
 }
 
 }

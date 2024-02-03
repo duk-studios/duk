@@ -31,7 +31,7 @@ public:
 private:
 };
 
-using SpriteMaterialResource = duk::resource::Resource<SpriteMaterial>;
+using SpriteMaterialResource = duk::resource::ResourceT<SpriteMaterial>;
 
 }
 

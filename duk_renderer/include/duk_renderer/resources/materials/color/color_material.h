@@ -58,7 +58,7 @@ private:
     ColorDescriptorSet m_descriptorSet;
 };
 
-using ColorMaterialResource = duk::resource::Resource<ColorMaterial>;
+using ColorMaterialResource = duk::resource::ResourceT<ColorMaterial>;
 
 }
 

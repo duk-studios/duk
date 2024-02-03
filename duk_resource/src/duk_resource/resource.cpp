@@ -32,4 +32,25 @@ uint64_t Id::value() const {
     return m_id;
 }
 
+Id Resource::id() const {
+    return m_id;
+}
+
+size_t Resource::use_count() const {
+    return m_resource.use_count();
+}
+
+bool Resource::valid() const {
+    return m_resource && m_id.value() != 0;
+}
+
+Resource::operator bool() const {
+    return valid();
+}
+
+void Resource::reset() {
+    m_resource.reset();
+    m_id = Id(0);
+}
+
 }

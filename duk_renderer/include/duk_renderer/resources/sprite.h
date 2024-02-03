@@ -41,7 +41,7 @@ private:
     glm::u32vec2 m_size;
 };
 
-using SpriteResource = duk::resource::Resource<Sprite>;
+using SpriteResource = duk::resource::ResourceT<Sprite>;
 
 }
 

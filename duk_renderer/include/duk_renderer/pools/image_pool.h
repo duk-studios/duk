@@ -12,7 +12,7 @@ namespace duk::renderer {
 
 class Renderer;
 
-using ImageResource = duk::resource::Resource<duk::rhi::Image>;
+using ImageResource = duk::resource::ResourceT<duk::rhi::Image>;
 
 struct ImagePoolCreateInfo {
     Renderer* renderer;

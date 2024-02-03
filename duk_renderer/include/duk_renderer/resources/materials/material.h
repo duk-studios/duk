@@ -60,7 +60,7 @@ private:
     Painter m_painter;
 };
 
-using MaterialResource = duk::resource::Resource<Material>;
+using MaterialResource = duk::resource::ResourceT<Material>;
 
 template<typename T>
 T* MaterialDataSource::as() requires std::is_base_of_v<MaterialDataSource, T> {

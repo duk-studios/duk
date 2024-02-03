@@ -12,7 +12,7 @@ namespace duk::renderer {
 
 class Renderer;
 
-using MeshResource = duk::resource::Resource<Mesh>;
+using MeshResource = duk::resource::ResourceT<Mesh>;
 
 struct MeshPoolCreateInfo {
     Renderer* renderer;
