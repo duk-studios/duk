@@ -24,8 +24,8 @@
 int main() {
     bool run = false;
 
-    //An event listener (duk::events::EventListener) is created to handle window events.
-    duk::events::EventListener listener;
+    //An event listener (duk::event::Listener) is created to handle window event.
+    duk::event::Listener listener;
 
     //A Window is created with a specified name ("RendererWindow") and dimensions (640x720).
     std::shared_ptr<duk::platform::Window> window;
@@ -45,7 +45,7 @@ int main() {
     }
     
 
-    //Event listeners are set up to respond to window close and destroy events.
+    //Event listeners are set up to respond to window close and destroy event.
     listener.listen(window->window_close_event, [&window] {
         std::cout<<"The window is closed!" << std::endl;
         window->close();

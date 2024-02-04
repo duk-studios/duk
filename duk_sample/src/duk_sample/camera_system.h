@@ -7,7 +7,7 @@
 
 #include <duk_engine/systems/system.h>
 #include <duk_scene/scene.h>
-#include <duk_events/event.h>
+#include <duk_event/event.h>
 
 namespace duk::sample {
 
@@ -22,7 +22,7 @@ public:
 
 private:
     duk::scene::Object m_camera;
-    duk::events::EventListener m_listener;
+    duk::event::Listener m_listener;
 };
 
 

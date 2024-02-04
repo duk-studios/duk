@@ -65,7 +65,7 @@ private:
     bool* m_requiresRecreationPtr;
     bool* m_ableToPresentPtr;
     VulkanSubmitter m_submitter;
-    events::EventListener m_listener;
+    event::Listener m_listener;
 };
 
 struct VulkanSwapchainCreateInfo {
@@ -121,7 +121,7 @@ private:
     VkPresentModeKHR m_presentMode;
     VkExtent2D m_extent;
 
-    duk::events::EventListener m_listener;
+    duk::event::Listener m_listener;
 
     uint32_t m_currentImage{};
     std::unique_ptr<VulkanSwapchainImage> m_image;

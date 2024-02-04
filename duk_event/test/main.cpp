@@ -1,11 +1,11 @@
 ﻿#include <iostream>
-#include <duk_events/event.h>
+#include <duk_event/event.h>
 
 int main() {
     int myInt = 0;
     
-    duk::events::EventListener mylistener;
-    duk::events::EventT<int> myIntEvent;
+    duk::event::Listener mylistener;
+    duk::event::EventT<int> myIntEvent;
 
     std::cout << "myInt current value: " << myInt << std::endl;
     

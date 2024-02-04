@@ -29,7 +29,7 @@ Logger::~Logger() {
     m_printQueue.stop();
 }
 
-void Logger::add_print_listener(events::EventListener& listener, PrintEvent::Callback&& callback) {
+void Logger::add_print_listener(event::Listener& listener, PrintEvent::Callback&& callback) {
     std::lock_guard lock(m_printMutex);
     listener.listen(m_printEvent, std::move(callback));
 }

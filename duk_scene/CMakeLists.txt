@@ -28,7 +28,7 @@ target_link_libraries(duk_scene
         PUBLIC
         duk_macros
         duk_hash
-        duk_events
+        duk_event
         duk_tools
         duk_json
         duk_log

@@ -4,7 +4,7 @@
 #define DUK_LOG_LOGGER_H
 
 #include <duk_macros/macros.h>
-#include <duk_events/event.h>
+#include <duk_event/event.h>
 #include <duk_task/task_queue.h>
 #include <duk_tools/format.h>
 
@@ -27,7 +27,7 @@ enum Level : uint8_t {
 class Logger {
 public:
 
-    using PrintEvent = duk::events::EventT<Level, const std::string&>;
+    using PrintEvent = duk::event::EventT<Level, const std::string&>;
 
 public:
 
@@ -45,7 +45,7 @@ public:
         }, level, format, fmt::make_format_args(args...));
     }
 
-    void add_print_listener(events::EventListener& listener, PrintEvent::Callback&& callback);
+    void add_print_listener(event::Listener& listener, PrintEvent::Callback&& callback);
 
     void wait();
 

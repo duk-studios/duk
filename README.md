@@ -6,7 +6,7 @@ Duk is a collection of tools for game development/rendering in general.
 There are many modules, each one exposing a specific set of features:
 - [duk_macros](./duk_macros/README.md):
 - [duk_hash](./duk_hash/README.md):
-- [duk_events](./duk_events/README.md):
+- [duk_event](duk_event/README.md):
 - [duk_task](./duk_task/README.md):
 - [duk_tools](./duk_tools/README.md):
 - [duk_platform](./duk_platform/README.md):

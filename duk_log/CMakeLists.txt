@@ -28,7 +28,7 @@ target_include_directories(duk_log
 target_link_libraries(duk_log
         PUBLIC
         duk_macros
-        duk_events
+        duk_event
         duk_task
         duk_tools
         duk_platform

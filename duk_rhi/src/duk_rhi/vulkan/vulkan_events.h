@@ -6,11 +6,11 @@
 
 #include <duk_rhi/vulkan/vulkan_import.h>
 
-#include <duk_events/event.h>
+#include <duk_event/event.h>
 
 namespace duk::rhi {
 
-using VulkanPrepareFrameEvent = duk::events::EventT<uint32_t>;
+using VulkanPrepareFrameEvent = duk::event::EventT<uint32_t>;
 
 struct VulkanSwapchainCreateEventInfo {
     VkFormat format;
@@ -19,14 +19,14 @@ struct VulkanSwapchainCreateEventInfo {
     VkSwapchainKHR swapchain;
 };
 
-using VulkanSwapchainCreateEvent = duk::events::EventT<VulkanSwapchainCreateEventInfo>;
-using VulkanSwapchainCleanEvent = duk::events::EventT<>;
+using VulkanSwapchainCreateEvent = duk::event::EventT<VulkanSwapchainCreateEventInfo>;
+using VulkanSwapchainCleanEvent = duk::event::EventT<>;
 
-using VulkanResourceCreateImageEvent = duk::events::EventT<uint32_t>;
-using VulkanResourceCleanImageEvent = duk::events::EventT<>;
+using VulkanResourceCreateImageEvent = duk::event::EventT<uint32_t>;
+using VulkanResourceCleanImageEvent = duk::event::EventT<>;
 
-using VulkanResourceCreateFrameBufferEvent = duk::events::EventT<uint32_t>;
-using VulkanResourceCleanFrameBufferEvent = duk::events::EventT<>;
+using VulkanResourceCreateFrameBufferEvent = duk::event::EventT<uint32_t>;
+using VulkanResourceCleanFrameBufferEvent = duk::event::EventT<>;
 
 }
 

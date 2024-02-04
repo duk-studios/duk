@@ -7,7 +7,7 @@
 
 #include <duk_platform/window_error.h>
 #include <duk_platform/key_codes.h>
-#include <duk_events/event.h>
+#include <duk_event/event.h>
 
 #include <tl/expected.hpp>
 
@@ -29,13 +29,13 @@ using ExpectedWindow = tl::expected<std::shared_ptr<Window>, WindowError>;
 class Window {
 public:
 
-    using CloseEvent = duk::events::EventVoid;
-    using DestroyEvent = duk::events::EventVoid;
-    using ResizeEvent = duk::events::EventT<uint32_t, uint32_t>;
-    using MouseMovement = duk::events::EventT<uint32_t, uint32_t>;
-    using MouseWheelMovementEvent = duk::events::EventT<uint32_t, uint32_t>;
-    using MouseButtonEvent = duk::events::EventT<MouseButton, KeyAction>;
-    using KeyEvent = duk::events::EventT<Keys, KeyModifiers::Mask, KeyAction>;
+    using CloseEvent = duk::event::EventVoid;
+    using DestroyEvent = duk::event::EventVoid;
+    using ResizeEvent = duk::event::EventT<uint32_t, uint32_t>;
+    using MouseMovement = duk::event::EventT<uint32_t, uint32_t>;
+    using MouseWheelMovementEvent = duk::event::EventT<uint32_t, uint32_t>;
+    using MouseButtonEvent = duk::event::EventT<MouseButton, KeyAction>;
+    using KeyEvent = duk::event::EventT<Keys, KeyModifiers::Mask, KeyAction>;
 
 public:
 

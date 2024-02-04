@@ -35,7 +35,7 @@ struct RendererCreateInfo {
 class Renderer {
 public:
 
-    using RenderStartEvent = duk::events::EventVoid;
+    using RenderStartEvent = duk::event::EventVoid;
 
 public:
 
@@ -85,7 +85,7 @@ protected:
     std::unique_ptr<MaterialPool> m_materialPool;
     std::unique_ptr<SpritePool> m_spritePool;
     duk::scene::Object::Id m_mainCameraObjectId;
-    duk::events::EventVoid m_renderStart;
+    duk::event::EventVoid m_renderStart;
 };
 
 } // namespace renderer

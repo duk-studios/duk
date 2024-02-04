@@ -2,9 +2,9 @@
 // Created by Ricardo on 15/04/2023.
 //
 
-#include <duk_events/event.h>
+#include <duk_event/event.h>
 
-namespace duk::events {
+namespace duk::event {
 
 Event::Handle::Handle(Event& owner) :
     m_owner(owner) {
@@ -13,7 +13,7 @@ Event::Handle::Handle(Event& owner) :
 
 void Event::Handle::unsubscribe(size_t id) {
     if (m_controlBlock.lock()){
-        m_owner.unsubscribe(id);
+        m_owner.remove_listener(id);
     }
 }
 
@@ -38,15 +38,17 @@ Event::Event() {
 
 Event::~Event() = default;
 
-EventListener::EventListener() {
+Listener::Listener() {
     static size_t idCounter = 0;
     m_id = idCounter++;
 }
 
-EventListener::~EventListener() {
+Listener::~Listener() {
     for (auto& event : m_events) {
         event.unsubscribe(m_id);
     }
 }
+
+size_t Dispatcher::s_indexCounter = 0;
 
 }

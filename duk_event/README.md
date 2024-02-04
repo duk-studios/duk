@@ -1,4 +1,4 @@
-# duk_events
+# duk_event
 - Defines event objects that can be used to invoke callbacks on n-listeners
 
 # Usage
@@ -6,8 +6,8 @@
 int main() {
     int myInt = 0;
     
-    duk::events::EventListener mylistener;
-    duk::events::EventT<int> myIntEvent;
+    duk::event::Listener mylistener;
+    duk::event::EventT<int> myIntEvent;
 
     std::cout << "myInt current value: " << myInt << std::endl;
     
