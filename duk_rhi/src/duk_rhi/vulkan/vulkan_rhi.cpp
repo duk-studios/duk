@@ -161,7 +161,8 @@ ExpectedCommandQueue VulkanRHI::create_command_queue(const CommandQueueCreateInf
 
     auto it = m_queueFamilyIndices.find(commandQueueCreateInfo.type);
     if (it == m_queueFamilyIndices.end()) {
-        return tl::unexpected<RendererError>(RendererError::INVALID_ARGUMENT, "queue type is not supported by the renderer");
+    //throw RHIException("fudeu tudo chefe", RHIError::FUDEU);
+    ////return tl::unexpected<RendererError>(RHIError::INVALID_ARGUMENT, "queue type is not supported by the renderer");
     }
 
     auto queueFamilyIndex = it->second;

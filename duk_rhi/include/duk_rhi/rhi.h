@@ -5,14 +5,13 @@
 #ifndef DUK_RHI_RENDERER_H
 #define DUK_RHI_RENDERER_H
 
-#include <duk_rhi/renderer_error.h>
+#include <duk_rhi/rhi_error.h>
 #include <duk_rhi/rhi_capabilities.h>
 #include <duk_rhi/command/command_queue.h>
 #include <duk_rhi/command/command_scheduler.h>
 #include <duk_rhi/render_pass.h>
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/image.h>
-#include <duk_rhi/image_data_source.h>
 #include <duk_rhi/descriptor_set.h>
 #include <duk_rhi/frame_buffer.h>
 #include <duk_rhi/pipeline/shader_data_source.h>
@@ -26,6 +25,7 @@
 
 #include <memory>
 #include <optional>
+
 
 namespace duk::platform {
 
@@ -43,17 +43,17 @@ enum class API {
 };
 
 class RHI;
-using ExpectedRHI = tl::expected<std::shared_ptr<RHI>, RendererError>;
-using ExpectedCommandQueue = tl::expected<std::shared_ptr<CommandQueue>, RendererError>;
-using ExpectedShader = tl::expected<std::shared_ptr<Shader>, RendererError>;
-using ExpectedGraphicsPipeline = tl::expected<std::shared_ptr<GraphicsPipeline>, RendererError>;
-using ExpectedComputePipeline = tl::expected<std::shared_ptr<ComputePipeline>, RendererError>;
-using ExpectedRenderPass = tl::expected<std::shared_ptr<RenderPass>, RendererError>;
-using ExpectedFrameBuffer = tl::expected<std::shared_ptr<FrameBuffer>, RendererError>;
-using ExpectedBuffer = tl::expected<std::shared_ptr<Buffer>, RendererError>;
-using ExpectedImage = tl::expected<std::shared_ptr<Image>, RendererError>;
-using ExpectedDescriptorSet = tl::expected<std::shared_ptr<DescriptorSet>, RendererError>;
-using ExpectedCommandScheduler = tl::expected<std::shared_ptr<CommandScheduler>, RendererError>;
+using ExpectedRHI = std::shared_ptr<RHI>;
+using ExpectedCommandQueue = std::shared_ptr<CommandQueue>;
+using ExpectedShader = std::shared_ptr<Shader>;
+using ExpectedGraphicsPipeline = std::shared_ptr<GraphicsPipeline>;
+using ExpectedComputePipeline = std::shared_ptr<ComputePipeline>;
+using ExpectedRenderPass = std::shared_ptr<RenderPass>;
+using ExpectedFrameBuffer = std::shared_ptr<FrameBuffer>;
+using ExpectedBuffer = std::shared_ptr<Buffer>;
+using ExpectedImage = std::shared_ptr<Image>;
+using ExpectedDescriptorSet = std::shared_ptr<DescriptorSet>;
+using ExpectedCommandScheduler = std::shared_ptr<CommandScheduler>;
 
 struct RHICreateInfo {
     duk::platform::Window* window;

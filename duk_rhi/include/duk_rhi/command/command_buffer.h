@@ -4,7 +4,7 @@
 #ifndef DUK_RHI_COMMAND_INTERFACE_H
 #define DUK_RHI_COMMAND_INTERFACE_H
 
-#include <duk_rhi/renderer_error.h>
+#include <..\rhi_error.h>
 #include <duk_rhi/command/command.h>
 #include <duk_rhi/pipeline/pipeline_flags.h>
 #include <duk_rhi/image.h>

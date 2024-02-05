@@ -26,21 +26,15 @@ std::shared_ptr<Window> create_win32_window(const WindowCreateInfo& windowCreate
 }
 
 ExpectedWindow Window::create_window(const WindowCreateInfo& windowCreateInfo) {
-    try {
 #if DUK_PLATFORM_IS_WINDOWS
-        return detail::create_win32_window(windowCreateInfo);
+    return detail::create_win32_window(windowCreateInfo);        
 #endif
-    }
-    catch (const std::exception& e) {
-        return tl::unexpected<WindowError>(WindowError::Type::INTERNAL_ERROR, e.what());
-    }
 }
 
 
 Window::Window(const WindowCreateInfo& windowCreateInfo) :
     m_width(windowCreateInfo.width),
     m_height(windowCreateInfo.height){
-
 }
 
 Window::~Window() = default;

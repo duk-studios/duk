@@ -2,8 +2,8 @@
 // Created by Ricardo on 09/04/2023.
 //
 
-#ifndef DUK_RHI_RENDERER_ERROR_H
-#define DUK_RHI_RENDERER_ERROR_H
+#ifndef DUK_RHI_ERROR_H
+#define DUK_RHI_ERROR_H
 
 #include <duk_macros/macros.h>
 
@@ -11,7 +11,7 @@
 
 namespace duk::rhi {
 
-class RendererError {
+class RHIError {
 public:
     enum Type {
         INTERNAL_ERROR = 0,
@@ -20,7 +20,7 @@ public:
     };
 public:
 
-    RendererError(Type type, const std::string& description);
+    RHIError(Type type, const std::string& description);
 
     DUK_NO_DISCARD Type type() const;
 
@@ -33,4 +33,4 @@ private:
 
 }
 
-#endif //DUK_RHI_RENDERER_ERROR_H
+#endif //DUK_RHI_ERROR_H

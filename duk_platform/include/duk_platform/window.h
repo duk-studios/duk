@@ -24,7 +24,7 @@ struct WindowCreateInfo {
 
 class Window;
 
-using ExpectedWindow = tl::expected<std::shared_ptr<Window>, WindowError>;
+using ExpectedWindow = std::shared_ptr<Window>;
 
 class Window {
 public:
@@ -39,7 +39,7 @@ public:
 
 public:
 
-    static ExpectedWindow create_window(const WindowCreateInfo& windowCreateInfo);
+    static std::shared_ptr<ExpectedWindow> create_window(const WindowCreateInfo& windowCreateInfo);
 
     explicit Window(const WindowCreateInfo& windowCreateInfo);
 
