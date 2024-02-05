@@ -1,7 +1,6 @@
 add_subdirectory(vulkan)
 add_subdirectory(volk)
 add_subdirectory(glm)
-add_subdirectory(expected)
 add_subdirectory(grapphs)
 add_subdirectory(SPIRV-Reflect)
 add_subdirectory(cxxopts)
