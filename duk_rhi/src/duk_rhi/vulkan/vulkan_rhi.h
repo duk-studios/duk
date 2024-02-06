@@ -42,25 +42,25 @@ public:
 
     DUK_NO_DISCARD RHICapabilities* capabilities() const override;
 
-    DUK_NO_DISCARD ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<CommandQueue> create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
 
-    DUK_NO_DISCARD ExpectedCommandScheduler create_command_scheduler() override;
+    DUK_NO_DISCARD std::shared_ptr<CommandScheduler> create_command_scheduler() override;
 
-    DUK_NO_DISCARD ExpectedShader create_shader(const ShaderCreateInfo& shaderCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<Shader> create_shader(const ShaderCreateInfo& shaderCreateInfo) override;
 
-    DUK_NO_DISCARD ExpectedGraphicsPipeline create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<GraphicsPipeline> create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) override;
 
-    DUK_NO_DISCARD ExpectedComputePipeline create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<ComputePipeline> create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) override;
 
-    DUK_NO_DISCARD ExpectedRenderPass create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<RenderPass> create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) override;
 
-    DUK_NO_DISCARD ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<Buffer> create_buffer(const BufferCreateInfo& bufferCreateInfo) override;
 
-    DUK_NO_DISCARD ExpectedImage create_image(const ImageCreateInfo& imageCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<Image> create_image(const ImageCreateInfo& imageCreateInfo) override;
 
-    DUK_NO_DISCARD ExpectedDescriptorSet create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<DescriptorSet> create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) override;
 
-    DUK_NO_DISCARD ExpectedFrameBuffer create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<FrameBuffer> create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) override;
 
 private:
     void create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCreateInfo);

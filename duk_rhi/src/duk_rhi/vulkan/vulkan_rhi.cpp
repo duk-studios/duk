@@ -11,6 +11,7 @@
 #include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
+#include <duk_rhi/rhi_exception.h>
 
 #if DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/window_win_32.h>
@@ -55,8 +56,8 @@ static uint32_t find_present_queue_index(VulkanPhysicalDevice* physicalDevice, V
         return ~0;
     }
 
-    auto presentQueueProperties = expectedPresentQueueProperties.value();
-    return presentQueueProperties.familyIndex;
+    auto presentQueueProperties = expectedPresentQueueProperties;
+    return presentQueueProperties->familyIndex;
 }
 
 static uint32_t find_graphics_queue_index(VulkanPhysicalDevice* physicalDevice){
@@ -65,23 +66,23 @@ static uint32_t find_graphics_queue_index(VulkanPhysicalDevice* physicalDevice){
         return ~0;
     }
 
-    auto graphicsQueueProperties = expectedGraphicsQueueProperties.value();
-    return graphicsQueueProperties.familyIndex;
+    auto graphicsQueueProperties = expectedGraphicsQueueProperties;
+    return graphicsQueueProperties->familyIndex;
 }
 
 static uint32_t find_compute_queue_index(VulkanPhysicalDevice* physicalDevice) {
     // try to find an exclusive compute queue
     auto expectedComputeQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT, VK_QUEUE_GRAPHICS_BIT);
     if (expectedComputeQueueProperties) {
-        auto computeQueueProperties = expectedComputeQueueProperties.value();
-        return computeQueueProperties.familyIndex;
+        auto computeQueueProperties = expectedComputeQueueProperties;
+        return computeQueueProperties->familyIndex;
     }
 
     // if not found, try to find any queue that supports compute
     expectedComputeQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT);
     if (expectedComputeQueueProperties) {
-        auto computeQueueProperties = expectedComputeQueueProperties.value();
-        return computeQueueProperties.familyIndex;
+        auto computeQueueProperties = expectedComputeQueueProperties;
+        return computeQueueProperties->familyIndex;
     }
     return ~0;
 }
@@ -157,12 +158,11 @@ RHICapabilities* VulkanRHI::capabilities() const {
     return m_rendererCapabilities.get();
 }
 
-ExpectedCommandQueue VulkanRHI::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
+std::shared_ptr<CommandQueue> VulkanRHI::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
 
     auto it = m_queueFamilyIndices.find(commandQueueCreateInfo.type);
     if (it == m_queueFamilyIndices.end()) {
-    //throw RHIException("fudeu tudo chefe", RHIError::FUDEU);
-    ////return tl::unexpected<RendererError>(RHIError::INVALID_ARGUMENT, "queue type is not supported by the renderer");
+        throw RHIException( RHIException::INTERNAL_ERROR, "Failed to create command queue");
     }
 
     auto queueFamilyIndex = it->second;
@@ -180,7 +180,7 @@ ExpectedCommandQueue VulkanRHI::create_command_queue(const CommandQueueCreateInf
     return std::make_shared<VulkanCommandQueue>(vulkanCommandQueueCreateInfo);
 }
 
-ExpectedCommandScheduler VulkanRHI::create_command_scheduler() {
+std::shared_ptr<CommandScheduler> VulkanRHI::create_command_scheduler() {
 
     VulkanCommandSchedulerCreateInfo commandSchedulerCreateInfo = {};
     commandSchedulerCreateInfo.device = m_device;
@@ -190,130 +190,91 @@ ExpectedCommandScheduler VulkanRHI::create_command_scheduler() {
     return std::make_shared<VulkanCommandScheduler>(commandSchedulerCreateInfo);
 }
 
-ExpectedShader VulkanRHI::create_shader(const RHI::ShaderCreateInfo& shaderCreateInfo) {
-    try {
-        VulkanShaderCreateInfo vulkanShaderCreateInfo = {};
-        vulkanShaderCreateInfo.shaderDataSource = shaderCreateInfo.shaderDataSource;
-        vulkanShaderCreateInfo.device = m_device;
-        vulkanShaderCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
-        return std::make_shared<VulkanShader>(vulkanShaderCreateInfo);
-    }
-    catch (const std::exception& e){
-        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
-    }
+std::shared_ptr<Shader> VulkanRHI::create_shader(const RHI::ShaderCreateInfo& shaderCreateInfo) {
+    
+    VulkanShaderCreateInfo vulkanShaderCreateInfo = {};
+    vulkanShaderCreateInfo.shaderDataSource = shaderCreateInfo.shaderDataSource;
+    vulkanShaderCreateInfo.device = m_device;
+    vulkanShaderCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
+    return std::make_shared<VulkanShader>(vulkanShaderCreateInfo);
 }
 
-ExpectedGraphicsPipeline VulkanRHI::create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) {
-    try {
-        VulkanGraphicsPipelineCreateInfo vulkanPipelineCreateInfo = {};
-        vulkanPipelineCreateInfo.device = m_device;
-        vulkanPipelineCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
-        vulkanPipelineCreateInfo.shader = dynamic_cast<VulkanShader*>(pipelineCreateInfo.shader);
-        vulkanPipelineCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(pipelineCreateInfo.renderPass);
-        vulkanPipelineCreateInfo.viewport = pipelineCreateInfo.viewport;
-        vulkanPipelineCreateInfo.scissor = pipelineCreateInfo.scissor;
-        vulkanPipelineCreateInfo.blend = pipelineCreateInfo.blend;
-        vulkanPipelineCreateInfo.cullModeMask = pipelineCreateInfo.cullModeMask;
-        vulkanPipelineCreateInfo.depthTesting = pipelineCreateInfo.depthTesting;
-        vulkanPipelineCreateInfo.topology = pipelineCreateInfo.topology;
-        vulkanPipelineCreateInfo.fillMode = pipelineCreateInfo.fillMode;
-        return m_resourceManager->create(vulkanPipelineCreateInfo);
-    }
-    catch (const std::exception& e){
-        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
-    }
+std::shared_ptr<GraphicsPipeline> VulkanRHI::create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) {
+    VulkanGraphicsPipelineCreateInfo vulkanPipelineCreateInfo = {};
+    vulkanPipelineCreateInfo.device = m_device;
+    vulkanPipelineCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+    vulkanPipelineCreateInfo.shader = dynamic_cast<VulkanShader*>(pipelineCreateInfo.shader);
+    vulkanPipelineCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(pipelineCreateInfo.renderPass);
+    vulkanPipelineCreateInfo.viewport = pipelineCreateInfo.viewport;
+    vulkanPipelineCreateInfo.scissor = pipelineCreateInfo.scissor;
+    vulkanPipelineCreateInfo.blend = pipelineCreateInfo.blend;
+    vulkanPipelineCreateInfo.cullModeMask = pipelineCreateInfo.cullModeMask;
+    vulkanPipelineCreateInfo.depthTesting = pipelineCreateInfo.depthTesting;
+    vulkanPipelineCreateInfo.topology = pipelineCreateInfo.topology;
+    vulkanPipelineCreateInfo.fillMode = pipelineCreateInfo.fillMode;
+    return m_resourceManager->create(vulkanPipelineCreateInfo);
 }
 
-ExpectedComputePipeline VulkanRHI::create_compute_pipeline(const RHI::ComputePipelineCreateInfo& pipelineCreateInfo) {
-    try {
-        VulkanComputePipelineCreateInfo vulkanPipelineCreateInfo = {};
-        vulkanPipelineCreateInfo.device = m_device;
-        vulkanPipelineCreateInfo.shader = dynamic_cast<VulkanShader*>(pipelineCreateInfo.shader);
-        return m_resourceManager->create(vulkanPipelineCreateInfo);
-    }
-    catch (const std::exception& e){
-        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
-    }
+std::shared_ptr<ComputePipeline> VulkanRHI::create_compute_pipeline(const RHI::ComputePipelineCreateInfo& pipelineCreateInfo) {
+    VulkanComputePipelineCreateInfo vulkanPipelineCreateInfo = {};
+    vulkanPipelineCreateInfo.device = m_device;
+    vulkanPipelineCreateInfo.shader = dynamic_cast<VulkanShader*>(pipelineCreateInfo.shader);
+    return m_resourceManager->create(vulkanPipelineCreateInfo);
 }
 
-ExpectedRenderPass VulkanRHI::create_render_pass(const RHI::RenderPassCreateInfo& renderPassCreateInfo) {
-    try {
-        VulkanRenderPassCreateInfo vulkanRenderPassCreateInfo = {};
-        vulkanRenderPassCreateInfo.device = m_device;
-        vulkanRenderPassCreateInfo.colorAttachments = renderPassCreateInfo.colorAttachments;
-        vulkanRenderPassCreateInfo.colorAttachmentCount = renderPassCreateInfo.colorAttachmentCount;
-        vulkanRenderPassCreateInfo.depthAttachment = renderPassCreateInfo.depthAttachment;
-        return m_resourceManager->create(vulkanRenderPassCreateInfo);
-    }
-    catch (std::exception& e) {
-        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
-    }
+std::shared_ptr<RenderPass> VulkanRHI::create_render_pass(const RHI::RenderPassCreateInfo& renderPassCreateInfo) {
+    VulkanRenderPassCreateInfo vulkanRenderPassCreateInfo = {};
+    vulkanRenderPassCreateInfo.device = m_device;
+    vulkanRenderPassCreateInfo.colorAttachments = renderPassCreateInfo.colorAttachments;
+    vulkanRenderPassCreateInfo.colorAttachmentCount = renderPassCreateInfo.colorAttachmentCount;
+    vulkanRenderPassCreateInfo.depthAttachment = renderPassCreateInfo.depthAttachment;
+    return m_resourceManager->create(vulkanRenderPassCreateInfo);
 }
 
-ExpectedBuffer VulkanRHI::create_buffer(const RHI::BufferCreateInfo& bufferCreateInfo) {
-    try {
-        VulkanBufferCreateInfo vulkanBufferCreateInfo = {};
-        vulkanBufferCreateInfo.updateFrequency = bufferCreateInfo.updateFrequency;
-        vulkanBufferCreateInfo.type = bufferCreateInfo.type;
-        vulkanBufferCreateInfo.elementCount = bufferCreateInfo.elementCount;
-        vulkanBufferCreateInfo.elementSize = bufferCreateInfo.elementSize;
-        vulkanBufferCreateInfo.device = m_device;
-        vulkanBufferCreateInfo.physicalDevice = m_physicalDevice.get();
-        vulkanBufferCreateInfo.commandQueue = dynamic_cast<VulkanCommandQueue*>(bufferCreateInfo.commandQueue);
-        vulkanBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
-        return m_resourceManager->create(vulkanBufferCreateInfo);
-    }
-    catch (std::exception& e) {
-        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
-    }
+std::shared_ptr<Buffer> VulkanRHI::create_buffer(const RHI::BufferCreateInfo& bufferCreateInfo) {
+    VulkanBufferCreateInfo vulkanBufferCreateInfo = {};
+    vulkanBufferCreateInfo.updateFrequency = bufferCreateInfo.updateFrequency;
+    vulkanBufferCreateInfo.type = bufferCreateInfo.type;
+    vulkanBufferCreateInfo.elementCount = bufferCreateInfo.elementCount;
+    vulkanBufferCreateInfo.elementSize = bufferCreateInfo.elementSize;
+    vulkanBufferCreateInfo.device = m_device;
+    vulkanBufferCreateInfo.physicalDevice = m_physicalDevice.get();
+    vulkanBufferCreateInfo.commandQueue = dynamic_cast<VulkanCommandQueue*>(bufferCreateInfo.commandQueue);
+    vulkanBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+    return m_resourceManager->create(vulkanBufferCreateInfo);
 }
 
-ExpectedImage VulkanRHI::create_image(const RHI::ImageCreateInfo& imageCreateInfo) {
-    try {
-        VulkanMemoryImageCreateInfo memoryImageCreateInfo = {};
-        memoryImageCreateInfo.device = m_device;
-        memoryImageCreateInfo.physicalDevice = m_physicalDevice.get();
-        memoryImageCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
-        memoryImageCreateInfo.commandQueue = dynamic_cast<VulkanCommandQueue*>(imageCreateInfo.commandQueue);
-        memoryImageCreateInfo.imageDataSource = imageCreateInfo.imageDataSource;
-        memoryImageCreateInfo.initialLayout = imageCreateInfo.initialLayout;
-        memoryImageCreateInfo.usage = imageCreateInfo.usage;
-        memoryImageCreateInfo.updateFrequency = imageCreateInfo.updateFrequency;
-        return m_resourceManager->create(memoryImageCreateInfo);
-    }
-    catch (std::exception& e) {
-        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
-    }
+std::shared_ptr<Image> VulkanRHI::create_image(const RHI::ImageCreateInfo& imageCreateInfo) {
+    VulkanMemoryImageCreateInfo memoryImageCreateInfo = {};
+    memoryImageCreateInfo.device = m_device;
+    memoryImageCreateInfo.physicalDevice = m_physicalDevice.get();
+    memoryImageCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+    memoryImageCreateInfo.commandQueue = dynamic_cast<VulkanCommandQueue*>(imageCreateInfo.commandQueue);
+    memoryImageCreateInfo.imageDataSource = imageCreateInfo.imageDataSource;
+    memoryImageCreateInfo.initialLayout = imageCreateInfo.initialLayout;
+    memoryImageCreateInfo.usage = imageCreateInfo.usage;
+    memoryImageCreateInfo.updateFrequency = imageCreateInfo.updateFrequency;
+    return m_resourceManager->create(memoryImageCreateInfo);
 }
 
-ExpectedDescriptorSet VulkanRHI::create_descriptor_set(const RHI::DescriptorSetCreateInfo& descriptorSetCreateInfo) {
-    try {
-        VulkanDescriptorSetCreateInfo vulkanDescriptorSetCreateInfo = {};
-        vulkanDescriptorSetCreateInfo.device = m_device;
-        vulkanDescriptorSetCreateInfo.descriptorSetDescription = descriptorSetCreateInfo.description;
-        vulkanDescriptorSetCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
-        vulkanDescriptorSetCreateInfo.samplerCache = m_samplerCache.get();
-        vulkanDescriptorSetCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
-        return m_resourceManager->create(vulkanDescriptorSetCreateInfo);
-    }
-    catch (std::exception& e) {
-        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
-    }
+std::shared_ptr<DescriptorSet> VulkanRHI::create_descriptor_set(const RHI::DescriptorSetCreateInfo& descriptorSetCreateInfo) {
+    VulkanDescriptorSetCreateInfo vulkanDescriptorSetCreateInfo = {};
+    vulkanDescriptorSetCreateInfo.device = m_device;
+    vulkanDescriptorSetCreateInfo.descriptorSetDescription = descriptorSetCreateInfo.description;
+    vulkanDescriptorSetCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
+    vulkanDescriptorSetCreateInfo.samplerCache = m_samplerCache.get();
+    vulkanDescriptorSetCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+    return m_resourceManager->create(vulkanDescriptorSetCreateInfo);
 }
 
-ExpectedFrameBuffer VulkanRHI::create_frame_buffer(const RHI::FrameBufferCreateInfo& frameBufferCreateInfo) {
-    try {
-        VulkanFrameBufferCreateInfo vulkanFrameBufferCreateInfo = {};
-        vulkanFrameBufferCreateInfo.device = m_device;
-        vulkanFrameBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
-        vulkanFrameBufferCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
-        vulkanFrameBufferCreateInfo.attachments = reinterpret_cast<VulkanImage**>(frameBufferCreateInfo.attachments);
-        vulkanFrameBufferCreateInfo.attachmentCount = frameBufferCreateInfo.attachmentCount;
-        return m_resourceManager->create(vulkanFrameBufferCreateInfo);
-    }
-    catch (std::exception& e) {
-        return tl::unexpected<RendererError>(RendererError::INTERNAL_ERROR, e.what());
-    }
+std::shared_ptr<FrameBuffer> VulkanRHI::create_frame_buffer(const RHI::FrameBufferCreateInfo& frameBufferCreateInfo) {
+    VulkanFrameBufferCreateInfo vulkanFrameBufferCreateInfo = {};
+    vulkanFrameBufferCreateInfo.device = m_device;
+    vulkanFrameBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+    vulkanFrameBufferCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
+    vulkanFrameBufferCreateInfo.attachments = reinterpret_cast<VulkanImage**>(frameBufferCreateInfo.attachments);
+    vulkanFrameBufferCreateInfo.attachmentCount = frameBufferCreateInfo.attachmentCount;
+    return m_resourceManager->create(vulkanFrameBufferCreateInfo);
 }
 
 void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCreateInfo) {

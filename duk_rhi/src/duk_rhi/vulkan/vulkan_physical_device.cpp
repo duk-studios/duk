@@ -65,7 +65,7 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
 
 VulkanPhysicalDevice::~VulkanPhysicalDevice() = default;
 
-ExpectedVulkanQueueFamilyProperties VulkanPhysicalDevice::find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) const {
+std::shared_ptr<VulkanQueueFamilyProperties> VulkanPhysicalDevice::find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) const {
     for (uint32_t candidateQueueIndex = 0; candidateQueueIndex < m_queueFamilyProperties.size(); candidateQueueIndex++) {
 
         const auto& candidateQueueFamily = m_queueFamilyProperties[candidateQueueIndex];
@@ -85,36 +85,39 @@ ExpectedVulkanQueueFamilyProperties VulkanPhysicalDevice::find_queue_family(VkSu
         bool hasProhibitedFlags = candidateFlags & prohibitedQueueFlags;
 
         if (candidateQueueFamily.queueCount > 0 && hasRequiredFlags && !hasProhibitedFlags) {
-            return VulkanQueueFamilyProperties{candidateQueueFamily, candidateQueueIndex};
+            std::shared_ptr<VulkanQueueFamilyProperties> vulkanQueueFamilyProperties = std::shared_ptr<VulkanQueueFamilyProperties>();
+            vulkanQueueFamilyProperties->familyProperties = candidateQueueFamily;
+            vulkanQueueFamilyProperties->familyIndex = candidateQueueIndex;
+            return vulkanQueueFamilyProperties;
         }
     }
 
-    return tl::unexpected<VulkanQueryError>(VulkanQueryError::NOT_FOUND);
+    throw VulkanQueryError(VulkanQueryError::NOT_FOUND);
 }
 
-ExpectedVulkanSurfaceDetails VulkanPhysicalDevice::query_surface_details(VkSurfaceKHR surface) const {
+std::shared_ptr<VulkanSurfaceDetails> VulkanPhysicalDevice::query_surface_details(VkSurfaceKHR surface) const {
     if (!surface) {
-        return tl::unexpected<VulkanQueryError>(VulkanQueryError::INVALID_ARGUMENT);
+        throw VulkanQueryError(VulkanQueryError::INVALID_ARGUMENT);
     }
 
-    VulkanSurfaceDetails surfaceDetails = {};
+    std::shared_ptr<VulkanSurfaceDetails> surfaceDetails = {};
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, surface, &surfaceDetails.capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, surface, &surfaceDetails->capabilities);
 
     uint32_t formatCount;
     vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, surface, &formatCount, nullptr);
 
     if (formatCount != 0) {
-        surfaceDetails.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, surface, &formatCount, surfaceDetails.formats.data());
+        surfaceDetails->formats.resize(formatCount);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, surface, &formatCount, surfaceDetails->formats.data());
     }
 
     uint32_t presentModeCount;
     vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, surface, &presentModeCount, nullptr);
 
     if (presentModeCount != 0) {
-        surfaceDetails.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, surface, &presentModeCount, surfaceDetails.presentModes.data());
+        surfaceDetails->presentModes.resize(presentModeCount);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, surface, &presentModeCount, surfaceDetails->presentModes.data());
     }
 
     return surfaceDetails;

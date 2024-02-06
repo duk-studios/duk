@@ -5,7 +5,6 @@
 #ifndef DUK_RHI_RENDERER_H
 #define DUK_RHI_RENDERER_H
 
-#include <duk_rhi/rhi_error.h>
 #include <duk_rhi/rhi_capabilities.h>
 #include <duk_rhi/command/command_queue.h>
 #include <duk_rhi/command/command_scheduler.h>
@@ -21,10 +20,7 @@
 
 #include <duk_log/logger.h>
 
-#include <tl/expected.hpp>
-
 #include <memory>
-#include <optional>
 
 
 namespace duk::platform {
@@ -43,17 +39,6 @@ enum class API {
 };
 
 class RHI;
-using ExpectedRHI = std::shared_ptr<RHI>;
-using ExpectedCommandQueue = std::shared_ptr<CommandQueue>;
-using ExpectedShader = std::shared_ptr<Shader>;
-using ExpectedGraphicsPipeline = std::shared_ptr<GraphicsPipeline>;
-using ExpectedComputePipeline = std::shared_ptr<ComputePipeline>;
-using ExpectedRenderPass = std::shared_ptr<RenderPass>;
-using ExpectedFrameBuffer = std::shared_ptr<FrameBuffer>;
-using ExpectedBuffer = std::shared_ptr<Buffer>;
-using ExpectedImage = std::shared_ptr<Image>;
-using ExpectedDescriptorSet = std::shared_ptr<DescriptorSet>;
-using ExpectedCommandScheduler = std::shared_ptr<CommandScheduler>;
 
 struct RHICreateInfo {
     duk::platform::Window* window;
@@ -69,7 +54,7 @@ struct RHICreateInfo {
 class RHI {
 public:
 
-    static ExpectedRHI create_rhi(const RHICreateInfo& rhiCreateInfo);
+    static std::shared_ptr<RHI> create_rhi(const RHICreateInfo& rhiCreateInfo);
 
     /// destructor
     virtual ~RHI() = default;
@@ -93,15 +78,15 @@ public:
         CommandQueue::Type::Bits type;
     };
 
-    DUK_NO_DISCARD virtual ExpectedCommandQueue create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<CommandQueue> create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
 
-    DUK_NO_DISCARD virtual ExpectedCommandScheduler create_command_scheduler() = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<CommandScheduler> create_command_scheduler() = 0;
 
     struct ShaderCreateInfo {
         const ShaderDataSource* shaderDataSource;
     };
 
-    DUK_NO_DISCARD virtual ExpectedShader create_shader(const ShaderCreateInfo& shaderCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<Shader> create_shader(const ShaderCreateInfo& shaderCreateInfo) = 0;
 
     struct GraphicsPipelineCreateInfo {
         Shader* shader;
@@ -115,13 +100,13 @@ public:
         bool depthTesting;
     };
 
-    DUK_NO_DISCARD virtual ExpectedGraphicsPipeline create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<GraphicsPipeline> create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) = 0;
 
     struct ComputePipelineCreateInfo {
         Shader* shader;
     };
 
-    DUK_NO_DISCARD virtual ExpectedComputePipeline create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<ComputePipeline> create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) = 0;
 
     struct RenderPassCreateInfo {
         AttachmentDescription* colorAttachments;
@@ -129,7 +114,7 @@ public:
         AttachmentDescription* depthAttachment;
     };
 
-    DUK_NO_DISCARD virtual ExpectedRenderPass create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<RenderPass> create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) = 0;
 
     struct BufferCreateInfo {
         Buffer::Type type;
@@ -139,7 +124,7 @@ public:
         CommandQueue* commandQueue;
     };
 
-    DUK_NO_DISCARD virtual ExpectedBuffer create_buffer(const BufferCreateInfo& bufferCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<Buffer> create_buffer(const BufferCreateInfo& bufferCreateInfo) = 0;
 
     struct ImageCreateInfo {
         const ImageDataSource* imageDataSource;
@@ -149,13 +134,13 @@ public:
         CommandQueue* commandQueue;
     };
 
-    DUK_NO_DISCARD virtual ExpectedImage create_image(const ImageCreateInfo& imageCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<Image> create_image(const ImageCreateInfo& imageCreateInfo) = 0;
 
     struct DescriptorSetCreateInfo {
         DescriptorSetDescription description;
     };
 
-    DUK_NO_DISCARD virtual ExpectedDescriptorSet create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<DescriptorSet> create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) = 0;
 
     struct FrameBufferCreateInfo {
         RenderPass* renderPass;
@@ -163,7 +148,7 @@ public:
         uint32_t attachmentCount;
     };
 
-    DUK_NO_DISCARD virtual ExpectedFrameBuffer create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::shared_ptr<FrameBuffer> create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) = 0;
 
 };
 
