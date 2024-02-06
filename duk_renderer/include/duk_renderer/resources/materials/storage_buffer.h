@@ -74,10 +74,10 @@ StorageBuffer<T>::StorageBuffer(const StorageBufferCreateInfo& storageBufferCrea
     auto expectedStorageBuffer = m_rhi->create_buffer(bufferCreateInfo);
 
     if (!expectedStorageBuffer) {
-        throw std::runtime_error("failed to create StorageBuffer<T>: " + expectedStorageBuffer.error().description());
+        throw std::runtime_error("failed to create StorageBuffer<T>!");
     }
 
-    m_buffer = std::move(expectedStorageBuffer.value());
+    m_buffer = expectedStorageBuffer;
     flush();
 }
 

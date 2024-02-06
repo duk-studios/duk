@@ -29,10 +29,10 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
         auto expectedRenderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
 
         if (!expectedRenderPass) {
-            throw std::runtime_error("failed to create RenderPass: " + expectedRenderPass.error().description());
+            throw std::runtime_error("failed to create RenderPass!");
         }
 
-        m_renderPass = std::move(expectedRenderPass.value());
+        m_renderPass = expectedRenderPass;
     }
 
     {
@@ -65,10 +65,10 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
         auto expectedFrameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
 
         if (!expectedFrameBuffer) {
-            throw std::runtime_error("failed to create FrameBuffer: " + expectedFrameBuffer.error().description());
+            throw std::runtime_error("failed to create FrameBuffer!");
         }
 
-        m_frameBuffer = std::move(expectedFrameBuffer.value());
+        m_frameBuffer = expectedFrameBuffer;
     }
 
     m_fullscreenMaterial->update(m_inColor.image(), duk::rhi::Sampler{duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER});

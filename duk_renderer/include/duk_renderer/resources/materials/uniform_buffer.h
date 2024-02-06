@@ -51,10 +51,10 @@ UniformBuffer<T>::UniformBuffer(const UniformBufferCreateInfo<T>& uniformBufferC
     auto expectedUniformBuffer = uniformBufferCreateInfo.rhi->create_buffer(bufferCreateInfo);
 
     if (!expectedUniformBuffer) {
-        throw std::runtime_error("failed to create UniformBuffer<T>: " + expectedUniformBuffer.error().description());
+        throw std::runtime_error("failed to create UniformBuffer<T>!");
     }
 
-    m_buffer = std::move(expectedUniformBuffer.value());
+    m_buffer = expectedUniformBuffer;
     flush();
 }
 

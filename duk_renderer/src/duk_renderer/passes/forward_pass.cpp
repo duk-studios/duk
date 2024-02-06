@@ -272,10 +272,10 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
         auto expectedRenderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
 
         if (!expectedRenderPass) {
-            throw std::runtime_error("failed to create RenderPass: " + expectedRenderPass.error().description());
+            throw std::runtime_error("failed to create RenderPass!");
         }
 
-        m_renderPass = std::move(expectedRenderPass.value());
+        m_renderPass = expectedRenderPass;
     }
 
     {
@@ -318,10 +318,10 @@ void ForwardPass::render(const RenderParams& renderParams) {
         auto expectedFrameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
 
         if (!expectedFrameBuffer) {
-            throw std::runtime_error("failed to create FrameBuffer: " + expectedFrameBuffer.error().description());
+            throw std::runtime_error("failed to create FrameBuffer!");
         }
 
-        m_frameBuffer = std::move(expectedFrameBuffer.value());
+        m_frameBuffer = expectedFrameBuffer;
     }
 
     renderParams.commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());

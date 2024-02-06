@@ -10,10 +10,10 @@ PhongDescriptorSet::PhongDescriptorSet(const PhongDescriptorSetCreateInfo& creat
     auto result = createInfo.rhi->create_descriptor_set(descriptorSetCreateInfo);
 
     if (!result) {
-        throw std::runtime_error("failed to create PhongDescriptorSet: " + result.error().description());
+        throw std::runtime_error("failed to create PhongDescriptorSet!");
     }
 
-    m_descriptorSet = std::move(result.value());
+    m_descriptorSet = result;
 }
 
 void PhongDescriptorSet::set(PhongDescriptorSet::Bindings binding, const duk::rhi::Descriptor& descriptor) {

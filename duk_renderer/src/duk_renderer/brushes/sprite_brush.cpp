@@ -39,10 +39,10 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
         auto expectedPositionVertexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);
 
         if (!expectedPositionVertexBuffer) {
-            throw std::runtime_error("failed to create SpriteBuffer position vertex buffer: " + expectedPositionVertexBuffer.error().description());
+            throw std::runtime_error("failed to create SpriteBuffer position vertex buffer!");
         }
 
-        m_vertexBuffers.at(VertexAttributes::POSITION) = std::move(expectedPositionVertexBuffer.value());
+        m_vertexBuffers.at(VertexAttributes::POSITION) = expectedPositionVertexBuffer;
     }
 
     // uv
@@ -57,10 +57,10 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
         auto expectedUvVertexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);
 
         if (!expectedUvVertexBuffer) {
-            throw std::runtime_error("failed to create SpriteBuffer uv vertex buffer: " + expectedUvVertexBuffer.error().description());
+            throw std::runtime_error("failed to create SpriteBuffer uv vertex buffer!");
         }
 
-        m_vertexBuffers.at(VertexAttributes::UV) = std::move(expectedUvVertexBuffer.value());
+        m_vertexBuffers.at(VertexAttributes::UV) = expectedUvVertexBuffer;
     }
 
     // index
@@ -75,10 +75,10 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
         auto expectedUvVertexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);
 
         if (!expectedUvVertexBuffer) {
-            throw std::runtime_error("failed to create SpriteBuffer index buffer: " + expectedUvVertexBuffer.error().description());
+            throw std::runtime_error("failed to create SpriteBuffer index buffer!");
         }
 
-        m_indexBuffer = std::move(expectedUvVertexBuffer.value());
+        m_indexBuffer = expectedUvVertexBuffer;
     }
 }
 

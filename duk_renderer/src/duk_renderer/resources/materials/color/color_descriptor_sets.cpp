@@ -10,10 +10,10 @@ ColorDescriptorSet::ColorDescriptorSet(const ColorDescriptorSetCreateInfo& creat
     auto result = createInfo.rhi->create_descriptor_set(descriptorSetCreateInfo);
 
     if (!result) {
-        throw std::runtime_error("failed to create ColorDescriptorSet: " + result.error().description());
+        throw std::runtime_error("failed to create ColorDescriptorSet!");
     }
 
-    m_descriptorSet = std::move(result.value());
+    m_descriptorSet = result;
 }
 
 void ColorDescriptorSet::set(ColorDescriptorSet::Bindings binding, const duk::rhi::Descriptor& descriptor) {
