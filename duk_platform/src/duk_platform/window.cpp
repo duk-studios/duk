@@ -25,7 +25,7 @@ std::shared_ptr<Window> create_win32_window(const WindowCreateInfo& windowCreate
 
 }
 
-ExpectedWindow Window::create_window(const WindowCreateInfo& windowCreateInfo) {
+std::shared_ptr<Window> Window::create_window(const WindowCreateInfo& windowCreateInfo) {
 #if DUK_PLATFORM_IS_WINDOWS
     return detail::create_win32_window(windowCreateInfo);        
 #endif

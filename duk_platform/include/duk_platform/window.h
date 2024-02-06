@@ -9,8 +9,6 @@
 #include <duk_platform/key_codes.h>
 #include <duk_events/event.h>
 
-#include <tl/expected.hpp>
-
 #include <memory>
 #include <cstdint>
 
@@ -23,8 +21,6 @@ struct WindowCreateInfo {
 };
 
 class Window;
-
-using ExpectedWindow = std::shared_ptr<Window>;
 
 class Window {
 public:
@@ -39,7 +35,7 @@ public:
 
 public:
 
-    static std::shared_ptr<ExpectedWindow> create_window(const WindowCreateInfo& windowCreateInfo);
+    static std::shared_ptr<Window> create_window(const WindowCreateInfo& windowCreateInfo);
 
     explicit Window(const WindowCreateInfo& windowCreateInfo);
 
