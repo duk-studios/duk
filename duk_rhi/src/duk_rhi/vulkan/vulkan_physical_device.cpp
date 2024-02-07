@@ -65,7 +65,8 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
 
 VulkanPhysicalDevice::~VulkanPhysicalDevice() = default;
 
-std::shared_ptr<VulkanQueueFamilyProperties> VulkanPhysicalDevice::find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) const {
+VulkanQueueFamilyProperties VulkanPhysicalDevice::find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) const {
+
     for (uint32_t candidateQueueIndex = 0; candidateQueueIndex < m_queueFamilyProperties.size(); candidateQueueIndex++) {
 
         const auto& candidateQueueFamily = m_queueFamilyProperties[candidateQueueIndex];
@@ -85,41 +86,39 @@ std::shared_ptr<VulkanQueueFamilyProperties> VulkanPhysicalDevice::find_queue_fa
         bool hasProhibitedFlags = candidateFlags & prohibitedQueueFlags;
 
         if (candidateQueueFamily.queueCount > 0 && hasRequiredFlags && !hasProhibitedFlags) {
-            std::shared_ptr<VulkanQueueFamilyProperties> vulkanQueueFamilyProperties = std::shared_ptr<VulkanQueueFamilyProperties>();
-            vulkanQueueFamilyProperties->familyProperties = candidateQueueFamily;
-            vulkanQueueFamilyProperties->familyIndex = candidateQueueIndex;
-            return vulkanQueueFamilyProperties;
+            return VulkanQueueFamilyProperties{true, candidateQueueFamily, candidateQueueIndex};
         }
     }
 
     throw VulkanQueryError(VulkanQueryError::NOT_FOUND);
 }
 
-std::shared_ptr<VulkanSurfaceDetails> VulkanPhysicalDevice::query_surface_details(VkSurfaceKHR surface) const {
+VulkanSurfaceDetails VulkanPhysicalDevice::query_surface_details(VkSurfaceKHR surface) const {
     if (!surface) {
         throw VulkanQueryError(VulkanQueryError::INVALID_ARGUMENT);
     }
 
-    std::shared_ptr<VulkanSurfaceDetails> surfaceDetails = {};
+    VulkanSurfaceDetails surfaceDetails = {};
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, surface, &surfaceDetails->capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, surface, &surfaceDetails.capabilities);
 
     uint32_t formatCount;
     vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, surface, &formatCount, nullptr);
 
     if (formatCount != 0) {
-        surfaceDetails->formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, surface, &formatCount, surfaceDetails->formats.data());
+        surfaceDetails.formats.resize(formatCount);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(m_physicalDevice, surface, &formatCount, surfaceDetails.formats.data());
     }
 
     uint32_t presentModeCount;
     vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, surface, &presentModeCount, nullptr);
 
     if (presentModeCount != 0) {
-        surfaceDetails->presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, surface, &presentModeCount, surfaceDetails->presentModes.data());
+        surfaceDetails.presentModes.resize(presentModeCount);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, surface, &presentModeCount, surfaceDetails.presentModes.data());
     }
 
+    surfaceDetails.isValid = true;
     return surfaceDetails;
 }
 

@@ -52,37 +52,37 @@ static std::vector<const char*> query_device_extensions() {
 
 static uint32_t find_present_queue_index(VulkanPhysicalDevice* physicalDevice, VkSurfaceKHR surface){
     auto expectedPresentQueueProperties = physicalDevice->find_queue_family(surface, 0);
-    if (!expectedPresentQueueProperties){
+    if (!expectedPresentQueueProperties.isValid) {
         return ~0;
     }
 
     auto presentQueueProperties = expectedPresentQueueProperties;
-    return presentQueueProperties->familyIndex;
+    return presentQueueProperties.familyIndex;
 }
 
 static uint32_t find_graphics_queue_index(VulkanPhysicalDevice* physicalDevice){
     auto expectedGraphicsQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_GRAPHICS_BIT);
-    if (!expectedGraphicsQueueProperties){
+    if (!expectedGraphicsQueueProperties.isValid) {
         return ~0;
     }
 
     auto graphicsQueueProperties = expectedGraphicsQueueProperties;
-    return graphicsQueueProperties->familyIndex;
+    return graphicsQueueProperties.familyIndex;
 }
 
 static uint32_t find_compute_queue_index(VulkanPhysicalDevice* physicalDevice) {
     // try to find an exclusive compute queue
     auto expectedComputeQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT, VK_QUEUE_GRAPHICS_BIT);
-    if (expectedComputeQueueProperties) {
+    if (expectedComputeQueueProperties.isValid) {
         auto computeQueueProperties = expectedComputeQueueProperties;
-        return computeQueueProperties->familyIndex;
+        return computeQueueProperties.familyIndex;
     }
 
     // if not found, try to find any queue that supports compute
     expectedComputeQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT);
-    if (expectedComputeQueueProperties) {
+    if (expectedComputeQueueProperties.isValid) {
         auto computeQueueProperties = expectedComputeQueueProperties;
-        return computeQueueProperties->familyIndex;
+        return computeQueueProperties.familyIndex;
     }
     return ~0;
 }

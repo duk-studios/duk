@@ -194,16 +194,16 @@ void VulkanSwapchain::create() {
 
     auto surfaceDetails = m_physicalDevice->query_surface_details(m_surface);
 
-    m_surfaceFormat = detail::choose_swap_surface_format(surfaceDetails->formats);
+    m_surfaceFormat = detail::choose_swap_surface_format(surfaceDetails.formats);
 
-    m_presentMode = detail::choose_swap_present_mode(surfaceDetails->presentModes);
+    m_presentMode = detail::choose_swap_present_mode(surfaceDetails.presentModes);
 
-    m_extent = detail::choose_swap_extent(surfaceDetails->capabilities, {m_window->width(), m_window->height()});
+    m_extent = detail::choose_swap_extent(surfaceDetails.capabilities, {m_window->width(), m_window->height()});
 
     //Old code, should check if this is right
-    auto imageCount = surfaceDetails->capabilities.minImageCount + 1;
-    if (surfaceDetails->capabilities.maxImageCount > 0 && imageCount > surfaceDetails->capabilities.maxImageCount) {
-        imageCount = surfaceDetails->capabilities.maxImageCount;
+    auto imageCount = surfaceDetails.capabilities.minImageCount + 1;
+    if (surfaceDetails.capabilities.maxImageCount > 0 && imageCount > surfaceDetails.capabilities.maxImageCount) {
+        imageCount = surfaceDetails.capabilities.maxImageCount;
     }
 
     VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
@@ -221,7 +221,7 @@ void VulkanSwapchain::create() {
     swapchainCreateInfo.queueFamilyIndexCount = 0;
     swapchainCreateInfo.pQueueFamilyIndices = nullptr;
 
-    swapchainCreateInfo.preTransform = surfaceDetails->capabilities.currentTransform;
+    swapchainCreateInfo.preTransform = surfaceDetails.capabilities.currentTransform;
     swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     swapchainCreateInfo.presentMode = m_presentMode;
     swapchainCreateInfo.clipped = VK_TRUE;
