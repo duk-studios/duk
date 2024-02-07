@@ -20,10 +20,10 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
         auto result = duk::platform::Window::create_window(windowCreateInfo);
 
         if (!result) {
-            throw std::runtime_error("failed to create engine window: " + result.error().description());
+            throw std::runtime_error("failed to create engine window!");
         }
 
-        m_window = std::move(result.value());
+        m_window = result;
     }
     m_listener.listen(m_window->window_close_event, [this] {
         m_window->close();
