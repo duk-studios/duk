@@ -1,6 +1,3 @@
-[submodule "external/expected/expected"]
-	path = external/expected/expected
-	url = git@github.com:TartanLlama/expected.git
 [submodule "external/glm/glm"]
 	path = external/glm/glm
 	url = git@github.com:g-truc/glm.git
