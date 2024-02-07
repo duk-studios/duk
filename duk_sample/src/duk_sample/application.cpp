@@ -16,7 +16,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
     auto importer = m_engine->importer();
-    importer->load_resources("resources.json");
+    //importer->load_resources("resources.json");
+    importer->load_resources("D:/DukEngine/duk/duk_sample/resources/resources.json");
 
     m_scene = importer->load_scene("main");
 
