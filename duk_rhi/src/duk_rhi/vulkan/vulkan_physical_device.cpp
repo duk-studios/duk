@@ -65,7 +65,7 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
 
 VulkanPhysicalDevice::~VulkanPhysicalDevice() = default;
 
-VulkanQueueFamilyProperties VulkanPhysicalDevice::find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) const {
+bool VulkanPhysicalDevice::find_queue_family(VulkanQueueFamilyProperties& vulkanQueueFamilyProperties, VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) const {
 
     for (uint32_t candidateQueueIndex = 0; candidateQueueIndex < m_queueFamilyProperties.size(); candidateQueueIndex++) {
 
@@ -86,19 +86,19 @@ VulkanQueueFamilyProperties VulkanPhysicalDevice::find_queue_family(VkSurfaceKHR
         bool hasProhibitedFlags = candidateFlags & prohibitedQueueFlags;
 
         if (candidateQueueFamily.queueCount > 0 && hasRequiredFlags && !hasProhibitedFlags) {
-            return VulkanQueueFamilyProperties{true, candidateQueueFamily, candidateQueueIndex};
+            vulkanQueueFamilyProperties.familyProperties = candidateQueueFamily;
+            vulkanQueueFamilyProperties.familyIndex = candidateQueueIndex;
+            return true;
         }
     }
 
-    throw VulkanQueryError(VulkanQueryError::NOT_FOUND);
+    return false;
 }
 
-VulkanSurfaceDetails VulkanPhysicalDevice::query_surface_details(VkSurfaceKHR surface) const {
+bool VulkanPhysicalDevice::query_surface_details(VkSurfaceKHR surface, VulkanSurfaceDetails& surfaceDetails) const {
     if (!surface) {
-        throw VulkanQueryError(VulkanQueryError::INVALID_ARGUMENT);
+        return false;
     }
-
-    VulkanSurfaceDetails surfaceDetails = {};
 
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, surface, &surfaceDetails.capabilities);
 
@@ -118,8 +118,7 @@ VulkanSurfaceDetails VulkanPhysicalDevice::query_surface_details(VkSurfaceKHR su
         vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, surface, &presentModeCount, surfaceDetails.presentModes.data());
     }
 
-    surfaceDetails.isValid = true;
-    return surfaceDetails;
+    return true;
 }
 
 VkPhysicalDevice VulkanPhysicalDevice::handle() {

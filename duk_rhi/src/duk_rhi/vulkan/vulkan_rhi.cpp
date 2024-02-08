@@ -50,40 +50,43 @@ static std::vector<const char*> query_device_extensions() {
     return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME, VK_EXT_ROBUSTNESS_2_EXTENSION_NAME};
 }
 
-static uint32_t find_present_queue_index(VulkanPhysicalDevice* physicalDevice, VkSurfaceKHR surface){
-    auto expectedPresentQueueProperties = physicalDevice->find_queue_family(surface, 0);
-    if (!expectedPresentQueueProperties.isValid) {
+static uint32_t find_present_queue_index(VulkanPhysicalDevice* physicalDevice, VkSurfaceKHR surface) {
+    VulkanQueueFamilyProperties vulkanQueueFamilyProperties = {};
+
+    if (!physicalDevice->find_queue_family(vulkanQueueFamilyProperties, surface, 0)) {
         return ~0;
     }
 
-    auto presentQueueProperties = expectedPresentQueueProperties;
+    auto presentQueueProperties = vulkanQueueFamilyProperties;
     return presentQueueProperties.familyIndex;
 }
 
-static uint32_t find_graphics_queue_index(VulkanPhysicalDevice* physicalDevice){
-    auto expectedGraphicsQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_GRAPHICS_BIT);
-    if (!expectedGraphicsQueueProperties.isValid) {
+static uint32_t find_graphics_queue_index(VulkanPhysicalDevice* physicalDevice) {
+    VulkanQueueFamilyProperties vulkanQueueFamilyProperties = {};
+
+    if (!physicalDevice->find_queue_family(vulkanQueueFamilyProperties, VK_NULL_HANDLE, VK_QUEUE_GRAPHICS_BIT)) {
         return ~0;
     }
 
-    auto graphicsQueueProperties = expectedGraphicsQueueProperties;
+    auto graphicsQueueProperties = vulkanQueueFamilyProperties;
     return graphicsQueueProperties.familyIndex;
 }
 
 static uint32_t find_compute_queue_index(VulkanPhysicalDevice* physicalDevice) {
     // try to find an exclusive compute queue
-    auto expectedComputeQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT, VK_QUEUE_GRAPHICS_BIT);
-    if (expectedComputeQueueProperties.isValid) {
-        auto computeQueueProperties = expectedComputeQueueProperties;
+    VulkanQueueFamilyProperties vulkanQueueFamilyProperties = {};
+
+    if (physicalDevice->find_queue_family(vulkanQueueFamilyProperties, VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT, VK_QUEUE_GRAPHICS_BIT)) {
+        auto computeQueueProperties = vulkanQueueFamilyProperties;
         return computeQueueProperties.familyIndex;
     }
 
     // if not found, try to find any queue that supports compute
-    expectedComputeQueueProperties = physicalDevice->find_queue_family(VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT);
-    if (expectedComputeQueueProperties.isValid) {
-        auto computeQueueProperties = expectedComputeQueueProperties;
+    if (physicalDevice->find_queue_family(vulkanQueueFamilyProperties, VK_NULL_HANDLE, VK_QUEUE_COMPUTE_BIT)) {
+        auto computeQueueProperties = vulkanQueueFamilyProperties;
         return computeQueueProperties.familyIndex;
     }
+
     return ~0;
 }
 

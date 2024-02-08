@@ -16,13 +16,11 @@
 namespace duk::rhi {
 
 struct VulkanQueueFamilyProperties {
-    bool isValid;
     VkQueueFamilyProperties familyProperties;
     uint32_t familyIndex;
 };
 
 struct VulkanSurfaceDetails {
-    bool isValid;
     VkSurfaceCapabilitiesKHR capabilities;
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> presentModes;
@@ -39,9 +37,9 @@ public:
 
     ~VulkanPhysicalDevice();
 
-    DUK_NO_DISCARD VulkanQueueFamilyProperties find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags = 0) const;
+    DUK_NO_DISCARD bool find_queue_family( VulkanQueueFamilyProperties& vulkanQueueFamilyProperties, VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags = 0) const;
 
-    DUK_NO_DISCARD VulkanSurfaceDetails query_surface_details(VkSurfaceKHR surface) const;
+    DUK_NO_DISCARD bool query_surface_details(VkSurfaceKHR surface, VulkanSurfaceDetails& surfaceDetails) const;
 
     DUK_NO_DISCARD VkPhysicalDevice handle();
 
