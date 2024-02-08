@@ -16,15 +16,8 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
     windowCreateInfo.width = 1280;
     windowCreateInfo.height = 720;
 
-    {
-        auto result = duk::platform::Window::create_window(windowCreateInfo);
+    m_window = duk::platform::Window::create_window(windowCreateInfo);
 
-        if (!result) {
-            throw std::runtime_error("failed to create engine window!");
-        }
-
-        m_window = result;
-    }
     m_listener.listen(m_window->window_close_event, [this] {
         m_window->close();
     });

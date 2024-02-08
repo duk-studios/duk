@@ -52,13 +52,7 @@ void Painter::PipelineCache::update_shader(const duk::rhi::ShaderDataSource* sha
     duk::rhi::RHI::ShaderCreateInfo shaderCreateInfo = {};
     shaderCreateInfo.shaderDataSource = shaderDataSource;
 
-    auto expectedColorShader = m_renderer->rhi()->create_shader(shaderCreateInfo);
-
-    if (!expectedColorShader) {
-        throw std::runtime_error("failed to init Shader!");
-    }
-
-    m_shader = expectedColorShader;
+    m_shader = m_renderer->rhi()->create_shader(shaderCreateInfo);
 }
 
 duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(const DrawParams& params) {

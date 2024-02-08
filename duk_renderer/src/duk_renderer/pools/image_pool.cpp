@@ -32,13 +32,9 @@ ImageResource ImagePool::create(duk::pool::ResourceId resourceId, const duk::rhi
     imageCreateInfo.usage = duk::rhi::Image::Usage::SAMPLED;
     imageCreateInfo.imageDataSource = imageDataSource;
 
-    auto result = m_renderer->rhi()->create_image(imageCreateInfo);
+    auto resourceImage = m_renderer->rhi()->create_image(imageCreateInfo);
 
-    if (!result) {
-        throw std::runtime_error("failed to create image for image pool!");
-    }
-
-    return insert(resourceId, result);
+    return insert(resourceId, resourceImage);
 }
 
 ImageResource ImagePool::white_image() const {

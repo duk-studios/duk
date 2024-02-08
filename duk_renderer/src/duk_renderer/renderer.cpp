@@ -29,37 +29,17 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
         rhiCreateInfo.engineName = "duk_engine";
         rhiCreateInfo.api = rendererCreateInfo.api;
 
-        auto expectedRHI = duk::rhi::RHI::create_rhi(rhiCreateInfo);
-
-        if (!expectedRHI) {
-            throw std::runtime_error("failed to create RHI!");
-        }
-
-        m_rhi = expectedRHI;
+        m_rhi = duk::rhi::RHI::create_rhi(rhiCreateInfo);
     }
 
-    {
-        duk::rhi::RHI::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
-        mainCommandQueueCreateInfo.type = rhi::CommandQueue::Type::GRAPHICS;
 
-        auto expectedCommandQueue = m_rhi->create_command_queue(mainCommandQueueCreateInfo);
+    duk::rhi::RHI::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
+    mainCommandQueueCreateInfo.type = rhi::CommandQueue::Type::GRAPHICS;
 
-        if (!expectedCommandQueue) {
-            throw std::runtime_error("failed to create main CommandQueue!");
-        }
+    m_mainQueue = m_rhi->create_command_queue(mainCommandQueueCreateInfo);
 
-        m_mainQueue = expectedCommandQueue;
-    }
+    m_scheduler = m_rhi->create_command_scheduler();;
 
-    {
-        auto expectedScheduler = m_rhi->create_command_scheduler();
-
-        if (!expectedScheduler) {
-            throw std::runtime_error("failed to create CommandScheduler!");
-        }
-
-        m_scheduler = expectedScheduler;
-    }
 
     {
         GlobalDescriptorsCreateInfo globalDescriptorsCreateInfo = {};

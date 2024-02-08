@@ -71,13 +71,7 @@ StorageBuffer<T>::StorageBuffer(const StorageBufferCreateInfo& storageBufferCrea
     bufferCreateInfo.elementCount = storageBufferCreateInfo.initialSize;
     bufferCreateInfo.updateFrequency = rhi::Buffer::UpdateFrequency::DYNAMIC;
 
-    auto expectedStorageBuffer = m_rhi->create_buffer(bufferCreateInfo);
-
-    if (!expectedStorageBuffer) {
-        throw std::runtime_error("failed to create StorageBuffer<T>!");
-    }
-
-    m_buffer = expectedStorageBuffer;
+    m_buffer = m_rhi->create_buffer(bufferCreateInfo);
     flush();
 }
 

@@ -7,13 +7,7 @@ PhongDescriptorSet::PhongDescriptorSet(const PhongDescriptorSetCreateInfo& creat
     duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
     descriptorSetCreateInfo.description = createInfo.shaderDataSource->descriptor_set_descriptions().at(0);
 
-    auto result = createInfo.rhi->create_descriptor_set(descriptorSetCreateInfo);
-
-    if (!result) {
-        throw std::runtime_error("failed to create PhongDescriptorSet!");
-    }
-
-    m_descriptorSet = result;
+    m_descriptorSet = createInfo.rhi->create_descriptor_set(descriptorSetCreateInfo);
 }
 
 void PhongDescriptorSet::set(PhongDescriptorSet::Bindings binding, const duk::rhi::Descriptor& descriptor) {

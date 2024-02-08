@@ -48,13 +48,7 @@ UniformBuffer<T>::UniformBuffer(const UniformBufferCreateInfo<T>& uniformBufferC
     bufferCreateInfo.elementCount = 1;
     bufferCreateInfo.updateFrequency = rhi::Buffer::UpdateFrequency::DYNAMIC;
 
-    auto expectedUniformBuffer = uniformBufferCreateInfo.rhi->create_buffer(bufferCreateInfo);
-
-    if (!expectedUniformBuffer) {
-        throw std::runtime_error("failed to create UniformBuffer<T>!");
-    }
-
-    m_buffer = expectedUniformBuffer;
+    m_buffer = uniformBufferCreateInfo.rhi->create_buffer(bufferCreateInfo);
     flush();
 }
 
