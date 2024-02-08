@@ -65,7 +65,8 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
 
 VulkanPhysicalDevice::~VulkanPhysicalDevice() = default;
 
-ExpectedVulkanQueueFamilyProperties VulkanPhysicalDevice::find_queue_family(VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) const {
+bool VulkanPhysicalDevice::find_queue_family(VulkanQueueFamilyProperties& vulkanQueueFamilyProperties, VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) const {
+
     for (uint32_t candidateQueueIndex = 0; candidateQueueIndex < m_queueFamilyProperties.size(); candidateQueueIndex++) {
 
         const auto& candidateQueueFamily = m_queueFamilyProperties[candidateQueueIndex];
@@ -85,19 +86,19 @@ ExpectedVulkanQueueFamilyProperties VulkanPhysicalDevice::find_queue_family(VkSu
         bool hasProhibitedFlags = candidateFlags & prohibitedQueueFlags;
 
         if (candidateQueueFamily.queueCount > 0 && hasRequiredFlags && !hasProhibitedFlags) {
-            return VulkanQueueFamilyProperties{candidateQueueFamily, candidateQueueIndex};
+            vulkanQueueFamilyProperties.familyProperties = candidateQueueFamily;
+            vulkanQueueFamilyProperties.familyIndex = candidateQueueIndex;
+            return true;
         }
     }
 
-    return tl::unexpected<VulkanQueryError>(VulkanQueryError::NOT_FOUND);
+    return false;
 }
 
-ExpectedVulkanSurfaceDetails VulkanPhysicalDevice::query_surface_details(VkSurfaceKHR surface) const {
+bool VulkanPhysicalDevice::query_surface_details(VkSurfaceKHR surface, VulkanSurfaceDetails& surfaceDetails) const {
     if (!surface) {
-        return tl::unexpected<VulkanQueryError>(VulkanQueryError::INVALID_ARGUMENT);
+        return false;
     }
-
-    VulkanSurfaceDetails surfaceDetails = {};
 
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physicalDevice, surface, &surfaceDetails.capabilities);
 
@@ -117,7 +118,7 @@ ExpectedVulkanSurfaceDetails VulkanPhysicalDevice::query_surface_details(VkSurfa
         vkGetPhysicalDeviceSurfacePresentModesKHR(m_physicalDevice, surface, &presentModeCount, surfaceDetails.presentModes.data());
     }
 
-    return surfaceDetails;
+    return true;
 }
 
 VkPhysicalDevice VulkanPhysicalDevice::handle() {

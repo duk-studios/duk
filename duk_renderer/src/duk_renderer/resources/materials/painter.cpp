@@ -52,13 +52,7 @@ void Painter::PipelineCache::update_shader(const duk::rhi::ShaderDataSource* sha
     duk::rhi::RHI::ShaderCreateInfo shaderCreateInfo = {};
     shaderCreateInfo.shaderDataSource = shaderDataSource;
 
-    auto expectedColorShader = m_renderer->rhi()->create_shader(shaderCreateInfo);
-
-    if (!expectedColorShader) {
-        throw std::runtime_error("failed to init Shader: " + expectedColorShader.error().description());
-    }
-
-    m_shader = std::move(expectedColorShader.value());
+    m_shader = m_renderer->rhi()->create_shader(shaderCreateInfo);
 }
 
 duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(const DrawParams& params) {
@@ -80,11 +74,11 @@ duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(con
 
         auto expectedPipeline = m_renderer->rhi()->create_graphics_pipeline(pipelineCreateInfo);
         if (!expectedPipeline) {
-            throw std::runtime_error("failed to create Pipeline: " + expectedPipeline.error().description());
+            throw std::runtime_error("failed to create Pipeline!");
         }
 
         PipelineEntry entry = {};
-        entry.pipeline = std::move(expectedPipeline.value());
+        entry.pipeline = expectedPipeline;
         entry.framesUnused = 0;
 
         auto result = m_pipelines.emplace(hash, entry);

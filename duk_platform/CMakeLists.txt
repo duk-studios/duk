@@ -28,7 +28,6 @@ target_link_libraries(duk_platform
         duk_hash
         duk_events
 
-        tl::expected
         )
 
 set_target_properties(duk_platform PROPERTIES CXX_STANDARD 20)

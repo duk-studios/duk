@@ -11,6 +11,7 @@
 #include <duk_renderer/pools/sprite_pool.h>
 
 #include <duk_platform/window.h>
+#include <duk_rhi/image_data_source.h>
 
 namespace duk::renderer {
 
@@ -28,37 +29,17 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
         rhiCreateInfo.engineName = "duk_engine";
         rhiCreateInfo.api = rendererCreateInfo.api;
 
-        auto expectedRHI = duk::rhi::RHI::create_rhi(rhiCreateInfo);
-
-        if (!expectedRHI) {
-            throw std::runtime_error("failed to create RHI: " + expectedRHI.error().description());
-        }
-
-        m_rhi = std::move(expectedRHI.value());
+        m_rhi = duk::rhi::RHI::create_rhi(rhiCreateInfo);
     }
 
-    {
-        duk::rhi::RHI::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
-        mainCommandQueueCreateInfo.type = rhi::CommandQueue::Type::GRAPHICS;
 
-        auto expectedCommandQueue = m_rhi->create_command_queue(mainCommandQueueCreateInfo);
+    duk::rhi::RHI::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
+    mainCommandQueueCreateInfo.type = rhi::CommandQueue::Type::GRAPHICS;
 
-        if (!expectedCommandQueue) {
-            throw std::runtime_error("failed to create main CommandQueue: " + expectedCommandQueue.error().description());
-        }
+    m_mainQueue = m_rhi->create_command_queue(mainCommandQueueCreateInfo);
 
-        m_mainQueue = std::move(expectedCommandQueue.value());
-    }
+    m_scheduler = m_rhi->create_command_scheduler();;
 
-    {
-        auto expectedScheduler = m_rhi->create_command_scheduler();
-
-        if (!expectedScheduler) {
-            throw std::runtime_error("failed to create CommandScheduler: " + expectedScheduler.error().description());
-        }
-
-        m_scheduler = std::move(expectedScheduler.value());
-    }
 
     {
         GlobalDescriptorsCreateInfo globalDescriptorsCreateInfo = {};
@@ -164,10 +145,10 @@ std::shared_ptr<duk::rhi::Image> Renderer::create_depth_image(uint32_t width, ui
     auto expectedDepthImage = m_rhi->create_image(depthImageCreateInfo);
 
     if (!expectedDepthImage) {
-        throw std::runtime_error("failed to create depth image: " + expectedDepthImage.error().description());
+        throw std::runtime_error("failed to create depth image!");
     }
 
-    return std::move(expectedDepthImage.value());
+    return expectedDepthImage;
 }
 
 std::shared_ptr<duk::rhi::Image> Renderer::create_color_image(uint32_t width, uint32_t height, duk::rhi::PixelFormat format) {
@@ -184,10 +165,10 @@ std::shared_ptr<duk::rhi::Image> Renderer::create_color_image(uint32_t width, ui
     auto expectedColorImage = m_rhi->create_image(colorImageCreateInfo);
 
     if (!expectedColorImage) {
-        throw std::runtime_error("failed to create color image: " + expectedColorImage.error().description());
+        throw std::runtime_error("failed to create color image!");
     }
 
-    return std::move(expectedColorImage.value());
+    return expectedColorImage;
 }
 
 duk::rhi::RHI* Renderer::rhi() const {

@@ -10,6 +10,7 @@
 
 #include <stdexcept>
 #include <limits>
+#include <duk_rhi/rhi_exception.h>
 
 namespace duk::rhi {
 
@@ -192,7 +193,10 @@ void VulkanSwapchain::create() {
         throw std::logic_error("tried to create a swapchain that was already created");
     }
 
-    auto surfaceDetails = m_physicalDevice->query_surface_details(m_surface).value();
+    VulkanSurfaceDetails surfaceDetails = {};
+    if(!m_physicalDevice->query_surface_details(m_surface, surfaceDetails)) {
+        throw RHIException(RHIException::INTERNAL_ERROR, "Could not query surface details for swapchain");
+    }
 
     m_surfaceFormat = detail::choose_swap_surface_format(surfaceDetails.formats);
 

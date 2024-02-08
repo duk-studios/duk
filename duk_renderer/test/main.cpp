@@ -30,18 +30,10 @@ int main() {
     duk::platform::WindowCreateInfo windowCreateInfo = {"RendererWindow", 640, 720};
 
     //The result of window creation is checked, and if successful, the program proceeds
-    {
-        auto result = duk::platform::Window::create_window(windowCreateInfo);
-        std::cout<< "Creating window" << std::endl;    
-        if (!result) {
-            throw std::runtime_error("failed to create engine window: " + result.error().description());
-        }
+    window = duk::platform::Window::create_window(windowCreateInfo);
+    std::cout<< "Window creation succeed!" << std::endl;
+    run = true;
 
-        std::cout<< "Window creation succeed!" << std::endl;
-        window = std::move(result.value());
-        run = true;
-    }
-    
 
     //Event listeners are set up to respond to window close and destroy events.
     listener.listen(window->window_close_event, [&window] {
