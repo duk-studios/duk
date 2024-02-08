@@ -7,13 +7,7 @@ ColorDescriptorSet::ColorDescriptorSet(const ColorDescriptorSetCreateInfo& creat
     duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
     descriptorSetCreateInfo.description = createInfo.shaderDataSource->descriptor_set_descriptions().at(0);
 
-    auto result = createInfo.rhi->create_descriptor_set(descriptorSetCreateInfo);
-
-    if (!result) {
-        throw std::runtime_error("failed to create ColorDescriptorSet: " + result.error().description());
-    }
-
-    m_descriptorSet = std::move(result.value());
+    m_descriptorSet = createInfo.rhi->create_descriptor_set(descriptorSetCreateInfo);
 }
 
 void ColorDescriptorSet::set(ColorDescriptorSet::Bindings binding, const duk::rhi::Descriptor& descriptor) {

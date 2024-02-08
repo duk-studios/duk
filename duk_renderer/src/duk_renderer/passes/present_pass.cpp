@@ -26,13 +26,7 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
         renderPassCreateInfo.colorAttachments = attachmentDescriptions;
         renderPassCreateInfo.colorAttachmentCount = std::size(attachmentDescriptions);
 
-        auto expectedRenderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
-
-        if (!expectedRenderPass) {
-            throw std::runtime_error("failed to create RenderPass: " + expectedRenderPass.error().description());
-        }
-
-        m_renderPass = std::move(expectedRenderPass.value());
+        m_renderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
     }
 
     {
@@ -62,13 +56,7 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
         frameBufferCreateInfo.attachments = frameBufferAttachments;
         frameBufferCreateInfo.renderPass = m_renderPass.get();
 
-        auto expectedFrameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
-
-        if (!expectedFrameBuffer) {
-            throw std::runtime_error("failed to create FrameBuffer: " + expectedFrameBuffer.error().description());
-        }
-
-        m_frameBuffer = std::move(expectedFrameBuffer.value());
+        m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
     }
 
     m_fullscreenMaterial->update(m_inColor.image(), duk::rhi::Sampler{duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER});

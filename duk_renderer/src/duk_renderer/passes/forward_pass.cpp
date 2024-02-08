@@ -269,13 +269,7 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
         renderPassCreateInfo.colorAttachmentCount = std::size(attachmentDescriptions);
         renderPassCreateInfo.depthAttachment = &depthAttachmentDescription;
 
-        auto expectedRenderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
-
-        if (!expectedRenderPass) {
-            throw std::runtime_error("failed to create RenderPass: " + expectedRenderPass.error().description());
-        }
-
-        m_renderPass = std::move(expectedRenderPass.value());
+        m_renderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
     }
 
     {
@@ -315,13 +309,8 @@ void ForwardPass::render(const RenderParams& renderParams) {
         frameBufferCreateInfo.attachments = frameBufferAttachments;
         frameBufferCreateInfo.renderPass = m_renderPass.get();
 
-        auto expectedFrameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
 
-        if (!expectedFrameBuffer) {
-            throw std::runtime_error("failed to create FrameBuffer: " + expectedFrameBuffer.error().description());
-        }
-
-        m_frameBuffer = std::move(expectedFrameBuffer.value());
+        m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
     }
 
     renderParams.commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());

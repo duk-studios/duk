@@ -9,18 +9,11 @@ int main() {
     std::shared_ptr<duk::platform::Window> window;
     
     duk::platform::WindowCreateInfo windowCreateInfo = {"MyWindow", 640, 720};
-    
-    {
-        auto result = duk::platform::Window::create_window(windowCreateInfo);
-        std::cout<< "Creating window" << std::endl;    
-        if (!result) {
-            throw std::runtime_error("failed to create engine window: " + result.error().description());
-        }
 
-        std::cout<< "Window creation succeed!" << std::endl;
-        window = std::move(result.value());
-        run = true;
-    }
+    std::cout<< "Creating window" << std::endl;
+
+    window = duk::platform::Window::create_window(windowCreateInfo);
+    run = true;
 
     uint32_t myWindowHeight = window->height();
     uint32_t myWindowWidth = window->width();

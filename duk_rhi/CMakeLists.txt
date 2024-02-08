@@ -2,7 +2,7 @@ project(duk_rhi)
 
 set(DUK_RHI_HEADERS
         include/duk_rhi/rhi.h
-        include/duk_rhi/renderer_error.h
+        include/duk_rhi/rhi_exception.h
         include/duk_rhi/command/command_queue.h
         include/duk_rhi/command/command_buffer.h
         include/duk_rhi/render_pass.h
@@ -29,7 +29,7 @@ set(DUK_RHI_HEADERS
 
 set(DUK_RHI_SOURCES
         src/duk_rhi/rhi.cpp
-        src/duk_rhi/renderer_error.cpp
+        src/duk_rhi/rhi_exception.cpp
         src/duk_rhi/vertex_layout.cpp
         src/duk_rhi/pipeline/graphics_pipeline.cpp
         src/duk_rhi/pipeline/shader.cpp
@@ -117,8 +117,6 @@ target_link_libraries(duk_rhi
 
         # external
         glm::glm
-
-        tl::expected
 
         grapphs::grapphs
 

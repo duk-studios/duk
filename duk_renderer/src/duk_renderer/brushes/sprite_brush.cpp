@@ -36,13 +36,8 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
         bufferCreateInfo.elementCount = m_spriteCapacity * detail::kVerticesPerSprite;
         bufferCreateInfo.elementSize = VertexAttributes::size_of(VertexAttributes::POSITION);
 
-        auto expectedPositionVertexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);
 
-        if (!expectedPositionVertexBuffer) {
-            throw std::runtime_error("failed to create SpriteBuffer position vertex buffer: " + expectedPositionVertexBuffer.error().description());
-        }
-
-        m_vertexBuffers.at(VertexAttributes::POSITION) = std::move(expectedPositionVertexBuffer.value());
+        m_vertexBuffers.at(VertexAttributes::POSITION) = renderer->rhi()->create_buffer(bufferCreateInfo);;
     }
 
     // uv
@@ -54,13 +49,7 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
         bufferCreateInfo.elementCount = m_spriteCapacity * detail::kVerticesPerSprite;
         bufferCreateInfo.elementSize = VertexAttributes::size_of(VertexAttributes::UV);
 
-        auto expectedUvVertexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);
-
-        if (!expectedUvVertexBuffer) {
-            throw std::runtime_error("failed to create SpriteBuffer uv vertex buffer: " + expectedUvVertexBuffer.error().description());
-        }
-
-        m_vertexBuffers.at(VertexAttributes::UV) = std::move(expectedUvVertexBuffer.value());
+        m_vertexBuffers.at(VertexAttributes::UV) = renderer->rhi()->create_buffer(bufferCreateInfo);;
     }
 
     // index
@@ -72,13 +61,8 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
         bufferCreateInfo.elementCount = m_spriteCapacity * detail::kIndicesPerSprite;
         bufferCreateInfo.elementSize = duk::rhi::index_size(duk::rhi::IndexType::UINT32);
 
-        auto expectedUvVertexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);
 
-        if (!expectedUvVertexBuffer) {
-            throw std::runtime_error("failed to create SpriteBuffer index buffer: " + expectedUvVertexBuffer.error().description());
-        }
-
-        m_indexBuffer = std::move(expectedUvVertexBuffer.value());
+        m_indexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);;
     }
 }
 

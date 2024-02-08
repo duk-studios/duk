@@ -1,6 +1,8 @@
 ﻿#ifndef DUK_PLATFORM_KEY_CODES_H
 #define DUK_PLATFORM_KEY_CODES_H
 
+#include <cstdint>
+
 namespace duk::platform {
 
 struct KeyModifiers {

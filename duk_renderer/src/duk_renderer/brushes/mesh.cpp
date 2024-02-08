@@ -24,19 +24,13 @@ MeshBuffer::ManagedBuffer::ManagedBuffer(const MeshBuffer::ManagedBufferCreateIn
     m_rhi(managedBufferCreateInfo.rhi),
     m_allocationCounter(0) {
 
-    auto expectedBuffer = m_rhi->create_buffer({
+    m_buffer = m_rhi->create_buffer({
         .type = managedBufferCreateInfo.type,
         .updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC,
         .elementCount = managedBufferCreateInfo.elementCount,
         .elementSize = managedBufferCreateInfo.elementSize,
         .commandQueue = managedBufferCreateInfo.commandQueue
     });
-
-    if (!expectedBuffer) {
-        throw std::runtime_error("failed to create ManagedBuffer: " + expectedBuffer.error().description());
-    }
-
-    m_buffer = std::move(expectedBuffer.value());
 
     m_freeBlocks.push_back({
         .offset = 0,
@@ -181,19 +175,13 @@ bool MeshBuffer::ManagedBuffer::allocate_from_free_blocks(uint32_t* allocationHa
 
 void MeshBuffer::ManagedBuffer::expand_by(size_t size) {
 
-    auto expectedBuffer = m_rhi->create_buffer({
+    auto newBuffer = m_rhi->create_buffer({
         .type = m_buffer->type(),
         .updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC,
         .elementCount = (m_buffer->byte_size() + size) / m_buffer->element_size(),
         .elementSize = m_buffer->element_size(),
         .commandQueue = m_buffer->command_queue()
     });
-
-    if (!expectedBuffer) {
-        throw std::runtime_error("failed to create ManagerBuffer: " + expectedBuffer.error().description());
-    }
-
-    auto newBuffer = std::move(expectedBuffer.value());
 
     newBuffer->copy_from(m_buffer.get(), m_buffer->byte_size(), 0, 0);
 
