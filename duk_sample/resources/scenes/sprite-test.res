@@ -6,6 +6,6 @@
     104
   ],
   "aliases": [
-    "main"
+    "empty"
   ]
 }
