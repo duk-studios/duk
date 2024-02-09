@@ -50,7 +50,7 @@ private:
     std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;
     std::unique_ptr<duk::scene::ComponentBuilder> m_componentBuilder;
     std::unique_ptr<duk::import::Importer> m_importer;
-    duk::resource::ResourceSolver m_solver;
+    duk::resource::ReferenceSolver m_solver;
     duk::event::Dispatcher m_dispatcher;
     duk::scene::Scene* m_scene;
     Systems m_systems;
