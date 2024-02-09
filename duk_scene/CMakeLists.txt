@@ -32,6 +32,7 @@ target_link_libraries(duk_scene
         duk_tools
         duk_json
         duk_log
+        duk_resource
         )
 
 set_target_properties(duk_scene PROPERTIES CXX_STANDARD 20)
