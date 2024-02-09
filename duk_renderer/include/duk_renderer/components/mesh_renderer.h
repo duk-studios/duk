@@ -6,6 +6,7 @@
 
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/resources/materials/mesh_material.h>
+#include <duk_resource/resource_solver.h>
 
 namespace duk::renderer {
 
@@ -22,6 +23,17 @@ template<>
 inline void from_json<duk::renderer::MeshRenderer>(const rapidjson::Value& jsonObject, duk::renderer::MeshRenderer& object) {
     object.mesh = from_json<duk::resource::Id>(jsonObject["mesh"]);
     object.material = from_json<duk::resource::Id>(jsonObject["material"]);
+}
+
+}
+
+namespace duk::resource {
+
+template<>
+inline void solve_resources<duk::renderer::MeshRenderer>(ResourceSolver* resourceSolver, duk::renderer::MeshRenderer& meshRenderer)
+{
+    resourceSolver->solve(meshRenderer.mesh);
+    resourceSolver->solve(meshRenderer.material);
 }
 
 }

@@ -18,7 +18,7 @@ struct ImagePoolCreateInfo {
     Renderer* renderer;
 };
 
-class ImagePool : public duk::resource::Pool<ImageResource> {
+class ImagePool : public duk::resource::PoolT<ImageResource> {
 public:
 
     explicit ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo);

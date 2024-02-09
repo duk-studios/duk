@@ -13,7 +13,7 @@ struct SpritePoolCreateInfo {
     ImagePool* imagePool;
 };
 
-class SpritePool : public duk::resource::Pool<SpriteResource> {
+class SpritePool : public duk::resource::PoolT<SpriteResource> {
 public:
 
     explicit SpritePool(const SpritePoolCreateInfo& spritePoolCreateInfo);

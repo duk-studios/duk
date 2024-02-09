@@ -21,7 +21,7 @@ struct MaterialPoolCreateInfo {
     ImagePool* imagePool;
 };
 
-class MaterialPool : public duk::resource::Pool<MaterialResource> {
+class MaterialPool : public duk::resource::PoolT<MaterialResource> {
 public:
 
     explicit MaterialPool(const MaterialPoolCreateInfo& materialPoolCreateInfo);
