@@ -15,19 +15,26 @@
 
 namespace duk::resource {
 
-template<typename ResourceT>
 class Pool {
+public:
+
+    virtual ~Pool();
+
+};
+
+template<typename ResourceT>
+class PoolT : public Pool {
 public:
 
     using ResourceType = typename ResourceT::Type;
 
-    virtual ~Pool();
+    ~PoolT() override;
 
     void clean();
 
     DUK_NO_DISCARD size_t size() const;
 
-    DUK_NO_DISCARD bool empty() const;
+    DUK_NO_DISCARD bool empty() const ;
 
     DUK_NO_DISCARD ResourceT find(Id id) const;
 
@@ -43,7 +50,7 @@ private:
 };
 
 template<typename ResourceT>
-ResourceT Pool<ResourceT>::find(Id id) const {
+ResourceT PoolT<ResourceT>::find(Id id) const {
     auto it = m_objects.find(id);
     if (it == m_objects.end()) {
         return ResourceT(id);
@@ -52,7 +59,7 @@ ResourceT Pool<ResourceT>::find(Id id) const {
 }
 
 template<typename ResourceT>
-ResourceT Pool<ResourceT>::find_or_default(Id id, const ResourceT& def) const {
+ResourceT PoolT<ResourceT>::find_or_default(Id id, const ResourceT& def) const {
     auto it = find(id);
     if (it.valid()) {
         return it;
@@ -61,13 +68,13 @@ ResourceT Pool<ResourceT>::find_or_default(Id id, const ResourceT& def) const {
 }
 
 template<typename ResourceT>
-Pool<ResourceT>::~Pool() {
+PoolT<ResourceT>::~PoolT() {
     clean();
     assert(empty() && "some resources are still in use");
 }
 
 template<typename ResourceT>
-void Pool<ResourceT>::clean() {
+void PoolT<ResourceT>::clean() {
     for (auto it = m_objects.cbegin(); it != m_objects.cend();) {
         const auto& object = it->second;
         if (object.use_count() == 1) {
@@ -79,17 +86,17 @@ void Pool<ResourceT>::clean() {
 }
 
 template<typename ResourceT>
-size_t Pool<ResourceT>::size() const {
+size_t PoolT<ResourceT>::size() const {
     return m_objects.size();
 }
 
 template<typename ResourceT>
-bool Pool<ResourceT>::empty() const {
+bool PoolT<ResourceT>::empty() const {
     return size() == 0;
 }
 
 template<typename ResourceT>
-ResourceT Pool<ResourceT>::insert(duk::resource::Id id, const std::shared_ptr<ResourceType>& resource) {
+ResourceT PoolT<ResourceT>::insert(duk::resource::Id id, const std::shared_ptr<ResourceType>& resource) {
 
     auto [it, inserted] = m_objects.emplace(id, ResourceT(id, resource));
 

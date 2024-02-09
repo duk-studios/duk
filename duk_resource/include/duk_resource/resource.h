@@ -97,6 +97,12 @@ public:
 
 };
 
+// Specialize this for resources that have inheritance
+template<typename T>
+struct BaseResource {
+    using Type = T;
+};
+
 template<typename T>
 Resource::Resource(Id id, const std::shared_ptr<T>& resource) :
     m_id(id),

@@ -3,12 +3,12 @@ project(duk_resource)
 set(DUK_RESOURCE_HEADERS
         include/duk_resource/resource.h
         include/duk_resource/pool.h
-        include/duk_resource/resource_builder.h
+        include/duk_resource/resource_solver.h
         )
 set(DUK_RESOURCE_SOURCES
         src/duk_resource/resource.cpp
         src/duk_resource/pool.cpp
-        src/duk_resource/resource_builder.cpp
+        src/duk_resource/resource_solver.cpp
         )
 
 add_library(duk_resource STATIC ${DUK_RESOURCE_HEADERS} ${DUK_RESOURCE_SOURCES})

@@ -6,4 +6,6 @@
 
 namespace duk::resource {
 
+Pool::~Pool() = default;
+
 }
