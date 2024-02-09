@@ -6,7 +6,7 @@
 
 #include <duk_scene/scene.h>
 #include <duk_json/types.h>
-#include <duk_resource/resource_solver.h>
+#include <duk_resource/solver/reference_solver.h>
 
 #include <string>
 #include <unordered_map>
@@ -15,7 +15,7 @@
 namespace duk::scene {
 
 struct ComponentBuilderCreateInfo {
-    duk::resource::ResourceSolver* solver;
+    duk::resource::ReferenceSolver* solver;
 };
 
 class ComponentBuilder {
@@ -31,11 +31,11 @@ private:
     template<typename T>
     class BuilderT : public Builder {
     public:
-        BuilderT(duk::resource::ResourceSolver* solver);
+        BuilderT(duk::resource::ReferenceSolver* solver);
 
         void build(Object& object, const rapidjson::Value& jsonObject) override;
     private:
-        duk::resource::ResourceSolver* m_solver;
+        duk::resource::ReferenceSolver* m_solver;
     };
 
 public:
@@ -49,11 +49,11 @@ public:
 
 private:
     std::unordered_map<std::string, std::unique_ptr<Builder>> m_componentBuilders;
-    duk::resource::ResourceSolver* m_solver;
+    duk::resource::ReferenceSolver* m_solver;
 };
 
 template<typename T>
-ComponentBuilder::BuilderT<T>::BuilderT(duk::resource::ResourceSolver* solver) :
+ComponentBuilder::BuilderT<T>::BuilderT(duk::resource::ReferenceSolver* solver) :
     m_solver(solver) {
 
 }
@@ -61,7 +61,7 @@ ComponentBuilder::BuilderT<T>::BuilderT(duk::resource::ResourceSolver* solver) :
 template<typename T>
 void ComponentBuilder::BuilderT<T>::build(Object& object, const rapidjson::Value& jsonObject) {
     auto component = json::from_json<T>(jsonObject);
-    m_solver->solve(component);
+    m_solver->template solve(component);
     object.add<T>(component);
 }
 

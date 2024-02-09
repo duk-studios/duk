@@ -1,14 +1,15 @@
 /// 08/02/2024
 /// resource_solver.h
 
-#ifndef DUK_RESOURCE_RESOURCE_SOLVER_H
-#define DUK_RESOURCE_RESOURCE_SOLVER_H
+#ifndef DUK_RESOURCE_REFERENCE_SOLVER_H
+#define DUK_RESOURCE_REFERENCE_SOLVER_H
 
 #include <duk_resource/pool.h>
+#include <duk_resource/solver/solver.h>
 
 namespace duk::resource {
 
-class ResourceSolver {
+class ReferenceSolver {
 public:
 
     template<typename T>
@@ -39,23 +40,19 @@ private:
 };
 
 template<typename T>
-std::type_index ResourceSolver::type_index() {
+std::type_index ReferenceSolver::type_index() {
     return typeid(BaseResourceType<T>);
 }
 
-// specialize method for types that need to solve their resources
 template<typename T>
-void solve_resources(ResourceSolver* solver, T& object) {}
-
-template<typename T>
-void ResourceSolver::add_pool(PoolT<ResourceT<T>>* pool) {
+void ReferenceSolver::add_pool(PoolT<ResourceT<T>>* pool) {
     const std::type_index type = type_index<T>();
     auto[it, inserted] = m_pools.emplace(type, pool);
-    assert(inserted && "pool of same type already exists in ResourceSolver");
+    assert(inserted && "pool of same type already exists in ReferenceSolver");
 }
 
 template<typename T>
-void ResourceSolver::solve(ResourceT<T>& resource) {
+void ReferenceSolver::solve(ResourceT<T>& resource) {
     auto pool = find_pool<T>();
     if (!pool) {
         throw std::logic_error("could not solve resource: pool not found");
@@ -64,12 +61,12 @@ void ResourceSolver::solve(ResourceT<T>& resource) {
 }
 
 template<typename T>
-void ResourceSolver::solve(T& object) {
+void ReferenceSolver::solve(T& object) {
     solve_resources(this, object);
 }
 
 template<typename T>
-PoolT<ResourceT<ResourceSolver::BaseResourceType<T>>>* ResourceSolver::find_pool() {
+PoolT<ResourceT<ReferenceSolver::BaseResourceType<T>>>* ReferenceSolver::find_pool() {
     const std::type_index type = type_index<T>();
     auto it = m_pools.find(type);
     if (it == m_pools.end()) {
@@ -80,5 +77,5 @@ PoolT<ResourceT<ResourceSolver::BaseResourceType<T>>>* ResourceSolver::find_pool
 
 }
 
-#endif // DUK_RESOURCE_RESOURCE_SOLVER_H
+#endif // DUK_RESOURCE_REFERENCE_SOLVER_H
 

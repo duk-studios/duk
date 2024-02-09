@@ -7,7 +7,6 @@
 
 #include <duk_renderer/resources/sprite.h>
 #include <duk_renderer/resources/materials/sprite_material.h>
-#include <duk_resource/resource_solver.h>
 
 namespace duk::renderer {
 
@@ -30,11 +29,10 @@ inline void from_json<duk::renderer::SpriteRenderer>(const rapidjson::Value& jso
 
 namespace duk::resource {
 
-template<>
-inline void solve_resources<duk::renderer::SpriteRenderer>(ResourceSolver* resourceSolver, duk::renderer::SpriteRenderer& spriteRenderer)
-{
-    resourceSolver->solve(spriteRenderer.sprite);
-    resourceSolver->solve(spriteRenderer.material);
+template<typename Solver>
+void solve_resources(Solver* solver, duk::renderer::SpriteRenderer& spriteRenderer) {
+    solver->solve(spriteRenderer.sprite);
+    solver->solve(spriteRenderer.material);
 }
 
 }
