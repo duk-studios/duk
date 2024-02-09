@@ -64,12 +64,12 @@ inline void from_json<duk::renderer::Rotation3D>(const rapidjson::Value& jsonObj
 
 template<>
 inline void from_json<duk::renderer::Rotation2D>(const rapidjson::Value& jsonObject, duk::renderer::Rotation2D& object) {
-    object.value = from_json<float>(jsonObject["value"]);
+    object.value = glm::radians(from_json<float>(jsonObject["value"]));
 }
 
 template<>
 inline void from_json<duk::renderer::Scale3D>(const rapidjson::Value& jsonObject, duk::renderer::Scale3D& object) {
-    object.value = glm::radians(from_json<glm::vec3>(jsonObject["value"])); // euler
+    object.value = from_json<glm::vec3>(jsonObject["value"]);
 }
 
 template<>
