@@ -31,4 +31,13 @@ using MeshMaterialResource = duk::resource::ResourceT<MeshMaterial>;
 
 }
 
+namespace duk::resource {
+
+template<>
+struct BaseResource<duk::renderer::MeshMaterial> {
+    using Type = duk::renderer::Material;
+};
+
+}
+
 #endif //DUK_RENDERER_MESH_MATERIAL_H

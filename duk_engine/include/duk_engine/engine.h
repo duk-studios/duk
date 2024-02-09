@@ -45,12 +45,14 @@ public:
     void register_component(const std::string& typeName);
 
 private:
-    duk::events::EventListener m_listener;
+    duk::event::Listener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;
+    std::unique_ptr<duk::scene::ComponentBuilder> m_componentBuilder;
     std::unique_ptr<duk::import::Importer> m_importer;
+    duk::resource::ResourceSolver m_solver;
+    duk::event::Dispatcher m_dispatcher;
     duk::scene::Scene* m_scene;
-    duk::scene::ComponentBuilder m_componentBuilder;
     Systems m_systems;
     duk::tools::Timer m_timer;
     bool m_run;
@@ -58,7 +60,7 @@ private:
 
 template<typename T>
 void Engine::register_component(const std::string& typeName) {
-    m_componentBuilder.add<T>(typeName);
+    m_componentBuilder->add<T>(typeName);
 }
 
 }

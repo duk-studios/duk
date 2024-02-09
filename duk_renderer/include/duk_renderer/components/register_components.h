@@ -8,7 +8,7 @@
 
 namespace duk::renderer {
 
-void register_components(duk::scene::ComponentBuilder& componentBuilder);
+void register_components(duk::scene::ComponentBuilder* componentBuilder);
 
 }
 

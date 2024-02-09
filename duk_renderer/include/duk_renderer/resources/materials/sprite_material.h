@@ -35,4 +35,14 @@ using SpriteMaterialResource = duk::resource::ResourceT<SpriteMaterial>;
 
 }
 
+namespace duk::resource {
+
+template<>
+struct BaseResource<duk::renderer::SpriteMaterial> {
+    using Type = duk::renderer::Material;
+};
+
+}
+
+
 #endif //DUK_SPRITE_MATERIAL_H
