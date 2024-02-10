@@ -5,6 +5,7 @@
 #define DUK_JSON_STRING_H
 
 #include <rapidjson/document.h>
+#include <string>
 
 namespace duk::json {
 
