@@ -1,7 +1,6 @@
 project(duk_scene)
 
 set(DUK_SCENE_HEADERS
-        include/duk_scene/object.h
         include/duk_scene/scene.h
         include/duk_scene/component_pool.h
         include/duk_scene/limits.h
@@ -9,7 +8,6 @@ set(DUK_SCENE_HEADERS
         )
 
 set(DUK_SCENE_SOURCES
-        src/duk_scene/object.cpp
         src/duk_scene/scene.cpp
         src/duk_scene/component_pool.cpp
         src/duk_scene/component_builder.cpp

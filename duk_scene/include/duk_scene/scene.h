@@ -4,11 +4,13 @@
 #ifndef DUK_SCENE_SCENE_H
 #define DUK_SCENE_SCENE_H
 
-#include <duk_scene/object.h>
 #include <duk_scene/component_pool.h>
 #include <duk_scene/limits.h>
 #include <duk_tools/fixed_vector.h>
 #include <duk_tools/bit_block.h>
+#include <duk_tools/singleton.h>
+#include <duk_resource/solver/reference_solver.h>
+#include <duk_resource/solver/dependency_solver.h>
 
 #include <array>
 
@@ -17,9 +19,113 @@ namespace duk::scene {
 class Scene;
 
 template<typename T>
+class Component;
+
+using ComponentMask = duk::tools::BitBlock<MAX_COMPONENTS>;
+
+class Object {
+public:
+
+    class Id {
+    public:
+
+        Id();
+
+        explicit Id(uint32_t index, uint32_t version);
+
+        DUK_NO_DISCARD uint32_t index() const;
+
+        DUK_NO_DISCARD uint32_t version() const;
+
+        bool operator==(const Id& rhs) const;
+
+        bool operator!=(const Id& rhs) const;
+
+    private:
+        uint32_t m_index;
+        uint32_t m_version;
+    };
+
+    class ComponentIterator {
+    public:
+
+        ComponentIterator(const ComponentMask& mask, uint32_t index);
+
+        bool operator==(const ComponentIterator& rhs);
+
+        bool operator!=(const ComponentIterator& rhs);
+
+        ComponentIterator operator++();
+
+        uint32_t operator*();
+
+    private:
+
+        void next();
+
+    private:
+        const ComponentMask& m_mask;
+        uint32_t m_i;
+    };
+
+    class ComponentView {
+    public:
+
+        ComponentView(const ComponentMask& mask);
+
+        ComponentIterator begin();
+
+        ComponentIterator end();
+
+    private:
+        const ComponentMask& m_mask;
+    };
+
+public:
+
+    Object();
+
+    Object(uint32_t index, uint32_t version, Scene* scene);
+
+    DUK_NO_DISCARD Id id() const;
+
+    DUK_NO_DISCARD bool valid() const;
+
+    DUK_NO_DISCARD operator bool() const;
+
+    DUK_NO_DISCARD Scene* scene() const;
+
+    void destroy() const;
+
+    template<typename T, typename ...Args>
+    Component<T> add(Args&& ...args);
+
+    template<typename T>
+    void remove();
+
+    template<typename T>
+    Component<T> component();
+
+    template<typename T>
+    Component<T> component() const;
+
+    template<typename ...Ts>
+    std::tuple<Component<Ts>...> components();
+
+    ComponentView components();
+
+private:
+    Id m_id;
+    Scene* m_scene;
+};
+
+
+template<typename T>
 class Component {
 public:
     Component(const Object::Id& ownerId, Scene* scene);
+
+    Component(const Object& owner);
 
     T* operator->();
 
@@ -37,15 +143,79 @@ public:
 
     DUK_NO_DISCARD explicit operator bool() const;
 
-    DUK_NO_DISCARD Object owner() const;
+    DUK_NO_DISCARD Object object() const;
 
 private:
     Object::Id m_ownerId;
     Scene* m_scene;
 };
 
+class ComponentRegistry : public duk::tools::Singleton<ComponentRegistry> {
+private:
 
-using ComponentMask = duk::tools::BitBlock<MAX_COMPONENTS>;
+    // Unfortunately we have to duplicate the solve method for each solver type.
+    // At the moment I could not think of a more elegant solution, this is not as simple
+    // as it might look at first glance :(
+    class ComponentEntry {
+    public:
+        virtual ~ComponentEntry() = default;
+
+        virtual void solve(duk::resource::ReferenceSolver* solver, Object& object) = 0;
+
+        virtual void solve(duk::resource::DependencySolver* solver, Object& object) = 0;
+
+    };
+
+    template<typename T>
+    class ComponentEntryT : public ComponentEntry {
+    public:
+        void solve(duk::resource::ReferenceSolver* solver, Object& object) override {
+            auto component = Component<T>(object);
+            solver->solve(component);
+        }
+
+        void solve(duk::resource::DependencySolver* solver, Object& object) override {
+            auto component = Component<T>(object);
+            solver->solve(component);
+        }
+    };
+
+public:
+
+    template<typename T>
+    DUK_NO_DISCARD static uint32_t component_index();
+
+    template<typename Solver>
+    void solve(Solver* solver, Object& object, uint32_t componentId) {
+        auto& entry = m_componentEntries.at(componentId);
+        assert(entry);
+        m_componentEntries.at(componentId)->solve(solver, object);
+    }
+private:
+
+    template<typename T>
+    void register_component(uint32_t index) {
+        auto& entry = m_componentEntries.at(index);
+        if (entry) {
+            return;
+        }
+        entry = std::make_unique<ComponentEntryT<T>>();
+    }
+
+private:
+    static uint32_t s_componentIndexCounter;
+    std::array<std::unique_ptr<ComponentEntry>, MAX_COMPONENTS> m_componentEntries;
+};
+
+template<typename T>
+uint32_t ComponentRegistry::component_index() {
+    static auto componentIndex = [](){
+        const auto index = s_componentIndexCounter++;
+        ComponentRegistry::instance(true)->register_component<T>(index);
+        return index;
+    }();
+    return componentIndex;
+}
 
 class Scene {
 public:
@@ -118,6 +288,8 @@ public:
     template<typename ...Ts>
     DUK_NO_DISCARD ObjectView objects_with_components();
 
+    DUK_NO_DISCARD Object::ComponentView components(const Object::Id& id);
+
     template<typename T, typename ...Args>
     void add_component(const Object::Id& id, Args&& ...args);
 
@@ -139,9 +311,6 @@ private:
     ComponentPoolT<T>* pool();
 
     template<typename T>
-    DUK_NO_DISCARD static uint32_t component_index();
-
-    template<typename T>
     static ComponentMask component_mask();
 
     template<typename T1, typename T2, typename ...Ts>
@@ -150,7 +319,6 @@ private:
     void remove_component(uint32_t index, uint32_t componentIndex);
 
 private:
-    static uint32_t s_componentIndexCounter;
     std::array<std::unique_ptr<ComponentPool>, MAX_COMPONENTS> m_componentPools;
     duk::tools::FixedVector<ComponentMask, MAX_OBJECTS> m_objectComponentMasks;
     duk::tools::FixedVector<uint32_t, MAX_OBJECTS> m_objectVersions;
@@ -158,12 +326,20 @@ private:
 
 };
 
+
 // Component Implementation //
 
 template<typename T>
 Component<T>::Component(const Object::Id& ownerId, Scene* scene) :
     m_ownerId(ownerId),
     m_scene(scene) {
+
+}
+
+template<typename T>
+Component<T>::Component(const Object& owner) :
+    m_ownerId(owner.id()),
+    m_scene(owner.scene()){
 
 }
 
@@ -209,7 +385,7 @@ bool Component<T>::valid() const {
 }
 
 template<typename T>
-Object Component<T>::owner() const {
+Object Component<T>::object() const {
     return m_scene->object(m_ownerId);
 }
 
@@ -226,14 +402,14 @@ void Scene::add_component(const Object::Id& id, Args&& ... args) {
     assert(!valid_component<T>(id));
     auto componentPool = pool<T>();
     componentPool->construct(id.index(), std::forward<Args>(args)...);
-    m_objectComponentMasks[id.index()].set(component_index<T>());
+    m_objectComponentMasks[id.index()].set(ComponentRegistry::component_index<T>());
 }
 
 template<typename T>
 void Scene::remove_component(const Object::Id& id) {
     assert(valid_component<T>(id));
-    remove_component(id.index(), component_index<T>());
-    m_objectComponentMasks[id.index()].reset(component_index<T>());
+    remove_component(id.index(), ComponentRegistry::component_index<T>());
+    m_objectComponentMasks[id.index()].reset(ComponentRegistry::component_index<T>());
 }
 
 template<typename T>
@@ -255,13 +431,13 @@ bool Scene::valid_component(const Object::Id& id) const {
     if (!valid_object(id)) {
         return false;
     }
-    const auto componentIndex = component_index<T>();
+    const auto componentIndex = ComponentRegistry::component_index<T>();
     return m_objectComponentMasks[id.index()].test(componentIndex);
 }
 
 template<typename T>
 ComponentPoolT<T>* Scene::pool() {
-    const auto componentIndex = component_index<T>();
+    const auto componentIndex = ComponentRegistry::component_index<T>();
     auto& pool = m_componentPools[componentIndex];
     if (!pool) {
         pool = std::make_unique<ComponentPoolT<T>>(MAX_OBJECTS);
@@ -275,12 +451,6 @@ ComponentPoolT<T>* Scene::pool() {
     return componentPool;
 }
 
-template<typename T>
-uint32_t Scene::component_index() {
-    static auto componentIndex = s_componentIndexCounter++;
-    return componentIndex;
-}
-
 template<typename ...Ts>
 Scene::ObjectView Scene::objects_with_components() {
     return Scene::ObjectView(this, component_mask<Ts...>());
@@ -289,7 +459,7 @@ Scene::ObjectView Scene::objects_with_components() {
 template<typename T>
 ComponentMask Scene::component_mask() {
     ComponentMask mask;
-    mask.set(component_index<T>());
+    mask.set(ComponentRegistry::component_index<T>());
     return mask;
 }
 
@@ -324,6 +494,34 @@ Component<T> Object::component() const {
 template<typename... Ts>
 std::tuple<Component<Ts>...> Object::components() {
     return std::make_tuple(component<Ts>()...);
+}
+
+}
+
+namespace duk::resource {
+
+template<typename Solver, typename T>
+void solve_resources(Solver* solver, duk::scene::Component<T>& component) {
+    solver->solve(*component);
+}
+
+template<typename Solver>
+void solve_resources(Solver* solver, duk::scene::Object& object) {
+
+    auto componentRegistry = duk::scene::ComponentRegistry::instance(true);
+
+    for (auto componentId : object.components()) {
+        componentRegistry->solve(solver, object, componentId);
+    }
+
+}
+
+
+template<typename Solver>
+void solve_resources(Solver* solver, duk::scene::Scene& scene) {
+    for (auto object : scene.objects()) {
+        solver->solve(object);
+    }
 }
 
 }
