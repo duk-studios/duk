@@ -61,7 +61,7 @@ ComponentBuilder::BuilderT<T>::BuilderT(duk::resource::ReferenceSolver* solver) 
 template<typename T>
 void ComponentBuilder::BuilderT<T>::build(Object& object, const rapidjson::Value& jsonObject) {
     auto component = json::from_json<T>(jsonObject);
-    m_solver->template solve(component);
+    m_solver->solve(component);
     object.add<T>(component);
 }
 
