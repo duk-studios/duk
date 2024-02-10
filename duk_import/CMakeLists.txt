@@ -2,8 +2,6 @@ project(duk_import)
 
 set(DUK_IMPORT_HEADERS
         include/duk_import/importer.h
-        include/duk_import/json/types.h
-        include/duk_import/scene/component_json_parser.h
         include/duk_import/image/image_importer.h
         include/duk_import/image/image_importer_stb.h
         include/duk_import/material/material_importer.h
@@ -15,8 +13,6 @@ set(DUK_IMPORT_HEADERS
         )
 set(DUK_IMPORT_SOURCES
         src/duk_import/importer.cpp
-        src/duk_import/json/types.cpp
-        src/duk_import/scene/component_json_parser.cpp
         src/duk_import/image/image_importer.cpp
         src/duk_import/image/image_importer_stb.cpp
         src/duk_import/material/material_importer.cpp

@@ -22,7 +22,7 @@ public:
 
     ~Sprite();
 
-    DUK_NO_DISCARD ImageResource image() const;
+    DUK_NO_DISCARD ImageResource& image();
 
     DUK_NO_DISCARD glm::vec2 image_min() const;
 
@@ -41,7 +41,16 @@ private:
     glm::u32vec2 m_size;
 };
 
-using SpriteResource = duk::pool::Resource<Sprite>;
+using SpriteResource = duk::resource::ResourceT<Sprite>;
+
+}
+
+namespace duk::resource {
+
+template<typename Solver>
+void solve_resources(Solver* solver, duk::renderer::Sprite& sprite) {
+    solver->solve(sprite.image());
+}
 
 }
 

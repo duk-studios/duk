@@ -5,25 +5,25 @@
 #ifndef DUK_RENDERER_IMAGE_POOL_H
 #define DUK_RENDERER_IMAGE_POOL_H
 
-#include <duk_pool/pool.h>
+#include <duk_resource/pool.h>
 #include <duk_rhi/image.h>
 
 namespace duk::renderer {
 
 class Renderer;
 
-using ImageResource = duk::pool::Resource<duk::rhi::Image>;
+using ImageResource = duk::resource::ResourceT<duk::rhi::Image>;
 
 struct ImagePoolCreateInfo {
     Renderer* renderer;
 };
 
-class ImagePool : public duk::pool::Pool<ImageResource> {
+class ImagePool : public duk::resource::PoolT<ImageResource> {
 public:
 
     explicit ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo);
 
-    DUK_NO_DISCARD ImageResource create(duk::pool::ResourceId resourceId, const duk::rhi::ImageDataSource* imageDataSource);
+    DUK_NO_DISCARD ImageResource create(duk::resource::Id resourceId, const duk::rhi::ImageDataSource* imageDataSource);
 
     DUK_NO_DISCARD ImageResource white_image() const;
 

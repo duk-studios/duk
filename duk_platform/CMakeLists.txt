@@ -26,7 +26,7 @@ target_link_libraries(duk_platform
         PUBLIC
         duk_macros
         duk_hash
-        duk_events
+        duk_event
 
         )
 

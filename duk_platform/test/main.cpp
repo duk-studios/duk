@@ -4,7 +4,7 @@
 int main() {
     bool run = false;
      
-    duk::events::EventListener listener;
+    duk::event::Listener listener;
     
     std::shared_ptr<duk::platform::Window> window;
     

@@ -106,7 +106,7 @@ private:
     std::unique_ptr<VulkanCommandBufferPool> m_commandBufferPool;
     std::vector<std::unique_ptr<VulkanCommandBuffer>> m_commandBuffers;
     uint32_t m_usedCommandBuffers;
-    duk::events::EventListener m_listener;
+    duk::event::Listener m_listener;
 };
 
 }

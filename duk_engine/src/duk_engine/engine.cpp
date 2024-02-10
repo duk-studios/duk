@@ -4,7 +4,10 @@
 
 #include <duk_engine/engine.h>
 #include <duk_import/importer.h>
+#include <duk_renderer/pools/mesh_pool.h>
+#include <duk_renderer/pools/sprite_pool.h>
 #include <duk_log/log.h>
+#include <duk_renderer/components/register_components.h>
 
 namespace duk::engine {
 
@@ -33,21 +36,24 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
 
     m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
 
+    m_referenceSolver.add_pool(m_renderer->image_pool());
+    m_referenceSolver.add_pool(m_renderer->mesh_pool());
+    m_referenceSolver.add_pool(m_renderer->sprite_pool());
+    m_referenceSolver.add_pool(m_renderer->material_pool());
+
+    {
+        duk::scene::ComponentBuilderCreateInfo componentBuilderCreateInfo = {};
+        componentBuilderCreateInfo.solver = &m_referenceSolver;
+        m_componentBuilder = std::make_unique<duk::scene::ComponentBuilder>(componentBuilderCreateInfo);
+    }
+
+    duk::renderer::register_components(m_componentBuilder.get());
+
     duk::import::ImporterCreateInfo importerCreateInfo = {};
     importerCreateInfo.renderer = m_renderer.get();
+    importerCreateInfo.componentBuilder = m_componentBuilder.get();
 
     m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
-
-    m_importer->register_component<duk::renderer::Position3D>("Position3D");
-    m_importer->register_component<duk::renderer::Position2D>("Position2D");
-    m_importer->register_component<duk::renderer::Rotation3D>("Rotation3D");
-    m_importer->register_component<duk::renderer::Rotation2D>("Rotation2D");
-    m_importer->register_component<duk::renderer::Scale2D>("Scale2D");
-    m_importer->register_component<duk::renderer::Scale3D>("Scale3D");
-    m_importer->register_component<duk::renderer::MeshRenderer>("MeshRenderer");
-    m_importer->register_component<duk::renderer::DirectionalLight>("DirectionalLight");
-    m_importer->register_component<duk::renderer::PointLight>("PointLight");
-    m_importer->register_component<duk::renderer::PerspectiveCamera>("PerspectiveCamera");
 }
 
 Engine::~Engine() = default;

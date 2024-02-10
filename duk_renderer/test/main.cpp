@@ -15,6 +15,7 @@
 #include <duk_renderer/forward/forward_renderer.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_renderer/pools/mesh_pool.h>
+#include <duk_renderer/pools/material_pool.h>
 #include <duk_tools/timer.h>
 #include <duk_log/log.h>
 
@@ -22,8 +23,8 @@
 int main() {
     bool run = false;
 
-    //An event listener (duk::events::EventListener) is created to handle window events.
-    duk::events::EventListener listener;
+    //An event listener (duk::event::Listener) is created to handle window event.
+    duk::event::Listener listener;
 
     //A Window is created with a specified name ("RendererWindow") and dimensions (640x720).
     std::shared_ptr<duk::platform::Window> window;
@@ -35,7 +36,7 @@ int main() {
     run = true;
 
 
-    //Event listeners are set up to respond to window close and destroy events.
+    //Event listeners are set up to respond to window close and destroy event.
     listener.listen(window->window_close_event, [&window] {
         std::cout<<"The window is closed!" << std::endl;
         window->close();
@@ -93,7 +94,7 @@ int main() {
     duk::scene::Object cubeObject = scene->add_object();
     auto cubeMeshRenderer = cubeObject.add<duk::renderer::MeshRenderer>();
     cubeMeshRenderer->mesh = renderer->mesh_pool()->cube();
-    cubeMeshRenderer->material = renderer->material_pool()->create_phong(duk::pool::ResourceId(666));
+    cubeMeshRenderer->material = renderer->material_pool()->create_phong(duk::resource::Id(666));
     auto cubePosition = cubeObject.add<duk::renderer::Position3D>();
     cubePosition->value = glm::vec3(0,0,-10);
     auto cubeScale = cubeObject.add<duk::renderer::Scale3D>();

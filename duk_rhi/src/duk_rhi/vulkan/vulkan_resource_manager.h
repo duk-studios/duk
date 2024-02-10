@@ -114,7 +114,7 @@ private:
 private:
     VulkanSwapchain* m_swapchain;
     uint32_t m_imageCount;
-    events::EventListener m_listener;
+    event::Listener m_listener;
     std::vector<VulkanBuffer*> m_buffers;
     std::vector<DeletionEntry<VulkanBuffer>> m_buffersToDelete;
     std::vector<VulkanMemoryImage*> m_images;

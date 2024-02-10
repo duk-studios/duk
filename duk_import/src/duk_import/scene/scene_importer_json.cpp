@@ -10,7 +10,7 @@
 namespace duk::import {
 
 SceneImporterJson::SceneImporterJson(const SceneImporterJsonCreateInfo& sceneImporterJsonCreateInfo) :
-    m_componentParser(sceneImporterJsonCreateInfo.componentParser) {
+    m_componentBuilder(sceneImporterJsonCreateInfo.componentBuilder) {
 
 }
 
@@ -43,7 +43,7 @@ std::unique_ptr<duk::scene::Scene> SceneImporterJson::load(const std::filesystem
         auto jsonComponents = jsonObject["components"].GetArray();
 
         for (auto& jsonComponent : jsonComponents) {
-            m_componentParser->parse(object, jsonComponent);
+            m_componentBuilder->build(object, jsonComponent);
         }
     }
 

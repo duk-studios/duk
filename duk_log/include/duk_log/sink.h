@@ -22,7 +22,7 @@ public:
     virtual void flush(Level level, const std::string& message) = 0;
 
 protected:
-    events::EventListener m_listener;
+    event::Listener m_listener;
     Level m_level;
 };
 

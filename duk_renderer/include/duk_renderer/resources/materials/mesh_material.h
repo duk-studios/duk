@@ -27,7 +27,16 @@ public:
     virtual void apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) = 0;
 };
 
-using MeshMaterialResource = duk::pool::Resource<MeshMaterial>;
+using MeshMaterialResource = duk::resource::ResourceT<MeshMaterial>;
+
+}
+
+namespace duk::resource {
+
+template<>
+struct BaseResource<duk::renderer::MeshMaterial> {
+    using Type = duk::renderer::Material;
+};
 
 }
 
