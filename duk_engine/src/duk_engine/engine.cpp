@@ -43,14 +43,14 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
 
     m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
 
-    m_solver.add_pool(m_renderer->image_pool());
-    m_solver.add_pool(m_renderer->mesh_pool());
-    m_solver.add_pool(m_renderer->sprite_pool());
-    m_solver.add_pool(m_renderer->material_pool());
+    m_referenceSolver.add_pool(m_renderer->image_pool());
+    m_referenceSolver.add_pool(m_renderer->mesh_pool());
+    m_referenceSolver.add_pool(m_renderer->sprite_pool());
+    m_referenceSolver.add_pool(m_renderer->material_pool());
 
     {
         duk::scene::ComponentBuilderCreateInfo componentBuilderCreateInfo = {};
-        componentBuilderCreateInfo.solver = &m_solver;
+        componentBuilderCreateInfo.solver = &m_referenceSolver;
         m_componentBuilder = std::make_unique<duk::scene::ComponentBuilder>(componentBuilderCreateInfo);
     }
 
