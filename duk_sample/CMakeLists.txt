@@ -31,10 +31,9 @@ target_link_libraries(duk_sample
 
 set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)
 
-install(TARGETS
-        duk_sample
-        )
-
-install(DIRECTORY
-        resources/
-        TYPE BIN)
+add_custom_command(
+        TARGET duk_sample POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+        "${CMAKE_CURRENT_BINARY_DIR}"
+)
