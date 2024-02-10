@@ -10,7 +10,6 @@
 
 #include <duk_resource/resource.h>
 #include <duk_rhi/command/command_buffer.h>
-#include <duk_scene/object.h>
 
 namespace duk::renderer {
 

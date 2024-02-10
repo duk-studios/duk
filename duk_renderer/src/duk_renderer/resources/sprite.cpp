@@ -26,7 +26,7 @@ Sprite::Sprite(const SpriteCreateInfo& spriteCreateInfo) :
 
 Sprite::~Sprite() = default;
 
-ImageResource Sprite::image() const {
+ImageResource& Sprite::image() {
     return m_image;
 }
 

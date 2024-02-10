@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_TRANSFORM_H
 #define DUK_RENDERER_TRANSFORM_H
 
-#include <duk_scene/object.h>
+#include <duk_scene/scene.h>
 #include <duk_json/types.h>
 
 #include <glm/matrix.hpp>
