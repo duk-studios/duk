@@ -31,9 +31,17 @@ target_link_libraries(duk_sample
 
 set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)
 
+get_cmake_property(IS_MULTI_CONFIG GENERATOR_IS_MULTI_CONFIG)
+
+set(OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+if (IS_MULTI_CONFIG)
+    set(OUTPUT_DIR "${OUTPUT_DIR}/$<CONFIG>")
+endif ()
+
 add_custom_command(
         TARGET duk_sample POST_BUILD
+        COMMENT "Copying resources to ${OUTPUT_DIR}"
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/resources"
-        "${CMAKE_CURRENT_BINARY_DIR}"
+        "${OUTPUT_DIR}"
 )
