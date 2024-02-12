@@ -1,5 +1,6 @@
 ﻿#include <iostream>
 #include <duk_platform/window.h>
+#include <duk_platform/Input.h>
 
 int main() {
     bool run = false;
@@ -7,13 +8,20 @@ int main() {
     duk::event::Listener listener;
     
     std::shared_ptr<duk::platform::Window> window;
-    
+
+
     duk::platform::WindowCreateInfo windowCreateInfo = {"MyWindow", 640, 720};
+
+    duk::platform::InputCreateInfo inputCreateInfo = {};
 
     std::cout<< "Creating window" << std::endl;
 
     window = duk::platform::Window::create_window(windowCreateInfo);
     run = true;
+
+    inputCreateInfo.window = window.get();
+    auto input = std::make_unique<duk::platform::Input>(inputCreateInfo);
+
 
     uint32_t myWindowHeight = window->height();
     uint32_t myWindowWidth = window->width();
@@ -66,6 +74,18 @@ int main() {
     
     while (run) {
         window->pool_events();
+
+        if(input->key(duk::platform::Keys::W)) {
+            std::cout << "Im pressing W";
+        }
+
+        if(input->key_down(duk::platform::Keys::W)) {
+            std::cout << "Im pressed W";
+        }
+
+        if(input->key_up(duk::platform::Keys::W)) {
+            std::cout << "Im released W";
+        }
     }
     
     return 0;
