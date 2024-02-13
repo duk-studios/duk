@@ -54,6 +54,10 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
     importerCreateInfo.componentBuilder = m_componentBuilder.get();
 
     m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
+
+    duk::engine::InputCreateInfo inputCreateInfo = {};
+    inputCreateInfo.window = m_window.get();
+    m_input = std::make_unique<duk::engine::Input>(inputCreateInfo);
 }
 
 Engine::~Engine() = default;
@@ -69,6 +73,9 @@ void Engine::run() {
 
     while (m_run) {
         m_timer.start();
+
+        m_input->refresh();
+
         m_window->pool_events();
 
         for (auto& system : m_systems) {
@@ -98,6 +105,11 @@ duk::import::Importer* Engine::importer() {
 duk::scene::Scene* Engine::scene() {
     return m_scene;
 }
+
+duk::engine::Input* Engine::input() {
+    return m_input.get();
+}
+
 
 const duk::tools::Timer *Engine::timer() const {
     return &m_timer;

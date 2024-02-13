@@ -5,11 +5,10 @@
 #ifndef DUK_INPUT_H
 #define DUK_INPUT_H
 
-#include <iostream>
 #include <duk_platform/window.h>
 #include <set>
 
-namespace duk::platform {
+namespace duk::engine {
 
 struct InputCreateInfo {
     duk::platform::Window* window;
@@ -17,7 +16,7 @@ struct InputCreateInfo {
 
 class Input {
 public:
-    Input(InputCreateInfo inputCreateInfo);
+    explicit Input(const InputCreateInfo& inputCreateInfo);
     ~Input();
 
     bool key(duk::platform::Keys key);
@@ -27,14 +26,16 @@ public:
     bool mouse_down(duk::platform::MouseButton mouseButton);
     bool mouse_up(duk::platform::MouseButton mouseButton);
 
+    void refresh();
+
     uint32_t mouse_x();
     uint32_t mouse_y();
 
 private:
-    duk::events::EventListener m_listener;
+    duk::event::Listener m_listener;
 
-    std::set<duk::platform::Keys> m_pressedKeys, m_releasedKeys;
-    std::set<duk::platform::MouseButton> m_pressedMouseButton, m_releasedMouseButton;
+    std::set<duk::platform::Keys> m_pressedKeys, m_releasedKeys, m_keys;
+    std::set<duk::platform::MouseButton> m_pressedMouseButton, m_releasedMouseButton, m_mouse;
 
     uint32_t m_mouseX;
     uint32_t m_mouseY;
