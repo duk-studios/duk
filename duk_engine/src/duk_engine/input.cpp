@@ -11,6 +11,9 @@ duk::engine::Input::Input(const InputCreateInfo &inputCreateInfo) {
     m_listener.listen(inputCreateInfo.window->key_event,[this](duk::platform::Keys key, duk::platform::KeyModifiers::Mask mods, duk::platform::KeyAction action) {
       switch (action) {
           case platform::KeyAction::PRESS:
+              if (m_keys.find(key) != m_keys.end()) {
+                  break;
+              }
               m_pressedKeys.insert(key);
               m_keys.insert(key);
               break;
