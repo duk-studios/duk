@@ -7,7 +7,7 @@ int main() {
     duk::event::Listener listener;
     
     std::shared_ptr<duk::platform::Window> window;
-    
+
     duk::platform::WindowCreateInfo windowCreateInfo = {"MyWindow", 640, 720};
 
     std::cout<< "Creating window" << std::endl;

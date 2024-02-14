@@ -5,7 +5,8 @@
 #include <duk_sample/camera_system.h>
 #include <duk_engine/engine.h>
 #include <duk_renderer/components/transform.h>
-#include "duk_renderer/components/camera.h"
+#include <duk_renderer/components/camera.h>
+#include <duk_log/log.h>
 
 
 namespace duk::sample {
@@ -55,6 +56,8 @@ void CameraSystem::init() {
 
 void CameraSystem::update() {
 
+    auto input = duk::engine::System::engine()->input();
+
     auto [position, rotation, pivotRotator] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::PivotRotator>();
 
     const auto time = engine()->timer()->total_duration().count();
@@ -67,14 +70,36 @@ void CameraSystem::update() {
             sinf((float)time * speed) * pivotRotator->distanceFromPivot
     };
 
-    position->value = pivotRotator->pivot + offset;
+    auto inputOffset = glm::vec3(0.0f, 0.0f, 0.0f);
+    auto movementSpeed = 0.2f;
 
-    // calculate rotation
-    {
-        const auto direction = -glm::normalize(offset);
-
-        rotation->value = glm::quatLookAt(direction, glm::vec3(0, 1, 0));
+    if(input->key_down(duk::platform::Keys::W)) {
+        inputOffset += glm::vec3(0.0f, 0.0f, -1.0f);
     }
+
+    if(input->key_down(duk::platform::Keys::A)) {
+        inputOffset += glm::vec3(-1.0f, 0.0f, 0.0f);
+    }
+
+    if(input->key_down(duk::platform::Keys::S)) {
+        inputOffset += glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+
+    if(input->key_down(duk::platform::Keys::D)) {
+        inputOffset += glm::vec3(1.0f, 0.0f, 0.0f);
+    }
+
+    if(input->key_down(duk::platform::Keys::Q)) {
+        inputOffset += glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+
+    if(input->key_down(duk::platform::Keys::E)) {
+        inputOffset += glm::vec3(0.0f, -1.0f, 0.0f);
+    }
+
+    position->value += inputOffset * movementSpeed * time;
+
+
 }
 
 }
