@@ -155,6 +155,58 @@ DefaultMeshDataSource sphere_mesh_data_source(uint32_t segments) {
     return meshDataSource;
 }
 
+DefaultMeshDataSource cone_mesh_data_source(uint32_t segments) {
+    DefaultMeshDataSource meshDataSource;
+
+    std::vector<DefaultMeshDataSource::VertexType> vertices;
+
+    {
+        DefaultMeshDataSource::VertexType center;
+        center.position = glm::vec3(0, 1, 0);
+        center.normal = glm::vec3(0, 1, 0);
+        center.uv = glm::vec2(1, 1);
+
+        vertices.push_back(center);
+    }
+
+    // create sides
+    for (uint32_t i = 0; i < segments; i++) {
+        float percent = (float)i / (segments - 1);
+        float angle = percent * glm::pi<float>() * 2;
+        float x = cosf(angle);
+        float z = sinf(angle);
+        float u = (x + 1.0f) / 2.0f;
+
+        glm::vec3 position(x, 0, z);
+        position *= 0.5f;
+        glm::vec3 normal(x, 0, z);
+        glm::vec2 uv(u, 0);
+
+        vertices.push_back({position, normal, uv});
+    }
+
+
+    meshDataSource.insert_vertices(vertices.begin(), vertices.end());
+
+    std::vector<DefaultMeshDataSource::IndexType> indices;
+
+    for (int i = 1; i < segments; i++) {
+        uint32_t idx0 = 0;
+        uint32_t idx1 = i;
+        uint32_t idx2 = i + 1;
+
+        indices.push_back(idx0);
+        indices.push_back(idx1);
+        indices.push_back(idx2);
+    }
+
+    meshDataSource.insert_indices(indices.begin(), indices.end());
+
+    meshDataSource.update_hash();
+
+    return meshDataSource;
+}
+
 }
 
 MeshPool::MeshPool(const MeshPoolCreateInfo& meshPoolCreateInfo) {
@@ -182,12 +234,18 @@ MeshPool::MeshPool(const MeshPoolCreateInfo& meshPoolCreateInfo) {
         auto sphereDataSource = detail::sphere_mesh_data_source(32);
         m_sphere = create(duk::resource::Id(3), &sphereDataSource);
     }
+
+    {
+        auto coneDataSource = detail::cone_mesh_data_source(32);
+        m_cone = create(duk::resource::Id(4), &coneDataSource);
+    }
 }
 
 MeshPool::~MeshPool() {
     m_quad.reset();
     m_cube.reset();
     m_sphere.reset();
+    m_cone.reset();
     clean();
     m_meshBufferPool.reset();
 }
@@ -206,6 +264,10 @@ MeshResource MeshPool::cube() const {
 
 MeshResource MeshPool::sphere() const {
     return m_sphere;
+}
+
+MeshResource MeshPool::cone() const {
+    return m_cone;
 }
 
 } // duk::renderer
