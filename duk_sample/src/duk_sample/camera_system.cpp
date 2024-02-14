@@ -11,13 +11,9 @@
 
 namespace duk::sample {
 
-namespace detail {
 
-struct PivotRotator {
-    glm::vec3 pivot;
-    float distanceFromPivot;
-    float angularSpeed;
-};
+
+namespace detail {
 
 static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveCamera> perspectiveCamera, uint32_t width, uint32_t height)
 {
@@ -26,6 +22,10 @@ static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveC
     perspectiveCamera->aspectRatio = (float)width / (float)height;
     perspectiveCamera->fovDegrees = 45.0f;
 }
+
+struct CameraSettings {
+    float speed;
+};
 
 }
 
@@ -43,13 +43,12 @@ void CameraSystem::init() {
 
     detail::update_perspective(m_camera.add<duk::renderer::PerspectiveCamera>(), renderer->render_width(), renderer->render_height());
 
-    m_camera.add<duk::renderer::Position3D>();
+    auto position = m_camera.add<duk::renderer::Position3D>();
+    position->value = glm::vec3(0, 0, 20);
     m_camera.add<duk::renderer::Rotation3D>();
+    auto settings = m_camera.add<detail::CameraSettings>();
+    settings->speed = 10.0f;
 
-    auto pivotRotator = m_camera.add<detail::PivotRotator>();
-    pivotRotator->pivot = glm::vec3(0);
-    pivotRotator->distanceFromPivot = 50.f;
-    pivotRotator->angularSpeed = 30.f;
 
     renderer->use_as_camera(m_camera);
 }
@@ -58,46 +57,37 @@ void CameraSystem::update() {
 
     auto input = duk::engine::System::engine()->input();
 
-    auto [position, rotation, pivotRotator] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::PivotRotator>();
+    auto [position, rotation, settings] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraSettings>();
 
-    const auto time = engine()->timer()->total_duration().count();
-
-    const auto speed = glm::radians(pivotRotator->angularSpeed);
-
-    glm::vec3 offset = {
-            cosf((float)time * speed) * pivotRotator->distanceFromPivot,
-            5,
-            sinf((float)time * speed) * pivotRotator->distanceFromPivot
-    };
+    const auto deltaTime = engine()->timer()->duration().count();
 
     auto inputOffset = glm::vec3(0.0f, 0.0f, 0.0f);
-    auto movementSpeed = 0.2f;
 
-    if(input->key_down(duk::platform::Keys::W)) {
+    if(input->key(duk::platform::Keys::W)) {
         inputOffset += glm::vec3(0.0f, 0.0f, -1.0f);
     }
 
-    if(input->key_down(duk::platform::Keys::A)) {
+    if(input->key(duk::platform::Keys::A)) {
         inputOffset += glm::vec3(-1.0f, 0.0f, 0.0f);
     }
 
-    if(input->key_down(duk::platform::Keys::S)) {
+    if(input->key(duk::platform::Keys::S)) {
         inputOffset += glm::vec3(0.0f, 0.0f, 1.0f);
     }
 
-    if(input->key_down(duk::platform::Keys::D)) {
+    if(input->key(duk::platform::Keys::D)) {
         inputOffset += glm::vec3(1.0f, 0.0f, 0.0f);
     }
 
-    if(input->key_down(duk::platform::Keys::Q)) {
+    if(input->key(duk::platform::Keys::Q)) {
         inputOffset += glm::vec3(0.0f, 1.0f, 0.0f);
     }
 
-    if(input->key_down(duk::platform::Keys::E)) {
+    if(input->key(duk::platform::Keys::E)) {
         inputOffset += glm::vec3(0.0f, -1.0f, 0.0f);
     }
 
-    position->value += inputOffset * movementSpeed * time;
+    position->value += inputOffset * settings->speed * deltaTime;
 
 
 }
