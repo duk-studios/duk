@@ -9,6 +9,6 @@
     104
   ],
   "aliases": [
-    "main"
+    "old-main"
   ]
 }

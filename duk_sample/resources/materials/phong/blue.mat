@@ -1,7 +1,7 @@
 {
   "type": "Color",
-  "base-color": "1;1;1",
-  "base-color-image": 53,
+  "base-color": "0.1;0.1f;1.0",
+  "base-color-image": 1,
   "base-color-sampler": {
     "wrap": "clamp-edge",
     "filter": "nearest"
