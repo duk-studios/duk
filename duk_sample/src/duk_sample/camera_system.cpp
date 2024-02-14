@@ -74,32 +74,31 @@ void CameraSystem::update() {
     auto movementSpeed = 0.2f;
 
     if(input->key_down(duk::platform::Keys::W)) {
-        inputOffset = glm::vec3(0.0f, 0.0f, -1.0f);
+        inputOffset += glm::vec3(0.0f, 0.0f, -1.0f);
     }
 
     if(input->key_down(duk::platform::Keys::A)) {
-        inputOffset = glm::vec3(-1.0f, 0.0f, 0.0f);
+        inputOffset += glm::vec3(-1.0f, 0.0f, 0.0f);
     }
 
     if(input->key_down(duk::platform::Keys::S)) {
-        inputOffset = glm::vec3(0.0f, 0.0f, 1.0f);
+        inputOffset += glm::vec3(0.0f, 0.0f, 1.0f);
     }
 
     if(input->key_down(duk::platform::Keys::D)) {
-        inputOffset = glm::vec3(1.0f, 0.0f, 0.0f);
+        inputOffset += glm::vec3(1.0f, 0.0f, 0.0f);
+    }
+
+    if(input->key_down(duk::platform::Keys::Q)) {
+        inputOffset += glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+
+    if(input->key_down(duk::platform::Keys::E)) {
+        inputOffset += glm::vec3(0.0f, -1.0f, 0.0f);
     }
 
     position->value += inputOffset * movementSpeed * time;
-    duk::log::debug("camera position: {0}, {1}, {2}", position->value.x, position->value.y, position->value.z);
 
-//    position->value = pivotRotator->pivot + offset;
-//
-//    // calculate rotation
-//    {
-//        const auto direction = -glm::normalize(offset);
-//
-//        rotation->value = glm::quatLookAt(direction, glm::vec3(0, 1, 0));
-//    }
 
 }
 

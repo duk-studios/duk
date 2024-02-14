@@ -66,20 +66,6 @@ int main() {
     
     while (run) {
         window->pool_events();
-
-//        if(input->key(duk::platform::Keys::W)) {
-//            std::cout << "Im pressing W";
-//        }
-//
-//        if(input->key_down(duk::platform::Keys::W)) {
-//            std::cout << "I pressed W";
-//        }
-//
-//        if(input->key_up(duk::platform::Keys::W)) {
-//            std::cout << "I released W";
-//        }
-//
-//        input->refresh();
     }
     
     return 0;
