@@ -9,35 +9,40 @@ namespace duk::engine {
 duk::engine::Input::Input(const InputCreateInfo &inputCreateInfo) {
 
     m_listener.listen(inputCreateInfo.window->key_event,[this](duk::platform::Keys key, duk::platform::KeyModifiers::Mask mods, duk::platform::KeyAction action) {
-      switch (action) {
-          case platform::KeyAction::PRESS:
-              if (m_keys.find(key) != m_keys.end()) {
+        switch (action) {
+              case platform::KeyAction::PRESS:
+                  if (m_keys.find(key) != m_keys.end()) {
+                      break;
+                  }
+                  m_pressedKeys.insert(key);
+                  m_keys.insert(key);
                   break;
-              }
-              m_pressedKeys.insert(key);
-              m_keys.insert(key);
-              break;
-          case platform::KeyAction::RELEASE:
-              m_releasedKeys.insert(key);
-              m_keys.erase(key);
-              break;
-      }
-  });
+              case platform::KeyAction::RELEASE:
+                  m_releasedKeys.insert(key);
+                  m_keys.erase(key);
+                  break;
+        }
+    });
 
     m_listener.listen(inputCreateInfo.window->mouse_button_event,[this](duk::platform::MouseButton mouseButton, duk::platform::KeyAction action) {
          switch (action) {
-          case platform::KeyAction::PRESS:
-              m_pressedMouseButton.insert(mouseButton);
-              m_mouse.insert(mouseButton);
-              break;
-          case platform::KeyAction::RELEASE:
-              m_releasedMouseButton.insert(mouseButton);
-              m_mouse.erase(mouseButton);
-              break;
-      }
-  });
+              case platform::KeyAction::PRESS:
+                  m_pressedMouseButton.insert(mouseButton);
+                  m_mouse.insert(mouseButton);
+                  break;
+              case platform::KeyAction::RELEASE:
+                  m_releasedMouseButton.insert(mouseButton);
+                  m_mouse.erase(mouseButton);
+                  break;
+         }
+    });
 
     m_listener.listen(inputCreateInfo.window->mouse_movement_event, [this](uint32_t x, uint32_t y) {
+        m_mouseX = x;
+        m_mouseY = y;
+    });
+
+    m_listener.listen(inputCreateInfo.window->mouse_wheel_movement_event, [this](uint32_t x, uint32_t y) {
         m_mouseX = x;
         m_mouseY = y;
     });
@@ -76,6 +81,10 @@ uint32_t duk::engine::Input::mouse_x() {
 
 uint32_t duk::engine::Input::mouse_y() {
     return m_mouseY;
+}
+
+uint32_t duk::engine::Input::mouse_wheel() {
+    return m_mouseWheel;
 }
 
 duk::engine::Input::~Input() {

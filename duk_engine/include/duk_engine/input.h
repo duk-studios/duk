@@ -30,6 +30,8 @@ public:
 
     uint32_t mouse_x();
     uint32_t mouse_y();
+    uint32_t mouse_wheel();
+
 
 private:
     duk::event::Listener m_listener;
@@ -37,8 +39,9 @@ private:
     std::set<duk::platform::Keys> m_pressedKeys, m_releasedKeys, m_keys;
     std::set<duk::platform::MouseButton> m_pressedMouseButton, m_releasedMouseButton, m_mouse;
 
-    uint32_t m_mouseX;
-    uint32_t m_mouseY;
+    uint32_t m_mouseX = 0;
+    uint32_t m_mouseY = 0;
+    uint32_t m_mouseWheel = 0;
 };
 
 }
