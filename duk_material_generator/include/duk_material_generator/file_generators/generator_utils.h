@@ -1,15 +1,15 @@
 /// 11/11/2023
 /// generator_utils.h
 
-#ifndef DUK_PAINTER_GENERATOR_GENERATOR_UTILS_H
-#define DUK_PAINTER_GENERATOR_GENERATOR_UTILS_H
+#ifndef DUK_MATERIAL_GENERATOR_GENERATOR_UTILS_H
+#define DUK_MATERIAL_GENERATOR_GENERATOR_UTILS_H
 
 #include <duk_macros/macros.h>
 
 #include <string>
 #include <sstream>
 
-namespace duk::painter_generator::utils {
+namespace duk::material_generator::utils {
 
 template<typename T, typename P>
 DUK_NO_DISCARD std::string generate_for_each(const T& container, P predicate, const char* separator = ",", bool onePerLine = true) {
@@ -32,5 +32,5 @@ DUK_NO_DISCARD std::string generate_for_each(const T& container, P predicate, co
 
 }
 
-#endif // DUK_PAINTER_GENERATOR_GENERATOR_UTILS_H
+#endif // DUK_MATERIAL_GENERATOR_GENERATOR_UTILS_H
 

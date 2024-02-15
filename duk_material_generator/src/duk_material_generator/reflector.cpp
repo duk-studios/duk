@@ -1,7 +1,7 @@
 /// 14/10/2023
 /// reflector.cpp
 
-#include <duk_painter_generator/reflector.h>
+#include <duk_material_generator/reflector.h>
 #include <duk_tools/file.h>
 
 #include <spirv_reflect.h>
@@ -10,7 +10,7 @@
 #include <sstream>
 #include <iostream>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 namespace detail {
 

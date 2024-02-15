@@ -1,18 +1,18 @@
 /// 04/11/2023
 /// shader_data_source_generator.cpp
 
-#include <duk_painter_generator/file_generators/shader_data_source_file_generator.h>
+#include <duk_material_generator/file_generators/shader_data_source_file_generator.h>
 #include <duk_tools/string.h>
 
 #include <filesystem>
 #include <regex>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 namespace detail {
 
 static std::string shader_data_source_file_name(const Parser& parser) {
-    return parser.output_painter_name() + "_shader_data_source";
+    return parser.output_material_name() + "_shader_data_source";
 }
 
 static std::string shader_header_include_path(const Parser& parser, const std::string& fileName) {
@@ -25,7 +25,7 @@ static std::string shader_header_include_path(const Parser& parser, const std::s
 }
 
 static std::string shader_data_source_class_name(const Parser& parser) {
-    return duk::tools::snake_to_pascal(parser.output_painter_name()) + "ShaderDataSource";
+    return duk::tools::snake_to_pascal(parser.output_material_name()) + "ShaderDataSource";
 }
 
 static std::string module_name(duk::rhi::Shader::Module::Bits moduleBit) {

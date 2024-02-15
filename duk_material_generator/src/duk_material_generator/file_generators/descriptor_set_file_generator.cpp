@@ -1,23 +1,23 @@
 /// 11/11/2023
 /// descriptor_set_generator.cpp
 
-#include <duk_painter_generator/file_generators/descriptor_set_file_generator.h>
-#include <duk_painter_generator/file_generators/generator_utils.h>
+#include <duk_material_generator/file_generators/descriptor_set_file_generator.h>
+#include <duk_material_generator/file_generators/generator_utils.h>
 #include <duk_tools/string.h>
 
 #include <filesystem>
 #include <regex>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 namespace detail {
 
 static std::string descriptor_set_file_name(const Parser& parser) {
-    return parser.output_painter_name() + "_descriptor_sets";
+    return parser.output_material_name() + "_descriptor_sets";
 }
 
 static std::string descriptor_set_class_name(const Parser& parser) {
-    return duk::tools::snake_to_pascal(parser.output_painter_name()) + "DescriptorSet";
+    return duk::tools::snake_to_pascal(parser.output_material_name()) + "DescriptorSet";
 }
 
 static std::string generate_bindings(const Reflector::Bindings& bindings) {

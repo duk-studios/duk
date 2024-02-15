@@ -25,17 +25,17 @@ list(APPEND GLOBAL_GLSL_FILES "${DUK_MATERIAL_SRC_DIR}/glsl/include/duk/phong_li
 list(APPEND GLOBAL_GLSL_FILES "${DUK_MATERIAL_SRC_DIR}/glsl/include/duk/camera.glsl")
 list(APPEND GLOBAL_GLSL_FILES "${DUK_MATERIAL_SRC_DIR}/glsl/include/duk/vertex.glsl")
 
-# global files, we use mark them as output to painter generation commands
+# global files, we use mark them as output to material generation commands
 set(GLOBAL_GENERATED_FILES)
 list(APPEND GLOBAL_GENERATED_FILES "${DUK_MATERIAL_INC_DIR}/globals/lights_types.h")
 list(APPEND GLOBAL_GENERATED_FILES "${DUK_MATERIAL_INC_DIR}/globals/camera_types.h")
 
 string(REPLACE ";" "," GLOBAL_BINDING_NAMES "${GLOBAL_BINDING_NAMES}")
 
-set(GENERATE_PAINTER_ENTRIES "" CACHE STRING "List of generate_painter_files calls" FORCE)
-set(GENERATED_FILES "" CACHE STRING "List of stamps for generated painter files" FORCE)
+set(GENERATE_MATERIAL_ENTRIES "" CACHE STRING "List of generate_material_files calls" FORCE)
+set(GENERATED_FILES "" CACHE STRING "List of stamps for generated material files" FORCE)
 
-function(pack_generate_painter_entry OUT_ENTRY IN_NAME IN_GLSL_SOURCES IN_INC_DIR IN_SRC_DIR)
+function(pack_generate_material_entry OUT_ENTRY IN_NAME IN_GLSL_SOURCES IN_INC_DIR IN_SRC_DIR)
     # pack glsl sources
     string(REPLACE ";" "###" PACKED_GLSL_SOURCES "${IN_GLSL_SOURCES}")
 
@@ -51,7 +51,7 @@ function(pack_generate_painter_entry OUT_ENTRY IN_NAME IN_GLSL_SOURCES IN_INC_DI
     set(${OUT_ENTRY} ${PACKED_ENTRY} PARENT_SCOPE)
 endfunction()
 
-function(unpack_generate_painter_entry IN_ENTRY OUT_NAME OUT_GLSL_SOURCES OUT_INC_DIR OUT_SRC_DIR)
+function(unpack_generate_material_entry IN_ENTRY OUT_NAME OUT_GLSL_SOURCES OUT_INC_DIR OUT_SRC_DIR)
 #    message(STATUS "packaged entry: ${IN_ENTRY}")
     string(REPLACE "@@@" ";" PACKED_ENTRY ${IN_ENTRY})
     list(GET PACKED_ENTRY 0 NAME)
@@ -69,7 +69,7 @@ function(unpack_generate_painter_entry IN_ENTRY OUT_NAME OUT_GLSL_SOURCES OUT_IN
     set(${OUT_SRC_DIR} ${SRC_DIR} PARENT_SCOPE)
 endfunction()
 
-function(generate_painter_files)
+function(generate_material_files)
 
     set(options)
     set(oneValueArgs NAME INC_DIR SRC_DIR GLOBALS_INC GLOBALS_SRC)
@@ -78,21 +78,21 @@ function(generate_painter_files)
     cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if (ARGS_NAME STREQUAL "")
-        message(FATAL_ERROR "NAME must be provided to generate_painter_files")
+        message(FATAL_ERROR "NAME must be provided to generate_material_files")
     endif ()
 
-    pack_generate_painter_entry(PACKED_ENTRY ${ARGS_NAME} "${ARGS_GLSL_SOURCES}" "${ARGS_INC_DIR}" "${ARGS_SRC_DIR}")
+    pack_generate_material_entry(PACKED_ENTRY ${ARGS_NAME} "${ARGS_GLSL_SOURCES}" "${ARGS_INC_DIR}" "${ARGS_SRC_DIR}")
 
-    list(APPEND GENERATE_PAINTER_ENTRIES "${PACKED_ENTRY}")
-    set(GENERATE_PAINTER_ENTRIES "${GENERATE_PAINTER_ENTRIES}" CACHE STRING "" FORCE)
+    list(APPEND GENERATE_MATERIAL_ENTRIES "${PACKED_ENTRY}")
+    set(GENERATE_MATERIAL_ENTRIES "${GENERATE_MATERIAL_ENTRIES}" CACHE STRING "" FORCE)
 
 endfunction()
 
-function(add_painter_generate_command PACKED_ENTRY)
+function(add_material_generate_command PACKED_ENTRY)
 
-    unpack_generate_painter_entry(${PACKED_ENTRY} NAME GLSL_SOURCES PAINTER_INC_DIR PAINTER_SRC_DIR)
+    unpack_generate_material_entry(${PACKED_ENTRY} NAME GLSL_SOURCES MATERIAL_INC_DIR MATERIAL_SRC_DIR)
 
-    set(SPV_DIR "${PAINTER_SRC_DIR}/spv")
+    set(SPV_DIR "${MATERIAL_SRC_DIR}/spv")
 
     set(COMMAND_LINE)
     set(COMPILED_SPV_FILES)
@@ -117,7 +117,7 @@ function(add_painter_generate_command PACKED_ENTRY)
         # add spv to compiled spv list, so we can mark it as "DEPENDS" on generator command
         list(APPEND COMPILED_SPV_FILES ${OUTPUT_SPV})
         
-        # add source to painter generator command line
+        # add source to material generator command line
         if (${GLSL_EXTENSION} STREQUAL ".vert")
             list(APPEND COMMAND_LINE "-v")
         elseif (${GLSL_EXTENSION} STREQUAL ".frag")
@@ -130,10 +130,10 @@ function(add_painter_generate_command PACKED_ENTRY)
     endforeach ()
 
     list(APPEND COMMAND_LINE "-s")
-    list(APPEND COMMAND_LINE "${PAINTER_SRC_DIR}")
+    list(APPEND COMMAND_LINE "${MATERIAL_SRC_DIR}")
 
     list(APPEND COMMAND_LINE "-i")
-    list(APPEND COMMAND_LINE "${PAINTER_INC_DIR}")
+    list(APPEND COMMAND_LINE "${MATERIAL_INC_DIR}")
 
     list(APPEND COMMAND_LINE "-n")
     list(APPEND COMMAND_LINE "${NAME}")
@@ -151,19 +151,19 @@ function(add_painter_generate_command PACKED_ENTRY)
     #message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
 
     set(OUTPUT_FILES)
-    list(APPEND OUTPUT_FILES "${PAINTER_INC_DIR}/${NAME}_types.h")
-    list(APPEND OUTPUT_FILES "${PAINTER_INC_DIR}/${NAME}_shader_data_source.h")
-    list(APPEND OUTPUT_FILES "${PAINTER_SRC_DIR}/${NAME}_shader_data_source.cpp")
+    list(APPEND OUTPUT_FILES "${MATERIAL_INC_DIR}/${NAME}_types.h")
+    list(APPEND OUTPUT_FILES "${MATERIAL_INC_DIR}/${NAME}_shader_data_source.h")
+    list(APPEND OUTPUT_FILES "${MATERIAL_SRC_DIR}/${NAME}_shader_data_source.cpp")
 
     list(APPEND GENERATED_FILES ${OUTPUT_FILES})
     set(GENERATED_FILES "${GENERATED_FILES}" CACHE STRING "" FORCE)
 
     add_custom_command(
             OUTPUT ${OUTPUT_FILES}
-            DEPENDS ${COMPILED_SPV_FILES} duk_painter_generator
-            COMMAND duk_painter_generator ${COMMAND_LINE}
+            DEPENDS ${COMPILED_SPV_FILES} duk_material_generator
+            COMMAND duk_material_generator ${COMMAND_LINE}
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-            COMMENT "Generating painter files for ${NAME}"
+            COMMENT "Generating material files for ${NAME}"
     )
 
     install(
@@ -178,8 +178,8 @@ add_subdirectory(fullscreen)
 add_subdirectory(phong)
 add_subdirectory(sprites/sprite_color)
 
-foreach (PACKED_ENTRY ${GENERATE_PAINTER_ENTRIES})
-    add_painter_generate_command(${PACKED_ENTRY})
+foreach (PACKED_ENTRY ${GENERATE_MATERIAL_ENTRIES})
+    add_material_generate_command(${PACKED_ENTRY})
 endforeach ()
 
 set(OUTPUT_STAMP "${CMAKE_CURRENT_BINARY_DIR}/stamps/globals.stamp")
@@ -188,12 +188,12 @@ add_custom_command(
         OUTPUT ${GLOBAL_GENERATED_FILES} ${OUTPUT_STAMP}
         DEPENDS ${GENERATED_FILES}
         COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT_STAMP}
-        COMMENT "Generating global painter files"
+        COMMENT "Generating global material files"
 )
 
-add_custom_target(generate_painter_files
-        DEPENDS duk_painter_generator ${GENERATED_FILES} ${GLOBAL_GENERATED_FILES} ${OUTPUT_STAMP}
-        COMMENT "Generating painter files"
+add_custom_target(generate_material_files
+        DEPENDS duk_material_generator ${GENERATED_FILES} ${GLOBAL_GENERATED_FILES} ${OUTPUT_STAMP}
+        COMMENT "Generating material files"
 )
 
-add_dependencies(duk_renderer generate_painter_files)
+add_dependencies(duk_renderer generate_material_files)

@@ -1,12 +1,12 @@
 /// 04/11/2023
 /// file_generator.cpp
 
-#include <duk_painter_generator/file_generators/file_generator.h>
-#include <duk_painter_generator/types.h>
+#include <duk_material_generator/file_generators/file_generator.h>
+#include <duk_material_generator/types.h>
 
 #include <fstream>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 namespace detail {
 
@@ -38,18 +38,18 @@ void FileGenerator::generate_include_directives(std::ostringstream& oss, std::sp
     }
 }
 
-void FileGenerator::generate_namespace_start(std::ostringstream& oss, const std::string& painterName) {
+void FileGenerator::generate_namespace_start(std::ostringstream& oss, const std::string& materialName) {
     oss << "namespace duk::renderer";
-    if (!painterName.empty()) {
-        oss << "::" << painterName;
+    if (!materialName.empty()) {
+        oss << "::" << materialName;
     }
     oss << " {" << std::endl;
 }
 
-void FileGenerator::generate_namespace_end(std::ostringstream& oss, const std::string& painterName) {
+void FileGenerator::generate_namespace_end(std::ostringstream& oss, const std::string& materialName) {
     oss << "} // namespace duk::renderer";
-    if (!painterName.empty()) {
-        oss << "::" << painterName;
+    if (!materialName.empty()) {
+        oss << "::" << materialName;
     }
     oss << std::endl;
 }

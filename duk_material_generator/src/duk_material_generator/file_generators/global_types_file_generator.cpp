@@ -1,13 +1,13 @@
 /// 04/11/2023
 /// global_types_file_generator.cpp
 
-#include <duk_painter_generator/file_generators/global_types_file_generator.h>
-#include <duk_painter_generator/types.h>
+#include <duk_material_generator/file_generators/global_types_file_generator.h>
+#include <duk_material_generator/types.h>
 
 #include <filesystem>
 #include <regex>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 namespace detail {
 

@@ -1,14 +1,14 @@
 /// 04/11/2023
 /// local_types_file_generator.h
 
-#ifndef DUK_PAINTER_GENERATOR_TYPES_FILE_GENERATOR_H
-#define DUK_PAINTER_GENERATOR_TYPES_FILE_GENERATOR_H
+#ifndef DUK_MATERIAL_GENERATOR_TYPES_FILE_GENERATOR_H
+#define DUK_MATERIAL_GENERATOR_TYPES_FILE_GENERATOR_H
 
-#include <duk_painter_generator/file_generators/file_generator.h>
+#include <duk_material_generator/file_generators/file_generator.h>
 
 #include <set>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 class TypesFileGenerator : public FileGenerator {
 public:
@@ -40,5 +40,5 @@ protected:
 
 }
 
-#endif // DUK_PAINTER_GENERATOR_TYPES_FILE_GENERATOR_H
+#endif // DUK_MATERIAL_GENERATOR_TYPES_FILE_GENERATOR_H
 

@@ -1,12 +1,12 @@
 /// 15/10/2023
 /// types.cpp
 
-#include <duk_painter_generator/types.h>
+#include <duk_material_generator/types.h>
 
 #include <unordered_map>
 #include <unordered_set>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 const std::string& glsl_to_cpp(const std::string& glslTypeName) {
     static const auto glslToCppMap = []() -> std::unordered_map<std::string, std::string> {

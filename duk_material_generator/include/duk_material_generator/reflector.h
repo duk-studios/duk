@@ -1,10 +1,10 @@
 /// 14/10/2023
 /// reflector.h
 
-#ifndef DUK_PAINTER_GENERATOR_REFLECTOR_H
-#define DUK_PAINTER_GENERATOR_REFLECTOR_H
+#ifndef DUK_MATERIAL_GENERATOR_REFLECTOR_H
+#define DUK_MATERIAL_GENERATOR_REFLECTOR_H
 
-#include <duk_painter_generator/parser.h>
+#include <duk_material_generator/parser.h>
 #include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/descriptor.h>
 #include <duk_rhi/vertex_layout.h>
@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <map>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 struct Type {
     enum Bits : uint32_t {
@@ -96,5 +96,5 @@ private:
 
 }
 
-#endif // DUK_PAINTER_GENERATOR_REFLECTOR_H
+#endif // DUK_MATERIAL_GENERATOR_REFLECTOR_H
 

@@ -1,10 +1,10 @@
-#include <duk_painter_generator/parser.h>
-#include <duk_painter_generator/reflector.h>
-#include <duk_painter_generator/generator.h>
+#include <duk_material_generator/parser.h>
+#include <duk_material_generator/reflector.h>
+#include <duk_material_generator/generator.h>
 
 #include <iostream>
 
-static void print_reflector(duk::painter_generator::Reflector& reflector) {
+static void print_reflector(duk::material_generator::Reflector& reflector) {
     const auto& typeMap = reflector.types();
 
     std::cout << "--------------------------" << std::endl;
@@ -42,15 +42,15 @@ static void print_reflector(duk::painter_generator::Reflector& reflector) {
 int main(int argc, char* argv[]) {
 
     try {
-        duk::painter_generator::Parser parser(argc, argv);
+        duk::material_generator::Parser parser(argc, argv);
 
-        duk::painter_generator::Reflector reflector(parser);
+        duk::material_generator::Reflector reflector(parser);
 
         if (parser.print_debug_info()) {
             print_reflector(reflector);
         }
 
-        duk::painter_generator::Generator generator(parser, reflector);
+        duk::material_generator::Generator generator(parser, reflector);
     }
     catch (std::exception& e) {
         std::cerr << "Error: " << e.what();

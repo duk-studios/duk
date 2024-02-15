@@ -1,18 +1,18 @@
 /// 14/10/2023
 /// parser.cpp
 
-#include <duk_painter_generator/parser.h>
+#include <duk_material_generator/parser.h>
 
 #include <cxxopts.hpp>
 #include <iostream>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
 
     using duk::rhi::Shader;
 
-    cxxopts::Options options("duk_painter_generator", "Painter generator for duk_renderer");
+    cxxopts::Options options("duk_material_generator", "Material generator for duk_renderer");
 
     options.add_options()
             ("v, vert", "Vertex shader path", cxxopts::value<std::string>())
@@ -21,7 +21,7 @@ Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
             ("e, tese", "Tesselation Evaluation shader path", cxxopts::value<std::string>())
             ("t, tesc", "Tesselation Control shader path", cxxopts::value<std::string>())
             ("c, comp", "Compute shader path", cxxopts::value<std::string>())
-            ("n, name", "Painter name", cxxopts::value<std::string>())
+            ("n, name", "Material name", cxxopts::value<std::string>())
             ("s, src", "Source output directory", cxxopts::value<std::string>())
             ("i, inc", "Include output directory", cxxopts::value<std::string>())
             ("l, globals", "Global bindings name list", cxxopts::value<std::vector<std::string>>())
@@ -36,7 +36,7 @@ Parser::Parser(int argc, char* argv[]) : m_printDebugInfo(false) {
 
         m_outputSourceDirectory = result["src"].as<std::string>();
         m_outputIncludeDirectory = result["inc"].as<std::string>();
-        m_outputPainterName = result["name"].as<std::string>();
+        m_outputMaterialName = result["name"].as<std::string>();
 
         if (result.count("vert")) {
             m_inputSpvPaths[Shader::Module::VERTEX] = result["vert"].as<std::string>();
@@ -98,8 +98,8 @@ const std::string& Parser::output_globals_include_directory() const {
     return m_outputGlobalsIncludeDirectory;
 }
 
-const std::string& Parser::output_painter_name() const {
-    return m_outputPainterName;
+const std::string& Parser::output_material_name() const {
+    return m_outputMaterialName;
 }
 
 const Parser::ShaderPaths& Parser::input_spv_paths() const {

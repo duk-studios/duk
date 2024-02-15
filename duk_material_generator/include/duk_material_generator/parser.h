@@ -1,8 +1,8 @@
 /// 14/10/2023
 /// parser.h
 
-#ifndef DUK_PAINTER_GENERATOR_PARSER_H
-#define DUK_PAINTER_GENERATOR_PARSER_H
+#ifndef DUK_MATERIAL_GENERATOR_PARSER_H
+#define DUK_MATERIAL_GENERATOR_PARSER_H
 
 #include <duk_rhi/pipeline/shader.h>
 
@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 class Parser {
 public:
@@ -30,7 +30,7 @@ public:
 
     DUK_NO_DISCARD const std::string& output_globals_include_directory() const;
 
-    DUK_NO_DISCARD const std::string& output_painter_name() const;
+    DUK_NO_DISCARD const std::string& output_material_name() const;
 
     DUK_NO_DISCARD const ShaderPaths& input_spv_paths() const;
 
@@ -43,7 +43,7 @@ private:
     std::string m_outputGlobalsSourceDirectory;
     std::string m_outputIncludeDirectory;
     std::string m_outputGlobalsIncludeDirectory;
-    std::string m_outputPainterName;
+    std::string m_outputMaterialName;
     ShaderPaths m_inputSpvPaths;
     std::unordered_set<std::string> m_globalBindings;
     bool m_printDebugInfo;
@@ -51,5 +51,5 @@ private:
 
 }
 
-#endif // DUK_PAINTER_GENERATOR_PARSER_H
+#endif // DUK_MATERIAL_GENERATOR_PARSER_H
 

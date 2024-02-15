@@ -1,12 +1,12 @@
 /// 04/11/2023
 /// shader_data_source_generator.h
 
-#ifndef DUK_PAINTER_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
-#define DUK_PAINTER_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
+#ifndef DUK_MATERIAL_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
+#define DUK_MATERIAL_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
 
-#include <duk_painter_generator/file_generators/file_generator.h>
+#include <duk_material_generator/file_generators/file_generator.h>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 class ShaderDataSourceFileGenerator : public FileGenerator {
 public:
@@ -36,5 +36,5 @@ private:
 
 }
 
-#endif // DUK_PAINTER_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
+#endif // DUK_MATERIAL_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
 

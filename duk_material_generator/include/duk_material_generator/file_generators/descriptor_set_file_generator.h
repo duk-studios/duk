@@ -1,13 +1,13 @@
 /// 11/11/2023
 /// descriptor_set_generator.h
 
-#ifndef DUK_PAINTER_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H
-#define DUK_PAINTER_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H
+#ifndef DUK_MATERIAL_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H
+#define DUK_MATERIAL_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H
 
-#include <duk_painter_generator/file_generators/file_generator.h>
-#include <duk_painter_generator/file_generators/shader_data_source_file_generator.h>
+#include <duk_material_generator/file_generators/file_generator.h>
+#include <duk_material_generator/file_generators/shader_data_source_file_generator.h>
 
-namespace duk::painter_generator {
+namespace duk::material_generator {
 
 class DescriptorSetFileGenerator : public FileGenerator {
 public:
@@ -33,5 +33,5 @@ private:
 
 }
 
-#endif // DUK_PAINTER_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H
+#endif // DUK_MATERIAL_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H
 
