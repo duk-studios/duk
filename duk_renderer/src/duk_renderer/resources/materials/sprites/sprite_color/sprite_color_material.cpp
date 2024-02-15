@@ -50,7 +50,7 @@ void SpriteColorMaterial::set_color(const glm::vec4& color) {
 }
 
 void SpriteColorMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params, uint32_t subMaterialIndex) {
-    painter()->use(commandBuffer, params);
+    pipeline()->use(commandBuffer, params);
 
     auto& descriptorSet = m_descriptorSets.at(subMaterialIndex);
     descriptorSet->set(SpriteColorDescriptorSet::Bindings::uCamera, duk::rhi::Descriptor::uniform_buffer(params.globalDescriptors->camera_ubo()->buffer()));

@@ -6,7 +6,7 @@
 
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/draw_entry.h>
-#include <duk_renderer/resources/materials/painter.h>
+#include <duk_renderer/resources/materials/pipeline.h>
 
 #include <duk_resource/resource.h>
 #include <duk_rhi/command/command_buffer.h>
@@ -51,12 +51,12 @@ protected:
 
 public:
 
-    DUK_NO_DISCARD Painter* painter();
+    DUK_NO_DISCARD Pipeline* pipeline();
 
-    DUK_NO_DISCARD const Painter* painter() const;
+    DUK_NO_DISCARD const Pipeline* pipeline() const;
 
 private:
-    Painter m_painter;
+    Pipeline m_pipeline;
 };
 
 using MaterialResource = duk::resource::ResourceT<Material>;

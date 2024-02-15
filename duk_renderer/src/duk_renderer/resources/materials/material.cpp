@@ -16,17 +16,17 @@ MaterialType MaterialDataSource::type() const {
 }
 
 Material::Material(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource) :
-    m_painter({.renderer = renderer, .shaderDataSource = shaderDataSource}) {
+    m_pipeline({.renderer = renderer, .shaderDataSource = shaderDataSource}) {
 }
 
 Material::~Material() = default;
 
-Painter* Material::painter() {
-    return &m_painter;
+Pipeline* Material::pipeline() {
+    return &m_pipeline;
 }
 
-const Painter* Material::painter() const {
-    return &m_painter;
+const Pipeline* Material::pipeline() const {
+    return &m_pipeline;
 }
 
 }

@@ -19,7 +19,7 @@ class Object;
 namespace renderer {
 
 class Pass;
-class Painter;
+class Pipeline;
 class GlobalDescriptors;
 class ImagePool;
 class MaterialPool;

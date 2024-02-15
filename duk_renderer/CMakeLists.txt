@@ -22,7 +22,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/resources/sprite.h
         include/duk_renderer/resources/sprite_data_source.h
         include/duk_renderer/resources/materials/globals/global_descriptors.h
-        include/duk_renderer/resources/materials/painter.h
+        include/duk_renderer/resources/materials/pipeline.h
         include/duk_renderer/resources/materials/material.h
         include/duk_renderer/resources/materials/mesh_material.h
         include/duk_renderer/resources/materials/sprite_material.h
@@ -74,7 +74,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/components/lighting.cpp
         src/duk_renderer/resources/sprite.cpp
         src/duk_renderer/resources/sprite_data_source.cpp
-        src/duk_renderer/resources/materials/painter.cpp
+        src/duk_renderer/resources/materials/pipeline.cpp
         src/duk_renderer/resources/materials/material.cpp
         src/duk_renderer/resources/materials/mesh_material.cpp
         src/duk_renderer/resources/materials/sprite_material.cpp

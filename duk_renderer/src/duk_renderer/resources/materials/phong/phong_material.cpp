@@ -78,7 +78,7 @@ void PhongMaterial::flush_instances() {
 }
 
 void PhongMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
-    painter()->use(commandBuffer, params);
+    pipeline()->use(commandBuffer, params);
 
     // updates current camera UBO
     m_descriptorSet.set(PhongDescriptorSet::Bindings::uCamera, *params.globalDescriptors->camera_ubo());

@@ -75,7 +75,7 @@ void ColorMaterial::flush_instances() {
 
 void ColorMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
 
-    painter()->use(commandBuffer, params);
+    pipeline()->use(commandBuffer, params);
 
     // updates current camera UBO
     m_descriptorSet.set(ColorDescriptorSet::Bindings::uCamera, *params.globalDescriptors->camera_ubo());

@@ -6,7 +6,7 @@
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/sprite_renderer.h>
 #include <duk_renderer/resources/materials/material.h>
-#include <duk_renderer/resources/materials/painter.h>
+#include <duk_renderer/resources/materials/pipeline.h>
 #include <duk_renderer/brushes/mesh.h>
 #include <duk_renderer/brushes/sprite_brush.h>
 #include "duk_renderer/components/transform.h"

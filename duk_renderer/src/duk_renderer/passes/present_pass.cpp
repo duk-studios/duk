@@ -3,7 +3,7 @@
 
 #include <duk_renderer/passes/present_pass.h>
 #include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
-#include <duk_renderer/resources/materials/painter.h>
+#include <duk_renderer/resources/materials/pipeline.h>
 
 namespace duk::renderer {
 
@@ -36,7 +36,7 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
         m_fullscreenMaterial = std::make_unique<FullscreenMaterial>(fullscreenMaterialCreateInfo);
 
         // necessary when using vulkan, need to take that into account when supporting other APIs
-        m_fullscreenMaterial->painter()->invert_y(true);
+        m_fullscreenMaterial->pipeline()->invert_y(true);
     }
 }
 

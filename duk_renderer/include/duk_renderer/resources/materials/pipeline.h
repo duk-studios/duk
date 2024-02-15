@@ -1,8 +1,8 @@
 /// 08/09/2023
-/// painter.h
+/// pipeline.h
 
-#ifndef DUK_RENDERER_PAINTER_H
-#define DUK_RENDERER_PAINTER_H
+#ifndef DUK_RENDERER_PIPELINE_H
+#define DUK_RENDERER_PIPELINE_H
 
 #include <duk_renderer/resources/materials/draw_entry.h>
 #include <duk_rhi/rhi.h>
@@ -14,14 +14,14 @@ class Brush;
 class Material;
 class GlobalDescriptors;
 
-struct PainterCreateInfo {
+struct PipelineCreateInfo {
     Renderer* renderer;
     const duk::rhi::ShaderDataSource* shaderDataSource;
 };
 
-class Painter {
+class Pipeline {
 public:
-    explicit Painter(const PainterCreateInfo& painterCreateInfo);
+    explicit Pipeline(const PipelineCreateInfo& pipelineCreateInfo);
 
     void use(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params);
 
@@ -75,5 +75,5 @@ private:
 
 }
 
-#endif // DUK_RENDERER_PAINTER_H
+#endif // DUK_RENDERER_PIPELINE_H
 

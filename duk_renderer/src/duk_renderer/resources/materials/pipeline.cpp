@@ -1,7 +1,7 @@
 /// 08/09/2023
-/// painter.cpp
+/// pipeline.cpp
 
-#include <duk_renderer/resources/materials/painter.h>
+#include <duk_renderer/resources/materials/pipeline.h>
 #include <duk_renderer/resources/materials/material.h>
 #include <duk_renderer/brushes/brush.h>
 
@@ -9,38 +9,38 @@ namespace duk::renderer {
 
 static constexpr int kDeleteUnusedPipelineAfterFrames = 512;
 
-Painter::Painter(const PainterCreateInfo& painterCreateInfo) :
-    m_renderer(painterCreateInfo.renderer),
-    m_pipelineCache(m_renderer, painterCreateInfo.shaderDataSource) {
+Pipeline::Pipeline(const PipelineCreateInfo& pipelineCreateInfo) :
+    m_renderer(pipelineCreateInfo.renderer),
+    m_pipelineCache(m_renderer, pipelineCreateInfo.shaderDataSource) {
 
     m_listener.listen(m_renderer->render_start_event(), [this]{
         m_pipelineCache.clear_unused_pipelines();
     });
 }
 
-void Painter::use(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
+void Pipeline::use(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
     commandBuffer->bind_graphics_pipeline(m_pipelineCache.find_pipeline_for_params(params));
 }
 
-void Painter::update_shader(duk::rhi::ShaderDataSource* shaderDataSource) {
+void Pipeline::update_shader(duk::rhi::ShaderDataSource* shaderDataSource) {
     m_pipelineCache.update_shader(shaderDataSource);
 }
 
-void Painter::invert_y(bool invert) {
+void Pipeline::invert_y(bool invert) {
     m_pipelineCache.invert_y(invert);
 }
 
-void Painter::cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask) {
+void Pipeline::cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask) {
     m_pipelineCache.cull_mode_mask(cullModeMask);
 }
 
-void Painter::clear_unused_pipelines() {
+void Pipeline::clear_unused_pipelines() {
     m_pipelineCache.clear_unused_pipelines();
 }
 
 //------------------------------------
 
-Painter::PipelineCache::PipelineCache(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource) :
+Pipeline::PipelineCache::PipelineCache(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource) :
     m_renderer(renderer),
     m_shader(nullptr),
     m_invertY(false),
@@ -48,14 +48,14 @@ Painter::PipelineCache::PipelineCache(Renderer* renderer, const duk::rhi::Shader
     update_shader(shaderDataSource);
 }
 
-void Painter::PipelineCache::update_shader(const duk::rhi::ShaderDataSource* shaderDataSource) {
+void Pipeline::PipelineCache::update_shader(const duk::rhi::ShaderDataSource* shaderDataSource) {
     duk::rhi::RHI::ShaderCreateInfo shaderCreateInfo = {};
     shaderCreateInfo.shaderDataSource = shaderDataSource;
 
     m_shader = m_renderer->rhi()->create_shader(shaderCreateInfo);
 }
 
-duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(const DrawParams& params) {
+duk::rhi::GraphicsPipeline* Pipeline::PipelineCache::find_pipeline_for_params(const DrawParams& params) {
     const auto hash = hash_for_params(params);
 
     auto it = m_pipelines.find(hash);
@@ -94,7 +94,7 @@ duk::rhi::GraphicsPipeline* Painter::PipelineCache::find_pipeline_for_params(con
     return it->second.pipeline.get();
 }
 
-duk::hash::Hash Painter::PipelineCache::hash_for_params(const DrawParams& params) const {
+duk::hash::Hash Pipeline::PipelineCache::hash_for_params(const DrawParams& params) const {
     hash::Hash hash = 0;
     hash::hash_combine(hash, params.renderPass);
     hash::hash_combine(hash, params.outputWidth);
@@ -105,7 +105,7 @@ duk::hash::Hash Painter::PipelineCache::hash_for_params(const DrawParams& params
     return hash;
 }
 
-duk::rhi::GraphicsPipeline::Viewport Painter::PipelineCache::viewport_for_params(const DrawParams& params) {
+duk::rhi::GraphicsPipeline::Viewport Pipeline::PipelineCache::viewport_for_params(const DrawParams& params) {
     duk::rhi::GraphicsPipeline::Viewport viewport = {};
     viewport.extent = {params.outputWidth, params.outputHeight};
     viewport.maxDepth = 1.0f;
@@ -117,15 +117,15 @@ duk::rhi::GraphicsPipeline::Viewport Painter::PipelineCache::viewport_for_params
     return viewport;
 }
 
-void Painter::PipelineCache::invert_y(bool invert) {
+void Pipeline::PipelineCache::invert_y(bool invert) {
     m_invertY = invert;
 }
 
-void Painter::PipelineCache::cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask) {
+void Pipeline::PipelineCache::cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask) {
     m_cullModeMask = cullModeMask;
 }
 
-void Painter::PipelineCache::clear_unused_pipelines() {
+void Pipeline::PipelineCache::clear_unused_pipelines() {
     std::vector<duk::hash::Hash> hashesToDelete;
     hashesToDelete.reserve(m_pipelines.size());
 
