@@ -1,15 +1,9 @@
 {
-  "type": "Phong",
-  "base-color": "0.1;0.5f;0.3",
-  "base-color-image": 51,
+  "type": "Color",
+  "base-color": "1;1;1",
+  "base-color-image": 53,
   "base-color-sampler": {
     "wrap": "clamp-edge",
-    "filter": "nearest"
-  },
-  "shininess": 128,
-  "shininess-image": 52,
-  "shininess-sampler": {
-    "wrap": "clamp-edge",
-    "filter": "nearest"
+    "filter": "linear"
   }
 }

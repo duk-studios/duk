@@ -31,11 +31,9 @@ void GlobalDescriptors::update_camera(const scene::Object& cameraObject) {
     auto& camera = m_cameraUBO->data();
     camera.proj = calculate_projection(cameraObject);
 
-    // an inverse view is simply the normal model matrix
-    camera.invView = model_matrix_3d(cameraObject);
+    camera.view = calculate_view(cameraObject);
 
-    // inverse it to have the proper view matrix
-    camera.view = glm::inverse(camera.invView);
+    camera.invView = glm::inverse(camera.view);
 
     camera.vp = camera.proj * camera.view;
 
@@ -58,11 +56,11 @@ void GlobalDescriptors::update_lights(duk::scene::Scene* scene) {
     }
 
     lights.pointLightCount = 0;
-    for (auto object : scene->objects_with_components<PointLight, Position3D>()) {
+    for (auto object : scene->objects_with_components<PointLight>()) {
         auto pointLightComponent = object.component<PointLight>();
         auto positionComponent = object.component<Position3D>();
         auto& pointLight = lights.pointLights[lights.pointLightCount++];
-        pointLight.position = positionComponent->value;
+        pointLight.position = positionComponent ? positionComponent->value : glm::vec3(0);
         pointLight.linear = 0.14f;
         pointLight.quadratic = 0.07f;
         pointLight.value.color = pointLightComponent->value.color;

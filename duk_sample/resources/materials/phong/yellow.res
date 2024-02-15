@@ -1,8 +1,7 @@
 {
   "type": "mat",
-  "id": 101,
-  "file": "color.mat",
+  "id": 100002,
+  "file": "yellow.mat",
   "dependencies": [
-    53
   ]
 }

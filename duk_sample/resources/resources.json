@@ -8,7 +8,14 @@
     "materials/phong.res",
     "materials/light.res",
     "materials/safeson.res",
+    "materials/phong/blue.res",
+    "materials/phong/cyan.res",
+    "materials/phong/green.res",
+    "materials/phong/magenta.res",
+    "materials/phong/red.res",
+    "materials/phong/yellow.res",
     "scenes/scene.res",
-    "scenes/sprite-test.res"
+    "scenes/empty.res",
+    "scenes/directions.res"
   ]
 }
