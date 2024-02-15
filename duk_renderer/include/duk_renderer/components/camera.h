@@ -19,6 +19,8 @@ struct PerspectiveCamera {
 
 glm::mat4 calculate_projection(const duk::scene::Object& object);
 
+glm::mat4 calculate_view(const duk::scene::Object& object);
+
 }
 
 #endif // DUK_RENDERER_CAMERA_H

@@ -31,11 +31,9 @@ void GlobalDescriptors::update_camera(const scene::Object& cameraObject) {
     auto& camera = m_cameraUBO->data();
     camera.proj = calculate_projection(cameraObject);
 
-    // an inverse view is simply the normal model matrix
-    camera.invView = model_matrix_3d(cameraObject);
+    camera.view = calculate_view(cameraObject);
 
-    // inverse it to have the proper view matrix
-    camera.view = glm::inverse(camera.invView);
+    camera.invView = glm::inverse(camera.view);
 
     camera.vp = camera.proj * camera.view;
 
