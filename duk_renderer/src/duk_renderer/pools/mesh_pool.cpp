@@ -16,7 +16,21 @@ namespace detail {
 
 using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::renderer::VertexNormalUV, uint16_t>;
 
-DefaultMeshDataSource quad_mesh_data_source() {
+static void calculate_normals(std::vector<DefaultMeshDataSource::VertexType>& vertices, const std::vector<DefaultMeshDataSource::IndexType>& indices) {
+
+    for (uint32_t i = 0; i < indices.size(); i += 3) {
+        auto idx0 = indices[i];
+        auto idx1 = indices[i + 1];
+
+        auto idx2 = indices[i + 2];
+        auto& v0 = vertices[idx0];
+        auto& v1 = vertices[idx1];
+        auto& v2 = vertices[idx2];
+        v0.normal = v1.normal = v2.normal = glm::normalize(glm::cross(v1.position - v0.position, glm::vec3(0, 1, 0)));
+    }
+}
+
+static DefaultMeshDataSource quad_mesh_data_source() {
     DefaultMeshDataSource meshDataSource;
 
     std::array<DefaultMeshDataSource::VertexType, 4> vertices = {};
@@ -36,7 +50,7 @@ DefaultMeshDataSource quad_mesh_data_source() {
     return meshDataSource;
 }
 
-DefaultMeshDataSource cube_mesh_data_source() {
+static DefaultMeshDataSource cube_mesh_data_source() {
     DefaultMeshDataSource meshDataSource;
 
     std::array<DefaultMeshDataSource::VertexType, 24> vertices = {};
@@ -95,7 +109,7 @@ DefaultMeshDataSource cube_mesh_data_source() {
     return meshDataSource;
 }
 
-DefaultMeshDataSource sphere_mesh_data_source(uint32_t segments) {
+static DefaultMeshDataSource sphere_mesh_data_source(uint32_t segments) {
     DefaultMeshDataSource meshDataSource;
 
     const auto rows = segments;
@@ -155,50 +169,76 @@ DefaultMeshDataSource sphere_mesh_data_source(uint32_t segments) {
     return meshDataSource;
 }
 
-DefaultMeshDataSource cone_mesh_data_source(uint32_t segments) {
+static DefaultMeshDataSource cone_mesh_data_source(uint32_t segments) {
     DefaultMeshDataSource meshDataSource;
 
-    std::vector<DefaultMeshDataSource::VertexType> vertices;
+    uint32_t vertexCount = (segments * 2) + 1;
 
-    {
-        DefaultMeshDataSource::VertexType center;
-        center.position = glm::vec3(0, 1, 0);
-        center.normal = glm::vec3(0, 1, 0);
-        center.uv = glm::vec2(1, 1);
-
-        vertices.push_back(center);
-    }
+    std::vector<DefaultMeshDataSource::VertexType> vertices(vertexCount);
 
     // create sides
-    for (uint32_t i = 0; i < segments; i++) {
-        float percent = (float)i / (segments - 1);
-        float angle = percent * glm::pi<float>() * 2;
-        float x = cosf(angle);
-        float z = sinf(angle);
-        float u = (x + 1.0f) / 2.0f;
+    for (uint32_t i = 0; i < vertexCount; i++) {
+        auto& vertex = vertices[i];
+        // start with pivot
+        float percent = (float)i / (vertexCount - 1);
+        if (i % 2) {
+            vertex.position = glm::vec3(0, 1, 0);
+            vertex.uv = glm::vec2(1.0f - percent, 0.0f);
+        }
+        else {
+            float angle = percent * glm::pi<float>() * 2;
+            float x = cosf(angle);
+            float z = sinf(angle);
 
-        glm::vec3 position(x, 0, z);
-        position *= 0.5f;
-        glm::vec3 normal(x, 0, z);
-        glm::vec2 uv(u, 0);
-
-        vertices.push_back({position, normal, uv});
+            vertex.position = glm::vec3(x, 0, z) * 0.5f;
+            vertex.uv = glm::vec2(1.0f - percent, 1.0f);
+        }
     }
-
-
-    meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
     std::vector<DefaultMeshDataSource::IndexType> indices;
 
-    for (int i = 1; i < segments; i++) {
-        uint32_t idx0 = 0;
-        uint32_t idx1 = i;
+    for (int i = 0; i < segments * 2; i += 2) {
+        uint32_t idx0 = i;
+        uint32_t idx1 = i + 2;
         uint32_t idx2 = i + 1;
 
         indices.push_back(idx0);
         indices.push_back(idx1);
         indices.push_back(idx2);
     }
+
+    // calculate normals for sides
+    calculate_normals(vertices, indices);
+
+    uint32_t firstBaseVertexIndex = vertices.size();
+    // add base
+    uint32_t baseVertexCount = segments + 1;
+    for (int i = 0; i < baseVertexCount; i++) {
+        float percent = (float)i / (baseVertexCount - 1);
+        float angle = percent * glm::pi<float>() * 2;
+        float x = cosf(angle);
+        float z = sinf(angle);
+
+        auto vertex = DefaultMeshDataSource::VertexType();
+        vertex.position = glm::vec3(x, 0, z) * 0.5f;
+        vertex.normal = glm::vec3(0, -1, 0);
+        vertex.uv = (glm::vec2(x, z) + glm::vec2(1.0f)) / 2.0f;
+        vertex.uv.y = 1 - vertex.uv.y;
+        vertices.push_back(vertex);
+    }
+
+    for (int i = 0; i < segments - 1; i++) {
+        uint32_t idx0 = firstBaseVertexIndex;
+        uint32_t idx1 = idx0 + i + 2;
+        uint32_t idx2 = idx0 + i + 1;
+
+        indices.push_back(idx0);
+        indices.push_back(idx1);
+        indices.push_back(idx2);
+    }
+
+
+    meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
     meshDataSource.insert_indices(indices.begin(), indices.end());
 
