@@ -4,6 +4,6 @@
   "base-color-image": 53,
   "base-color-sampler": {
     "wrap": "clamp-edge",
-    "filter": "nearest"
+    "filter": "linear"
   }
 }
