@@ -72,6 +72,24 @@ void CameraSystem::update() {
 
     auto inputOffset = glm::vec3(0.0f, 0.0f, 0.0f);
     auto movementSpeed = 0.2f;
+    auto camSensitivity = 1.0f;
+    auto camRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    auto camTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    auto camDirection = glm::normalize(position->value - camTarget);
+    auto up = glm::vec3(0.0f, 1.0f, 0.0f);
+    auto cameraRight = glm::normalize(glm::cross(up, camDirection));
+    auto cameraUp = glm::cross(camDirection, cameraRight);
+    glm::mat4 view;
+    view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+                       glm::vec3(0.0f, 0.0f, 0.0f),
+                       glm::vec3(0.0f, 1.0f, 0.0f));
+    auto yaw = -90.0f;
+    auto pitch = 0.0f;
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
 
     if(input->key_down(duk::platform::Keys::W)) {
         inputOffset += glm::vec3(0.0f, 0.0f, -1.0f);
@@ -99,7 +117,10 @@ void CameraSystem::update() {
 
     position->value += inputOffset * movementSpeed * time;
 
+    camRotation.x += input->mouse_x() * camSensitivity;
+    camRotation.y += input->mouse_y() * camSensitivity;
 
+    rotation->value = glm::quat(camRotation);
 }
 
 }
