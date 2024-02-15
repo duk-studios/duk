@@ -21,6 +21,7 @@ static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveC
 
 struct CameraSettings {
     float speed;
+    float rotationSpeed;
     float yaw = -90.0f;
     float pitch = 0.0f;
     float sensitivity = 0.1f;
@@ -51,6 +52,7 @@ void CameraSystem::init() {
     m_camera.add<duk::renderer::Rotation3D>();
     auto settings = m_camera.add<detail::CameraSettings>();
     settings->speed = 10.0f;
+    settings->rotationSpeed = 50.0f;
     settings->lastX = window->width() / 2;
     settings->lastY = window->height() / 2;
 
@@ -60,11 +62,21 @@ void CameraSystem::init() {
 
 void CameraSystem::update() {
 
-    auto input = duk::engine::System::engine()->input();
+    auto input = engine()->input();
+
+    const auto deltaTime = engine()->timer()->duration().count();
 
     auto [position, rotation, settings, perspective] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraSettings,duk::renderer::PerspectiveCamera>();
 
-    const auto deltaTime = engine()->timer()->duration().count();
+    glm::vec3 rotationDir = glm::vec3(0);
+    if (input->key(duk::platform::Keys::RIGHT_ARROW)) {
+        rotationDir = glm::vec3(0, -1, 0);
+    }
+    if (input->key(duk::platform::Keys::LEFT_ARROW)) {
+        rotationDir = glm::vec3(0, 1, 0);
+    }
+
+    rotation->value = glm::normalize(glm::quat(glm::radians(rotationDir * settings->rotationSpeed * deltaTime)) * rotation->value);
 
     auto inputOffset = glm::vec3(0.0f, 0.0f, 0.0f);
     auto camRotation = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -126,6 +138,8 @@ void CameraSystem::update() {
     if(input->key(duk::platform::Keys::E)) {
         inputOffset += glm::vec3(0.0f, -1.0f, 0.0f);
     }
+
+    inputOffset = rotation->value * inputOffset;
 
     position->value += inputOffset * settings->speed * deltaTime;
 }

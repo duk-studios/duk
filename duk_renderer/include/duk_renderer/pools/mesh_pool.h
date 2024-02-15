@@ -33,10 +33,13 @@ public:
 
     DUK_NO_DISCARD MeshResource sphere() const;
 
+    DUK_NO_DISCARD MeshResource cone() const;
+
 private:
     MeshResource m_quad;
     MeshResource m_cube;
     MeshResource m_sphere;
+    MeshResource m_cone;
     std::shared_ptr<MeshBufferPool> m_meshBufferPool;
 };
 
