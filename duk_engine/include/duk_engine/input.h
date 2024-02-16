@@ -25,6 +25,7 @@ public:
 
     bool mouse_down(duk::platform::MouseButton mouseButton);
     bool mouse_up(duk::platform::MouseButton mouseButton);
+    bool mouse(duk::platform::MouseButton mouseButton);
 
     void refresh();
 

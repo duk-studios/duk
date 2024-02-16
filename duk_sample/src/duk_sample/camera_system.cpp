@@ -6,6 +6,7 @@
 #include <duk_engine/engine.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/camera.h>
+#include "duk_log/log.h"
 
 
 namespace duk::sample {
@@ -19,16 +20,13 @@ static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveC
     perspectiveCamera->fovDegrees = 45.0f;
 }
 
-struct CameraSettings {
+struct CameraController {
     float speed;
     float rotationSpeed;
     float yaw = -90.0f;
     float pitch = 0.0f;
     float sensitivity = 0.1f;
     float lastX, lastY;
-    glm::vec3 front;
-    glm::vec3 up;
-    glm::vec3 right;
 };
 
 }
@@ -50,7 +48,7 @@ void CameraSystem::init() {
     auto position = m_camera.add<duk::renderer::Position3D>();
     position->value = glm::vec3(0, 0, 20);
     m_camera.add<duk::renderer::Rotation3D>();
-    auto settings = m_camera.add<detail::CameraSettings>();
+    auto settings = m_camera.add<detail::CameraController>();
     settings->speed = 10.0f;
     settings->rotationSpeed = 50.0f;
     settings->lastX = window->width() / 2;
@@ -66,7 +64,7 @@ void CameraSystem::update() {
 
     const auto deltaTime = engine()->timer()->duration().count();
 
-    auto [position, rotation, settings, perspective] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraSettings,duk::renderer::PerspectiveCamera>();
+    auto [position, rotation, controller, perspective] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraController,duk::renderer::PerspectiveCamera>();
 
     glm::vec3 rotationDir = glm::vec3(0);
     if (input->key(duk::platform::Keys::RIGHT_ARROW)) {
@@ -76,40 +74,39 @@ void CameraSystem::update() {
         rotationDir = glm::vec3(0, 1, 0);
     }
 
-    rotation->value = glm::normalize(glm::quat(glm::radians(rotationDir * settings->rotationSpeed * deltaTime)) * rotation->value);
+    rotation->value = glm::normalize(glm::quat(glm::radians(rotationDir * controller->rotationSpeed * deltaTime)) * rotation->value);
 
     auto inputOffset = glm::vec3(0.0f, 0.0f, 0.0f);
     auto camRotation = glm::vec3(0.0f, 0.0f, 0.0f);
     auto camTarget = glm::vec3(0.0f, 0.0f, 0.0f);
     auto camDirection = glm::normalize(position->value - camTarget);
     auto worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-    settings->right = glm::normalize(glm::cross(worldUp, camDirection));
-    settings->up = glm::cross(camDirection, settings->right);
+    auto right = glm::normalize(glm::cross(worldUp, camDirection));
+    auto up = glm::cross(camDirection, right);
 
     glm::vec3 direction;
-    direction.x = cos(glm::radians(settings->yaw)) * cos(glm::radians(settings->pitch));
-    direction.y = sin(glm::radians(settings->pitch));
-    direction.z = sin(glm::radians(settings->yaw)) * cos(glm::radians(settings->pitch));
-    settings->front = glm::normalize(direction);
+    direction.x = cos(glm::radians(controller->yaw)) * cos(glm::radians(controller->pitch));
+    direction.y = sin(glm::radians(controller->pitch));
+    direction.z = sin(glm::radians(controller->yaw)) * cos(glm::radians(controller->pitch));
+    auto front = glm::normalize(direction);
 
-    float xOffset = input->mouse_x() - settings->lastX;
-    float yOffset = settings->lastY - input->mouse_y();
-    settings->lastX = input->mouse_x();
-    settings->lastY = input->mouse_y();
-    xOffset *= settings->sensitivity;
-    yOffset *= settings->sensitivity;
-    settings->yaw += xOffset;
-    settings->pitch += yOffset;
+    float xOffset = input->mouse_x() - controller->lastX;
+    float yOffset = controller->lastY - input->mouse_y();
+    controller->lastX = input->mouse_x();
+    controller->lastY = input->mouse_y();
+    xOffset *= controller->sensitivity;
+    yOffset *= controller->sensitivity;
+    controller->yaw += xOffset;
+    controller->pitch += yOffset;
 
-    if(settings->pitch > 89.0f)
-        settings->pitch =  89.0f;
-    if(settings->pitch < -89.0f)
-        settings->pitch = -89.0f;
-
-    rotation->value = glm::lookAt(position->value, position->value + settings->front, settings->up);
+    if(controller->pitch > 89.0f)
+        controller->pitch =  89.0f;
+    if(controller->pitch < -89.0f)
+        controller->pitch = -89.0f;
 
     perspective->fovDegrees -= input->mouse_wheel();
 
+    duk::log::debug("wheel delta: {0}", input->mouse_wheel());
     if (perspective->fovDegrees < 1.0f)
         perspective->fovDegrees = 1.0f;
     if (perspective->fovDegrees > 45.0f)
@@ -139,9 +136,16 @@ void CameraSystem::update() {
         inputOffset += glm::vec3(0.0f, -1.0f, 0.0f);
     }
 
+    if(input->mouse(duk::platform::MouseButton::RIGHT)) {
+        if(xOffset != 0.0f || yOffset != 0.0f) {
+            rotation->value = glm::lookAt(position->value, position->value + front, up);
+        }
+
+    }
+
     inputOffset = rotation->value * inputOffset;
 
-    position->value += inputOffset * settings->speed * deltaTime;
+    position->value += inputOffset * controller->speed * deltaTime;
 }
 
 }

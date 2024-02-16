@@ -27,6 +27,10 @@ duk::engine::Input::Input(const InputCreateInfo &inputCreateInfo) {
     m_listener.listen(inputCreateInfo.window->mouse_button_event,[this](duk::platform::MouseButton mouseButton, duk::platform::KeyAction action) {
          switch (action) {
               case platform::KeyAction::PRESS:
+                  if(m_mouse.find(mouseButton) != m_mouse.end()){
+                      break;
+                  }
+
                   m_pressedMouseButton.insert(mouseButton);
                   m_mouse.insert(mouseButton);
                   break;
@@ -42,9 +46,8 @@ duk::engine::Input::Input(const InputCreateInfo &inputCreateInfo) {
         m_mouseY = y;
     });
 
-    m_listener.listen(inputCreateInfo.window->mouse_wheel_movement_event, [this](uint32_t x, uint32_t y) {
-        m_mouseX = x;
-        m_mouseY = y;
+    m_listener.listen(inputCreateInfo.window->mouse_wheel_movement_event, [this](float x, float wheelDelta) {
+        m_mouseWheel = wheelDelta;
     });
 }
 
@@ -67,6 +70,11 @@ bool duk::engine::Input::mouse_down(duk::platform::MouseButton mouseButton) {
 bool duk::engine::Input::mouse_up(duk::platform::MouseButton mouseButton) {
     return m_releasedMouseButton.find(mouseButton) != m_releasedMouseButton.end();
 }
+
+bool duk::engine::Input::mouse(duk::platform::MouseButton mouseButton) {
+    return m_mouse.find(mouseButton) != m_mouse.end();
+}
+
 
 void duk::engine::Input::refresh() {
     m_pressedKeys.clear();
