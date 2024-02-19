@@ -31,11 +31,7 @@ private:
 
 template<typename T>
 void DependencySolver::solve(ResourceT<T>& resource) {
-    const bool alreadyInserted = m_dependencies.find(resource.id()) != m_dependencies.end();
     m_dependencies.insert(resource.id());
-    if (!alreadyInserted) {
-        solve_resources(this, *resource); // get dependencies of this resource
-    }
 }
 
 template<typename T>
