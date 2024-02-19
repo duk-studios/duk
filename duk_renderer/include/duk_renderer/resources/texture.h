@@ -20,6 +20,10 @@ public:
 
     Texture();
 
+    Texture(const ImageResource& image);
+
+    Texture(const ImageResource& image, const duk::rhi::Sampler& sampler);
+
     DUK_NO_DISCARD ImageResource& image();
 
     DUK_NO_DISCARD const ImageResource& image() const;

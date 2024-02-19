@@ -2,13 +2,22 @@
 /// texture.cpp
 
 #include <duk_renderer/resources/texture.h>
-#include <duk_renderer/pools/image_pool.h>
 
 namespace duk::renderer {
 
 Texture::Texture() :
-    m_image(duk::resource::Id(0)),
-    m_sampler(duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE) {
+    Texture(duk::resource::Id(0), kDefaultTextureSampler) {
+
+}
+
+Texture::Texture(const ImageResource& image) :
+    Texture(image, kDefaultTextureSampler) {
+
+}
+
+Texture::Texture(const ImageResource& image, const rhi::Sampler& sampler) :
+    m_image(image),
+    m_sampler(sampler) {
 
 }
 
