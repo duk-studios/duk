@@ -16,8 +16,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 4,
-          "material": 100001
+          "mesh": 10004,
+          "material": 1000009
         }
       ]
     },
@@ -37,8 +37,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 4,
-          "material": 100005
+          "mesh": 10004,
+          "material": 1000007
         }
       ]
     },
@@ -58,8 +58,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 4,
-          "material": 100003
+          "mesh": 10004,
+          "material": 1000005
         }
       ]
     },
@@ -79,8 +79,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 4,
-          "material": 100002
+          "mesh": 10004,
+          "material": 1000010
         }
       ]
     },
@@ -100,8 +100,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 4,
-          "material": 100004
+          "mesh": 10004,
+          "material": 1000006
         }
       ]
     },
@@ -121,8 +121,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 4,
-          "material": 100006
+          "mesh": 10004,
+          "material": 1000008
         }
       ]
     },
@@ -142,8 +142,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 1,
-          "material": 101
+          "mesh": 10001,
+          "material": 1000013
         }
       ]
     },
@@ -159,8 +159,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 3,
-          "material": 103
+          "mesh": 10003,
+          "material": 1000012
         },
         {
           "type": "Scale3D",

@@ -2,7 +2,7 @@
   "type": "Color",
   "color": "1;1;1;1",
   "texture": {
-    "image": 54,
+    "image": 1000003,
     "sampler": {
       "wrap": "clamp-edge",
       "filter": "linear"

@@ -1,7 +1,5 @@
 {
   "type": "mat",
-  "id": 100006,
-  "file": "magenta.mat",
-  "dependencies": [
-  ]
+  "id": 1000008,
+  "file": "magenta.mat"
 }

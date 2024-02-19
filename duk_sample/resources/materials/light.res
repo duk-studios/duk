@@ -1,5 +1,5 @@
 {
   "type": "mat",
-  "id": 103,
+  "id": 1000012,
   "file": "light.mat"
 }
