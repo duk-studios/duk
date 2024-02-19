@@ -94,7 +94,7 @@ static const std::string kTypesFileIncludes[] = {
 
 TypesFileGenerator::TypesFileGenerator(const Parser& parser, const Reflector& reflector) :
     m_parser(parser),
-    m_reflector(reflector){
+    m_reflector(reflector) {
 
 }
 
@@ -103,27 +103,35 @@ void TypesFileGenerator::generate_includes(std::ostringstream& oss) {
     oss << std::endl;
 }
 
-void TypesFileGenerator::generate_type(std::ostringstream& oss, const TypeReflection& type) {
-    oss << "struct " << type.name << " {" << std::endl;
+void TypesFileGenerator::generate_type(std::ostringstream& oss, const TypeReflection& type, uint32_t indentationLevel) {
+    std::vector<char> indentationBuffer(indentationLevel, ' ');
+    std::string indentation(indentationBuffer.begin(), indentationBuffer.end());
+    oss << indentation << "struct " << type.name << " {" << std::endl;
     for (auto& member : type.members) {
-        oss << "    " << glsl_to_cpp(member.typeName) << " " << member.name;
+        oss << indentation << "    " << glsl_to_cpp(member.typeName) << " " << member.name;
         if (member.arraySize) {
             oss << '[' << member.arraySize << ']';
         }
         oss << ';' << std::endl;
         if (member.paddedSize > member.size) {
             auto padding = member.paddedSize - member.size;
-            oss << "    uint8_t _padding_" << member.name << '[' << padding << "];" << std::endl;
+            oss << indentation << "    uint8_t _padding_" << member.name << '[' << padding << "];" << std::endl;
         }
     }
-    oss << "};" << std::endl;
+    oss << indentation << "};" << std::endl;
 }
 
-void TypesFileGenerator::generate_types(std::ostringstream& oss, const std::vector<TypeReflection>& types) {
+void TypesFileGenerator::generate_types(std::ostringstream& oss, const std::vector<TypeReflection>& types, uint32_t indentationLevel) {
     for (const auto& type : types) {
-        generate_type(oss, type);
+        generate_type(oss, type, indentationLevel);
         oss << std::endl;
     }
+}
+
+std::string TypesFileGenerator::generate_types(const std::vector<TypeReflection>& types, uint32_t indentationLevel) {
+    std::ostringstream oss;
+    generate_types(oss, types, indentationLevel);
+    return oss.str();
 }
 
 void TypesFileGenerator::generate_binding_alias(std::ostringstream& oss, const BindingReflection& binding) {

@@ -13,11 +13,11 @@ namespace duk::material_generator {
 namespace detail {
 
 static std::string descriptor_set_file_name(const Parser& parser) {
-    return parser.output_material_name() + "_descriptor_sets";
+    return parser.output_material_name() + "_descriptors";
 }
 
 static std::string descriptor_set_class_name(const Parser& parser) {
-    return duk::tools::snake_to_pascal(parser.output_material_name()) + "DescriptorSet";
+    return duk::tools::snake_to_pascal(parser.output_material_name()) + "Descriptors";
 }
 
 static std::string generate_bindings(const Reflector::Bindings& bindings) {
@@ -32,6 +32,17 @@ static std::string generate_bindings(const Reflector::Bindings& bindings) {
     return oss.str();
 }
 
+static std::vector<BindingReflection> extract_local_bindings(const Parser& parser, std::span<const BindingReflection> bindings) {
+    std::vector<BindingReflection> localBindings;
+    for (auto& binding: bindings) {
+        if (parser.is_global_binding(binding.typeName)) {
+            continue;
+        }
+        localBindings.push_back(binding);
+    }
+    return localBindings;
+}
+
 static std::string descriptor_set_header_include_path(const Parser& parser, const std::string& fileName) {
     auto absoluteIncludeDirectory = parser.output_include_directory();
     auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/resources/materials/");
@@ -43,70 +54,26 @@ static std::string descriptor_set_header_include_path(const Parser& parser, cons
 
 
 const char* kDescriptorSetClassDeclarationTemplate = R"(
-struct TemplateClassNameCreateInfo {
-    duk::rhi::RHI* rhi;
-    const TemplateShaderDataSourceClassName* shaderDataSource;
-};
-
 class TemplateClassName {
 public:
 
-    enum class Bindings : uint32_t TemplateBindings;
+    enum Bindings : uint32_t TemplateBindings;
 
-public:
+    static constexpr uint32_t kDescriptorCount = TemplateBindingCount;
 
-    TemplateClassName(const TemplateClassNameCreateInfo& descriptorSetCreateInfo);
-
-    void set(Bindings binding, const duk::rhi::Descriptor& descriptor);
-
-    duk::rhi::Descriptor& at(Bindings binding);
-
-    duk::rhi::Descriptor& at(uint32_t bindingIndex);
-
-    duk::rhi::DescriptorSet* handle();
-
-    void flush();
-
-private:
-    std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
+TemplateTypes
 };
 )";
 
 const char* kDescriptorSetClassImplementationTemplate = R"(
-TemplateClassName::TemplateClassName(const TemplateClassNameCreateInfo& createInfo) {
 
-    duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
-    descriptorSetCreateInfo.description = createInfo.shaderDataSource->descriptor_set_descriptions().at(0);
 
-    m_descriptorSet = createInfo.rhi->create_descriptor_set(descriptorSetCreateInfo);
-}
-
-void TemplateClassName::set(TemplateClassName::Bindings binding, const duk::rhi::Descriptor& descriptor) {
-    m_descriptorSet->set(static_cast<uint32_t>(binding), descriptor);
-}
-
-duk::rhi::Descriptor& TemplateClassName::at(TemplateClassName::Bindings binding) {
-    return m_descriptorSet->at(static_cast<uint32_t>(binding));
-}
-
-duk::rhi::Descriptor& TemplateClassName::at(uint32_t bindingIndex) {
-    return m_descriptorSet->at(bindingIndex);
-}
-
-duk::rhi::DescriptorSet* TemplateClassName::handle() {
-    return m_descriptorSet.get();
-}
-
-void TemplateClassName::flush() {
-    m_descriptorSet->flush();
-}
 )";
 
 }
 
 DescriptorSetFileGenerator::DescriptorSetFileGenerator(const Parser& parser, const Reflector& reflector, const ShaderDataSourceFileGenerator& shaderDataSourceFileGenerator) :
-    m_parser(parser),
-    m_reflector(reflector),
+    TypesFileGenerator(parser, reflector),
     m_shaderDataSourceFileGenerator(shaderDataSourceFileGenerator) {
 
     m_fileName = detail::descriptor_set_file_name(m_parser);
@@ -134,6 +101,7 @@ DescriptorSetFileGenerator::DescriptorSetFileGenerator(const Parser& parser, con
 
 void DescriptorSetFileGenerator::generate_header_file_content(std::ostringstream& oss) {
     std::string includes[] = {
+            "duk_renderer/resources/materials/material_descriptor_set.h",
             m_shaderDataSourceFileGenerator.output_header_include_path(),
             "duk_rhi/rhi.h"
     };
@@ -169,7 +137,8 @@ void DescriptorSetFileGenerator::generate_class_declaration(std::ostringstream& 
     auto classDeclaration = std::regex_replace(detail::kDescriptorSetClassDeclarationTemplate, std::regex("TemplateClassName"), m_className);
     classDeclaration = std::regex_replace(classDeclaration, std::regex("TemplateShaderDataSourceClassName"), m_shaderDataSourceFileGenerator.output_shader_data_source_class_name());
     classDeclaration = std::regex_replace(classDeclaration, std::regex("TemplateBindings"), detail::generate_bindings(descriptorSet.bindings));
-
+    classDeclaration = std::regex_replace(classDeclaration, std::regex("TemplateBindingCount"), std::to_string(descriptorSet.bindings.size()));
+    classDeclaration = std::regex_replace(classDeclaration, std::regex("TemplateTypes"), generate_types(extract_types(detail::extract_local_bindings(m_parser, descriptorSet.bindings)), 4));
     oss << classDeclaration;
 }
 

@@ -10,7 +10,6 @@
 namespace duk::material_generator {
 
 Generator::Generator(const Parser& parser, const Reflector& reflector) {
-    LocalTypesFileGenerator localTypesFileGenerator(parser, reflector);
     GlobalTypesFileGenerator globalTypesFileGenerator(parser, reflector);
     ShaderDataSourceFileGenerator shaderDataSourceFileGenerator(parser, reflector);
     DescriptorSetFileGenerator descriptorSetFileGenerator(parser, reflector, shaderDataSourceFileGenerator);

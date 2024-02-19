@@ -151,9 +151,10 @@ function(add_material_generate_command PACKED_ENTRY)
     #message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
 
     set(OUTPUT_FILES)
-    list(APPEND OUTPUT_FILES "${MATERIAL_INC_DIR}/${NAME}_types.h")
     list(APPEND OUTPUT_FILES "${MATERIAL_INC_DIR}/${NAME}_shader_data_source.h")
     list(APPEND OUTPUT_FILES "${MATERIAL_SRC_DIR}/${NAME}_shader_data_source.cpp")
+    list(APPEND OUTPUT_FILES "${MATERIAL_INC_DIR}/${NAME}_descriptors.h")
+    list(APPEND OUTPUT_FILES "${MATERIAL_SRC_DIR}/${NAME}_descriptors.cpp")
 
     list(APPEND GENERATED_FILES ${OUTPUT_FILES})
     set(GENERATED_FILES "${GENERATED_FILES}" CACHE STRING "" FORCE)

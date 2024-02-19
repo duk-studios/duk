@@ -19,9 +19,11 @@ protected:
 
     void generate_includes(std::ostringstream& oss);
 
-    void generate_type(std::ostringstream& oss, const TypeReflection& type);
+    void generate_type(std::ostringstream& oss, const TypeReflection& type, uint32_t indentationLevel = 0);
 
-    void generate_types(std::ostringstream& oss, const std::vector<TypeReflection>& types);
+    void generate_types(std::ostringstream& oss, const std::vector<TypeReflection>& types, uint32_t indentationLevel = 0);
+
+    std::string generate_types(const std::vector<TypeReflection>& types, uint32_t indentationLevel = 0);
 
     void generate_binding_alias(std::ostringstream& oss, const BindingReflection& bindingReflection);
 
