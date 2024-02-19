@@ -92,18 +92,18 @@ static duk::rhi::Sampler::Filter parse_filter(const char* str) {
 
 template<>
 inline void from_json<duk::rhi::Sampler::WrapMode>(const rapidjson::Value& jsonObject, duk::rhi::Sampler::WrapMode& object) {
-    object = detail::parse_wrap_mode(jsonObject.GetString());
+    object = detail::parse_wrap_mode(from_json<const char*>(jsonObject));
 }
 
 template<>
 inline void from_json<duk::rhi::Sampler::Filter>(const rapidjson::Value& jsonObject, duk::rhi::Sampler::Filter& object) {
-    object = detail::parse_filter(jsonObject.GetString());
+    object = detail::parse_filter(from_json<const char*>(jsonObject));
 }
 
 template<>
 inline void from_json<duk::rhi::Sampler>(const rapidjson::Value& jsonObject, duk::rhi::Sampler& object) {
-    object.filter = from_json<duk::rhi::Sampler::Filter>(jsonObject["filter"]);
-    object.wrapMode = from_json<duk::rhi::Sampler::WrapMode>(jsonObject["wrap"]);
+    object.filter = from_json_member<duk::rhi::Sampler::Filter>(jsonObject, "filter", duk::rhi::Sampler::Filter::LINEAR);
+    object.wrapMode = from_json_member<duk::rhi::Sampler::WrapMode>(jsonObject, "wrap", duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE);
 }
 
 }
