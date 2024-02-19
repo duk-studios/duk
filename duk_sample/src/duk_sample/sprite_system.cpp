@@ -16,9 +16,14 @@ void SpriteSystem::init() {
     auto engine = this->engine();
     auto scene = engine->scene();
 
-    // sprite testing
-    auto spriteColorMaterial = engine->renderer()->material_pool()->create_sprite_color(duk::resource::Id(1001));
     auto sprite = engine->renderer()->sprite_pool()->white_square();
+
+    duk::renderer::SpriteColorMaterialDataSource materialDataSource = {};
+    materialDataSource.color = glm::vec4(1);
+    materialDataSource.image = sprite->image();
+
+    // sprite testing
+    auto spriteColorMaterial = engine->renderer()->material_pool()->create(duk::resource::Id(1001), &materialDataSource);
 
     auto object = scene->add_object();
 
