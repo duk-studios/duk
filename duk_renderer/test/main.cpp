@@ -16,6 +16,7 @@
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/material_pool.h>
+#include <duk_renderer/pools/image_pool.h>
 #include <duk_tools/timer.h>
 #include <duk_log/log.h>
 
@@ -85,7 +86,7 @@ int main() {
     auto globalLightPosition = globalLight.add<duk::renderer::Position3D>();
     globalLightPosition->value = glm::vec3(0,4,-5);
     auto globalPointLight = globalLight.add<duk::renderer::PointLight>();
-    globalPointLight->value.color = glm::vec3(1.0f,0.0f,0.0f);
+    globalPointLight->value.color = glm::vec3(1.0f,1.0f,1.0f);
     globalPointLight->value.intensity = 5.0f;
 
     //And finally adding the cube to the scene.
@@ -94,7 +95,15 @@ int main() {
     duk::scene::Object cubeObject = scene->add_object();
     auto cubeMeshRenderer = cubeObject.add<duk::renderer::MeshRenderer>();
     cubeMeshRenderer->mesh = renderer->mesh_pool()->cube();
-    cubeMeshRenderer->material = renderer->material_pool()->create_phong(duk::resource::Id(666));
+
+    // Create a phong material
+    duk::renderer::PhongMaterialDataSource phongMaterialDataSource = {};
+    phongMaterialDataSource.albedo = glm::vec4(0.4f, 1.0f, 0.8f, 1.0f);
+    phongMaterialDataSource.albedoTexture = renderer->image_pool()->white_image();
+    phongMaterialDataSource.specular = 32;
+    phongMaterialDataSource.specularTexture = renderer->image_pool()->white_image();
+    phongMaterialDataSource.update_hash();
+    cubeMeshRenderer->material = renderer->material_pool()->create(duk::resource::Id(666), &phongMaterialDataSource);
     auto cubePosition = cubeObject.add<duk::renderer::Position3D>();
     cubePosition->value = glm::vec3(0,0,-10);
     auto cubeScale = cubeObject.add<duk::renderer::Scale3D>();
