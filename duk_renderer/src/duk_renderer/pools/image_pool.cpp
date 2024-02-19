@@ -25,16 +25,11 @@ ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo) :
 }
 
 ImageResource ImagePool::create(duk::resource::Id resourceId, const duk::rhi::ImageDataSource* imageDataSource) {
-    duk::rhi::RHI::ImageCreateInfo imageCreateInfo = {};
-    imageCreateInfo.commandQueue = m_renderer->main_command_queue();
-    imageCreateInfo.initialLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
-    imageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::STATIC;
-    imageCreateInfo.usage = duk::rhi::Image::Usage::SAMPLED;
+    ImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageDataSource = imageDataSource;
+    imageCreateInfo.renderer = m_renderer;
 
-    auto resourceImage = m_renderer->rhi()->create_image(imageCreateInfo);
-
-    return insert(resourceId, resourceImage);
+    return insert(resourceId, std::make_shared<Image>(imageCreateInfo));
 }
 
 ImageResource ImagePool::white_image() const {
@@ -44,6 +39,5 @@ ImageResource ImagePool::white_image() const {
 ImageResource ImagePool::black_image() const {
     return m_blackImage;
 }
-
 
 }

@@ -5,14 +5,12 @@
 #ifndef DUK_RENDERER_IMAGE_POOL_H
 #define DUK_RENDERER_IMAGE_POOL_H
 
+#include <duk_renderer/resources/image.h>
 #include <duk_resource/pool.h>
-#include <duk_rhi/image.h>
 
 namespace duk::renderer {
 
 class Renderer;
-
-using ImageResource = duk::resource::ResourceT<duk::rhi::Image>;
 
 struct ImagePoolCreateInfo {
     Renderer* renderer;

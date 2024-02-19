@@ -7,10 +7,10 @@
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/brushes/generic_brush.h>
+#include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
 
 namespace duk::renderer {
-
-class FullscreenMaterial;
 
 struct PresentPassCreateInfo {
     Renderer* renderer;
@@ -32,7 +32,8 @@ private:
     PassConnection m_inColor;
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
-    std::unique_ptr<FullscreenMaterial> m_fullscreenMaterial;
+    std::unique_ptr<Material> m_fullscreenMaterial;
+    FullscreenMaterialDescriptorSet* m_fullscreenMaterialDescriptorSet;
 };
 
 }
