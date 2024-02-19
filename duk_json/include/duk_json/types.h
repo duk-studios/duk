@@ -39,6 +39,35 @@ T from_json(const rapidjson::Value& jsonObject) {
     return object;
 }
 
+template<typename T>
+std::unique_ptr<T> make_unique_from_json(const rapidjson::Value& jsonObject) {
+    return std::make_unique<T>(from_json<T>(jsonObject));
+}
+
+template<typename T>
+std::shared_ptr<T> make_shared_from_json(const rapidjson::Value& jsonObject) {
+    return std::make_shared<T>(from_json<T>(jsonObject));
+}
+
+template<typename T>
+T from_json_member(const rapidjson::Value& jsonObject, const char* memberName, const T& defaultValue = {}) {
+    auto it = jsonObject.FindMember(memberName);
+    if (it == jsonObject.MemberEnd()) {
+        return defaultValue;
+    }
+    return from_json<T>(it->value);
+}
+
+template<typename T>
+std::unique_ptr<T> make_unique_from_json_member(const rapidjson::Value& jsonObject, const char* memberName, const T& defaultValue) {
+    return std::make_unique<T>(from_json_member<T>(jsonObject, memberName, defaultValue));
+}
+
+template<typename T>
+std::shared_ptr<T> make_shared_from_json(const rapidjson::Value& jsonObject, const char* memberName, const T& defaultValue) {
+    return std::make_shared<T>(from_json_member<T>(jsonObject, memberName, defaultValue));
+}
+
 template<>
 inline void from_json<glm::vec2>(const rapidjson::Value& jsonObject, glm::vec2& object) {
     object = detail::parse_vec<glm::vec2>(jsonObject);
