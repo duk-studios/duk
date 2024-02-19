@@ -26,10 +26,7 @@ public:
 private:
 
     template<typename T>
-    using BaseResourceType = typename BaseResource<T>::Type;
-
-    template<typename T>
-    PoolT<ResourceT<BaseResourceType<T>>>* find_pool();
+    PoolT<ResourceT<T>>* find_pool();
 
     template<typename T>
     static std::type_index type_index();
@@ -41,7 +38,7 @@ private:
 
 template<typename T>
 std::type_index ReferenceSolver::type_index() {
-    return typeid(BaseResourceType<T>);
+    return typeid(T);
 }
 
 template<typename T>
@@ -66,13 +63,13 @@ void ReferenceSolver::solve(T& object) {
 }
 
 template<typename T>
-PoolT<ResourceT<ReferenceSolver::BaseResourceType<T>>>* ReferenceSolver::find_pool() {
+PoolT<ResourceT<T>>* ReferenceSolver::find_pool() {
     const std::type_index type = type_index<T>();
     auto it = m_pools.find(type);
     if (it == m_pools.end()) {
         return nullptr;
     }
-    return dynamic_cast<PoolT<ResourceT<BaseResourceType<T>>>*>(it->second);
+    return dynamic_cast<PoolT<ResourceT<T>>*>(it->second);
 }
 
 }
