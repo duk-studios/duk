@@ -1,9 +1,11 @@
 {
   "type": "Color",
-  "base-color": "1;1;1",
-  "base-color-image": 53,
-  "base-color-sampler": {
-    "wrap": "clamp-edge",
-    "filter": "linear"
+  "color": "1;1;1;1",
+  "texture": {
+    "image": 1000004,
+    "sampler": {
+      "wrap": "clamp-edge",
+      "filter": "linear"
+    }
   }
 }

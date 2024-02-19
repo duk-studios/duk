@@ -2,6 +2,7 @@
 // Created by rov on 1/9/2024.
 //
 #include <duk_renderer/pools/sprite_pool.h>
+#include <duk_renderer/resources/builtin_resource_ids.h>
 
 namespace duk::renderer {
 
@@ -17,7 +18,7 @@ SpritePool::SpritePool(const SpritePoolCreateInfo& spritePoolCreateInfo) :
 
         SpriteDataSource spriteDataSource(spriteDataSourceCreateInfo);
 
-        m_whiteSquareSprite = create(duk::resource::Id(10001), &spriteDataSource);
+        m_whiteSquareSprite = create(kWhiteSquareSpriteId, &spriteDataSource);
     }
 
 }

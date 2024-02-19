@@ -1,15 +1,19 @@
 {
   "type": "Phong",
-  "base-color": "0.1;1.0f;1.0",
-  "base-color-image": 1,
-  "base-color-sampler": {
-    "wrap": "clamp-edge",
-    "filter": "nearest"
+  "albedo": "0.1;1.0f;1.0",
+  "albedo-texture": {
+    "image": 1,
+    "sampler": {
+      "filter": "nearest",
+      "wrap": "clamp-edge"
+    }
   },
-  "shininess": 32,
-  "shininess-image": 1,
-  "shininess-sampler": {
-    "wrap": "clamp-edge",
-    "filter": "nearest"
+  "specular": 32,
+  "specular-texture": {
+    "image": 1,
+    "sampler": {
+      "filter": "nearest",
+      "wrap": "clamp-edge"
+    }
   }
 }

@@ -22,28 +22,23 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/resources/sprite.h
         include/duk_renderer/resources/sprite_data_source.h
         include/duk_renderer/resources/materials/globals/global_descriptors.h
-        include/duk_renderer/resources/materials/painter.h
+        include/duk_renderer/resources/materials/pipeline.h
         include/duk_renderer/resources/materials/material.h
-        include/duk_renderer/resources/materials/mesh_material.h
-        include/duk_renderer/resources/materials/sprite_material.h
+        include/duk_renderer/resources/materials/instance_buffer.h
         include/duk_renderer/resources/materials/uniform_buffer.h
         include/duk_renderer/resources/materials/storage_buffer.h
         include/duk_renderer/resources/materials/color/color_material.h
         include/duk_renderer/resources/materials/color/color_shader_data_source.h
-        include/duk_renderer/resources/materials/color/color_types.h
-        include/duk_renderer/resources/materials/color/color_descriptor_sets.h
+        include/duk_renderer/resources/materials/color/color_descriptors.h
         include/duk_renderer/resources/materials/fullscreen/fullscreen_material.h
         include/duk_renderer/resources/materials/fullscreen/fullscreen_shader_data_source.h
-        include/duk_renderer/resources/materials/fullscreen/fullscreen_types.h
-        include/duk_renderer/resources/materials/fullscreen/fullscreen_descriptor_sets.h
+        include/duk_renderer/resources/materials/fullscreen/fullscreen_descriptors.h
         include/duk_renderer/resources/materials/phong/phong_material.h
         include/duk_renderer/resources/materials/phong/phong_shader_data_source.h
-        include/duk_renderer/resources/materials/phong/phong_types.h
-        include/duk_renderer/resources/materials/phong/phong_descriptor_sets.h
+        include/duk_renderer/resources/materials/phong/phong_descriptors.h
         include/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_material.h
         include/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_shader_data_source.h
-        include/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_types.h
-        include/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptor_sets.h
+        include/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptors.h
         include/duk_renderer/resources/materials/globals/lights_types.h
         include/duk_renderer/resources/materials/globals/camera_types.h
         include/duk_renderer/resources/materials/draw_entry.h
@@ -55,6 +50,10 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/pools/material_pool.h
         include/duk_renderer/pools/sprite_pool.h
         include/duk_renderer/components/register_components.h
+        include/duk_renderer/resources/texture.h
+        include/duk_renderer/resources/image.h
+        include/duk_renderer/resources/materials/material_descriptor_set.h
+        include/duk_renderer/resources/builtin_resource_ids.h
         )
 
 set(DUK_RENDERER_SOURCES
@@ -74,24 +73,23 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/components/lighting.cpp
         src/duk_renderer/resources/sprite.cpp
         src/duk_renderer/resources/sprite_data_source.cpp
-        src/duk_renderer/resources/materials/painter.cpp
+        src/duk_renderer/resources/materials/pipeline.cpp
         src/duk_renderer/resources/materials/material.cpp
-        src/duk_renderer/resources/materials/mesh_material.cpp
-        src/duk_renderer/resources/materials/sprite_material.cpp
+        src/duk_renderer/resources/materials/instance_buffer.cpp
         src/duk_renderer/resources/materials/uniform_buffer.cpp
         src/duk_renderer/resources/materials/storage_buffer.cpp
         src/duk_renderer/resources/materials/color/color_material.cpp
         src/duk_renderer/resources/materials/color/color_shader_data_source.cpp
-        src/duk_renderer/resources/materials/color/color_descriptor_sets.cpp
+        src/duk_renderer/resources/materials/color/color_descriptors.cpp
         src/duk_renderer/resources/materials/fullscreen/fullscreen_material.cpp
         src/duk_renderer/resources/materials/fullscreen/fullscreen_shader_data_source.cpp
-        src/duk_renderer/resources/materials/fullscreen/fullscreen_descriptor_sets.cpp
+        src/duk_renderer/resources/materials/fullscreen/fullscreen_descriptors.cpp
         src/duk_renderer/resources/materials/phong/phong_material.cpp
         src/duk_renderer/resources/materials/phong/phong_shader_data_source.cpp
-        src/duk_renderer/resources/materials/phong/phong_descriptor_sets.cpp
+        src/duk_renderer/resources/materials/phong/phong_descriptors.cpp
         src/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_material.cpp
         src/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_shader_data_source.cpp
-        src/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptor_sets.cpp
+        src/duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptors.cpp
         src/duk_renderer/resources/materials/globals/global_descriptors.cpp
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp
@@ -101,6 +99,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/pools/material_pool.cpp
         src/duk_renderer/pools/sprite_pool.cpp
         src/duk_renderer/components/register_components.cpp
+        src/duk_renderer/resources/texture.cpp
+        src/duk_renderer/resources/image.cpp
+        src/duk_renderer/resources/materials/material_descriptor_set.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

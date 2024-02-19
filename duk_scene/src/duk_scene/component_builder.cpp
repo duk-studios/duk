@@ -7,11 +7,6 @@
 
 namespace duk::scene {
 
-ComponentBuilder::ComponentBuilder(const ComponentBuilderCreateInfo& componentBuilderCreateInfo) :
-    m_solver(componentBuilderCreateInfo.solver) {
-
-}
-
 void ComponentBuilder::build(Object& object, const rapidjson::Value& jsonObject) {
 
     auto typeIt = jsonObject.FindMember("type");

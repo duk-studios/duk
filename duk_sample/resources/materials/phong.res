@@ -1,9 +1,5 @@
 {
   "type": "mat",
-  "id": 102,
-  "file": "phong.mat",
-  "dependencies": [
-    53,
-    52
-  ]
+  "id": 1000013,
+  "file": "phong.mat"
 }

@@ -28,20 +28,6 @@ public:
 
     DUK_NO_DISCARD MaterialResource create(duk::resource::Id resourceId, const MaterialDataSource* materialDataSource);
 
-    DUK_NO_DISCARD PhongMaterialResource create_phong(duk::resource::Id resourceId);
-
-    DUK_NO_DISCARD PhongMaterialResource create_phong(duk::resource::Id resourceId, const PhongMaterialDataSource* phongMaterialDataSource);
-
-    DUK_NO_DISCARD ColorMaterialResource create_color(duk::resource::Id resourceId);
-
-    DUK_NO_DISCARD ColorMaterialResource create_color(duk::resource::Id resourceId, const ColorMaterialDataSource* colorMaterialDataSource);
-
-    DUK_NO_DISCARD FullscreenMaterialResource create_fullscreen(duk::resource::Id resourceId);
-
-    DUK_NO_DISCARD SpriteColorMaterialResource create_sprite_color(duk::resource::Id resourceId);
-
-    DUK_NO_DISCARD SpriteColorMaterialResource create_sprite_color(duk::resource::Id resourceId, const SpriteColorMaterialDataSource* spriteColorMaterialDataSource);
-
 private:
     duk::renderer::Renderer* m_renderer;
     ImagePool* m_imagePool;

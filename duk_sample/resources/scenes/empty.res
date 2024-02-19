@@ -1,8 +1,7 @@
 {
   "type": "scn",
-  "id": 202,
+  "id": 1000015,
   "file": "sprite-test.scn",
-  "dependencies": [],
   "aliases": [
     "empty"
   ]

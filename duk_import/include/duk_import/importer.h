@@ -18,6 +18,7 @@ namespace duk::import {
 struct ImporterCreateInfo {
     duk::renderer::Renderer* renderer;
     duk::scene::ComponentBuilder* componentBuilder;
+    duk::resource::ReferenceSolver* referenceSolver;
 };
 
 class Importer {
@@ -51,6 +52,7 @@ private:
 
 private:
     duk::renderer::Renderer* m_renderer;
+    duk::resource::ReferenceSolver* m_referenceSolver;
     std::unique_ptr<ResourceImporter> m_resourceImporter;
     std::unique_ptr<SceneImporter> m_sceneImporter;
     std::vector<std::unique_ptr<ImageImporter>> m_imageImporters;

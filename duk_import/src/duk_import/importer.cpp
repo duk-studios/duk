@@ -6,16 +6,16 @@
 #include <duk_import/material/material_importer_json.h>
 #include <duk_import/resource/resource_importer_json.h>
 #include <duk_import/scene/scene_importer_json.h>
+#include <duk_renderer/resources/builtin_resource_ids.h>
 
 namespace duk::import {
 
 Importer::Importer(const ImporterCreateInfo& importerCreateInfo) :
-    m_renderer(importerCreateInfo.renderer) {
-
-    auto imagePool = m_renderer->image_pool();
+    m_renderer(importerCreateInfo.renderer),
+    m_referenceSolver(importerCreateInfo.referenceSolver) {
 
     m_imageImporters.emplace_back(std::make_unique<ImageImporterStb>(m_renderer->rhi()->capabilities()));
-    m_materialImporters.emplace_back(std::make_unique<MaterialImporterJson>(imagePool));
+    m_materialImporters.emplace_back(std::make_unique<MaterialImporterJson>());
     m_resourceImporter = std::make_unique<ResourceImporterJson>();
 
     {
@@ -93,11 +93,19 @@ std::unique_ptr<duk::scene::Scene> Importer::load_scene(duk::resource::Id id) {
         throw std::invalid_argument("scene id does not correspond to a scene resource");
     }
 
-    for (const auto& dependencyId : sceneDescription.dependencies) {
-        load_resource(dependencyId);
+    auto scene = m_sceneImporter->load(sceneDescription.path);
+
+    duk::resource::DependencySolver dependencySolver;
+
+    dependencySolver.solve(*scene);
+
+    for (auto dependency : dependencySolver.dependencies()) {
+        load_resource(dependency);
     }
 
-    return m_sceneImporter->load(sceneDescription.path);
+    m_referenceSolver->solve(*scene);
+
+    return scene;
 }
 
 std::unique_ptr<duk::scene::Scene> Importer::load_scene(const std::string& alias) {
@@ -112,6 +120,11 @@ std::unique_ptr<duk::scene::Scene> Importer::load_scene(const std::string& alias
 }
 
 void Importer::load_resource(duk::resource::Id id) {
+    if (id < duk::renderer::kMaxBuiltinResourceId) {
+        // this is a builtin resource, skip
+        return;
+    }
+
     auto& resources = m_resourceSet.resources;
 
     auto it = resources.find(id);
@@ -121,17 +134,23 @@ void Importer::load_resource(duk::resource::Id id) {
 
     const auto& resourceDescription = it->second;
 
-    for (const auto& dependencyId : resourceDescription.dependencies) {
-        load_resource(dependencyId);
-    }
-
     switch (resourceDescription.type) {
         case ResourceType::IMG:
             load_image(resourceDescription.id, resourceDescription.path);
             break;
-        case ResourceType::MAT:
-            load_material(resourceDescription.id, resourceDescription.path);
+        case ResourceType::MAT: {
+            auto material = load_material(resourceDescription.id, resourceDescription.path);
+
+            duk::resource::DependencySolver dependencySolver;
+            dependencySolver.solve(*material);
+
+            for (auto dependency : dependencySolver.dependencies()) {
+                load_resource(dependency);
+            }
+
+            m_referenceSolver->solve(*material);
             break;
+        }
         default:
             throw std::logic_error("loading unsupported resource type");
     }

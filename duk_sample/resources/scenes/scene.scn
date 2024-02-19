@@ -12,8 +12,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 2,
-          "material": 102
+          "mesh": 10003,
+          "material": 1000013
         }
       ]
     },
@@ -29,8 +29,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 3,
-          "material": 101
+          "mesh": 10002,
+          "material": 1000013
         }
       ]
     },
@@ -46,8 +46,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 1,
-          "material": 104
+          "mesh": 10002,
+          "material": 1000013
         }
       ]
     },
@@ -82,8 +82,8 @@
         },
         {
           "type": "MeshRenderer",
-          "mesh": 3,
-          "material": 103
+          "mesh": 10003,
+          "material": 1000012
         },
         {
           "type": "Scale3D",

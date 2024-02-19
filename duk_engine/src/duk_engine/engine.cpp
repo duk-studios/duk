@@ -41,17 +41,14 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
     m_referenceSolver.add_pool(m_renderer->sprite_pool());
     m_referenceSolver.add_pool(m_renderer->material_pool());
 
-    {
-        duk::scene::ComponentBuilderCreateInfo componentBuilderCreateInfo = {};
-        componentBuilderCreateInfo.solver = &m_referenceSolver;
-        m_componentBuilder = std::make_unique<duk::scene::ComponentBuilder>(componentBuilderCreateInfo);
-    }
+    m_componentBuilder = std::make_unique<duk::scene::ComponentBuilder>();
 
     duk::renderer::register_components(m_componentBuilder.get());
 
     duk::import::ImporterCreateInfo importerCreateInfo = {};
     importerCreateInfo.renderer = m_renderer.get();
     importerCreateInfo.componentBuilder = m_componentBuilder.get();
+    importerCreateInfo.referenceSolver = &m_referenceSolver;
 
     m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
 

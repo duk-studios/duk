@@ -22,7 +22,7 @@ public:
 
     explicit UniformBuffer(const UniformBufferCreateInfo<T>& uniformBufferCreateInfo);
 
-    DUK_NO_DISCARD operator duk::rhi::Descriptor() const;
+    DUK_NO_DISCARD duk::rhi::Descriptor descriptor() const;
 
     DUK_NO_DISCARD T& data();
 
@@ -53,7 +53,7 @@ UniformBuffer<T>::UniformBuffer(const UniformBufferCreateInfo<T>& uniformBufferC
 }
 
 template<typename T>
-UniformBuffer<T>::operator duk::rhi::Descriptor() const {
+duk::rhi::Descriptor UniformBuffer<T>::descriptor() const {
     return duk::rhi::Descriptor::uniform_buffer(m_buffer.get());
 }
 

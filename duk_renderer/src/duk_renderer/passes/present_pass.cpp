@@ -3,7 +3,7 @@
 
 #include <duk_renderer/passes/present_pass.h>
 #include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
-#include <duk_renderer/resources/materials/painter.h>
+#include <duk_renderer/resources/materials/pipeline.h>
 
 namespace duk::renderer {
 
@@ -30,13 +30,20 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
     }
 
     {
-        FullscreenMaterialCreateInfo fullscreenMaterialCreateInfo = {};
-        fullscreenMaterialCreateInfo.renderer = m_renderer;
+        FullscreenMaterialDataSource fullscreenMaterialDataSource = {};
+        fullscreenMaterialDataSource.sampler = duk::rhi::Sampler(duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER);
+        fullscreenMaterialDataSource.update_hash();
 
-        m_fullscreenMaterial = std::make_unique<FullscreenMaterial>(fullscreenMaterialCreateInfo);
+        MaterialCreateInfo materialCreateInfo = {};
+        materialCreateInfo.renderer = m_renderer;
+        materialCreateInfo.materialDataSource = &fullscreenMaterialDataSource;
+
+        m_fullscreenMaterial = std::make_unique<Material>(materialCreateInfo);
+
+        m_fullscreenMaterialDescriptorSet = dynamic_cast<FullscreenMaterialDescriptorSet*>(m_fullscreenMaterial->descriptor_set());
 
         // necessary when using vulkan, need to take that into account when supporting other APIs
-        m_fullscreenMaterial->painter()->invert_y(true);
+        m_fullscreenMaterial->pipeline()->invert_y(true);
     }
 }
 
@@ -45,6 +52,10 @@ PresentPass::~PresentPass() = default;
 void PresentPass::render(const Pass::RenderParams& renderParams) {
 
     if (!m_inColor.image()) {
+        return;
+    }
+
+    if (!m_fullscreenMaterialDescriptorSet) {
         return;
     }
 
@@ -59,7 +70,7 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
         m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
     }
 
-    m_fullscreenMaterial->update(m_inColor.image(), duk::rhi::Sampler{duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER});
+    m_fullscreenMaterialDescriptorSet->set_image(m_inColor.image());
 
     auto commandBuffer = renderParams.commandBuffer;
 
@@ -82,7 +93,7 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
     drawParams.outputHeight = renderParams.outputHeight;
     drawParams.renderPass = m_renderPass.get();
 
-    m_fullscreenMaterial->apply(commandBuffer, drawParams);
+    m_fullscreenMaterial->bind(commandBuffer, drawParams);
 
     // a single triangle that will cover the entire screen
     commandBuffer->draw(3, 0, 1, 0);

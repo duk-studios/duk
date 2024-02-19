@@ -28,7 +28,7 @@ public:
 
     explicit StorageBuffer(const StorageBufferCreateInfo& storageBufferCreateInfo);
 
-    DUK_NO_DISCARD operator duk::rhi::Descriptor() const;
+    DUK_NO_DISCARD duk::rhi::Descriptor descriptor() const;
 
     DUK_NO_DISCARD T& at(size_t index);
 
@@ -76,7 +76,7 @@ StorageBuffer<T>::StorageBuffer(const StorageBufferCreateInfo& storageBufferCrea
 }
 
 template<typename T>
-StorageBuffer<T>::operator duk::rhi::Descriptor() const {
+duk::rhi::Descriptor StorageBuffer<T>::descriptor() const {
     return duk::rhi::Descriptor::storage_buffer(m_buffer.get());
 }
 

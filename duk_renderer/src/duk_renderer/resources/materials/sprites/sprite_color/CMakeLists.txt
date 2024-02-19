@@ -1,4 +1,4 @@
-generate_painter_files(
+generate_material_files(
         GLSL_SOURCES
         "${CMAKE_CURRENT_SOURCE_DIR}/glsl/sprite_color.vert"
         "${CMAKE_CURRENT_SOURCE_DIR}/glsl/sprite_color.frag"

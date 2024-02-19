@@ -4,6 +4,7 @@
 
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/resources/builtin_resource_ids.h>
 #include <duk_rhi/image_data_source.h>
 
 namespace duk::renderer {
@@ -14,27 +15,22 @@ ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo) :
         duk::rhi::ImageDataSourceRGBA8U whiteImageDataSource(1, 1);
         whiteImageDataSource.at(0, 0) = {255, 255, 255, 255};
         whiteImageDataSource.update_hash();
-        m_whiteImage = create(duk::resource::Id(1), &whiteImageDataSource);
+        m_whiteImage = create(kWhiteImageId, &whiteImageDataSource);
     }
     {
         duk::rhi::ImageDataSourceRGBA8U blackImageDataSource(1, 1);
         blackImageDataSource.at(0, 0) = {0, 0, 0, 255};
         blackImageDataSource.update_hash();
-        m_blackImage = create(duk::resource::Id(2), &blackImageDataSource);
+        m_blackImage = create(kBlackImageId, &blackImageDataSource);
     }
 }
 
 ImageResource ImagePool::create(duk::resource::Id resourceId, const duk::rhi::ImageDataSource* imageDataSource) {
-    duk::rhi::RHI::ImageCreateInfo imageCreateInfo = {};
-    imageCreateInfo.commandQueue = m_renderer->main_command_queue();
-    imageCreateInfo.initialLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
-    imageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::STATIC;
-    imageCreateInfo.usage = duk::rhi::Image::Usage::SAMPLED;
+    ImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageDataSource = imageDataSource;
+    imageCreateInfo.renderer = m_renderer;
 
-    auto resourceImage = m_renderer->rhi()->create_image(imageCreateInfo);
-
-    return insert(resourceId, resourceImage);
+    return insert(resourceId, std::make_shared<Image>(imageCreateInfo));
 }
 
 ImageResource ImagePool::white_image() const {
@@ -44,6 +40,5 @@ ImageResource ImagePool::white_image() const {
 ImageResource ImagePool::black_image() const {
     return m_blackImage;
 }
-
 
 }
