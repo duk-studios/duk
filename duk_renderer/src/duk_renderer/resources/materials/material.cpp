@@ -2,21 +2,16 @@
 /// material.cpp
 
 #include <duk_renderer/resources/materials/material.h>
-#include <duk_renderer/brushes/brush.h>
 
 namespace duk::renderer {
 
-MaterialDataSource::MaterialDataSource(MaterialType type) :
-        m_type(type) {
 
-}
+Material::Material(const MaterialCreateInfo& materialCreateInfo) :
+    m_pipeline({.renderer = materialCreateInfo.renderer, .shaderDataSource = materialCreateInfo.materialDataSource->shader_data_source()}){
 
-MaterialType MaterialDataSource::type() const {
-    return m_type;
-}
-
-Material::Material(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource) :
-    m_pipeline({.renderer = renderer, .shaderDataSource = shaderDataSource}) {
+    MaterialDescriptorSetCreateInfo materialDescriptorSetCreateInfo = {};
+    materialDescriptorSetCreateInfo.renderer = materialCreateInfo.renderer;
+    m_descriptorSet = materialCreateInfo.materialDataSource->create_descriptor_set(materialDescriptorSetCreateInfo);
 }
 
 Material::~Material() = default;
@@ -27,6 +22,19 @@ Pipeline* Material::pipeline() {
 
 const Pipeline* Material::pipeline() const {
     return &m_pipeline;
+}
+
+MaterialDescriptorSet* Material::descriptor_set() {
+    return m_descriptorSet.get();
+}
+
+InstanceBuffer* Material::instance_buffer() {
+    return m_descriptorSet->instance_buffer();
+}
+
+void Material::bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& drawParams) {
+    m_pipeline.use(commandBuffer, drawParams);
+    m_descriptorSet->bind(commandBuffer, drawParams);
 }
 
 }

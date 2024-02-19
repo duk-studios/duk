@@ -6,30 +6,45 @@
 
 #include <duk_renderer/resources/materials/material.h>
 #include <duk_renderer/resources/materials/fullscreen/fullscreen_shader_data_source.h>
-#include <duk_renderer/resources/materials/fullscreen/fullscreen_descriptor_sets.h>
+#include <duk_renderer/resources/materials/fullscreen/fullscreen_descriptors.h>
 #include <duk_rhi/rhi.h>
 
 namespace duk::renderer {
 
-struct FullscreenMaterialCreateInfo {
-    Renderer* renderer;
+class FullscreenMaterialDataSource : public MaterialDataSource {
+public:
+    const duk::rhi::ShaderDataSource* shader_data_source() const override;
+
+    std::unique_ptr<MaterialDescriptorSet> create_descriptor_set(const MaterialDescriptorSetCreateInfo& materialDescriptorSetCreateInfo) const override;
+
+    duk::rhi::Sampler sampler;
+
+protected:
+    hash::Hash calculate_hash() const override;
 };
 
-class FullscreenMaterial : public Material {
+
+struct FullscreenMaterialDescriptorSetCreateInfo {
+    Renderer* renderer;
+    const FullscreenMaterialDataSource* fullscreenMaterialDataSource;
+};
+
+class FullscreenMaterialDescriptorSet : public MaterialDescriptorSet {
 public:
 
-    explicit FullscreenMaterial(const FullscreenMaterialCreateInfo& fullscreenMaterialCreateInfo);
+    explicit FullscreenMaterialDescriptorSet(const FullscreenMaterialDescriptorSetCreateInfo& fullscreenMaterialDescriptorSetCreateInfo);
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params);
+    void set_image(duk::rhi::Image* image);
 
-    void update(duk::rhi::Image* image, const duk::rhi::Sampler& sampler);
+    void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) override;
+
+    uint32_t size() const override;
 
 private:
-    FullscreenDescriptorSet m_descriptorSet;
+    std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
+    duk::rhi::Sampler m_sampler;
 
 };
-
-using FullscreenMaterialResource = duk::resource::ResourceT<FullscreenMaterial>;
 
 }
 

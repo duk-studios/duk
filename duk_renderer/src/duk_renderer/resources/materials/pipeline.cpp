@@ -4,6 +4,7 @@
 #include <duk_renderer/resources/materials/pipeline.h>
 #include <duk_renderer/resources/materials/material.h>
 #include <duk_renderer/brushes/brush.h>
+#include <duk_renderer/renderer.h>
 
 namespace duk::renderer {
 

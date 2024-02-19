@@ -4,18 +4,11 @@
 #ifndef DUK_RENDERER_COLOR_MATERIAL_H
 #define DUK_RENDERER_COLOR_MATERIAL_H
 
-#include <duk_renderer/resources/materials/mesh_material.h>
-#include <duk_renderer/resources/materials/color/color_types.h>
-#include <duk_renderer/resources/materials/color/color_descriptor_sets.h>
-#include <duk_renderer/pools/image_pool.h>
-
-#include <duk_scene/limits.h>
-#include <duk_rhi/rhi.h>
-#include <duk_rhi/descriptor_set.h>
-
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-
+#include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/resources/materials/instance_buffer.h>
+#include <duk_renderer/resources/materials/color/color_descriptors.h>
+#include <duk_renderer/resources/materials/storage_buffer.h>
+#include <duk_renderer/resources/materials/uniform_buffer.h>
 
 namespace duk::renderer {
 
@@ -23,42 +16,78 @@ class ColorMaterialDataSource : public MaterialDataSource {
 public:
     ColorMaterialDataSource();
 
-public:
+    const rhi::ShaderDataSource* shader_data_source() const override;
+
+    std::unique_ptr<MaterialDescriptorSet> create_descriptor_set(const MaterialDescriptorSetCreateInfo& materialDescriptorSetCreateInfo) const override;
+
     glm::vec4 color;
-    ImageResource baseColorImage;
-    duk::rhi::Sampler baseColorSampler;
+    Texture colorTexture;
 
 protected:
     DUK_NO_DISCARD duk::hash::Hash calculate_hash() const override;
 };
 
-struct ColorMaterialCreateInfo {
+struct ColorInstanceBufferCreateInfo {
+    Renderer* renderer;
+};
+
+class ColorInstanceBuffer : public InstanceBuffer {
+public:
+
+    ColorInstanceBuffer(const ColorInstanceBufferCreateInfo& phongInstanceBufferCreateInfo);
+
+    void insert(const scene::Object& object) override;
+
+    void clear() override;
+
+    void flush() override;
+
+    StorageBuffer<ColorDescriptors::Instance>* transform_buffer();
+
+private:
+    std::unique_ptr<StorageBuffer<ColorDescriptors::Instance>> m_transformSBO;
+};
+
+struct ColorMaterialDescriptorSetCreateInfo {
     Renderer* renderer;
     const ColorMaterialDataSource* colorMaterialDataSource;
 };
 
-class ColorMaterial : public MeshMaterial {
+class ColorMaterialDescriptorSet : public MaterialDescriptorSet {
 public:
 
-    explicit ColorMaterial(const ColorMaterialCreateInfo& colorMaterialCreateInfo);
+    explicit ColorMaterialDescriptorSet(const ColorMaterialDescriptorSetCreateInfo& colorMaterialDescriptorSetCreateInfo);
 
     void set_color(const glm::vec4& color);
 
-    void flush_instances() override;
+    void set_color_texture(const Texture& colorTexture);
 
-    void insert_instance(const InsertInstanceParams& params) override;
+    void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) override;
 
-    void clear_instances() override;
+    uint32_t size() const override;
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) override;
+    ImageResource& image_at(uint32_t index) override;
+
+    bool is_image(uint32_t index) override;
+
+    InstanceBuffer* instance_buffer() override;
 
 private:
-    std::unique_ptr<color::InstanceSBO> m_instanceSBO;
-    std::unique_ptr<color::MaterialUBO> m_materialUBO;
-    ColorDescriptorSet m_descriptorSet;
+    std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
+    std::unique_ptr<ColorInstanceBuffer> m_instanceBuffer;
+    std::unique_ptr<UniformBuffer<ColorDescriptors::Material>> m_materialUBO;
+    Texture m_colorTexture;
 };
 
-using ColorMaterialResource = duk::resource::ResourceT<ColorMaterial>;
+}
+
+namespace duk::json {
+
+template<>
+inline void from_json<duk::renderer::ColorMaterialDataSource>(const rapidjson::Value& jsonObject, duk::renderer::ColorMaterialDataSource& colorMaterialDataSource) {
+    colorMaterialDataSource.color = from_json_member<glm::vec4>(jsonObject, "color", glm::vec4(1));
+    colorMaterialDataSource.colorTexture = from_json_member<duk::renderer::Texture>(jsonObject, "texture");
+}
 
 }
 

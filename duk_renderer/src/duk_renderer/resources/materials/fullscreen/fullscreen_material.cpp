@@ -2,26 +2,56 @@
 /// fullscreen_material.cpp
 
 #include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
+#include <duk_renderer/renderer.h>
 
 namespace duk::renderer {
 
+namespace detail {
+
 static const FullscreenShaderDataSource kFullscreenShaderDataSource;
 
-FullscreenMaterial::FullscreenMaterial(const FullscreenMaterialCreateInfo& fullscreenMaterialCreateInfo) :
-    Material(fullscreenMaterialCreateInfo.renderer, &kFullscreenShaderDataSource),
-    m_descriptorSet({fullscreenMaterialCreateInfo.renderer->rhi(), &kFullscreenShaderDataSource}) {
-
 }
 
-void FullscreenMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
-    pipeline()->use(commandBuffer, params);
-    commandBuffer->bind_descriptor_set(m_descriptorSet.handle(), 0);
+const duk::rhi::ShaderDataSource* FullscreenMaterialDataSource::shader_data_source() const {
+    return &detail::kFullscreenShaderDataSource;
 }
 
-void FullscreenMaterial::update(duk::rhi::Image* image, const duk::rhi::Sampler& sampler) {
-    m_descriptorSet.set(FullscreenDescriptorSet::Bindings::uTexture, duk::rhi::Descriptor::image_sampler(image, duk::rhi::Image::Layout::SHADER_READ_ONLY, sampler));
-    m_descriptorSet.flush();
+std::unique_ptr<MaterialDescriptorSet> FullscreenMaterialDataSource::create_descriptor_set(const MaterialDescriptorSetCreateInfo& materialDescriptorSetCreateInfo) const {
+    FullscreenMaterialDescriptorSetCreateInfo fullscreenMaterialDescriptorSetCreateInfo = {};
+    fullscreenMaterialDescriptorSetCreateInfo.renderer = materialDescriptorSetCreateInfo.renderer;
+    fullscreenMaterialDescriptorSetCreateInfo.fullscreenMaterialDataSource = this;
+    return std::make_unique<FullscreenMaterialDescriptorSet>(fullscreenMaterialDescriptorSetCreateInfo);
 }
 
+hash::Hash FullscreenMaterialDataSource::calculate_hash() const {
+    duk::hash::Hash hash = 0;
+    duk::hash::hash_combine(hash, sampler);
+    return hash;
+}
+
+FullscreenMaterialDescriptorSet::FullscreenMaterialDescriptorSet(const FullscreenMaterialDescriptorSetCreateInfo& fullscreenMaterialDescriptorSetCreateInfo) {
+    auto rhi = fullscreenMaterialDescriptorSetCreateInfo.renderer->rhi();
+    auto materialDataSource = fullscreenMaterialDescriptorSetCreateInfo.fullscreenMaterialDataSource;
+    auto shaderDataSource = materialDataSource->shader_data_source();
+
+    duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
+    descriptorSetCreateInfo.description = shaderDataSource->descriptor_set_descriptions().at(0);
+    m_descriptorSet = rhi->create_descriptor_set(descriptorSetCreateInfo);
+
+    m_sampler = materialDataSource->sampler;
+}
+
+void FullscreenMaterialDescriptorSet::set_image(duk::rhi::Image* image) {
+    m_descriptorSet->set(FullscreenDescriptors::uTexture, duk::rhi::Descriptor::image_sampler(image, rhi::Image::Layout::SHADER_READ_ONLY, m_sampler));
+    m_descriptorSet->flush();
+}
+
+void FullscreenMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
+    commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
+}
+
+uint32_t FullscreenMaterialDescriptorSet::size() const {
+    return FullscreenDescriptors::kDescriptorCount;
+}
 
 }

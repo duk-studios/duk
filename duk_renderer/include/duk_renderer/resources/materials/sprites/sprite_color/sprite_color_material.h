@@ -5,10 +5,11 @@
 #ifndef DUK_RENDERER_SPRITE_COLOR_MATERIAL_H
 #define DUK_RENDERER_SPRITE_COLOR_MATERIAL_H
 
-#include <duk_renderer/resources/materials/sprite_material.h>
-#include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_types.h>
+#include <duk_renderer/resources/materials/material.h>
 #include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_shader_data_source.h>
-#include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptor_sets.h>
+#include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptors.h>
+#include <duk_renderer/resources/materials/uniform_buffer.h>
+#include <cstdint>
 
 namespace duk::renderer {
 
@@ -17,45 +18,41 @@ public:
 
     SpriteColorMaterialDataSource();
 
+    const rhi::ShaderDataSource* shader_data_source() const override;
+
+    std::unique_ptr<MaterialDescriptorSet> create_descriptor_set(const MaterialDescriptorSetCreateInfo& materialDescriptorSetCreateInfo) const override;
+
     glm::vec4 color;
+    ImageResource image;
 
 protected:
     hash::Hash calculate_hash() const override;
 };
 
-
-struct SpriteColorMaterialCreateInfo {
+struct SpriteColorMaterialDescriptorSetCreateInfo {
     Renderer* renderer;
     const SpriteColorMaterialDataSource* spriteColorMaterialDataSource;
 };
 
-class SpriteColorMaterial : public SpriteMaterial {
+class SpriteColorMaterialDescriptorSet : public MaterialDescriptorSet {
 public:
-    explicit SpriteColorMaterial(const SpriteColorMaterialCreateInfo& spriteColorMaterialCreateInfo);
+    explicit SpriteColorMaterialDescriptorSet(const SpriteColorMaterialDescriptorSetCreateInfo& spriteColorMaterialCreateInfo);
 
     void set_color(const glm::vec4& color);
 
-    DUK_NO_DISCARD uint32_t get_sub_material_index(const PushSpriteParams& params) override;
+    uint32_t size() const override;
 
-    void apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params, uint32_t subMaterialIndex) override;
+    ImageResource& image_at(uint32_t index) override;
 
-    void clear_sub_materials() override;
+    bool is_image(uint32_t index) override;
 
-protected:
-
-    std::unique_ptr<SpriteColorDescriptorSet> allocate_descriptor_set(const PushSpriteParams& params);
-
-    void update_sub_material(SpriteColorDescriptorSet* descriptorSet, const SpriteMaterial::PushSpriteParams& params);
+    void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& drawParams) override;
 
 private:
-    Renderer* m_renderer;
-    std::unique_ptr<sprite_color::MaterialUBO> m_materialUBO;
-    std::unordered_map<uint32_t, size_t> m_handleToDescriptorSetIndex;
-    std::vector<std::unique_ptr<SpriteColorDescriptorSet>> m_descriptorSets;
-    size_t m_usedDescriptorSets;
+    std::unique_ptr<UniformBuffer<SpriteColorDescriptors::Material>> m_materialUBO;
+    std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
+    ImageResource m_image;
 };
-
-using SpriteColorMaterialResource = duk::resource::ResourceT<SpriteColorMaterial>;
 
 }
 

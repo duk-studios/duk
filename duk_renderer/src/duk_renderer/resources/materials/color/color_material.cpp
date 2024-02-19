@@ -1,89 +1,143 @@
 /// 12/09/2023
 /// color_material.cpp
 
+#include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/color/color_material.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_renderer/components/transform.h>
 
 namespace duk::renderer {
 
+namespace detail {
+
 static const ColorShaderDataSource kColorShaderDataSource;
 
-ColorMaterialDataSource::ColorMaterialDataSource() :
-    MaterialDataSource(MaterialType::COLOR),
-    color(),
-    baseColorImage(),
-    baseColorSampler(rhi::Sampler::Filter::NEAREST, rhi::Sampler::WrapMode::REPEAT) {
+}
 
+ColorMaterialDataSource::ColorMaterialDataSource() :
+    color(glm::vec4(1)),
+    colorTexture() {
+
+}
+
+const duk::rhi::ShaderDataSource* ColorMaterialDataSource::shader_data_source() const {
+    return &detail::kColorShaderDataSource;
+}
+
+std::unique_ptr<MaterialDescriptorSet> ColorMaterialDataSource::create_descriptor_set(const MaterialDescriptorSetCreateInfo& materialDescriptorSetCreateInfo) const {
+    ColorMaterialDescriptorSetCreateInfo colorMaterialDescriptorSetCreateInfo = {};
+    colorMaterialDescriptorSetCreateInfo.renderer = materialDescriptorSetCreateInfo.renderer;
+    colorMaterialDescriptorSetCreateInfo.colorMaterialDataSource = this;
+    return std::make_unique<ColorMaterialDescriptorSet>(colorMaterialDescriptorSetCreateInfo);
 }
 
 duk::hash::Hash ColorMaterialDataSource::calculate_hash() const {
     duk::hash::Hash hash = 0;
     duk::hash::hash_combine(hash, color);
-    duk::hash::hash_combine(hash, baseColorImage.id());
-    duk::hash::hash_combine(hash, baseColorSampler);
+    duk::hash::hash_combine(hash, colorTexture);
     return hash;
+
 }
 
-ColorMaterial::ColorMaterial(const ColorMaterialCreateInfo& colorMaterialCreateInfo) :
-    MeshMaterial(colorMaterialCreateInfo.renderer, &kColorShaderDataSource),
-    m_descriptorSet({colorMaterialCreateInfo.renderer->rhi(), &kColorShaderDataSource}){
+ColorInstanceBuffer::ColorInstanceBuffer(const ColorInstanceBufferCreateInfo& colorInstanceBufferCreateInfo) {
+    auto rhi = colorInstanceBufferCreateInfo.renderer->rhi();
+    auto commandQueue = colorInstanceBufferCreateInfo.renderer->main_command_queue();
 
-    auto rhi = colorMaterialCreateInfo.renderer->rhi();
-    auto commandQueue = colorMaterialCreateInfo.renderer->main_command_queue();
+    StorageBufferCreateInfo transformSBOCreateInfo = {};
+    transformSBOCreateInfo.rhi = rhi;
+    transformSBOCreateInfo.commandQueue = commandQueue;
+    transformSBOCreateInfo.initialSize = 1;
+    m_transformSBO = std::make_unique<StorageBuffer<ColorDescriptors::Instance>>(transformSBOCreateInfo);
+}
+
+void ColorInstanceBuffer::insert(const scene::Object& object) {
+    auto& transform = m_transformSBO->next();
+    transform.model = model_matrix_3d(object);
+}
+
+void ColorInstanceBuffer::clear() {
+    m_transformSBO->clear();
+}
+
+void ColorInstanceBuffer::flush() {
+    m_transformSBO->flush();
+}
+
+StorageBuffer<ColorDescriptors::Instance>* ColorInstanceBuffer::transform_buffer() {
+    return m_transformSBO.get();
+}
+
+ColorMaterialDescriptorSet::ColorMaterialDescriptorSet(const ColorMaterialDescriptorSetCreateInfo& colorMaterialDescriptorSetCreateInfo) {
+    auto renderer = colorMaterialDescriptorSetCreateInfo.renderer;
+    auto materialDataSource = colorMaterialDescriptorSetCreateInfo.colorMaterialDataSource;
+    auto shaderDataSource = materialDataSource->shader_data_source();
+    auto rhi = renderer->rhi();
+    auto commandQueue = renderer->main_command_queue();
 
     {
-        StorageBufferCreateInfo instanceSBOCreateInfo = {};
-        instanceSBOCreateInfo.rhi = rhi;
-        instanceSBOCreateInfo.commandQueue = commandQueue;
-        instanceSBOCreateInfo.initialSize = 1;
-        m_instanceSBO = std::make_unique<color::InstanceSBO>(instanceSBOCreateInfo);
+        duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
+        descriptorSetCreateInfo.description = shaderDataSource->descriptor_set_descriptions().at(0);
+        m_descriptorSet = rhi->create_descriptor_set(descriptorSetCreateInfo);
     }
-
-    auto dataSource = colorMaterialCreateInfo.colorMaterialDataSource;
-
     {
-        UniformBufferCreateInfo<color::Material> materialUBOCreateInfo = {};
+        ColorInstanceBufferCreateInfo colorInstanceBufferCreateInfo = {};
+        colorInstanceBufferCreateInfo.renderer = renderer;
+        m_instanceBuffer = std::make_unique<ColorInstanceBuffer>(colorInstanceBufferCreateInfo);
+        m_descriptorSet->set(ColorDescriptors::uInstances, m_instanceBuffer->transform_buffer()->descriptor());
+    }
+    {
+        UniformBufferCreateInfo<ColorDescriptors::Material> materialUBOCreateInfo = {};
         materialUBOCreateInfo.rhi = rhi;
         materialUBOCreateInfo.commandQueue = commandQueue;
-        materialUBOCreateInfo.initialData.color = dataSource->color;
-        m_materialUBO = std::make_unique<color::MaterialUBO>(materialUBOCreateInfo);
+        materialUBOCreateInfo.initialData.color = materialDataSource->color;
+        m_materialUBO = std::make_unique<UniformBuffer<ColorDescriptors::Material>>(materialUBOCreateInfo);
+        m_descriptorSet->set(ColorDescriptors::uMaterial, m_materialUBO->descriptor());
     }
-
-    m_descriptorSet.set(ColorDescriptorSet::Bindings::uInstances, *m_instanceSBO);
-    m_descriptorSet.set(ColorDescriptorSet::Bindings::uMaterial, *m_materialUBO);
-    m_descriptorSet.set(ColorDescriptorSet::Bindings::uBaseColor, duk::rhi::Descriptor::image_sampler(dataSource->baseColorImage.get(), duk::rhi::Image::Layout::SHADER_READ_ONLY, dataSource->baseColorSampler));
+    set_color(materialDataSource->color);
+    set_color_texture(materialDataSource->colorTexture);
 }
 
-void ColorMaterial::set_color(const glm::vec4& color) {
+void ColorMaterialDescriptorSet::set_color(const glm::vec4& color) {
     m_materialUBO->data().color = color;
     m_materialUBO->flush();
 }
 
-void ColorMaterial::clear_instances() {
-    m_instanceSBO->clear();
+void ColorMaterialDescriptorSet::set_color_texture(const Texture& colorTexture) {
+    m_colorTexture = colorTexture;
 }
 
-void ColorMaterial::insert_instance(const InsertInstanceParams& params) {
-    auto& transform = m_instanceSBO->next();
-    transform.model = duk::renderer::model_matrix_3d(params.object);
-}
-
-void ColorMaterial::flush_instances() {
-    m_instanceSBO->flush();
-}
-
-void ColorMaterial::apply(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
-
-    pipeline()->use(commandBuffer, params);
-
+void ColorMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
     // updates current camera UBO
-    m_descriptorSet.set(ColorDescriptorSet::Bindings::uCamera, *params.globalDescriptors->camera_ubo());
+    m_descriptorSet->set(ColorDescriptors::uCamera, params.globalDescriptors->camera_ubo()->descriptor());
+
+    // these might have changed
+    m_descriptorSet->set(ColorDescriptors::uBaseColor, m_colorTexture.descriptor());
 
     // updates descriptor set in case some descriptor changed
-    m_descriptorSet.flush();
+    m_descriptorSet->flush();
 
-    commandBuffer->bind_descriptor_set(m_descriptorSet.handle(), 0);
+    commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
+}
+
+uint32_t ColorMaterialDescriptorSet::size() const {
+    return ColorDescriptors::kDescriptorCount;
+}
+
+ImageResource& ColorMaterialDescriptorSet::image_at(uint32_t index) {
+    switch (index) {
+        case ColorDescriptors::uBaseColor:
+            return m_colorTexture.image();
+        default:
+            throw std::invalid_argument(fmt::format("Descriptor at index {} is not an image", index));
+    }
+}
+
+bool ColorMaterialDescriptorSet::is_image(uint32_t index) {
+    return index == ColorDescriptors::uBaseColor;
+}
+
+InstanceBuffer* ColorMaterialDescriptorSet::instance_buffer() {
+    return m_instanceBuffer.get();
 }
 
 }

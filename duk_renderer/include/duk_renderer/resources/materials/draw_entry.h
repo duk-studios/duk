@@ -15,8 +15,6 @@ class Mesh;
 class Sprite;
 class SpriteBrush;
 class Material;
-class MeshMaterial;
-class SpriteMaterial;
 class GlobalDescriptors;
 
 struct DrawParams {
@@ -29,13 +27,13 @@ struct DrawParams {
 struct MeshEntry {
     duk::scene::Object::Id objectId;
     Mesh* mesh{};
-    MeshMaterial* material{};
+    Material* material{};
     SortKey sortKey{};
 };
 
 struct MeshDrawEntry {
     DrawParams params;
-    MeshMaterial* material;
+    Material* material;
     Mesh* mesh;
     uint32_t instanceCount;
     uint32_t firstInstance;
@@ -43,16 +41,14 @@ struct MeshDrawEntry {
 
 struct SpriteEntry {
     duk::scene::Object::Id objectId;
-    SpriteMaterial* material{};
+    Material* material{};
     Sprite* sprite{};
     SortKey sortKey{};
-    uint32_t materialIndex;
 };
 
 struct SpriteDrawEntry {
     SpriteBrush* brush;
-    SpriteMaterial* material;
-    uint32_t materialIndex;
+    Material* material;
     size_t instanceCount;
     size_t firstInstance;
 };
