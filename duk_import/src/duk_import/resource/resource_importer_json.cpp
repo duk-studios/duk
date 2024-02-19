@@ -33,13 +33,6 @@ ResourceDescription parse_resource_description(const std::filesystem::path& path
     resourceDescription.type = parse_resource_type(object["type"].GetString());
     resourceDescription.path = (path.parent_path() / object["file"].GetString()).string();
     resourceDescription.id = json::from_json<duk::resource::Id>(object["id"]);
-    auto dependenciesMember = object.FindMember("dependencies");
-    if (dependenciesMember != object.MemberEnd()) {
-        auto dependencies = dependenciesMember->value.GetArray();
-        for (auto& dependency : dependencies) {
-            resourceDescription.dependencies.insert(json::from_json<duk::resource::Id>(dependency));
-        }
-    }
     auto aliasesMember = object.FindMember("aliases");
     if (aliasesMember != object.MemberEnd()) {
         auto aliases = aliasesMember->value.GetArray();

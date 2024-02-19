@@ -25,7 +25,6 @@ struct ResourceDescription {
     ResourceType type;
     std::string path;
     duk::resource::Id id;
-    std::set<duk::resource::Id> dependencies;
     std::set<std::string> aliases;
 };
 
