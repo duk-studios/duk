@@ -3,7 +3,7 @@
 
 #include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_material.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
-#include <duk_renderer/components/transform.h>
+#include <duk_renderer/resources/builtin_resource_ids.h>
 #include <duk_renderer/renderer.h>
 
 namespace duk::renderer {
@@ -16,12 +16,12 @@ static const SpriteColorShaderDataSource kSpriteColorShaderDataSource;
 
 SpriteColorMaterialDataSource::SpriteColorMaterialDataSource() :
     color(1),
-    image() {
+    image(kWhiteImageId) {
 
 }
 
 const rhi::ShaderDataSource* SpriteColorMaterialDataSource::shader_data_source() const {
-    return nullptr;
+    return &detail::kSpriteColorShaderDataSource;
 }
 
 std::unique_ptr<MaterialDescriptorSet> SpriteColorMaterialDataSource::create_descriptor_set(const MaterialDescriptorSetCreateInfo& materialDescriptorSetCreateInfo) const {

@@ -4,6 +4,7 @@
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/color/color_material.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
+#include <duk_renderer/resources/builtin_resource_ids.h>
 #include <duk_renderer/components/transform.h>
 
 namespace duk::renderer {
@@ -16,7 +17,7 @@ static const ColorShaderDataSource kColorShaderDataSource;
 
 ColorMaterialDataSource::ColorMaterialDataSource() :
     color(glm::vec4(1)),
-    colorTexture() {
+    colorTexture(kWhiteImageId) {
 
 }
 
