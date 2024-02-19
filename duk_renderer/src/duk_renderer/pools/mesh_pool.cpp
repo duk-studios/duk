@@ -5,6 +5,7 @@
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/brushes/mesh_data_source.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/resources/builtin_resource_ids.h>
 
 #include <glm/ext/scalar_constants.hpp>
 
@@ -262,22 +263,22 @@ MeshPool::MeshPool(const MeshPoolCreateInfo& meshPoolCreateInfo) {
 
     {
         auto quadDataSource = detail::quad_mesh_data_source();
-        m_quad = create(duk::resource::Id(1), &quadDataSource);
+        m_quad = create(kQuadMeshId, &quadDataSource);
     }
 
     {
         auto cubeDataSource = detail::cube_mesh_data_source();
-        m_cube = create(duk::resource::Id(2), &cubeDataSource);
+        m_cube = create(kCubeMeshId, &cubeDataSource);
     }
 
     {
         auto sphereDataSource = detail::sphere_mesh_data_source(32);
-        m_sphere = create(duk::resource::Id(3), &sphereDataSource);
+        m_sphere = create(kSphereMeshId, &sphereDataSource);
     }
 
     {
         auto coneDataSource = detail::cone_mesh_data_source(32);
-        m_cone = create(duk::resource::Id(4), &coneDataSource);
+        m_cone = create(kConeMeshId, &coneDataSource);
     }
 }
 

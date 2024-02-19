@@ -4,6 +4,7 @@
 
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/resources/builtin_resource_ids.h>
 #include <duk_rhi/image_data_source.h>
 
 namespace duk::renderer {
@@ -14,13 +15,13 @@ ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo) :
         duk::rhi::ImageDataSourceRGBA8U whiteImageDataSource(1, 1);
         whiteImageDataSource.at(0, 0) = {255, 255, 255, 255};
         whiteImageDataSource.update_hash();
-        m_whiteImage = create(duk::resource::Id(1), &whiteImageDataSource);
+        m_whiteImage = create(kWhiteImageId, &whiteImageDataSource);
     }
     {
         duk::rhi::ImageDataSourceRGBA8U blackImageDataSource(1, 1);
         blackImageDataSource.at(0, 0) = {0, 0, 0, 255};
         blackImageDataSource.update_hash();
-        m_blackImage = create(duk::resource::Id(2), &blackImageDataSource);
+        m_blackImage = create(kBlackImageId, &blackImageDataSource);
     }
 }
 

@@ -16,9 +16,9 @@ namespace duk::resource {
 class Id {
 public:
 
-    Id();
+    constexpr Id() : Id(0) {}
 
-    explicit Id(uint64_t id);
+    explicit constexpr Id(uint64_t id) : m_id(id) {}
 
     DUK_NO_DISCARD bool operator==(const Id& rhs) const;
 
@@ -95,12 +95,6 @@ public:
 
     DUK_NO_DISCARD T& operator*() const;
 
-};
-
-// Specialize this for resources that have inheritance
-template<typename T>
-struct BaseResource {
-    using Type = T;
 };
 
 template<typename T>
