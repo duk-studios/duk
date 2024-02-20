@@ -15,6 +15,23 @@
 
 namespace duk::log {
 
+namespace detail {
+
+template<typename T>
+T build_arg(T arg) {
+    return T(arg);
+}
+
+static std::string build_arg(std::string_view arg)  {
+    return std::string(arg);
+}
+
+static std::string build_arg(const char* arg)  {
+    return std::string(arg);
+}
+
+}
+
 enum Level : uint8_t {
     VERBOSE = 0,
     INFO,
@@ -36,13 +53,13 @@ public:
     ~Logger();
 
     template<typename ...Args>
-    auto print(Level level, const std::string& format, Args&&... args) {
-        return m_printQueue.enqueue([this](Level level, const std::string& format, fmt::format_args args) -> void {
+    auto print(Level level, const std::string& format, Args... args) {
+        return m_printQueue.enqueue([this](Level level, const std::string& format, auto... args) -> void {
             if (level < m_minimumLevel) {
                 return;
             }
-            dispatch_print(level, fmt::vformat(format, std::move(args)));
-        }, level, format, fmt::make_format_args(args...));
+            dispatch_print(level, fmt::vformat(format, fmt::make_format_args(args...)));
+        }, level, format, detail::build_arg(args)...);
     }
 
     void add_print_listener(event::Listener& listener, PrintEvent::Callback&& callback);
