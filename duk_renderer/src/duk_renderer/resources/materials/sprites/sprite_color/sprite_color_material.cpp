@@ -3,7 +3,7 @@
 
 #include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_material.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
-#include <duk_renderer/resources/builtin_resource_ids.h>
+#include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/renderer.h>
 
 namespace duk::renderer {

@@ -10,6 +10,10 @@
 
 namespace duk::renderer {
 
+// 1 - 10,000 - reserved for built-in images
+static constexpr duk::resource::Id kWhiteImageId(1);
+static constexpr duk::resource::Id kBlackImageId(2);
+
 class Renderer;
 
 struct ImagePoolCreateInfo {

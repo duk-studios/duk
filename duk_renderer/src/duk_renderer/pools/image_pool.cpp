@@ -4,7 +4,6 @@
 
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/resources/builtin_resource_ids.h>
 #include <duk_rhi/image_data_source.h>
 
 namespace duk::renderer {

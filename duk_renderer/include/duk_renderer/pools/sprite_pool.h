@@ -9,6 +9,9 @@
 
 namespace duk::renderer {
 
+// 20,001 - 30,000 - reserved for built-in sprites
+static constexpr duk::resource::Id kWhiteSquareSpriteId(20001);
+
 struct SpritePoolCreateInfo {
     ImagePool* imagePool;
 };
