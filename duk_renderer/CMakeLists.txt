@@ -53,8 +53,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/resources/texture.h
         include/duk_renderer/resources/image.h
         include/duk_renderer/resources/materials/material_descriptor_set.h
-        include/duk_renderer/resources/builtin_resource_ids.h
-        )
+)
 
 set(DUK_RENDERER_SOURCES
         src/duk_renderer/renderer.cpp

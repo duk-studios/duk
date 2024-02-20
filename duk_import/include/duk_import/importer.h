@@ -4,21 +4,16 @@
 #ifndef DUK_IMPORT_IMPORTER_H
 #define DUK_IMPORT_IMPORTER_H
 
-#include <duk_import/image/image_importer.h>
-#include <duk_import/material/material_importer.h>
-#include <duk_import/resource/resource_importer.h>
-#include <duk_import/scene/scene_importer.h>
-#include <duk_renderer/renderer.h>
-#include <duk_renderer/pools/image_pool.h>
-#include <duk_renderer/pools/material_pool.h>
-#include <duk_scene/component_builder.h>
+#include <duk_import/resource_set_importer.h>
+#include <duk_import/resource_importer.h>
 
 namespace duk::import {
 
+// 1,000,000 reserved for built-in resources
+static constexpr duk::resource::Id kMaxBuiltInResourceId(1000000);
+
 struct ImporterCreateInfo {
-    duk::renderer::Renderer* renderer;
-    duk::scene::ComponentBuilder* componentBuilder;
-    duk::resource::ReferenceSolver* referenceSolver;
+    duk::resource::Pools* pools;
 };
 
 class Importer {
@@ -28,37 +23,42 @@ public:
 
     ~Importer();
 
+    ResourceImporter* add_resource_importer(std::unique_ptr<ResourceImporter> resourceImporter);
+
+    template<typename T, typename ...Args>
+    T* add_resource_importer(Args&&... args);
+
     void load_resources(const std::filesystem::path& path);
-
-    std::unique_ptr<duk::rhi::ImageDataSource> load_image_data_source(const std::filesystem::path& path);
-
-    duk::renderer::ImageResource load_image(duk::resource::Id id, const std::filesystem::path& path);
-
-    DUK_NO_DISCARD duk::renderer::ImageResource find_image(duk::resource::Id id) const;
-
-    std::unique_ptr<duk::renderer::MaterialDataSource> load_material_data_source(const std::filesystem::path& path);
-
-    duk::renderer::MaterialResource load_material(duk::resource::Id id, const std::filesystem::path& path);
-
-    DUK_NO_DISCARD duk::renderer::MaterialResource find_material(duk::resource::Id id) const;
-
-    DUK_NO_DISCARD std::unique_ptr<duk::scene::Scene> load_scene(duk::resource::Id id);
-
-    DUK_NO_DISCARD std::unique_ptr<duk::scene::Scene> load_scene(const std::string& alias);
-
-private:
 
     void load_resource(duk::resource::Id id);
 
+    duk::resource::Id find_id(const std::string& alias);
+
+    ResourceImporter* get_importer(const std::string& tag);
+
+    template<typename T>
+    T* get_importer_as(const std::string& tag);
+
 private:
-    duk::renderer::Renderer* m_renderer;
-    duk::resource::ReferenceSolver* m_referenceSolver;
-    std::unique_ptr<ResourceImporter> m_resourceImporter;
-    std::unique_ptr<SceneImporter> m_sceneImporter;
-    std::vector<std::unique_ptr<ImageImporter>> m_imageImporters;
-    std::vector<std::unique_ptr<MaterialImporter>> m_materialImporters;
+    duk::resource::Pools* m_pools;
+    ResourceSetImporter m_resourceSetImporter;
+    std::unordered_map<std::string, std::unique_ptr<ResourceImporter>> m_resourceImporters;
     ResourceSet m_resourceSet;
 };
+
+template<typename T, typename... Args>
+T* Importer::add_resource_importer(Args&& ... args) {
+    return dynamic_cast<T*>(add_resource_importer(std::make_unique<T>(std::forward<Args>(args)...)));
+}
+
+template<typename T>
+T* Importer::get_importer_as(const std::string& tag) {
+    auto importer = get_importer(tag);
+    if (importer->tag() != tag) {
+        return nullptr;
+    }
+    return dynamic_cast<T*>(importer);
+}
 
 }
 

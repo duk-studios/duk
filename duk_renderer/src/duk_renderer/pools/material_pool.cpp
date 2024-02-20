@@ -8,8 +8,7 @@
 namespace duk::renderer {
 
 MaterialPool::MaterialPool(const MaterialPoolCreateInfo& materialPoolCreateInfo) :
-    m_renderer(materialPoolCreateInfo.renderer),
-    m_imagePool(materialPoolCreateInfo.imagePool) {
+    m_renderer(materialPoolCreateInfo.renderer) {
 
 }
 

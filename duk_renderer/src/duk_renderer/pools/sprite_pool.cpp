@@ -2,7 +2,6 @@
 // Created by rov on 1/9/2024.
 //
 #include <duk_renderer/pools/sprite_pool.h>
-#include <duk_renderer/resources/builtin_resource_ids.h>
 
 namespace duk::renderer {
 

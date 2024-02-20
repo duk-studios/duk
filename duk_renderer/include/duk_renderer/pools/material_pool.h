@@ -18,7 +18,6 @@ class ImagePool;
 
 struct MaterialPoolCreateInfo {
     Renderer* renderer;
-    ImagePool* imagePool;
 };
 
 class MaterialPool : public duk::resource::PoolT<MaterialResource> {
@@ -26,11 +25,10 @@ public:
 
     explicit MaterialPool(const MaterialPoolCreateInfo& materialPoolCreateInfo);
 
-    DUK_NO_DISCARD MaterialResource create(duk::resource::Id resourceId, const MaterialDataSource* materialDataSource);
+    MaterialResource create(duk::resource::Id resourceId, const MaterialDataSource* materialDataSource);
 
 private:
     duk::renderer::Renderer* m_renderer;
-    ImagePool* m_imagePool;
 };
 
 }

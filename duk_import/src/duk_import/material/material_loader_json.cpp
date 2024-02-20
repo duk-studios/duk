@@ -2,7 +2,7 @@
 // Created by rov on 12/4/2023.
 //
 
-#include <duk_import/material/material_importer_json.h>
+#include <duk_import/material/material_loader_json.h>
 #include <duk_json/types.h>
 #include <duk_tools/file.h>
 #include <duk_renderer/pools/material_pool.h>
@@ -34,11 +34,11 @@ std::unique_ptr<duk::renderer::MaterialDataSource> parse_material(const rapidjso
 
 }
 
-bool MaterialImporterJson::accepts(const std::filesystem::path& path) {
+bool MaterialLoaderJson::accepts(const std::filesystem::path& path) {
     return path.extension() == ".mat";
 }
 
-std::unique_ptr<duk::renderer::MaterialDataSource> MaterialImporterJson::load(const std::filesystem::path& path) {
+std::unique_ptr<duk::renderer::MaterialDataSource> MaterialLoaderJson::load(const std::filesystem::path& path) {
 
     auto content = duk::tools::File::load_text(path.string().c_str());
 

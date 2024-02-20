@@ -6,8 +6,11 @@
 #include <duk_import/importer.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/sprite_pool.h>
+#include <duk_renderer/pools/image_pool.h>
 #include <duk_log/log.h>
-#include <duk_renderer/components/register_components.h>
+#include <duk_import/image/image_importer.h>
+#include <duk_import/material/material_importer.h>
+#include <duk_import/scene/scene_importer.h>
 
 namespace duk::engine {
 
@@ -36,28 +39,62 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
 
     m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
 
-    m_referenceSolver.add_pool(m_renderer->image_pool());
-    m_referenceSolver.add_pool(m_renderer->mesh_pool());
-    m_referenceSolver.add_pool(m_renderer->sprite_pool());
-    m_referenceSolver.add_pool(m_renderer->material_pool());
-
-    m_componentBuilder = std::make_unique<duk::scene::ComponentBuilder>();
-
-    duk::renderer::register_components(m_componentBuilder.get());
-
     duk::import::ImporterCreateInfo importerCreateInfo = {};
-    importerCreateInfo.renderer = m_renderer.get();
-    importerCreateInfo.componentBuilder = m_componentBuilder.get();
-    importerCreateInfo.referenceSolver = &m_referenceSolver;
-
+    importerCreateInfo.pools = &m_pools;
     m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
+
+    /* init resources */
+    // images
+    {
+        duk::renderer::ImagePoolCreateInfo imagePoolCreateInfo = {};
+        imagePoolCreateInfo.renderer = m_renderer.get();
+        m_pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
+
+        duk::import::ImageImporterCreateInfo imageImporterCreateInfo = {};
+        imageImporterCreateInfo.rhiCapabilities = m_renderer->rhi()->capabilities();
+        imageImporterCreateInfo.imagePool = m_pools.get<duk::renderer::ImagePool>();
+        m_importer->add_resource_importer<duk::import::ImageImporter>(imageImporterCreateInfo);
+    }
+
+    // materials
+    {
+        duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
+        materialPoolCreateInfo.renderer = m_renderer.get();
+        m_pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
+
+        duk::import::MaterialImporterCreateInfo materialImporterCreateInfo = {};
+        materialImporterCreateInfo.materialPool = m_pools.get<duk::renderer::MaterialPool>();
+        m_importer->add_resource_importer<duk::import::MaterialImporter>(materialImporterCreateInfo);
+    }
+
+    // meshes
+    {
+        duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};
+        meshPoolCreateInfo.renderer = m_renderer.get();
+        m_pools.create_pool<duk::renderer::MeshPool>(meshPoolCreateInfo);
+    }
+
+    // sprites
+    {
+        duk::renderer::SpritePoolCreateInfo spritePoolCreateInfo = {};
+        spritePoolCreateInfo.imagePool = m_pools.get<duk::renderer::ImagePool>();
+        m_pools.create_pool<duk::renderer::SpritePool>(spritePoolCreateInfo);
+    }
+
+    // scenes
+    {
+        m_importer->add_resource_importer<duk::import::SceneImporter>();
+    }
 
     duk::engine::InputCreateInfo inputCreateInfo = {};
     inputCreateInfo.window = m_window.get();
     m_input = std::make_unique<duk::engine::Input>(inputCreateInfo);
 }
 
-Engine::~Engine() = default;
+Engine::~Engine() {
+    m_importer.reset();
+    m_pools.clear();
+}
 
 void Engine::run() {
     m_run = true;
@@ -95,6 +132,10 @@ duk::renderer::Renderer* Engine::renderer() {
     return m_renderer.get();
 }
 
+duk::resource::Pools* Engine::pools() {
+    return &m_pools;
+}
+
 duk::import::Importer* Engine::importer() {
     return m_importer.get();
 }
@@ -106,7 +147,6 @@ duk::scene::Scene* Engine::scene() {
 duk::engine::Input* Engine::input() {
     return m_input.get();
 }
-
 
 const duk::tools::Timer *Engine::timer() const {
     return &m_timer;

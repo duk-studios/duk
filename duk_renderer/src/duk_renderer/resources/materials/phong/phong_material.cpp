@@ -4,7 +4,6 @@
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/phong/phong_material.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
-#include <duk_renderer/resources/builtin_resource_ids.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/pools/image_pool.h>
 

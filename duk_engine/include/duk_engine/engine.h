@@ -34,6 +34,8 @@ public:
 
     DUK_NO_DISCARD duk::renderer::Renderer* renderer();
 
+    DUK_NO_DISCARD duk::resource::Pools* pools();
+
     DUK_NO_DISCARD duk::import::Importer* importer();
 
     DUK_NO_DISCARD duk::scene::Scene* scene();
@@ -51,10 +53,9 @@ private:
     duk::event::Listener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;
-    std::unique_ptr<duk::scene::ComponentBuilder> m_componentBuilder;
     std::unique_ptr<duk::import::Importer> m_importer;
     std::unique_ptr<duk::engine::Input> m_input;
-    duk::resource::ReferenceSolver m_referenceSolver;
+    duk::resource::Pools m_pools;
     duk::event::Dispatcher m_dispatcher;
     duk::scene::Scene* m_scene;
     Systems m_systems;
@@ -64,7 +65,7 @@ private:
 
 template<typename T>
 void Engine::register_component(const std::string& typeName) {
-    m_componentBuilder->add<T>(typeName);
+    duk::scene::ComponentRegistry::instance(true)->add<T>(typeName);
 }
 
 }

@@ -10,6 +10,13 @@
 
 namespace duk::renderer {
 
+// 10,001 - 20,000 - reserved for built-in mesh
+static constexpr duk::resource::Id kQuadMeshId(10001);
+static constexpr duk::resource::Id kCubeMeshId(10002);
+static constexpr duk::resource::Id kSphereMeshId(10003);
+static constexpr duk::resource::Id kConeMeshId(10004);
+
+
 class Renderer;
 
 using MeshResource = duk::resource::ResourceT<Mesh>;

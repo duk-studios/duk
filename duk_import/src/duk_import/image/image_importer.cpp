@@ -2,10 +2,10 @@
 /// image_importer.cpp
 
 #include <duk_import/image/image_importer.h>
+#include <duk_import/image/image_loader_stb.h>
+#include <duk_renderer/pools/image_pool.h>
 
 namespace duk::import {
-
-ImageImporter::~ImageImporter() = default;
 
 std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height) {
     switch (format) {
@@ -34,6 +34,21 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* dat
         default:
             throw std::invalid_argument("failed to create Image: invalid PixelFormat");
     }
+}
+
+ImageImporter::ImageImporter(const ImageImporterCreateInfo& imageImporterCreateInfo) :
+    m_imagePool(imageImporterCreateInfo.imagePool) {
+    add_loader<ImageLoaderStb>(imageImporterCreateInfo.rhiCapabilities);
+}
+
+const std::string& ImageImporter::tag() const {
+    static const std::string imgTag("img");
+    return imgTag;
+}
+
+void ImageImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
+    auto dataSource = ResourceImporterT<duk::rhi::ImageDataSource>::load(path);
+    m_imagePool->create(id, dataSource.get());
 }
 
 }

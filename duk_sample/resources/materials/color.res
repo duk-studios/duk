@@ -1,5 +1,5 @@
 {
-  "type": "mat",
+  "tag": "mat",
   "id": 1000011,
   "file": "color.mat"
 }
