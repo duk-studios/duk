@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <vector>
 #include <stdexcept>
 #include <cstdint>
 #include <cassert>
@@ -46,8 +47,59 @@ protected:
 
 private:
     std::unordered_map<Id, ResourceT> m_objects;
-
 };
+
+class Pools {
+public:
+
+    ~Pools();
+
+    template<typename T, typename ...Args>
+    T* create_pool(Args&&... args) requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
+
+    template<typename T>
+    T* get() requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
+
+    void clear();
+
+private:
+
+    template<typename T>
+    size_t pool_index();
+
+private:
+    static size_t s_poolIndexCounter;
+    std::vector<std::unique_ptr<Pool>> m_pools;
+};
+
+template<typename T, typename... Args>
+T* Pools::create_pool(Args&& ... args) requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T> {
+    const auto index = pool_index<typename T::ResourceType>();
+    if (m_pools.size() <= index) {
+        m_pools.resize(index + 1);
+    }
+
+    auto& pool = m_pools.at(index);
+    if (!pool) {
+        pool = std::make_unique<T>(std::forward<Args>(args)...);
+    }
+    return dynamic_cast<T*>(pool.get());
+}
+
+template<typename T>
+T* Pools::get() requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T> {
+    const auto index = pool_index<typename T::ResourceType>();
+    if (index >= m_pools.size()){
+        return nullptr;
+    }
+    return dynamic_cast<T*>(m_pools.at(index).get());
+}
+
+template<typename T>
+size_t Pools::pool_index() {
+    static const auto index = s_poolIndexCounter++;
+    return index;
+}
 
 template<typename ResourceT>
 ResourceT PoolT<ResourceT>::find(Id id) const {
@@ -70,7 +122,7 @@ ResourceT PoolT<ResourceT>::find_or_default(Id id, const ResourceT& def) const {
 template<typename ResourceT>
 PoolT<ResourceT>::~PoolT() {
     clean();
-    assert(empty() && "some resources are still in use");
+    assert(empty());
 }
 
 template<typename ResourceT>

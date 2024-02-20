@@ -12,8 +12,7 @@ namespace duk::resource {
 class ReferenceSolver {
 public:
 
-    template<typename T>
-    void add_pool(PoolT<ResourceT<T>>* pool);
+    explicit ReferenceSolver(Pools* pools);
 
     // Solve a given resource that already has a set Id
     template<typename T>
@@ -28,25 +27,10 @@ private:
     template<typename T>
     PoolT<ResourceT<T>>* find_pool();
 
-    template<typename T>
-    static std::type_index type_index();
-
-
 private:
-    std::unordered_map<std::type_index, Pool*> m_pools;
+    Pools* m_pools;
 };
 
-template<typename T>
-std::type_index ReferenceSolver::type_index() {
-    return typeid(T);
-}
-
-template<typename T>
-void ReferenceSolver::add_pool(PoolT<ResourceT<T>>* pool) {
-    const std::type_index type = type_index<T>();
-    auto[it, inserted] = m_pools.emplace(type, pool);
-    assert(inserted && "pool of same type already exists in ReferenceSolver");
-}
 
 template<typename T>
 void ReferenceSolver::solve(ResourceT<T>& resource) {
@@ -64,12 +48,7 @@ void ReferenceSolver::solve(T& object) {
 
 template<typename T>
 PoolT<ResourceT<T>>* ReferenceSolver::find_pool() {
-    const std::type_index type = type_index<T>();
-    auto it = m_pools.find(type);
-    if (it == m_pools.end()) {
-        return nullptr;
-    }
-    return dynamic_cast<PoolT<ResourceT<T>>*>(it->second);
+    return m_pools->get<PoolT<ResourceT<T>>>();
 }
 
 }
