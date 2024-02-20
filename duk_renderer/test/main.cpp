@@ -62,6 +62,25 @@ int main() {
 
     //Creating our renderer with the forwardRendererCreateInfo, and a scene.
     auto renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
+
+    //Create a Pools object to hold our resources
+    duk::resource::Pools pools;
+
+    // mesh pool
+    duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};
+    meshPoolCreateInfo.renderer = renderer.get();
+    auto meshPool = pools.create_pool<duk::renderer::MeshPool>(meshPoolCreateInfo);
+
+    // image pool
+    duk::renderer::ImagePoolCreateInfo imagePoolCreateInfo = {};
+    imagePoolCreateInfo.renderer = renderer.get();
+    auto imagePool = pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
+
+    // material pool
+    duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
+    materialPoolCreateInfo.renderer = renderer.get();
+    auto materialPool = pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
+
     auto scene = std::make_unique<duk::scene::Scene>();
 
     //Adding our first object to the scene, a camera.
@@ -94,16 +113,16 @@ int main() {
     //Also our position and scale and rotation values.
     duk::scene::Object cubeObject = scene->add_object();
     auto cubeMeshRenderer = cubeObject.add<duk::renderer::MeshRenderer>();
-    cubeMeshRenderer->mesh = renderer->mesh_pool()->cube();
+    cubeMeshRenderer->mesh = meshPool->cube();
 
     // Create a phong material
     duk::renderer::PhongMaterialDataSource phongMaterialDataSource = {};
     phongMaterialDataSource.albedo = glm::vec4(0.4f, 1.0f, 0.8f, 1.0f);
-    phongMaterialDataSource.albedoTexture = renderer->image_pool()->white_image();
+    phongMaterialDataSource.albedoTexture = imagePool->white_image();
     phongMaterialDataSource.specular = 32;
-    phongMaterialDataSource.specularTexture = renderer->image_pool()->white_image();
+    phongMaterialDataSource.specularTexture = imagePool->white_image();
     phongMaterialDataSource.update_hash();
-    cubeMeshRenderer->material = renderer->material_pool()->create(duk::resource::Id(666), &phongMaterialDataSource);
+    cubeMeshRenderer->material = materialPool->create(duk::resource::Id(666), &phongMaterialDataSource);
     auto cubePosition = cubeObject.add<duk::renderer::Position3D>();
     cubePosition->value = glm::vec3(0,0,-10);
     auto cubeScale = cubeObject.add<duk::renderer::Scale3D>();
