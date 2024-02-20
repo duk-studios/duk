@@ -1,5 +1,5 @@
 {
-  "type": "scn",
+  "tag": "scn",
   "id": 1000016,
   "file": "scene.scn",
   "aliases": [

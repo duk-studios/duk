@@ -5,6 +5,7 @@
 #include <duk_sample/camera_system.h>
 #include <duk_sample/sprite_system.h>
 #include <duk_engine/systems/render_system.h>
+#include <duk_import/scene/scene_importer.h>
 
 namespace duk::sample {
 
@@ -19,10 +20,10 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     importer->load_resources("./");
 
     // this will be removed
-    auto sceneId = importer->find_id_from_alias("main");
+    auto sceneId = importer->find_id("main");
     importer->load_resource(sceneId);
 
-    auto sceneImporter = dynamic_cast<duk::import::SceneImporter*>(importer->importer_for_resource_type("scn"));
+    auto sceneImporter = importer->get_importer_as<duk::import::SceneImporter>("scn");
     auto scene = sceneImporter->find(sceneId);
 
     m_engine->use_scene(scene);
