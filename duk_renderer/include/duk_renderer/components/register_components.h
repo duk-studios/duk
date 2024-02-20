@@ -4,11 +4,9 @@
 #ifndef DUK_RENDERER_REGISTER_COMPONENTS_H
 #define DUK_RENDERER_REGISTER_COMPONENTS_H
 
-#include <duk_scene/component_builder.h>
-
 namespace duk::renderer {
 
-void register_components(duk::scene::ComponentBuilder* componentBuilder);
+void register_components();
 
 }
 

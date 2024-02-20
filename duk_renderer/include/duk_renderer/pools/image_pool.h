@@ -21,7 +21,7 @@ public:
 
     explicit ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo);
 
-    DUK_NO_DISCARD ImageResource create(duk::resource::Id resourceId, const duk::rhi::ImageDataSource* imageDataSource);
+    ImageResource create(duk::resource::Id resourceId, const duk::rhi::ImageDataSource* imageDataSource);
 
     DUK_NO_DISCARD ImageResource white_image() const;
 

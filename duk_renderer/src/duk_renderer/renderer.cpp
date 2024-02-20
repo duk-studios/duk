@@ -5,6 +5,7 @@
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
 
+#include <duk_renderer/components/register_components.h>
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/material_pool.h>
@@ -12,6 +13,7 @@
 
 #include <duk_platform/window.h>
 #include <duk_rhi/image_data_source.h>
+
 
 namespace duk::renderer {
 
@@ -49,34 +51,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
         m_globalDescriptors = std::make_unique<GlobalDescriptors>(globalDescriptorsCreateInfo);
     }
 
-    {
-        ImagePoolCreateInfo imagePoolCreateInfo = {};
-        imagePoolCreateInfo.renderer = this;
-
-        m_imagePool = std::make_unique<ImagePool>(imagePoolCreateInfo);
-    }
-
-    {
-        MaterialPoolCreateInfo materialPoolCreateInfo = {};
-        materialPoolCreateInfo.renderer = this;
-        materialPoolCreateInfo.imagePool = m_imagePool.get();
-
-        m_materialPool = std::make_unique<MaterialPool>(materialPoolCreateInfo);
-    }
-
-    {
-        MeshPoolCreateInfo meshPoolCreateInfo = {};
-        meshPoolCreateInfo.renderer = this;
-
-        m_meshPool = std::make_unique<MeshPool>(meshPoolCreateInfo);
-    }
-
-    {
-        SpritePoolCreateInfo spritePoolCreateInfo = {};
-        spritePoolCreateInfo.imagePool = m_imagePool.get();
-
-        m_spritePool = std::make_unique<SpritePool>(spritePoolCreateInfo);
-    }
+    register_components();
 }
 
 Renderer::~Renderer() = default;
@@ -181,22 +156,6 @@ duk::rhi::CommandQueue* Renderer::main_command_queue() const {
 
 Renderer::RenderStartEvent& Renderer::render_start_event() {
     return m_renderStart;
-}
-
-ImagePool* Renderer::image_pool() {
-    return m_imagePool.get();
-}
-
-MeshPool* Renderer::mesh_pool() {
-    return m_meshPool.get();
-}
-
-MaterialPool* Renderer::material_pool() {
-    return m_materialPool.get();
-}
-
-SpritePool* Renderer::sprite_pool() {
-    return m_spritePool.get();
 }
 
 void Renderer::use_as_camera(const scene::Object& object) {

@@ -9,17 +9,18 @@
 
 namespace duk::renderer {
 
-void register_components(duk::scene::ComponentBuilder* componentBuilder) {
-    componentBuilder->add<DirectionalLight>("DirectionalLight");
-    componentBuilder->add<PointLight>("PointLight");
-    componentBuilder->add<Position3D>("Position3D");
-    componentBuilder->add<Position2D>("Position2D");
-    componentBuilder->add<Rotation3D>("Rotation3D");
-    componentBuilder->add<Rotation2D>("Rotation2D");
-    componentBuilder->add<Scale3D>("Scale3D");
-    componentBuilder->add<Scale2D>("Scale2D");
-    componentBuilder->add<SpriteRenderer>("SpriteRenderer");
-    componentBuilder->add<MeshRenderer>("MeshRenderer");
+void register_components() {
+    auto componentRegistry = duk::scene::ComponentRegistry::instance(true);
+    componentRegistry->add<DirectionalLight>("DirectionalLight");
+    componentRegistry->add<PointLight>("PointLight");
+    componentRegistry->add<Position3D>("Position3D");
+    componentRegistry->add<Position2D>("Position2D");
+    componentRegistry->add<Rotation3D>("Rotation3D");
+    componentRegistry->add<Rotation2D>("Rotation2D");
+    componentRegistry->add<Scale3D>("Scale3D");
+    componentRegistry->add<Scale2D>("Scale2D");
+    componentRegistry->add<SpriteRenderer>("SpriteRenderer");
+    componentRegistry->add<MeshRenderer>("MeshRenderer");
 }
 
 }

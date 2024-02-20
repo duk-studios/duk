@@ -59,14 +59,6 @@ public:
 
     DUK_NO_DISCARD RenderStartEvent& render_start_event();
 
-    DUK_NO_DISCARD ImagePool* image_pool();
-
-    DUK_NO_DISCARD MeshPool* mesh_pool();
-
-    DUK_NO_DISCARD MaterialPool* material_pool();
-
-    DUK_NO_DISCARD SpritePool* sprite_pool();
-
     void use_as_camera(const duk::scene::Object& object);
 
 private:
