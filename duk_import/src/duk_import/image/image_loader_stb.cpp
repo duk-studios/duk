@@ -1,7 +1,7 @@
 /// 12/11/2023
 /// image_importer_stb.cpp
 
-#include <duk_import/image/image_importer_stb.h>
+#include <duk_import/image/image_loader_stb.h>
 #include <stb_image.h>
 #include <stdexcept>
 #include <fstream>
@@ -22,12 +22,12 @@ duk::rhi::PixelFormat build_pixel_format(int channelCount) {
 
 }
 
-ImageImporterStb::ImageImporterStb(const duk::rhi::RHICapabilities* rhiCapabilities) :
+ImageLoaderStb::ImageLoaderStb(const duk::rhi::RHICapabilities* rhiCapabilities) :
     m_rhiCapabilities(rhiCapabilities) {
 
 }
 
-bool ImageImporterStb::accepts(const std::filesystem::path& path) {
+bool ImageLoaderStb::accepts(const std::filesystem::path& path) {
     const auto extension = path.extension().string();
     if (extension != ".png" && extension != ".jpg" && extension != ".jpeg") {
         return false;
@@ -35,7 +35,7 @@ bool ImageImporterStb::accepts(const std::filesystem::path& path) {
     return true;
 }
 
-std::unique_ptr<duk::rhi::ImageDataSource> ImageImporterStb::load(const std::filesystem::path& path) {
+std::unique_ptr<duk::rhi::ImageDataSource> ImageLoaderStb::load(const std::filesystem::path& path) {
 
     const auto pathStr = path.string();
     if (!std::filesystem::exists(path)) {

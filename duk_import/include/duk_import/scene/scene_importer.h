@@ -5,19 +5,28 @@
 #ifndef DUK_IMPORT_SCENE_IMPORTER_H
 #define DUK_IMPORT_SCENE_IMPORTER_H
 
+#include <duk_import/resource_importer.h>
 #include <duk_scene/scene.h>
 #include <filesystem>
 
 namespace duk::import {
 
-class SceneImporter {
+class SceneImporter : public ResourceImporterT<duk::scene::Scene> {
 public:
+    SceneImporter();
 
-    virtual ~SceneImporter();
+    ~SceneImporter();
 
-    virtual bool accepts(const std::filesystem::path& path) = 0;
+    void load(const duk::resource::Id& id, const std::filesystem::path& path) override;
 
-    virtual std::unique_ptr<duk::scene::Scene> load(const std::filesystem::path& path) = 0;
+    void solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) override;
+
+    void solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) override;
+
+    duk::scene::Scene* find(duk::resource::Id id);
+
+private:
+    std::unordered_map<duk::resource::Id, std::unique_ptr<duk::scene::Scene>> m_scenes;
 };
 
 }

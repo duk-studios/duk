@@ -5,22 +5,29 @@
 #define DUK_IMPORT_IMAGE_IMPORTER_H
 
 #include <duk_rhi/image_data_source.h>
+#include <duk_import/resource_importer.h>
+#include <duk_renderer/renderer.h>
 
 #include <filesystem>
 
 namespace duk::import {
 
-class ImageImporter {
+struct ImageImporterCreateInfo {
+    duk::rhi::RHICapabilities* rhiCapabilities;
+    duk::renderer::ImagePool* imagePool;
+};
+
+class ImageImporter : public ResourceImporterT<duk::rhi::ImageDataSource> {
 public:
-
-    virtual ~ImageImporter();
-
-    virtual bool accepts(const std::filesystem::path& path) = 0;
-
-    virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) = 0;
 
     static std::unique_ptr<duk::rhi::ImageDataSource> create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height);
 
+    explicit ImageImporter(const ImageImporterCreateInfo& imageImporterCreateInfo);
+
+    void load(const duk::resource::Id& id, const std::filesystem::path& path) override;
+
+private:
+    duk::renderer::ImagePool* m_imagePool;
 };
 
 }

@@ -5,19 +5,39 @@
 #ifndef DUK_MATERIAL_IMPORTER_H
 #define DUK_MATERIAL_IMPORTER_H
 
-#include <duk_renderer/resources/materials/material.h>
+#include <duk_import/resource_importer.h>
+#include <duk_renderer/pools/material_pool.h>
 
 #include <filesystem>
 
-class MaterialImporter {
-public:
-    virtual ~MaterialImporter();
+namespace duk::import {
 
+class MaterialLoader {
+public:
     virtual bool accepts(const std::filesystem::path& path) = 0;
 
-    virtual std::unique_ptr<duk::renderer::MaterialDataSource> load(const std::filesystem::path& path) = 0;
-
+    virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) = 0;
 };
 
+struct MaterialImporterCreateInfo {
+    duk::renderer::MaterialPool* materialPool;
+};
+
+class MaterialImporter : public ResourceImporterT<duk::renderer::MaterialDataSource> {
+public:
+
+    explicit MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo);
+
+    void load(const duk::resource::Id& id, const std::filesystem::path& path) override;
+
+    void solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) override;
+
+    void solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) override;
+
+private:
+    duk::renderer::MaterialPool* m_materialPool;
+};
+
+}
 
 #endif //DUK_MATERIAL_IMPORTER_H

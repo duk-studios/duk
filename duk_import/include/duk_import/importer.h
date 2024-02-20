@@ -6,19 +6,18 @@
 
 #include <duk_import/image/image_importer.h>
 #include <duk_import/material/material_importer.h>
-#include <duk_import/resource/resource_importer.h>
+#include "resource_set_importer.h"
 #include <duk_import/scene/scene_importer.h>
+#include <duk_import/resource_importer.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/material_pool.h>
-#include <duk_scene/component_builder.h>
 
 namespace duk::import {
 
 struct ImporterCreateInfo {
     duk::renderer::Renderer* renderer;
-    duk::scene::ComponentBuilder* componentBuilder;
-    duk::resource::ReferenceSolver* referenceSolver;
+    duk::resource::Pools* pools;
 };
 
 class Importer {
@@ -30,33 +29,16 @@ public:
 
     void load_resources(const std::filesystem::path& path);
 
-    std::unique_ptr<duk::rhi::ImageDataSource> load_image_data_source(const std::filesystem::path& path);
-
-    duk::renderer::ImageResource load_image(duk::resource::Id id, const std::filesystem::path& path);
-
-    DUK_NO_DISCARD duk::renderer::ImageResource find_image(duk::resource::Id id) const;
-
-    std::unique_ptr<duk::renderer::MaterialDataSource> load_material_data_source(const std::filesystem::path& path);
-
-    duk::renderer::MaterialResource load_material(duk::resource::Id id, const std::filesystem::path& path);
-
-    DUK_NO_DISCARD duk::renderer::MaterialResource find_material(duk::resource::Id id) const;
-
-    DUK_NO_DISCARD std::unique_ptr<duk::scene::Scene> load_scene(duk::resource::Id id);
-
-    DUK_NO_DISCARD std::unique_ptr<duk::scene::Scene> load_scene(const std::string& alias);
-
-private:
-
     void load_resource(duk::resource::Id id);
 
+    duk::resource::Id find_id_from_alias(const std::string& alias);
+
+    ResourceImporter* importer_for_resource_type(const std::string& resourceType);
+
 private:
-    duk::renderer::Renderer* m_renderer;
-    duk::resource::ReferenceSolver* m_referenceSolver;
-    std::unique_ptr<ResourceImporter> m_resourceImporter;
-    std::unique_ptr<SceneImporter> m_sceneImporter;
-    std::vector<std::unique_ptr<ImageImporter>> m_imageImporters;
-    std::vector<std::unique_ptr<MaterialImporter>> m_materialImporters;
+    duk::resource::Pools* m_pools;
+    ResourceSetImporter m_resourceSetImporter;
+    std::unordered_map<std::string, std::unique_ptr<ResourceImporter>> m_resourceImporters;
     ResourceSet m_resourceSet;
 };
 

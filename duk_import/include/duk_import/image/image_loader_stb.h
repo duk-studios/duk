@@ -9,14 +9,15 @@
 
 namespace duk::import {
 
-class ImageImporterStb : public ImageImporter {
+class ImageLoaderStb : public ResourceLoader<duk::rhi::ImageDataSource> {
 public:
 
-    ImageImporterStb(const duk::rhi::RHICapabilities* rhiCapabilities);
+    ImageLoaderStb(const duk::rhi::RHICapabilities* rhiCapabilities);
 
     bool accepts(const std::filesystem::path& path) override;
 
     std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) override;
+
 private:
     const duk::rhi::RHICapabilities* m_rhiCapabilities;
 };
