@@ -16,11 +16,16 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
     auto importer = m_engine->importer();
-    importer->load_resources("resources.json");
+    importer->load_resources("./");
 
-    m_scene = importer->load_scene("main");
+    // this will be removed
+    auto sceneId = importer->find_id_from_alias("main");
+    importer->load_resource(sceneId);
 
-    m_engine->use_scene(m_scene.get());
+    auto sceneImporter = dynamic_cast<duk::import::SceneImporter*>(importer->importer_for_resource_type("scn"));
+    auto scene = sceneImporter->find(sceneId);
+
+    m_engine->use_scene(scene);
 
     auto systems = m_engine->systems();
     systems->add_system<CameraSystem>(*m_engine, "CameraSystem");
