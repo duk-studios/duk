@@ -13,6 +13,8 @@
 #include <duk_resource/solver/dependency_solver.h>
 
 #include <array>
+#include "duk_log/log.h"
+#include "duk_json/string.h"
 
 namespace duk::scene {
 
@@ -164,6 +166,8 @@ private:
 
         virtual void solve(duk::resource::DependencySolver* solver, Object& object) = 0;
 
+        virtual void build(Object& object, const rapidjson::Value& jsonObject) = 0;
+
     };
 
     template<typename T>
@@ -178,6 +182,10 @@ private:
             auto component = Component<T>(object);
             solver->solve(component);
         }
+
+        void build(Object& object, const rapidjson::Value& jsonObject) override {
+            object.add<T>(json::from_json<T>(jsonObject));
+        }
     };
 
 public:
@@ -191,30 +199,45 @@ public:
         assert(entry);
         m_componentEntries.at(componentId)->solve(solver, object);
     }
-private:
+
+    void build_from_json(Object& object, const rapidjson::Value& jsonObject) {
+        const auto typeName = json::from_json_member<const char*>(jsonObject, "type");
+        if (!typeName) {
+            duk::log::warn("Missing \"type\" field from Component json object: {}", duk::json::to_string(jsonObject));
+            return;
+        }
+        const auto it = m_componentNameToIndex.find(typeName);
+        if (it == m_componentNameToIndex.end()) {
+            duk::log::warn("Unregistered Component type: \"{}\"", typeName);
+            return;
+        }
+        const auto index = it->second;
+        auto& entry = m_componentEntries.at(index);
+        assert(entry);
+        entry->build(object, jsonObject);
+    }
 
     template<typename T>
-    void register_component(uint32_t index) {
+    void add(const std::string& typeName) {
+        const auto index = component_index<T>();
         auto& entry = m_componentEntries.at(index);
         if (entry) {
             return;
         }
         entry = std::make_unique<ComponentEntryT<T>>();
+        m_componentNameToIndex.emplace(typeName, index);
     }
 
 private:
     static uint32_t s_componentIndexCounter;
     std::array<std::unique_ptr<ComponentEntry>, MAX_COMPONENTS> m_componentEntries;
+    std::unordered_map<std::string, uint32_t> m_componentNameToIndex;
 };
 
 template<typename T>
 uint32_t ComponentRegistry::component_index() {
-    static auto componentIndex = [](){
-        const auto index = s_componentIndexCounter++;
-        ComponentRegistry::instance(true)->register_component<T>(index);
-        return index;
-    }();
-    return componentIndex;
+    static const auto index = s_componentIndexCounter++;
+    return index;
 }
 
 class Scene {
