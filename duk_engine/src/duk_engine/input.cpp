@@ -4,6 +4,7 @@
 
 #include <duk_engine/input.h>
 
+
 namespace duk::engine {
 
 duk::engine::Input::Input(const InputCreateInfo &inputCreateInfo) {
@@ -77,21 +78,27 @@ bool duk::engine::Input::mouse(duk::platform::MouseButton mouseButton) {
 
 
 void duk::engine::Input::refresh() {
+    m_lastMouseY = m_mouseY;
+    m_lastMouseX = m_mouseX;
     m_pressedKeys.clear();
     m_releasedKeys.clear();
     m_pressedMouseButton.clear();
     m_releasedMouseButton.clear();
 }
 
-uint32_t duk::engine::Input::mouse_x() {
+glm::vec2 duk::engine::Input::delta_mouse() {
+    return glm::vec2(m_mouseX - m_lastMouseX, m_mouseY - m_lastMouseY);
+}
+
+int32_t duk::engine::Input::mouse_x() {
     return m_mouseX;
 }
 
-uint32_t duk::engine::Input::mouse_y() {
+int32_t duk::engine::Input::mouse_y() {
     return m_mouseY;
 }
 
-uint32_t duk::engine::Input::mouse_wheel() {
+int32_t duk::engine::Input::mouse_wheel() {
     return m_mouseWheel;
 }
 
@@ -99,4 +106,8 @@ duk::engine::Input::~Input() {
     m_pressedKeys.clear();
     m_releasedKeys.clear();
 }
+
+
+
+
 }

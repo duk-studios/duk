@@ -7,6 +7,7 @@
 
 #include <duk_platform/window.h>
 #include <set>
+#include <glm/vec2.hpp>
 
 namespace duk::engine {
 
@@ -29,9 +30,10 @@ public:
 
     void refresh();
 
-    uint32_t mouse_x();
-    uint32_t mouse_y();
-    uint32_t mouse_wheel();
+    glm::vec2 delta_mouse();
+    int32_t mouse_x();
+    int32_t mouse_y();
+    int32_t mouse_wheel();
 
 
 private:
@@ -40,9 +42,11 @@ private:
     std::set<duk::platform::Keys> m_pressedKeys, m_releasedKeys, m_keys;
     std::set<duk::platform::MouseButton> m_pressedMouseButton, m_releasedMouseButton, m_mouse;
 
-    uint32_t m_mouseX = 0;
-    uint32_t m_mouseY = 0;
-    uint32_t m_mouseWheel = 0;
+    int32_t m_mouseX = 0;
+    int32_t m_mouseY = 0;
+    int32_t m_lastMouseX = 0;
+    int32_t m_lastMouseY = 0;
+    int32_t m_mouseWheel = 0;
 };
 
 }
