@@ -15,6 +15,11 @@ SceneImporter::~SceneImporter() {
     m_scenes.clear();
 }
 
+const std::string& SceneImporter::tag() const {
+    static const std::string scnTag("scn");
+    return scnTag;
+}
+
 void SceneImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
     m_scenes.clear();
     auto scene = ResourceImporterT<duk::scene::Scene>::load(path);
@@ -46,4 +51,3 @@ duk::scene::Scene* SceneImporter::find(duk::resource::Id id) {
 }
 
 }
-

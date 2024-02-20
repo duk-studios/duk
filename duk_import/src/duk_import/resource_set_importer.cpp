@@ -12,13 +12,13 @@ namespace detail {
 
 ResourceDescription parse_resource_description(const rapidjson::Value& object) {
     ResourceDescription resourceDescription = {};
-    resourceDescription.type = json::from_json_member<const char*>(object, "type", "unknown");
+    resourceDescription.tag = json::from_json_member<const char*>(object, "tag", "undefined");
     resourceDescription.path = json::from_json_member<const char*>(object, "file");
     resourceDescription.id = json::from_json_member<duk::resource::Id>(object, "id");
     auto aliasesMember = object.FindMember("aliases");
     if (aliasesMember != object.MemberEnd()) {
         auto aliases = aliasesMember->value.GetArray();
-        for (auto& alias: aliases) {
+        for (auto& alias : aliases) {
             resourceDescription.aliases.insert(alias.GetString());
         }
     }

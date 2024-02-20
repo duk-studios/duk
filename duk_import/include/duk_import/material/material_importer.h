@@ -28,6 +28,8 @@ public:
 
     explicit MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo);
 
+    const std::string& tag() const override;
+
     void load(const duk::resource::Id& id, const std::filesystem::path& path) override;
 
     void solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) override;

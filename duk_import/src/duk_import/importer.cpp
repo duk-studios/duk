@@ -2,36 +2,25 @@
 /// importer.cpp
 
 #include <duk_import/importer.h>
-#include <duk_import/image/image_loader_stb.h>
-#include <duk_import/material/material_loader_json.h>
 #include <duk_import/scene/scene_loader_json.h>
-#include <duk_renderer/resources/builtin_resource_ids.h>
-#include <duk_renderer/pools/image_pool.h>
-#include <duk_renderer/pools/mesh_pool.h>
-#include <duk_renderer/pools/material_pool.h>
-#include <duk_renderer/pools/sprite_pool.h>
 
 namespace duk::import {
 
 Importer::Importer(const ImporterCreateInfo& importerCreateInfo) :
     m_pools(importerCreateInfo.pools) {
 
-    {
-        ImageImporterCreateInfo imageImporterCreateInfo = {};
-        imageImporterCreateInfo.rhiCapabilities = importerCreateInfo.renderer->rhi()->capabilities();
-        imageImporterCreateInfo.imagePool = m_pools->get<duk::renderer::ImagePool>();
-        m_resourceImporters.emplace("img", std::make_unique<ImageImporter>(imageImporterCreateInfo));
-    }
-
-    {
-        MaterialImporterCreateInfo materialImporterCreateInfo = {};
-        materialImporterCreateInfo.materialPool = m_pools->get<duk::renderer::MaterialPool>();
-        m_resourceImporters.emplace("mat", std::make_unique<MaterialImporter>(materialImporterCreateInfo));
-    }
-    m_resourceImporters.emplace("scn", std::make_unique<SceneImporter>());
 }
 
 Importer::~Importer() = default;
+
+ResourceImporter* Importer::add_resource_importer(std::unique_ptr<ResourceImporter> resourceImporter) {
+    const auto& tag = resourceImporter->tag();
+    auto it = m_resourceImporters.find(tag);
+    if (it != m_resourceImporters.end()) {
+        throw std::logic_error(fmt::format("a ResourceImporter with tag \"{}\" already exists in this importer", tag));
+    }
+    return m_resourceImporters.emplace(tag, std::move(resourceImporter)).first->second.get();
+}
 
 void Importer::load_resources(const std::filesystem::path& path) {
     if (!m_resourceSetImporter.accept(path)) {
@@ -42,7 +31,7 @@ void Importer::load_resources(const std::filesystem::path& path) {
 }
 
 void Importer::load_resource(duk::resource::Id id) {
-    if (id < duk::renderer::kMaxBuiltinResourceId) {
+    if (id < kMaxBuiltInResourceId) {
         // this is a builtin resource, skip
         return;
     }
@@ -56,12 +45,10 @@ void Importer::load_resource(duk::resource::Id id) {
 
     const auto& resourceDescription = resourceIt->second;
 
-    auto importerIt = m_resourceImporters.find(resourceDescription.type);
-    if (importerIt == m_resourceImporters.end()) {
-        throw std::runtime_error(fmt::format("Could not find an importer for resource type \"{}\"", resourceDescription.type));
+    auto importer = get_importer(resourceDescription.tag);
+    if (!importer) {
+        throw std::runtime_error(fmt::format("Could not find an importer for tag \"{}\"", resourceDescription.tag));
     }
-
-    auto& importer = importerIt->second;
 
     importer->load(resourceDescription.id, resourceDescription.path);
 
@@ -76,7 +63,7 @@ void Importer::load_resource(duk::resource::Id id) {
     importer->solve_references(resourceDescription.id, referenceSolver);
 }
 
-duk::resource::Id Importer::find_id_from_alias(const std::string& alias) {
+duk::resource::Id Importer::find_id(const std::string& alias) {
     auto& aliases = m_resourceSet.aliases;
     auto it = aliases.find(alias);
     if (it == aliases.end()) {
@@ -85,10 +72,10 @@ duk::resource::Id Importer::find_id_from_alias(const std::string& alias) {
     return it->second;
 }
 
-ResourceImporter* Importer::importer_for_resource_type(const std::string& resourceType) {
-    auto it = m_resourceImporters.find(resourceType);
+ResourceImporter* Importer::get_importer(const std::string& tag) {
+    auto it = m_resourceImporters.find(tag);
     if (it == m_resourceImporters.end()) {
-        throw std::invalid_argument(fmt::format("could not find resource importer for type \"{}\"", resourceType));
+        return nullptr;
     }
     return it->second.get();
 }

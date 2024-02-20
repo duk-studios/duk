@@ -12,6 +12,11 @@ MaterialImporter::MaterialImporter(const MaterialImporterCreateInfo& materialImp
     add_loader<MaterialLoaderJson>();
 }
 
+const std::string& MaterialImporter::tag() const {
+    static const std::string matTag("mat");
+    return matTag;
+}
+
 void MaterialImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
     auto dataSource = ResourceImporterT<duk::renderer::MaterialDataSource>::load(path);
     m_materialPool->create(id, dataSource.get());
@@ -32,5 +37,6 @@ void MaterialImporter::solve_references(const duk::resource::Id& id, duk::resour
     }
     referenceSolver.solve(*material);
 }
+
 
 }

@@ -24,6 +24,8 @@ public:
 
     explicit ImageImporter(const ImageImporterCreateInfo& imageImporterCreateInfo);
 
+    const std::string& tag() const override;
+
     void load(const duk::resource::Id& id, const std::filesystem::path& path) override;
 
 private:

@@ -17,6 +17,8 @@ public:
 
     virtual ~ResourceImporter() = default;
 
+    virtual const std::string& tag() const = 0;
+
     virtual void load(const duk::resource::Id& id, const std::filesystem::path& path) = 0;
 
     virtual void solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver);

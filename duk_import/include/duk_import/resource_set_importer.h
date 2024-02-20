@@ -15,7 +15,7 @@
 namespace duk::import {
 
 struct ResourceDescription {
-    std::string type;
+    std::string tag;
     std::string path;
     duk::resource::Id id;
     std::set<std::string> aliases;
