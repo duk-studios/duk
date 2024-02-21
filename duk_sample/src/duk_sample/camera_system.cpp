@@ -23,7 +23,6 @@ static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveC
 struct CameraController {
     float speed;
     float rotationSpeed;
-    float sensitivity = 0.1f;
 };
 
 }
@@ -47,7 +46,7 @@ void CameraSystem::init() {
     m_camera.add<duk::renderer::Rotation3D>();
     auto settings = m_camera.add<detail::CameraController>();
     settings->speed = 10.0f;
-    settings->rotationSpeed = 10.0f;
+    settings->rotationSpeed = 50.0f;
 
 
     renderer->use_as_camera(m_camera);
@@ -61,10 +60,23 @@ void CameraSystem::update() {
 
     auto [position, rotation, controller, perspective] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraController,duk::renderer::PerspectiveCamera>();
 
-
     glm::vec3 rotationDir = glm::vec3(0);
     if (input->mouse(duk::platform::MouseButton::LEFT)) {
         rotationDir = glm::vec3(-input->delta_mouse().y, -input->delta_mouse().x, 0);
+    }
+    else {
+        if(input->key(duk::platform::Keys::UP_ARROW)) {
+            rotationDir = glm::vec3(-1, 0, 0);
+        }
+        if(input->key(duk::platform::Keys::DOWN_ARROW)) {
+            rotationDir = glm::vec3(1, 0, 0);
+        }
+        if(input->key(duk::platform::Keys::RIGHT_ARROW)) {
+            rotationDir = glm::vec3(0, 1, 0);
+        }
+        if(input->key(duk::platform::Keys::LEFT_ARROW)) {
+            rotationDir = glm::vec3(0, -1, 0);
+        }
     }
 
     auto inputOffset = glm::vec3(0.0f, 0.0f, 0.0f);

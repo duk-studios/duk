@@ -20,19 +20,19 @@ public:
     explicit Input(const InputCreateInfo& inputCreateInfo);
     ~Input();
 
-    bool key(duk::platform::Keys key);
-    bool key_down(duk::platform::Keys key);
-    bool key_up(duk::platform::Keys key);
+    bool key(duk::platform::Keys key) const;
+    bool key_down(duk::platform::Keys key) const;
+    bool key_up(duk::platform::Keys key) const;
 
-    bool mouse_down(duk::platform::MouseButton mouseButton);
-    bool mouse_up(duk::platform::MouseButton mouseButton);
-    bool mouse(duk::platform::MouseButton mouseButton);
+    bool mouse_down(duk::platform::MouseButton mouseButton) const;
+    bool mouse_up(duk::platform::MouseButton mouseButton) const;
+    bool mouse(duk::platform::MouseButton mouseButton) const;
 
     void refresh();
 
-    glm::vec2 delta_mouse();
-    glm::vec2 mouse_position();
-    int32_t mouse_wheel();
+    glm::vec2 delta_mouse() const;
+    glm::vec2 mouse_position() const;
+    int32_t mouse_wheel() const;
 
 
 private:
@@ -43,6 +43,7 @@ private:
 
     glm::vec2 m_mousePos = glm::vec2(0,0);
     glm::vec2 m_lastMousePos = glm::vec2(0,0);
+    glm::vec2 m_deltaMousePos = glm::vec2(0,0);
     int32_t m_mouseWheel = 0;
 };
 
