@@ -43,8 +43,8 @@ duk::engine::Input::Input(const InputCreateInfo &inputCreateInfo) {
     });
 
     m_listener.listen(inputCreateInfo.window->mouse_movement_event, [this](uint32_t x, uint32_t y) {
-        m_mouseX = x;
-        m_mouseY = y;
+        m_mousePos.x = x;
+        m_mousePos.y = y;
     });
 
     m_listener.listen(inputCreateInfo.window->mouse_wheel_movement_event, [this](float x, float wheelDelta) {
@@ -78,8 +78,8 @@ bool duk::engine::Input::mouse(duk::platform::MouseButton mouseButton) {
 
 
 void duk::engine::Input::refresh() {
-    m_lastMouseY = m_mouseY;
-    m_lastMouseX = m_mouseX;
+    m_lastMouseY = m_mousePos.y;
+    m_lastMouseX = m_mousePos.x;
     m_pressedKeys.clear();
     m_releasedKeys.clear();
     m_pressedMouseButton.clear();
@@ -87,15 +87,11 @@ void duk::engine::Input::refresh() {
 }
 
 glm::vec2 duk::engine::Input::delta_mouse() {
-    return glm::vec2(m_mouseX - m_lastMouseX, m_mouseY - m_lastMouseY);
+    return glm::vec2(m_mousePos.x - m_lastMouseX, m_mousePos.y - m_lastMouseY);
 }
 
-int32_t duk::engine::Input::mouse_x() {
-    return m_mouseX;
-}
-
-int32_t duk::engine::Input::mouse_y() {
-    return m_mouseY;
+glm::vec2 duk::engine::Input::mouse_position() {
+    return m_mousePos;
 }
 
 int32_t duk::engine::Input::mouse_wheel() {
