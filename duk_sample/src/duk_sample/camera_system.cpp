@@ -61,14 +61,10 @@ void CameraSystem::update() {
 
     auto [position, rotation, controller, perspective] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraController,duk::renderer::PerspectiveCamera>();
 
-    float deltaMouseX = 0.0f;
-    float deltaMouseY = 0.0f;
 
     glm::vec3 rotationDir = glm::vec3(0);
     if (input->mouse(duk::platform::MouseButton::LEFT)) {
-        deltaMouseX = input->delta_mouse().x;
-        deltaMouseY = input->delta_mouse().y;
-        rotationDir = glm::vec3(-deltaMouseY, -deltaMouseX, 0);
+        rotationDir = glm::vec3(-input->delta_mouse().y, -input->delta_mouse().x, 0);
     }
 
     auto inputOffset = glm::vec3(0.0f, 0.0f, 0.0f);
