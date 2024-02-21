@@ -72,10 +72,10 @@ void CameraSystem::update() {
             rotationDir = glm::vec3(1, 0, 0);
         }
         if(input->key(duk::platform::Keys::RIGHT_ARROW)) {
-            rotationDir = glm::vec3(0, 1, 0);
+            rotationDir = glm::vec3(0, -1, 0);
         }
         if(input->key(duk::platform::Keys::LEFT_ARROW)) {
-            rotationDir = glm::vec3(0, -1, 0);
+            rotationDir = glm::vec3(0, 1, 0);
         }
     }
 
