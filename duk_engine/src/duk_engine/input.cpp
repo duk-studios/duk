@@ -78,8 +78,7 @@ bool duk::engine::Input::mouse(duk::platform::MouseButton mouseButton) {
 
 
 void duk::engine::Input::refresh() {
-    m_lastMouseY = m_mousePos.y;
-    m_lastMouseX = m_mousePos.x;
+    m_lastMousePos = m_mousePos;
     m_pressedKeys.clear();
     m_releasedKeys.clear();
     m_pressedMouseButton.clear();
@@ -87,7 +86,7 @@ void duk::engine::Input::refresh() {
 }
 
 glm::vec2 duk::engine::Input::delta_mouse() {
-    return glm::vec2(m_mousePos.x - m_lastMouseX, m_mousePos.y - m_lastMouseY);
+    return glm::vec2(m_mousePos.x - m_lastMousePos.x, m_mousePos.y - m_lastMousePos.y);
 }
 
 glm::vec2 duk::engine::Input::mouse_position() {

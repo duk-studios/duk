@@ -42,8 +42,7 @@ private:
     std::set<duk::platform::MouseButton> m_pressedMouseButton, m_releasedMouseButton, m_mouse;
 
     glm::vec2 m_mousePos = glm::vec2(0,0);
-    int32_t m_lastMouseX = 0;
-    int32_t m_lastMouseY = 0;
+    glm::vec2 m_lastMousePos = glm::vec2(0,0);
     int32_t m_mouseWheel = 0;
 };
 
