@@ -40,7 +40,7 @@ public:
 
     DUK_NO_DISCARD duk::scene::Scene* scene();
 
-    DUK_NO_DISCARD duk::engine::Input* input();
+    DUK_NO_DISCARD const duk::engine::Input* input() const;
 
     DUK_NO_DISCARD const duk::tools::Timer* timer() const;
 

@@ -144,7 +144,7 @@ duk::scene::Scene* Engine::scene() {
     return m_scene;
 }
 
-duk::engine::Input* Engine::input() {
+const duk::engine::Input* Engine::input() const {
     return m_input.get();
 }
 

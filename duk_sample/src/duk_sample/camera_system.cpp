@@ -6,24 +6,21 @@
 #include <duk_engine/engine.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/camera.h>
-#include <duk_log/log.h>
+#include "duk_log/log.h"
 
 
 namespace duk::sample {
 
-
-
 namespace detail {
 
-static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveCamera> perspectiveCamera, uint32_t width, uint32_t height)
-{
+static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveCamera> perspectiveCamera, uint32_t width, uint32_t height){
     perspectiveCamera->zNear = 0.1f;
     perspectiveCamera->zFar = 1000.f;
     perspectiveCamera->aspectRatio = (float)width / (float)height;
     perspectiveCamera->fovDegrees = 45.0f;
 }
 
-struct CameraSettings {
+struct CameraController {
     float speed;
     float rotationSpeed;
 };
@@ -47,7 +44,7 @@ void CameraSystem::init() {
     auto position = m_camera.add<duk::renderer::Position3D>();
     position->value = glm::vec3(0, 0, 20);
     m_camera.add<duk::renderer::Rotation3D>();
-    auto settings = m_camera.add<detail::CameraSettings>();
+    auto settings = m_camera.add<detail::CameraController>();
     settings->speed = 10.0f;
     settings->rotationSpeed = 50.0f;
 
@@ -61,19 +58,30 @@ void CameraSystem::update() {
 
     const auto deltaTime = engine()->timer()->duration().count();
 
-    auto [position, rotation, settings] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraSettings>();
+    auto [position, rotation, controller, perspective] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraController,duk::renderer::PerspectiveCamera>();
 
     glm::vec3 rotationDir = glm::vec3(0);
-    if (input->key(duk::platform::Keys::RIGHT_ARROW)) {
-        rotationDir = glm::vec3(0, -1, 0);
+    if (input->mouse(duk::platform::MouseButton::LEFT)) {
+        rotationDir = glm::vec3(-input->delta_mouse().y, -input->delta_mouse().x, 0);
     }
-    if (input->key(duk::platform::Keys::LEFT_ARROW)) {
-        rotationDir = glm::vec3(0, 1, 0);
+    else {
+        if(input->key(duk::platform::Keys::UP_ARROW)) {
+            rotationDir = glm::vec3(-1, 0, 0);
+        }
+        if(input->key(duk::platform::Keys::DOWN_ARROW)) {
+            rotationDir = glm::vec3(1, 0, 0);
+        }
+        if(input->key(duk::platform::Keys::RIGHT_ARROW)) {
+            rotationDir = glm::vec3(0, -1, 0);
+        }
+        if(input->key(duk::platform::Keys::LEFT_ARROW)) {
+            rotationDir = glm::vec3(0, 1, 0);
+        }
     }
-
-    rotation->value = glm::normalize(glm::quat(glm::radians(rotationDir * settings->rotationSpeed * deltaTime)) * rotation->value);
 
     auto inputOffset = glm::vec3(0.0f, 0.0f, 0.0f);
+
+    rotation->value = glm::normalize( rotation->value * glm::quat(glm::radians(rotationDir * controller->rotationSpeed * deltaTime)));
 
     if(input->key(duk::platform::Keys::W)) {
         inputOffset += glm::vec3(0.0f, 0.0f, -1.0f);
@@ -101,7 +109,7 @@ void CameraSystem::update() {
 
     inputOffset = rotation->value * inputOffset;
 
-    position->value += inputOffset * settings->speed * deltaTime;
+    position->value += inputOffset * controller->speed * deltaTime;
 }
 
 }
