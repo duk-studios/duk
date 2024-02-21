@@ -12,7 +12,7 @@
 namespace duk {
 
 namespace scene {
-class Scene;
+class Objects;
 class Object;
 }
 
@@ -43,7 +43,7 @@ public:
 
     virtual ~Renderer();
 
-    void render(duk::scene::Scene* scene);
+    void render(duk::scene::Objects* scene);
 
     DUK_NO_DISCARD uint32_t render_width() const;
 
@@ -63,7 +63,7 @@ public:
 
 private:
 
-    void update_global_descriptors(duk::scene::Scene* scene);
+    void update_global_descriptors(duk::scene::Objects* scene);
 
 protected:
     duk::platform::Window* m_window;

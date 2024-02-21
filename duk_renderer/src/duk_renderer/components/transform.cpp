@@ -2,7 +2,7 @@
 /// transform.cpp
 
 #include <duk_renderer/components/transform.h>
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>

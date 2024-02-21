@@ -6,7 +6,7 @@
 #include <duk_rhi/rhi.h>
 #include <duk_renderer/brushes/mesh.h>
 #include <duk_platform/window.h>
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>
@@ -81,7 +81,7 @@ int main() {
     materialPoolCreateInfo.renderer = renderer.get();
     auto materialPool = pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
 
-    auto scene = std::make_unique<duk::scene::Scene>();
+    auto scene = std::make_unique<duk::scene::Objects>();
 
     //Adding our first object to the scene, a camera.
     //Setup the camera position, and adding the Perspective Component to it.

@@ -40,10 +40,10 @@ void GlobalDescriptors::update_camera(const scene::Object& cameraObject) {
     m_cameraUBO->flush();
 }
 
-void GlobalDescriptors::update_lights(duk::scene::Scene* scene) {
+void GlobalDescriptors::update_lights(duk::scene::Objects* scene) {
     auto& lights = m_lightsUBO->data();
     lights.directionalLightCount = 0;
-    for (auto object : scene->objects_with_components<DirectionalLight>()) {
+    for (auto object : scene->all_with<DirectionalLight>()) {
         auto directionalLightComponent = object.component<DirectionalLight>();
         auto& directionalLight = lights.directionalLights[lights.directionalLightCount++];
         directionalLight.direction = forward_direction_3d(object);
@@ -56,7 +56,7 @@ void GlobalDescriptors::update_lights(duk::scene::Scene* scene) {
     }
 
     lights.pointLightCount = 0;
-    for (auto object : scene->objects_with_components<PointLight>()) {
+    for (auto object : scene->all_with<PointLight>()) {
         auto pointLightComponent = object.component<PointLight>();
         auto positionComponent = object.component<Position3D>();
         auto& pointLight = lights.pointLights[lights.pointLightCount++];

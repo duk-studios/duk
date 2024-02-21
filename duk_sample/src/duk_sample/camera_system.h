@@ -6,7 +6,7 @@
 #define DUK_SAMPLE_CAMERA_SYSTEM_H
 
 #include <duk_engine/systems/system.h>
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 #include <duk_event/event.h>
 
 namespace duk::sample {

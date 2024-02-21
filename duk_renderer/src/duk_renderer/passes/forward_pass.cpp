@@ -41,7 +41,7 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
 
     std::set<Material*> uniqueMaterials;
 
-    for (auto object : renderParams.scene->objects_with_components<MeshRenderer>()) {
+    for (auto object : renderParams.scene->all_with<MeshRenderer>()) {
         auto meshRenderer = object.component<MeshRenderer>();
 
         auto material = meshRenderer->material.get();
@@ -149,7 +149,7 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
 
     std::set<Material*> usedMaterials;
 
-    for (auto object : renderParams.scene->objects_with_components<SpriteRenderer>()) {
+    for (auto object : renderParams.scene->all_with<SpriteRenderer>()) {
         auto spriteRenderer = object.component<SpriteRenderer>();
         auto material = spriteRenderer->material.get();
         auto sprite = spriteRenderer->sprite.get();

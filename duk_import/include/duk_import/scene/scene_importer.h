@@ -6,12 +6,12 @@
 #define DUK_IMPORT_SCENE_IMPORTER_H
 
 #include <duk_import/resource_importer.h>
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 #include <filesystem>
 
 namespace duk::import {
 
-class SceneImporter : public ResourceImporterT<duk::scene::Scene> {
+class SceneImporter : public ResourceImporterT<duk::scene::Objects> {
 public:
     SceneImporter();
 
@@ -25,10 +25,10 @@ public:
 
     void solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) override;
 
-    duk::scene::Scene* find(duk::resource::Id id);
+    duk::scene::Objects* find(duk::resource::Id id);
 
 private:
-    std::unordered_map<duk::resource::Id, std::unique_ptr<duk::scene::Scene>> m_scenes;
+    std::unordered_map<duk::resource::Id, std::unique_ptr<duk::scene::Objects>> m_scenes;
 };
 
 }

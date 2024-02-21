@@ -56,7 +56,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
 
 Renderer::~Renderer() = default;
 
-void Renderer::render(duk::scene::Scene* scene) {
+void Renderer::render(duk::scene::Objects* scene) {
     // if no camera is set, return
     if (!scene->valid_object(m_mainCameraObjectId)) {
         return;
@@ -162,7 +162,7 @@ void Renderer::use_as_camera(const scene::Object& object) {
     m_mainCameraObjectId = object.id();
 }
 
-void Renderer::update_global_descriptors(duk::scene::Scene* scene) {
+void Renderer::update_global_descriptors(duk::scene::Objects* scene) {
     if (scene->valid_object(m_mainCameraObjectId)) {
         m_globalDescriptors->update_camera(scene->object(m_mainCameraObjectId));
     }

@@ -22,7 +22,7 @@ const std::string& SceneImporter::tag() const {
 
 void SceneImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
     m_scenes.clear();
-    auto scene = ResourceImporterT<duk::scene::Scene>::load(path);
+    auto scene = ResourceImporterT<duk::scene::Objects>::load(path);
     m_scenes.emplace(id, std::move(scene));
 }
 
@@ -42,7 +42,7 @@ void SceneImporter::solve_references(const duk::resource::Id& id, duk::resource:
     referenceSolver.solve(*scene);
 }
 
-duk::scene::Scene* SceneImporter::find(duk::resource::Id id) {
+duk::scene::Objects* SceneImporter::find(duk::resource::Id id) {
     auto it = m_scenes.find(id);
     if (it == m_scenes.end()) {
         return nullptr;

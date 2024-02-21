@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_SORT_H
 #define DUK_RENDERER_SORT_H
 
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 
 #include <cstdint>
 #include <numeric>

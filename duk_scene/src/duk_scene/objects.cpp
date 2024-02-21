@@ -1,7 +1,7 @@
 /// 06/07/2023
 /// scene.cpp
 
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 
 namespace duk::scene {
 
@@ -37,9 +37,9 @@ Object::Object() : Object(MAX_OBJECTS, 0, nullptr) {
 
 }
 
-Object::Object(uint32_t index, uint32_t version, Scene* scene) :
+Object::Object(uint32_t index, uint32_t version, Objects* scene) :
         m_id(index, version),
-        m_scene(scene) {
+        m_objects(scene) {
 
 }
 
@@ -48,23 +48,23 @@ Object::Id Object::id() const {
 }
 
 bool Object::valid() const {
-    return m_scene != nullptr && m_scene->valid_object(m_id);
+    return m_objects != nullptr && m_objects->valid_object(m_id);
 }
 
 Object::operator bool() const {
     return valid();
 }
 
-Scene* Object::scene() const {
-    return m_scene;
+Objects* Object::scene() const {
+    return m_objects;
 }
 
 void Object::destroy() const {
-    m_scene->destroy_object(m_id);
+    m_objects->destroy_object(m_id);
 }
 
 Object::ComponentView Object::components() {
-    return m_scene->components(m_id);
+    return m_objects->components(m_id);
 }
 
 Object::ComponentIterator::ComponentIterator(const ComponentMask& mask, uint32_t index) :
@@ -111,108 +111,108 @@ Object::ComponentIterator Object::ComponentView::end() {
 }
 
 
-Scene::~Scene() {
-    for (auto object : objects()) {
+Objects::~Objects() {
+    for (auto object : all()) {
         object.destroy();
     }
 }
 
-Object Scene::add_object() {
+Object Objects::add_object() {
     if (!m_freeList.empty()) {
         auto freeIndex = m_freeList.back();
         m_freeList.pop_back();
-        auto version = m_objectVersions[freeIndex];
-        m_objectComponentMasks[freeIndex].reset();
+        auto version = m_versions[freeIndex];
+        m_componentMasks[freeIndex].reset();
         return {freeIndex, version, this};
     }
-    auto index = (uint32_t)m_objectVersions.size();
-    m_objectVersions.resize(m_objectVersions.size() + 1);
-    m_objectComponentMasks.resize(m_objectVersions.size());
-    m_objectVersions[index] = 0;
+    auto index = (uint32_t)m_versions.size();
+    m_versions.resize(m_versions.size() + 1);
+    m_componentMasks.resize(m_versions.size());
+    m_versions[index] = 0;
     return {index, 0, this};
 }
 
-void Scene::destroy_object(const Object::Id& id) {
+void Objects::destroy_object(const Object::Id& id) {
     assert(valid_object(id));
     auto index = id.index();
-    m_objectVersions[index]++;
+    m_versions[index]++;
     m_freeList.push_back(index);
     std::sort(m_freeList.begin(), m_freeList.end());
 
-    auto componentMask = m_objectComponentMasks[index];
+    auto componentMask = m_componentMasks[index];
     duk::tools::for_each_bit<true>(componentMask, [index, this](size_t componentIndex) {
         remove_component(index, componentIndex);
     });
 }
 
-Object Scene::object(const Object::Id& id) {
+Object Objects::object(const Object::Id& id) {
     return {id.index(), id.version(), this};
 }
 
-bool Scene::valid_object(const Object::Id& id) const {
+bool Objects::valid_object(const Object::Id& id) const {
     const auto index = id.index();
-    return m_objectVersions.size() > index && m_objectVersions[index] == id.version();
+    return m_versions.size() > index && m_versions[index] == id.version();
 }
 
-Scene::ObjectView Scene::objects() {
+Objects::ObjectView Objects::all() {
     return {this, {}};
 }
 
-void Scene::remove_component(uint32_t index, uint32_t componentIndex) {
+void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
     m_componentPools[componentIndex]->destruct(index);
-    m_objectComponentMasks[index].reset(componentIndex);
+    m_componentMasks[index].reset(componentIndex);
 }
 
-Object::ComponentView Scene::components(const Object::Id& id) {
+Object::ComponentView Objects::components(const Object::Id& id) {
     assert(valid_object(id));
-    return Object::ComponentView(m_objectComponentMasks.at(id.index()));
+    return Object::ComponentView(m_componentMasks.at(id.index()));
 }
 
-Scene::ObjectView::Iterator::Iterator(uint32_t i, Scene* scene, ComponentMask componentMask) :
-    m_i(i),
-    m_freeListCursor(0),
-    m_scene(scene),
-    m_componentMask(componentMask) {
+Objects::ObjectView::Iterator::Iterator(uint32_t i, Objects* scene, ComponentMask componentMask) :
+        m_i(i),
+        m_freeListCursor(0),
+        m_objects(scene),
+        m_componentMask(componentMask) {
     next();
 }
 
-Object Scene::ObjectView::Iterator::operator*() const {
-    return m_scene->object(Object::Id{m_i, m_scene->m_objectVersions[m_i]});
+Object Objects::ObjectView::Iterator::operator*() const {
+    return m_objects->object(Object::Id{m_i, m_objects->m_versions[m_i]});
 }
 
-Scene::ObjectView::Iterator& Scene::ObjectView::Iterator::operator++() {
+Objects::ObjectView::Iterator& Objects::ObjectView::Iterator::operator++() {
     m_i++;
     next();
     return *this;
 }
 
-Scene::ObjectView::Iterator Scene::ObjectView::Iterator::operator++(int) {
+Objects::ObjectView::Iterator Objects::ObjectView::Iterator::operator++(int) {
     auto old = *this;
     m_i++;
     next();
     return old;
 }
 
-bool Scene::ObjectView::Iterator::operator==(const Scene::ObjectView::Iterator& other) const {
-    return m_i == other.m_i && m_scene == other.m_scene;
+bool Objects::ObjectView::Iterator::operator==(const Objects::ObjectView::Iterator& other) const {
+    return m_i == other.m_i && m_objects == other.m_objects;
 }
 
-bool Scene::ObjectView::Iterator::operator!=(const Scene::ObjectView::Iterator& other) const {
+bool Objects::ObjectView::Iterator::operator!=(const Objects::ObjectView::Iterator& other) const {
     return !(*this == other);
 }
 
-void Scene::ObjectView::Iterator::next() {
-    while (m_i < m_scene->m_objectVersions.size() && !valid_object()) {
+void Objects::ObjectView::Iterator::next() {
+    while (m_i < m_objects->m_versions.size() && !valid_object()) {
         m_i++;
         m_freeListCursor++;
     }
 }
 
-bool Scene::ObjectView::Iterator::valid_object() {
-    if ((m_componentMask & m_scene->m_objectComponentMasks[m_i]) != m_componentMask) {
+bool Objects::ObjectView::Iterator::valid_object() {
+    if ((m_componentMask & m_objects->m_componentMasks[m_i]) != m_componentMask) {
         return false;
     }
-    auto& freeList = m_scene->m_freeList;
+    auto& freeList = m_objects->m_freeList;
     if (freeList.empty() || m_freeListCursor >= freeList.size()) {
         return true;
     }
@@ -220,26 +220,26 @@ bool Scene::ObjectView::Iterator::valid_object() {
     return freeList[m_freeListCursor] != m_i;
 }
 
-Scene::ObjectView::ObjectView(Scene* scene, ComponentMask componentMask) :
-    m_scene(scene),
+Objects::ObjectView::ObjectView(Objects* scene, ComponentMask componentMask) :
+    m_objects(scene),
     m_componentMask(componentMask) {
 
 }
 
-Scene::ObjectView::Iterator Scene::ObjectView::begin() {
-    return {0, m_scene, m_componentMask};
+Objects::ObjectView::Iterator Objects::ObjectView::begin() {
+    return {0, m_objects, m_componentMask};
 }
 
-Scene::ObjectView::Iterator Scene::ObjectView::begin() const {
-    return {0, m_scene, m_componentMask};
+Objects::ObjectView::Iterator Objects::ObjectView::begin() const {
+    return {0, m_objects, m_componentMask};
 }
 
-Scene::ObjectView::Iterator Scene::ObjectView::end() {
-    return {static_cast<uint32_t>(m_scene->m_objectVersions.size()), m_scene, m_componentMask};
+Objects::ObjectView::Iterator Objects::ObjectView::end() {
+    return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
 }
 
-Scene::ObjectView::Iterator Scene::ObjectView::end() const {
-    return {static_cast<uint32_t>(m_scene->m_objectVersions.size()), m_scene, m_componentMask};
+Objects::ObjectView::Iterator Objects::ObjectView::end() const {
+    return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
 }
 
 }

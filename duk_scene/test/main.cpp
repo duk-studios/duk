@@ -2,7 +2,7 @@
 // Created by Ricardo on 20/07/2023.
 //
 
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 #include <iostream>
 
 struct ComponentTest {
@@ -39,7 +39,7 @@ struct ComponentTest3 {
 int main() {
 
     //The scene which is in use
-    auto scene = std::make_unique<duk::scene::Scene>();
+    auto scene = std::make_unique<duk::scene::Objects>();
     
     //Adding a new object to the scene
     auto obj0 = scene->add_object();
@@ -54,13 +54,13 @@ int main() {
     obj2.add<ComponentTest>();
     obj2.add<ComponentTest2>();
     obj2.add<ComponentTest3>();
-    
+
     scene->add_object();
     scene->add_object();
 
     //Iterating through all the scene objects with specified components
     //The objects that have any component type like: ComponentTest, ComponentTest2, ComponentTest3, will be listed below
-    for (auto object : scene->objects_with_components<ComponentTest, ComponentTest2, ComponentTest3>()) {
+    for (auto object : scene->all_with<ComponentTest, ComponentTest2, ComponentTest3>()) {
         std::cout << "Id: " << object.id().index() << std::endl;
         
         auto [comp1, comp2, comp3] = object.components<ComponentTest, ComponentTest2, ComponentTest3>();

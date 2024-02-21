@@ -140,7 +140,7 @@ duk::import::Importer* Engine::importer() {
     return m_importer.get();
 }
 
-duk::scene::Scene* Engine::scene() {
+duk::scene::Objects* Engine::scene() {
     return m_scene;
 }
 
@@ -152,7 +152,7 @@ const duk::tools::Timer *Engine::timer() const {
     return &m_timer;
 }
 
-void Engine::use_scene(duk::scene::Scene* scene) {
+void Engine::use_scene(duk::scene::Objects* scene) {
     m_scene = scene;
 }
 

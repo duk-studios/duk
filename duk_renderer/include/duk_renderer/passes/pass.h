@@ -14,7 +14,7 @@
 namespace duk {
 
 namespace scene {
-class Scene;
+class Objects;
 }
 
 namespace renderer {
@@ -66,7 +66,7 @@ public:
 
     struct RenderParams {
         duk::rhi::CommandBuffer* commandBuffer;
-        duk::scene::Scene* scene;
+        duk::scene::Objects* scene;
         GlobalDescriptors* globalDescriptors;
         uint32_t outputWidth;
         uint32_t outputHeight;

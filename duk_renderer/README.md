@@ -70,7 +70,7 @@ int main() {
 
     //Creating our renderer with the forwardRendererCreateInfo, and a scene.
     auto renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
-    auto scene = std::make_unique<duk::scene::Scene>();
+    auto scene = std::make_unique<duk::scene::Objects>();
 
     //Adding our first object to the scene, a camera.
     //Setup the camera position, and adding the Perspective Component to it.

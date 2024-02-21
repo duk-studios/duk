@@ -38,13 +38,13 @@ public:
 
     DUK_NO_DISCARD duk::import::Importer* importer();
 
-    DUK_NO_DISCARD duk::scene::Scene* scene();
+    DUK_NO_DISCARD duk::scene::Objects* scene();
 
     DUK_NO_DISCARD const duk::engine::Input* input() const;
 
     DUK_NO_DISCARD const duk::tools::Timer* timer() const;
 
-    void use_scene(duk::scene::Scene* scene);
+    void use_scene(duk::scene::Objects* scene);
 
     template<typename T>
     void register_component(const std::string& typeName);
@@ -57,7 +57,7 @@ private:
     std::unique_ptr<duk::engine::Input> m_input;
     duk::resource::Pools m_pools;
     duk::event::Dispatcher m_dispatcher;
-    duk::scene::Scene* m_scene;
+    duk::scene::Objects* m_scene;
     Systems m_systems;
     duk::tools::Timer m_timer;
     bool m_run;
