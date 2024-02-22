@@ -8,7 +8,7 @@
 
 int main() {
     duk::sample::ApplicationCreateInfo applicationCreateInfo = {};
-    applicationCreateInfo.name = "Quacker";
+    applicationCreateInfo.engineSettingsPath = "./sample.duk";
 
     try {
         duk::sample::Application application(applicationCreateInfo);

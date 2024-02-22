@@ -16,11 +16,14 @@
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
-    : m_run(false) {
+    : m_settingsPath(engineCreateInfo.settingsPath)
+    , m_run(false) {
+    m_settings = load_settings(m_settingsPath);
+
     duk::platform::WindowCreateInfo windowCreateInfo = {};
-    windowCreateInfo.windowTitle = engineCreateInfo.applicationName;
-    windowCreateInfo.width = 1280;
-    windowCreateInfo.height = 720;
+    windowCreateInfo.windowTitle = m_settings.name.c_str();
+    windowCreateInfo.width = m_settings.resolution.x;
+    windowCreateInfo.height = m_settings.resolution.y;
 
     m_window = duk::platform::Window::create_window(windowCreateInfo);
 
@@ -98,6 +101,14 @@ Engine::~Engine() {
 
 void Engine::run() {
     m_run = true;
+
+    m_importer->load_resource_set(m_settingsPath);
+
+    m_importer->load_resource(m_settings.scene);
+
+    auto sceneImporter = m_importer->get_importer_as<duk::import::SceneImporter>("scn");
+    m_scene = sceneImporter->find(m_settings.scene);
+
     m_window->show();
 
     // assume 60fps for the first frame
@@ -148,10 +159,6 @@ const duk::engine::Input* Engine::input() const {
 
 const duk::tools::Timer* Engine::timer() const {
     return &m_timer;
-}
-
-void Engine::use_scene(duk::scene::Scene* scene) {
-    m_scene = scene;
 }
 
 }// namespace duk::engine

@@ -78,8 +78,18 @@ std::shared_ptr<T> make_shared_from_json(const rapidjson::Value& jsonObject, con
 }
 
 template<>
+inline void from_json<std::string>(const rapidjson::Value& jsonObject, std::string& str) {
+    str = from_json<const char*>(jsonObject);
+}
+
+template<>
 inline void from_json<glm::vec2>(const rapidjson::Value& jsonObject, glm::vec2& object) {
     object = detail::parse_vec<glm::vec2>(jsonObject);
+}
+
+template<>
+inline void from_json<glm::ivec2>(const rapidjson::Value& jsonObject, glm::ivec2& object) {
+    object = detail::parse_vec<glm::ivec2>(jsonObject);
 }
 
 template<>

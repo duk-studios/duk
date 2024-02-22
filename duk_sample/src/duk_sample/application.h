@@ -9,7 +9,7 @@
 namespace duk::sample {
 
 struct ApplicationCreateInfo {
-    const char* name;
+    std::string engineSettingsPath;
 };
 
 class Application {

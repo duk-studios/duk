@@ -27,7 +27,7 @@ public:
     template<typename T, typename... Args>
     T* add_resource_importer(Args&&... args);
 
-    void load_resources(const std::filesystem::path& path);
+    void load_resource_set(const std::filesystem::path& path);
 
     void load_resource(duk::resource::Id id);
 
