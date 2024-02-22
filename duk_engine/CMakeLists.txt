@@ -9,6 +9,7 @@ set(DUK_ENGINE_HEADERS
         include/duk_engine/systems/system.h
         include/duk_engine/systems/render_system.h
         include/duk_engine/input.h
+        include/duk_engine/settings.h
         )
 
 set(DUK_ENGINE_SOURCES
@@ -16,6 +17,7 @@ set(DUK_ENGINE_SOURCES
         src/duk_engine/systems/system.cpp
         src/duk_engine/systems/render_system.cpp
         src/duk_engine/input.cpp
+        src/duk_engine/settings.cpp
         )
 
 add_library(duk_engine STATIC ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})
