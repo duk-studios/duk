@@ -521,6 +521,26 @@ std::tuple<Component<Ts>...> Object::components() {
 
 }
 
+namespace duk::json {
+
+template<>
+inline void from_json<duk::scene::Objects>(const rapidjson::Value& jsonObject, duk::scene::Objects& objects) {
+    auto objectJsons = jsonObject.GetArray();
+
+    for (auto& objectJson : objectJsons) {
+
+        auto object = objects.add_object();
+
+        auto jsonComponents = objectJson["components"].GetArray();
+
+        for (auto& jsonComponent : jsonComponents) {
+            duk::scene::ComponentRegistry::instance()->build_from_json(object, jsonComponent);
+        }
+    }
+}
+
+}
+
 namespace duk::resource {
 
 template<typename Solver, typename T>
@@ -539,10 +559,9 @@ void solve_resources(Solver* solver, duk::scene::Object& object) {
 
 }
 
-
 template<typename Solver>
-void solve_resources(Solver* solver, duk::scene::Objects& scene) {
-    for (auto object : scene.all()) {
+void solve_resources(Solver* solver, duk::scene::Objects& objects) {
+    for (auto object : objects.all()) {
         solver->solve(object);
     }
 }

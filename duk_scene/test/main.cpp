@@ -2,7 +2,7 @@
 // Created by Ricardo on 20/07/2023.
 //
 
-#include <duk_scene/objects.h>
+#include <duk_scene/scene.h>
 #include <iostream>
 
 struct ComponentTest {
@@ -39,28 +39,29 @@ struct ComponentTest3 {
 int main() {
 
     //The scene which is in use
-    auto scene = std::make_unique<duk::scene::Objects>();
+    auto scene = std::make_unique<duk::scene::Scene>();
+    auto& objects = scene->objects();
     
     //Adding a new object to the scene
-    auto obj0 = scene->add_object();
+    auto obj0 = objects.add_object();
 
     //Adding a new component to this object
     obj0.add<ComponentTest>();
 
     //Adding new objects to the scene with new components
-    auto obj1 = scene->add_object();
+    auto obj1 = objects.add_object();
     obj1.add<ComponentTest2>();
-    auto obj2 = scene->add_object();
+    auto obj2 = objects.add_object();
     obj2.add<ComponentTest>();
     obj2.add<ComponentTest2>();
     obj2.add<ComponentTest3>();
 
-    scene->add_object();
-    scene->add_object();
+    objects.add_object();
+    objects.add_object();
 
     //Iterating through all the scene objects with specified components
     //The objects that have any component type like: ComponentTest, ComponentTest2, ComponentTest3, will be listed below
-    for (auto object : scene->all_with<ComponentTest, ComponentTest2, ComponentTest3>()) {
+    for (auto object : objects.all_with<ComponentTest, ComponentTest2, ComponentTest3>()) {
         std::cout << "Id: " << object.id().index() << std::endl;
         
         auto [comp1, comp2, comp3] = object.components<ComponentTest, ComponentTest2, ComponentTest3>();
@@ -70,10 +71,10 @@ int main() {
     }
 
     //Removing the Component from obj with id
-    scene->remove_component<ComponentTest>(obj0.id());
+    obj0.remove<ComponentTest>();
 
     //Destroying object from scene
-    scene->destroy_object(obj0.id());
+    obj1.destroy();
 
     return 0;
 }
