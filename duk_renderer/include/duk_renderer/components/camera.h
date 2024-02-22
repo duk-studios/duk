@@ -21,7 +21,6 @@ glm::mat4 calculate_projection(const duk::scene::Object& object);
 
 glm::mat4 calculate_view(const duk::scene::Object& object);
 
-}
+}// namespace duk::renderer
 
-#endif // DUK_RENDERER_CAMERA_H
-
+#endif// DUK_RENDERER_CAMERA_H

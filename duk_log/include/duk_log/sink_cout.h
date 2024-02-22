@@ -10,16 +10,14 @@ namespace duk::log {
 
 class SinkCout : public Sink {
 public:
-
     explicit SinkCout(Level level);
 
     void flush(Level level, const std::string& message) override;
+
 private:
     std::mutex m_mutex;
 };
 
-}
+}// namespace duk::log
 
-
-#endif // DUK_LOG_SINK_C0UT_H
-
+#endif// DUK_LOG_SINK_C0UT_H

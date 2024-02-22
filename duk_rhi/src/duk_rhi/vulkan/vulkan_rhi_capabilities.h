@@ -16,7 +16,6 @@ struct VulkanRendererCapabilitiesCreateInfo {
 
 class VulkanRendererCapabilities : public RHICapabilities {
 public:
-
     explicit VulkanRendererCapabilities(const VulkanRendererCapabilitiesCreateInfo& rendererCapabilitiesCreateInfo);
 
     ~VulkanRendererCapabilities() override;
@@ -29,7 +28,6 @@ private:
     VulkanPhysicalDevice* m_physicalDevice;
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_VULKAN_RENDERER_CAPABILITIES_H
-
+#endif// DUK_RHI_VULKAN_RENDERER_CAPABILITIES_H

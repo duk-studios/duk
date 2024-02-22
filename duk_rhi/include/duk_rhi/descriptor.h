@@ -4,16 +4,16 @@
 #ifndef DUK_RHI_DESCRIPTOR_H
 #define DUK_RHI_DESCRIPTOR_H
 
-#include <duk_rhi/pipeline/shader.h>
-#include <duk_rhi/image.h>
 #include <duk_rhi/buffer.h>
+#include <duk_rhi/image.h>
+#include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/sampler.h>
 
-#include <duk_macros/macros.h>
 #include <duk_hash/hash_combine.h>
+#include <duk_macros/macros.h>
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace duk::rhi {
 
@@ -35,10 +35,8 @@ struct DescriptorSetDescription {
     std::vector<DescriptorDescription> bindings;
 };
 
-
 class Descriptor {
 public:
-
     Descriptor();
 
     static Descriptor uniform_buffer(Buffer* buffer);
@@ -66,7 +64,6 @@ public:
     DUK_NO_DISCARD bool operator==(const Descriptor& rhs) const noexcept;
 
 private:
-
     void update_hash();
 
 private:
@@ -90,7 +87,7 @@ private:
     duk::hash::Hash m_hash;
 };
 
-}
+}// namespace duk::rhi
 
 namespace std {
 
@@ -113,5 +110,5 @@ struct hash<duk::rhi::DescriptorSetDescription> {
     }
 };
 
-}
-#endif // DUK_RHI_DESCRIPTOR_H
+}// namespace std
+#endif// DUK_RHI_DESCRIPTOR_H

@@ -36,8 +36,8 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* dat
     }
 }
 
-ImageImporter::ImageImporter(const ImageImporterCreateInfo& imageImporterCreateInfo) :
-    m_imagePool(imageImporterCreateInfo.imagePool) {
+ImageImporter::ImageImporter(const ImageImporterCreateInfo& imageImporterCreateInfo)
+    : m_imagePool(imageImporterCreateInfo.imagePool) {
     add_loader<ImageLoaderStb>(imageImporterCreateInfo.rhiCapabilities);
 }
 
@@ -51,4 +51,4 @@ void ImageImporter::load(const duk::resource::Id& id, const std::filesystem::pat
     m_imagePool->create(id, dataSource.get());
 }
 
-}
+}// namespace duk::import

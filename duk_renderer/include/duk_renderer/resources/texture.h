@@ -4,10 +4,10 @@
 #ifndef DUK_RENDERER_TEXTURE_H
 #define DUK_RENDERER_TEXTURE_H
 
-#include <duk_resource/resource.h>
 #include <duk_renderer/resources/image.h>
-#include <duk_rhi/sampler.h>
+#include <duk_resource/resource.h>
 #include <duk_rhi/descriptor.h>
+#include <duk_rhi/sampler.h>
 
 namespace duk::renderer {
 
@@ -17,7 +17,6 @@ class ImagePool;
 
 class Texture {
 public:
-
     Texture();
 
     Texture(const ImageResource& image);
@@ -39,7 +38,7 @@ private:
     duk::rhi::Sampler m_sampler;
 };
 
-}
+}// namespace duk::renderer
 
 namespace std {
 
@@ -53,7 +52,7 @@ struct hash<duk::renderer::Texture> {
     }
 };
 
-}
+}// namespace std
 
 namespace duk::json {
 
@@ -63,7 +62,6 @@ inline void from_json<duk::renderer::Texture>(const rapidjson::Value& jsonObject
     object.sampler() = from_json_member<duk::rhi::Sampler>(jsonObject, "sampler", duk::renderer::kDefaultTextureSampler);
 }
 
-}
+}// namespace duk::json
 
-#endif // DUK_RENDERER_TEXTURE_H
-
+#endif// DUK_RENDERER_TEXTURE_H

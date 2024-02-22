@@ -3,7 +3,4 @@
 
 #include <duk_renderer/resources/materials/uniform_buffer.h>
 
-namespace duk::renderer {
-
-}
-
+namespace duk::renderer {}

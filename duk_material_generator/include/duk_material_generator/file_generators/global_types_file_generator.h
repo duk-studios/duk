@@ -8,19 +8,15 @@
 
 namespace duk::material_generator {
 
-class GlobalTypesFileGenerator: public TypesFileGenerator {
+class GlobalTypesFileGenerator : public TypesFileGenerator {
 public:
-
     GlobalTypesFileGenerator(const Parser& parser, const Reflector& reflector);
 
 private:
-
     std::vector<BindingReflection> extract_global_bindings();
 
     void generate_file_content(std::ostringstream& oss, const BindingReflection& binding);
-
 };
 
-}
-#endif // DUK_MATERIAL_GENERATOR_GLOBAL_TYPES_FILE_GENERATOR_H
-
+}// namespace duk::material_generator
+#endif// DUK_MATERIAL_GENERATOR_GLOBAL_TYPES_FILE_GENERATOR_H

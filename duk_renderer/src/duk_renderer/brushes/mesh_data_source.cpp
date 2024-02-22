@@ -4,7 +4,4 @@
 
 #include <duk_renderer/brushes/mesh_data_source.h>
 
-namespace duk::rhi {
-
-
-}
+namespace duk::rhi {}

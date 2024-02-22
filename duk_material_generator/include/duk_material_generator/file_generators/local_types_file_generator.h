@@ -10,20 +10,16 @@ namespace duk::material_generator {
 
 class LocalTypesFileGenerator : public TypesFileGenerator {
 public:
-
     LocalTypesFileGenerator(const Parser& parser, const Reflector& reflector);
 
 private:
-
     void generate_file_content(std::ostringstream& oss);
 
     std::vector<TypeReflection> extract_local_types(std::vector<BindingReflection>& bindings);
 
     std::vector<BindingReflection> extract_local_bindings();
-
 };
 
-}
+}// namespace duk::material_generator
 
-#endif // DUK_MATERIAL_GENERATOR_LOCAL_TYPES_FILE_GENERATOR_H
-
+#endif// DUK_MATERIAL_GENERATOR_LOCAL_TYPES_FILE_GENERATOR_H

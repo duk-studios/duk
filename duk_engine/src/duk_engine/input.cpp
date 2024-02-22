@@ -4,42 +4,40 @@
 
 #include <duk_engine/input.h>
 
-
 namespace duk::engine {
 
-duk::engine::Input::Input(const InputCreateInfo &inputCreateInfo) {
-
-    m_listener.listen(inputCreateInfo.window->key_event,[this](duk::platform::Keys key, duk::platform::KeyModifiers::Mask mods, duk::platform::KeyAction action) {
+duk::engine::Input::Input(const InputCreateInfo& inputCreateInfo) {
+    m_listener.listen(inputCreateInfo.window->key_event, [this](duk::platform::Keys key, duk::platform::KeyModifiers::Mask mods, duk::platform::KeyAction action) {
         switch (action) {
-              case platform::KeyAction::PRESS:
-                  if (m_keys.find(key) != m_keys.end()) {
-                      break;
-                  }
-                  m_pressedKeys.insert(key);
-                  m_keys.insert(key);
-                  break;
-              case platform::KeyAction::RELEASE:
-                  m_releasedKeys.insert(key);
-                  m_keys.erase(key);
-                  break;
+            case platform::KeyAction::PRESS:
+                if (m_keys.find(key) != m_keys.end()) {
+                    break;
+                }
+                m_pressedKeys.insert(key);
+                m_keys.insert(key);
+                break;
+            case platform::KeyAction::RELEASE:
+                m_releasedKeys.insert(key);
+                m_keys.erase(key);
+                break;
         }
     });
 
-    m_listener.listen(inputCreateInfo.window->mouse_button_event,[this](duk::platform::MouseButton mouseButton, duk::platform::KeyAction action) {
-         switch (action) {
-              case platform::KeyAction::PRESS:
-                  if(m_mouse.find(mouseButton) != m_mouse.end()){
-                      break;
-                  }
+    m_listener.listen(inputCreateInfo.window->mouse_button_event, [this](duk::platform::MouseButton mouseButton, duk::platform::KeyAction action) {
+        switch (action) {
+            case platform::KeyAction::PRESS:
+                if (m_mouse.find(mouseButton) != m_mouse.end()) {
+                    break;
+                }
 
-                  m_pressedMouseButton.insert(mouseButton);
-                  m_mouse.insert(mouseButton);
-                  break;
-              case platform::KeyAction::RELEASE:
-                  m_releasedMouseButton.insert(mouseButton);
-                  m_mouse.erase(mouseButton);
-                  break;
-         }
+                m_pressedMouseButton.insert(mouseButton);
+                m_mouse.insert(mouseButton);
+                break;
+            case platform::KeyAction::RELEASE:
+                m_releasedMouseButton.insert(mouseButton);
+                m_mouse.erase(mouseButton);
+                break;
+        }
     });
 
     m_listener.listen(inputCreateInfo.window->mouse_movement_event, [this](uint32_t x, uint32_t y) {
@@ -79,18 +77,18 @@ bool duk::engine::Input::mouse(duk::platform::MouseButton mouseButton) const {
 
 void duk::engine::Input::refresh() {
     m_lastMousePos = m_mousePos;
-    m_deltaMousePos = glm::vec2(0,0);
+    m_deltaMousePos = glm::vec2(0, 0);
     m_pressedKeys.clear();
     m_releasedKeys.clear();
     m_pressedMouseButton.clear();
     m_releasedMouseButton.clear();
 }
 
-glm::vec2 duk::engine::Input::delta_mouse() const  {
+glm::vec2 duk::engine::Input::delta_mouse() const {
     return m_deltaMousePos;
 }
 
-glm::vec2 duk::engine::Input::mouse_position() const  {
+glm::vec2 duk::engine::Input::mouse_position() const {
     return m_mousePos;
 }
 
@@ -102,4 +100,4 @@ duk::engine::Input::~Input() {
     m_pressedKeys.clear();
     m_releasedKeys.clear();
 }
-}
+}// namespace duk::engine

@@ -4,15 +4,14 @@
 #ifndef DUK_RHI_IMAGE_SAMPLER_H
 #define DUK_RHI_IMAGE_SAMPLER_H
 
-#include <duk_macros/macros.h>
 #include <duk_hash/hash.h>
 #include <duk_json/types.h>
+#include <duk_macros/macros.h>
 
 namespace duk::rhi {
 
 struct Sampler {
 public:
-
     enum class Filter {
         NEAREST,
         LINEAR,
@@ -28,7 +27,6 @@ public:
     };
 
 public:
-
     DUK_NO_DISCARD bool operator==(const Sampler& rhs) const noexcept;
 
 public:
@@ -36,7 +34,7 @@ public:
     WrapMode wrapMode;
 };
 
-}
+}// namespace duk::rhi
 
 namespace std {
 
@@ -50,7 +48,7 @@ struct hash<duk::rhi::Sampler> {
     }
 };
 
-}
+}// namespace std
 
 namespace duk::json {
 
@@ -88,7 +86,7 @@ static duk::rhi::Sampler::Filter parse_filter(const char* str) {
     throw std::invalid_argument("unknown filter name");
 }
 
-}
+}// namespace detail
 
 template<>
 inline void from_json<duk::rhi::Sampler::WrapMode>(const rapidjson::Value& jsonObject, duk::rhi::Sampler::WrapMode& object) {
@@ -106,7 +104,6 @@ inline void from_json<duk::rhi::Sampler>(const rapidjson::Value& jsonObject, duk
     object.wrapMode = from_json_member<duk::rhi::Sampler::WrapMode>(jsonObject, "wrap", duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE);
 }
 
-}
+}// namespace duk::json
 
-#endif // DUK_RHI_IMAGE_SAMPLER_H
-
+#endif// DUK_RHI_IMAGE_SAMPLER_H

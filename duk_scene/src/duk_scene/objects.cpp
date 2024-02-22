@@ -7,14 +7,13 @@ namespace duk::scene {
 
 uint32_t ComponentRegistry::s_componentIndexCounter = 0;
 
-Object::Id::Id() : Id(MAX_OBJECTS, 0) {
-
+Object::Id::Id()
+    : Id(MAX_OBJECTS, 0) {
 }
 
-Object::Id::Id(uint32_t index, uint32_t version) :
-        m_index(index),
-        m_version(version) {
-
+Object::Id::Id(uint32_t index, uint32_t version)
+    : m_index(index)
+    , m_version(version) {
 }
 
 uint32_t Object::Id::index() const {
@@ -33,14 +32,13 @@ bool Object::Id::operator!=(const Object::Id& rhs) const {
     return !(*this == rhs);
 }
 
-Object::Object() : Object(MAX_OBJECTS, 0, nullptr) {
-
+Object::Object()
+    : Object(MAX_OBJECTS, 0, nullptr) {
 }
 
-Object::Object(uint32_t index, uint32_t version, Objects* scene) :
-        m_id(index, version),
-        m_objects(scene) {
-
+Object::Object(uint32_t index, uint32_t version, Objects* scene)
+    : m_id(index, version)
+    , m_objects(scene) {
 }
 
 Object::Id Object::id() const {
@@ -67,8 +65,9 @@ Object::ComponentView Object::components() {
     return m_objects->components(m_id);
 }
 
-Object::ComponentIterator::ComponentIterator(const ComponentMask& mask, uint32_t index) :
-        m_mask(mask), m_i(index) {
+Object::ComponentIterator::ComponentIterator(const ComponentMask& mask, uint32_t index)
+    : m_mask(mask)
+    , m_i(index) {
     next();
 }
 
@@ -97,9 +96,8 @@ void Object::ComponentIterator::next() {
     m_i += m_mask.countr_zero(m_i);
 }
 
-Object::ComponentView::ComponentView(const ComponentMask& mask) :
-        m_mask(mask) {
-
+Object::ComponentView::ComponentView(const ComponentMask& mask)
+    : m_mask(mask) {
 }
 
 Object::ComponentIterator Object::ComponentView::begin() {
@@ -110,9 +108,8 @@ Object::ComponentIterator Object::ComponentView::end() {
     return Object::ComponentIterator(m_mask, MAX_COMPONENTS);
 }
 
-
 Objects::~Objects() {
-    for (auto object : all()) {
+    for (auto object: all()) {
         object.destroy();
     }
 }
@@ -168,11 +165,11 @@ Object::ComponentView Objects::components(const Object::Id& id) {
     return Object::ComponentView(m_componentMasks.at(id.index()));
 }
 
-Objects::ObjectView::Iterator::Iterator(uint32_t i, Objects* scene, ComponentMask componentMask) :
-        m_i(i),
-        m_freeListCursor(0),
-        m_objects(scene),
-        m_componentMask(componentMask) {
+Objects::ObjectView::Iterator::Iterator(uint32_t i, Objects* scene, ComponentMask componentMask)
+    : m_i(i)
+    , m_freeListCursor(0)
+    , m_objects(scene)
+    , m_componentMask(componentMask) {
     next();
 }
 
@@ -220,10 +217,9 @@ bool Objects::ObjectView::Iterator::valid_object() {
     return freeList[m_freeListCursor] != m_i;
 }
 
-Objects::ObjectView::ObjectView(Objects* scene, ComponentMask componentMask) :
-    m_objects(scene),
-    m_componentMask(componentMask) {
-
+Objects::ObjectView::ObjectView(Objects* scene, ComponentMask componentMask)
+    : m_objects(scene)
+    , m_componentMask(componentMask) {
 }
 
 Objects::ObjectView::Iterator Objects::ObjectView::begin() {
@@ -242,4 +238,4 @@ Objects::ObjectView::Iterator Objects::ObjectView::end() const {
     return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
 }
 
-}
+}// namespace duk::scene

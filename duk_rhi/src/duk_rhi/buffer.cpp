@@ -15,4 +15,4 @@ uint8_t* Buffer::write_ptr() {
     return write_ptr(0);
 }
 
-}
+}// namespace duk::rhi

@@ -7,8 +7,8 @@
 #include <duk_renderer/renderer.h>
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/index_types.h>
-#include <duk_tools/fixed_vector.h>
 #include <duk_scene/objects.h>
+#include <duk_tools/fixed_vector.h>
 
 #include <numbers>
 
@@ -20,11 +20,11 @@ static const uint32_t kPixelsPerUnit = 100;
 static const uint32_t kVerticesPerSprite = 4;
 static const uint32_t kIndicesPerSprite = 6;
 
-}
+}// namespace detail
 
-SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
-    m_spriteCapacity(spriteBrushCreateInfo.initialSpriteCapacity),
-    m_spriteCount(0) {
+SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)
+    : m_spriteCapacity(spriteBrushCreateInfo.initialSpriteCapacity)
+    , m_spriteCount(0) {
     auto renderer = spriteBrushCreateInfo.renderer;
 
     // position
@@ -36,8 +36,8 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
         bufferCreateInfo.elementCount = m_spriteCapacity * detail::kVerticesPerSprite;
         bufferCreateInfo.elementSize = VertexAttributes::size_of(VertexAttributes::POSITION);
 
-
-        m_vertexBuffers.at(VertexAttributes::POSITION) = renderer->rhi()->create_buffer(bufferCreateInfo);;
+        m_vertexBuffers.at(VertexAttributes::POSITION) = renderer->rhi()->create_buffer(bufferCreateInfo);
+        ;
     }
 
     // uv
@@ -49,7 +49,8 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
         bufferCreateInfo.elementCount = m_spriteCapacity * detail::kVerticesPerSprite;
         bufferCreateInfo.elementSize = VertexAttributes::size_of(VertexAttributes::UV);
 
-        m_vertexBuffers.at(VertexAttributes::UV) = renderer->rhi()->create_buffer(bufferCreateInfo);;
+        m_vertexBuffers.at(VertexAttributes::UV) = renderer->rhi()->create_buffer(bufferCreateInfo);
+        ;
     }
 
     // index
@@ -61,8 +62,8 @@ SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)  :
         bufferCreateInfo.elementCount = m_spriteCapacity * detail::kIndicesPerSprite;
         bufferCreateInfo.elementSize = duk::rhi::index_size(duk::rhi::IndexType::UINT32);
 
-
-        m_indexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);;
+        m_indexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);
+        ;
     }
 }
 
@@ -72,10 +73,7 @@ void SpriteBrush::push(const Sprite* sprite, const glm::mat4& model) {
         resize(static_cast<uint32_t>(static_cast<double>(m_spriteCapacity) * std::numbers::phi_v<double>));
     }
 
-    glm::vec2 halfSize = {
-            static_cast<float>(sprite->width()) / detail::kPixelsPerUnit / 2,
-            static_cast<float>(sprite->height()) / detail::kPixelsPerUnit / 2
-    };
+    glm::vec2 halfSize = {static_cast<float>(sprite->width()) / detail::kPixelsPerUnit / 2, static_cast<float>(sprite->height()) / detail::kPixelsPerUnit / 2};
 
     // position
     {
@@ -110,12 +108,12 @@ void SpriteBrush::push(const Sprite* sprite, const glm::mat4& model) {
     {
         auto startIndex = currentSpriteIndex * detail::kIndicesPerSprite;
         std::array<uint32_t, 6> indices = {
-                startIndex,     // 0
-                startIndex + 1, // 1
-                startIndex + 2, // 2
-                startIndex + 2, // 2
-                startIndex + 1, // 1
-                startIndex + 3  // 3
+                startIndex,    // 0
+                startIndex + 1,// 1
+                startIndex + 2,// 2
+                startIndex + 2,// 2
+                startIndex + 1,// 1
+                startIndex + 3 // 3
         };
 
         m_indexBuffer->write(indices, startIndex);
@@ -135,9 +133,7 @@ void SpriteBrush::resize(uint32_t spriteCapacity) {
         auto uvVertexBuffer = m_vertexBuffers.at(VertexAttributes::UV);
         uvVertexBuffer->resize(spriteCapacity * VertexAttributes::size_of(VertexAttributes::UV) * detail::kVerticesPerSprite);
     }
-    {
-        m_indexBuffer->resize(spriteCapacity * duk::rhi::index_size(duk::rhi::IndexType::UINT32) * detail::kIndicesPerSprite);
-    }
+    { m_indexBuffer->resize(spriteCapacity * duk::rhi::index_size(duk::rhi::IndexType::UINT32) * detail::kIndicesPerSprite); }
     m_spriteCapacity = spriteCapacity;
 }
 
@@ -145,7 +141,7 @@ void SpriteBrush::draw(duk::rhi::CommandBuffer* commandBuffer, size_t instanceCo
     assert(firstInstance + instanceCount <= m_spriteCount);
     duk::tools::FixedVector<duk::rhi::Buffer*, VertexAttributes::COUNT> buffers;
 
-    for (auto& vertexBuffer : m_vertexBuffers) {
+    for (auto& vertexBuffer: m_vertexBuffers) {
         duk::rhi::Buffer* buffer = nullptr;
         if (vertexBuffer) {
             buffer = vertexBuffer.get();
@@ -163,14 +159,12 @@ void SpriteBrush::draw(duk::rhi::CommandBuffer* commandBuffer, size_t instanceCo
     commandBuffer->draw_indexed(indexCount, 1, firstIndex, 0, 0);
 }
 
-SpriteBrushPool::SpriteBrushPool(const SpriteBrushPoolCreateInfo& spriteBrushPoolCreateInfo) :
-    m_renderer(spriteBrushPoolCreateInfo.renderer),
-    m_spriteBrushesInUse(0) {
-
+SpriteBrushPool::SpriteBrushPool(const SpriteBrushPoolCreateInfo& spriteBrushPoolCreateInfo)
+    : m_renderer(spriteBrushPoolCreateInfo.renderer)
+    , m_spriteBrushesInUse(0) {
 }
 
 SpriteBrush* SpriteBrushPool::get(uint32_t spriteHandle) {
-
     // see if this handle already has an associated sprite brush
     auto it = m_spriteHandleToIndex.find(spriteHandle);
     if (it != m_spriteHandleToIndex.end()) {
@@ -201,4 +195,4 @@ void SpriteBrushPool::clear() {
     m_spriteHandleToIndex.clear();
 }
 
-}
+}// namespace duk::renderer

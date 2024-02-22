@@ -4,20 +4,19 @@
 
 #include <duk_engine/engine.h>
 #include <duk_engine/systems/render_system.h>
-#include <duk_import/importer.h>
-#include <duk_renderer/pools/mesh_pool.h>
-#include <duk_renderer/pools/sprite_pool.h>
-#include <duk_renderer/pools/image_pool.h>
-#include <duk_log/log.h>
 #include <duk_import/image/image_importer.h>
+#include <duk_import/importer.h>
 #include <duk_import/material/material_importer.h>
 #include <duk_import/scene/scene_importer.h>
+#include <duk_log/log.h>
+#include <duk_renderer/pools/image_pool.h>
+#include <duk_renderer/pools/mesh_pool.h>
+#include <duk_renderer/pools/sprite_pool.h>
 
 namespace duk::engine {
 
-Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
-    m_run(false) {
-
+Engine::Engine(const EngineCreateInfo& engineCreateInfo)
+    : m_run(false) {
     duk::platform::WindowCreateInfo windowCreateInfo = {};
     windowCreateInfo.windowTitle = engineCreateInfo.applicationName;
     windowCreateInfo.width = 1280;
@@ -29,7 +28,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
         m_window->close();
     });
 
-    m_listener.listen(m_window->window_destroy_event, [this](){
+    m_listener.listen(m_window->window_destroy_event, [this]() {
         m_run = false;
     });
 
@@ -83,9 +82,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
     }
 
     // scenes
-    {
-        m_importer->add_resource_importer<duk::import::SceneImporter>();
-    }
+    { m_importer->add_resource_importer<duk::import::SceneImporter>(); }
 
     duk::scene::register_system<RenderSystem>(*this);
 
@@ -149,7 +146,7 @@ const duk::engine::Input* Engine::input() const {
     return m_input.get();
 }
 
-const duk::tools::Timer *Engine::timer() const {
+const duk::tools::Timer* Engine::timer() const {
     return &m_timer;
 }
 
@@ -157,4 +154,4 @@ void Engine::use_scene(duk::scene::Scene* scene) {
     m_scene = scene;
 }
 
-}
+}// namespace duk::engine

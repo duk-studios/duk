@@ -9,7 +9,7 @@ std::string snake_to_pascal(const std::string& snakeCase) {
     std::string pascalCase;
     bool capitalize = true;
 
-    for (char c : snakeCase) {
+    for (char c: snakeCase) {
         if (c == '_') {
             capitalize = true;
             continue;
@@ -25,4 +25,4 @@ std::string snake_to_pascal(const std::string& snakeCase) {
     return pascalCase;
 }
 
-}
+}// namespace duk::tools

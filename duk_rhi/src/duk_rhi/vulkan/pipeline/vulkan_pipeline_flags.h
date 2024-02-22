@@ -17,7 +17,6 @@ VkAccessFlagBits convert_access(Access::Bits access);
 
 VkAccessFlags convert_access_mask(Access::Mask accessMask);
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_VULKAN_PIPELINE_STAGES_H
-
+#endif// DUK_RHI_VULKAN_PIPELINE_STAGES_H

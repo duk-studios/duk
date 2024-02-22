@@ -6,8 +6,8 @@
 
 #include <duk_macros/macros.h>
 
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace duk::material_generator::utils {
 
@@ -16,7 +16,7 @@ DUK_NO_DISCARD std::string generate_for_each(const T& container, P predicate, co
     std::ostringstream oss;
 
     bool needsSeparator = false;
-    for (const auto& element : container) {
+    for (const auto& element: container) {
         if (needsSeparator) {
             oss << separator;
             if (onePerLine) {
@@ -30,7 +30,6 @@ DUK_NO_DISCARD std::string generate_for_each(const T& container, P predicate, co
     return oss.str();
 }
 
-}
+}// namespace duk::material_generator::utils
 
-#endif // DUK_MATERIAL_GENERATOR_GENERATOR_UTILS_H
-
+#endif// DUK_MATERIAL_GENERATOR_GENERATOR_UTILS_H

@@ -8,4 +8,3 @@ namespace duk::rhi {
 ComputePipeline::~ComputePipeline() = default;
 
 }
-

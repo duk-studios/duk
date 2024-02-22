@@ -4,7 +4,4 @@
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/transform.h>
 
-namespace duk::renderer {
-
-
-}
+namespace duk::renderer {}

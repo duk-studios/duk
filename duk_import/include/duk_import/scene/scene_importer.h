@@ -31,6 +31,6 @@ private:
     std::unordered_map<duk::resource::Id, std::unique_ptr<duk::scene::Scene>> m_scenes;
 };
 
-}
+}// namespace duk::import
 
-#endif //DUK_IMPORT_SCENE_IMPORTER_H
+#endif//DUK_IMPORT_SCENE_IMPORTER_H

@@ -6,9 +6,9 @@
 
 #include <duk_macros/macros.h>
 
+#include <span>
 #include <sstream>
 #include <vector>
-#include <span>
 
 namespace duk::cli {
 
@@ -43,6 +43,6 @@ std::string generate_for_each(const T& container, P predicate, const char* separ
     return oss.str();
 }
 
-}
+}// namespace duk::cli
 
-#endif // DUK_CLI_FILE_GENERATOR_H
+#endif// DUK_CLI_FILE_GENERATOR_H

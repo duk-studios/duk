@@ -7,4 +7,4 @@
 
 #define DUK_NO_DISCARD [[nodiscard]]
 
-#endif //DUK_MACROS_MACROS_H
+#endif//DUK_MACROS_MACROS_H

@@ -1,11 +1,11 @@
 /// 13/10/2023
 /// phong_material.cpp
 
-#include <duk_renderer/renderer.h>
-#include <duk_renderer/resources/materials/phong/phong_material.h>
-#include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/pools/image_pool.h>
+#include <duk_renderer/renderer.h>
+#include <duk_renderer/resources/materials/globals/global_descriptors.h>
+#include <duk_renderer/resources/materials/phong/phong_material.h>
 
 namespace duk::renderer {
 
@@ -24,12 +24,11 @@ duk::hash::Hash PhongMaterialDataSource::calculate_hash() const {
     return hash;
 }
 
-PhongMaterialDataSource::PhongMaterialDataSource() :
-    albedo(1),
-    albedoTexture(kWhiteImageId),
-    specular(1),
-    specularTexture(kWhiteImageId) {
-
+PhongMaterialDataSource::PhongMaterialDataSource()
+    : albedo(1)
+    , albedoTexture(kWhiteImageId)
+    , specular(1)
+    , specularTexture(kWhiteImageId) {
 }
 
 const rhi::ShaderDataSource* PhongMaterialDataSource::shader_data_source() const {
@@ -44,7 +43,6 @@ std::unique_ptr<MaterialDescriptorSet> PhongMaterialDataSource::create_descripto
 }
 
 PhongInstanceBuffer::PhongInstanceBuffer(const PhongInstanceBufferCreateInfo& phongInstanceBufferCreateInfo) {
-
     auto rhi = phongInstanceBufferCreateInfo.renderer->rhi();
     auto commandQueue = phongInstanceBufferCreateInfo.renderer->main_command_queue();
 
@@ -163,4 +161,4 @@ InstanceBuffer* PhongMaterialDescriptorSet::instance_buffer() {
     return m_instanceBuffer.get();
 }
 
-}
+}// namespace duk::renderer

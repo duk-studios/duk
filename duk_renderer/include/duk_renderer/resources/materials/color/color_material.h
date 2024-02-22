@@ -4,9 +4,9 @@
 #ifndef DUK_RENDERER_COLOR_MATERIAL_H
 #define DUK_RENDERER_COLOR_MATERIAL_H
 
-#include <duk_renderer/resources/materials/material.h>
-#include <duk_renderer/resources/materials/instance_buffer.h>
 #include <duk_renderer/resources/materials/color/color_descriptors.h>
+#include <duk_renderer/resources/materials/instance_buffer.h>
+#include <duk_renderer/resources/materials/material.h>
 #include <duk_renderer/resources/materials/storage_buffer.h>
 #include <duk_renderer/resources/materials/uniform_buffer.h>
 
@@ -33,7 +33,6 @@ struct ColorInstanceBufferCreateInfo {
 
 class ColorInstanceBuffer : public InstanceBuffer {
 public:
-
     ColorInstanceBuffer(const ColorInstanceBufferCreateInfo& phongInstanceBufferCreateInfo);
 
     void insert(const scene::Object& object) override;
@@ -55,7 +54,6 @@ struct ColorMaterialDescriptorSetCreateInfo {
 
 class ColorMaterialDescriptorSet : public MaterialDescriptorSet {
 public:
-
     explicit ColorMaterialDescriptorSet(const ColorMaterialDescriptorSetCreateInfo& colorMaterialDescriptorSetCreateInfo);
 
     void set_color(const glm::vec4& color);
@@ -79,7 +77,7 @@ private:
     Texture m_colorTexture;
 };
 
-}
+}// namespace duk::renderer
 
 namespace duk::json {
 
@@ -89,7 +87,6 @@ inline void from_json<duk::renderer::ColorMaterialDataSource>(const rapidjson::V
     colorMaterialDataSource.colorTexture = from_json_member<duk::renderer::Texture>(jsonObject, "texture");
 }
 
-}
+}// namespace duk::json
 
-#endif // DUK_RENDERER_COLOR_MATERIAL_H
-
+#endif// DUK_RENDERER_COLOR_MATERIAL_H

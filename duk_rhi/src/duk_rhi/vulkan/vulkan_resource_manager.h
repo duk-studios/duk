@@ -4,15 +4,15 @@
 #ifndef DUK_RHI_VULKAN_RESOURCE_MANAGER_H
 #define DUK_RHI_VULKAN_RESOURCE_MANAGER_H
 
-#include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_events.h>
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
+#include <duk_rhi/vulkan/vulkan_import.h>
 
 #include <duk_macros/macros.h>
 
-#include <vector>
-#include <set>
 #include <memory>
+#include <set>
+#include <vector>
 
 namespace duk::rhi {
 
@@ -32,7 +32,6 @@ class VulkanFrameBufferCreateInfo;
 class VulkanRenderPass;
 class VulkanRenderPassCreateInfo;
 
-
 struct VulkanResourceManagerCreateInfo {
     VulkanSwapchain* swapchain;
     uint32_t imageCount;
@@ -41,7 +40,6 @@ struct VulkanResourceManagerCreateInfo {
 
 class VulkanResourceManager {
 public:
-
     explicit VulkanResourceManager(const VulkanResourceManagerCreateInfo& resourceManagerCreateInfo);
 
     ~VulkanResourceManager();
@@ -61,8 +59,8 @@ public:
     std::shared_ptr<VulkanFrameBuffer> create(const VulkanFrameBufferCreateInfo& frameBufferCreateInfo);
 
     std::shared_ptr<VulkanRenderPass> create(const VulkanRenderPassCreateInfo& renderPassCreateInfo);
-private:
 
+private:
     template<typename T>
     struct DeletionEntry {
         T* resource;
@@ -70,7 +68,6 @@ private:
     };
 
 private:
-
     DUK_NO_DISCARD std::set<uint32_t> image_indices_set() const;
 
     template<typename ResourceT, typename CreateInfoT>
@@ -85,18 +82,16 @@ private:
         return {ptr, deleter};
     }
 
-
     template<typename T>
     void clean(std::vector<DeletionEntry<T>>& resourcesToDelete, uint32_t imageIndex) {
         std::vector<DeletionEntry<T>> aliveResources;
-        for (auto& deletionEntry : resourcesToDelete) {
+        for (auto& deletionEntry: resourcesToDelete) {
             deletionEntry.resource->clean(imageIndex);
             deletionEntry.pendingIndices.erase(imageIndex);
             if (deletionEntry.pendingIndices.empty()) {
                 delete deletionEntry.resource;
                 deletionEntry.resource = nullptr;
-            }
-            else {
+            } else {
                 aliveResources.push_back(deletionEntry);
             }
         }
@@ -105,7 +100,7 @@ private:
 
     template<typename T>
     void clean(std::vector<DeletionEntry<T>>& resourcesToDelete) {
-        for (auto& deletionEntry : resourcesToDelete) {
+        for (auto& deletionEntry: resourcesToDelete) {
             delete deletionEntry.resource;
         }
         resourcesToDelete.clear();
@@ -131,7 +126,6 @@ private:
     std::vector<DeletionEntry<VulkanRenderPass>> m_renderPassesToDelete;
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_VULKAN_RESOURCE_MANAGER_H
-
+#endif// DUK_RHI_VULKAN_RESOURCE_MANAGER_H

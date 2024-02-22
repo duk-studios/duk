@@ -11,7 +11,6 @@ namespace duk::import {
 
 class ImageLoaderStb : public ResourceLoader<duk::rhi::ImageDataSource> {
 public:
-
     ImageLoaderStb(const duk::rhi::RHICapabilities* rhiCapabilities);
 
     bool accepts(const std::filesystem::path& path) override;
@@ -22,7 +21,6 @@ private:
     const duk::rhi::RHICapabilities* m_rhiCapabilities;
 };
 
-}
+}// namespace duk::import
 
-#endif // DUK_IMPORT_IMAGE_IMPORTER_STB_H
-
+#endif// DUK_IMPORT_IMAGE_IMPORTER_STB_H

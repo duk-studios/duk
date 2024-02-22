@@ -4,9 +4,9 @@
 #ifndef DUK_IMPORT_IMAGE_IMPORTER_H
 #define DUK_IMPORT_IMAGE_IMPORTER_H
 
-#include <duk_rhi/image_data_source.h>
 #include <duk_import/resource_importer.h>
 #include <duk_renderer/renderer.h>
+#include <duk_rhi/image_data_source.h>
 
 #include <filesystem>
 
@@ -19,7 +19,6 @@ struct ImageImporterCreateInfo {
 
 class ImageImporter : public ResourceImporterT<duk::rhi::ImageDataSource> {
 public:
-
     static std::unique_ptr<duk::rhi::ImageDataSource> create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height);
 
     explicit ImageImporter(const ImageImporterCreateInfo& imageImporterCreateInfo);
@@ -32,7 +31,6 @@ private:
     duk::renderer::ImagePool* m_imagePool;
 };
 
-}
+}// namespace duk::import
 
-#endif // DUK_IMPORT_IMAGE_IMPORTER_H
-
+#endif// DUK_IMPORT_IMAGE_IMPORTER_H

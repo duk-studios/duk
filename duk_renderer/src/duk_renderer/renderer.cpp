@@ -1,25 +1,23 @@
 /// 19/08/2023
 /// renderer.cpp
 
-#include <duk_renderer/renderer.h>
 #include <duk_renderer/passes/pass.h>
+#include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
 
 #include <duk_renderer/components/register_components.h>
 #include <duk_renderer/pools/image_pool.h>
-#include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/material_pool.h>
+#include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/sprite_pool.h>
 
 #include <duk_platform/window.h>
 #include <duk_rhi/image_data_source.h>
 
-
 namespace duk::renderer {
 
-Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
-    m_window(rendererCreateInfo.window) {
-
+Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
+    : m_window(rendererCreateInfo.window) {
     {
         duk::rhi::RHICreateInfo rhiCreateInfo = {};
         rhiCreateInfo.window = rendererCreateInfo.window;
@@ -34,14 +32,13 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
         m_rhi = duk::rhi::RHI::create_rhi(rhiCreateInfo);
     }
 
-
     duk::rhi::RHI::CommandQueueCreateInfo mainCommandQueueCreateInfo = {};
     mainCommandQueueCreateInfo.type = rhi::CommandQueue::Type::GRAPHICS;
 
     m_mainQueue = m_rhi->create_command_queue(mainCommandQueueCreateInfo);
 
-    m_scheduler = m_rhi->create_command_scheduler();;
-
+    m_scheduler = m_rhi->create_command_scheduler();
+    ;
 
     {
         GlobalDescriptorsCreateInfo globalDescriptorsCreateInfo = {};
@@ -77,7 +74,7 @@ void Renderer::render(duk::scene::Scene* scene) {
         renderParams.outputWidth = render_width();
         renderParams.outputHeight = render_height();
 
-        for (auto& pass : m_passes) {
+        for (auto& pass: m_passes) {
             pass->render(renderParams);
         }
 
@@ -167,4 +164,4 @@ void Renderer::update_global_descriptors(duk::scene::Objects& objects) {
     m_globalDescriptors->update_lights(objects);
 }
 
-}
+}// namespace duk::renderer

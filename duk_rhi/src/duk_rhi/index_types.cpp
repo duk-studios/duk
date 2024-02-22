@@ -46,5 +46,4 @@ size_t index_size(IndexType indexType) {
     }
 }
 
-}
-
+}// namespace duk::rhi
