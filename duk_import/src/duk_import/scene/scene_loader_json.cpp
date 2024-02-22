@@ -23,18 +23,7 @@ std::unique_ptr<duk::scene::Scene> SceneLoaderJson::load(const std::filesystem::
 
     auto scene = std::make_unique<duk::scene::Scene>();
 
-    auto jsonObjects = root["objects"].GetArray();
-
-    for (auto& jsonObject : jsonObjects) {
-
-        auto object = scene->add_object();
-
-        auto jsonComponents = jsonObject["components"].GetArray();
-
-        for (auto& jsonComponent : jsonComponents) {
-            duk::scene::ComponentRegistry::instance()->build_from_json(object, jsonComponent);
-        }
-    }
+    duk::json::from_json(root, *scene);
 
     return scene;
 }

@@ -28,8 +28,6 @@ public:
 
     void run();
 
-    DUK_NO_DISCARD Systems* systems();
-
     DUK_NO_DISCARD duk::platform::Window* window();
 
     DUK_NO_DISCARD duk::renderer::Renderer* renderer();
@@ -58,7 +56,6 @@ private:
     duk::resource::Pools m_pools;
     duk::event::Dispatcher m_dispatcher;
     duk::scene::Scene* m_scene;
-    Systems m_systems;
     duk::tools::Timer m_timer;
     bool m_run;
 };

@@ -6,7 +6,7 @@
 #define DUK_SAMPLE_CAMERA_SYSTEM_H
 
 #include <duk_engine/systems/system.h>
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 #include <duk_event/event.h>
 
 namespace duk::sample {
@@ -16,9 +16,12 @@ public:
 
     using duk::engine::System::System;
 
-    void init() override;
+protected:
+    void enter(engine::Engine& engine) override;
 
-    void update() override;
+    void update(engine::Engine& engine) override;
+
+    void exit(engine::Engine& engine) override;
 
 private:
     duk::scene::Object m_camera;

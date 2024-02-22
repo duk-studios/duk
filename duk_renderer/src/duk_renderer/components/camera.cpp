@@ -3,7 +3,7 @@
 
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 #include <glm/ext/matrix_clip_space.hpp>
 
 namespace duk::renderer {

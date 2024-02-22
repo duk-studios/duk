@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_LIGHTING_H
 #define DUK_RENDERER_LIGHTING_H
 
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 #include <duk_json/types.h>
 #include <glm/glm.hpp>
 

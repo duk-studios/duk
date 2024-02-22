@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_FORWARD_RENDERER_H
 #define DUK_RENDERER_FORWARD_RENDERER_H
 
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 #include <duk_renderer/renderer.h>
 #include <duk_rhi/rhi.h>
 

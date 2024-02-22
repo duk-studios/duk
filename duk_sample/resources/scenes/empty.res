@@ -1,7 +1,7 @@
 {
   "tag": "scn",
   "id": 1000015,
-  "file": "sprite-test.scn",
+  "file": "empty.scn",
   "aliases": [
     "empty"
   ]

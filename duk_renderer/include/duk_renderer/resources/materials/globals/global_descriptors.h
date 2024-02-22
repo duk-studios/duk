@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_GLOBAL_DESCRIPTORS_H
 #define DUK_RENDERER_GLOBAL_DESCRIPTORS_H
 
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 
 #include <duk_renderer/resources/materials/globals/camera_types.h>
 #include <duk_renderer/resources/materials/globals/lights_types.h>
@@ -23,7 +23,7 @@ public:
 
     void update_camera(const duk::scene::Object& cameraObject);
 
-    void update_lights(duk::scene::Scene* scene);
+    void update_lights(duk::scene::Objects& objects);
 
     globals::CameraUBO* camera_ubo();
 

@@ -5,48 +5,21 @@
 
 namespace duk::engine {
 
-System::System(Engine &engine, std::string name) :
-    m_engine(engine),
-    m_name(std::move(name)) {
+System::System(Engine& engine) :
+    m_engine(engine) {
 
 }
 
-System::~System() = default;
-
-
-const std::string& System::name() {
-    return m_name;
+void System::enter() {
+    enter(m_engine);
 }
 
-Engine* System::engine() {
-    return &m_engine;
+void System::update() {
+    update(m_engine);
 }
 
-Engine* System::engine() const {
-    return &m_engine;
+void System::exit() {
+    exit(m_engine);
 }
-
-void Systems::init() {
-    for (auto& system : m_container) {
-        system->init();
-    }
-}
-
-Systems::Iterator Systems::begin() {
-    return m_container.begin();
-}
-
-Systems::ConstIterator Systems::begin() const {
-    return m_container.begin();
-}
-
-Systems::Iterator Systems::end() {
-    return m_container.end();
-}
-
-Systems::ConstIterator Systems::end() const {
-    return m_container.end();
-}
-
 
 }

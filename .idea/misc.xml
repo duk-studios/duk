@@ -4,4 +4,28 @@
     <option name="sdkName" value="Python 3.9 (duk)" />
   </component>
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="CidrRootsConfiguration">
+    <sourceRoots>
+      <file path="$PROJECT_DIR$/duk_cli" />
+      <file path="$PROJECT_DIR$/duk_engine" />
+      <file path="$PROJECT_DIR$/duk_event" />
+      <file path="$PROJECT_DIR$/duk_hash" />
+      <file path="$PROJECT_DIR$/duk_import" />
+      <file path="$PROJECT_DIR$/duk_json" />
+      <file path="$PROJECT_DIR$/duk_log" />
+      <file path="$PROJECT_DIR$/duk_macros" />
+      <file path="$PROJECT_DIR$/duk_material_generator" />
+      <file path="$PROJECT_DIR$/duk_platform" />
+      <file path="$PROJECT_DIR$/duk_renderer" />
+      <file path="$PROJECT_DIR$/duk_resource" />
+      <file path="$PROJECT_DIR$/duk_rhi" />
+      <file path="$PROJECT_DIR$/duk_sample" />
+      <file path="$PROJECT_DIR$/duk_scene" />
+      <file path="$PROJECT_DIR$/duk_task" />
+      <file path="$PROJECT_DIR$/duk_tools" />
+    </sourceRoots>
+    <libraryRoots>
+      <file path="$PROJECT_DIR$/external" />
+    </libraryRoots>
+  </component>
 </project>

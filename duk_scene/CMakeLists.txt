@@ -1,14 +1,18 @@
 project(duk_scene)
 
 set(DUK_SCENE_HEADERS
-        include/duk_scene/scene.h
+        include/duk_scene/objects.h
         include/duk_scene/component_pool.h
         include/duk_scene/limits.h
+        include/duk_scene/scene.h
+        include/duk_scene/systems.h
         )
 
 set(DUK_SCENE_SOURCES
-        src/duk_scene/scene.cpp
+        src/duk_scene/objects.cpp
         src/duk_scene/component_pool.cpp
+        src/duk_scene/scene.cpp
+        src/duk_scene/system.cpp
         )
 
 add_library(duk_scene STATIC ${DUK_SCENE_SOURCES} ${DUK_SCENE_HEADERS})

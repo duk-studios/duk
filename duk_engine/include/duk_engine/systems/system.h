@@ -6,6 +6,7 @@
 #define DUK_ENGINE_SYSTEM_H
 
 #include <duk_macros/macros.h>
+#include <duk_scene/systems.h>
 
 #include <string>
 #include <memory>
@@ -17,72 +18,28 @@ namespace duk::engine {
 
 class Engine;
 
-class System {
+class System : public duk::scene::System {
 public:
 
-    explicit System(Engine& engine, std::string name);
+    explicit System(Engine& engine);
 
-    virtual ~System();
+    void enter() final;
 
-    virtual void init() = 0;
+    void update() final;
 
-    virtual void update() = 0;
-
-    const std::string& name();
+    void exit() final;
 
 protected:
 
-    DUK_NO_DISCARD Engine* engine();
+    virtual void enter(Engine& engine) = 0;
 
-    DUK_NO_DISCARD Engine* engine() const;
+    virtual void update(Engine& engine) = 0;
+
+    virtual void exit(Engine& engine) = 0;
 
 private:
     Engine& m_engine;
-    std::string m_name;
 };
-
-class Systems {
-public:
-    using Container = std::vector<std::unique_ptr<System>>;
-    using Iterator = Container::iterator;
-    using ConstIterator = Container::const_iterator;
-
-    template<typename T, typename ...Args>
-    Iterator add_system(Args&&... args);
-
-    template<typename T, typename ...Args>
-    Iterator add_system(Iterator position, Args&&... args);
-
-    void init();
-
-    DUK_NO_DISCARD Iterator begin();
-
-    DUK_NO_DISCARD ConstIterator begin() const;
-
-    DUK_NO_DISCARD Iterator end();
-
-    DUK_NO_DISCARD ConstIterator end() const;
-
-private:
-    Container m_container;
-};
-
-template<typename T, typename... Args>
-Systems::Iterator Systems::add_system(Args &&... args) {
-    return add_system<T>(m_container.end(), std::forward<Args>(args)...);
-}
-
-template<typename T, typename... Args>
-Systems::Iterator Systems::add_system(Systems::Iterator position, Args &&... args) {
-    auto system = std::make_unique<T>(std::forward<Args>(args)...);
-    const auto alreadyPresent = std::any_of(begin(), end(), [&system](const auto& sys) {
-        return system->name() == sys->name();
-    });
-    if (alreadyPresent) {
-        throw std::logic_error(system->name() + "is already present");
-    }
-    return m_container.insert(position, std::move(system));
-}
 
 }
 

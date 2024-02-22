@@ -8,7 +8,7 @@
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/index_types.h>
 #include <duk_tools/fixed_vector.h>
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 
 #include <numbers>
 

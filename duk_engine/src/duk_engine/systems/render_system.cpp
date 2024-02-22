@@ -6,23 +6,22 @@
 
 namespace duk::engine {
 
-void RenderSystem::init() {
+void RenderSystem::enter(Engine& engine) {
 
 }
 
-void RenderSystem::update() {
-    auto engine = System::engine();
-    auto window = engine->window();
+void RenderSystem::update(Engine& engine) {
+    auto window = engine.window();
     if (!window || window->minimized()) {
         return;
     }
 
-    auto scene = engine->scene();
+    auto scene = engine.scene();
     if (!scene) {
         return;
     }
 
-    auto renderer = engine->renderer();
+    auto renderer = engine.renderer();
     if (!renderer) {
         return;
     }
@@ -30,4 +29,7 @@ void RenderSystem::update() {
     renderer->render(scene);
 }
 
+void RenderSystem::exit(Engine& engine) {
+
+}
 }

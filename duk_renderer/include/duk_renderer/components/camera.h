@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_CAMERA_H
 #define DUK_RENDERER_CAMERA_H
 
-#include <duk_scene/scene.h>
+#include <duk_scene/objects.h>
 
 #include <glm/mat4x4.hpp>
 

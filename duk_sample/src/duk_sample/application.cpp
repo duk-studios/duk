@@ -3,7 +3,6 @@
 
 #include <duk_sample/application.h>
 #include <duk_sample/camera_system.h>
-#include <duk_sample/sprite_system.h>
 #include <duk_engine/systems/render_system.h>
 #include <duk_import/scene/scene_importer.h>
 
@@ -16,6 +15,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
+    duk::scene::register_system<CameraSystem>(*m_engine);
+
     auto importer = m_engine->importer();
     importer->load_resources("./");
 
@@ -27,11 +28,6 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     auto scene = sceneImporter->find(sceneId);
 
     m_engine->use_scene(scene);
-
-    auto systems = m_engine->systems();
-    systems->add_system<CameraSystem>(*m_engine, "CameraSystem");
-    systems->add_system<duk::engine::RenderSystem>(*m_engine, "RenderSystem");
-
 }
 
 Application::~Application() = default;
