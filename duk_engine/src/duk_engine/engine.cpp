@@ -3,6 +3,7 @@
 //
 
 #include <duk_engine/engine.h>
+#include <duk_engine/systems/render_system.h>
 #include <duk_import/importer.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/sprite_pool.h>
@@ -86,6 +87,8 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo) :
         m_importer->add_resource_importer<duk::import::SceneImporter>();
     }
 
+    duk::scene::register_system<RenderSystem>(*this);
+
     duk::engine::InputCreateInfo inputCreateInfo = {};
     inputCreateInfo.window = m_window.get();
     m_input = std::make_unique<duk::engine::Input>(inputCreateInfo);
@@ -103,7 +106,9 @@ void Engine::run() {
     // assume 60fps for the first frame
     m_timer.add_duration(std::chrono::milliseconds(16));
 
-    m_systems.init();
+    auto& systems = m_scene->systems();
+
+    systems.enter();
 
     while (m_run) {
         m_timer.start();
@@ -112,16 +117,12 @@ void Engine::run() {
 
         m_window->pool_events();
 
-        for (auto& system : m_systems) {
-            system->update();
-        }
+        systems.update();
 
         m_timer.stop();
     }
-}
 
-Systems* Engine::systems() {
-    return &m_systems;
+    systems.exit();
 }
 
 duk::platform::Window* Engine::window() {
@@ -140,7 +141,7 @@ duk::import::Importer* Engine::importer() {
     return m_importer.get();
 }
 
-duk::scene::Objects* Engine::scene() {
+duk::scene::Scene* Engine::scene() {
     return m_scene;
 }
 
@@ -152,7 +153,7 @@ const duk::tools::Timer *Engine::timer() const {
     return &m_timer;
 }
 
-void Engine::use_scene(duk::scene::Objects* scene) {
+void Engine::use_scene(duk::scene::Scene* scene) {
     m_scene = scene;
 }
 

@@ -11,12 +11,14 @@ namespace duk::engine {
 
 class RenderSystem : public System {
 public:
+    using System::System;
 
-    using duk::engine::System::System;
+protected:
+    void enter(Engine& engine) override;
 
-    void init() override;
+    void update(Engine& engine) override;
 
-    void update() override;
+    void exit(Engine& engine) override;
 
 };
 
