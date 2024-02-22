@@ -11,7 +11,7 @@ bool SceneLoaderJson::accepts(const std::filesystem::path& path) {
     return path.extension() == ".scn";
 }
 
-std::unique_ptr<duk::scene::Objects> SceneLoaderJson::load(const std::filesystem::path& path) {
+std::unique_ptr<duk::scene::Scene> SceneLoaderJson::load(const std::filesystem::path& path) {
 
     auto content = duk::tools::File::load_text(path.string().c_str());
 
@@ -21,20 +21,9 @@ std::unique_ptr<duk::scene::Objects> SceneLoaderJson::load(const std::filesystem
 
     auto root = result.GetObject();
 
-    auto scene = std::make_unique<duk::scene::Objects>();
+    auto scene = std::make_unique<duk::scene::Scene>();
 
-    auto jsonObjects = root["objects"].GetArray();
-
-    for (auto& jsonObject : jsonObjects) {
-
-        auto object = scene->add_object();
-
-        auto jsonComponents = jsonObject["components"].GetArray();
-
-        for (auto& jsonComponent : jsonComponents) {
-            duk::scene::ComponentRegistry::instance()->build_from_json(object, jsonComponent);
-        }
-    }
+    duk::json::from_json(root, *scene);
 
     return scene;
 }
