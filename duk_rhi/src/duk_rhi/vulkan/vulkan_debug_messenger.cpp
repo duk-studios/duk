@@ -29,9 +29,7 @@ VulkanDebugMessenger::VulkanDebugMessenger()
     , enabledMessageTypes(0) {
 }
 
-void VulkanDebugMessenger::log(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                               VkDebugUtilsMessageTypeFlagsEXT messageTypes,
-                               const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData) const {
+void VulkanDebugMessenger::log(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData) const {
     if (!logger) {
         return;
     }

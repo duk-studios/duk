@@ -17,7 +17,11 @@ namespace duk::rhi {
 VulkanCommandBuffer::VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& commandBufferCreateInfo)
     : m_commandQueue(commandBufferCreateInfo.commandQueue)
     , m_currentImagePtr(commandBufferCreateInfo.currentImagePtr)
-    , m_submitter([this](const auto& params) { submit(params); }, true, true, commandBufferCreateInfo.frameCount, commandBufferCreateInfo.currentFramePtr, commandBufferCreateInfo.device)
+    , m_submitter(
+              [this](const auto& params) {
+                  submit(params);
+              },
+              true, true, commandBufferCreateInfo.frameCount, commandBufferCreateInfo.currentFramePtr, commandBufferCreateInfo.device)
     , m_currentPipelineLayout(VK_NULL_HANDLE) {
     m_commandBuffers.resize(commandBufferCreateInfo.frameCount);
     for (auto& commandBuffer: m_commandBuffers) {
@@ -207,16 +211,7 @@ void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier&
             }
         }
 
-        vkCmdPipelineBarrier(m_currentCommandBuffer,
-                             convert_pipeline_stage_mask(dukBufferMemoryBarrier.srcStageMask),
-                             convert_pipeline_stage_mask(dukBufferMemoryBarrier.dstStageMask),
-                             0,
-                             0,
-                             nullptr,
-                             1,
-                             &vkBufferMemoryBarrier,
-                             0,
-                             nullptr);
+        vkCmdPipelineBarrier(m_currentCommandBuffer, convert_pipeline_stage_mask(dukBufferMemoryBarrier.srcStageMask), convert_pipeline_stage_mask(dukBufferMemoryBarrier.dstStageMask), 0, 0, nullptr, 1, &vkBufferMemoryBarrier, 0, nullptr);
     }
 
     for (int i = 0; i < barrier.imageMemoryBarrierCount; i++) {
@@ -245,16 +240,7 @@ void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier&
             }
         }
 
-        vkCmdPipelineBarrier(m_currentCommandBuffer,
-                             convert_pipeline_stage_mask(dukImageMemoryBarrier.srcStageMask),
-                             convert_pipeline_stage_mask(dukImageMemoryBarrier.dstStageMask),
-                             0,
-                             0,
-                             nullptr,
-                             0,
-                             nullptr,
-                             1,
-                             &vkImageMemoryBarrier);
+        vkCmdPipelineBarrier(m_currentCommandBuffer, convert_pipeline_stage_mask(dukImageMemoryBarrier.srcStageMask), convert_pipeline_stage_mask(dukImageMemoryBarrier.dstStageMask), 0, 0, nullptr, 0, nullptr, 1, &vkImageMemoryBarrier);
     }
 }
 

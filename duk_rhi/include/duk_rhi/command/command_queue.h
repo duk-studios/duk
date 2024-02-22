@@ -30,9 +30,7 @@ public:
 
     template<typename F, typename... Args, std::enable_if_t<std::is_void_v<std::invoke_result_t<F, CommandBuffer*, Args&&...>>, int> = 0>
     FutureCommand submit(F&& func, Args&&... args) {
-        return m_taskQueue.enqueue([this,
-                                    taskFunc = std::forward<F>(func),
-                                    &args...]() -> Command* {
+        return m_taskQueue.enqueue([this, taskFunc = std::forward<F>(func), &args...]() -> Command* {
             auto commandBuffer = next_command_buffer();
             m_currentCommandBuffer = commandBuffer;
             taskFunc(commandBuffer, std::forward<Args>(args)...);

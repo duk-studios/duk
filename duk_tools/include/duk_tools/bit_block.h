@@ -48,7 +48,8 @@ public:
         using Iterator = BitBlockIterator<Set>;
 
         explicit BitBlockView(const BitBlock& block)
-            : m_block(block) {}
+            : m_block(block) {
+        }
 
         Iterator begin() const;
 

@@ -108,8 +108,7 @@ static std::string generate_module_mask(const Reflector& reflector) {
 
 static std::string generate_spir_v_code(const std::vector<uint8_t>& code) {
     std::ostringstream oss;
-    oss << '{' << std::endl
-        << "        ";
+    oss << '{' << std::endl << "        ";
     bool needsComma = false;
     int lineSize = 0;
     for (uint8_t byte: code) {
@@ -119,16 +118,14 @@ static std::string generate_spir_v_code(const std::vector<uint8_t>& code) {
         needsComma = true;
 
         if (lineSize > 24) {
-            oss << std::endl
-                << "        ";
+            oss << std::endl << "        ";
             lineSize = 0;
         }
 
         oss << "0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
         lineSize++;
     }
-    oss << std::endl
-        << "        }" << std::endl;
+    oss << std::endl << "        }" << std::endl;
     return oss.str();
 }
 
@@ -146,8 +143,7 @@ static std::string generate_spir_v_code_map(const Reflector& reflector) {
         oss << "        " << module_name(module) << ", " << generate_spir_v_code(code);
         oss << "    }";
     }
-    oss << std::endl
-        << '}';
+    oss << std::endl << '}';
 
     return oss.str();
 }
@@ -196,14 +192,11 @@ static std::string generate_descriptor_sets_description(const Reflector& reflect
                 oss << "                " << generate_module_mask(binding.moduleMask) << std::endl;
                 oss << "            }";
             }
-            oss << std::endl
-                << "        }";
-            oss << std::endl
-                << "    }";
+            oss << std::endl << "        }";
+            oss << std::endl << "    }";
         }
     }
-    oss << std::endl
-        << "}";
+    oss << std::endl << "}";
 
     return oss.str();
 }
@@ -224,15 +217,13 @@ static std::string generate_vertex_layout(const Reflector& reflector) {
             needsComma = true;
             oss << "    " << vertex_attribute_format_name(format);
         }
-        oss << std::endl
-            << "}";
+        oss << std::endl << "}";
     }
 
     return oss.str();
 }
 
-static const std::string kHeaderFileIncludes[] = {
-        "duk_rhi/pipeline/shader_data_source.h"};
+static const std::string kHeaderFileIncludes[] = {"duk_rhi/pipeline/shader_data_source.h"};
 
 /// header file template -----------------------------
 /// --------------------------------------------------
@@ -354,8 +345,7 @@ void ShaderDataSourceFileGenerator::generate_header_file_content(std::ostringstr
 }
 
 void ShaderDataSourceFileGenerator::generate_source_file_content(std::ostringstream& oss) {
-    std::string includes[] = {
-            m_headerIncludePath};
+    std::string includes[] = {m_headerIncludePath};
     generate_include_directives(oss, includes);
     oss << std::endl;
     generate_namespace_start(oss, "");

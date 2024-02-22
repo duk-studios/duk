@@ -52,13 +52,14 @@ public:
 
     template<typename... Args>
     auto print(Level level, const std::string& format, Args... args) {
-        return m_printQueue.enqueue([this](Level level, const std::string& format, auto... args) -> void {
-            if (level < m_minimumLevel) {
-                return;
-            }
-            dispatch_print(level, fmt::vformat(format, fmt::make_format_args(args...)));
-        },
-                                    level, format, detail::build_arg(args)...);
+        return m_printQueue.enqueue(
+                [this](Level level, const std::string& format, auto... args) -> void {
+                    if (level < m_minimumLevel) {
+                        return;
+                    }
+                    dispatch_print(level, fmt::vformat(format, fmt::make_format_args(args...)));
+                },
+                level, format, detail::build_arg(args)...);
     }
 
     void add_print_listener(event::Listener& listener, PrintEvent::Callback&& callback);

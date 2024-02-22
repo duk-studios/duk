@@ -22,8 +22,7 @@ VkSurfaceFormatKHR choose_swap_surface_format(const std::vector<VkSurfaceFormatK
     }
 
     for (const auto& availableFormat: formats) {
-        if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
-            availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+        if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
             return availableFormat;
         }
     }
@@ -49,19 +48,18 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities, cons
     }
 
     VkExtent2D actualExtent = {};
-    actualExtent.width = std::clamp<uint32_t>(windowExtent.width,
-                                              capabilities.minImageExtent.width,
-                                              capabilities.maxImageExtent.width);
+    actualExtent.width = std::clamp<uint32_t>(windowExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 
-    actualExtent.height = std::clamp<uint32_t>(windowExtent.height,
-                                               capabilities.minImageExtent.height,
-                                               capabilities.maxImageExtent.height);
+    actualExtent.height = std::clamp<uint32_t>(windowExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
     return actualExtent;
 }
 }// namespace detail
 
 VulkanImageAcquireCommand::VulkanImageAcquireCommand(const VulkanImageAcquireCommandCreateInfo& commandCreateInfo)
-    : m_submitter([](const auto&) {}, true, false, commandCreateInfo.frameCount, commandCreateInfo.currentFramePtr, commandCreateInfo.device) {
+    : m_submitter(
+              [](const auto&) {
+              },
+              true, false, commandCreateInfo.frameCount, commandCreateInfo.currentFramePtr, commandCreateInfo.device) {
 }
 
 void VulkanImageAcquireCommand::submit(const VulkanCommandParams& commandParams) {
@@ -77,7 +75,11 @@ VulkanPresentCommand::VulkanPresentCommand(const VulkanPresentCommandCreateInfo&
     , m_presentQueue(commandCreateInfo.presentQueue)
     , m_requiresRecreationPtr(commandCreateInfo.requiresRecreationPtr)
     , m_ableToPresentPtr(commandCreateInfo.ableToPresentPtr)
-    , m_submitter([this](const auto& params) { submit(params); }, false, false, 0, nullptr, VK_NULL_HANDLE) {
+    , m_submitter(
+              [this](const auto& params) {
+                  submit(params);
+              },
+              false, false, 0, nullptr, VK_NULL_HANDLE) {
     m_listener.listen(*commandCreateInfo.swapchainCreateEvent, [this](const auto& swapchainInfo) {
         m_swapchain = swapchainInfo.swapchain;
     });

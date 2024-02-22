@@ -4,6 +4,4 @@
 
 #include <duk_renderer/resources/materials/instance_buffer.h>
 
-namespace duk::renderer {
-
-}
+namespace duk::renderer {}

@@ -53,18 +53,15 @@ public:
 
     template<typename F, typename... Args, std::enable_if_t<std::is_invocable_v<F&&, Args&&...>, int> = 0>
     std::future<std::invoke_result_t<F, Args...>> enqueue(F&& func, Args&&... args) {
-        std::packaged_task<std::invoke_result_t<F, Args...>()> packagedTask(
-                [_f = std::forward<F>(func),
-                 _args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
-                    return std::apply(std::move(_f), std::move(_args));
-                });
+        std::packaged_task<std::invoke_result_t<F, Args...>()> packagedTask([_f = std::forward<F>(func), _args = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+            return std::apply(std::move(_f), std::move(_args));
+        });
 
         auto future = packagedTask.get_future();
 
-        auto task = std::unique_ptr<detail::Task>(new detail::TaskT(
-                [t(std::move(packagedTask))]() mutable {
-                    t();
-                }));
+        auto task = std::unique_ptr<detail::Task>(new detail::TaskT([t(std::move(packagedTask))]() mutable {
+            t();
+        }));
 
         {
             std::unique_lock<std::mutex> lock(m_taskQueueMutex);

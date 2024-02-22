@@ -29,8 +29,7 @@ MeshBuffer::ManagedBuffer::ManagedBuffer(const MeshBuffer::ManagedBufferCreateIn
                                      .elementSize = managedBufferCreateInfo.elementSize,
                                      .commandQueue = managedBufferCreateInfo.commandQueue});
 
-    m_freeBlocks.push_back({.offset = 0,
-                            .size = m_buffer->byte_size()});
+    m_freeBlocks.push_back({.offset = 0, .size = m_buffer->byte_size()});
 }
 
 MeshBuffer::ManagedBuffer::~ManagedBuffer() {
@@ -111,8 +110,7 @@ void MeshBuffer::ManagedBuffer::merge_free_blocks() {
             // only insert block if it has some size
             // e.g. the first block might not start at 0
             if (blockSize > 0) {
-                freeBlocks.push_back({.offset = blockOffset,
-                                      .size = blockSize});
+                freeBlocks.push_back({.offset = blockOffset, .size = blockSize});
             }
 
             // reset block size
@@ -127,8 +125,7 @@ void MeshBuffer::ManagedBuffer::merge_free_blocks() {
     }
 
     if (blockSize > 0) {
-        freeBlocks.push_back({.offset = blockOffset,
-                              .size = blockSize});
+        freeBlocks.push_back({.offset = blockOffset, .size = blockSize});
     }
 
     std::swap(m_freeBlocks, freeBlocks);
@@ -169,8 +166,7 @@ void MeshBuffer::ManagedBuffer::expand_by(size_t size) {
 
     newBuffer->copy_from(m_buffer.get(), m_buffer->byte_size(), 0, 0);
 
-    m_freeBlocks.push_back({.offset = m_buffer->byte_size(),
-                            .size = size});
+    m_freeBlocks.push_back({.offset = m_buffer->byte_size(), .size = size});
 
     merge_free_blocks();
 

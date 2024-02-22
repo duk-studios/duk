@@ -73,9 +73,7 @@ void SpriteBrush::push(const Sprite* sprite, const glm::mat4& model) {
         resize(static_cast<uint32_t>(static_cast<double>(m_spriteCapacity) * std::numbers::phi_v<double>));
     }
 
-    glm::vec2 halfSize = {
-            static_cast<float>(sprite->width()) / detail::kPixelsPerUnit / 2,
-            static_cast<float>(sprite->height()) / detail::kPixelsPerUnit / 2};
+    glm::vec2 halfSize = {static_cast<float>(sprite->width()) / detail::kPixelsPerUnit / 2, static_cast<float>(sprite->height()) / detail::kPixelsPerUnit / 2};
 
     // position
     {
@@ -135,9 +133,7 @@ void SpriteBrush::resize(uint32_t spriteCapacity) {
         auto uvVertexBuffer = m_vertexBuffers.at(VertexAttributes::UV);
         uvVertexBuffer->resize(spriteCapacity * VertexAttributes::size_of(VertexAttributes::UV) * detail::kVerticesPerSprite);
     }
-    {
-        m_indexBuffer->resize(spriteCapacity * duk::rhi::index_size(duk::rhi::IndexType::UINT32) * detail::kIndicesPerSprite);
-    }
+    { m_indexBuffer->resize(spriteCapacity * duk::rhi::index_size(duk::rhi::IndexType::UINT32) * detail::kIndicesPerSprite); }
     m_spriteCapacity = spriteCapacity;
 }
 

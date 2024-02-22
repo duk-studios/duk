@@ -74,12 +74,15 @@ static void destroy_window_class_entry(std::shared_ptr<WindowClassEntry>& entry)
 static KeyModifiers::Mask get_key_mod() {
     KeyModifiers::Mask mods = 1;
 
-    if (GetKeyState(VK_SHIFT) & 0x8000)
+    if (GetKeyState(VK_SHIFT) & 0x8000) {
         mods |= KeyModifiers::SHIFT;
-    if (GetKeyState(VK_CONTROL) & 0x8000)
+    }
+    if (GetKeyState(VK_CONTROL) & 0x8000) {
         mods |= KeyModifiers::CTRL;
-    if (GetKeyState(VK_MENU) & 0x8000)
+    }
+    if (GetKeyState(VK_MENU) & 0x8000) {
         mods |= KeyModifiers::ALT;
+    }
 
     return mods;
 }
@@ -286,19 +289,18 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo)
 
     // Create the window.
 
-    m_hwnd = CreateWindowEx(
-            0,                                                 // Optional window styles.
-            m_windowClassEntry->className.c_str(),             // Window class
-            windowWin32CreateInfo.windowCreateInfo.windowTitle,// Window text
-            WS_OVERLAPPEDWINDOW,                               // Window style
+    m_hwnd = CreateWindowEx(0,                                                 // Optional window styles.
+                            m_windowClassEntry->className.c_str(),             // Window class
+                            windowWin32CreateInfo.windowCreateInfo.windowTitle,// Window text
+                            WS_OVERLAPPEDWINDOW,                               // Window style
 
-            // Size and position
-            CW_USEDEFAULT, CW_USEDEFAULT, static_cast<int32_t>(m_width), static_cast<int32_t>(m_height),
+                            // Size and position
+                            CW_USEDEFAULT, CW_USEDEFAULT, static_cast<int32_t>(m_width), static_cast<int32_t>(m_height),
 
-            NULL,                          // Parent window
-            NULL,                          // Menu
-            windowWin32CreateInfo.instance,// Instance handle
-            this                           // Additional application data
+                            NULL,                          // Parent window
+                            NULL,                          // Menu
+                            windowWin32CreateInfo.instance,// Instance handle
+                            this                           // Additional application data
     );
 
     if (!m_hwnd) {

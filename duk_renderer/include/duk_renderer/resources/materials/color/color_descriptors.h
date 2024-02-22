@@ -1,15 +1,14 @@
 #ifndef DUK_RENDERER_COLOR_DESCRIPTORS_H
 #define DUK_RENDERER_COLOR_DESCRIPTORS_H
 
-#include <duk_renderer/resources/materials/material_descriptor_set.h>
 #include <duk_renderer/resources/materials/color/color_shader_data_source.h>
+#include <duk_renderer/resources/materials/material_descriptor_set.h>
 #include <duk_rhi/rhi.h>
 
 namespace duk::renderer {
 
 class ColorDescriptors {
 public:
-
     enum Bindings : uint32_t {
         uCamera = 0,
         uInstances = 1,
@@ -26,10 +25,8 @@ public:
     struct Material {
         glm::vec4 color;
     };
-
-
 };
 
-} // namespace duk::renderer
+}// namespace duk::renderer
 
-#endif // DUK_RENDERER_COLOR_DESCRIPTORS_H
+#endif// DUK_RENDERER_COLOR_DESCRIPTORS_H

@@ -82,9 +82,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     }
 
     // scenes
-    {
-        m_importer->add_resource_importer<duk::import::SceneImporter>();
-    }
+    { m_importer->add_resource_importer<duk::import::SceneImporter>(); }
 
     duk::scene::register_system<RenderSystem>(*this);
 

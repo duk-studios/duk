@@ -123,7 +123,8 @@ static std::string generate_from_json_member_access(const ReflectedMemberDescrip
 
 static std::string generate_from_json_method_content(const ReflectedClassDescription& classDescription) {
     return generate_for_each(
-            classDescription.members, [](const ReflectedMemberDescription& member) {
+            classDescription.members,
+            [](const ReflectedMemberDescription& member) {
                 std::ostringstream oss;
                 oss << "object." << member.name << " = " << generate_from_json_member_access(member) << ';';
                 return oss.str();
@@ -159,8 +160,7 @@ static std::string generate_from_json_file(const Reflector& reflector, const std
     generate_include_guard_start(oss, includeGuardName);
     oss << std::endl;
 
-    std::vector<std::string> includes{
-            "duk_import/json/types.h"};
+    std::vector<std::string> includes{"duk_import/json/types.h"};
 
     includes.insert(includes.end(), additionalIncludes.begin(), additionalIncludes.end());
 
@@ -237,10 +237,7 @@ void JsonCommand::execute() {
 
     auto filename = std::filesystem::path(m_inputFilepath).filename().stem().string();
 
-    const auto generatedContent = detail::generate_from_json_file(reflector,
-                                                                  m_nameSpace,
-                                                                  filename,
-                                                                  m_additionalIncludes);
+    const auto generatedContent = detail::generate_from_json_file(reflector, m_nameSpace, filename, m_additionalIncludes);
 
     write_file(generatedContent, m_outputFilepath);
 }

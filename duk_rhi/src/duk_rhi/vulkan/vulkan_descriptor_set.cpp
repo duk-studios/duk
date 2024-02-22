@@ -280,8 +280,7 @@ void VulkanDescriptorSet::update_descriptors_and_set(uint32_t imageIndex) {
     std::vector<VkWriteDescriptorSet> writeDescriptors;
 
     detail::iterate_descriptors(
-            m_descriptors.begin(),
-            m_descriptors.end(),
+            m_descriptors.begin(), m_descriptors.end(),
             [&](VulkanBuffer* buffer, uint32_t bindingIndex, const Descriptor& descriptor) {
                 buffer->update(imageIndex);
 
@@ -331,8 +330,7 @@ void VulkanDescriptorSet::update_descriptors(uint32_t imageIndex) {
     auto& descriptorSet = m_descriptorSets[imageIndex];
 
     detail::iterate_descriptors(
-            m_descriptors.begin(),
-            m_descriptors.end(),
+            m_descriptors.begin(), m_descriptors.end(),
             [imageIndex](VulkanBuffer* buffer, uint32_t bindingIndex, const Descriptor& descriptor) {
                 buffer->update(imageIndex);
             },

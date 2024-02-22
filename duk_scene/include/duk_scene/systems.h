@@ -112,10 +112,11 @@ SystemRegistry::SystemEntryT<T, Args...>::SystemEntryT(Args&&... args)
 
 template<typename T, typename... Args>
 void SystemRegistry::SystemEntryT<T, Args...>::build(Systems& systems) {
-    std::apply([&systems](Args&&... args) {
-        systems.add<T>(std::forward<Args>(args)...);
-    },
-               m_buildArgs);
+    std::apply(
+            [&systems](Args&&... args) {
+                systems.add<T>(std::forward<Args>(args)...);
+            },
+            m_buildArgs);
 }
 
 template<typename T>

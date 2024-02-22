@@ -21,8 +21,7 @@ namespace duk::rhi {
 
 namespace detail {
 
-static std::vector<const char*> s_validationLayers = {
-        "VK_LAYER_KHRONOS_validation"};
+static std::vector<const char*> s_validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
 static std::vector<const char*> query_instance_extensions(bool hasValidationLayers) {
     std::vector<const char*> extensions = {VK_KHR_SURFACE_EXTENSION_NAME};
@@ -36,10 +35,7 @@ static std::vector<const char*> query_instance_extensions(bool hasValidationLaye
     return extensions;
 }
 
-static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                               VkDebugUtilsMessageTypeFlagsEXT messageTypes,
-                               const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                               void* pUserData) {
+static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
     auto debugMessanger = (VulkanDebugMessenger*)pUserData;
     debugMessanger->log(messageSeverity, messageTypes, pCallbackData);
     return VK_FALSE;
@@ -301,14 +297,8 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
 
         debugCreateInfo = {};
         debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        debugCreateInfo.messageSeverity =
-                VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT |
-                VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        debugCreateInfo.messageType =
-                VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        debugCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         debugCreateInfo.pfnUserCallback = detail::debug_callback;
         debugCreateInfo.pUserData = &m_debugMessenger;
         m_debugMessenger.enabledMessageTypes = debugCreateInfo.messageType;

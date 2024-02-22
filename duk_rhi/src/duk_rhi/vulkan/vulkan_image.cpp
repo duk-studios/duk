@@ -366,13 +366,7 @@ void VulkanImage::transition_image_layout(VkCommandBuffer commandBuffer, const T
             break;
     }
 
-    vkCmdPipelineBarrier(
-            commandBuffer,
-            transitionImageLayoutInfo.srcStageMask, transitionImageLayoutInfo.dstStageMask,
-            0,
-            0, nullptr,
-            0, nullptr,
-            1, &imageMemoryBarrier);
+    vkCmdPipelineBarrier(commandBuffer, transitionImageLayoutInfo.srcStageMask, transitionImageLayoutInfo.dstStageMask, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 }
 
 void VulkanImage::copy_buffer_to_image(VkCommandBuffer commandBuffer, const CopyBufferToImageInfo& copyBufferToImageInfo) {
@@ -393,18 +387,9 @@ void VulkanImage::copy_buffer_to_image(VkCommandBuffer commandBuffer, const Copy
     bufferImageCopyRegion.imageSubresource.layerCount = 1;
 
     bufferImageCopyRegion.imageOffset = {0, 0, 0};
-    bufferImageCopyRegion.imageExtent = {
-            copyBufferToImageInfo.width,
-            copyBufferToImageInfo.height,
-            1};
+    bufferImageCopyRegion.imageExtent = {copyBufferToImageInfo.width, copyBufferToImageInfo.height, 1};
 
-    vkCmdCopyBufferToImage(
-            commandBuffer,
-            copyBufferToImageInfo.buffer->handle(),
-            copyBufferToImageInfo.image,
-            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            1,
-            &bufferImageCopyRegion);
+    vkCmdCopyBufferToImage(commandBuffer, copyBufferToImageInfo.buffer->handle(), copyBufferToImageInfo.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferImageCopyRegion);
 
     transitionImageLayoutInfo.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     transitionImageLayoutInfo.newLayout = copyBufferToImageInfo.finalLayout;

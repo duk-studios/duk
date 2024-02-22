@@ -49,9 +49,7 @@ public:
         static constexpr uint32_t kRemainingArrayLayers = ~0u;
     };
 
-    static constexpr SubresourceRange kFullSubresourceRange{
-            0u, SubresourceRange::kRemainingMipLevels,
-            0u, SubresourceRange::kRemainingArrayLayers};
+    static constexpr SubresourceRange kFullSubresourceRange{0u, SubresourceRange::kRemainingMipLevels, 0u, SubresourceRange::kRemainingArrayLayers};
 
 public:
     virtual ~Image();

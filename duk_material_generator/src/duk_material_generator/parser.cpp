@@ -14,7 +14,11 @@ Parser::Parser(int argc, char* argv[])
 
     cxxopts::Options options("duk_material_generator", "Material generator for duk_renderer");
 
-    options.add_options()("v, vert", "Vertex shader path", cxxopts::value<std::string>())("f, frag", "Fragment shader path", cxxopts::value<std::string>())("g, geom", "Geometry shader path", cxxopts::value<std::string>())("e, tese", "Tesselation Evaluation shader path", cxxopts::value<std::string>())("t, tesc", "Tesselation Control shader path", cxxopts::value<std::string>())("c, comp", "Compute shader path", cxxopts::value<std::string>())("n, name", "Material name", cxxopts::value<std::string>())("s, src", "Source output directory", cxxopts::value<std::string>())("i, inc", "Include output directory", cxxopts::value<std::string>())("l, globals", "Global bindings name list", cxxopts::value<std::vector<std::string>>())("j, globals-include", "Globals include output directory", cxxopts::value<std::string>())("h, globals-source", "Globals source output directory", cxxopts::value<std::string>())("d, debug", "Print debug information");
+    options.add_options()("v, vert", "Vertex shader path", cxxopts::value<std::string>())("f, frag", "Fragment shader path", cxxopts::value<std::string>())("g, geom", "Geometry shader path", cxxopts::value<std::string>())(
+            "e, tese", "Tesselation Evaluation shader path", cxxopts::value<std::string>())("t, tesc", "Tesselation Control shader path",
+                                                                                            cxxopts::value<std::string>())("c, comp", "Compute shader path", cxxopts::value<std::string>())("n, name", "Material name", cxxopts::value<std::string>())(
+            "s, src", "Source output directory", cxxopts::value<std::string>())("i, inc", "Include output directory", cxxopts::value<std::string>())("l, globals", "Global bindings name list", cxxopts::value<std::vector<std::string>>())(
+            "j, globals-include", "Globals include output directory", cxxopts::value<std::string>())("h, globals-source", "Globals source output directory", cxxopts::value<std::string>())("d, debug", "Print debug information");
 
     cxxopts::ParseResult result;
     try {

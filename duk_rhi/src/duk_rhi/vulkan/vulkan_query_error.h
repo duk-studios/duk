@@ -12,6 +12,6 @@ enum class VulkanQueryError {
     INVALID_ARGUMENT
 };
 
-}
+}// namespace duk::rhi
 
 #endif//DUK_VULKAN_QUERY_ERROR_H

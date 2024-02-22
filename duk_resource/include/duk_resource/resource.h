@@ -16,10 +16,12 @@ namespace duk::resource {
 class Id {
 public:
     constexpr Id()
-        : Id(0) {}
+        : Id(0) {
+    }
 
     explicit constexpr Id(uint64_t id)
-        : m_id(id) {}
+        : m_id(id) {
+    }
 
     DUK_NO_DISCARD bool operator==(const Id& rhs) const;
 

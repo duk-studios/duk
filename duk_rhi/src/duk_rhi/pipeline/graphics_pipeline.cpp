@@ -59,13 +59,7 @@ void GraphicsPipeline::set_blend_enabled(bool enabled) {
     set_blend(blend);
 }
 
-duk::hash::Hash GraphicsPipeline::hash_of(GraphicsPipeline::Viewport viewport,
-                                          GraphicsPipeline::Scissor scissor,
-                                          GraphicsPipeline::Blend blend,
-                                          Shader* shader,
-                                          RenderPass* renderPass,
-                                          GraphicsPipeline::CullMode::Mask cullMode,
-                                          bool depthTesting) {
+duk::hash::Hash GraphicsPipeline::hash_of(GraphicsPipeline::Viewport viewport, GraphicsPipeline::Scissor scissor, GraphicsPipeline::Blend blend, Shader* shader, RenderPass* renderPass, GraphicsPipeline::CullMode::Mask cullMode, bool depthTesting) {
     duk::hash::Hash hash = 0;
     duk::hash::hash_combine(hash, viewport.offset);
     duk::hash::hash_combine(hash, viewport.extent);

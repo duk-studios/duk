@@ -65,8 +65,7 @@ struct VertexColorUV {
 
 template<>
 inline VertexAttributes VertexAttributes::create<VertexColorUV>() {
-    VertexAttributes::Type attributes[] = {
-            VertexAttributes::POSITION, VertexAttributes::COLOR, VertexAttributes::UV};
+    VertexAttributes::Type attributes[] = {VertexAttributes::POSITION, VertexAttributes::COLOR, VertexAttributes::UV};
     return VertexAttributes(attributes);
 }
 
@@ -80,8 +79,7 @@ struct VertexNormalUV {
 
 template<>
 inline VertexAttributes VertexAttributes::create<VertexNormalUV>() {
-    VertexAttributes::Type attributes[] = {
-            VertexAttributes::POSITION, VertexAttributes::NORMAL, VertexAttributes::UV};
+    VertexAttributes::Type attributes[] = {VertexAttributes::POSITION, VertexAttributes::NORMAL, VertexAttributes::UV};
     return VertexAttributes(attributes);
 }
 

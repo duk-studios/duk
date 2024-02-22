@@ -4,11 +4,9 @@
 
 DUK_SERIALIZE_RESOURCE
 
-struct Foo {
-};
+struct Foo {};
 
-struct Boo {
-};
+struct Boo {};
 
 DUK_SERIALIZE_RESOURCE
 

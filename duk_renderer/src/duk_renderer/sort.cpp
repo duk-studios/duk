@@ -3,6 +3,4 @@
 
 #include <duk_renderer/sort.h>
 
-namespace duk::renderer {
-
-}
+namespace duk::renderer {}

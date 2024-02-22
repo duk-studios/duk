@@ -26,8 +26,7 @@ struct TypeReferences {
     std::set<std::string> referencedTypes;
 };
 
-static uint32_t sum_reference_count(const std::unordered_map<std::string, TypeReferences>& typeReferences,
-                                    const std::string& typeName) {
+static uint32_t sum_reference_count(const std::unordered_map<std::string, TypeReferences>& typeReferences, const std::string& typeName) {
     auto it = typeReferences.find(typeName);
     if (it == typeReferences.end()) {
         return 0;
@@ -83,10 +82,7 @@ static void insert_referenced_types_from_bindings(const Reflector& reflector, st
     }
 }
 
-static const std::string kTypesFileIncludes[] = {
-        "duk_renderer/resources/materials/uniform_buffer.h",
-        "duk_renderer/resources/materials/storage_buffer.h",
-        "glm/glm.hpp"};
+static const std::string kTypesFileIncludes[] = {"duk_renderer/resources/materials/uniform_buffer.h", "duk_renderer/resources/materials/storage_buffer.h", "glm/glm.hpp"};
 
 }// namespace detail
 

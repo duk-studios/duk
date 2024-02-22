@@ -28,8 +28,7 @@ static std::string generate_bindings(const Reflector::Bindings& bindings) {
         oss << "        " << binding.name << " = " << binding.binding;
         return oss.str();
     });
-    oss << std::endl
-        << "    }";
+    oss << std::endl << "    }";
     return oss.str();
 }
 
@@ -98,10 +97,7 @@ DescriptorSetFileGenerator::DescriptorSetFileGenerator(const Parser& parser, con
 }
 
 void DescriptorSetFileGenerator::generate_header_file_content(std::ostringstream& oss) {
-    std::string includes[] = {
-            "duk_renderer/resources/materials/material_descriptor_set.h",
-            m_shaderDataSourceFileGenerator.output_header_include_path(),
-            "duk_rhi/rhi.h"};
+    std::string includes[] = {"duk_renderer/resources/materials/material_descriptor_set.h", m_shaderDataSourceFileGenerator.output_header_include_path(), "duk_rhi/rhi.h"};
 
     generate_include_guard_start(oss, m_fileName);
     oss << std::endl;

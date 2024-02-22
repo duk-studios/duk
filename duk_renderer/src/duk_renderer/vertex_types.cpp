@@ -26,7 +26,8 @@ size_t VertexAttributes::size_of(VertexAttributes::Type attributeType) {
 }
 
 VertexAttributes::VertexAttributes()
-    : m_attributeOffset({}) {}
+    : m_attributeOffset({}) {
+}
 
 VertexAttributes::VertexAttributes(const std::span<VertexAttributes::Type>& attributes) {
     size_t offset = 0;

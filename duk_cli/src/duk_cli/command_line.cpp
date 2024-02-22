@@ -25,7 +25,8 @@ Usage:
 std::unique_ptr<Command> make_json_generate_command(int argc, const char* argv[]) {
     cxxopts::Options options("duk json generate");
 
-    options.add_options()("s, source", "Source file to parse", cxxopts::value<std::string>())("o, output", "Output file with generated methods", cxxopts::value<std::string>())("n, namespace", "Namespace for generated methods", cxxopts::value<std::string>())("i, includes", "Additional includes for generated file", cxxopts::value<std::vector<std::string>>());
+    options.add_options()("s, source", "Source file to parse", cxxopts::value<std::string>())("o, output", "Output file with generated methods", cxxopts::value<std::string>())(
+            "n, namespace", "Namespace for generated methods", cxxopts::value<std::string>())("i, includes", "Additional includes for generated file", cxxopts::value<std::vector<std::string>>());
 
     auto result = options.parse(argc, argv);
 

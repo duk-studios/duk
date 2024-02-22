@@ -64,9 +64,10 @@ public:
 
     void add_listener(Callback&& callback, size_t listenerId) {
         assert(!m_emitting && "Attempted to add_listener on a event that is currently emitting");
-        assert(std::find_if(m_listeners.begin(), m_listeners.end(), [listenerId](size_t listener) {
-                   return listener == listenerId;
-               }) == m_listeners.end() &&
+        assert(std::find_if(m_listeners.begin(), m_listeners.end(),
+                            [listenerId](size_t listener) {
+                                return listener == listenerId;
+                            }) == m_listeners.end() &&
                "Tried to add_listener to an event with a listener that was already subscribed.");
 
         m_listeners.emplace_back(listenerId);

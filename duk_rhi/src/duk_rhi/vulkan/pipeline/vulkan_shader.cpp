@@ -47,12 +47,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo)
     , m_moduleMask(shaderCreateInfo.shaderDataSource->module_mask()) {
     auto shaderDataSource = shaderCreateInfo.shaderDataSource;
     if (shaderDataSource->valid_graphics_shader()) {
-        Shader::Module::Bits modules[] = {
-                Shader::Module::VERTEX,
-                Shader::Module::TESSELLATION_CONTROL,
-                Shader::Module::TESSELLATION_EVALUATION,
-                Shader::Module::GEOMETRY,
-                Shader::Module::FRAGMENT};
+        Shader::Module::Bits modules[] = {Shader::Module::VERTEX, Shader::Module::TESSELLATION_CONTROL, Shader::Module::TESSELLATION_EVALUATION, Shader::Module::GEOMETRY, Shader::Module::FRAGMENT};
 
         for (auto module: modules) {
             create_shader_module(module, shaderDataSource);

@@ -93,9 +93,9 @@ static DefaultMeshDataSource cube_mesh_data_source() {
     meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
     std::array<DefaultMeshDataSource::IndexType, 36> indices = {
-            0, 2, 1, 1, 2, 3,      // front
-            4, 6, 5, 5, 6, 7,      // back
-            8, 10, 9, 9, 10, 11,   // right
+            0,  2,  1,  1,  2,  3, // front
+            4,  6,  5,  5,  6,  7, // back
+            8,  10, 9,  9,  10, 11,// right
             12, 14, 13, 13, 14, 15,// left
             16, 18, 17, 17, 18, 19,// top
             20, 22, 21, 21, 22, 23 // bottom

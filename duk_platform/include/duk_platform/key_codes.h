@@ -121,7 +121,6 @@ enum class Keys {
     DOT,          //0xBE
     SLASH,        //0xBF
     QUESTION_MARK,//0xBF
-
 };
 }// namespace duk::platform
 

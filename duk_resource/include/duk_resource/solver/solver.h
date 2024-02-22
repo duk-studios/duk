@@ -22,7 +22,8 @@ void solve_resources(Solver* solver, YourType& obj) {
  */
 
 template<typename Solver, typename T>
-void solve_resources(Solver* solver, T& obj) {}
+void solve_resources(Solver* solver, T& obj) {
+}
 
 }// namespace duk::resource
 
