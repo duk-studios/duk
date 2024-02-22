@@ -4,17 +4,11 @@
 #ifndef DUK_RENDERER_RENDERER_H
 #define DUK_RENDERER_RENDERER_H
 
-#include <duk_renderer/sort.h>
-
 #include <duk_rhi/rhi.h>
 #include <duk_log/logger.h>
+#include <duk_scene/scene.h>
 
 namespace duk {
-
-namespace scene {
-class Objects;
-class Object;
-}
 
 namespace renderer {
 
@@ -43,7 +37,7 @@ public:
 
     virtual ~Renderer();
 
-    void render(duk::scene::Objects* scene);
+    void render(duk::scene::Scene* scene);
 
     DUK_NO_DISCARD uint32_t render_width() const;
 
@@ -63,7 +57,7 @@ public:
 
 private:
 
-    void update_global_descriptors(duk::scene::Objects* scene);
+    void update_global_descriptors(duk::scene::Objects& objects);
 
 protected:
     duk::platform::Window* m_window;
@@ -72,10 +66,6 @@ protected:
     std::shared_ptr<duk::rhi::CommandScheduler> m_scheduler;
     std::vector<std::shared_ptr<Pass>> m_passes;
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
-    std::unique_ptr<ImagePool> m_imagePool;
-    std::unique_ptr<MeshPool> m_meshPool;
-    std::unique_ptr<MaterialPool> m_materialPool;
-    std::unique_ptr<SpritePool> m_spritePool;
     duk::scene::Object::Id m_mainCameraObjectId;
     duk::event::EventVoid m_renderStart;
 };

@@ -35,13 +35,14 @@ static bool valid(const MeshDrawEntry& drawEntry) {
 static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, MeshDrawData* drawData) {
 
     drawData->clear();
+    auto& objects = renderParams.scene->objects();
     auto& meshes = drawData->meshes;
     auto& sortedMeshes = drawData->sortedMeshes;
     auto& drawEntries = drawData->drawEntries;
 
     std::set<Material*> uniqueMaterials;
 
-    for (auto object : renderParams.scene->all_with<MeshRenderer>()) {
+    for (auto object : objects.all_with<MeshRenderer>()) {
         auto meshRenderer = object.component<MeshRenderer>();
 
         auto material = meshRenderer->material.get();
@@ -80,7 +81,7 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
         auto& meshEntry = meshes[sortedIndex];
 
         // update instance buffer
-        meshEntry.material->instance_buffer()->insert(renderParams.scene->object(meshEntry.objectId));
+        meshEntry.material->instance_buffer()->insert(objects.object(meshEntry.objectId));
 
         if (compatible(meshEntry, drawEntry)) {
             drawEntry.instanceCount++;
@@ -142,6 +143,7 @@ static bool valid(const SpriteDrawEntry& drawEntry) {
 void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, SpriteDrawData* drawData) {
 
     drawData->clear();
+    auto& objects = renderParams.scene->objects();
     auto& sortedSprites = drawData->sortedSprites;
     auto& sprites = drawData->sprites;
     auto& drawEntries = drawData->drawEntries;
@@ -149,7 +151,7 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
 
     std::set<Material*> usedMaterials;
 
-    for (auto object : renderParams.scene->all_with<SpriteRenderer>()) {
+    for (auto object : objects.all_with<SpriteRenderer>()) {
         auto spriteRenderer = object.component<SpriteRenderer>();
         auto material = spriteRenderer->material.get();
         auto sprite = spriteRenderer->sprite.get();
@@ -176,7 +178,7 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
     for (auto sortedIndex : sortedSprites) {
         auto& spriteEntry = sprites[sortedIndex];
 
-        auto object = renderParams.scene->object(spriteEntry.objectId);
+        auto object = objects.object(spriteEntry.objectId);
 
         brush->push(spriteEntry.sprite, model_matrix_3d(object));
 

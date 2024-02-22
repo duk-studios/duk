@@ -56,11 +56,8 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo) :
 
 Renderer::~Renderer() = default;
 
-void Renderer::render(duk::scene::Objects* scene) {
+void Renderer::render(duk::scene::Scene* scene) {
     // if no camera is set, return
-    if (!scene->valid_object(m_mainCameraObjectId)) {
-        return;
-    }
 
     m_rhi->prepare_frame();
 
@@ -68,7 +65,7 @@ void Renderer::render(duk::scene::Objects* scene) {
 
     m_renderStart.emit();
 
-    update_global_descriptors(scene);
+    update_global_descriptors(scene->objects());
 
     auto mainPass = m_mainQueue->submit([this, scene](duk::rhi::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
@@ -162,12 +159,12 @@ void Renderer::use_as_camera(const scene::Object& object) {
     m_mainCameraObjectId = object.id();
 }
 
-void Renderer::update_global_descriptors(duk::scene::Objects* scene) {
-    if (scene->valid_object(m_mainCameraObjectId)) {
-        m_globalDescriptors->update_camera(scene->object(m_mainCameraObjectId));
+void Renderer::update_global_descriptors(duk::scene::Objects& objects) {
+    if (objects.valid_object(m_mainCameraObjectId)) {
+        m_globalDescriptors->update_camera(objects.object(m_mainCameraObjectId));
     }
 
-    m_globalDescriptors->update_lights(scene);
+    m_globalDescriptors->update_lights(objects);
 }
 
 }

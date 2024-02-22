@@ -4,9 +4,8 @@
 
 #include <iostream>
 #include <duk_rhi/rhi.h>
-#include <duk_renderer/brushes/mesh.h>
 #include <duk_platform/window.h>
-#include <duk_scene/objects.h>
+#include <duk_scene/scene.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>
@@ -81,11 +80,12 @@ int main() {
     materialPoolCreateInfo.renderer = renderer.get();
     auto materialPool = pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
 
-    auto scene = std::make_unique<duk::scene::Objects>();
+    auto scene = std::make_unique<duk::scene::Scene>();
+    auto& objects = scene->objects();
 
     //Adding our first object to the scene, a camera.
     //Setup the camera position, and adding the Perspective Component to it.
-    duk::scene::Object camera = scene->add_object();
+    duk::scene::Object camera = objects.add_object();
     auto cameraPosition = camera.add<duk::renderer::Position3D>();  
     cameraPosition->value = glm::vec3(0,0,0);
     camera.add<duk::renderer::Rotation3D>();
@@ -101,7 +101,7 @@ int main() {
     });
 
     ////Adding a light to our scene.
-    duk::scene::Object globalLight = scene->add_object();
+    duk::scene::Object globalLight = objects.add_object();
     auto globalLightPosition = globalLight.add<duk::renderer::Position3D>();
     globalLightPosition->value = glm::vec3(0,4,-5);
     auto globalPointLight = globalLight.add<duk::renderer::PointLight>();
@@ -111,7 +111,7 @@ int main() {
     //And finally adding the cube to the scene.
     //Our cube has the Mesh Drawing component, that specifies what mesh type and material we are going to use.
     //Also our position and scale and rotation values.
-    duk::scene::Object cubeObject = scene->add_object();
+    duk::scene::Object cubeObject = objects.add_object();
     auto cubeMeshRenderer = cubeObject.add<duk::renderer::MeshRenderer>();
     cubeMeshRenderer->mesh = meshPool->cube();
 
