@@ -27,6 +27,6 @@ private:
     duk::rhi::VertexLayout m_vertexLayout;
 };
 
-}// namespace duk::renderer
+} // namespace duk::renderer
 
-#endif// DUK_RENDERER_FULLSCREEN_SHADER_DATA_SOURCE_H
+#endif // DUK_RENDERER_FULLSCREEN_SHADER_DATA_SOURCE_H

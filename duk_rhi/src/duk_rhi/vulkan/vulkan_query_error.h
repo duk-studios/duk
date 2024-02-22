@@ -14,4 +14,4 @@ enum class VulkanQueryError {
 
 }
 
-#endif//DUK_VULKAN_QUERY_ERROR_H
+#endif //DUK_VULKAN_QUERY_ERROR_H

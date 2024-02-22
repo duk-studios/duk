@@ -1,8 +1,9 @@
-﻿#include <duk_log/log.h>
-#include <duk_log/logger.h>
+﻿#include <duk_log/logger.h>
+#include <duk_log/log.h>
 #include <duk_log/sink_cout.h>
 
 int main() {
+
     //Simple usage of Duk Log for basic logging messages
     {
         duk::log::warn("Hello warn!");
@@ -26,6 +27,7 @@ int main() {
         duk::log::wait();
     }
 
+    
     //--------Advanced logging with separate logger and sink, and using wait functions--------
 
     {
@@ -44,6 +46,6 @@ int main() {
         //Print a debug log message from the logger and wait for it to complete
         logger->print(duk::log::DEBUG, "A debug log from a logger with wait method after being added to a new sink").wait();
     }
-
+    
     return 0;
 }

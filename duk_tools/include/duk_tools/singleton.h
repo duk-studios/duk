@@ -9,6 +9,7 @@ namespace duk::tools {
 template<typename T>
 class Singleton {
 public:
+
     static bool valid() {
         return s_instance != nullptr;
     }
@@ -37,12 +38,13 @@ public:
     virtual ~Singleton() = default;
 
 private:
+
     static T* s_instance;
 };
 
 template<typename T>
 T* Singleton<T>::s_instance = nullptr;
 
-}// namespace duk::tools
+}
 
-#endif// DUK_TOOLS_SINGLETON_H
+#endif // DUK_TOOLS_SINGLETON_H

@@ -48,7 +48,9 @@ protected:
     Shader::Module::Mask m_moduleMask;
     std::vector<DescriptorSetDescription> m_descriptorSetDescriptions;
     VertexLayout m_vertexLayout;
-};
-}// namespace duk::rhi
 
-#endif// DUK_RHI_STD_SHADER_DATA_SOURCE_H
+};
+}
+
+#endif // DUK_RHI_STD_SHADER_DATA_SOURCE_H
+

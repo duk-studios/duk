@@ -6,15 +6,18 @@
 
 #include <duk_rhi/vulkan/vulkan_import.h>
 
-#include <cassert>
 #include <vector>
+#include <cassert>
 
 namespace duk::rhi {
 
 template<typename T>
 class VulkanHandlePool {
 public:
-    VulkanHandlePool() : m_allocationCount(0) {
+
+    VulkanHandlePool() :
+        m_allocationCount(0) {
+
     }
 
     virtual ~VulkanHandlePool() {
@@ -70,7 +73,6 @@ public:
     void expand(size_t n) override;
 
     void clean();
-
 private:
     VkDevice m_device;
     VkFenceCreateFlags m_flags;
@@ -89,10 +91,10 @@ public:
     void expand(size_t n) override;
 
     void clean();
-
 private:
     VkDevice m_device;
 };
+
 
 struct VulkanCommandBufferPoolCreateInfo {
     VkDevice device;
@@ -108,12 +110,13 @@ public:
     void expand(size_t n) override;
 
     void clean();
-
 private:
     VkDevice m_device;
     VkCommandPool m_commandPool;
 };
 
-}// namespace duk::rhi
 
-#endif// DUK_RHI_VULKAN_RESOURCE_POOL_H
+}
+
+#endif // DUK_RHI_VULKAN_RESOURCE_POOL_H
+

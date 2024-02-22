@@ -24,7 +24,7 @@ bool is_format_supported(VkPhysicalDevice physicalDevice, VkFormat format, VkIma
 }
 
 VkFormat find_supported_format(VkPhysicalDevice physicalDevice, std::span<VkFormat> candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
-    for (VkFormat format: candidates) {
+    for (VkFormat format : candidates) {
         if (is_format_supported(physicalDevice, format, tiling, features)) {
             return format;
         }
@@ -32,9 +32,10 @@ VkFormat find_supported_format(VkPhysicalDevice physicalDevice, std::span<VkForm
     throw std::runtime_error("failed to find supported format!");
 }
 
-}// namespace detail
+}
 
-VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo& physicalDeviceCreateInfo) : m_physicalDevice(VK_NULL_HANDLE) {
+VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo& physicalDeviceCreateInfo) :
+    m_physicalDevice(VK_NULL_HANDLE){
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(physicalDeviceCreateInfo.instance, &deviceCount, nullptr);
 
@@ -46,7 +47,7 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
     vkEnumeratePhysicalDevices(physicalDeviceCreateInfo.instance, &deviceCount, devices.data());
 
     auto desiredGPUIndex = (size_t)physicalDeviceCreateInfo.deviceIndex;
-    if (desiredGPUIndex >= devices.size()) {
+    if (desiredGPUIndex >= devices.size()){
         throw std::runtime_error("physical device index out of bounds");
     }
 
@@ -65,7 +66,9 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
 VulkanPhysicalDevice::~VulkanPhysicalDevice() = default;
 
 bool VulkanPhysicalDevice::find_queue_family(VulkanQueueFamilyProperties& vulkanQueueFamilyProperties, VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags) const {
+
     for (uint32_t candidateQueueIndex = 0; candidateQueueIndex < m_queueFamilyProperties.size(); candidateQueueIndex++) {
+
         const auto& candidateQueueFamily = m_queueFamilyProperties[candidateQueueIndex];
 
         if (surface) {
@@ -143,4 +146,4 @@ VkFormat VulkanPhysicalDevice::select_depth_format(std::span<VkFormat> formats) 
     return detail::find_supported_format(m_physicalDevice, formats, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 }
 
-}// namespace duk::rhi
+}

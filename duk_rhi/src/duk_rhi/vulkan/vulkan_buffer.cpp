@@ -1,8 +1,8 @@
 /// 28/05/2023
 /// vulkan_buffer.cpp
 
-#include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
+#include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 
 #include <stdexcept>
 
@@ -32,14 +32,16 @@ static VkBufferUsageFlags buffer_usage_from_type(Buffer::Type type) {
     return usageFlags;
 }
 
-}// namespace detail
+}
 
-VulkanBufferMemory::VulkanBufferMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo, VkMemoryPropertyFlags memoryPropertyFlags, VkBufferUsageFlags additionalUsageFlags) : m_device(vulkanBufferMemoryCreateInfo.device),
-                                                                                                                                                                                               m_physicalDevice(vulkanBufferMemoryCreateInfo.physicalDevice),
-                                                                                                                                                                                               m_commandQueue(vulkanBufferMemoryCreateInfo.commandQueue),
-                                                                                                                                                                                               m_usageFlags(vulkanBufferMemoryCreateInfo.usageFlags | additionalUsageFlags),
-                                                                                                                                                                                               m_memoryProperties(memoryPropertyFlags),
-                                                                                                                                                                                               m_size(vulkanBufferMemoryCreateInfo.size) {
+VulkanBufferMemory::VulkanBufferMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo, VkMemoryPropertyFlags memoryPropertyFlags, VkBufferUsageFlags additionalUsageFlags) :
+    m_device(vulkanBufferMemoryCreateInfo.device),
+    m_physicalDevice(vulkanBufferMemoryCreateInfo.physicalDevice),
+    m_commandQueue(vulkanBufferMemoryCreateInfo.commandQueue),
+    m_usageFlags(vulkanBufferMemoryCreateInfo.usageFlags | additionalUsageFlags),
+    m_memoryProperties(memoryPropertyFlags),
+    m_size(vulkanBufferMemoryCreateInfo.size) {
+
     VkBufferCreateInfo vkBufferCreateInfo = {};
     vkBufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     vkBufferCreateInfo.size = m_size;
@@ -103,8 +105,10 @@ VkDeviceMemory VulkanBufferMemory::memory() const {
     return m_memory;
 }
 
-VulkanBufferHostMemory::VulkanBufferHostMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo) : VulkanBufferMemory(vulkanBufferMemoryCreateInfo, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 0),
-                                                                                                                   m_mapped(nullptr) {
+VulkanBufferHostMemory::VulkanBufferHostMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo) :
+    VulkanBufferMemory(vulkanBufferMemoryCreateInfo, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, 0),
+    m_mapped(nullptr) {
+
 }
 
 VulkanBufferHostMemory::~VulkanBufferHostMemory() = default;
@@ -140,13 +144,16 @@ void VulkanBufferHostMemory::unmap() {
     }
 }
 
-VulkanBufferDeviceMemory::VulkanBufferDeviceMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo) : VulkanBufferMemory(vulkanBufferMemoryCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT),
-                                                                                                                       m_requiredBufferUsageFlags(vulkanBufferMemoryCreateInfo.usageFlags) {
+VulkanBufferDeviceMemory::VulkanBufferDeviceMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo) :
+    VulkanBufferMemory(vulkanBufferMemoryCreateInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT),
+    m_requiredBufferUsageFlags(vulkanBufferMemoryCreateInfo.usageFlags) {
+
 }
 
 VulkanBufferDeviceMemory::~VulkanBufferDeviceMemory() = default;
 
 void VulkanBufferDeviceMemory::write(void* src, size_t size, size_t offset) {
+
     VulkanBufferMemoryCreateInfo bufferHostMemoryCreateInfo = {};
     bufferHostMemoryCreateInfo.device = m_device;
     bufferHostMemoryCreateInfo.physicalDevice = m_physicalDevice;
@@ -159,6 +166,7 @@ void VulkanBufferDeviceMemory::write(void* src, size_t size, size_t offset) {
     bufferHostMemory.write(src, size, 0);
 
     m_commandQueue->submit([&](VkCommandBuffer commandBuffer) {
+
         VkBufferCopy bufferCopyRegion = {};
         bufferCopyRegion.size = size;
         bufferCopyRegion.srcOffset = 0;
@@ -169,6 +177,7 @@ void VulkanBufferDeviceMemory::write(void* src, size_t size, size_t offset) {
 }
 
 void VulkanBufferDeviceMemory::read(void* dst, size_t size, size_t offset) {
+
     VulkanBufferMemoryCreateInfo bufferHostMemoryCreateInfo = {};
     bufferHostMemoryCreateInfo.device = m_device;
     bufferHostMemoryCreateInfo.physicalDevice = m_physicalDevice;
@@ -179,6 +188,7 @@ void VulkanBufferDeviceMemory::read(void* dst, size_t size, size_t offset) {
     VulkanBufferHostMemory bufferHostMemory(bufferHostMemoryCreateInfo);
 
     m_commandQueue->submit([&](VkCommandBuffer commandBuffer) {
+
         VkBufferCopy bufferCopyRegion = {};
         bufferCopyRegion.size = size;
         bufferCopyRegion.srcOffset = offset;
@@ -190,15 +200,17 @@ void VulkanBufferDeviceMemory::read(void* dst, size_t size, size_t offset) {
     bufferHostMemory.read(dst, size, offset);
 }
 
-VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo) : m_device(bufferCreateInfo.device),
-                                                                             m_physicalDevice(bufferCreateInfo.physicalDevice),
-                                                                             m_commandQueue(bufferCreateInfo.commandQueue),
-                                                                             m_type(bufferCreateInfo.type),
-                                                                             m_updateFrequency(bufferCreateInfo.updateFrequency),
-                                                                             m_elementCount(bufferCreateInfo.elementCount),
-                                                                             m_elementSize(bufferCreateInfo.elementSize),
-                                                                             m_data(m_elementCount * m_elementSize, 0),
-                                                                             m_dataHash(0) {
+VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo) :
+    m_device(bufferCreateInfo.device),
+    m_physicalDevice(bufferCreateInfo.physicalDevice),
+    m_commandQueue(bufferCreateInfo.commandQueue),
+    m_type(bufferCreateInfo.type),
+    m_updateFrequency(bufferCreateInfo.updateFrequency),
+    m_elementCount(bufferCreateInfo.elementCount),
+    m_elementSize(bufferCreateInfo.elementSize),
+    m_data(m_elementCount * m_elementSize, 0),
+    m_dataHash(0) {
+
     create(bufferCreateInfo.imageCount);
 }
 
@@ -209,6 +221,7 @@ VkBuffer VulkanBuffer::handle(uint32_t imageIndex) {
 }
 
 void VulkanBuffer::update(uint32_t imageIndex) {
+
     imageIndex = fix_index(imageIndex);
 
     auto& bufferHash = m_bufferHashes[imageIndex];
@@ -227,7 +240,7 @@ void VulkanBuffer::create(uint32_t imageCount) {
     switch (m_updateFrequency) {
         case UpdateFrequency::DYNAMIC:
             m_buffers.resize(imageCount);
-            for (auto& buffer: m_buffers) {
+            for (auto& buffer : m_buffers) {
                 buffer = create_buffer();
             }
             break;
@@ -295,6 +308,7 @@ void VulkanBuffer::flush() {
     // static buffers updates as soon as we flush
     // also check if hash changed, so we can avoid calling vkDeviceIdle unnecessarily
     if (m_bufferHashes[0] != m_dataHash && m_updateFrequency == Buffer::UpdateFrequency::STATIC) {
+
         // this may be really expensive, we need to wait for the device to idle because it may be using this buffer while we update it
         // we could try using pipeline barriers to make sure that we only wait when necessary
         vkDeviceWaitIdle(m_device);
@@ -348,6 +362,7 @@ void VulkanBuffer::update_data_hash() {
 }
 
 std::unique_ptr<VulkanBufferMemory> VulkanBuffer::create_buffer() {
+
     VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
     bufferMemoryCreateInfo.device = m_device;
     bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
@@ -369,4 +384,4 @@ uint32_t VulkanBuffer::fix_index(uint32_t imageIndex) {
     return m_updateFrequency == Buffer::UpdateFrequency::DYNAMIC ? imageIndex : 0;
 }
 
-}// namespace duk::rhi
+}

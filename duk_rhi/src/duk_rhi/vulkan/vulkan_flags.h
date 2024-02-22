@@ -20,6 +20,7 @@ VkFlags convert_flags(uint32_t mask, F convertBitFunc) {
     return flags;
 }
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_VULKAN_FLAGS_H
+#endif // DUK_RHI_VULKAN_FLAGS_H
+

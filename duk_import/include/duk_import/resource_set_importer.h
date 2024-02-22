@@ -7,10 +7,10 @@
 
 #include "duk_resource/resource.h"
 
-#include <filesystem>
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <filesystem>
 
 namespace duk::import {
 
@@ -32,13 +32,15 @@ struct ResourceSet {
 
 class ResourceSetImporter {
 public:
+
     virtual ~ResourceSetImporter();
 
     DUK_NO_DISCARD bool accept(const std::filesystem::path& path) const;
 
     DUK_NO_DISCARD ResourceSet load(const std::filesystem::path& path) const;
+
 };
 
-}// namespace duk::import
+}
 
-#endif//DUK_IMPORT_RESOURCE_SET_IMPORTER_H
+#endif //DUK_IMPORT_RESOURCE_SET_IMPORTER_H

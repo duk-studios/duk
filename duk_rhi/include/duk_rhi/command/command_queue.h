@@ -12,27 +12,30 @@ namespace duk::rhi {
 
 class CommandQueue {
 public:
+
     struct Type {
         enum Bits : uint32_t {
             GRAPHICS = 1 << 0,
             COMPUTE = 1 << 1,
             PRESENT = 1 << 2
         };
-
         static constexpr uint32_t kCount = 3;
         using Mask = uint32_t;
     };
 
 public:
+
     CommandQueue();
 
     virtual ~CommandQueue();
 
-    template<typename F, typename... Args, std::enable_if_t<std::is_void_v<std::invoke_result_t<F, CommandBuffer*, Args&&...>>, int> = 0>
+    template<typename F, typename ...Args, std::enable_if_t<std::is_void_v<std::invoke_result_t<F, CommandBuffer*, Args&&...>>, int> = 0>
     FutureCommand submit(F&& func, Args&&... args) {
-        return m_taskQueue.enqueue([this,
-                                    taskFunc = std::forward<F>(func),
-                                    &args...]() -> Command* {
+        return m_taskQueue.enqueue([
+                this,
+                taskFunc = std::forward<F>(func),
+                &args...
+                ]() -> Command* {
             auto commandBuffer = next_command_buffer();
             m_currentCommandBuffer = commandBuffer;
             taskFunc(commandBuffer, std::forward<Args>(args)...);
@@ -41,7 +44,9 @@ public:
         });
     }
 
+
 protected:
+
     virtual CommandBuffer* next_command_buffer() = 0;
 
 protected:
@@ -51,6 +56,7 @@ protected:
     CommandBuffer* m_currentCommandBuffer;
 };
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_COMMAND_QUEUE_H
+#endif // DUK_RHI_COMMAND_QUEUE_H
+

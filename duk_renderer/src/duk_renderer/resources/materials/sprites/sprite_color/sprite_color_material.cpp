@@ -1,10 +1,10 @@
 /// 12/09/2023
 /// color_material.cpp
 
+#include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_material.h>
+#include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/resources/materials/globals/global_descriptors.h>
-#include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_material.h>
 
 namespace duk::renderer {
 
@@ -14,8 +14,10 @@ static const SpriteColorShaderDataSource kSpriteColorShaderDataSource;
 
 }
 
-SpriteColorMaterialDataSource::SpriteColorMaterialDataSource() : color(1),
-                                                                 image(kWhiteImageId) {
+SpriteColorMaterialDataSource::SpriteColorMaterialDataSource() :
+    color(1),
+    image(kWhiteImageId) {
+
 }
 
 const rhi::ShaderDataSource* SpriteColorMaterialDataSource::shader_data_source() const {
@@ -85,4 +87,4 @@ void SpriteColorMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuff
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }
 
-}// namespace duk::renderer
+}

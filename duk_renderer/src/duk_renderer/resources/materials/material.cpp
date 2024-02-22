@@ -5,7 +5,10 @@
 
 namespace duk::renderer {
 
-Material::Material(const MaterialCreateInfo& materialCreateInfo) : m_pipeline({.renderer = materialCreateInfo.renderer, .shaderDataSource = materialCreateInfo.materialDataSource->shader_data_source()}) {
+
+Material::Material(const MaterialCreateInfo& materialCreateInfo) :
+    m_pipeline({.renderer = materialCreateInfo.renderer, .shaderDataSource = materialCreateInfo.materialDataSource->shader_data_source()}){
+
     MaterialDescriptorSetCreateInfo materialDescriptorSetCreateInfo = {};
     materialDescriptorSetCreateInfo.renderer = materialCreateInfo.renderer;
     m_descriptorSet = materialCreateInfo.materialDataSource->create_descriptor_set(materialDescriptorSetCreateInfo);
@@ -34,4 +37,4 @@ void Material::bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& dr
     m_descriptorSet->bind(commandBuffer, drawParams);
 }
 
-}// namespace duk::renderer
+}

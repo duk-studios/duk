@@ -21,6 +21,7 @@ struct ReflectedClassDescription {
 
 class Reflector {
 public:
+
     explicit Reflector(const std::string& content);
 
     DUK_NO_DISCARD const std::vector<ReflectedClassDescription>& reflected_types() const;
@@ -49,6 +50,6 @@ private:
     std::vector<std::string> m_additionalIncludes;
 };
 
-}// namespace duk::cli
+}
 
-#endif//DUK_CLI_JSON_PARSER_GENERATOR_H
+#endif //DUK_CLI_JSON_PARSER_GENERATOR_H

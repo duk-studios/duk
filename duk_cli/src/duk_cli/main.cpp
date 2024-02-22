@@ -12,8 +12,9 @@ int main(int argc, const char* argv[]) {
         // skip executable path argument
         duk::cli::CommandLine commandLine(argc, argv);
 
-        commandLine.command()->execute();
-    } catch (const std::exception& e) {
+       commandLine.command()->execute();
+    }
+    catch (const std::exception& e) {
         duk::log::fatal("exception caught: {}", e.what()).wait();
         return 1;
     }

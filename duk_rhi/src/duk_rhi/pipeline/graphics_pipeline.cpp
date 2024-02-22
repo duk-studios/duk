@@ -85,4 +85,4 @@ duk::hash::Hash GraphicsPipeline::hash_of(GraphicsPipeline::Viewport viewport,
     return hash;
 }
 
-}// namespace duk::rhi
+}

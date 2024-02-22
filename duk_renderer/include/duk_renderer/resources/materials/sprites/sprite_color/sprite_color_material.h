@@ -5,16 +5,17 @@
 #ifndef DUK_RENDERER_SPRITE_COLOR_MATERIAL_H
 #define DUK_RENDERER_SPRITE_COLOR_MATERIAL_H
 
-#include <cstdint>
 #include <duk_renderer/resources/materials/material.h>
-#include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptors.h>
 #include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_shader_data_source.h>
+#include <duk_renderer/resources/materials/sprites/sprite_color/sprite_color_descriptors.h>
 #include <duk_renderer/resources/materials/uniform_buffer.h>
+#include <cstdint>
 
 namespace duk::renderer {
 
 class SpriteColorMaterialDataSource : public MaterialDataSource {
 public:
+
     SpriteColorMaterialDataSource();
 
     const rhi::ShaderDataSource* shader_data_source() const override;
@@ -53,6 +54,6 @@ private:
     ImageResource m_image;
 };
 
-}// namespace duk::renderer
+}
 
-#endif//DUK_RENDERER_SPRITE_COLOR_MATERIAL_H
+#endif //DUK_RENDERER_SPRITE_COLOR_MATERIAL_H

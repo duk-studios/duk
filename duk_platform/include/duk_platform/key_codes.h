@@ -15,18 +15,18 @@ struct KeyModifiers {
     static constexpr uint32_t kCount = 3;
     using Mask = uint8_t;
 };
-
+    
 enum class MouseButton {
     LEFT,
     MIDDLE,
     RIGHT
 };
-
+    
 enum class KeyAction : int {
     PRESS = 0,
     RELEASE = 1
 };
-
+    
 enum class Keys {
     UNDEFINED,
     BACKSPACE,
@@ -114,15 +114,16 @@ enum class Keys {
     F10,
     F11,
     F12,
-    SEMICOLON,    //0xBF
-    COLON,        //0xBF
-    COMMA,        //0xBC
-    DASH,         //0xBD
-    DOT,          //0xBE
-    SLASH,        //0xBF
-    QUESTION_MARK,//0xBF
-
+    SEMICOLON,//0xBF
+    COLON,//0xBF
+    COMMA, //0xBC
+    DASH, //0xBD
+    DOT, //0xBE
+    SLASH, //0xBF
+    QUESTION_MARK, //0xBF
+    
+    
 };
-}// namespace duk::platform
+}
 
-#endif//DUK_PLATFORM_KEY_CODES_H
+#endif //DUK_PLATFORM_KEY_CODES_H

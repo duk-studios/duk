@@ -5,7 +5,9 @@
 
 namespace duk::renderer {
 
-GenericBrush::GenericBrush(GenericBrush::DrawFunction drawFunction) : m_drawFunction(std::move(drawFunction)) {
+GenericBrush::GenericBrush(GenericBrush::DrawFunction drawFunction) :
+    m_drawFunction(std::move(drawFunction)) {
+
 }
 
 GenericBrush::~GenericBrush() = default;
@@ -16,4 +18,4 @@ void GenericBrush::draw(duk::rhi::CommandBuffer* commandBuffer, size_t instanceC
     }
 }
 
-}// namespace duk::renderer
+}

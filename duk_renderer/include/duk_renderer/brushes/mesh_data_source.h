@@ -5,10 +5,10 @@
 #ifndef DUK_RHI_VERTEX_DATA_SOURCE_H
 #define DUK_RHI_VERTEX_DATA_SOURCE_H
 
-#include <duk_hash/data_source.h>
 #include <duk_renderer/vertex_types.h>
-#include <duk_rhi/index_types.h>
+#include <duk_hash/data_source.h>
 #include <duk_rhi/vertex_layout.h>
+#include <duk_rhi/index_types.h>
 
 #include <cstring>
 
@@ -16,6 +16,7 @@ namespace duk::renderer {
 
 class MeshDataSource : public duk::hash::DataSource {
 public:
+
     DUK_NO_DISCARD virtual size_t vertex_byte_count() const = 0;
 
     DUK_NO_DISCARD virtual size_t vertex_count() const = 0;
@@ -37,6 +38,7 @@ public:
     virtual void read_vertices_attribute(VertexAttributes::Type attribute, void* dst, uint32_t count, uint32_t offset) const = 0;
 
     virtual void read_indices(void* dst, uint32_t count, uint32_t offset) const = 0;
+
 };
 
 template<typename V, typename I>
@@ -46,6 +48,7 @@ public:
     using IndexType = I;
 
 public:
+
     MeshDataSourceT();
 
     template<typename InputIterator>
@@ -77,6 +80,7 @@ public:
     void read_indices(void* dst, uint32_t count, uint32_t offset) const override;
 
 protected:
+
     DUK_NO_DISCARD hash::Hash calculate_hash() const override;
 
 private:
@@ -86,7 +90,9 @@ private:
 };
 
 template<typename V, typename I>
-MeshDataSourceT<V, I>::MeshDataSourceT() : m_vertexAttributes(VertexAttributes::create<V>()) {
+MeshDataSourceT<V, I>::MeshDataSourceT() :
+    m_vertexAttributes(VertexAttributes::create<V>()){
+
 }
 
 template<typename V, typename I>
@@ -181,6 +187,6 @@ hash::Hash MeshDataSourceT<V, I>::calculate_hash() const {
     return hash;
 }
 
-}// namespace duk::renderer
+}
 
-#endif//DUK_RHI_VERTEX_DATA_SOURCE_H
+#endif //DUK_RHI_VERTEX_DATA_SOURCE_H

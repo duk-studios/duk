@@ -14,8 +14,11 @@ public:
     using Iterator = typename std::map<K, V>::iterator;
     using ConstIterator = typename std::map<K, V>::const_iterator;
 
+
     // constructor associates whole range of K with val
-    IntervalMap(const V& val) : m_valBegin(val) {
+    IntervalMap(const V& val) :
+        m_valBegin(val) {
+
     }
 
     // Assign value val to interval [keyBegin, keyEnd).
@@ -65,15 +68,16 @@ public:
         return (--it)->second;
     }
 
+
     K find_first_of(const V& val, const K& begin, const K& end) {
         auto beginRange = m_map.lower_bound(begin);
         auto endRange = m_map.upper_bound(end);
-        if (beginRange == endRange) {
+        if (beginRange == endRange){
             return end;
         }
 
-        while (beginRange != endRange) {
-            if (beginRange->second == val) {
+        while (beginRange != endRange){
+            if (beginRange->second == val){
                 return beginRange->first;
             }
             beginRange++;
@@ -82,8 +86,9 @@ public:
 
 private:
     V m_valBegin;
-    std::map<K, V> m_map;
+    std::map<K,V> m_map;
 };
-}// namespace duk::tools
+}
 
-#endif// DUK_TOOLS_INTERVAL_MAP_H
+#endif // DUK_TOOLS_INTERVAL_MAP_H
+

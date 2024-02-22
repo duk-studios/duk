@@ -25,6 +25,7 @@ struct MaterialImporterCreateInfo {
 
 class MaterialImporter : public ResourceImporterT<duk::renderer::MaterialDataSource> {
 public:
+
     explicit MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo);
 
     const std::string& tag() const override;
@@ -39,6 +40,6 @@ private:
     duk::renderer::MaterialPool* m_materialPool;
 };
 
-}// namespace duk::import
+}
 
-#endif//DUK_MATERIAL_IMPORTER_H
+#endif //DUK_MATERIAL_IMPORTER_H

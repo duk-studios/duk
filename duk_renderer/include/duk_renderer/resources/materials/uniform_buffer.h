@@ -19,6 +19,7 @@ struct UniformBufferCreateInfo {
 template<typename T>
 class UniformBuffer {
 public:
+
     explicit UniformBuffer(const UniformBufferCreateInfo<T>& uniformBufferCreateInfo);
 
     DUK_NO_DISCARD duk::rhi::Descriptor descriptor() const;
@@ -37,7 +38,9 @@ private:
 };
 
 template<typename T>
-UniformBuffer<T>::UniformBuffer(const UniformBufferCreateInfo<T>& uniformBufferCreateInfo) : m_data(uniformBufferCreateInfo.initialData) {
+UniformBuffer<T>::UniformBuffer(const UniformBufferCreateInfo<T>& uniformBufferCreateInfo) :
+    m_data(uniformBufferCreateInfo.initialData) {
+
     duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
     bufferCreateInfo.commandQueue = uniformBufferCreateInfo.commandQueue;
     bufferCreateInfo.type = rhi::Buffer::Type::UNIFORM;
@@ -75,6 +78,7 @@ void UniformBuffer<T>::flush() {
     m_buffer->flush();
 }
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_UNIFORM_BUFFER_H
+#endif // DUK_RENDERER_UNIFORM_BUFFER_H
+

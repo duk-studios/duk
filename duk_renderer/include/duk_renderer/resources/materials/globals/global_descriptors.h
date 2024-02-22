@@ -18,6 +18,7 @@ struct GlobalDescriptorsCreateInfo {
 
 class GlobalDescriptors {
 public:
+
     explicit GlobalDescriptors(const GlobalDescriptorsCreateInfo& globalDescriptorsCreateInfo);
 
     void update_camera(const duk::scene::Object& cameraObject);
@@ -33,6 +34,7 @@ private:
     std::unique_ptr<globals::LightsUBO> m_lightsUBO;
 };
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_GLOBAL_DESCRIPTORS_H
+#endif // DUK_RENDERER_GLOBAL_DESCRIPTORS_H
+

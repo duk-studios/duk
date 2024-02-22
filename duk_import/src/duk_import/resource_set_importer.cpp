@@ -3,8 +3,8 @@
 //
 
 #include "duk_import/resource_set_importer.h"
-#include "duk_log/log.h"
 #include "duk_tools/file.h"
+#include "duk_log/log.h"
 
 namespace duk::import {
 
@@ -18,7 +18,7 @@ ResourceDescription parse_resource_description(const rapidjson::Value& object) {
     auto aliasesMember = object.FindMember("aliases");
     if (aliasesMember != object.MemberEnd()) {
         auto aliases = aliasesMember->value.GetArray();
-        for (auto& alias: aliases) {
+        for (auto& alias : aliases) {
             resourceDescription.aliases.insert(alias.GetString());
         }
     }
@@ -38,7 +38,7 @@ ResourceDescription load_resource_description(const std::filesystem::path& path)
     return resourceDescription;
 }
 
-}// namespace detail
+}
 
 ResourceSetImporter::~ResourceSetImporter() = default;
 
@@ -55,6 +55,7 @@ bool ResourceSetImporter::accept(const std::filesystem::path& directory) const {
 }
 
 ResourceSet ResourceSetImporter::load(const std::filesystem::path& directory) const {
+
     if (!std::filesystem::is_directory(directory)) {
         throw std::invalid_argument(fmt::format("path \"{}\" is not a directory", directory.string()));
     }
@@ -62,7 +63,7 @@ ResourceSet ResourceSetImporter::load(const std::filesystem::path& directory) co
     ResourceSet resourceSet;
 
     // recursively search for .res files and add them to the resourceSet
-    for (const auto& entry: std::filesystem::recursive_directory_iterator(directory)) {
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
         if (std::filesystem::is_regular_file(entry.path()) && entry.path().extension() == ".res") {
             auto resourceDescription = detail::load_resource_description(entry.path());
 
@@ -74,7 +75,7 @@ ResourceSet ResourceSetImporter::load(const std::filesystem::path& directory) co
 
             // include resource description into result
             resourceSet.resources.emplace(resourceDescription.id, resourceDescription);
-            for (auto& alias: resourceDescription.aliases) {
+            for (auto& alias : resourceDescription.aliases) {
                 resourceSet.aliases.emplace(alias, resourceDescription.id);
             }
         }
@@ -83,4 +84,4 @@ ResourceSet ResourceSetImporter::load(const std::filesystem::path& directory) co
     return resourceSet;
 }
 
-}// namespace duk::import
+}

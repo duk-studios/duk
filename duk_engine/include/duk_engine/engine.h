@@ -7,11 +7,11 @@
 
 #include <duk_engine/systems/system.h>
 
-#include <duk_engine/input.h>
-#include <duk_import/importer.h>
 #include <duk_platform/window.h>
+#include <duk_import/importer.h>
 #include <duk_renderer/forward/forward_renderer.h>
 #include <duk_tools/timer.h>
+#include <duk_engine/input.h>
 
 namespace duk::engine {
 
@@ -21,6 +21,7 @@ struct EngineCreateInfo {
 
 class Engine {
 public:
+
     explicit Engine(const EngineCreateInfo& engineCreateInfo);
 
     ~Engine();
@@ -64,6 +65,6 @@ void Engine::register_component(const std::string& typeName) {
     duk::scene::ComponentRegistry::instance(true)->add<T>(typeName);
 }
 
-}// namespace duk::engine
+}
 
-#endif//DUK_ENGINE_ENGINE_H
+#endif //DUK_ENGINE_ENGINE_H

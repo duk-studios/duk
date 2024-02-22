@@ -28,6 +28,7 @@ using VulkanResourceCleanImageEvent = duk::event::EventT<>;
 using VulkanResourceCreateFrameBufferEvent = duk::event::EventT<uint32_t>;
 using VulkanResourceCleanFrameBufferEvent = duk::event::EventT<>;
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_VULKAN_EVENTS_H
+#endif // DUK_RHI_VULKAN_EVENTS_H
+

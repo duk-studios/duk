@@ -4,10 +4,10 @@
 #ifndef DUK_RENDERER_PHONG_MATERIAL_H
 #define DUK_RENDERER_PHONG_MATERIAL_H
 
-#include <duk_renderer/resources/materials/instance_buffer.h>
 #include <duk_renderer/resources/materials/material.h>
-#include <duk_renderer/resources/materials/phong/phong_descriptors.h>
+#include <duk_renderer/resources/materials/instance_buffer.h>
 #include <duk_renderer/resources/materials/phong/phong_shader_data_source.h>
+#include <duk_renderer/resources/materials/phong/phong_descriptors.h>
 #include <duk_renderer/resources/materials/storage_buffer.h>
 #include <duk_renderer/resources/materials/uniform_buffer.h>
 
@@ -38,6 +38,7 @@ struct PhongInstanceBufferCreateInfo {
 
 class PhongInstanceBuffer : public InstanceBuffer {
 public:
+
     PhongInstanceBuffer(const PhongInstanceBufferCreateInfo& phongInstanceBufferCreateInfo);
 
     void insert(const scene::Object& object) override;
@@ -59,6 +60,7 @@ struct PhongMaterialDescriptorSetCreateInfo {
 
 class PhongMaterialDescriptorSet : public MaterialDescriptorSet {
 public:
+
     PhongMaterialDescriptorSet(const PhongMaterialDescriptorSetCreateInfo& phongMaterialDescriptorSetCreateInfo);
 
     ~PhongMaterialDescriptorSet() override = default;
@@ -89,7 +91,7 @@ private:
     Texture m_specular;
 };
 
-}// namespace duk::renderer
+}
 
 namespace duk::json {
 
@@ -101,6 +103,7 @@ inline void from_json<duk::renderer::PhongMaterialDataSource>(const rapidjson::V
     phongMaterialDataSource.specularTexture = from_json_member<duk::renderer::Texture>(jsonObject, "specular-texture");
 }
 
-}// namespace duk::json
+}
 
-#endif// DUK_RENDERER_PHONG_MATERIAL_H
+#endif // DUK_RENDERER_PHONG_MATERIAL_H
+

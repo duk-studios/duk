@@ -13,4 +13,5 @@ std::string to_string(const rapidjson::Value& value);
 
 }
 
-#endif// DUK_JSON_STRING_H
+#endif // DUK_JSON_STRING_H
+

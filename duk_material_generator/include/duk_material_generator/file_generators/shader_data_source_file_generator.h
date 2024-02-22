@@ -17,6 +17,7 @@ public:
     DUK_NO_DISCARD const std::string& output_shader_data_source_class_name() const;
 
 private:
+
     void generate_header_file_content(std::ostringstream& oss);
 
     void generate_source_file_content(std::ostringstream& oss);
@@ -33,6 +34,7 @@ private:
     std::string m_className;
 };
 
-}// namespace duk::material_generator
+}
 
-#endif// DUK_MATERIAL_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
+#endif // DUK_MATERIAL_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
+

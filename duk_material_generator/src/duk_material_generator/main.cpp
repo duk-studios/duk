@@ -1,6 +1,6 @@
-#include <duk_material_generator/generator.h>
 #include <duk_material_generator/parser.h>
 #include <duk_material_generator/reflector.h>
+#include <duk_material_generator/generator.h>
 
 #include <iostream>
 
@@ -11,11 +11,12 @@ static void print_reflector(duk::material_generator::Reflector& reflector) {
     std::cout << "-----------types----------" << std::endl;
     std::cout << "--------------------------" << std::endl;
 
-    for (const auto& [typeName, type]: typeMap) {
+    for (const auto& [typeName, type] : typeMap) {
+
         std::cout << "-" << typeName << std::endl;
         std::cout << "- size:        " << type.size << std::endl;
         std::cout << "- memberCount: " << type.members.size() << std::endl;
-        for (const auto& member: type.members) {
+        for (const auto& member : type.members) {
             std::cout << "-- type: " << member.typeName << " name: " << member.name << std::endl;
             std::cout << "-- size: " << member.size << " paddedSize: " << member.paddedSize << " offset: " << member.offset << std::endl;
             if (member.arraySize) {
@@ -29,9 +30,9 @@ static void print_reflector(duk::material_generator::Reflector& reflector) {
     std::cout << "--------------------------" << std::endl;
 
     const auto& sets = reflector.sets();
-    for (const auto& set: sets) {
+    for (const auto& set : sets) {
         std::cout << "- set buffer binding count: " << set.bindings.size() << std::endl;
-        for (const auto& binding: set.bindings) {
+        for (const auto& binding : set.bindings) {
             std::cout << "-- type: " << binding.typeName << " name: " << binding.name << std::endl;
             std::cout << "-- binding: " << binding.binding << " set: " << binding.set << std::endl;
         }
@@ -39,6 +40,7 @@ static void print_reflector(duk::material_generator::Reflector& reflector) {
 }
 
 int main(int argc, char* argv[]) {
+
     try {
         duk::material_generator::Parser parser(argc, argv);
 
@@ -49,7 +51,8 @@ int main(int argc, char* argv[]) {
         }
 
         duk::material_generator::Generator generator(parser, reflector);
-    } catch (std::exception& e) {
+    }
+    catch (std::exception& e) {
         std::cerr << "Error: " << e.what();
         return 1;
     }

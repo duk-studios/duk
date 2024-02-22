@@ -16,7 +16,6 @@ struct SortKey {
         uint16_t lower16Bits;
         uint16_t higher16Bits;
     };
-
     union {
         Flags flags;
         uint32_t key;
@@ -33,8 +32,10 @@ struct SortKey {
     static void sort_indices(const ObjectEntriesContainerT& objectEntries, ObjectIndicesContainerT& sortedIndices);
 };
 
+
 template<typename ObjectEntriesContainerT, typename ObjectIndicesContainerT>
 void SortKey::sort_indices(const ObjectEntriesContainerT& objectEntries, ObjectIndicesContainerT& sortedIndices) {
+
     sortedIndices.resize(std::size(objectEntries));
 
     // fill vector with 0 ... objectsEntries.size()
@@ -46,6 +47,7 @@ void SortKey::sort_indices(const ObjectEntriesContainerT& objectEntries, ObjectI
     });
 }
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_SORT_H
+#endif // DUK_RENDERER_SORT_H
+

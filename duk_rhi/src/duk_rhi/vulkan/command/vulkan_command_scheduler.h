@@ -5,9 +5,9 @@
 #define DUK_RHI_VULKAN_COMMAND_SCHEDULER_H
 
 #include <duk_rhi/command/command_scheduler.h>
+#include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/command/vulkan_command.h>
 #include <duk_rhi/vulkan/vulkan_handle_pool.h>
-#include <duk_rhi/vulkan/vulkan_import.h>
 
 #include <grapphs/adjacency_list.h>
 
@@ -36,6 +36,7 @@ public:
     void schedule_after(std::size_t before, std::size_t after, PipelineStage::Mask waitStages) override;
 
 private:
+
     class CommandNode {
     public:
         explicit CommandNode(FutureCommand&& futureCommand) noexcept;
@@ -61,6 +62,7 @@ private:
 
     class Frame {
     public:
+
         explicit Frame(const FrameCreateInfo& frameCreateInfo);
 
         Frame(Frame&& other) noexcept;
@@ -113,6 +115,8 @@ private:
     std::vector<Frame> m_frames;
 };
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_VULKAN_COMMAND_SCHEDULER_H
+
+#endif // DUK_RHI_VULKAN_COMMAND_SCHEDULER_H
+

@@ -4,8 +4,8 @@
 #ifndef DUK_IMPORT_IMPORTER_H
 #define DUK_IMPORT_IMPORTER_H
 
-#include <duk_import/resource_importer.h>
 #include <duk_import/resource_set_importer.h>
+#include <duk_import/resource_importer.h>
 
 namespace duk::import {
 
@@ -18,13 +18,14 @@ struct ImporterCreateInfo {
 
 class Importer {
 public:
+
     explicit Importer(const ImporterCreateInfo& importerCreateInfo);
 
     ~Importer();
 
     ResourceImporter* add_resource_importer(std::unique_ptr<ResourceImporter> resourceImporter);
 
-    template<typename T, typename... Args>
+    template<typename T, typename ...Args>
     T* add_resource_importer(Args&&... args);
 
     void load_resources(const std::filesystem::path& path);
@@ -46,7 +47,7 @@ private:
 };
 
 template<typename T, typename... Args>
-T* Importer::add_resource_importer(Args&&... args) {
+T* Importer::add_resource_importer(Args&& ... args) {
     return dynamic_cast<T*>(add_resource_importer(std::make_unique<T>(std::forward<Args>(args)...)));
 }
 
@@ -59,6 +60,7 @@ T* Importer::get_importer_as(const std::string& tag) {
     return dynamic_cast<T*>(importer);
 }
 
-}// namespace duk::import
+}
 
-#endif// DUK_IMPORT_IMPORTER_H
+#endif // DUK_IMPORT_IMPORTER_H
+

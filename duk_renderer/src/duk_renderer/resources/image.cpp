@@ -1,8 +1,8 @@
 /// 17/02/2024
 /// image.cpp
 
-#include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/image.h>
+#include <duk_renderer/renderer.h>
 
 namespace duk::renderer {
 
@@ -45,4 +45,4 @@ duk::rhi::Descriptor Image::descriptor() {
     return duk::rhi::Descriptor::image(m_image.get(), duk::rhi::Image::Layout::SHADER_READ_ONLY);
 }
 
-}// namespace duk::renderer
+}

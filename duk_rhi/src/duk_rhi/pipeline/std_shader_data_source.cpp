@@ -7,7 +7,9 @@
 
 namespace duk::rhi {
 
-StdShaderDataSource::StdShaderDataSource() : m_moduleMask(0) {
+StdShaderDataSource::StdShaderDataSource() :
+    m_moduleMask(0) {
+
 }
 
 StdShaderDataSource::~StdShaderDataSource() = default;
@@ -30,12 +32,12 @@ duk::hash::Hash StdShaderDataSource::calculate_hash() const {
     duk::hash::Hash hash = 0;
 
     duk::hash::hash_combine(hash, m_moduleMask);
-    for (auto& [type, module]: m_shaderModules) {
+    for (auto&[type, module] : m_shaderModules) {
         duk::hash::hash_combine(hash, type);
         duk::hash::hash_combine(hash, module.spirVCode.data(), module.spirVCode.size());
     }
 
-    for (auto& descriptorSetDescription: m_descriptorSetDescriptions) {
+    for (auto& descriptorSetDescription : m_descriptorSetDescriptions) {
         duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
     }
 
@@ -85,4 +87,4 @@ const VertexLayout& StdShaderDataSource::vertex_layout() const {
     return m_vertexLayout;
 }
 
-}// namespace duk::rhi
+}

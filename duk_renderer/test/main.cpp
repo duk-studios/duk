@@ -2,22 +2,23 @@
 // Created by Ricardo on 19/08/2023.
 //
 
-#include <duk_log/log.h>
+#include <iostream>
+#include <duk_rhi/rhi.h>
 #include <duk_platform/window.h>
+#include <duk_scene/scene.h>
+#include <duk_renderer/renderer.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/forward/forward_renderer.h>
-#include <duk_renderer/pools/image_pool.h>
-#include <duk_renderer/pools/material_pool.h>
-#include <duk_renderer/pools/mesh_pool.h>
-#include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
-#include <duk_rhi/rhi.h>
-#include <duk_scene/scene.h>
+#include <duk_renderer/pools/mesh_pool.h>
+#include <duk_renderer/pools/material_pool.h>
+#include <duk_renderer/pools/image_pool.h>
 #include <duk_tools/timer.h>
-#include <iostream>
+#include <duk_log/log.h>
+
 
 int main() {
     bool run = false;
@@ -31,16 +32,17 @@ int main() {
 
     //The result of window creation is checked, and if successful, the program proceeds
     window = duk::platform::Window::create_window(windowCreateInfo);
-    std::cout << "Window creation succeed!" << std::endl;
+    std::cout<< "Window creation succeed!" << std::endl;
     run = true;
+
 
     //Event listeners are set up to respond to window close and destroy event.
     listener.listen(window->window_close_event, [&window] {
-        std::cout << "The window is closed!" << std::endl;
+        std::cout<<"The window is closed!" << std::endl;
         window->close();
     });
 
-    listener.listen(window->window_destroy_event, [&run]() {
+    listener.listen(window->window_destroy_event, [&run](){
         run = false;
     });
 
@@ -48,7 +50,7 @@ int main() {
     auto logger = duk::log::Logging::instance(true)->default_logger();
 
     //Setting up rendererCreateInfo.
-    duk::renderer::RendererCreateInfo rendererCreateInfo = {};
+    duk::renderer::RendererCreateInfo rendererCreateInfo = { };
     rendererCreateInfo.window = window.get();
     rendererCreateInfo.api = duk::rhi::API::VULKAN;
     rendererCreateInfo.logger = logger;
@@ -84,8 +86,8 @@ int main() {
     //Adding our first object to the scene, a camera.
     //Setup the camera position, and adding the Perspective Component to it.
     duk::scene::Object camera = objects.add_object();
-    auto cameraPosition = camera.add<duk::renderer::Position3D>();
-    cameraPosition->value = glm::vec3(0, 0, 0);
+    auto cameraPosition = camera.add<duk::renderer::Position3D>();  
+    cameraPosition->value = glm::vec3(0,0,0);
     camera.add<duk::renderer::Rotation3D>();
     auto cameraPerspective = camera.add<duk::renderer::PerspectiveCamera>();
     cameraPerspective->aspectRatio = (float)window->width() / (float)window->height();
@@ -101,9 +103,9 @@ int main() {
     ////Adding a light to our scene.
     duk::scene::Object globalLight = objects.add_object();
     auto globalLightPosition = globalLight.add<duk::renderer::Position3D>();
-    globalLightPosition->value = glm::vec3(0, 4, -5);
+    globalLightPosition->value = glm::vec3(0,4,-5);
     auto globalPointLight = globalLight.add<duk::renderer::PointLight>();
-    globalPointLight->value.color = glm::vec3(1.0f, 1.0f, 1.0f);
+    globalPointLight->value.color = glm::vec3(1.0f,1.0f,1.0f);
     globalPointLight->value.intensity = 5.0f;
 
     //And finally adding the cube to the scene.
@@ -122,7 +124,7 @@ int main() {
     phongMaterialDataSource.update_hash();
     cubeMeshRenderer->material = materialPool->create(duk::resource::Id(666), &phongMaterialDataSource);
     auto cubePosition = cubeObject.add<duk::renderer::Position3D>();
-    cubePosition->value = glm::vec3(0, 0, -10);
+    cubePosition->value = glm::vec3(0,0,-10);
     auto cubeScale = cubeObject.add<duk::renderer::Scale3D>();
     cubeScale->value = glm::vec3(1.0f, 1.0f, 1.0f);
     auto cubeRotation = cubeObject.add<duk::renderer::Rotation3D>();
@@ -139,11 +141,12 @@ int main() {
 
     //Our main loop
     while (run) {
-        timer.start();
 
+        timer.start();
+        
         window->pool_events();
 
-        //Rotating the cube in the X value by the timer total duration.
+        //Rotating the cube in the X value by the timer total duration. 
         cubeRotation->value = glm::vec3(timer.total_duration().count(), 45.0f, 0.0f);
 
         //Telling to our renderer to render the scene we want.
@@ -151,6 +154,6 @@ int main() {
 
         timer.stop();
     }
-
+    
     return 0;
 }

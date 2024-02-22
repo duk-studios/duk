@@ -6,9 +6,9 @@
 
 #include <spirv_reflect.h>
 
-#include <iostream>
-#include <sstream>
 #include <stdexcept>
+#include <sstream>
+#include <iostream>
 
 namespace duk::material_generator {
 
@@ -22,26 +22,19 @@ static void check_result(SpvReflectResult result) {
 
 static Type::Bits convert_type_bits(SpvReflectTypeFlagBits typeBits) {
     switch (typeBits) {
-        case SPV_REFLECT_TYPE_FLAG_BOOL:
-            return Type::BOOL;
-        case SPV_REFLECT_TYPE_FLAG_INT:
-            return Type::INT;
-        case SPV_REFLECT_TYPE_FLAG_FLOAT:
-            return Type::FLOAT;
-        case SPV_REFLECT_TYPE_FLAG_VECTOR:
-            return Type::VECTOR;
-        case SPV_REFLECT_TYPE_FLAG_MATRIX:
-            return Type::MATRIX;
-        case SPV_REFLECT_TYPE_FLAG_STRUCT:
-            return Type::STRUCT;
-        case SPV_REFLECT_TYPE_FLAG_ARRAY:
-            return Type::ARRAY;
-        default:
-            return Type::UNKNOWN;
+        case SPV_REFLECT_TYPE_FLAG_BOOL: return Type::BOOL;
+        case SPV_REFLECT_TYPE_FLAG_INT: return Type::INT;
+        case SPV_REFLECT_TYPE_FLAG_FLOAT: return Type::FLOAT;
+        case SPV_REFLECT_TYPE_FLAG_VECTOR: return Type::VECTOR;
+        case SPV_REFLECT_TYPE_FLAG_MATRIX: return Type::MATRIX;
+        case SPV_REFLECT_TYPE_FLAG_STRUCT: return Type::STRUCT;
+        case SPV_REFLECT_TYPE_FLAG_ARRAY: return Type::ARRAY;
+        default: return Type::UNKNOWN;
     }
 }
 
 static Type::Mask convert_type_mask(SpvReflectTypeFlags typeFlags) {
+
     static constexpr uint32_t kSpvReflectTypeFlagsBitsCount = 16;
 
     Type::Mask typeMask = 0;
@@ -50,26 +43,20 @@ static Type::Mask convert_type_mask(SpvReflectTypeFlags typeFlags) {
         if (bit) {
             typeMask |= convert_type_bits(bit);
         }
+
     }
     return typeMask;
 }
 
 static duk::rhi::DescriptorType convert_descriptor_type(SpvReflectDescriptorType descriptorType) {
     switch (descriptorType) {
-        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER:
-            return duk::rhi::DescriptorType::IMAGE;
-        case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
-            return duk::rhi::DescriptorType::IMAGE_SAMPLER;
-        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
-            return duk::rhi::DescriptorType::IMAGE;
-        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE:
-            return duk::rhi::DescriptorType::STORAGE_IMAGE;
-        case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-            return duk::rhi::DescriptorType::UNIFORM_BUFFER;
-        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER:
-            return duk::rhi::DescriptorType::STORAGE_BUFFER;
-        default:
-            return duk::rhi::DescriptorType::UNDEFINED;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER: return duk::rhi::DescriptorType::IMAGE;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER: return duk::rhi::DescriptorType::IMAGE_SAMPLER;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE: return duk::rhi::DescriptorType::IMAGE;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE: return duk::rhi::DescriptorType::STORAGE_IMAGE;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER: return duk::rhi::DescriptorType::UNIFORM_BUFFER;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER: return duk::rhi::DescriptorType::STORAGE_BUFFER;
+        default: return duk::rhi::DescriptorType::UNDEFINED;
     }
 }
 
@@ -82,10 +69,12 @@ static std::string calculate_vector_type_name(SpvReflectTypeDescription* typeDes
         if (traits.scalar.width > 32) {
             oss << 'd';
         }
-    } else if (typeFlags & SPV_REFLECT_TYPE_FLAG_INT) {
+    }
+    else if (typeFlags & SPV_REFLECT_TYPE_FLAG_INT) {
         if (traits.scalar.signedness) {
             oss << 'i';
-        } else {
+        }
+        else {
             oss << 'u';
         }
     }
@@ -153,7 +142,8 @@ static void add_types_from_block(SpvReflectBlockVariable* block, Reflector::Type
     typeReflection.typeMask = convert_type_mask(block->type_description->type_flags);
 
     std::vector<SpvReflectBlockVariable> blockMembers(block->members, block->members + block->member_count);
-    for (auto& blockMember: blockMembers) {
+    for (auto& blockMember : blockMembers) {
+
         add_types_from_block(&blockMember, types);
 
         MemberReflection memberReflection = {};
@@ -170,6 +160,7 @@ static void add_types_from_block(SpvReflectBlockVariable* block, Reflector::Type
 }
 
 static void add_binding(SpvReflectDescriptorBinding* spvBinding, Reflector::Bindings& bindings, duk::rhi::Shader::Module::Bits shaderModuleBit) {
+
     if (bindings.size() <= spvBinding->binding) {
         bindings.resize(spvBinding->binding + 1);
     }
@@ -192,24 +183,15 @@ static void add_binding(SpvReflectDescriptorBinding* spvBinding, Reflector::Bind
 
 static duk::rhi::VertexInput::Format vertex_attribute_format(SpvReflectFormat format) {
     switch (format) {
-        case SPV_REFLECT_FORMAT_R16_UINT:
-            return duk::rhi::VertexInput::Format::UINT16;
-        case SPV_REFLECT_FORMAT_R16_SINT:
-            return duk::rhi::VertexInput::Format::INT16;
-        case SPV_REFLECT_FORMAT_R32_UINT:
-            return duk::rhi::VertexInput::Format::UINT32;
-        case SPV_REFLECT_FORMAT_R32_SINT:
-            return duk::rhi::VertexInput::Format::INT32;
-        case SPV_REFLECT_FORMAT_R32_SFLOAT:
-            return duk::rhi::VertexInput::Format::FLOAT32;
-        case SPV_REFLECT_FORMAT_R32G32_SFLOAT:
-            return duk::rhi::VertexInput::Format::VEC2;
-        case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT:
-            return duk::rhi::VertexInput::Format::VEC3;
-        case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT:
-            return duk::rhi::VertexInput::Format::VEC4;
-        default:
-            throw std::runtime_error("unsupported vertex attribute format");
+        case SPV_REFLECT_FORMAT_R16_UINT: return duk::rhi::VertexInput::Format::UINT16;
+        case SPV_REFLECT_FORMAT_R16_SINT: return duk::rhi::VertexInput::Format::INT16;
+        case SPV_REFLECT_FORMAT_R32_UINT: return duk::rhi::VertexInput::Format::UINT32;
+        case SPV_REFLECT_FORMAT_R32_SINT: return duk::rhi::VertexInput::Format::INT32;
+        case SPV_REFLECT_FORMAT_R32_SFLOAT: return duk::rhi::VertexInput::Format::FLOAT32;
+        case SPV_REFLECT_FORMAT_R32G32_SFLOAT: return duk::rhi::VertexInput::Format::VEC2;
+        case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT: return duk::rhi::VertexInput::Format::VEC3;
+        case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT: return duk::rhi::VertexInput::Format::VEC4;
+        default: throw std::runtime_error("unsupported vertex attribute format");
     }
 }
 
@@ -219,10 +201,12 @@ static void remove_unsupported_attributes(std::vector<SpvReflectInterfaceVariabl
     });
 }
 
-}// namespace detail
+}
 
-Reflector::Reflector(const Parser& parser) : m_parser(parser) {
-    for (const auto& [module, spvPath]: m_parser.input_spv_paths()) {
+Reflector::Reflector(const Parser& parser) :
+    m_parser(parser) {
+    for (const auto& [module, spvPath] : m_parser.input_spv_paths()) {
+
         const auto spvCode = duk::tools::File::load_bytes(spvPath.c_str());
 
         reflect_spv(spvCode, module);
@@ -232,6 +216,7 @@ Reflector::Reflector(const Parser& parser) : m_parser(parser) {
 Reflector::~Reflector() = default;
 
 void Reflector::reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::Module::Bits shaderModuleBit) {
+
     m_modules.emplace(shaderModuleBit, code);
 
     SpvReflectShaderModule module = {};
@@ -264,11 +249,11 @@ void Reflector::reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::
         m_sets.resize(descriptorSetCount);
     }
 
-    for (auto descriptorSet: descriptorSets) {
+    for (auto descriptorSet : descriptorSets) {
         auto& set = m_sets[descriptorSet->set];
 
         std::vector<SpvReflectDescriptorBinding*> spvBindings(descriptorSet->bindings, descriptorSet->bindings + descriptorSet->binding_count);
-        for (auto spvBinding: spvBindings) {
+        for (auto spvBinding : spvBindings) {
             switch (spvBinding->descriptor_type) {
                 case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER:
                 case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
@@ -288,6 +273,7 @@ void Reflector::reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::
     }
 
     spvReflectDestroyShaderModule(&module);
+
 }
 
 const Reflector::Types& Reflector::types() const {
@@ -306,4 +292,4 @@ const Reflector::Attributes& Reflector::attributes() const {
     return m_attributes;
 }
 
-}// namespace duk::material_generator
+}

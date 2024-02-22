@@ -10,9 +10,12 @@ namespace duk::rhi {
 
 class ComputePipeline {
 public:
+
     virtual ~ComputePipeline();
+
 };
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_COMPUTE_PIPELINE_H
+#endif // DUK_RHI_COMPUTE_PIPELINE_H
+

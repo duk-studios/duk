@@ -5,9 +5,9 @@
 #define DUK_RHI_VULKAN_BUFFER_H
 
 #include <duk_rhi/buffer.h>
-#include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
+#include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 
 #include <duk_hash/hash.h>
 
@@ -25,9 +25,11 @@ struct VulkanBufferMemoryCreateInfo {
 
 class VulkanBufferMemory {
 protected:
+
     explicit VulkanBufferMemory(const VulkanBufferMemoryCreateInfo& vulkanBufferMemoryCreateInfo, VkMemoryPropertyFlags memoryPropertyFlags, VkBufferUsageFlags additionalUsageFlags);
 
 public:
+
     virtual ~VulkanBufferMemory();
 
     virtual void write(void* src, size_t size, size_t offset) = 0;
@@ -86,7 +88,6 @@ public:
     void write(void* src, size_t size, size_t offset) override;
 
     void read(void* dst, size_t size, size_t offset) override;
-
 private:
     VkBufferUsageFlags m_requiredBufferUsageFlags;
 };
@@ -104,6 +105,7 @@ struct VulkanBufferCreateInfo {
 
 class VulkanBuffer : public Buffer {
 public:
+
     explicit VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo);
 
     ~VulkanBuffer() override;
@@ -147,6 +149,7 @@ public:
     DUK_NO_DISCARD duk::hash::Hash hash() const override;
 
 private:
+
     void update_data_hash();
 
     std::unique_ptr<VulkanBufferMemory> create_buffer();
@@ -165,8 +168,11 @@ private:
     std::vector<duk::hash::Hash> m_bufferHashes;
     std::vector<uint8_t> m_data;
     duk::hash::Hash m_dataHash;
+
 };
 
-}// namespace duk::rhi
 
-#endif// DUK_RHI_VULKAN_BUFFER_H
+}
+
+#endif // DUK_RHI_VULKAN_BUFFER_H
+

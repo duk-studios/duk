@@ -1,8 +1,8 @@
 /// 05/10/2023
 /// fullscreen_material.cpp
 
-#include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
+#include <duk_renderer/renderer.h>
 
 namespace duk::renderer {
 
@@ -54,4 +54,4 @@ uint32_t FullscreenMaterialDescriptorSet::size() const {
     return FullscreenDescriptors::kDescriptorCount;
 }
 
-}// namespace duk::renderer
+}

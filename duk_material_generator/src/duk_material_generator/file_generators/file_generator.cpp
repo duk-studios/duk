@@ -11,13 +11,13 @@ namespace duk::material_generator {
 namespace detail {
 
 static std::string include_guard_name(std::string name) {
-    for (auto& c: name) {
+    for (auto& c : name) {
         c = std::toupper(c);
     }
     return "DUK_RENDERER_" + name + "_H";
 }
 
-}// namespace detail
+}
 
 FileGenerator::~FileGenerator() = default;
 
@@ -64,4 +64,4 @@ void FileGenerator::write_file(const std::string& content, const std::string& fi
     file << content;
 }
 
-}// namespace duk::material_generator
+}

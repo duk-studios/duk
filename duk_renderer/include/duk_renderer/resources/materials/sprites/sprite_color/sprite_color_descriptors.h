@@ -9,6 +9,7 @@ namespace duk::renderer {
 
 class SpriteColorDescriptors {
 public:
+
     enum Bindings : uint32_t {
         uCamera = 0,
         uBaseColor = 1,
@@ -20,8 +21,10 @@ public:
     struct Material {
         glm::vec4 color;
     };
+
+
 };
 
-}// namespace duk::renderer
+} // namespace duk::renderer
 
-#endif// DUK_RENDERER_SPRITE_COLOR_DESCRIPTORS_H
+#endif // DUK_RENDERER_SPRITE_COLOR_DESCRIPTORS_H

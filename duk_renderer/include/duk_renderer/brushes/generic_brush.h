@@ -10,9 +10,11 @@ namespace duk::renderer {
 
 class GenericBrush : public Brush {
 public:
+
     using DrawFunction = std::function<void(duk::rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance)>;
 
 public:
+
     explicit GenericBrush(DrawFunction drawFunction);
 
     ~GenericBrush() override;
@@ -23,6 +25,7 @@ private:
     DrawFunction m_drawFunction;
 };
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_GENERIC_BRUSH_H
+#endif // DUK_RENDERER_GENERIC_BRUSH_H
+

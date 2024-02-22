@@ -18,6 +18,7 @@ class RenderPass;
 
 class GraphicsPipeline {
 public:
+
     struct Viewport {
         glm::vec2 extent;
         glm::vec2 offset;
@@ -36,7 +37,6 @@ public:
             FRONT = 1 << 0,
             BACK = 1 << 1,
         };
-
         static constexpr uint32_t kCount = 3;
         using Mask = uint32_t;
     };
@@ -102,6 +102,7 @@ public:
     };
 
 public:
+
     virtual ~GraphicsPipeline();
 
     virtual void set_viewport(const Viewport& viewport) = 0;
@@ -157,8 +158,10 @@ public:
                                                   RenderPass* renderPass,
                                                   CullMode::Mask cullMode,
                                                   bool depthTesting);
+
 };
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_PIPELINE_H
+#endif // DUK_RHI_PIPELINE_H
+

@@ -9,6 +9,7 @@
 namespace duk::rhi {
 
 struct PipelineStage {
+
     enum Bits : uint32_t {
         NONE = 0,
         TOP_OF_PIPE = 1 << 0,
@@ -29,7 +30,6 @@ struct PipelineStage {
         ALL_GRAPHICS = 1 << 15,
         ALL_COMMANDS = 1 << 16
     };
-
     static constexpr auto kCount = 18;
     using Mask = uint32_t;
 };
@@ -55,11 +55,11 @@ struct Access {
         MEMORY_READ = 0x00008000,
         MEMORY_WRITE = 0x00010000
     };
-
     static constexpr auto kCount = 18;
     using Mask = uint32_t;
 };
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_PIPELINE_STAGES_H
+#endif // DUK_RHI_PIPELINE_STAGES_H
+

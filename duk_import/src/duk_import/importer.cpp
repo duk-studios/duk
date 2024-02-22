@@ -6,7 +6,9 @@
 
 namespace duk::import {
 
-Importer::Importer(const ImporterCreateInfo& importerCreateInfo) : m_pools(importerCreateInfo.pools) {
+Importer::Importer(const ImporterCreateInfo& importerCreateInfo) :
+    m_pools(importerCreateInfo.pools) {
+
 }
 
 Importer::~Importer() = default;
@@ -53,7 +55,7 @@ void Importer::load_resource(duk::resource::Id id) {
     duk::resource::DependencySolver dependencySolver;
     importer->solve_dependencies(resourceDescription.id, dependencySolver);
 
-    for (auto dependency: dependencySolver.dependencies()) {
+    for (auto dependency : dependencySolver.dependencies()) {
         load_resource(dependency);
     }
 
@@ -78,4 +80,4 @@ ResourceImporter* Importer::get_importer(const std::string& tag) {
     return it->second.get();
 }
 
-}// namespace duk::import
+}

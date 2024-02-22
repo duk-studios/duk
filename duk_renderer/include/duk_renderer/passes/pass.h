@@ -5,11 +5,11 @@
 #define DUK_RENDERER_PASS_H
 
 #include <duk_macros/macros.h>
-#include <duk_rhi/command/command_buffer.h>
 #include <duk_rhi/pipeline/pipeline_flags.h>
+#include <duk_rhi/command/command_buffer.h>
 
-#include <cstdint>
 #include <list>
+#include <cstdint>
 
 namespace duk {
 
@@ -23,6 +23,7 @@ class GlobalDescriptors;
 
 class PassConnection {
 public:
+
     PassConnection(duk::rhi::Access::Mask accessMask, duk::rhi::PipelineStage::Mask stageMask, duk::rhi::Image::Layout imageLayout);
 
     ~PassConnection();
@@ -60,6 +61,7 @@ private:
 
 class Pass {
 public:
+
     virtual ~Pass();
 
     struct RenderParams {
@@ -71,9 +73,11 @@ public:
     };
 
     virtual void render(const RenderParams& renderParams) = 0;
+
 };
 
-}// namespace renderer
-}// namespace duk
+}
+}
 
-#endif// DUK_RENDERER_PASS_H
+#endif // DUK_RENDERER_PASS_H
+

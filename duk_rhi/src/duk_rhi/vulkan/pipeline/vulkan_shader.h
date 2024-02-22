@@ -6,8 +6,8 @@
 
 #include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/pipeline/shader_data_source.h>
-#include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
+#include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 
 namespace duk::rhi {
 
@@ -23,6 +23,7 @@ struct VulkanShaderCreateInfo {
 
 class VulkanShader : public Shader {
 public:
+
     explicit VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo);
 
     ~VulkanShader() override;
@@ -44,6 +45,7 @@ public:
     DUK_NO_DISCARD bool is_compute_shader() const override;
 
 private:
+
     bool create_shader_module(Shader::Module::Bits type, const ShaderDataSource* shaderDataSource);
 
 private:
@@ -55,8 +57,10 @@ private:
     VkPipelineLayout m_pipelineLayout;
     std::vector<VkVertexInputBindingDescription> m_inputBindings;
     std::vector<VkVertexInputAttributeDescription> m_inputAttributes;
+
 };
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_VULKAN_SHADER_H
+#endif // DUK_RHI_VULKAN_SHADER_H
+

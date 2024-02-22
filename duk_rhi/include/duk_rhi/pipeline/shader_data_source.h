@@ -16,6 +16,7 @@ namespace duk::rhi {
 
 class ShaderDataSource : public duk::hash::DataSource {
 public:
+
     ~ShaderDataSource() override;
 
     DUK_NO_DISCARD virtual Shader::Module::Mask module_mask() const = 0;
@@ -43,8 +44,10 @@ public:
     DUK_NO_DISCARD bool valid_graphics_shader() const;
 
     DUK_NO_DISCARD bool valid_compute_shader() const;
+
 };
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_SHADER_DATA_SOURCE_H
+#endif // DUK_RHI_SHADER_DATA_SOURCE_H
+

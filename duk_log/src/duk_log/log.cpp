@@ -2,8 +2,8 @@
 // Created by rov on 12/13/2023.
 //
 #include <duk_log/log.h>
-#include <duk_log/sink_cout.h>
 #include <duk_log/sink_fmt.h>
+#include <duk_log/sink_cout.h>
 
 namespace duk::log {
 
@@ -20,7 +20,7 @@ Logging::~Logging() {
 Logger* Logging::add_logger(std::unique_ptr<Logger> logger) {
     auto ptr = m_loggers.emplace_back(std::move(logger)).get();
 
-    for (auto& sink: m_sinks) {
+    for (auto& sink : m_sinks) {
         sink->flush_from(*ptr);
     }
 
@@ -29,14 +29,14 @@ Logger* Logging::add_logger(std::unique_ptr<Logger> logger) {
 
 void Logging::remove_logger(Logger* logger) {
     std::erase_if(m_loggers, [logger](const std::unique_ptr<Logger>& element) -> bool {
-        return element.get() == logger;
+       return element.get() == logger;
     });
 }
 
 Sink* Logging::add_sink(std::unique_ptr<Sink> sink) {
     auto ptr = m_sinks.emplace_back(std::move(sink)).get();
 
-    for (auto& logger: m_loggers) {
+    for (auto& logger : m_loggers) {
         ptr->flush_from(*logger);
     }
 
@@ -50,7 +50,7 @@ void Logging::remove_sink(Sink* sink) {
 }
 
 void Logging::wait() {
-    for (auto& logger: m_loggers) {
+    for (auto& logger : m_loggers) {
         logger->wait();
     }
 }
@@ -83,4 +83,4 @@ void wait() {
     Logging::instance(true)->wait();
 }
 
-}// namespace duk::log
+}

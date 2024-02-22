@@ -84,9 +84,10 @@ bool is_builtin_glsl_type(const std::string& glslTypeName) {
                 "dmat3x4",
                 "dmat4x2",
                 "dmat4x3",
-                "dmat4x4"};
+                "dmat4x4"
+        };
     }();
     return builtinGlslTypeNameSet.find(glslTypeName) != builtinGlslTypeNameSet.end();
 }
 
-}// namespace duk::material_generator
+}

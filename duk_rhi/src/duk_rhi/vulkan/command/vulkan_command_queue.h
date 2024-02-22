@@ -8,9 +8,9 @@
 #include <duk_macros/macros.h>
 #include <duk_rhi/command/command_queue.h>
 #include <duk_rhi/vulkan/command/vulkan_command_buffer.h>
-#include <duk_rhi/vulkan/vulkan_events.h>
-#include <duk_rhi/vulkan/vulkan_handle_pool.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
+#include <duk_rhi/vulkan/vulkan_handle_pool.h>
+#include <duk_rhi/vulkan/vulkan_events.h>
 
 namespace duk::rhi {
 
@@ -29,6 +29,7 @@ struct VulkanCommandQueueCreateInfo {
 
 class VulkanCommandQueue : public CommandQueue {
 public:
+
     explicit VulkanCommandQueue(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo);
 
     ~VulkanCommandQueue() override;
@@ -72,7 +73,8 @@ public:
 
         if (m_taskQueue.owns_current_thread()) {
             submission();
-        } else {
+        }
+        else {
             m_taskQueue.enqueue(submission).wait();
         }
     }
@@ -107,6 +109,6 @@ private:
     duk::event::Listener m_listener;
 };
 
-}// namespace duk::rhi
+}
 
-#endif//DUK_RHI_VULKAN_QUEUE_H
+#endif //DUK_RHI_VULKAN_QUEUE_H

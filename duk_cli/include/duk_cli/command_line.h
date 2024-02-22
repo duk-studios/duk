@@ -7,14 +7,15 @@
 
 #include <duk_macros/macros.h>
 
-#include <memory>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace duk::cli {
 
 class Command {
 public:
+
     virtual ~Command();
 
     virtual void execute() = 0;
@@ -22,6 +23,7 @@ public:
 
 class CommandLine {
 public:
+
     CommandLine(int argc, const char* argv[]);
 
     DUK_NO_DISCARD Command* command() const;
@@ -30,6 +32,6 @@ private:
     std::unique_ptr<Command> m_command;
 };
 
-}// namespace duk::cli
+}
 
-#endif//DUK_CLI_PARSER_H
+#endif //DUK_CLI_PARSER_H

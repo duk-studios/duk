@@ -1,17 +1,20 @@
 /// 21/04/2023
 /// job_queue.cpp
 
-#include <algorithm>
 #include <duk_task/task_queue.h>
+#include <algorithm>
 
 namespace duk::task {
 
 TaskQueue::TaskQueue() : TaskQueue(1) {
+
 }
 
-TaskQueue::TaskQueue(size_t threadCount) : m_threads(threadCount),
-                                           m_workingThreads(threadCount, false),
-                                           m_running(false) {
+TaskQueue::TaskQueue(size_t threadCount) :
+    m_threads(threadCount),
+    m_workingThreads(threadCount, false),
+    m_running(false) {
+
 }
 
 TaskQueue::~TaskQueue() {
@@ -29,9 +32,10 @@ void TaskQueue::start() {
     }
 
     int index = 0;
-    for (auto& thread: m_threads) {
-        thread = std::thread([this, index]() {
+    for (auto& thread : m_threads){
+        thread = std::thread([this, index](){
             while (m_running) {
+
                 m_idleCondition.notify_all();
 
                 // waits until asked to quit or have some task available
@@ -65,14 +69,15 @@ void TaskQueue::start() {
 }
 
 void TaskQueue::stop() {
+
     {
         std::unique_lock<std::mutex> lock(m_taskQueueMutex);
         m_running = false;
     }
     m_awakeCondition.notify_all();
 
-    for (auto& thread: m_threads) {
-        if (thread.joinable()) {
+    for (auto& thread : m_threads){
+        if (thread.joinable()){
             thread.join();
         }
     }
@@ -104,4 +109,5 @@ bool TaskQueue::owns_current_thread() const {
     return std::any_of(m_threads.begin(), m_threads.end(), predicate);
 }
 
-}// namespace duk::task
+}
+

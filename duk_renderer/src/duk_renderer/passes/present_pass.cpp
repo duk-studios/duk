@@ -7,8 +7,10 @@
 
 namespace duk::renderer {
 
-PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) : m_renderer(presentPassCreateInfo.renderer),
-                                                                               m_inColor(duk::rhi::Access::SHADER_READ, duk::rhi::PipelineStage::FRAGMENT_SHADER, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
+PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) :
+    m_renderer(presentPassCreateInfo.renderer),
+    m_inColor(duk::rhi::Access::SHADER_READ, duk::rhi::PipelineStage::FRAGMENT_SHADER, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
+
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};
         colorAttachmentDescription.format = m_renderer->rhi()->present_image()->format();
@@ -48,6 +50,7 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo) : m
 PresentPass::~PresentPass() = default;
 
 void PresentPass::render(const Pass::RenderParams& renderParams) {
+
     if (!m_inColor.image()) {
         return;
     }
@@ -102,4 +105,4 @@ PassConnection* PresentPass::in_color() {
     return &m_inColor;
 }
 
-}// namespace duk::renderer
+}

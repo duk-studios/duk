@@ -30,64 +30,41 @@ static std::string shader_data_source_class_name(const Parser& parser) {
 
 static std::string module_name(duk::rhi::Shader::Module::Bits moduleBit) {
     switch (moduleBit) {
-        case duk::rhi::Shader::Module::VERTEX:
-            return "duk::rhi::Shader::Module::VERTEX";
-        case duk::rhi::Shader::Module::TESSELLATION_CONTROL:
-            return "duk::rhi::Shader::Module::TESSELLATION_CONTROL";
-        case duk::rhi::Shader::Module::TESSELLATION_EVALUATION:
-            return "duk::rhi::Shader::Module::TESSELLATION_EVALUATION";
-        case duk::rhi::Shader::Module::GEOMETRY:
-            return "duk::rhi::Shader::Module::GEOMETRY";
-        case duk::rhi::Shader::Module::FRAGMENT:
-            return "duk::rhi::Shader::Module::FRAGMENT";
-        case duk::rhi::Shader::Module::COMPUTE:
-            return "duk::rhi::Shader::Module::COMPUTE";
+        case duk::rhi::Shader::Module::VERTEX: return "duk::rhi::Shader::Module::VERTEX";
+        case duk::rhi::Shader::Module::TESSELLATION_CONTROL: return "duk::rhi::Shader::Module::TESSELLATION_CONTROL";
+        case duk::rhi::Shader::Module::TESSELLATION_EVALUATION: return "duk::rhi::Shader::Module::TESSELLATION_EVALUATION";
+        case duk::rhi::Shader::Module::GEOMETRY: return "duk::rhi::Shader::Module::GEOMETRY";
+        case duk::rhi::Shader::Module::FRAGMENT: return "duk::rhi::Shader::Module::FRAGMENT";
+        case duk::rhi::Shader::Module::COMPUTE: return "duk::rhi::Shader::Module::COMPUTE";
     }
     throw std::runtime_error("Unknown shader module");
 }
 
 static std::string descriptor_type_name(duk::rhi::DescriptorType type) {
     switch (type) {
-        case duk::rhi::DescriptorType::UNDEFINED:
-            return "duk::rhi::DescriptorType::UNDEFINED";
-        case duk::rhi::DescriptorType::UNIFORM_BUFFER:
-            return "duk::rhi::DescriptorType::UNIFORM_BUFFER";
-        case duk::rhi::DescriptorType::STORAGE_BUFFER:
-            return "duk::rhi::DescriptorType::STORAGE_BUFFER";
-        case duk::rhi::DescriptorType::IMAGE:
-            return "duk::rhi::DescriptorType::IMAGE";
-        case duk::rhi::DescriptorType::IMAGE_SAMPLER:
-            return "duk::rhi::DescriptorType::IMAGE_SAMPLER";
-        case duk::rhi::DescriptorType::STORAGE_IMAGE:
-            return "duk::rhi::DescriptorType::STORAGE_IMAGE";
+        case duk::rhi::DescriptorType::UNDEFINED: return "duk::rhi::DescriptorType::UNDEFINED";
+        case duk::rhi::DescriptorType::UNIFORM_BUFFER: return "duk::rhi::DescriptorType::UNIFORM_BUFFER";
+        case duk::rhi::DescriptorType::STORAGE_BUFFER: return "duk::rhi::DescriptorType::STORAGE_BUFFER";
+        case duk::rhi::DescriptorType::IMAGE: return "duk::rhi::DescriptorType::IMAGE";
+        case duk::rhi::DescriptorType::IMAGE_SAMPLER: return "duk::rhi::DescriptorType::IMAGE_SAMPLER";
+        case duk::rhi::DescriptorType::STORAGE_IMAGE: return "duk::rhi::DescriptorType::STORAGE_IMAGE";
     }
     throw std::runtime_error("Unknown descriptor type");
 }
 
 static std::string vertex_attribute_format_name(duk::rhi::VertexInput::Format format) {
     switch (format) {
-        case duk::rhi::VertexInput::Format::UNDEFINED:
-            return "duk::rhi::VertexInput::Format::UNDEFINED";
-        case duk::rhi::VertexInput::Format::INT8:
-            return "duk::rhi::VertexInput::Format::INT8";
-        case duk::rhi::VertexInput::Format::UINT8:
-            return "duk::rhi::VertexInput::Format::UINT8";
-        case duk::rhi::VertexInput::Format::INT16:
-            return "duk::rhi::VertexInput::Format::INT16";
-        case duk::rhi::VertexInput::Format::UINT16:
-            return "duk::rhi::VertexInput::Format::UINT16";
-        case duk::rhi::VertexInput::Format::INT32:
-            return "duk::rhi::VertexInput::Format::INT32";
-        case duk::rhi::VertexInput::Format::UINT32:
-            return "duk::rhi::VertexInput::Format::UINT32";
-        case duk::rhi::VertexInput::Format::FLOAT32:
-            return "duk::rhi::VertexInput::Format::FLOAT32";
-        case duk::rhi::VertexInput::Format::VEC2:
-            return "duk::rhi::VertexInput::Format::VEC2";
-        case duk::rhi::VertexInput::Format::VEC3:
-            return "duk::rhi::VertexInput::Format::VEC3";
-        case duk::rhi::VertexInput::Format::VEC4:
-            return "duk::rhi::VertexInput::Format::VEC4";
+        case duk::rhi::VertexInput::Format::UNDEFINED: return "duk::rhi::VertexInput::Format::UNDEFINED";
+        case duk::rhi::VertexInput::Format::INT8: return "duk::rhi::VertexInput::Format::INT8";
+        case duk::rhi::VertexInput::Format::UINT8: return "duk::rhi::VertexInput::Format::UINT8";
+        case duk::rhi::VertexInput::Format::INT16: return "duk::rhi::VertexInput::Format::INT16";
+        case duk::rhi::VertexInput::Format::UINT16: return "duk::rhi::VertexInput::Format::UINT16";
+        case duk::rhi::VertexInput::Format::INT32: return "duk::rhi::VertexInput::Format::INT32";
+        case duk::rhi::VertexInput::Format::UINT32: return "duk::rhi::VertexInput::Format::UINT32";
+        case duk::rhi::VertexInput::Format::FLOAT32: return "duk::rhi::VertexInput::Format::FLOAT32";
+        case duk::rhi::VertexInput::Format::VEC2: return "duk::rhi::VertexInput::Format::VEC2";
+        case duk::rhi::VertexInput::Format::VEC3: return "duk::rhi::VertexInput::Format::VEC3";
+        case duk::rhi::VertexInput::Format::VEC4: return "duk::rhi::VertexInput::Format::VEC4";
     }
     throw std::runtime_error("unknown VertexInput::Format");
 }
@@ -96,7 +73,7 @@ static std::string generate_module_mask(const Reflector& reflector) {
     std::ostringstream oss;
     const auto& modules = reflector.modules();
     bool needOperatorOr = false;
-    for (const auto& [module, code]: modules) {
+    for (const auto& [module, code] : modules) {
         if (needOperatorOr) {
             oss << " | ";
         }
@@ -108,27 +85,24 @@ static std::string generate_module_mask(const Reflector& reflector) {
 
 static std::string generate_spir_v_code(const std::vector<uint8_t>& code) {
     std::ostringstream oss;
-    oss << '{' << std::endl
-        << "        ";
+    oss << '{' << std::endl << "        ";
     bool needsComma = false;
     int lineSize = 0;
-    for (uint8_t byte: code) {
+    for (uint8_t byte : code) {
         if (needsComma) {
             oss << ',';
         }
         needsComma = true;
 
         if (lineSize > 24) {
-            oss << std::endl
-                << "        ";
+            oss << std::endl << "        ";
             lineSize = 0;
         }
 
         oss << "0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
         lineSize++;
     }
-    oss << std::endl
-        << "        }" << std::endl;
+    oss << std::endl << "        }" << std::endl;
     return oss.str();
 }
 
@@ -137,7 +111,7 @@ static std::string generate_spir_v_code_map(const Reflector& reflector) {
     oss << "{" << std::endl;
     const auto& modules = reflector.modules();
     bool needsComma = false;
-    for (const auto& [module, code]: modules) {
+    for (const auto& [module, code] : modules) {
         if (needsComma) {
             oss << ',' << std::endl;
         }
@@ -146,8 +120,7 @@ static std::string generate_spir_v_code_map(const Reflector& reflector) {
         oss << "        " << module_name(module) << ", " << generate_spir_v_code(code);
         oss << "    }";
     }
-    oss << std::endl
-        << '}';
+    oss << std::endl << '}';
 
     return oss.str();
 }
@@ -177,7 +150,7 @@ static std::string generate_descriptor_sets_description(const Reflector& reflect
 
     if (!sets.empty()) {
         bool needsSetComma = false;
-        for (const auto& set: sets) {
+        for (const auto& set : sets) {
             if (needsSetComma) {
                 oss << ',' << std::endl;
             }
@@ -196,14 +169,11 @@ static std::string generate_descriptor_sets_description(const Reflector& reflect
                 oss << "                " << generate_module_mask(binding.moduleMask) << std::endl;
                 oss << "            }";
             }
-            oss << std::endl
-                << "        }";
-            oss << std::endl
-                << "    }";
+            oss << std::endl << "        }";
+            oss << std::endl << "    }";
         }
     }
-    oss << std::endl
-        << "}";
+    oss << std::endl << "}";
 
     return oss.str();
 }
@@ -213,26 +183,27 @@ static std::string generate_vertex_layout(const Reflector& reflector) {
 
     if (reflector.attributes().empty()) {
         oss << "{}";
-    } else {
+    }
+    else {
         oss << '{' << std::endl;
 
         bool needsComma = false;
-        for (auto format: reflector.attributes()) {
+        for (auto format : reflector.attributes()) {
             if (needsComma) {
                 oss << ',' << std::endl;
             }
             needsComma = true;
             oss << "    " << vertex_attribute_format_name(format);
         }
-        oss << std::endl
-            << "}";
+        oss << std::endl << "}";
     }
 
     return oss.str();
 }
 
 static const std::string kHeaderFileIncludes[] = {
-        "duk_rhi/pipeline/shader_data_source.h"};
+    "duk_rhi/pipeline/shader_data_source.h"
+};
 
 /// header file template -----------------------------
 /// --------------------------------------------------
@@ -310,10 +281,12 @@ duk::hash::Hash TemplateShaderDataSource::calculate_hash() const {
 })";
 /// ---------------------------------------------------
 
-}// namespace detail
+}
 
-ShaderDataSourceFileGenerator::ShaderDataSourceFileGenerator(const Parser& parser, const Reflector& reflector) : m_parser(parser),
-                                                                                                                 m_reflector(reflector) {
+ShaderDataSourceFileGenerator::ShaderDataSourceFileGenerator(const Parser& parser, const Reflector& reflector) :
+    m_parser(parser),
+    m_reflector(reflector) {
+
     m_fileName = detail::shader_data_source_file_name(m_parser);
     m_headerIncludePath = detail::shader_header_include_path(m_parser, m_fileName);
     m_className = detail::shader_data_source_class_name(m_parser);
@@ -354,7 +327,8 @@ void ShaderDataSourceFileGenerator::generate_header_file_content(std::ostringstr
 
 void ShaderDataSourceFileGenerator::generate_source_file_content(std::ostringstream& oss) {
     std::string includes[] = {
-            m_headerIncludePath};
+            m_headerIncludePath
+    };
     generate_include_directives(oss, includes);
     oss << std::endl;
     generate_namespace_start(oss, "");
@@ -388,4 +362,5 @@ const std::string& ShaderDataSourceFileGenerator::output_shader_data_source_clas
     return m_className;
 }
 
-}// namespace duk::material_generator
+
+}

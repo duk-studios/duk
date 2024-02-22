@@ -3,10 +3,13 @@
 
 #include <duk_rhi/command/command_scheduler.h>
 
+
 namespace duk::rhi {
 
-ScheduledCommand::ScheduledCommand(CommandScheduler* owner, std::size_t index) : m_owner(owner),
-                                                                                 m_index(index) {
+ScheduledCommand::ScheduledCommand(CommandScheduler* owner, std::size_t index) :
+        m_owner(owner),
+        m_index(index) {
+
 }
 
 ScheduledCommand& ScheduledCommand::then(ScheduledCommand& next, PipelineStage::Mask waitStages) {
@@ -23,4 +26,4 @@ void CommandScheduler::schedule_after(const ScheduledCommand& before, const Sche
     schedule_after(before.m_index, after.m_index, waitStages);
 }
 
-}// namespace duk::rhi
+}

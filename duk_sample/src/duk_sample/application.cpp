@@ -1,14 +1,15 @@
 /// 03/06/2023
 /// application.cpp
 
-#include <duk_engine/systems/render_system.h>
-#include <duk_import/scene/scene_importer.h>
 #include <duk_sample/application.h>
 #include <duk_sample/camera_system.h>
+#include <duk_engine/systems/render_system.h>
+#include <duk_import/scene/scene_importer.h>
 
 namespace duk::sample {
 
 Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
+
     duk::engine::EngineCreateInfo engineCreateInfo = {};
     engineCreateInfo.applicationName = applicationCreateInfo.name;
 
@@ -35,4 +36,5 @@ void Application::run() {
     m_engine->run();
 }
 
-}// namespace duk::sample
+}
+

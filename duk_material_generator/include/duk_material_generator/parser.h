@@ -7,17 +7,17 @@
 #include <duk_rhi/pipeline/shader.h>
 
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 namespace duk::material_generator {
 
 class Parser {
 public:
     using ShaderPaths = std::unordered_map<duk::rhi::Shader::Module::Bits, std::string>;
-
 public:
+
     Parser(int argc, char* argv[]);
 
     ~Parser();
@@ -49,6 +49,7 @@ private:
     bool m_printDebugInfo;
 };
 
-}// namespace duk::material_generator
+}
 
-#endif// DUK_MATERIAL_GENERATOR_PARSER_H
+#endif // DUK_MATERIAL_GENERATOR_PARSER_H
+

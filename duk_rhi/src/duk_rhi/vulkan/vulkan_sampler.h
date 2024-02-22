@@ -17,6 +17,7 @@ struct VulkanSamplerCacheCreateInfo {
 
 class VulkanSamplerCache {
 public:
+
     explicit VulkanSamplerCache(const VulkanSamplerCacheCreateInfo& createInfo);
 
     ~VulkanSamplerCache();
@@ -28,6 +29,7 @@ private:
     std::unordered_map<duk::hash::Hash, VkSampler> m_samplers;
 };
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_VULKAN_SAMPLER_H
+#endif // DUK_RHI_VULKAN_SAMPLER_H
+

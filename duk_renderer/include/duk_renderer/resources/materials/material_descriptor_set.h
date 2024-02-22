@@ -4,9 +4,9 @@
 #ifndef DUK_RENDERER_MATERIAL_DESCRIPTOR_SET_H
 #define DUK_RENDERER_MATERIAL_DESCRIPTOR_SET_H
 
-#include <duk_renderer/resources/image.h>
 #include <duk_renderer/resources/materials/draw_entry.h>
 #include <duk_renderer/resources/materials/instance_buffer.h>
+#include <duk_renderer/resources/image.h>
 #include <duk_renderer/resources/texture.h>
 #include <duk_rhi/command/command_buffer.h>
 
@@ -14,9 +14,11 @@ namespace duk::renderer {
 
 class MaterialDescriptorSet {
 public:
+
     template<typename ResourceT>
     class ResourceIterator {
     public:
+
         ResourceIterator(MaterialDescriptorSet& descriptorSet, uint32_t i);
 
         uint32_t index() const;
@@ -30,6 +32,7 @@ public:
         bool operator!=(const ResourceIterator& rhs) const;
 
     private:
+
         void next();
 
     private:
@@ -40,6 +43,7 @@ public:
     template<typename ResourceT>
     class ResourceView {
     public:
+
         ResourceView(MaterialDescriptorSet& descriptorSet);
 
         ResourceIterator<ResourceT> begin();
@@ -51,6 +55,7 @@ public:
     };
 
 public:
+
     virtual ~MaterialDescriptorSet() = default;
 
     DUK_NO_DISCARD ResourceView<ImageResource> images();
@@ -64,6 +69,7 @@ public:
     DUK_NO_DISCARD virtual uint32_t size() const = 0;
 
     virtual void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& drawParams) = 0;
+
 };
 
 namespace detail {
@@ -84,7 +90,7 @@ inline bool is_resource<ImageResource>(MaterialDescriptorSet& descriptorSet, uin
     return descriptorSet.is_image(index);
 }
 
-}// namespace detail
+}
 
 template<typename ResourceT>
 ResourceT& MaterialDescriptorSet::ResourceIterator<ResourceT>::operator*() {
@@ -92,8 +98,9 @@ ResourceT& MaterialDescriptorSet::ResourceIterator<ResourceT>::operator*() {
 }
 
 template<typename ResourceT>
-MaterialDescriptorSet::ResourceIterator<ResourceT>::ResourceIterator(MaterialDescriptorSet& descriptorSet, uint32_t i) : m_descriptorSet(descriptorSet),
-                                                                                                                         m_i(i) {
+MaterialDescriptorSet::ResourceIterator<ResourceT>::ResourceIterator(MaterialDescriptorSet& descriptorSet, uint32_t i) :
+    m_descriptorSet(descriptorSet),
+    m_i(i) {
     next();
 }
 
@@ -127,7 +134,9 @@ void MaterialDescriptorSet::ResourceIterator<ResourceT>::next() {
 }
 
 template<typename ResourceT>
-MaterialDescriptorSet::ResourceView<ResourceT>::ResourceView(MaterialDescriptorSet& descriptorSet) : m_descriptorSet(descriptorSet) {
+MaterialDescriptorSet::ResourceView<ResourceT>::ResourceView(MaterialDescriptorSet& descriptorSet) :
+    m_descriptorSet(descriptorSet) {
+
 }
 
 template<typename ResourceT>
@@ -140,6 +149,6 @@ MaterialDescriptorSet::ResourceIterator<ResourceT> MaterialDescriptorSet::Resour
     return MaterialDescriptorSet::ResourceIterator<ResourceT>(m_descriptorSet, m_descriptorSet.size());
 }
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_MATERIAL_DESCRIPTOR_SET_H
+#endif // DUK_RENDERER_MATERIAL_DESCRIPTOR_SET_H

@@ -4,8 +4,8 @@
 #ifndef DUK_RENDERER_LIGHTING_H
 #define DUK_RENDERER_LIGHTING_H
 
-#include <duk_json/types.h>
 #include <duk_scene/objects.h>
+#include <duk_json/types.h>
 #include <glm/glm.hpp>
 
 namespace duk::renderer {
@@ -24,7 +24,7 @@ struct PointLight {
     float radius;
 };
 
-}// namespace duk::renderer
+}
 
 namespace duk::json {
 
@@ -45,6 +45,7 @@ inline void from_json<duk::renderer::PointLight>(const rapidjson::Value& jsonObj
     object.radius = from_json<float>(jsonObject["radius"]);
 }
 
-}// namespace duk::json
+}
 
-#endif// DUK_RENDERER_LIGHTING_H
+#endif // DUK_RENDERER_LIGHTING_H
+

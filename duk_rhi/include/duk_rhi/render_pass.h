@@ -8,8 +8,8 @@
 
 #include <duk_macros/macros.h>
 
-#include <cstdint>
 #include <vector>
+#include <cstdint>
 
 namespace duk::rhi {
 
@@ -35,6 +35,7 @@ struct AttachmentDescription {
 
 class RenderPass {
 public:
+
     virtual ~RenderPass();
 
     DUK_NO_DISCARD virtual size_t attachment_count() const = 0;
@@ -44,9 +45,11 @@ public:
     DUK_NO_DISCARD virtual bool has_depth_attachment() const = 0;
 
     DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
+
+
 };
 
-}// namespace duk::rhi
+}
 
 namespace std {
 
@@ -64,6 +67,7 @@ struct hash<duk::rhi::AttachmentDescription> {
     }
 };
 
-}// namespace std
+}
 
-#endif// DUK_RHI_RENDER_PASS_H
+#endif // DUK_RHI_RENDER_PASS_H
+

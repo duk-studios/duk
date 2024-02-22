@@ -6,12 +6,13 @@
 
 namespace duk::event {
 
-Event::Handle::Handle(Event& owner) : m_owner(owner) {
+Event::Handle::Handle(Event& owner) :
+    m_owner(owner) {
     m_controlBlock = m_owner.m_controlBlock;
 }
 
 void Event::Handle::unsubscribe(size_t id) {
-    if (m_controlBlock.lock()) {
+    if (m_controlBlock.lock()){
         m_owner.remove_listener(id);
     }
 }
@@ -24,6 +25,7 @@ Event::Handle& Event::Handle::operator=(const Event::Handle& other) {
     m_controlBlock = other.m_controlBlock;
     return *this;
 }
+
 
 bool Event::Handle::operator==(Event::Handle& other) const noexcept {
     return &m_owner == &other.m_owner;
@@ -42,11 +44,11 @@ Listener::Listener() {
 }
 
 Listener::~Listener() {
-    for (auto& event: m_events) {
+    for (auto& event : m_events) {
         event.unsubscribe(m_id);
     }
 }
 
 size_t Dispatcher::s_indexCounter = 0;
 
-}// namespace duk::event
+}

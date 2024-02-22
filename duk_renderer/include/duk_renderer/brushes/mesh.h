@@ -4,8 +4,8 @@
 #ifndef DUK_RENDERER_MESH_H
 #define DUK_RENDERER_MESH_H
 
-#include <duk_renderer/brushes/brush.h>
 #include <duk_renderer/brushes/mesh_data_source.h>
+#include <duk_renderer/brushes/brush.h>
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/rhi.h>
 
@@ -23,6 +23,7 @@ struct MeshCreateInfo {
 
 class Mesh : public Brush {
 public:
+
     explicit Mesh(const MeshCreateInfo& meshCreateInfo);
 
     ~Mesh() override;
@@ -34,6 +35,7 @@ public:
     void draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance) override;
 
 private:
+
     void create(const MeshDataSource* meshDataSource);
 
 private:
@@ -47,6 +49,7 @@ private:
     size_t m_indexCount;
     rhi::IndexType m_indexType;
     VertexAttributes m_vertexAttributes;
+
 };
 
 struct MeshBufferCreateInfo {
@@ -58,6 +61,7 @@ struct MeshBufferCreateInfo {
 
 class MeshBuffer {
 private:
+
     struct ManagedBufferCreateInfo {
         duk::rhi::RHI* rhi;
         duk::rhi::CommandQueue* commandQueue;
@@ -68,12 +72,14 @@ private:
 
     class ManagedBuffer {
     public:
+
         struct Block {
             size_t offset;
             size_t size;
         };
 
     public:
+
         explicit ManagedBuffer(const ManagedBufferCreateInfo& managedBufferCreateInfo);
 
         ~ManagedBuffer();
@@ -91,6 +97,7 @@ private:
         DUK_NO_DISCARD rhi::Buffer* internal_buffer();
 
     private:
+
         void merge_free_blocks();
 
         bool allocate_from_free_blocks(uint32_t* allocationHandle, size_t size);
@@ -108,6 +115,7 @@ private:
     using VertexBuffers = std::array<std::unique_ptr<ManagedBuffer>, static_cast<size_t>(VertexAttributes::Type::COUNT)>;
 
 public:
+
     explicit MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo);
 
     DUK_NO_DISCARD VertexBuffers& vertex_buffers();
@@ -126,6 +134,7 @@ struct MeshBufferPoolCreateInfo {
 
 class MeshBufferPool {
 public:
+
     explicit MeshBufferPool(const MeshBufferPoolCreateInfo& meshBufferPoolCreateInfo);
 
     std::shared_ptr<Mesh> create_mesh(const MeshDataSource* meshDataSource);
@@ -138,6 +147,7 @@ private:
     std::unordered_map<uint32_t, std::unique_ptr<MeshBuffer>> m_meshBuffers;
 };
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_MESH_H
+#endif // DUK_RENDERER_MESH_H
+

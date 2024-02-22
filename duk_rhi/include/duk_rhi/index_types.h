@@ -35,6 +35,7 @@ inline IndexType index_type<uint32_t>() {
     return IndexType::UINT32;
 }
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_INDEX_TYPES_H
+#endif // DUK_RHI_INDEX_TYPES_H
+

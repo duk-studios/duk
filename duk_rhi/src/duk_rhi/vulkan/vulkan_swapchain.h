@@ -4,13 +4,13 @@
 #ifndef DUK_RHI_VULKAN_SWAPCHAIN_H
 #define DUK_RHI_VULKAN_SWAPCHAIN_H
 
-#include <duk_rhi/vulkan/command/vulkan_command.h>
-#include <duk_rhi/vulkan/vulkan_events.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
+#include <duk_rhi/vulkan/command/vulkan_command.h>
+#include <duk_rhi/vulkan/vulkan_events.h>
 
-#include <memory>
 #include <set>
+#include <memory>
 
 namespace duk {
 
@@ -30,6 +30,7 @@ struct VulkanImageAcquireCommandCreateInfo {
 
 class VulkanImageAcquireCommand : public Command {
 public:
+
     explicit VulkanImageAcquireCommand(const VulkanImageAcquireCommandCreateInfo& commandCreateInfo);
 
     void submit(const VulkanCommandParams& commandParams);
@@ -50,6 +51,7 @@ struct VulkanPresentCommandCreateInfo {
 
 class VulkanPresentCommand : public Command {
 public:
+
     explicit VulkanPresentCommand(const VulkanPresentCommandCreateInfo& commandCreateInfo);
 
     void submit(const VulkanCommandParams& commandParams);
@@ -104,6 +106,7 @@ public:
     DUK_NO_DISCARD VulkanSwapchainCleanEvent* clean_event();
 
 private:
+
     void recreate_swapchain();
 
 private:
@@ -130,7 +133,8 @@ private:
     bool m_ableToPresent;
 };
 
-}// namespace rhi
-}// namespace duk
+} // namespace rhi
+} // namespace duk
 
-#endif// DUK_RHI_VULKAN_SWAPCHAIN_H
+#endif // DUK_RHI_VULKAN_SWAPCHAIN_H
+

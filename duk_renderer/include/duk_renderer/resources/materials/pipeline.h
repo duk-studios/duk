@@ -73,6 +73,7 @@ private:
     duk::event::Listener m_listener;
 };
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_PIPELINE_H
+#endif // DUK_RENDERER_PIPELINE_H
+

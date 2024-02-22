@@ -2,16 +2,16 @@
 // Created by Ricardo on 04/02/2023.
 //
 
-#include <duk_rhi/rhi_exception.h>
-#include <duk_rhi/vulkan/command/vulkan_command_scheduler.h>
-#include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
-#include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
-#include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
+#include <duk_rhi/vulkan/vulkan_rhi.h>
+#include <duk_rhi/vulkan/vulkan_render_pass.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
-#include <duk_rhi/vulkan/vulkan_render_pass.h>
-#include <duk_rhi/vulkan/vulkan_rhi.h>
+#include <duk_rhi/vulkan/command/vulkan_command_scheduler.h>
+#include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
+#include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
+#include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
+#include <duk_rhi/rhi_exception.h>
 
 #if DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/window_win_32.h>
@@ -22,7 +22,8 @@ namespace duk::rhi {
 namespace detail {
 
 static std::vector<const char*> s_validationLayers = {
-        "VK_LAYER_KHRONOS_validation"};
+        "VK_LAYER_KHRONOS_validation"
+};
 
 static std::vector<const char*> query_instance_extensions(bool hasValidationLayers) {
     std::vector<const char*> extensions = {VK_KHR_SURFACE_EXTENSION_NAME};
@@ -36,10 +37,10 @@ static std::vector<const char*> query_instance_extensions(bool hasValidationLaye
     return extensions;
 }
 
-static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                               VkDebugUtilsMessageTypeFlagsEXT messageTypes,
-                               const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                               void* pUserData) {
+static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT           messageSeverity,
+                               VkDebugUtilsMessageTypeFlagsEXT                  messageTypes,
+                               const VkDebugUtilsMessengerCallbackDataEXT*      pCallbackData,
+                               void*                                            pUserData) {
     auto debugMessanger = (VulkanDebugMessenger*)pUserData;
     debugMessanger->log(messageSeverity, messageTypes, pCallbackData);
     return VK_FALSE;
@@ -89,14 +90,16 @@ static uint32_t find_compute_queue_index(VulkanPhysicalDevice* physicalDevice) {
     return ~0;
 }
 
-}// namespace detail
+}
 
-VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& vulkanRendererCreateInfo) : m_instance(VK_NULL_HANDLE),
-                                                                            m_physicalDevice(VK_NULL_HANDLE),
-                                                                            m_surface(VK_NULL_HANDLE),
-                                                                            m_device(VK_NULL_HANDLE),
-                                                                            m_maxFramesInFlight(vulkanRendererCreateInfo.maxFramesInFlight),
-                                                                            m_currentFrame(0) {
+VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& vulkanRendererCreateInfo) :
+    m_instance(VK_NULL_HANDLE),
+    m_physicalDevice(VK_NULL_HANDLE),
+    m_surface(VK_NULL_HANDLE),
+    m_device(VK_NULL_HANDLE),
+    m_maxFramesInFlight(vulkanRendererCreateInfo.maxFramesInFlight),
+    m_currentFrame(0) {
+
     volkInitialize();
 
     create_vk_instance(vulkanRendererCreateInfo);
@@ -159,9 +162,10 @@ RHICapabilities* VulkanRHI::capabilities() const {
 }
 
 std::shared_ptr<CommandQueue> VulkanRHI::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
+
     auto it = m_queueFamilyIndices.find(commandQueueCreateInfo.type);
     if (it == m_queueFamilyIndices.end()) {
-        throw RHIException(RHIException::INTERNAL_ERROR, "Failed to create command queue");
+        throw RHIException( RHIException::INTERNAL_ERROR, "Failed to create command queue");
     }
 
     auto queueFamilyIndex = it->second;
@@ -180,6 +184,7 @@ std::shared_ptr<CommandQueue> VulkanRHI::create_command_queue(const CommandQueue
 }
 
 std::shared_ptr<CommandScheduler> VulkanRHI::create_command_scheduler() {
+
     VulkanCommandSchedulerCreateInfo commandSchedulerCreateInfo = {};
     commandSchedulerCreateInfo.device = m_device;
     commandSchedulerCreateInfo.frameCount = m_maxFramesInFlight;
@@ -189,6 +194,7 @@ std::shared_ptr<CommandScheduler> VulkanRHI::create_command_scheduler() {
 }
 
 std::shared_ptr<Shader> VulkanRHI::create_shader(const RHI::ShaderCreateInfo& shaderCreateInfo) {
+    
     VulkanShaderCreateInfo vulkanShaderCreateInfo = {};
     vulkanShaderCreateInfo.shaderDataSource = shaderCreateInfo.shaderDataSource;
     vulkanShaderCreateInfo.device = m_device;
@@ -315,13 +321,14 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
         m_debugMessenger.logger = rendererCreateInfo.logger;
 
         instanceCreateInfo.pNext = &debugCreateInfo;
-    } else {
+    }
+    else {
         instanceCreateInfo.enabledLayerCount = 0;
         instanceCreateInfo.pNext = nullptr;
     }
 
     auto result = vkCreateInstance(&instanceCreateInfo, nullptr, &m_instance);
-    if (result != VK_SUCCESS) {
+    if (result != VK_SUCCESS){
         throw std::runtime_error("failed to create VkInstance");
     }
 
@@ -329,6 +336,7 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
 }
 
 void VulkanRHI::select_vk_physical_device(uint32_t deviceIndex) {
+
     VulkanPhysicalDeviceCreateInfo physicalDeviceCreateInfo = {};
     physicalDeviceCreateInfo.instance = m_instance;
     physicalDeviceCreateInfo.deviceIndex = deviceIndex;
@@ -363,6 +371,7 @@ void VulkanRHI::create_vk_surface(const VulkanRHICreateInfo& vulkanRendererCreat
 }
 
 void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreateInfo) {
+
     std::set<uint32_t> uniqueQueueFamilies;
 
     if (m_surface) {
@@ -395,7 +404,7 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     float queuePriority = 1.0f;
-    for (auto familyIndex: queueFamilyIndices) {
+    for (auto familyIndex : queueFamilyIndices) {
         VkDeviceQueueCreateInfo graphicsQueueCreateInfo = {};
         graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         graphicsQueueCreateInfo.queueFamilyIndex = familyIndex;
@@ -449,6 +458,7 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
 }
 
 void VulkanRHI::create_vk_swapchain(const VulkanRHICreateInfo& vulkanRendererCreateInfo) {
+
     VkQueue presentQueue;
     vkGetDeviceQueue(m_device, m_queueFamilyIndices.at(CommandQueue::Type::PRESENT), 0, &presentQueue);
 
@@ -490,6 +500,7 @@ void VulkanRHI::create_sampler_cache() {
     samplerCacheCreateInfo.device = m_device;
 
     m_samplerCache = std::make_unique<VulkanSamplerCache>(samplerCacheCreateInfo);
+
 }
 
-}// namespace duk::rhi
+}

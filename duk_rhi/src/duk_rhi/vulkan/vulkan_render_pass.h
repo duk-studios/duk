@@ -9,9 +9,9 @@
 
 #include <duk_macros/macros.h>
 
+#include <unordered_map>
 #include <memory>
 #include <optional>
-#include <unordered_map>
 
 namespace duk::rhi {
 
@@ -28,6 +28,7 @@ struct VulkanRenderPassCreateInfo {
 
 class VulkanRenderPass : public RenderPass {
 public:
+
     explicit VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRenderPassCreateInfo);
 
     ~VulkanRenderPass() override;
@@ -57,6 +58,7 @@ private:
     duk::hash::Hash m_hash;
 };
 
-}// namespace duk::rhi
+}
 
-#endif// DUK_RHI_VULKAN_RENDER_PASS_H
+#endif // DUK_RHI_VULKAN_RENDER_PASS_H
+

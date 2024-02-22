@@ -4,11 +4,11 @@
 #ifndef DUK_RENDERER_PRESENT_PASS_H
 #define DUK_RENDERER_PRESENT_PASS_H
 
-#include <duk_renderer/brushes/generic_brush.h>
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
+#include <duk_renderer/brushes/generic_brush.h>
 #include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
 
 namespace duk::renderer {
 
@@ -18,6 +18,7 @@ struct PresentPassCreateInfo {
 
 class PresentPass : public Pass {
 public:
+
     explicit PresentPass(const PresentPassCreateInfo& presentPassCreateInfo);
 
     ~PresentPass() override;
@@ -35,6 +36,7 @@ private:
     FullscreenMaterialDescriptorSet* m_fullscreenMaterialDescriptorSet;
 };
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_PRESENT_PASS_H
+#endif // DUK_RENDERER_PRESENT_PASS_H
+

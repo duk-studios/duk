@@ -6,29 +6,32 @@
 
 #include <duk_macros/macros.h>
 
-#include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <utility>
+#include <cassert>
 
 namespace duk::scene {
 
 class ComponentPool {
 public:
+
     virtual ~ComponentPool();
 
     virtual void destruct(uint32_t index) = 0;
+
 };
 
 template<typename T>
 class ComponentPoolT : public ComponentPool {
 public:
+
     explicit ComponentPoolT(uint32_t componentCount);
 
     ~ComponentPoolT() override;
 
-    template<typename... Args>
-    void construct(uint32_t index, Args&&... args);
+    template<typename ...Args>
+    void construct(uint32_t index, Args&& ...args);
 
     void destruct(uint32_t index) override;
 
@@ -45,9 +48,11 @@ private:
 // Implementations //
 
 template<typename T>
-ComponentPoolT<T>::ComponentPoolT(uint32_t componentCount) : m_componentCount(componentCount),
-                                                             m_components((T*)malloc(componentCount * sizeof(T))),
-                                                             m_allocationCount(0) {
+ComponentPoolT<T>::ComponentPoolT(uint32_t componentCount) :
+    m_componentCount(componentCount),
+    m_components((T*)malloc(componentCount * sizeof(T))),
+    m_allocationCount(0) {
+
 }
 
 template<typename T>
@@ -58,9 +63,9 @@ ComponentPoolT<T>::~ComponentPoolT() {
 
 template<typename T>
 template<typename... Args>
-void ComponentPoolT<T>::construct(uint32_t index, Args&&... args) {
+void ComponentPoolT<T>::construct(uint32_t index, Args&& ... args) {
     auto ptr = get(index);
-    ::new (ptr) T(std::forward<Args>(args)...);
+    ::new(ptr) T(std::forward<Args>(args)...);
     m_allocationCount++;
 }
 
@@ -83,6 +88,7 @@ const T* ComponentPoolT<T>::get(uint32_t index) const {
     return m_components + index;
 }
 
-}// namespace duk::scene
+}
 
-#endif// DUK_SCENE_COMPONENT_H
+#endif // DUK_SCENE_COMPONENT_H
+

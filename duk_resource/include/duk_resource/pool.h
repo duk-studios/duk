@@ -7,23 +7,26 @@
 
 #include <duk_resource/resource.h>
 
-#include <cassert>
-#include <cstdint>
 #include <memory>
-#include <stdexcept>
 #include <unordered_map>
 #include <vector>
+#include <stdexcept>
+#include <cstdint>
+#include <cassert>
 
 namespace duk::resource {
 
 class Pool {
 public:
+
     virtual ~Pool();
+
 };
 
 template<typename ResourceT>
 class PoolT : public Pool {
 public:
+
     using ResourceType = typename ResourceT::Type;
 
     ~PoolT() override;
@@ -32,13 +35,14 @@ public:
 
     DUK_NO_DISCARD size_t size() const;
 
-    DUK_NO_DISCARD bool empty() const;
+    DUK_NO_DISCARD bool empty() const ;
 
     DUK_NO_DISCARD ResourceT find(Id id) const;
 
     DUK_NO_DISCARD ResourceT find_or_default(Id id, const ResourceT& def) const;
 
 protected:
+
     ResourceT insert(duk::resource::Id id, const std::shared_ptr<ResourceType>& resource);
 
 private:
@@ -47,19 +51,19 @@ private:
 
 class Pools {
 public:
+
     ~Pools();
 
-    template<typename T, typename... Args>
-    T* create_pool(Args&&... args)
-        requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
+    template<typename T, typename ...Args>
+    T* create_pool(Args&&... args) requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
 
     template<typename T>
-    T* get()
-        requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
+    T* get() requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
 
     void clear();
 
 private:
+
     template<typename T>
     size_t pool_index();
 
@@ -69,9 +73,7 @@ private:
 };
 
 template<typename T, typename... Args>
-T* Pools::create_pool(Args&&... args)
-    requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>
-{
+T* Pools::create_pool(Args&& ... args) requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T> {
     const auto index = pool_index<typename T::ResourceType>();
     if (m_pools.size() <= index) {
         m_pools.resize(index + 1);
@@ -85,11 +87,9 @@ T* Pools::create_pool(Args&&... args)
 }
 
 template<typename T>
-T* Pools::get()
-    requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>
-{
+T* Pools::get() requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T> {
     const auto index = pool_index<typename T::ResourceType>();
-    if (index >= m_pools.size()) {
+    if (index >= m_pools.size()){
         return nullptr;
     }
     return dynamic_cast<T*>(m_pools.at(index).get());
@@ -149,6 +149,7 @@ bool PoolT<ResourceT>::empty() const {
 
 template<typename ResourceT>
 ResourceT PoolT<ResourceT>::insert(duk::resource::Id id, const std::shared_ptr<ResourceType>& resource) {
+
     auto [it, inserted] = m_objects.emplace(id, ResourceT(id, resource));
 
     if (!inserted) {
@@ -158,6 +159,6 @@ ResourceT PoolT<ResourceT>::insert(duk::resource::Id id, const std::shared_ptr<R
     return it->second;
 }
 
-}// namespace duk::resource
+}
 
-#endif//DUK_RESOURCE_POOL_H
+#endif //DUK_RESOURCE_POOL_H

@@ -9,13 +9,13 @@ namespace duk::cli {
 namespace detail {
 
 static std::string include_guard_name(std::string name) {
-    for (auto& c: name) {
+    for (auto& c : name) {
         c = std::toupper(c);
     }
     return name + "_H";
 }
 
-}// namespace detail
+}
 
 void generate_include_guard_start(std::ostringstream& oss, const std::string& fileName) {
     const auto includeGuard = detail::include_guard_name(fileName);
@@ -52,4 +52,4 @@ void write_file(const std::string& content, const std::string& filepath) {
     file << content;
 }
 
-}// namespace duk::cli
+}

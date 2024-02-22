@@ -8,3 +8,4 @@ namespace duk::rhi {
 RenderPass::~RenderPass() = default;
 
 }
+

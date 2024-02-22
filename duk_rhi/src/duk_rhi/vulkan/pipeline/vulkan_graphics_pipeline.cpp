@@ -3,8 +3,8 @@
 
 #include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
-#include <duk_rhi/vulkan/vulkan_flags.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
+#include <duk_rhi/vulkan/vulkan_flags.h>
 
 #include <stdexcept>
 
@@ -13,15 +13,9 @@ namespace duk::rhi {
 VkCullModeFlagBits convert_cull_mode(GraphicsPipeline::CullMode::Bits cullModeBit) {
     VkCullModeFlagBits converted;
     switch (cullModeBit) {
-        case GraphicsPipeline::CullMode::NONE:
-            converted = VK_CULL_MODE_NONE;
-            break;
-        case GraphicsPipeline::CullMode::FRONT:
-            converted = VK_CULL_MODE_FRONT_BIT;
-            break;
-        case GraphicsPipeline::CullMode::BACK:
-            converted = VK_CULL_MODE_BACK_BIT;
-            break;
+        case GraphicsPipeline::CullMode::NONE: converted = VK_CULL_MODE_NONE; break;
+        case GraphicsPipeline::CullMode::FRONT: converted = VK_CULL_MODE_FRONT_BIT; break;
+        case GraphicsPipeline::CullMode::BACK: converted = VK_CULL_MODE_BACK_BIT; break;
         default:
             throw std::invalid_argument("unhandled Pipeline::CullMode for Vulkan");
     }
@@ -35,21 +29,11 @@ VkCullModeFlags convert_cull_mode_mask(GraphicsPipeline::CullMode::Mask cullMode
 VkBlendOp convert_blend_op(GraphicsPipeline::Blend::Operator blendOperator) {
     VkBlendOp converted;
     switch (blendOperator) {
-        case GraphicsPipeline::Blend::Operator::ADD:
-            converted = VK_BLEND_OP_ADD;
-            break;
-        case GraphicsPipeline::Blend::Operator::SUBTRACT:
-            converted = VK_BLEND_OP_SUBTRACT;
-            break;
-        case GraphicsPipeline::Blend::Operator::REVERSE_SUBTRACT:
-            converted = VK_BLEND_OP_REVERSE_SUBTRACT;
-            break;
-        case GraphicsPipeline::Blend::Operator::MIN:
-            converted = VK_BLEND_OP_MIN;
-            break;
-        case GraphicsPipeline::Blend::Operator::MAX:
-            converted = VK_BLEND_OP_MAX;
-            break;
+        case GraphicsPipeline::Blend::Operator::ADD: converted = VK_BLEND_OP_ADD; break;
+        case GraphicsPipeline::Blend::Operator::SUBTRACT: converted = VK_BLEND_OP_SUBTRACT; break;
+        case GraphicsPipeline::Blend::Operator::REVERSE_SUBTRACT: converted = VK_BLEND_OP_REVERSE_SUBTRACT; break;
+        case GraphicsPipeline::Blend::Operator::MIN: converted = VK_BLEND_OP_MIN; break;
+        case GraphicsPipeline::Blend::Operator::MAX: converted = VK_BLEND_OP_MAX; break;
         default:
             throw std::invalid_argument("unhandled Pipeline::Blend::Operator for Vulkan");
     }
@@ -59,63 +43,25 @@ VkBlendOp convert_blend_op(GraphicsPipeline::Blend::Operator blendOperator) {
 VkBlendFactor convert_blend_factor(GraphicsPipeline::Blend::Factor blendFactor) {
     VkBlendFactor converted;
     switch (blendFactor) {
-        case GraphicsPipeline::Blend::Factor::ZERO:
-            converted = VK_BLEND_FACTOR_ZERO;
-            break;
-        case GraphicsPipeline::Blend::Factor::ONE:
-            converted = VK_BLEND_FACTOR_ONE;
-            break;
-        case GraphicsPipeline::Blend::Factor::SRC_COLOR:
-            converted = VK_BLEND_FACTOR_SRC_COLOR;
-            break;
-        case GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC_COLOR:
-            converted = VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-            break;
-        case GraphicsPipeline::Blend::Factor::DST_COLOR:
-            converted = VK_BLEND_FACTOR_DST_COLOR;
-            break;
-        case GraphicsPipeline::Blend::Factor::ONE_MINUS_DST_COLOR:
-            converted = VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-            break;
-        case GraphicsPipeline::Blend::Factor::SRC_ALPHA:
-            converted = VK_BLEND_FACTOR_SRC_ALPHA;
-            break;
-        case GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC_ALPHA:
-            converted = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-            break;
-        case GraphicsPipeline::Blend::Factor::DST_ALPHA:
-            converted = VK_BLEND_FACTOR_DST_ALPHA;
-            break;
-        case GraphicsPipeline::Blend::Factor::ONE_MINUS_DST_ALPHA:
-            converted = VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-            break;
-        case GraphicsPipeline::Blend::Factor::CONSTANT_COLOR:
-            converted = VK_BLEND_FACTOR_CONSTANT_COLOR;
-            break;
-        case GraphicsPipeline::Blend::Factor::ONE_MINUS_CONSTANT_COLOR:
-            converted = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
-            break;
-        case GraphicsPipeline::Blend::Factor::CONSTANT_ALPHA:
-            converted = VK_BLEND_FACTOR_CONSTANT_ALPHA;
-            break;
-        case GraphicsPipeline::Blend::Factor::ONE_MINUS_CONSTANT_ALPHA:
-            converted = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
-            break;
-        case GraphicsPipeline::Blend::Factor::SRC_ALPHA_SATURATE:
-            converted = VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
-            break;
-        case GraphicsPipeline::Blend::Factor::SRC1_COLOR:
-            converted = VK_BLEND_FACTOR_SRC1_COLOR;
-            break;
-        case GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC1_COLOR:
-            converted = VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
-            break;
-        case GraphicsPipeline::Blend::Factor::SRC1_ALPHA:
-            converted = VK_BLEND_FACTOR_SRC1_ALPHA;
-            break;
-        case GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC1_ALPHA:
-            converted = VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
-            break;
+        case GraphicsPipeline::Blend::Factor::ZERO: converted = VK_BLEND_FACTOR_ZERO; break;
+        case GraphicsPipeline::Blend::Factor::ONE: converted = VK_BLEND_FACTOR_ONE; break;
+        case GraphicsPipeline::Blend::Factor::SRC_COLOR: converted = VK_BLEND_FACTOR_SRC_COLOR; break;
+        case GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC_COLOR: converted = VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR; break;
+        case GraphicsPipeline::Blend::Factor::DST_COLOR: converted = VK_BLEND_FACTOR_DST_COLOR; break;
+        case GraphicsPipeline::Blend::Factor::ONE_MINUS_DST_COLOR: converted = VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR; break;
+        case GraphicsPipeline::Blend::Factor::SRC_ALPHA: converted = VK_BLEND_FACTOR_SRC_ALPHA; break;
+        case GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC_ALPHA: converted = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA; break;
+        case GraphicsPipeline::Blend::Factor::DST_ALPHA: converted = VK_BLEND_FACTOR_DST_ALPHA; break;
+        case GraphicsPipeline::Blend::Factor::ONE_MINUS_DST_ALPHA: converted = VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA; break;
+        case GraphicsPipeline::Blend::Factor::CONSTANT_COLOR: converted = VK_BLEND_FACTOR_CONSTANT_COLOR; break;
+        case GraphicsPipeline::Blend::Factor::ONE_MINUS_CONSTANT_COLOR: converted = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR; break;
+        case GraphicsPipeline::Blend::Factor::CONSTANT_ALPHA: converted = VK_BLEND_FACTOR_CONSTANT_ALPHA; break;
+        case GraphicsPipeline::Blend::Factor::ONE_MINUS_CONSTANT_ALPHA: converted = VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA; break;
+        case GraphicsPipeline::Blend::Factor::SRC_ALPHA_SATURATE: converted = VK_BLEND_FACTOR_SRC_ALPHA_SATURATE; break;
+        case GraphicsPipeline::Blend::Factor::SRC1_COLOR: converted = VK_BLEND_FACTOR_SRC1_COLOR; break;
+        case GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC1_COLOR: converted = VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR; break;
+        case GraphicsPipeline::Blend::Factor::SRC1_ALPHA: converted = VK_BLEND_FACTOR_SRC1_ALPHA; break;
+        case GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC1_ALPHA: converted = VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA; break;
         default:
             throw std::invalid_argument("unhandled Pipeline::Blend::Factor for Vulkan");
     }
@@ -125,39 +71,17 @@ VkBlendFactor convert_blend_factor(GraphicsPipeline::Blend::Factor blendFactor) 
 VkPrimitiveTopology convert_topology(GraphicsPipeline::Topology topology) {
     VkPrimitiveTopology converted;
     switch (topology) {
-        case GraphicsPipeline::Topology::POINT_LIST:
-            converted = VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-            break;
-        case GraphicsPipeline::Topology::LINE_LIST:
-            converted = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-            break;
-        case GraphicsPipeline::Topology::LINE_STRIP:
-            converted = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-            break;
-        case GraphicsPipeline::Topology::TRIANGLE_LIST:
-            converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-            break;
-        case GraphicsPipeline::Topology::TRIANGLE_STRIP:
-            converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-            break;
-        case GraphicsPipeline::Topology::TRIANGLE_FAN:
-            converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
-            break;
-        case GraphicsPipeline::Topology::LINE_LIST_WITH_ADJACENCY:
-            converted = VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY;
-            break;
-        case GraphicsPipeline::Topology::LINE_STRIP_WITH_ADJACENCY:
-            converted = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY;
-            break;
-        case GraphicsPipeline::Topology::TRIANGLE_LIST_WITH_ADJACENCY:
-            converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY;
-            break;
-        case GraphicsPipeline::Topology::TRIANGLE_STRIP_WITH_ADJACENCY:
-            converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY;
-            break;
-        case GraphicsPipeline::Topology::PATCH_LIST:
-            converted = VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
-            break;
+        case GraphicsPipeline::Topology::POINT_LIST: converted = VK_PRIMITIVE_TOPOLOGY_POINT_LIST; break;
+        case GraphicsPipeline::Topology::LINE_LIST: converted = VK_PRIMITIVE_TOPOLOGY_LINE_LIST; break;
+        case GraphicsPipeline::Topology::LINE_STRIP: converted = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP; break;
+        case GraphicsPipeline::Topology::TRIANGLE_LIST: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST; break;
+        case GraphicsPipeline::Topology::TRIANGLE_STRIP: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP; break;
+        case GraphicsPipeline::Topology::TRIANGLE_FAN: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN; break;
+        case GraphicsPipeline::Topology::LINE_LIST_WITH_ADJACENCY: converted = VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY; break;
+        case GraphicsPipeline::Topology::LINE_STRIP_WITH_ADJACENCY: converted = VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY; break;
+        case GraphicsPipeline::Topology::TRIANGLE_LIST_WITH_ADJACENCY: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY; break;
+        case GraphicsPipeline::Topology::TRIANGLE_STRIP_WITH_ADJACENCY: converted = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY; break;
+        case GraphicsPipeline::Topology::PATCH_LIST: converted = VK_PRIMITIVE_TOPOLOGY_PATCH_LIST; break;
         default:
             throw std::invalid_argument("unhandled Pipeline::Topology for Vulkan");
     }
@@ -167,32 +91,27 @@ VkPrimitiveTopology convert_topology(GraphicsPipeline::Topology topology) {
 VkPolygonMode convert_fill_mode(GraphicsPipeline::FillMode fillMode) {
     VkPolygonMode converted;
     switch (fillMode) {
-        case GraphicsPipeline::FillMode::FILL:
-            converted = VK_POLYGON_MODE_FILL;
-            break;
-        case GraphicsPipeline::FillMode::LINE:
-            converted = VK_POLYGON_MODE_LINE;
-            break;
-        case GraphicsPipeline::FillMode::POINT:
-            converted = VK_POLYGON_MODE_POINT;
-            break;
+        case GraphicsPipeline::FillMode::FILL: converted = VK_POLYGON_MODE_FILL; break;
+        case GraphicsPipeline::FillMode::LINE: converted = VK_POLYGON_MODE_LINE; break;
+        case GraphicsPipeline::FillMode::POINT: converted = VK_POLYGON_MODE_POINT; break;
         default:
             throw std::invalid_argument("unhandled Pipeline::FillMode for Vulkan");
     }
     return converted;
 }
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreateInfo& pipelineCreateInfo) : m_device(pipelineCreateInfo.device),
-                                                                                                             m_shader(pipelineCreateInfo.shader),
-                                                                                                             m_renderPass(pipelineCreateInfo.renderPass),
-                                                                                                             m_viewport(pipelineCreateInfo.viewport),
-                                                                                                             m_scissor(pipelineCreateInfo.scissor),
-                                                                                                             m_cullModeMask(pipelineCreateInfo.cullModeMask),
-                                                                                                             m_blend(pipelineCreateInfo.blend),
-                                                                                                             m_topology(pipelineCreateInfo.topology),
-                                                                                                             m_fillMode(pipelineCreateInfo.fillMode),
-                                                                                                             m_depthTesting(pipelineCreateInfo.depthTesting),
-                                                                                                             m_hash(duk::hash::kUndefinedHash) {
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreateInfo& pipelineCreateInfo) :
+    m_device(pipelineCreateInfo.device),
+    m_shader(pipelineCreateInfo.shader),
+    m_renderPass(pipelineCreateInfo.renderPass),
+    m_viewport(pipelineCreateInfo.viewport),
+    m_scissor(pipelineCreateInfo.scissor),
+    m_cullModeMask(pipelineCreateInfo.cullModeMask),
+    m_blend(pipelineCreateInfo.blend),
+    m_topology(pipelineCreateInfo.topology),
+    m_fillMode(pipelineCreateInfo.fillMode),
+    m_depthTesting(pipelineCreateInfo.depthTesting),
+    m_hash(duk::hash::kUndefinedHash) {
     if (!m_shader->is_graphics_shader()) {
         throw std::invalid_argument("invalid shader type for GraphicsPipeline");
     }
@@ -237,7 +156,8 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
         auto& shaderModules = m_shader->shader_modules();
         shaderStages.reserve(shaderModules.size());
 
-        for (auto& [moduleType, module]: shaderModules) {
+        for (auto&[moduleType, module] : shaderModules) {
+
             VkPipelineShaderStageCreateInfo shaderStageCreateInfo = {};
             shaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStageCreateInfo.stage = convert_module(moduleType);
@@ -273,8 +193,8 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
     viewport.maxDepth = m_viewport.maxDepth;
 
     VkRect2D scissor = {};
-    scissor.offset = {m_scissor.offset.x, m_scissor.offset.y};
-    scissor.extent = {m_scissor.extent.x, m_scissor.extent.y};
+    scissor.offset = { m_scissor.offset.x, m_scissor.offset.y };
+    scissor.extent = { m_scissor.extent.x, m_scissor.extent.y };
 
     VkPipelineViewportStateCreateInfo viewportState = {};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -299,7 +219,7 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
     multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
     VkPipelineColorBlendAttachmentState blendAttachmentState = {};
-    blendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    blendAttachmentState.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |  VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     if (m_blend.enabled) {
         blendAttachmentState.blendEnable = VK_TRUE;
         blendAttachmentState.srcColorBlendFactor = convert_blend_factor(m_blend.srcColorBlendFactor);
@@ -308,14 +228,15 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
         blendAttachmentState.srcAlphaBlendFactor = convert_blend_factor(m_blend.srcAlphaBlendFactor);
         blendAttachmentState.dstAlphaBlendFactor = convert_blend_factor(m_blend.dstAlphaBlendFactor);
         blendAttachmentState.alphaBlendOp = convert_blend_op(m_blend.alphaBlendOp);
-    } else {
+    }
+    else {
         blendAttachmentState.blendEnable = VK_FALSE;
         blendAttachmentState.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
-        blendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;// Optional
-        blendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD;            // Optional
+        blendAttachmentState.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
+        blendAttachmentState.colorBlendOp = VK_BLEND_OP_ADD; // Optional
         blendAttachmentState.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
-        blendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;// Optional
-        blendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD;            // Optional
+        blendAttachmentState.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
+        blendAttachmentState.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
     }
 
     std::vector<VkPipelineColorBlendAttachmentState> blendAttachments(m_renderPass->color_attachment_count(), blendAttachmentState);
@@ -333,7 +254,8 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
         depthStencil.depthTestEnable = VK_TRUE;
         depthStencil.depthWriteEnable = VK_TRUE;
         depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
-    } else {
+    }
+    else {
         depthStencil.depthTestEnable = VK_FALSE;
         depthStencil.depthWriteEnable = VK_FALSE;
         depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
@@ -429,4 +351,4 @@ void VulkanGraphicsPipeline::update_hash() {
     m_hash = hash_of(m_viewport, m_scissor, m_blend, m_shader, m_renderPass, m_cullModeMask, m_depthTesting);
 }
 
-}// namespace duk::rhi
+}

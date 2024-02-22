@@ -10,11 +10,14 @@ namespace duk::renderer {
 
 class Brush {
 public:
+
     virtual ~Brush();
 
     virtual void draw(duk::rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance) = 0;
+
 };
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_BRUSH_H
+#endif // DUK_RENDERER_BRUSH_H
+

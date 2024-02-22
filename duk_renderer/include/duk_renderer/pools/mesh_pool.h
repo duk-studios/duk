@@ -5,8 +5,8 @@
 #ifndef DUK_RENDERER_MESH_POOL_H
 #define DUK_RENDERER_MESH_POOL_H
 
-#include <duk_renderer/brushes/mesh.h>
 #include <duk_resource/pool.h>
+#include <duk_renderer/brushes/mesh.h>
 
 namespace duk::renderer {
 
@@ -15,6 +15,7 @@ static constexpr duk::resource::Id kQuadMeshId(10001);
 static constexpr duk::resource::Id kCubeMeshId(10002);
 static constexpr duk::resource::Id kSphereMeshId(10003);
 static constexpr duk::resource::Id kConeMeshId(10004);
+
 
 class Renderer;
 
@@ -26,6 +27,7 @@ struct MeshPoolCreateInfo {
 
 class MeshPool : public duk::resource::PoolT<MeshResource> {
 public:
+
     explicit MeshPool(const MeshPoolCreateInfo& meshPoolCreateInfo);
 
     ~MeshPool() override;
@@ -48,6 +50,6 @@ private:
     std::shared_ptr<MeshBufferPool> m_meshBufferPool;
 };
 
-}// namespace duk::renderer
+} // duk::renderer
 
-#endif//DUK_RENDERER_MESH_POOL_H
+#endif //DUK_RENDERER_MESH_POOL_H

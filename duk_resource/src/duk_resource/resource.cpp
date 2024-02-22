@@ -43,4 +43,4 @@ void Resource::reset() {
     m_id = Id(0);
 }
 
-}// namespace duk::resource
+}

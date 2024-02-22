@@ -5,8 +5,8 @@
 #define DUK_RENDERER_IMAGE_H
 
 #include <duk_resource/resource.h>
-#include <duk_rhi/descriptor.h>
 #include <duk_rhi/image.h>
+#include <duk_rhi/descriptor.h>
 
 namespace duk::renderer {
 
@@ -17,8 +17,9 @@ struct ImageCreateInfo {
     const duk::rhi::ImageDataSource* imageDataSource;
 };
 
-class Image {
+class Image  {
 public:
+
     explicit Image(const ImageCreateInfo& imageCreateInfo);
 
     DUK_NO_DISCARD duk::rhi::PixelFormat format() const;
@@ -39,6 +40,7 @@ private:
 
 using ImageResource = duk::resource::ResourceT<Image>;
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_IMAGE_H
+#endif // DUK_RENDERER_IMAGE_H
+

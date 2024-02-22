@@ -1,8 +1,8 @@
 /// 20/05/2023
 /// descriptor.cpp
 
-#include <duk_rhi/buffer.h>
 #include <duk_rhi/descriptor.h>
+#include <duk_rhi/buffer.h>
 
 #include <cassert>
 #include <stdexcept>
@@ -69,12 +69,12 @@ duk::hash::Hash Descriptor::hash() const {
 }
 
 Image* Descriptor::image() const {
-    assert(m_type == DescriptorType::IMAGE || m_type == DescriptorType::IMAGE_SAMPLER || m_type == DescriptorType::STORAGE_IMAGE);
+    assert(m_type == DescriptorType::IMAGE || m_type == DescriptorType::IMAGE_SAMPLER  || m_type == DescriptorType::STORAGE_IMAGE);
     return m_data.imageDescriptor.image;
 }
 
 Image::Layout Descriptor::image_layout() const {
-    assert(m_type == DescriptorType::IMAGE || m_type == DescriptorType::IMAGE_SAMPLER || m_type == DescriptorType::STORAGE_IMAGE);
+    assert(m_type == DescriptorType::IMAGE || m_type == DescriptorType::IMAGE_SAMPLER  || m_type == DescriptorType::STORAGE_IMAGE);
     return m_data.imageDescriptor.layout;
 }
 
@@ -112,4 +112,4 @@ void Descriptor::update_hash() {
     m_hash = hash;
 }
 
-}// namespace duk::rhi
+}

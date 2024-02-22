@@ -12,6 +12,7 @@ namespace duk::log {
 
 class Sink {
 public:
+
     explicit Sink(Level minimumLevel);
 
     virtual ~Sink();
@@ -25,6 +26,7 @@ protected:
     Level m_level;
 };
 
-}// namespace duk::log
+}
 
-#endif// DUK_LOG_SINK_H
+#endif // DUK_LOG_SINK_H
+

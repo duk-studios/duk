@@ -5,8 +5,8 @@
 #ifndef DUK_RENDERER_SPRITE_DATA_SOURCE_H
 #define DUK_RENDERER_SPRITE_DATA_SOURCE_H
 
-#include <duk_hash/data_source.h>
 #include <duk_resource/resource.h>
+#include <duk_hash/data_source.h>
 
 namespace duk::renderer {
 
@@ -18,6 +18,7 @@ struct SpriteDataSourceCreateInfo {
 
 class SpriteDataSource : public duk::hash::DataSource {
 public:
+
     explicit SpriteDataSource(const SpriteDataSourceCreateInfo& spriteDataSourceCreateInfo);
 
     DUK_NO_DISCARD duk::resource::Id image_id() const;
@@ -27,6 +28,7 @@ public:
     DUK_NO_DISCARD glm::vec2 image_max() const;
 
 protected:
+
     DUK_NO_DISCARD duk::hash::Hash calculate_hash() const override;
 
 private:
@@ -35,6 +37,6 @@ private:
     glm::vec2 m_imageMax;
 };
 
-}// namespace duk::renderer
+}
 
-#endif//DUK_RENDERER_SPRITE_DATA_SOURCE_H
+#endif //DUK_RENDERER_SPRITE_DATA_SOURCE_H

@@ -1,32 +1,33 @@
 /// 21/04/2023
 /// vulkan_command_interface.cpp
 
-#include "duk_tools/fixed_vector.h"
-#include <duk_rhi/vulkan/command/vulkan_command.h>
 #include <duk_rhi/vulkan/command/vulkan_command_buffer.h>
 #include <duk_rhi/vulkan/command/vulkan_command_queue.h>
-#include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
-#include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
-#include <duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.h>
+#include <duk_rhi/vulkan/command/vulkan_command.h>
+#include <duk_rhi/vulkan/vulkan_rhi.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
-#include <duk_rhi/vulkan/vulkan_rhi.h>
+#include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
+#include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
+#include <duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.h>
+#include "duk_tools/fixed_vector.h"
 
 namespace duk::rhi {
 
-VulkanCommandBuffer::VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& commandBufferCreateInfo) : m_commandQueue(commandBufferCreateInfo.commandQueue),
-                                                                                                         m_currentImagePtr(commandBufferCreateInfo.currentImagePtr),
-                                                                                                         m_submitter([this](const auto& params) { submit(params); }, true, true, commandBufferCreateInfo.frameCount, commandBufferCreateInfo.currentFramePtr, commandBufferCreateInfo.device),
-                                                                                                         m_currentPipelineLayout(VK_NULL_HANDLE) {
+VulkanCommandBuffer::VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& commandBufferCreateInfo) :
+    m_commandQueue(commandBufferCreateInfo.commandQueue),
+    m_currentImagePtr(commandBufferCreateInfo.currentImagePtr),
+    m_submitter([this](const auto& params) { submit(params); }, true, true, commandBufferCreateInfo.frameCount, commandBufferCreateInfo.currentFramePtr, commandBufferCreateInfo.device),
+    m_currentPipelineLayout(VK_NULL_HANDLE) {
     m_commandBuffers.resize(commandBufferCreateInfo.frameCount);
-    for (auto& commandBuffer: m_commandBuffers) {
+    for (auto& commandBuffer : m_commandBuffers) {
         commandBuffer = m_commandQueue->allocate_command_buffer();
     }
 }
 
 VulkanCommandBuffer::~VulkanCommandBuffer() {
-    for (auto& commandBuffer: m_commandBuffers) {
+    for (auto& commandBuffer : m_commandBuffers) {
         m_commandQueue->free_command_buffer(commandBuffer);
     }
 }
@@ -51,7 +52,7 @@ void VulkanCommandBuffer::submit(const VulkanCommandParams& params) {
     }
 
     // only signal one semaphore per submission
-    if (params.signalSemaphore) {
+    if (params.signalSemaphore){
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &params.signalSemaphore;
     }
@@ -78,6 +79,7 @@ void VulkanCommandBuffer::end() {
 }
 
 void VulkanCommandBuffer::begin_render_pass(RenderPass* renderPass, FrameBuffer* frameBuffer) {
+
     auto vulkanFramebuffer = (VulkanFrameBuffer*)frameBuffer;
     auto vulkanRenderPass = (VulkanRenderPass*)renderPass;
 
@@ -185,8 +187,9 @@ void VulkanCommandBuffer::dispatch(uint32_t groupCountX, uint32_t groupCountY, u
 }
 
 void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier& barrier) {
-    auto imageIndex = *m_currentImagePtr;
 
+    auto imageIndex = *m_currentImagePtr;
+    
     for (int i = 0; i < barrier.bufferMemoryBarrierCount; i++) {
         VkBufferMemoryBarrier vkBufferMemoryBarrier = {};
         auto& dukBufferMemoryBarrier = barrier.bufferMemoryBarriers[i];
@@ -208,17 +211,17 @@ void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier&
         }
 
         vkCmdPipelineBarrier(m_currentCommandBuffer,
-                             convert_pipeline_stage_mask(dukBufferMemoryBarrier.srcStageMask),
-                             convert_pipeline_stage_mask(dukBufferMemoryBarrier.dstStageMask),
-                             0,
-                             0,
-                             nullptr,
-                             1,
-                             &vkBufferMemoryBarrier,
-                             0,
-                             nullptr);
+                    convert_pipeline_stage_mask(dukBufferMemoryBarrier.srcStageMask),
+                    convert_pipeline_stage_mask(dukBufferMemoryBarrier.dstStageMask),
+                    0,
+                    0,
+                    nullptr,
+                    1,
+                    &vkBufferMemoryBarrier,
+                    0,
+                    nullptr);        
     }
-
+    
     for (int i = 0; i < barrier.imageMemoryBarrierCount; i++) {
         VkImageMemoryBarrier vkImageMemoryBarrier = {};
         auto& dukImageMemoryBarrier = barrier.imageMemoryBarriers[i];
@@ -246,15 +249,15 @@ void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier&
         }
 
         vkCmdPipelineBarrier(m_currentCommandBuffer,
-                             convert_pipeline_stage_mask(dukImageMemoryBarrier.srcStageMask),
-                             convert_pipeline_stage_mask(dukImageMemoryBarrier.dstStageMask),
-                             0,
-                             0,
-                             nullptr,
-                             0,
-                             nullptr,
-                             1,
-                             &vkImageMemoryBarrier);
+            convert_pipeline_stage_mask(dukImageMemoryBarrier.srcStageMask),
+            convert_pipeline_stage_mask(dukImageMemoryBarrier.dstStageMask),
+            0,
+            0,
+            nullptr,
+            0,
+            nullptr,
+            1,
+            &vkImageMemoryBarrier);
     }
 }
 
@@ -262,4 +265,4 @@ Submitter* VulkanCommandBuffer::submitter_ptr() {
     return &m_submitter;
 }
 
-}// namespace duk::rhi
+}

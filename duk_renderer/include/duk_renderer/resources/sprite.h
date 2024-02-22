@@ -5,8 +5,8 @@
 #ifndef DUK_RENDERER_SPRITE_H
 #define DUK_RENDERER_SPRITE_H
 
-#include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/resources/sprite_data_source.h>
+#include <duk_renderer/pools/image_pool.h>
 
 namespace duk::renderer {
 
@@ -17,6 +17,7 @@ struct SpriteCreateInfo {
 
 class Sprite {
 public:
+
     explicit Sprite(const SpriteCreateInfo& spriteCreateInfo);
 
     ~Sprite();
@@ -42,7 +43,7 @@ private:
 
 using SpriteResource = duk::resource::ResourceT<Sprite>;
 
-}// namespace duk::renderer
+}
 
 namespace duk::resource {
 
@@ -51,6 +52,6 @@ void solve_resources(Solver* solver, duk::renderer::Sprite& sprite) {
     solver->solve(sprite.image());
 }
 
-}// namespace duk::resource
+}
 
-#endif//DUK_RENDERER_SPRITE_H
+#endif //DUK_RENDERER_SPRITE_H

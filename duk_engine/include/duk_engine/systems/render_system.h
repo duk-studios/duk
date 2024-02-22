@@ -19,8 +19,9 @@ protected:
     void update(Engine& engine) override;
 
     void exit(Engine& engine) override;
+
 };
 
-}// namespace duk::engine
+}
 
-#endif//DUK_ENGINE_RENDER_SYSTEM_H
+#endif //DUK_ENGINE_RENDER_SYSTEM_H

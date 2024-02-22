@@ -7,6 +7,7 @@
 #include <duk_log/log.h>
 
 int main() {
+
     duk::sample::ApplicationCreateInfo applicationCreateInfo = {};
     applicationCreateInfo.name = "Quacker";
 
@@ -14,7 +15,8 @@ int main() {
         duk::sample::Application application(applicationCreateInfo);
 
         application.run();
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e) {
         duk::log::fatal("exception caught: {}", e.what());
 
         // guarantees that every log is printed

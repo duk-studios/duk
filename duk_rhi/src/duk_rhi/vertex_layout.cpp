@@ -13,31 +13,17 @@ namespace duk::rhi {
 size_t VertexInput::size_of(VertexInput::Format type) {
     size_t result;
     switch (type) {
-        case Format::UNDEFINED:
-            result = 0;
-            break;
+        case Format::UNDEFINED: result = 0; break;
         case Format::UINT8:
-        case Format::INT8:
-            result = 1;
-            break;
+        case Format::INT8: result = 1; break;
         case Format::UINT16:
-        case Format::INT16:
-            result = 2;
-            break;
+        case Format::INT16: result = 2; break;
         case Format::UINT32:
         case Format::INT32:
-        case Format::FLOAT32:
-            result = 4;
-            break;
-        case Format::VEC2:
-            result = 8;
-            break;
-        case Format::VEC3:
-            result = 12;
-            break;
-        case Format::VEC4:
-            result = 16;
-            break;
+        case Format::FLOAT32: result = 4; break;
+        case Format::VEC2: result = 8; break;
+        case Format::VEC3: result = 12; break;
+        case Format::VEC4: result = 16; break;
     }
     return result;
 }
@@ -46,7 +32,9 @@ size_t VertexInput::size_of(VertexInput::Format type) {
 
 VertexLayout::VertexLayout() = default;
 
-VertexLayout::VertexLayout(const std::initializer_list<VertexInput::Format>& formats) : m_formats(formats) {
+VertexLayout::VertexLayout(const std::initializer_list<VertexInput::Format>& formats) :
+    m_formats(formats) {
+
 }
 
 void VertexLayout::insert(VertexInput::Format format) {
@@ -63,7 +51,7 @@ size_t VertexLayout::size() const {
 
 size_t VertexLayout::byte_size() const {
     size_t size = 0;
-    for (auto& attribute: m_formats) {
+    for (auto& attribute : m_formats){
         size += VertexInput::size_of(attribute);
     }
     return size;
@@ -89,4 +77,4 @@ std::vector<VertexInput::Format>::const_iterator VertexLayout::end() const {
     return m_formats.cend();
 }
 
-}// namespace duk::rhi
+}

@@ -5,8 +5,8 @@
 #ifndef DUK_RHI_VERTEX_LAYOUT_H
 #define DUK_RHI_VERTEX_LAYOUT_H
 
-#include <duk_hash/hash.h>
 #include <duk_macros/macros.h>
+#include <duk_hash/hash.h>
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
@@ -41,6 +41,7 @@ public:
 
 class VertexLayout {
 public:
+
     using Container = std::vector<VertexInput::Format>;
 
     VertexLayout();
@@ -74,63 +75,53 @@ template<>
 inline VertexInput::Format VertexInput::format_of<uint8_t>() {
     return VertexInput::Format::UINT8;
 }
-
 //INT8,
 template<>
 inline VertexInput::Format VertexInput::format_of<int8_t>() {
     return VertexInput::Format::INT8;
 }
-
 //UINT16,
 template<>
 inline VertexInput::Format VertexInput::format_of<uint16_t>() {
     return VertexInput::Format::UINT16;
 }
-
 //INT16,
 template<>
 inline VertexInput::Format VertexInput::format_of<int16_t>() {
     return VertexInput::Format::INT16;
 }
-
 //UINT32,
 template<>
 inline VertexInput::Format VertexInput::format_of<uint32_t>() {
     return VertexInput::Format::UINT32;
 }
-
 //INT32,
 template<>
 inline VertexInput::Format VertexInput::format_of<int32_t>() {
     return VertexInput::Format::INT32;
 }
-
 //FLOAT,
 template<>
 inline VertexInput::Format VertexInput::format_of<float>() {
     return VertexInput::Format::FLOAT32;
 }
-
 //VEC2,
 template<>
 inline VertexInput::Format VertexInput::format_of<glm::vec2>() {
     return VertexInput::Format::VEC2;
 }
-
 //VEC3,
 template<>
 inline VertexInput::Format VertexInput::format_of<glm::vec3>() {
     return VertexInput::Format::VEC3;
 }
-
 //VEC4
 template<>
 inline VertexInput::Format VertexInput::format_of<glm::vec4>() {
     return VertexInput::Format::VEC4;
 }
 
-}// namespace duk::rhi
-
+}
 namespace std {
 template<>
 struct hash<duk::rhi::VertexLayout> {
@@ -140,5 +131,5 @@ struct hash<duk::rhi::VertexLayout> {
         return hash;
     }
 };
-}// namespace std
-#endif//DUK_RHI_VERTEX_LAYOUT_H
+}
+#endif //DUK_RHI_VERTEX_LAYOUT_H

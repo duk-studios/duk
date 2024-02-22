@@ -9,8 +9,8 @@
 
 #include <duk_tools/fixed_vector.h>
 
-#include <cmath>
 #include <cstdint>
+#include <cmath>
 #include <numbers>
 
 namespace duk::renderer {
@@ -49,6 +49,7 @@ public:
     void flush();
 
 private:
+
     T* ptr_at(size_t index);
 
     const T* const_ptr_at(size_t index) const;
@@ -60,8 +61,9 @@ private:
 };
 
 template<typename T>
-StorageBuffer<T>::StorageBuffer(const StorageBufferCreateInfo& storageBufferCreateInfo) : m_rhi(storageBufferCreateInfo.rhi),
-                                                                                          m_size(0) {
+StorageBuffer<T>::StorageBuffer(const StorageBufferCreateInfo& storageBufferCreateInfo) :
+    m_rhi(storageBufferCreateInfo.rhi),
+    m_size(0) {
     duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
     bufferCreateInfo.commandQueue = storageBufferCreateInfo.commandQueue;
     bufferCreateInfo.type = rhi::Buffer::Type::STORAGE;
@@ -105,7 +107,7 @@ T& StorageBuffer<T>::next() {
         m_buffer->resize(std::ceil(m_size * std::numbers::phi_v<float>));
     }
     auto ptr = ptr_at(m_size++);
-    ::new (ptr) T();
+    ::new(ptr) T();
     return *ptr;
 }
 
@@ -139,6 +141,7 @@ const T* StorageBuffer<T>::const_ptr_at(size_t index) const {
     return reinterpret_cast<const T*>(m_buffer->read_ptr(index * sizeof(T)));
 }
 
-}// namespace duk::renderer
+}
 
-#endif// DUK_RENDERER_STORAGE_BUFFER_H
+#endif // DUK_RENDERER_STORAGE_BUFFER_H
+

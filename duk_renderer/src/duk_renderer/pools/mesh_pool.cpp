@@ -2,8 +2,8 @@
 // Created by rov on 11/21/2023.
 //
 
-#include <duk_renderer/brushes/mesh_data_source.h>
 #include <duk_renderer/pools/mesh_pool.h>
+#include <duk_renderer/brushes/mesh_data_source.h>
 #include <duk_renderer/renderer.h>
 
 #include <glm/ext/scalar_constants.hpp>
@@ -17,6 +17,7 @@ namespace detail {
 using DefaultMeshDataSource = duk::renderer::MeshDataSourceT<duk::renderer::VertexNormalUV, uint16_t>;
 
 static void calculate_normals(std::vector<DefaultMeshDataSource::VertexType>& vertices, const std::vector<DefaultMeshDataSource::IndexType>& indices) {
+
     for (uint32_t i = 0; i < indices.size(); i += 3) {
         auto idx0 = indices[i];
         auto idx1 = indices[i + 1];
@@ -55,49 +56,49 @@ static DefaultMeshDataSource cube_mesh_data_source() {
     std::array<DefaultMeshDataSource::VertexType, 24> vertices = {};
 
     // front
-    vertices[0] = {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}};
-    vertices[1] = {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}};
-    vertices[2] = {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}};
-    vertices[3] = {{0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}};
+    vertices[0] = {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 1.0f}};
+    vertices[1] = {{ 0.5f, -0.5f, 0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 1.0f}};
+    vertices[2] = {{-0.5f,  0.5f, 0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 0.0f}};
+    vertices[3] = {{ 0.5f,  0.5f, 0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 0.0f}};
 
     // back
-    vertices[4] = {{0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}};
+    vertices[4] = {{ 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}};
     vertices[5] = {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}};
-    vertices[6] = {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}};
-    vertices[7] = {{-0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}};
+    vertices[6] = {{ 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}};
+    vertices[7] = {{-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}};
 
     // left
-    vertices[8] = {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
-    vertices[9] = {{-0.5f, -0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}};
-    vertices[10] = {{-0.5f, 0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
-    vertices[11] = {{-0.5f, 0.5f, 0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[8] =  {{-0.5f, -0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[9] =  {{-0.5f, -0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}};
+    vertices[10] = {{-0.5f,  0.5f, -0.5f}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[11] = {{-0.5f,  0.5f,  0.5f}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
 
     // right
-    vertices[12] = {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[12] = {{0.5f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}};
     vertices[13] = {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}};
-    vertices[14] = {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
-    vertices[15] = {{0.5f, 0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[14] = {{0.5f,  0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[15] = {{0.5f,  0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}};
 
     // top
-    vertices[16] = {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}};
-    vertices[17] = {{0.5f, 0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}};
+    vertices[16] = {{-0.5f, 0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}};
+    vertices[17] = {{ 0.5f, 0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}};
     vertices[18] = {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}};
-    vertices[19] = {{0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[19] = {{ 0.5f, 0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}};
 
     // bottom
     vertices[20] = {{-0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}};
-    vertices[21] = {{0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}};
-    vertices[22] = {{-0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}};
-    vertices[23] = {{0.5f, -0.5f, 0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}};
+    vertices[21] = {{ 0.5f, -0.5f, -0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}};
+    vertices[22] = {{-0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}};
+    vertices[23] = {{ 0.5f, -0.5f,  0.5f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}};
 
     meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
     std::array<DefaultMeshDataSource::IndexType, 36> indices = {
-            0, 2, 1, 1, 2, 3,      // front
-            4, 6, 5, 5, 6, 7,      // back
-            8, 10, 9, 9, 10, 11,   // right
-            12, 14, 13, 13, 14, 15,// left
-            16, 18, 17, 17, 18, 19,// top
+            0, 2, 1, 1, 2, 3, // front
+            4, 6, 5, 5, 6, 7, // back
+            8, 10, 9, 9, 10, 11, // right
+            12, 14, 13, 13, 14, 15, // left
+            16, 18, 17, 17, 18, 19, // top
             20, 22, 21, 21, 22, 23 // bottom
     };
 
@@ -183,7 +184,8 @@ static DefaultMeshDataSource cone_mesh_data_source(uint32_t segments) {
         if (i % 2) {
             vertex.position = glm::vec3(0, 1, 0);
             vertex.uv = glm::vec2(1.0f - percent, 0.0f);
-        } else {
+        }
+        else {
             float angle = percent * glm::pi<float>() * 2;
             float x = cosf(angle);
             float z = sinf(angle);
@@ -235,6 +237,7 @@ static DefaultMeshDataSource cone_mesh_data_source(uint32_t segments) {
         indices.push_back(idx2);
     }
 
+
     meshDataSource.insert_vertices(vertices.begin(), vertices.end());
 
     meshDataSource.insert_indices(indices.begin(), indices.end());
@@ -244,9 +247,10 @@ static DefaultMeshDataSource cone_mesh_data_source(uint32_t segments) {
     return meshDataSource;
 }
 
-}// namespace detail
+}
 
 MeshPool::MeshPool(const MeshPoolCreateInfo& meshPoolCreateInfo) {
+
     {
         auto renderer = meshPoolCreateInfo.renderer;
         duk::renderer::MeshBufferPoolCreateInfo meshBufferPoolCreateInfo = {};
@@ -306,4 +310,4 @@ MeshResource MeshPool::cone() const {
     return m_cone;
 }
 
-}// namespace duk::renderer
+} // duk::renderer

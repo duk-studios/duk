@@ -15,4 +15,5 @@ enum Limits : uint64_t {
 
 }
 
-#endif// DUK_SCENE_LIMITS_H
+#endif // DUK_SCENE_LIMITS_H
+

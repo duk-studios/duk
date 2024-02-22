@@ -19,6 +19,7 @@ struct SpriteBrushCreateInfo {
 
 class SpriteBrush : public Brush {
 public:
+
     explicit SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo);
 
     void push(const Sprite* sprite, const glm::mat4& model);
@@ -42,6 +43,7 @@ struct SpriteBrushPoolCreateInfo {
 
 class SpriteBrushPool {
 public:
+
     explicit SpriteBrushPool(const SpriteBrushPoolCreateInfo& spriteBrushPoolCreateInfo);
 
     DUK_NO_DISCARD SpriteBrush* get(uint32_t spriteHandle);
@@ -55,6 +57,6 @@ private:
     size_t m_spriteBrushesInUse;
 };
 
-}// namespace duk::renderer
+}
 
-#endif//DUK_RENDERER_SPRITE_BRUSH_H
+#endif //DUK_RENDERER_SPRITE_BRUSH_H

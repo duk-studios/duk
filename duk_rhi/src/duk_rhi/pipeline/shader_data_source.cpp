@@ -50,4 +50,4 @@ bool ShaderDataSource::valid_compute_shader() const {
     return hasCompute && onlyHasCompute;
 }
 
-}// namespace duk::rhi
+}

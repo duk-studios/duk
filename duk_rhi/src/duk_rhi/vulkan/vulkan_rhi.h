@@ -6,16 +6,16 @@
 #define DUK_RHI_VULKAN_RENDERER_H
 
 #include <duk_rhi/rhi.h>
-#include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 #include <duk_rhi/vulkan/vulkan_debug_messenger.h>
-#include <duk_rhi/vulkan/vulkan_descriptor_set.h>
-#include <duk_rhi/vulkan/vulkan_events.h>
-#include <duk_rhi/vulkan/vulkan_frame_buffer.h>
+#include <duk_rhi/vulkan/vulkan_rhi_capabilities.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
-#include <duk_rhi/vulkan/vulkan_resource_manager.h>
-#include <duk_rhi/vulkan/vulkan_rhi_capabilities.h>
+#include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 #include <duk_rhi/vulkan/vulkan_swapchain.h>
+#include <duk_rhi/vulkan/vulkan_frame_buffer.h>
+#include <duk_rhi/vulkan/vulkan_events.h>
+#include <duk_rhi/vulkan/vulkan_resource_manager.h>
+#include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 
 namespace duk::rhi {
 
@@ -27,6 +27,7 @@ struct VulkanRHICreateInfo {
 
 class VulkanRHI : public RHI {
 public:
+
     explicit VulkanRHI(const VulkanRHICreateInfo& vulkanRendererCreateInfo);
 
     ~VulkanRHI() override;
@@ -79,6 +80,7 @@ private:
     void create_sampler_cache();
 
 private:
+
     VkInstance m_instance;
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;
     std::unique_ptr<VulkanRendererCapabilities> m_rendererCapabilities;
@@ -95,8 +97,9 @@ private:
 
     uint32_t m_currentFrame;
     VulkanPrepareFrameEvent m_prepareFrameEvent;
+
 };
 
-}// namespace duk::rhi
+}
 
-#endif//DUK_RHI_VULKAN_RENDERER_H
+#endif //DUK_RHI_VULKAN_RENDERER_H
