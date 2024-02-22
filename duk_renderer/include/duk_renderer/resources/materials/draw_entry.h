@@ -64,6 +64,5 @@ inline SortKey SortKey::sort_key(const SpriteEntry& spriteEntry) {
     return spriteEntry.sortKey;
 }
 
-}
-#endif // DUK_RENDERER_PAINT_ENTRY_H
-
+}// namespace duk::renderer
+#endif// DUK_RENDERER_PAINT_ENTRY_H

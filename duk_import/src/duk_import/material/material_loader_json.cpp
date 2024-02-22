@@ -4,8 +4,8 @@
 
 #include <duk_import/material/material_loader_json.h>
 #include <duk_json/types.h>
-#include <duk_tools/file.h>
 #include <duk_renderer/pools/material_pool.h>
+#include <duk_tools/file.h>
 
 #include <fstream>
 #include <regex>
@@ -32,14 +32,13 @@ std::unique_ptr<duk::renderer::MaterialDataSource> parse_material(const rapidjso
     throw std::runtime_error("unsupported material for parsing");
 }
 
-}
+}// namespace detail
 
 bool MaterialLoaderJson::accepts(const std::filesystem::path& path) {
     return path.extension() == ".mat";
 }
 
 std::unique_ptr<duk::renderer::MaterialDataSource> MaterialLoaderJson::load(const std::filesystem::path& path) {
-
     auto content = duk::tools::File::load_text(path.string().c_str());
 
     rapidjson::Document document;
@@ -51,4 +50,4 @@ std::unique_ptr<duk::renderer::MaterialDataSource> MaterialLoaderJson::load(cons
     return detail::parse_material(root);
 }
 
-}
+}// namespace duk::import

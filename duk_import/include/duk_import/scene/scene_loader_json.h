@@ -11,13 +11,11 @@ namespace duk::import {
 
 class SceneLoaderJson : public ResourceLoader<duk::scene::Scene> {
 public:
-
     bool accepts(const std::filesystem::path& path) override;
 
     std::unique_ptr<duk::scene::Scene> load(const std::filesystem::path& path) override;
-
 };
 
-}
+}// namespace duk::import
 
-#endif //DUK_IMPORT_SCENE_IMPORTER_JSON_H
+#endif//DUK_IMPORT_SCENE_IMPORTER_JSON_H

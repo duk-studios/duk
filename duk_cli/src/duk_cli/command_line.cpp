@@ -25,12 +25,7 @@ Usage:
 std::unique_ptr<Command> make_json_generate_command(int argc, const char* argv[]) {
     cxxopts::Options options("duk json generate");
 
-    options.add_options()
-        ("s, source", "Source file to parse", cxxopts::value<std::string>())
-        ("o, output", "Output file with generated methods", cxxopts::value<std::string>())
-        ("n, namespace", "Namespace for generated methods", cxxopts::value<std::string>())
-        ("i, includes", "Additional includes for generated file", cxxopts::value<std::vector<std::string>>())
-        ;
+    options.add_options()("s, source", "Source file to parse", cxxopts::value<std::string>())("o, output", "Output file with generated methods", cxxopts::value<std::string>())("n, namespace", "Namespace for generated methods", cxxopts::value<std::string>())("i, includes", "Additional includes for generated file", cxxopts::value<std::vector<std::string>>());
 
     auto result = options.parse(argc, argv);
 
@@ -41,7 +36,6 @@ std::unique_ptr<Command> make_json_generate_command(int argc, const char* argv[]
     jsonCommandCreateInfo.additionalIncludes = result["includes"].as<std::vector<std::string>>();
 
     return std::make_unique<JsonCommand>(jsonCommandCreateInfo);
-
 }
 
 std::unique_ptr<Command> make_json_command(int argc, const char* argv[]) {
@@ -53,18 +47,16 @@ std::unique_ptr<Command> make_json_command(int argc, const char* argv[]) {
 
     if (commandType == "generate") {
         return make_json_generate_command(argc - 1, argv + 1);
-    }
-    else {
+    } else {
         throw std::invalid_argument("unknown json command: " + commandType);
     }
 }
 
-}
+}// namespace detail
 
 Command::~Command() = default;
 
 CommandLine::CommandLine(int argc, const char* argv[]) {
-
     if (argc < 2) {
         throw std::invalid_argument("insufficient arguments");
     }
@@ -73,15 +65,13 @@ CommandLine::CommandLine(int argc, const char* argv[]) {
 
     if (commandName == "json") {
         m_command = detail::make_json_command(argc - 1, argv + 1);
-    }
-    else {
+    } else {
         throw std::invalid_argument("unknown command: " + commandName);
     }
-
 }
 
 Command* CommandLine::command() const {
     return m_command.get();
 }
 
-}
+}// namespace duk::cli

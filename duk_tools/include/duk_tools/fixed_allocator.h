@@ -25,13 +25,13 @@ public:
     static constexpr const_pointer kInvalidPointer = ~0;
 
     // Constructor and destructor
-    FixedAllocator() :
-            m_block(malloc(sizeof(value_type) * N)),
-            m_allocationMap(kInvalidPointer) {
-
+    FixedAllocator()
+        : m_block(malloc(sizeof(value_type) * N))
+        , m_allocationMap(kInvalidPointer) {
         // nullptr indicates a free block
         m_allocationMap.assign(m_block, m_block + N, nullptr);
     }
+
     ~FixedAllocator() {
         free(m_block);
     }
@@ -53,16 +53,15 @@ public:
     }
 
     // Construct and destroy methods
-    template <typename U, typename... Args>
+    template<typename U, typename... Args>
     void construct(U* p, Args&&... args) {
-        ::new((void*)p) U(std::forward<Args>(args)...);
+        ::new ((void*)p) U(std::forward<Args>(args)...);
     }
 
-    template <typename U>
+    template<typename U>
     void destroy(U* p) {
         p->~U();
     }
-
 
     // Copy and move constructors
     FixedAllocator(const FixedAllocator&) = default;
@@ -73,34 +72,32 @@ public:
     FixedAllocator& operator=(FixedAllocator&&) = default;
 
     // Rebind for different types
-    template <typename U>
+    template<typename U>
     struct rebind {
         using other = FixedAllocator<U, N>;
     };
-private:
 
+private:
     pointer find_free_block(size_t minimumSize) {
         pointer startPtr = m_block;
         pointer endPtr = startPtr + N;
 
-        while (startPtr < endPtr){
+        while (startPtr < endPtr) {
             startPtr = m_allocationMap.find_first_of(nullptr, startPtr, endPtr);
 
             auto blockSize = m_allocationMap.interval_size(startPtr);
-            if (blockSize >= minimumSize){
+            if (blockSize >= minimumSize) {
                 return startPtr;
             }
         }
         return nullptr;
     }
 
-
 private:
     pointer m_block;
     IntervalMap<pointer, pointer> m_allocationMap;
 };
 
-}
+}// namespace duk::tools
 
-#endif // DUK_TOOLS_FIXED_ALLOCATOR_H
-
+#endif// DUK_TOOLS_FIXED_ALLOCATOR_H

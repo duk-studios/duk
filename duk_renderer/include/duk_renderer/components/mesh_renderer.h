@@ -14,7 +14,7 @@ struct MeshRenderer {
     MaterialResource material;
 };
 
-}
+}// namespace duk::renderer
 
 namespace duk::json {
 
@@ -24,7 +24,7 @@ inline void from_json<duk::renderer::MeshRenderer>(const rapidjson::Value& jsonO
     object.material = from_json_member<duk::resource::Id>(jsonObject, "material");
 }
 
-}
+}// namespace duk::json
 
 namespace duk::resource {
 
@@ -34,6 +34,6 @@ void solve_resources(Solver* solver, duk::renderer::MeshRenderer& meshRenderer) 
     solver->solve(meshRenderer.material);
 }
 
-}
+}// namespace duk::resource
 
-#endif // DUK_RENDERER_MESH_RENDERER_H
+#endif// DUK_RENDERER_MESH_RENDERER_H

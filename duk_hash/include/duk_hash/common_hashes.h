@@ -112,6 +112,6 @@ struct hash<glm::ivec4> {
     }
 };
 
-}
+}// namespace std
 
-#endif //DUK_HASH_COMMON_HASHES_H
+#endif//DUK_HASH_COMMON_HASHES_H

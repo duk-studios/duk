@@ -5,9 +5,8 @@
 #define DUK_RHI_COMMAND_INTERFACE_H
 
 #include <duk_rhi/command/command.h>
-#include <duk_rhi/pipeline/pipeline_flags.h>
 #include <duk_rhi/image.h>
-
+#include <duk_rhi/pipeline/pipeline_flags.h>
 
 namespace duk::rhi {
 
@@ -21,7 +20,6 @@ class DescriptorSet;
 
 class CommandBuffer : public Command {
 public:
-
     ~CommandBuffer() override = default;
 
     virtual void begin() = 0;
@@ -81,10 +79,8 @@ public:
     };
 
     virtual void pipeline_barrier(const PipelineBarrier& barrier) = 0;
-
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_COMMAND_INTERFACE_H
-
+#endif// DUK_RHI_COMMAND_INTERFACE_H

@@ -5,27 +5,28 @@
 #define DUK_MATERIAL_GENERATOR_REFLECTOR_H
 
 #include <duk_material_generator/parser.h>
-#include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/descriptor.h>
+#include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/vertex_layout.h>
 
 #include <cstdint>
-#include <unordered_map>
 #include <map>
+#include <unordered_map>
 
 namespace duk::material_generator {
 
 struct Type {
     enum Bits : uint32_t {
         UNKNOWN = 0,
-        FLOAT   = 1,
-        INT     = 1 << 1,
-        BOOL    = 1 << 2,
-        VECTOR  = 1 << 3,
-        MATRIX  = 1 << 4,
-        ARRAY   = 1 << 5,
-        STRUCT  = 1 << 6,
+        FLOAT = 1,
+        INT = 1 << 1,
+        BOOL = 1 << 2,
+        VECTOR = 1 << 3,
+        MATRIX = 1 << 4,
+        ARRAY = 1 << 5,
+        STRUCT = 1 << 6,
     };
+
     static constexpr uint32_t kCount = 7;
     using Mask = uint32_t;
 };
@@ -68,8 +69,8 @@ public:
     using Sets = std::vector<SetReflection>;
     using Modules = std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint8_t>>;
     using Attributes = std::vector<duk::rhi::VertexInput::Format>;
-public:
 
+public:
     explicit Reflector(const Parser& parser);
 
     ~Reflector();
@@ -83,7 +84,6 @@ public:
     const Attributes& attributes() const;
 
 private:
-
     void reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::Module::Bits shaderModuleBit);
 
 private:
@@ -94,7 +94,6 @@ private:
     Attributes m_attributes;
 };
 
-}
+}// namespace duk::material_generator
 
-#endif // DUK_MATERIAL_GENERATOR_REFLECTOR_H
-
+#endif// DUK_MATERIAL_GENERATOR_REFLECTOR_H

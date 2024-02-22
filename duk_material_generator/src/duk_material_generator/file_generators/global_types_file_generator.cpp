@@ -22,22 +22,20 @@ static std::string binding_name_to_file_name(const std::string& bindingName) {
     std::string fileName = std::regex_replace(withoutUBOorSSBO, std::regex("([a-z])([A-Z])"), "$1_$2");
 
     // Convert the result to lowercase.
-    for (char& c : fileName) {
+    for (char& c: fileName) {
         c = std::tolower(c);
     }
 
     return fileName + "_types";
 }
 
-}
+}// namespace detail
 
-GlobalTypesFileGenerator::GlobalTypesFileGenerator(const Parser& parser, const Reflector& reflector) :
-    TypesFileGenerator(parser, reflector) {
-
+GlobalTypesFileGenerator::GlobalTypesFileGenerator(const Parser& parser, const Reflector& reflector)
+    : TypesFileGenerator(parser, reflector) {
     const auto globalBindings = extract_global_bindings();
 
-    for (auto& binding : globalBindings) {
-
+    for (auto& binding: globalBindings) {
         std::ostringstream oss;
         generate_file_content(oss, binding);
 
@@ -71,8 +69,8 @@ void GlobalTypesFileGenerator::generate_file_content(std::ostringstream& oss, co
 std::vector<BindingReflection> GlobalTypesFileGenerator::extract_global_bindings() {
     std::vector<BindingReflection> globalBindings;
     const auto& sets = m_reflector.sets();
-    for (const auto& set : sets) {
-        for (const auto& binding : set.bindings) {
+    for (const auto& set: sets) {
+        for (const auto& binding: set.bindings) {
             if (m_parser.is_global_binding(binding.typeName)) {
                 globalBindings.push_back(binding);
             }
@@ -81,4 +79,4 @@ std::vector<BindingReflection> GlobalTypesFileGenerator::extract_global_bindings
     return globalBindings;
 }
 
-}
+}// namespace duk::material_generator

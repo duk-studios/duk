@@ -5,8 +5,8 @@
 #define DUK_RHI_VULKAN_FRAME_BUFFER_H
 
 #include <duk_rhi/frame_buffer.h>
-#include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
+#include <duk_rhi/vulkan/vulkan_import.h>
 
 #include <vector>
 
@@ -25,7 +25,6 @@ struct VulkanFrameBufferCreateInfo {
 
 class VulkanFrameBuffer : public FrameBuffer {
 public:
-
     explicit VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFrameBufferCreateInfo);
 
     ~VulkanFrameBuffer() override;
@@ -45,7 +44,6 @@ public:
     DUK_NO_DISCARD VkFramebuffer handle(uint32_t frameIndex) const;
 
 private:
-
     void update_extent();
 
     void update_hash();
@@ -61,8 +59,6 @@ private:
     std::vector<duk::hash::Hash> m_frameBufferHashes;
 };
 
+}// namespace duk::rhi
 
-}
-
-#endif // DUK_RHI_VULKAN_FRAME_BUFFER_H
-
+#endif// DUK_RHI_VULKAN_FRAME_BUFFER_H

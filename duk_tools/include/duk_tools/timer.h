@@ -13,7 +13,6 @@ namespace duk::tools {
 
 class Timer {
 public:
-
     using Clock = std::chrono::high_resolution_clock;
     using Duration = std::chrono::duration<float>;
 
@@ -37,6 +36,6 @@ private:
     Clock::time_point m_start;
 };
 
-}
+}// namespace duk::tools
 
-#endif //DUK_TOOLS_TIMER_H
+#endif//DUK_TOOLS_TIMER_H

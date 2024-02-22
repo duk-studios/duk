@@ -8,11 +8,16 @@ namespace duk::renderer {
 
 duk::rhi::VertexInput::Format VertexAttributes::format_of(VertexAttributes::Type attributeType) {
     switch (attributeType) {
-        case Type::POSITION: return duk::rhi::VertexInput::Format::VEC3;
-        case Type::NORMAL: return duk::rhi::VertexInput::Format::VEC3;
-        case Type::UV: return duk::rhi::VertexInput::Format::VEC2;
-        case Type::COLOR: return duk::rhi::VertexInput::Format::VEC4;
-        default: throw std::invalid_argument("unknown VertexInput::Format for VertexAttribute::Type");
+        case Type::POSITION:
+            return duk::rhi::VertexInput::Format::VEC3;
+        case Type::NORMAL:
+            return duk::rhi::VertexInput::Format::VEC3;
+        case Type::UV:
+            return duk::rhi::VertexInput::Format::VEC2;
+        case Type::COLOR:
+            return duk::rhi::VertexInput::Format::VEC4;
+        default:
+            throw std::invalid_argument("unknown VertexInput::Format for VertexAttribute::Type");
     }
 }
 
@@ -20,11 +25,12 @@ size_t VertexAttributes::size_of(VertexAttributes::Type attributeType) {
     return duk::rhi::VertexInput::size_of(format_of(attributeType));
 }
 
-VertexAttributes::VertexAttributes() : m_attributeOffset({}) {}
+VertexAttributes::VertexAttributes()
+    : m_attributeOffset({}) {}
 
 VertexAttributes::VertexAttributes(const std::span<VertexAttributes::Type>& attributes) {
     size_t offset = 0;
-    for (auto attribute : attributes) {
+    for (auto attribute: attributes) {
         const auto attributeIndex = static_cast<uint32_t>(attribute);
         m_attributes.set(attributeIndex);
         m_layout.insert(format_of(attribute));
@@ -56,4 +62,4 @@ VertexAttributes::ConstIterator VertexAttributes::end() const {
     return m_attributes.bits<true>().end();
 }
 
-}
+}// namespace duk::renderer

@@ -5,16 +5,17 @@
 #ifndef DUK_EVENT_EVENT_H
 #define DUK_EVENT_EVENT_H
 
-#include <functional>
 #include <cassert>
-#include <vector>
+#include <functional>
 #include <memory>
+#include <vector>
 
 namespace duk::event {
 
 class Event {
 private:
     friend class Listener;
+
     class Handle {
     public:
         explicit Handle(Event& owner);
@@ -33,7 +34,6 @@ private:
     };
 
 public:
-
     Event();
 
     virtual ~Event();
@@ -44,10 +44,9 @@ private:
     std::shared_ptr<void> m_controlBlock;
 };
 
-template<typename ...Args>
+template<typename... Args>
 class EventT : public Event {
 public:
-
     using Callback = std::function<void(Args...)>;
 
     inline void operator()(const Args&... args) {
@@ -66,8 +65,9 @@ public:
     void add_listener(Callback&& callback, size_t listenerId) {
         assert(!m_emitting && "Attempted to add_listener on a event that is currently emitting");
         assert(std::find_if(m_listeners.begin(), m_listeners.end(), [listenerId](size_t listener) {
-            return listener == listenerId;
-        }) == m_listeners.end() && "Tried to add_listener to an event with a listener that was already subscribed.");
+                   return listener == listenerId;
+               }) == m_listeners.end() &&
+               "Tried to add_listener to an event with a listener that was already subscribed.");
 
         m_listeners.emplace_back(listenerId);
         m_callbacks.emplace_back(std::move(callback));
@@ -96,7 +96,6 @@ using EventVoid = EventT<>;
 
 class Listener {
 public:
-
     Listener();
 
     ~Listener();
@@ -116,15 +115,12 @@ public:
     }
 
 private:
-
     size_t m_id;
     std::vector<Event::Handle> m_events;
 };
 
-
 class Dispatcher {
 public:
-
     template<typename T>
     void emit(const T& ev) {
         const auto idx = index<T>();
@@ -152,16 +148,14 @@ public:
     template<typename T>
     void remove_listener(Listener& listener) {
         const auto idx = index<T>();
-        assert(m_events.size() > idx); //it would mean that this was never even listened to
+        assert(m_events.size() > idx);//it would mean that this was never even listened to
         const auto event = dynamic_cast<EventT<T>*>(m_events[idx].get());
         listener.ignore(*event);
     }
 
 private:
-
     template<typename T>
     static size_t index();
-
 
 private:
     static size_t s_indexCounter;
@@ -174,6 +168,6 @@ size_t Dispatcher::index() {
     return index;
 }
 
-}
+}// namespace duk::event
 
-#endif //DUK_EVENT_EVENT_H
+#endif//DUK_EVENT_EVENT_H

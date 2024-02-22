@@ -5,8 +5,8 @@
 #define DUK_RHI_VULKAN_COMMAND_INTERFACE_H
 
 #include <duk_rhi/command/command_buffer.h>
-#include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/command/vulkan_command.h>
+#include <duk_rhi/vulkan/vulkan_import.h>
 
 namespace duk::rhi {
 
@@ -75,10 +75,8 @@ private:
     // state cache
     VkPipelineLayout m_currentPipelineLayout;
     VkPipelineBindPoint m_currentPipelineBindPoint;
-
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_VULKAN_COMMAND_INTERFACE_H
-
+#endif// DUK_RHI_VULKAN_COMMAND_INTERFACE_H

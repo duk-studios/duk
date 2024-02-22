@@ -8,24 +8,23 @@
 
 namespace duk::renderer {
 
-PassConnection::PassConnection(duk::rhi::Access::Mask accessMask, duk::rhi::PipelineStage::Mask stageMask, duk::rhi::Image::Layout imageLayout) :
-    m_accessMask(accessMask),
-    m_stageMask(stageMask),
-    m_imageLayout(imageLayout),
-    m_image(nullptr),
-    m_parent(nullptr) {
-
+PassConnection::PassConnection(duk::rhi::Access::Mask accessMask, duk::rhi::PipelineStage::Mask stageMask, duk::rhi::Image::Layout imageLayout)
+    : m_accessMask(accessMask)
+    , m_stageMask(stageMask)
+    , m_imageLayout(imageLayout)
+    , m_image(nullptr)
+    , m_parent(nullptr) {
 }
 
 PassConnection::~PassConnection() {
-    for (auto child : m_children) {
+    for (auto child: m_children) {
         child->m_parent = nullptr;
     }
 }
 
 void PassConnection::update(duk::rhi::Image* image) {
     m_image = image;
-    for (auto& child : m_children) {
+    for (auto& child: m_children) {
         child->update(image);
     }
 }
@@ -100,4 +99,4 @@ duk::rhi::CommandBuffer::ImageMemoryBarrier PassConnection::image_memory_barrier
 
 Pass::~Pass() = default;
 
-}
+}// namespace duk::renderer

@@ -14,7 +14,6 @@ struct ApplicationCreateInfo {
 
 class Application {
 public:
-
     explicit Application(const ApplicationCreateInfo& applicationCreateInfo);
 
     ~Application();
@@ -25,7 +24,6 @@ private:
     std::unique_ptr<duk::engine::Engine> m_engine;
 };
 
-}
+}// namespace duk::sample
 
-#endif // DUK_SAMPLE_APPLICATION_H
-
+#endif// DUK_SAMPLE_APPLICATION_H

@@ -17,4 +17,4 @@ const std::set<Id>& DependencySolver::dependencies() const {
     return m_dependencies;
 }
 
-}
+}// namespace duk::resource

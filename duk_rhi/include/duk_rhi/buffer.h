@@ -4,11 +4,11 @@
 #ifndef DUK_RHI_BUFFER_H
 #define DUK_RHI_BUFFER_H
 
-#include <duk_macros/macros.h>
 #include <duk_hash/hash.h>
+#include <duk_macros/macros.h>
 
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
 #include <ranges>
 #include <type_traits>
 
@@ -33,7 +33,6 @@ public:
     };
 
 public:
-
     virtual ~Buffer();
 
     DUK_NO_DISCARD virtual const uint8_t* read_ptr(size_t offset) const = 0;
@@ -97,10 +96,8 @@ public:
     DUK_NO_DISCARD virtual CommandQueue* command_queue() const = 0;
 
     DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
-
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_BUFFER_H
-
+#endif// DUK_RHI_BUFFER_H

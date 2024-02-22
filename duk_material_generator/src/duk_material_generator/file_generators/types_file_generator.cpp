@@ -4,8 +4,8 @@
 #include <duk_material_generator/file_generators/types_file_generator.h>
 #include <duk_material_generator/types.h>
 
-#include <set>
 #include <filesystem>
+#include <set>
 
 namespace duk::material_generator {
 
@@ -28,7 +28,6 @@ struct TypeReferences {
 
 static uint32_t sum_reference_count(const std::unordered_map<std::string, TypeReferences>& typeReferences,
                                     const std::string& typeName) {
-
     auto it = typeReferences.find(typeName);
     if (it == typeReferences.end()) {
         return 0;
@@ -37,7 +36,7 @@ static uint32_t sum_reference_count(const std::unordered_map<std::string, TypeRe
     const auto& referencedTypes = it->second.referencedTypes;
 
     uint32_t sum = 0;
-    for (const auto& referencedType : referencedTypes) {
+    for (const auto& referencedType: referencedTypes) {
         sum++;
         sum += sum_reference_count(typeReferences, referencedType);
     }
@@ -64,7 +63,7 @@ static void insert_referenced_types(std::set<std::string>& referencedTypeNames, 
 
     const auto& types = reflector.types();
 
-    for (const auto& member : type.members) {
+    for (const auto& member: type.members) {
         insert_referenced_types(referencedTypeNames, reflector, types.at(member.typeName), true);
     }
 }
@@ -79,7 +78,7 @@ static void insert_referenced_types_from_binding(const Reflector& reflector, std
 }
 
 static void insert_referenced_types_from_bindings(const Reflector& reflector, std::set<std::string>& referencedTypes, std::span<const BindingReflection> bindings) {
-    for (const auto& binding : bindings) {
+    for (const auto& binding: bindings) {
         insert_referenced_types_from_binding(reflector, referencedTypes, binding);
     }
 }
@@ -87,15 +86,13 @@ static void insert_referenced_types_from_bindings(const Reflector& reflector, st
 static const std::string kTypesFileIncludes[] = {
         "duk_renderer/resources/materials/uniform_buffer.h",
         "duk_renderer/resources/materials/storage_buffer.h",
-        "glm/glm.hpp"
-};
+        "glm/glm.hpp"};
 
-}
+}// namespace detail
 
-TypesFileGenerator::TypesFileGenerator(const Parser& parser, const Reflector& reflector) :
-    m_parser(parser),
-    m_reflector(reflector) {
-
+TypesFileGenerator::TypesFileGenerator(const Parser& parser, const Reflector& reflector)
+    : m_parser(parser)
+    , m_reflector(reflector) {
 }
 
 void TypesFileGenerator::generate_includes(std::ostringstream& oss) {
@@ -107,7 +104,7 @@ void TypesFileGenerator::generate_type(std::ostringstream& oss, const TypeReflec
     std::vector<char> indentationBuffer(indentationLevel, ' ');
     std::string indentation(indentationBuffer.begin(), indentationBuffer.end());
     oss << indentation << "struct " << type.name << " {" << std::endl;
-    for (auto& member : type.members) {
+    for (auto& member: type.members) {
         oss << indentation << "    " << glsl_to_cpp(member.typeName) << " " << member.name;
         if (member.arraySize) {
             oss << '[' << member.arraySize << ']';
@@ -122,7 +119,7 @@ void TypesFileGenerator::generate_type(std::ostringstream& oss, const TypeReflec
 }
 
 void TypesFileGenerator::generate_types(std::ostringstream& oss, const std::vector<TypeReflection>& types, uint32_t indentationLevel) {
-    for (const auto& type : types) {
+    for (const auto& type: types) {
         generate_type(oss, type, indentationLevel);
         oss << std::endl;
     }
@@ -145,7 +142,7 @@ void TypesFileGenerator::generate_binding_alias(std::ostringstream& oss, const B
 }
 
 void TypesFileGenerator::generate_binding_aliases(std::ostringstream& oss, std::span<const BindingReflection> bindingReflections) {
-    for (const auto& bindingReflection : bindingReflections) {
+    for (const auto& bindingReflection: bindingReflections) {
         generate_binding_alias(oss, bindingReflection);
     }
 }
@@ -167,15 +164,14 @@ std::vector<TypeReflection> TypesFileGenerator::extract_types(std::span<const Bi
 }
 
 std::vector<TypeReflection> TypesFileGenerator::sort_types_by_declaration_order(const std::set<std::string>& typeNames) {
-
     const auto& types = m_reflector.types();
     // resolve references
     std::unordered_map<std::string, detail::TypeReferences> typeReferences;
 
-    for (auto& typeName : typeNames) {
+    for (auto& typeName: typeNames) {
         auto& type = types.at(typeName);
 
-        for (auto& member : type.members) {
+        for (auto& member: type.members) {
             if (typeNames.find(member.typeName) != typeNames.end()) {
                 typeReferences[typeName].referencedTypes.insert(member.typeName);
             }
@@ -198,4 +194,4 @@ std::vector<TypeReflection> TypesFileGenerator::sort_types_by_declaration_order(
     return sortedTypes;
 }
 
-}
+}// namespace duk::material_generator

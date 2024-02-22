@@ -8,19 +8,25 @@ namespace detail {
 
 static std::string level_to_string(Level level) {
     switch (level) {
-        case VERBOSE: return "VERBOSE";
-        case INFO: return "INFO";
-        case DEBUG: return "DEBUG";
-        case WARN: return "WARN";
-        case FATAL: return "FATAL";
-        default: return "UNKNOWN";
+        case VERBOSE:
+            return "VERBOSE";
+        case INFO:
+            return "INFO";
+        case DEBUG:
+            return "DEBUG";
+        case WARN:
+            return "WARN";
+        case FATAL:
+            return "FATAL";
+        default:
+            return "UNKNOWN";
     }
 }
 
-}
+}// namespace detail
 
-Logger::Logger(Level minimumLevel) :
-    m_minimumLevel(minimumLevel){
+Logger::Logger(Level minimumLevel)
+    : m_minimumLevel(minimumLevel) {
     m_printQueue.start();
 }
 
@@ -44,4 +50,4 @@ void Logger::dispatch_print(Level level, const std::string& message) {
     m_printEvent(level, messageWithHeader);
 }
 
-}
+}// namespace duk::log

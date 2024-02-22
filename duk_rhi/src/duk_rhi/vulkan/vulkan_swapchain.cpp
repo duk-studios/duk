@@ -1,16 +1,16 @@
 /// 20/04/2023
 /// vulkan_swapchain.cpp
 
-#include <duk_rhi/vulkan/vulkan_swapchain.h>
-#include <duk_rhi/vulkan/vulkan_render_pass.h>
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
+#include <duk_rhi/vulkan/vulkan_render_pass.h>
+#include <duk_rhi/vulkan/vulkan_swapchain.h>
 
 #include <duk_platform/window.h>
 
-#include <stdexcept>
-#include <limits>
 #include <duk_rhi/rhi_exception.h>
+#include <limits>
+#include <stdexcept>
 
 namespace duk::rhi {
 
@@ -21,7 +21,7 @@ VkSurfaceFormatKHR choose_swap_surface_format(const std::vector<VkSurfaceFormatK
         return {VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
     }
 
-    for (const auto &availableFormat : formats) {
+    for (const auto& availableFormat: formats) {
         if (availableFormat.format == VK_FORMAT_B8G8R8A8_UNORM &&
             availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
             return availableFormat;
@@ -32,7 +32,7 @@ VkSurfaceFormatKHR choose_swap_surface_format(const std::vector<VkSurfaceFormatK
 
 VkPresentModeKHR choose_swap_present_mode(const std::vector<VkPresentModeKHR>& presentModes) {
     VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
-    for (auto availablePresentMode : presentModes) {
+    for (auto availablePresentMode: presentModes) {
         if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
             return availablePresentMode;
         }
@@ -58,11 +58,10 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities, cons
                                                capabilities.maxImageExtent.height);
     return actualExtent;
 }
-}
+}// namespace detail
 
-VulkanImageAcquireCommand::VulkanImageAcquireCommand(const VulkanImageAcquireCommandCreateInfo& commandCreateInfo) :
-    m_submitter([](const auto&) {}, true, false, commandCreateInfo.frameCount, commandCreateInfo.currentFramePtr, commandCreateInfo.device) {
-
+VulkanImageAcquireCommand::VulkanImageAcquireCommand(const VulkanImageAcquireCommandCreateInfo& commandCreateInfo)
+    : m_submitter([](const auto&) {}, true, false, commandCreateInfo.frameCount, commandCreateInfo.currentFramePtr, commandCreateInfo.device) {
 }
 
 void VulkanImageAcquireCommand::submit(const VulkanCommandParams& commandParams) {
@@ -73,13 +72,12 @@ Submitter* VulkanImageAcquireCommand::submitter_ptr() {
     return &m_submitter;
 }
 
-VulkanPresentCommand::VulkanPresentCommand(const VulkanPresentCommandCreateInfo& commandCreateInfo) :
-    m_currentImagePtr(commandCreateInfo.currentImagePtr),
-    m_presentQueue(commandCreateInfo.presentQueue),
-    m_requiresRecreationPtr(commandCreateInfo.requiresRecreationPtr),
-    m_ableToPresentPtr(commandCreateInfo.ableToPresentPtr),
-    m_submitter([this](const auto& params) { submit(params); }, false, false, 0, nullptr, VK_NULL_HANDLE) {
-
+VulkanPresentCommand::VulkanPresentCommand(const VulkanPresentCommandCreateInfo& commandCreateInfo)
+    : m_currentImagePtr(commandCreateInfo.currentImagePtr)
+    , m_presentQueue(commandCreateInfo.presentQueue)
+    , m_requiresRecreationPtr(commandCreateInfo.requiresRecreationPtr)
+    , m_ableToPresentPtr(commandCreateInfo.ableToPresentPtr)
+    , m_submitter([this](const auto& params) { submit(params); }, false, false, 0, nullptr, VK_NULL_HANDLE) {
     m_listener.listen(*commandCreateInfo.swapchainCreateEvent, [this](const auto& swapchainInfo) {
         m_swapchain = swapchainInfo.swapchain;
     });
@@ -106,8 +104,7 @@ void VulkanPresentCommand::submit(const VulkanCommandParams& commandParams) {
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
         *m_requiresRecreationPtr = true;
-    }
-    else if (result != VK_SUCCESS) {
+    } else if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to present swapchain image!");
     }
 }
@@ -116,17 +113,15 @@ Submitter* VulkanPresentCommand::submitter_ptr() {
     return &m_submitter;
 }
 
-VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreateInfo) :
-    m_device(swapchainCreateInfo.device),
-    m_physicalDevice(swapchainCreateInfo.physicalDevice),
-    m_surface(swapchainCreateInfo.surface),
-    m_window(swapchainCreateInfo.window),
-    m_presentQueue(swapchainCreateInfo.presentQueue),
-    m_swapchain(VK_NULL_HANDLE),
-    m_requiresRecreation(false) {
-
+VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreateInfo)
+    : m_device(swapchainCreateInfo.device)
+    , m_physicalDevice(swapchainCreateInfo.physicalDevice)
+    , m_surface(swapchainCreateInfo.surface)
+    , m_window(swapchainCreateInfo.window)
+    , m_presentQueue(swapchainCreateInfo.presentQueue)
+    , m_swapchain(VK_NULL_HANDLE)
+    , m_requiresRecreation(false) {
     m_listener.listen(*swapchainCreateInfo.prepareFrameEvent, [this](uint32_t currentFrame) {
-
         if (m_requiresRecreation) {
             recreate_swapchain();
         }
@@ -156,7 +151,7 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
         m_ableToPresent = true;
     });
 
-    m_listener.listen(m_window->window_resize_event, [this] (auto, auto) {
+    m_listener.listen(m_window->window_resize_event, [this](auto, auto) {
         m_requiresRecreation = true;
     });
 
@@ -194,7 +189,7 @@ void VulkanSwapchain::create() {
     }
 
     VulkanSurfaceDetails surfaceDetails = {};
-    if(!m_physicalDevice->query_surface_details(m_surface, surfaceDetails)) {
+    if (!m_physicalDevice->query_surface_details(m_surface, surfaceDetails)) {
         throw RHIException(RHIException::INTERNAL_ERROR, "Could not query surface details for swapchain");
     }
 
@@ -301,4 +296,4 @@ VulkanSwapchainCleanEvent* VulkanSwapchain::clean_event() {
     return &m_swapchainCleanEvent;
 }
 
-}
+}// namespace duk::rhi

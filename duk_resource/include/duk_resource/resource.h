@@ -5,8 +5,8 @@
 #ifndef DUK_RESOURCE_RESOURCE_H
 #define DUK_RESOURCE_RESOURCE_H
 
-#include <duk_macros/macros.h>
 #include <duk_json/types.h>
+#include <duk_macros/macros.h>
 
 #include <memory>
 #include <typeindex>
@@ -15,10 +15,11 @@ namespace duk::resource {
 
 class Id {
 public:
+    constexpr Id()
+        : Id(0) {}
 
-    constexpr Id() : Id(0) {}
-
-    explicit constexpr Id(uint64_t id) : m_id(id) {}
+    explicit constexpr Id(uint64_t id)
+        : m_id(id) {}
 
     DUK_NO_DISCARD bool operator==(const Id& rhs) const;
 
@@ -37,7 +38,6 @@ class ResourceT;
 
 class Resource {
 public:
-
     DUK_NO_DISCARD Id id() const;
 
     template<typename T>
@@ -55,7 +55,6 @@ public:
     void reset();
 
 protected:
-
     template<typename T>
     Resource(Id id, const std::shared_ptr<T>& resource);
 
@@ -71,7 +70,6 @@ protected:
 template<typename T>
 class ResourceT : public Resource {
 public:
-
     using Type = T;
 
     ResourceT();
@@ -81,7 +79,8 @@ public:
     ResourceT(Id id, const std::shared_ptr<T>& resource);
 
     template<typename U>
-    ResourceT(const ResourceT<U>& other) requires std::is_base_of_v<T, U>;
+    ResourceT(const ResourceT<U>& other)
+        requires std::is_base_of_v<T, U>;
 
     DUK_NO_DISCARD T* get();
 
@@ -94,15 +93,13 @@ public:
     DUK_NO_DISCARD T& operator*();
 
     DUK_NO_DISCARD T& operator*() const;
-
 };
 
 template<typename T>
-Resource::Resource(Id id, const std::shared_ptr<T>& resource) :
-    m_id(id),
-    m_resource(resource),
-    m_type(typeid(T)) {
-
+Resource::Resource(Id id, const std::shared_ptr<T>& resource)
+    : m_id(id)
+    , m_resource(resource)
+    , m_type(typeid(T)) {
 }
 
 template<typename T>
@@ -116,28 +113,25 @@ bool Resource::is() const {
 }
 
 template<typename T>
-ResourceT<T>::ResourceT() :
-    ResourceT(Id(0), nullptr) {
-
+ResourceT<T>::ResourceT()
+    : ResourceT(Id(0), nullptr) {
 }
 
 template<typename T>
-ResourceT<T>::ResourceT(Id id) :
-    Resource(id, std::shared_ptr<T>()) {
-
+ResourceT<T>::ResourceT(Id id)
+    : Resource(id, std::shared_ptr<T>()) {
 }
 
 template<typename T>
-ResourceT<T>::ResourceT(Id id, const std::shared_ptr<T>& resource) :
-    Resource(id, resource) {
-
+ResourceT<T>::ResourceT(Id id, const std::shared_ptr<T>& resource)
+    : Resource(id, resource) {
 }
 
 template<typename T>
 template<typename U>
-ResourceT<T>::ResourceT(const ResourceT<U>& other) requires std::is_base_of_v<T, U> :
-    Resource(other.id(), other.m_resource) {
-
+ResourceT<T>::ResourceT(const ResourceT<U>& other)
+    requires std::is_base_of_v<T, U>
+    : Resource(other.id(), other.m_resource) {
 }
 
 template<typename T>
@@ -170,7 +164,7 @@ T& ResourceT<T>::operator*() const {
     return *get();
 }
 
-}
+}// namespace duk::resource
 
 namespace duk::json {
 
@@ -179,7 +173,7 @@ inline void from_json<duk::resource::Id>(const rapidjson::Value& jsonObject, duk
     object = duk::resource::Id(from_json<uint64_t>(jsonObject));
 }
 
-}
+}// namespace duk::json
 
 namespace std {
 
@@ -190,6 +184,6 @@ struct hash<duk::resource::Id> {
     }
 };
 
-}
+}// namespace std
 
-#endif //DUK_RESOURCE_RESOURCE_H
+#endif//DUK_RESOURCE_RESOURCE_H

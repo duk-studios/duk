@@ -9,8 +9,8 @@
 
 #include <windows.h>
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace duk::platform {
 
@@ -22,7 +22,6 @@ struct WindowWin32CreateInfo {
 namespace detail {
 
 struct WindowClassEntry {
-
     WindowClassEntry(const WindowWin32CreateInfo& windowWin32CreateInfo, const std::string& className);
 
     ~WindowClassEntry();
@@ -32,11 +31,10 @@ struct WindowClassEntry {
     HINSTANCE instance;
 };
 
-}
+}// namespace detail
 
 class WindowWin32 : public Window {
 public:
-
     explicit WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo);
 
     ~WindowWin32() override;
@@ -59,12 +57,12 @@ public:
     void close() override;
 
     DUK_NO_DISCARD bool minimized() const override;
-    
+
 private:
     std::shared_ptr<detail::WindowClassEntry> m_windowClassEntry;
     HWND m_hwnd;
 };
 
-}
+}// namespace duk::platform
 
-#endif //DUK_PLATFORM_WINDOW_WIN_32_H
+#endif//DUK_PLATFORM_WINDOW_WIN_32_H

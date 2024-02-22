@@ -5,23 +5,22 @@
 #ifndef DUK_RHI_RENDERER_H
 #define DUK_RHI_RENDERER_H
 
-#include <duk_rhi/rhi_capabilities.h>
+#include <duk_rhi/buffer.h>
 #include <duk_rhi/command/command_queue.h>
 #include <duk_rhi/command/command_scheduler.h>
-#include <duk_rhi/render_pass.h>
-#include <duk_rhi/buffer.h>
-#include <duk_rhi/image.h>
 #include <duk_rhi/descriptor_set.h>
 #include <duk_rhi/frame_buffer.h>
-#include <duk_rhi/pipeline/shader_data_source.h>
-#include <duk_rhi/pipeline/shader.h>
-#include <duk_rhi/pipeline/graphics_pipeline.h>
+#include <duk_rhi/image.h>
 #include <duk_rhi/pipeline/compute_pipeline.h>
+#include <duk_rhi/pipeline/graphics_pipeline.h>
+#include <duk_rhi/pipeline/shader.h>
+#include <duk_rhi/pipeline/shader_data_source.h>
+#include <duk_rhi/render_pass.h>
+#include <duk_rhi/rhi_capabilities.h>
 
 #include <duk_log/logger.h>
 
 #include <memory>
-
 
 namespace duk::platform {
 
@@ -53,7 +52,6 @@ struct RHICreateInfo {
 
 class RHI {
 public:
-
     static std::shared_ptr<RHI> create_rhi(const RHICreateInfo& rhiCreateInfo);
 
     /// destructor
@@ -149,9 +147,8 @@ public:
     };
 
     DUK_NO_DISCARD virtual std::shared_ptr<FrameBuffer> create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) = 0;
-
 };
 
-}
+}// namespace duk::rhi
 
-#endif //DUK_RHI_RENDERER_H
+#endif//DUK_RHI_RENDERER_H

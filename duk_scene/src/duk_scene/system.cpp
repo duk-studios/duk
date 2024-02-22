@@ -19,13 +19,11 @@ void SystemRegistry::build(const std::string& entryName, Systems& systems) {
 }
 
 System::~System() {
-
 }
 
-Systems::SystemIterator::SystemIterator(Systems& systems, size_t i) :
-    m_systems(systems),
-    m_i(i) {
-
+Systems::SystemIterator::SystemIterator(Systems& systems, size_t i)
+    : m_systems(systems)
+    , m_i(i) {
 }
 
 Systems::SystemIterator& Systems::SystemIterator::operator++() {
@@ -54,19 +52,19 @@ Systems::SystemIterator Systems::end() {
 }
 
 void Systems::enter() {
-    for (auto& system : m_container) {
+    for (auto& system: m_container) {
         system->enter();
     }
 }
 
 void Systems::update() {
-    for (auto& system : m_container) {
+    for (auto& system: m_container) {
         system->update();
     }
 }
 
 void Systems::exit() {
-    for (auto& system : m_container) {
+    for (auto& system: m_container) {
         system->exit();
     }
 }
@@ -75,4 +73,4 @@ void build_system(const std::string& entryName, Systems& systems) {
     SystemRegistry::instance(true)->build(entryName, systems);
 }
 
-}
+}// namespace duk::scene

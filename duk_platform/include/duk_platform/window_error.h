@@ -26,9 +26,8 @@ public:
 private:
     Type m_type;
     std::string m_description;
-
 };
 
-}
+}// namespace duk::platform
 
-#endif //DUK_PLATFORM_WINDOW_ERROR_H
+#endif//DUK_PLATFORM_WINDOW_ERROR_H

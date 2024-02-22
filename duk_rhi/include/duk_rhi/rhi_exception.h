@@ -30,6 +30,6 @@ private:
     std::string m_description;
 };
 
-}
+}// namespace duk::rhi
 
-#endif //DUK_RHI_EXCEPTION_H
+#endif//DUK_RHI_EXCEPTION_H

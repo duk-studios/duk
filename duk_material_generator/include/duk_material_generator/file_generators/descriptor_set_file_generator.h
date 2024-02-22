@@ -4,8 +4,8 @@
 #ifndef DUK_MATERIAL_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H
 #define DUK_MATERIAL_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H
 
-#include <duk_material_generator/file_generators/types_file_generator.h>
 #include <duk_material_generator/file_generators/shader_data_source_file_generator.h>
+#include <duk_material_generator/file_generators/types_file_generator.h>
 
 namespace duk::material_generator {
 
@@ -14,7 +14,6 @@ public:
     DescriptorSetFileGenerator(const Parser& parser, const Reflector& reflector, const ShaderDataSourceFileGenerator& shaderDataSourceFileGenerator);
 
 private:
-
     void generate_header_file_content(std::ostringstream& oss);
 
     void generate_source_file_content(std::ostringstream& oss);
@@ -29,7 +28,6 @@ private:
     std::string m_className;
 };
 
-}
+}// namespace duk::material_generator
 
-#endif // DUK_MATERIAL_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H
-
+#endif// DUK_MATERIAL_GENERATOR_DESCRIPTOR_SET_FILE_GENERATOR_H

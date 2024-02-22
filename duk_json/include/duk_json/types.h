@@ -5,8 +5,8 @@
 #ifndef DUK_JSON_TYPES_H
 #define DUK_JSON_TYPES_H
 
-#include <rapidjson/document.h>
 #include <glm/glm.hpp>
+#include <rapidjson/document.h>
 #include <sstream>
 
 namespace duk::json {
@@ -24,7 +24,7 @@ static VecT parse_vec(const rapidjson::Value& member) {
     return result;
 }
 
-}
+}// namespace detail
 
 // specialize this method for custom types
 template<typename T>
@@ -92,6 +92,6 @@ inline void from_json<glm::vec4>(const rapidjson::Value& jsonObject, glm::vec4& 
     object = detail::parse_vec<glm::vec4>(jsonObject);
 }
 
-}
+}// namespace duk::json
 
-#endif //DUK_JSON_TYPES_H
+#endif//DUK_JSON_TYPES_H

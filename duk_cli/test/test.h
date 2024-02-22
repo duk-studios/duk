@@ -3,18 +3,17 @@
 //
 
 DUK_SERIALIZE_RESOURCE
-struct Foo {
 
+struct Foo {
 };
 
 struct Boo {
-
 };
 
 DUK_SERIALIZE_RESOURCE
+
 struct Bar {
     uint32_t a;
     float b;
     duk::pool::ResourceId resourceId;
 };
-
