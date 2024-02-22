@@ -2,8 +2,10 @@
 /// types.cpp
 
 #include <duk_tools/types.h>
+#ifdef __GNUG__
 #include <memory>
 #include <cxxabi.h>
+#endif
 
 namespace duk::tools {
 
