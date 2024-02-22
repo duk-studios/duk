@@ -1,11 +1,11 @@
 /// 12/09/2023
 /// color_material.cpp
 
+#include <duk_renderer/components/transform.h>
+#include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/color/color_material.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
-#include <duk_renderer/components/transform.h>
-#include <duk_renderer/pools/image_pool.h>
 
 namespace duk::renderer {
 
@@ -15,10 +15,8 @@ static const ColorShaderDataSource kColorShaderDataSource;
 
 }
 
-ColorMaterialDataSource::ColorMaterialDataSource() :
-    color(glm::vec4(1)),
-    colorTexture(kWhiteImageId) {
-
+ColorMaterialDataSource::ColorMaterialDataSource() : color(glm::vec4(1)),
+                                                     colorTexture(kWhiteImageId) {
 }
 
 const duk::rhi::ShaderDataSource* ColorMaterialDataSource::shader_data_source() const {
@@ -37,7 +35,6 @@ duk::hash::Hash ColorMaterialDataSource::calculate_hash() const {
     duk::hash::hash_combine(hash, color);
     duk::hash::hash_combine(hash, colorTexture);
     return hash;
-
 }
 
 ColorInstanceBuffer::ColorInstanceBuffer(const ColorInstanceBufferCreateInfo& colorInstanceBufferCreateInfo) {
@@ -141,4 +138,4 @@ InstanceBuffer* ColorMaterialDescriptorSet::instance_buffer() {
     return m_instanceBuffer.get();
 }
 
-}
+}// namespace duk::renderer

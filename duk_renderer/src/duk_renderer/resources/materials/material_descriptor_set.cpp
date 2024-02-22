@@ -21,4 +21,4 @@ InstanceBuffer* MaterialDescriptorSet::instance_buffer() {
     return nullptr;
 }
 
-}
+}// namespace duk::renderer

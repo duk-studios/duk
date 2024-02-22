@@ -19,7 +19,6 @@ struct VulkanWaitDependency {
     VkPipelineStageFlags* stages;
 };
 
-
 struct VulkanCommandParams {
     VulkanWaitDependency waitDependency;
     VkSemaphore signalSemaphore;
@@ -28,7 +27,6 @@ struct VulkanCommandParams {
 
 class VulkanSubmitter : public Submitter {
 public:
-
     using SubmissionFunc = std::function<void(const VulkanCommandParams&)>;
 
     VulkanSubmitter(SubmissionFunc&& submissionFunc, bool signalsSemaphore, bool signalsFence, uint32_t frameCount, const uint32_t* currentFramePtr, VkDevice device);
@@ -53,6 +51,6 @@ private:
     std::vector<VkFence> m_fences;
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_VULKAN_COMMAND_H
+#endif// DUK_RHI_VULKAN_COMMAND_H

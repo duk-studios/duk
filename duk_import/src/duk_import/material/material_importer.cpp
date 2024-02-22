@@ -7,8 +7,7 @@
 
 namespace duk::import {
 
-MaterialImporter::MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo) :
-    m_materialPool(materialImporterCreateInfo.materialPool) {
+MaterialImporter::MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo) : m_materialPool(materialImporterCreateInfo.materialPool) {
     add_loader<MaterialLoaderJson>();
 }
 
@@ -38,5 +37,4 @@ void MaterialImporter::solve_references(const duk::resource::Id& id, duk::resour
     referenceSolver.solve(*material);
 }
 
-
-}
+}// namespace duk::import

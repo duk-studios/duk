@@ -1,11 +1,11 @@
 /// 03/02/2024
 /// register_components.cpp
 
-#include <duk_renderer/components/register_components.h>
 #include <duk_renderer/components/lighting.h>
-#include <duk_renderer/components/transform.h>
-#include <duk_renderer/components/sprite_renderer.h>
 #include <duk_renderer/components/mesh_renderer.h>
+#include <duk_renderer/components/register_components.h>
+#include <duk_renderer/components/sprite_renderer.h>
+#include <duk_renderer/components/transform.h>
 
 namespace duk::renderer {
 
@@ -23,4 +23,4 @@ void register_components() {
     componentRegistry->add<MeshRenderer>("MeshRenderer");
 }
 
-}
+}// namespace duk::renderer

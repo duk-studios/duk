@@ -14,10 +14,8 @@ public:
     bool accepts(const std::filesystem::path& path) override;
 
     std::unique_ptr<duk::renderer::MaterialDataSource> load(const std::filesystem::path& path) override;
-
 };
 
-}
+}// namespace duk::import
 
-
-#endif //DUK_IMPORT_MATERIAL_IMPORTER_JSON_H
+#endif//DUK_IMPORT_MATERIAL_IMPORTER_JSON_H

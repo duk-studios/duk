@@ -13,5 +13,4 @@ VkFormat convert_vertex_attribute_format(VertexInput::Format format);
 
 }
 
-#endif // DUK_RHI_VULKAN_VERTEX_H
-
+#endif// DUK_RHI_VULKAN_VERTEX_H

@@ -5,10 +5,7 @@
 
 namespace duk::renderer {
 
-SpritePool::SpritePool(const SpritePoolCreateInfo& spritePoolCreateInfo) :
-    m_imagePool(spritePoolCreateInfo.imagePool) {
-
-
+SpritePool::SpritePool(const SpritePoolCreateInfo& spritePoolCreateInfo) : m_imagePool(spritePoolCreateInfo.imagePool) {
     {
         SpriteDataSourceCreateInfo spriteDataSourceCreateInfo = {};
         spriteDataSourceCreateInfo.imageId = m_imagePool->white_image().id();
@@ -19,7 +16,6 @@ SpritePool::SpritePool(const SpritePoolCreateInfo& spritePoolCreateInfo) :
 
         m_whiteSquareSprite = create(kWhiteSquareSpriteId, &spriteDataSource);
     }
-
 }
 
 SpriteResource SpritePool::create(duk::resource::Id resourceId, const duk::renderer::SpriteDataSource* spriteDataSource) {
@@ -33,4 +29,4 @@ SpriteResource SpritePool::white_square() const {
     return m_whiteSquareSprite;
 }
 
-}
+}// namespace duk::renderer

@@ -2,17 +2,16 @@
 /// vulkan_frame_buffer.cpp
 
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
-#include <duk_rhi/vulkan/vulkan_swapchain.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
+#include <duk_rhi/vulkan/vulkan_swapchain.h>
 
 #include <span>
 
 namespace duk::rhi {
 
-VulkanFrameBuffer::VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFrameBufferCreateInfo) :
-    m_device(vulkanFrameBufferCreateInfo.device),
-    m_renderPass(vulkanFrameBufferCreateInfo.renderPass),
-    m_attachments(vulkanFrameBufferCreateInfo.attachments, vulkanFrameBufferCreateInfo.attachments + vulkanFrameBufferCreateInfo.attachmentCount) {
+VulkanFrameBuffer::VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFrameBufferCreateInfo) : m_device(vulkanFrameBufferCreateInfo.device),
+                                                                                                       m_renderPass(vulkanFrameBufferCreateInfo.renderPass),
+                                                                                                       m_attachments(vulkanFrameBufferCreateInfo.attachments, vulkanFrameBufferCreateInfo.attachments + vulkanFrameBufferCreateInfo.attachmentCount) {
     create(vulkanFrameBufferCreateInfo.imageCount);
     update_extent();
     update_hash();
@@ -85,7 +84,7 @@ uint32_t VulkanFrameBuffer::height() const {
 void VulkanFrameBuffer::update_extent() {
     m_width = std::numeric_limits<uint32_t>::max();
     m_height = std::numeric_limits<uint32_t>::max();
-    for (auto& attachment : m_attachments) {
+    for (auto& attachment: m_attachments) {
         m_width = std::min(m_width, attachment->width());
         m_height = std::min(m_height, attachment->height());
     }
@@ -93,9 +92,9 @@ void VulkanFrameBuffer::update_extent() {
 
 void VulkanFrameBuffer::update_hash() {
     m_hash = 0;
-    for (auto& attachment : m_attachments) {
+    for (auto& attachment: m_attachments) {
         duk::hash::hash_combine(m_hash, attachment->hash());
     }
 }
 
-}
+}// namespace duk::rhi

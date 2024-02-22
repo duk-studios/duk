@@ -8,10 +8,8 @@
 namespace duk::rhi {
 
 /// VkFence
-VulkanFencePool::VulkanFencePool(const VulkanFencePoolCreateInfo& fencePoolCreateInfo) :
-    m_device(fencePoolCreateInfo.device),
-    m_flags(fencePoolCreateInfo.flags) {
-
+VulkanFencePool::VulkanFencePool(const VulkanFencePoolCreateInfo& fencePoolCreateInfo) : m_device(fencePoolCreateInfo.device),
+                                                                                         m_flags(fencePoolCreateInfo.flags) {
 }
 
 VulkanFencePool::~VulkanFencePool() {
@@ -24,7 +22,7 @@ void VulkanFencePool::expand(size_t n) {
     VkFenceCreateInfo fenceCreateInfo = {};
     fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceCreateInfo.flags = m_flags;
-    for (auto& fence : fences) {
+    for (auto& fence: fences) {
         auto result = vkCreateFence(m_device, &fenceCreateInfo, nullptr, &fence);
         if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to create VkFence");
@@ -34,16 +32,14 @@ void VulkanFencePool::expand(size_t n) {
 }
 
 void VulkanFencePool::clean() {
-    for (auto& fence : m_resources) {
+    for (auto& fence: m_resources) {
         vkDestroyFence(m_device, fence, nullptr);
     }
     m_resources.clear();
 }
 
 /// VkSemaphore
-VulkanSemaphorePool::VulkanSemaphorePool(const VulkanSemaphorePoolCreateInfo& semaphorePoolCreateInfo) :
-    m_device(semaphorePoolCreateInfo.device) {
-
+VulkanSemaphorePool::VulkanSemaphorePool(const VulkanSemaphorePoolCreateInfo& semaphorePoolCreateInfo) : m_device(semaphorePoolCreateInfo.device) {
 }
 
 VulkanSemaphorePool::~VulkanSemaphorePool() {
@@ -55,9 +51,9 @@ void VulkanSemaphorePool::expand(size_t n) {
 
     VkSemaphoreCreateInfo semaphoreCreateInfo = {};
     semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    for (auto& semaphore : semaphores) {
+    for (auto& semaphore: semaphores) {
         auto result = vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &semaphore);
-        if (result != VK_SUCCESS){
+        if (result != VK_SUCCESS) {
             throw std::runtime_error("failed to create VkSemaphore");
         }
     }
@@ -65,17 +61,15 @@ void VulkanSemaphorePool::expand(size_t n) {
 }
 
 void VulkanSemaphorePool::clean() {
-    for (auto& semaphore : m_resources) {
+    for (auto& semaphore: m_resources) {
         vkDestroySemaphore(m_device, semaphore, nullptr);
     }
     m_resources.clear();
 }
 
 /// VkCommandBuffer
-VulkanCommandBufferPool::VulkanCommandBufferPool(const VulkanCommandBufferPoolCreateInfo& commandBufferPoolCreateInfo) :
-    m_device(commandBufferPoolCreateInfo.device),
-    m_commandPool(commandBufferPoolCreateInfo.commandPool) {
-
+VulkanCommandBufferPool::VulkanCommandBufferPool(const VulkanCommandBufferPoolCreateInfo& commandBufferPoolCreateInfo) : m_device(commandBufferPoolCreateInfo.device),
+                                                                                                                         m_commandPool(commandBufferPoolCreateInfo.commandPool) {
 }
 
 VulkanCommandBufferPool::~VulkanCommandBufferPool() {
@@ -106,4 +100,4 @@ void VulkanCommandBufferPool::clean() {
     m_resources.clear();
 }
 
-}
+}// namespace duk::rhi

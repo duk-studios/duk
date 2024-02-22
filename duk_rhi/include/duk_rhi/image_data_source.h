@@ -14,7 +14,6 @@ namespace duk::rhi {
 
 class ImageDataSource : public duk::hash::DataSource {
 public:
-
     DUK_NO_DISCARD virtual PixelFormat pixel_format() const = 0;
 
     DUK_NO_DISCARD virtual size_t pixel_count() const = 0;
@@ -42,31 +41,27 @@ public:
 template<typename PixelType>
 class ImageDataSourceT : public ImageDataSource {
 public:
-    ImageDataSourceT(uint32_t width, uint32_t height) :
-        m_pixels(width * height),
-        m_width(width),
-        m_height(height) {
+    ImageDataSourceT(uint32_t width, uint32_t height) : m_pixels(width * height),
+                                                        m_width(width),
+                                                        m_height(height) {
         assert(width * height == m_pixels.size());
     }
 
-    ImageDataSourceT(std::vector<PixelType>&& pixels, uint32_t width, uint32_t height) :
-        m_pixels(std::move(pixels)),
-        m_width(width),
-        m_height(height) {
+    ImageDataSourceT(std::vector<PixelType>&& pixels, uint32_t width, uint32_t height) : m_pixels(std::move(pixels)),
+                                                                                         m_width(width),
+                                                                                         m_height(height) {
         assert(width * height == m_pixels.size());
     }
 
-    ImageDataSourceT(const std::vector<PixelType>& pixels, uint32_t width, uint32_t height) :
-        m_pixels(pixels),
-        m_width(width),
-        m_height(height) {
+    ImageDataSourceT(const std::vector<PixelType>& pixels, uint32_t width, uint32_t height) : m_pixels(pixels),
+                                                                                              m_width(width),
+                                                                                              m_height(height) {
         assert(width * height == m_pixels.size());
     }
 
-    ImageDataSourceT(const PixelType* pixels, uint32_t width, uint32_t height) :
-        m_pixels(pixels, pixels + (width * height)),
-        m_width(width),
-        m_height(height) {
+    ImageDataSourceT(const PixelType* pixels, uint32_t width, uint32_t height) : m_pixels(pixels, pixels + (width * height)),
+                                                                                 m_width(width),
+                                                                                 m_height(height) {
         assert(width * height == m_pixels.size());
     }
 
@@ -125,7 +120,6 @@ public:
     }
 
 protected:
-
     DUK_NO_DISCARD duk::hash::Hash calculate_hash() const override {
         duk::hash::Hash hash = 0;
         duk::hash::hash_combine(hash, m_pixels.data(), byte_count());
@@ -155,11 +149,9 @@ using ImageDataSourceRGBA32F = ImageDataSourceT<duk::rhi::PixelRGBA32F>;
 
 class ImageDataSourceEmpty : public ImageDataSource {
 public:
-    ImageDataSourceEmpty(uint32_t width, uint32_t height, PixelFormat pixelFormat) :
-        m_width(width),
-        m_height(height),
-        m_pixelFormat(pixelFormat) {
-
+    ImageDataSourceEmpty(uint32_t width, uint32_t height, PixelFormat pixelFormat) : m_width(width),
+                                                                                     m_height(height),
+                                                                                     m_pixelFormat(pixelFormat) {
     }
 
     DUK_NO_DISCARD PixelFormat pixel_format() const override {
@@ -191,7 +183,6 @@ public:
     }
 
 protected:
-
     DUK_NO_DISCARD duk::hash::Hash calculate_hash() const override {
         duk::hash::Hash hash = 0;
         duk::hash::hash_combine(hash, m_width);
@@ -206,7 +197,6 @@ private:
     PixelFormat m_pixelFormat;
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_IMAGE_DATA_SOURCE_H
-
+#endif// DUK_RHI_IMAGE_DATA_SOURCE_H

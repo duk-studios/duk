@@ -11,7 +11,6 @@ namespace duk::scene {
 
 class Scene {
 public:
-
     Objects& objects();
 
     const Objects& objects() const;
@@ -25,7 +24,7 @@ private:
     Systems m_systems;
 };
 
-}
+}// namespace duk::scene
 
 namespace duk::json {
 
@@ -35,7 +34,7 @@ inline void from_json<duk::scene::Scene>(const rapidjson::Value& jsonObject, duk
     from_json_member(jsonObject, "systems", scene.systems());
 }
 
-}
+}// namespace duk::json
 
 namespace duk::resource {
 
@@ -44,6 +43,6 @@ void solve_resources(Solver* solver, duk::scene::Scene& scene) {
     solver->solve(scene.objects());
 }
 
-}
+}// namespace duk::resource
 
-#endif // DUK_SCENE_SCENE_H
+#endif// DUK_SCENE_SCENE_H

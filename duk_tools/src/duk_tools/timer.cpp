@@ -7,11 +7,9 @@ using namespace std::chrono_literals;
 
 namespace duk::tools {
 
-Timer::Timer() :
-    m_duration(0s),
-    m_totalDuration(0s),
-    m_start(0s) {
-
+Timer::Timer() : m_duration(0s),
+                 m_totalDuration(0s),
+                 m_start(0s) {
 }
 
 void Timer::start() {
@@ -41,4 +39,4 @@ Timer::Duration Timer::total_duration() const {
     return m_totalDuration;
 }
 
-}
+}// namespace duk::tools

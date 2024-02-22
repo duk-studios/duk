@@ -46,13 +46,10 @@ public:
     // flushes all scheduled commands, taking into account described dependencies
     virtual void flush() = 0;
 
-
 protected:
-
     virtual void schedule_after(std::size_t before, std::size_t after, PipelineStage::Mask waitStages) = 0;
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_COMMAND_SCHEDULER_H
-
+#endif// DUK_RHI_COMMAND_SCHEDULER_H

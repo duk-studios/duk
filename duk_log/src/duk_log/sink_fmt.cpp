@@ -19,4 +19,4 @@ void SinkFmt::flush(Level level, const std::string& message) {
     fmt::print(style, "{}\n", message);
 }
 
-}
+}// namespace duk::log

@@ -4,8 +4,8 @@
 #ifndef DUK_RENDERER_RENDERER_H
 #define DUK_RENDERER_RENDERER_H
 
-#include <duk_rhi/rhi.h>
 #include <duk_log/logger.h>
+#include <duk_rhi/rhi.h>
 #include <duk_scene/scene.h>
 
 namespace duk {
@@ -28,11 +28,9 @@ struct RendererCreateInfo {
 
 class Renderer {
 public:
-
     using RenderStartEvent = duk::event::EventVoid;
 
 public:
-
     explicit Renderer(const RendererCreateInfo& rendererCreateInfo);
 
     virtual ~Renderer();
@@ -56,7 +54,6 @@ public:
     void use_as_camera(const duk::scene::Object& object);
 
 private:
-
     void update_global_descriptors(duk::scene::Objects& objects);
 
 protected:
@@ -70,7 +67,7 @@ protected:
     duk::event::EventVoid m_renderStart;
 };
 
-} // namespace renderer
-} // namespace duk
+}// namespace renderer
+}// namespace duk
 
-#endif // DUK_RENDERER_RENDERER_H
+#endif// DUK_RENDERER_RENDERER_H

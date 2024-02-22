@@ -4,9 +4,9 @@
 #ifndef DUK_RENDERER_FORWARD_PASS_H
 #define DUK_RENDERER_FORWARD_PASS_H
 
+#include <duk_renderer/brushes/sprite_brush.h>
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/resources/materials/draw_entry.h>
-#include <duk_renderer/brushes/sprite_brush.h>
 
 #include <duk_tools/fixed_vector.h>
 
@@ -37,7 +37,6 @@ struct ForwardPassCreateInfo {
 
 class ForwardPass : public Pass {
 public:
-
     explicit ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo);
 
     ~ForwardPass() override;
@@ -57,7 +56,6 @@ private:
     SpriteDrawData m_spriteDrawData;
 };
 
-}
+}// namespace duk::renderer
 
-#endif // DUK_RENDERER_FORWARD_PASS_H
-
+#endif// DUK_RENDERER_FORWARD_PASS_H

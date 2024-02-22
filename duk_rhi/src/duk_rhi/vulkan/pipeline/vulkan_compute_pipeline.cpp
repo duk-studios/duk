@@ -5,12 +5,11 @@
 
 namespace duk::rhi {
 
-VulkanComputePipeline::VulkanComputePipeline(const VulkanComputePipelineCreateInfo& computePipelineCreateInfo) :
-    m_device(computePipelineCreateInfo.device),
-    m_shader(computePipelineCreateInfo.shader),
-    m_pipeline(VK_NULL_HANDLE),
-    m_hash(m_shader->hash()),
-    m_pipelineHash(duk::hash::kUndefinedHash) {
+VulkanComputePipeline::VulkanComputePipeline(const VulkanComputePipelineCreateInfo& computePipelineCreateInfo) : m_device(computePipelineCreateInfo.device),
+                                                                                                                 m_shader(computePipelineCreateInfo.shader),
+                                                                                                                 m_pipeline(VK_NULL_HANDLE),
+                                                                                                                 m_hash(m_shader->hash()),
+                                                                                                                 m_pipelineHash(duk::hash::kUndefinedHash) {
 }
 
 VulkanComputePipeline::~VulkanComputePipeline() {
@@ -57,4 +56,4 @@ VkPipelineLayout VulkanComputePipeline::pipeline_layout() const {
     return m_shader->pipeline_layout();
 }
 
-}
+}// namespace duk::rhi

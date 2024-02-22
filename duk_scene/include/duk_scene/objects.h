@@ -4,17 +4,17 @@
 #ifndef DUK_SCENE_OBJECTS_H
 #define DUK_SCENE_OBJECTS_H
 
+#include <duk_resource/solver/dependency_solver.h>
+#include <duk_resource/solver/reference_solver.h>
 #include <duk_scene/component_pool.h>
 #include <duk_scene/limits.h>
-#include <duk_tools/fixed_vector.h>
 #include <duk_tools/bit_block.h>
+#include <duk_tools/fixed_vector.h>
 #include <duk_tools/singleton.h>
-#include <duk_resource/solver/reference_solver.h>
-#include <duk_resource/solver/dependency_solver.h>
 
-#include <array>
-#include "duk_log/log.h"
 #include "duk_json/string.h"
+#include "duk_log/log.h"
+#include <array>
 
 namespace duk::scene {
 
@@ -27,10 +27,8 @@ using ComponentMask = duk::tools::BitBlock<MAX_COMPONENTS>;
 
 class Object {
 public:
-
     class Id {
     public:
-
         Id();
 
         explicit Id(uint32_t index, uint32_t version);
@@ -50,7 +48,6 @@ public:
 
     class ComponentIterator {
     public:
-
         ComponentIterator(const ComponentMask& mask, uint32_t index);
 
         bool operator==(const ComponentIterator& rhs);
@@ -62,7 +59,6 @@ public:
         uint32_t operator*();
 
     private:
-
         void next();
 
     private:
@@ -72,7 +68,6 @@ public:
 
     class ComponentView {
     public:
-
         ComponentView(const ComponentMask& mask);
 
         ComponentIterator begin();
@@ -84,7 +79,6 @@ public:
     };
 
 public:
-
     Object();
 
     Object(uint32_t index, uint32_t version, Objects* scene);
@@ -99,8 +93,8 @@ public:
 
     void destroy() const;
 
-    template<typename T, typename ...Args>
-    Component<T> add(Args&& ...args);
+    template<typename T, typename... Args>
+    Component<T> add(Args&&... args);
 
     template<typename T>
     void remove();
@@ -111,7 +105,7 @@ public:
     template<typename T>
     Component<T> component() const;
 
-    template<typename ...Ts>
+    template<typename... Ts>
     std::tuple<Component<Ts>...> components();
 
     ComponentView components();
@@ -120,7 +114,6 @@ private:
     Id m_id;
     Objects* m_objects;
 };
-
 
 template<typename T>
 class Component {
@@ -154,7 +147,6 @@ private:
 
 class ComponentRegistry : public duk::tools::Singleton<ComponentRegistry> {
 private:
-
     // Unfortunately we have to duplicate the solve method for each solver type.
     // At the moment I could not think of a more elegant solution, this is not as simple
     // as it might look at first glance :(
@@ -167,7 +159,6 @@ private:
         virtual void solve(duk::resource::DependencySolver* solver, Object& object) = 0;
 
         virtual void build(Object& object, const rapidjson::Value& jsonObject) = 0;
-
     };
 
     template<typename T>
@@ -189,7 +180,6 @@ private:
     };
 
 public:
-
     template<typename T>
     DUK_NO_DISCARD static uint32_t component_index();
 
@@ -242,10 +232,8 @@ uint32_t ComponentRegistry::component_index() {
 
 class Objects {
 public:
-
     class ObjectView {
     public:
-
         class Iterator {
         public:
             Iterator(uint32_t index, Objects* scene, ComponentMask componentMask);
@@ -265,7 +253,6 @@ public:
             DUK_NO_DISCARD bool operator!=(const Iterator& other) const;
 
         private:
-
             void next();
 
             bool valid_object();
@@ -278,7 +265,6 @@ public:
         };
 
     public:
-
         ObjectView(Objects* scene, ComponentMask componentMask);
 
         DUK_NO_DISCARD Iterator begin();
@@ -295,7 +281,6 @@ public:
     };
 
 public:
-
     ~Objects();
 
     Object add_object();
@@ -308,13 +293,13 @@ public:
 
     DUK_NO_DISCARD ObjectView all();
 
-    template<typename ...Ts>
+    template<typename... Ts>
     DUK_NO_DISCARD ObjectView all_with();
 
     DUK_NO_DISCARD Object::ComponentView components(const Object::Id& id);
 
-    template<typename T, typename ...Args>
-    void add_component(const Object::Id& id, Args&& ...args);
+    template<typename T, typename... Args>
+    void add_component(const Object::Id& id, Args&&... args);
 
     template<typename T>
     void remove_component(const Object::Id& id);
@@ -329,14 +314,13 @@ public:
     DUK_NO_DISCARD bool valid_component(const Object::Id& id) const;
 
 private:
-
     template<typename T>
     ComponentPoolT<T>* pool();
 
     template<typename T>
     static ComponentMask component_mask();
 
-    template<typename T1, typename T2, typename ...Ts>
+    template<typename T1, typename T2, typename... Ts>
     static ComponentMask component_mask();
 
     void remove_component(uint32_t index, uint32_t componentIndex);
@@ -346,24 +330,18 @@ private:
     duk::tools::FixedVector<ComponentMask, MAX_OBJECTS> m_componentMasks;
     duk::tools::FixedVector<uint32_t, MAX_OBJECTS> m_versions;
     duk::tools::FixedVector<uint32_t, MAX_OBJECTS> m_freeList;
-
 };
-
 
 // Component Implementation //
 
 template<typename T>
-Component<T>::Component(const Object::Id& ownerId, Objects* objects) :
-    m_ownerId(ownerId),
-    m_objects(objects) {
-
+Component<T>::Component(const Object::Id& ownerId, Objects* objects) : m_ownerId(ownerId),
+                                                                       m_objects(objects) {
 }
 
 template<typename T>
-Component<T>::Component(const Object& owner) :
-    m_ownerId(owner.id()),
-    m_objects(owner.scene()){
-
+Component<T>::Component(const Object& owner) : m_ownerId(owner.id()),
+                                               m_objects(owner.scene()) {
 }
 
 template<typename T>
@@ -420,7 +398,7 @@ Component<T>::operator bool() const {
 // Objects Implementation //
 
 template<typename T, typename... Args>
-void Objects::add_component(const Object::Id& id, Args&& ... args) {
+void Objects::add_component(const Object::Id& id, Args&&... args) {
     assert(valid_object(id));
     assert(!valid_component<T>(id));
     auto componentPool = pool<T>();
@@ -474,7 +452,7 @@ ComponentPoolT<T>* Objects::pool() {
     return componentPool;
 }
 
-template<typename ...Ts>
+template<typename... Ts>
 Objects::ObjectView Objects::all_with() {
     return Objects::ObjectView(this, component_mask<Ts...>());
 }
@@ -486,7 +464,7 @@ ComponentMask Objects::component_mask() {
     return mask;
 }
 
-template<typename T1, typename T2, typename ...Ts>
+template<typename T1, typename T2, typename... Ts>
 ComponentMask Objects::component_mask() {
     return component_mask<T1>() | component_mask<T2, Ts...>();
 }
@@ -494,7 +472,7 @@ ComponentMask Objects::component_mask() {
 // From object.h //
 
 template<typename T, typename... Args>
-Component<T> Object::add(Args&& ... args) {
+Component<T> Object::add(Args&&... args) {
     m_objects->template add_component<T>(m_id, std::forward<Args>(args)...);
     return Component<T>(m_id, m_objects);
 }
@@ -519,7 +497,7 @@ std::tuple<Component<Ts>...> Object::components() {
     return std::make_tuple(component<Ts>()...);
 }
 
-}
+}// namespace duk::scene
 
 namespace duk::json {
 
@@ -527,19 +505,18 @@ template<>
 inline void from_json<duk::scene::Objects>(const rapidjson::Value& jsonObject, duk::scene::Objects& objects) {
     auto objectJsons = jsonObject.GetArray();
 
-    for (auto& objectJson : objectJsons) {
-
+    for (auto& objectJson: objectJsons) {
         auto object = objects.add_object();
 
         auto jsonComponents = objectJson["components"].GetArray();
 
-        for (auto& jsonComponent : jsonComponents) {
+        for (auto& jsonComponent: jsonComponents) {
             duk::scene::ComponentRegistry::instance()->build_from_json(object, jsonComponent);
         }
     }
 }
 
-}
+}// namespace duk::json
 
 namespace duk::resource {
 
@@ -550,22 +527,20 @@ void solve_resources(Solver* solver, duk::scene::Component<T>& component) {
 
 template<typename Solver>
 void solve_resources(Solver* solver, duk::scene::Object& object) {
-
     auto componentRegistry = duk::scene::ComponentRegistry::instance(true);
 
-    for (auto componentId : object.components()) {
+    for (auto componentId: object.components()) {
         componentRegistry->solve(solver, object, componentId);
     }
-
 }
 
 template<typename Solver>
 void solve_resources(Solver* solver, duk::scene::Objects& objects) {
-    for (auto object : objects.all()) {
+    for (auto object: objects.all()) {
         solver->solve(object);
     }
 }
 
-}
+}// namespace duk::resource
 
-#endif // DUK_SCENE_OBJECTS_H
+#endif// DUK_SCENE_OBJECTS_H

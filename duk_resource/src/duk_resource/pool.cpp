@@ -20,4 +20,4 @@ Pools::~Pools() {
     clear();
 }
 
-}
+}// namespace duk::resource

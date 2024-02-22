@@ -6,8 +6,8 @@
 
 #include <duk_macros/macros.h>
 
-#include <future>
 #include <any>
+#include <future>
 
 namespace duk::rhi {
 
@@ -39,7 +39,6 @@ protected:
 
 using FutureCommand = std::future<Command*>;
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_COMMAND_H
-
+#endif// DUK_RHI_COMMAND_H

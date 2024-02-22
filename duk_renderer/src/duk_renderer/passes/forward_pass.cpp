@@ -1,15 +1,15 @@
 /// 05/10/2023
 /// forward_pass.cpp
 
-#include <duk_renderer/passes/forward_pass.h>
-#include <duk_renderer/renderer.h>
-#include <duk_renderer/components/mesh_renderer.h>
-#include <duk_renderer/components/sprite_renderer.h>
-#include <duk_renderer/resources/materials/material.h>
-#include <duk_renderer/resources/materials/pipeline.h>
+#include "duk_renderer/components/transform.h"
 #include <duk_renderer/brushes/mesh.h>
 #include <duk_renderer/brushes/sprite_brush.h>
-#include "duk_renderer/components/transform.h"
+#include <duk_renderer/components/mesh_renderer.h>
+#include <duk_renderer/components/sprite_renderer.h>
+#include <duk_renderer/passes/forward_pass.h>
+#include <duk_renderer/renderer.h>
+#include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/resources/materials/pipeline.h>
 
 namespace duk::renderer {
 
@@ -33,7 +33,6 @@ static bool valid(const MeshDrawEntry& drawEntry) {
 }
 
 static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, MeshDrawData* drawData) {
-
     drawData->clear();
     auto& objects = renderParams.scene->objects();
     auto& meshes = drawData->meshes;
@@ -42,7 +41,7 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
 
     std::set<Material*> uniqueMaterials;
 
-    for (auto object : objects.all_with<MeshRenderer>()) {
+    for (auto object: objects.all_with<MeshRenderer>()) {
         auto meshRenderer = object.component<MeshRenderer>();
 
         auto material = meshRenderer->material.get();
@@ -65,7 +64,7 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
         return;
     }
 
-    for (auto material : uniqueMaterials) {
+    for (auto material: uniqueMaterials) {
         material->instance_buffer()->clear();
     }
 
@@ -77,7 +76,7 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
     drawEntry.params.outputHeight = renderParams.outputHeight;
     drawEntry.params.globalDescriptors = renderParams.globalDescriptors;
 
-    for (auto sortedIndex : sortedMeshes) {
+    for (auto sortedIndex: sortedMeshes) {
         auto& meshEntry = meshes[sortedIndex];
 
         // update instance buffer
@@ -110,13 +109,13 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
     }
 
     // mark all instance buffers for gpu upload
-    for (auto material : uniqueMaterials) {
+    for (auto material: uniqueMaterials) {
         material->instance_buffer()->flush();
     }
 
     // for each draw entry
     Material* currentMaterial = nullptr;
-    for (auto& entry : drawEntries) {
+    for (auto& entry: drawEntries) {
         if (currentMaterial != entry.material) {
             currentMaterial = entry.material;
             entry.material->bind(renderParams.commandBuffer, entry.params);
@@ -141,7 +140,6 @@ static bool valid(const SpriteDrawEntry& drawEntry) {
 }
 
 void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, SpriteDrawData* drawData) {
-
     drawData->clear();
     auto& objects = renderParams.scene->objects();
     auto& sortedSprites = drawData->sortedSprites;
@@ -151,7 +149,7 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
 
     std::set<Material*> usedMaterials;
 
-    for (auto object : objects.all_with<SpriteRenderer>()) {
+    for (auto object: objects.all_with<SpriteRenderer>()) {
         auto spriteRenderer = object.component<SpriteRenderer>();
         auto material = spriteRenderer->material.get();
         auto sprite = spriteRenderer->sprite.get();
@@ -175,7 +173,7 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
     SpriteDrawEntry drawEntry = {};
     drawEntry.brush = brush.get();
 
-    for (auto sortedIndex : sortedSprites) {
+    for (auto sortedIndex: sortedSprites) {
         auto& spriteEntry = sprites[sortedIndex];
 
         auto object = objects.object(spriteEntry.objectId);
@@ -208,7 +206,7 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
 
     Material* currentMaterial = nullptr;
 
-    for (auto& entry : drawEntries) {
+    for (auto& entry: drawEntries) {
         if (entry.material != currentMaterial) {
             entry.material->bind(commandBuffer, drawParams);
             currentMaterial = entry.material;
@@ -217,7 +215,7 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
     }
 }
 
-}
+}// namespace detail
 
 void MeshDrawData::clear() {
     meshes.clear();
@@ -232,10 +230,8 @@ void SpriteDrawData::clear() {
     drawEntries.clear();
 }
 
-ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
-    m_renderer(forwardPassCreateInfo.renderer),
-    m_outColor(duk::rhi::Access::COLOR_ATTACHMENT_WRITE, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
-
+ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) : m_renderer(forwardPassCreateInfo.renderer),
+                                                                               m_outColor(duk::rhi::Access::COLOR_ATTACHMENT_WRITE, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};
         colorAttachmentDescription.format = detail::kColorFormat;
@@ -275,7 +271,6 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo) :
 ForwardPass::~ForwardPass() = default;
 
 void ForwardPass::render(const RenderParams& renderParams) {
-
     if (!m_colorImage || m_colorImage->width() != renderParams.outputWidth || m_colorImage->height() != renderParams.outputHeight) {
         m_colorImage = m_renderer->create_color_image(renderParams.outputWidth, renderParams.outputHeight, detail::kColorFormat);
 
@@ -300,7 +295,6 @@ void ForwardPass::render(const RenderParams& renderParams) {
         frameBufferCreateInfo.attachments = frameBufferAttachments;
         frameBufferCreateInfo.renderPass = m_renderPass.get();
 
-
         m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
     }
 
@@ -317,4 +311,4 @@ PassConnection* ForwardPass::out_color() {
     return &m_outColor;
 }
 
-}
+}// namespace duk::renderer

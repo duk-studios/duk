@@ -8,8 +8,7 @@
 
 namespace duk::renderer {
 
-ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo) :
-    m_renderer(imagePoolCreateInfo.renderer) {
+ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo) : m_renderer(imagePoolCreateInfo.renderer) {
     {
         duk::rhi::ImageDataSourceRGBA8U whiteImageDataSource(1, 1);
         whiteImageDataSource.at(0, 0) = {255, 255, 255, 255};
@@ -40,4 +39,4 @@ ImageResource ImagePool::black_image() const {
     return m_blackImage;
 }
 
-}
+}// namespace duk::renderer

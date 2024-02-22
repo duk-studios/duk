@@ -1,14 +1,14 @@
 /// 28/05/2023
 /// vulkan_resource_manager.cpp
 
-#include <duk_rhi/vulkan/vulkan_resource_manager.h>
-#include <duk_rhi/vulkan/vulkan_render_pass.h>
-#include <duk_rhi/vulkan/vulkan_frame_buffer.h>
-#include <duk_rhi/vulkan/vulkan_image.h>
+#include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
+#include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
-#include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
-#include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
+#include <duk_rhi/vulkan/vulkan_frame_buffer.h>
+#include <duk_rhi/vulkan/vulkan_image.h>
+#include <duk_rhi/vulkan/vulkan_render_pass.h>
+#include <duk_rhi/vulkan/vulkan_resource_manager.h>
 #include <duk_rhi/vulkan/vulkan_swapchain.h>
 
 namespace duk::rhi {
@@ -17,24 +17,22 @@ namespace detail {
 
 template<typename T>
 void create(std::vector<T*>& resources, uint32_t imageCount) {
-    for (auto& resource : resources) {
+    for (auto& resource: resources) {
         resource->create(imageCount);
     }
 }
 
 template<typename T>
 void clean(std::vector<T*>& resources) {
-    for (auto& resource : resources) {
+    for (auto& resource: resources) {
         resource->clean();
     }
 }
 
-}
+}// namespace detail
 
-VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateInfo& resourceManagerCreateInfo) :
-    m_swapchain(resourceManagerCreateInfo.swapchain),
-    m_imageCount(resourceManagerCreateInfo.imageCount) {
-
+VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateInfo& resourceManagerCreateInfo) : m_swapchain(resourceManagerCreateInfo.swapchain),
+                                                                                                                 m_imageCount(resourceManagerCreateInfo.imageCount) {
     if (m_swapchain) {
         m_listener.listen(*m_swapchain->create_event(), [this](const auto& swapchainInfo) {
             m_imageCount = swapchainInfo.imageCount;
@@ -120,4 +118,4 @@ std::set<uint32_t> VulkanResourceManager::image_indices_set() const {
     }
     return pendingIndices;
 }
-}
+}// namespace duk::rhi

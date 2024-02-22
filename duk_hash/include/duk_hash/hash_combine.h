@@ -5,8 +5,8 @@
 #ifndef DUK_HASH_HASH_COMBINE_H
 #define DUK_HASH_HASH_COMBINE_H
 
-#include <functional>
 #include <cstdint>
+#include <functional>
 
 namespace duk::hash {
 
@@ -35,7 +35,6 @@ inline void hash_combine(std::size_t& seed, InputIterator begin, InputIterator e
 }
 
 static inline void hash_combine(std::size_t& seed, const void* data, size_t size) {
-
     auto uint64Ptr = (const uint64_t*)data;
     auto uint64PtrEnd = uint64Ptr + (size / sizeof(uint64_t));
 
@@ -54,6 +53,6 @@ static inline void hash_combine(std::size_t& seed, const void* data, size_t size
     }
 }
 
-} // duk::hash
+}// namespace duk::hash
 
-#endif //DUK_HASH_HASH_COMBINE_H
+#endif//DUK_HASH_HASH_COMBINE_H

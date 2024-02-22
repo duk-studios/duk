@@ -19,6 +19,6 @@ const std::string& type_name_of() {
     return typeName;
 }
 
-}
+}// namespace duk::tools
 
-#endif // DUK_TOOLS_TYPES_H
+#endif// DUK_TOOLS_TYPES_H

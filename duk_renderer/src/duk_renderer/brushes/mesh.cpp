@@ -18,24 +18,18 @@ static duk::hash::Hash calculate_hash(const rhi::VertexLayout& vertexLayout, rhi
     return hash;
 }
 
-}
+}// namespace detail
 
-MeshBuffer::ManagedBuffer::ManagedBuffer(const MeshBuffer::ManagedBufferCreateInfo& managedBufferCreateInfo) :
-    m_rhi(managedBufferCreateInfo.rhi),
-    m_allocationCounter(0) {
+MeshBuffer::ManagedBuffer::ManagedBuffer(const MeshBuffer::ManagedBufferCreateInfo& managedBufferCreateInfo) : m_rhi(managedBufferCreateInfo.rhi),
+                                                                                                               m_allocationCounter(0) {
+    m_buffer = m_rhi->create_buffer({.type = managedBufferCreateInfo.type,
+                                     .updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC,
+                                     .elementCount = managedBufferCreateInfo.elementCount,
+                                     .elementSize = managedBufferCreateInfo.elementSize,
+                                     .commandQueue = managedBufferCreateInfo.commandQueue});
 
-    m_buffer = m_rhi->create_buffer({
-        .type = managedBufferCreateInfo.type,
-        .updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC,
-        .elementCount = managedBufferCreateInfo.elementCount,
-        .elementSize = managedBufferCreateInfo.elementSize,
-        .commandQueue = managedBufferCreateInfo.commandQueue
-    });
-
-    m_freeBlocks.push_back({
-        .offset = 0,
-        .size = m_buffer->byte_size()
-    });
+    m_freeBlocks.push_back({.offset = 0,
+                            .size = m_buffer->byte_size()});
 }
 
 MeshBuffer::ManagedBuffer::~ManagedBuffer() {
@@ -43,7 +37,6 @@ MeshBuffer::ManagedBuffer::~ManagedBuffer() {
 }
 
 uint32_t MeshBuffer::ManagedBuffer::allocate(size_t size) {
-
     // try to allocate from current free blocks
     uint32_t allocationHandle = 0;
     if (allocate_from_free_blocks(&allocationHandle, size)) {
@@ -55,7 +48,6 @@ uint32_t MeshBuffer::ManagedBuffer::allocate(size_t size) {
 
     // try to allocate again
     if (!allocate_from_free_blocks(&allocationHandle, size)) {
-
         // this should never happen, but if it does throw an error
         throw std::runtime_error("failed to allocate mesh in ManagedBuffer");
     }
@@ -81,7 +73,6 @@ void MeshBuffer::ManagedBuffer::free(uint32_t handle) {
 }
 
 void MeshBuffer::ManagedBuffer::write(uint32_t handle, uint8_t* src, size_t size) {
-
     const auto allocatedBlock = at(handle);
 
     // make sure to not write on other allocations space
@@ -112,18 +103,15 @@ void MeshBuffer::ManagedBuffer::merge_free_blocks() {
     decltype(m_freeBlocks) freeBlocks;
     size_t blockSize = 0;
     size_t blockOffset = 0;
-    for (auto& currentBlock : m_freeBlocks) {
+    for (auto& currentBlock: m_freeBlocks) {
         // if current block is not contiguous, store previous accumulated blocks and start to count a new block
         // starting from currentBlock.offset
         if ((blockOffset + blockSize) != currentBlock.offset) {
-
             // only insert block if it has some size
             // e.g. the first block might not start at 0
             if (blockSize > 0) {
-                freeBlocks.push_back({
-                    .offset = blockOffset,
-                    .size = blockSize
-                });
+                freeBlocks.push_back({.offset = blockOffset,
+                                      .size = blockSize});
             }
 
             // reset block size
@@ -138,10 +126,8 @@ void MeshBuffer::ManagedBuffer::merge_free_blocks() {
     }
 
     if (blockSize > 0) {
-        freeBlocks.push_back({
-            .offset = blockOffset,
-            .size = blockSize
-        });
+        freeBlocks.push_back({.offset = blockOffset,
+                              .size = blockSize});
     }
 
     std::swap(m_freeBlocks, freeBlocks);
@@ -174,21 +160,16 @@ bool MeshBuffer::ManagedBuffer::allocate_from_free_blocks(uint32_t* allocationHa
 }
 
 void MeshBuffer::ManagedBuffer::expand_by(size_t size) {
-
-    auto newBuffer = m_rhi->create_buffer({
-        .type = m_buffer->type(),
-        .updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC,
-        .elementCount = (m_buffer->byte_size() + size) / m_buffer->element_size(),
-        .elementSize = m_buffer->element_size(),
-        .commandQueue = m_buffer->command_queue()
-    });
+    auto newBuffer = m_rhi->create_buffer({.type = m_buffer->type(),
+                                           .updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC,
+                                           .elementCount = (m_buffer->byte_size() + size) / m_buffer->element_size(),
+                                           .elementSize = m_buffer->element_size(),
+                                           .commandQueue = m_buffer->command_queue()});
 
     newBuffer->copy_from(m_buffer.get(), m_buffer->byte_size(), 0, 0);
 
-    m_freeBlocks.push_back({
-        .offset = m_buffer->byte_size(),
-        .size = size
-    });
+    m_freeBlocks.push_back({.offset = m_buffer->byte_size(),
+                            .size = size});
 
     merge_free_blocks();
 
@@ -205,22 +186,20 @@ MeshBuffer::ManagedBuffer::Block MeshBuffer::ManagedBuffer::at(uint32_t handle) 
     return it->second;
 }
 
-Mesh::Mesh(const MeshCreateInfo& meshCreateInfo) :
-        m_meshBufferPool(meshCreateInfo.meshBufferPool),
-        m_vertexBufferHandles({}),
-        m_indexBufferHandle(kInvalidBufferHandle),
-        m_currentBuffer(nullptr),
-        m_firstVertex(~0),
-        m_vertexCount(~0),
-        m_firstIndex(~0),
-        m_indexCount(~0),
-        m_indexType(rhi::IndexType::NONE) {
+Mesh::Mesh(const MeshCreateInfo& meshCreateInfo) : m_meshBufferPool(meshCreateInfo.meshBufferPool),
+                                                   m_vertexBufferHandles({}),
+                                                   m_indexBufferHandle(kInvalidBufferHandle),
+                                                   m_currentBuffer(nullptr),
+                                                   m_firstVertex(~0),
+                                                   m_vertexCount(~0),
+                                                   m_firstIndex(~0),
+                                                   m_indexCount(~0),
+                                                   m_indexType(rhi::IndexType::NONE) {
     m_vertexBufferHandles.fill(kInvalidBufferHandle);
     create(meshCreateInfo.meshDataSource);
 }
 
 Mesh::~Mesh() {
-
     auto& vertexBuffers = m_currentBuffer->vertex_buffers();
     for (auto i = 0; i < m_vertexBufferHandles.size(); i++) {
         auto& vertexBufferHandle = m_vertexBufferHandles[i];
@@ -246,12 +225,11 @@ rhi::IndexType Mesh::index_type() const {
 }
 
 void Mesh::draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance) {
-
     auto& vertexBuffers = m_currentBuffer->vertex_buffers();
 
     duk::tools::FixedVector<duk::rhi::Buffer*, static_cast<uint32_t>(VertexAttributes::Type::COUNT)> buffers;
 
-    for (auto& vertexBuffer : vertexBuffers) {
+    for (auto& vertexBuffer: vertexBuffers) {
         duk::rhi::Buffer* buffer = nullptr;
         if (vertexBuffer) {
             buffer = vertexBuffer->internal_buffer();
@@ -264,14 +242,12 @@ void Mesh::draw(rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t 
     if (m_indexType != rhi::IndexType::NONE) {
         commandBuffer->bind_index_buffer(m_currentBuffer->index_buffer()->internal_buffer());
         commandBuffer->draw_indexed(m_indexCount, instanceCount, m_firstIndex, static_cast<int32_t>(m_firstVertex), firstInstance);
-    }
-    else {
+    } else {
         commandBuffer->draw(m_vertexCount, m_firstVertex, instanceCount, firstInstance);
     }
 }
 
 void Mesh::create(const MeshDataSource* meshDataSource) {
-
     m_vertexAttributes = meshDataSource->vertex_attributes();
     m_indexType = meshDataSource->index_type();
 
@@ -281,7 +257,7 @@ void Mesh::create(const MeshDataSource* meshDataSource) {
     {
         auto& vertexBuffers = m_currentBuffer->vertex_buffers();
 
-        for (auto attributeIndex : m_vertexAttributes) {
+        for (auto attributeIndex: m_vertexAttributes) {
             const auto attribute = static_cast<VertexAttributes::Type>(attributeIndex);
             const auto attributeSize = VertexAttributes::size_of(attribute);
             auto& vertexBuffer = vertexBuffers[attributeIndex];
@@ -318,9 +294,8 @@ void Mesh::create(const MeshDataSource* meshDataSource) {
     }
 }
 
-MeshBuffer::MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo)  {
-
-    for (auto attributeIndex : meshBufferCreateInfo.vertexAttributes) {
+MeshBuffer::MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo) {
+    for (auto attributeIndex: meshBufferCreateInfo.vertexAttributes) {
         auto attribute = static_cast<VertexAttributes::Type>(attributeIndex);
         ManagedBufferCreateInfo vertexBufferCreateInfo = {};
         vertexBufferCreateInfo.rhi = meshBufferCreateInfo.rhi;
@@ -352,10 +327,8 @@ MeshBuffer::ManagedBuffer* MeshBuffer::index_buffer() {
     return m_indexBuffer.get();
 }
 
-MeshBufferPool::MeshBufferPool(const MeshBufferPoolCreateInfo& meshBufferPoolCreateInfo) :
-    m_rhi(meshBufferPoolCreateInfo.rhi),
-    m_commandQueue(meshBufferPoolCreateInfo.commandQueue) {
-
+MeshBufferPool::MeshBufferPool(const MeshBufferPoolCreateInfo& meshBufferPoolCreateInfo) : m_rhi(meshBufferPoolCreateInfo.rhi),
+                                                                                           m_commandQueue(meshBufferPoolCreateInfo.commandQueue) {
 }
 
 std::shared_ptr<Mesh> MeshBufferPool::create_mesh(const MeshDataSource* meshDataSource) {
@@ -370,7 +343,6 @@ MeshBuffer* MeshBufferPool::find_buffer(const VertexAttributes& vertexAttributes
 
     auto it = m_meshBuffers.find(hash);
     if (it == m_meshBuffers.end()) {
-
         MeshBufferCreateInfo meshBufferCreateInfo = {};
         meshBufferCreateInfo.rhi = m_rhi;
         meshBufferCreateInfo.commandQueue = m_commandQueue;
@@ -390,4 +362,4 @@ MeshBuffer* MeshBufferPool::find_buffer(const VertexAttributes& vertexAttributes
     return it->second.get();
 }
 
-}
+}// namespace duk::renderer

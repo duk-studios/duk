@@ -16,7 +16,6 @@ public:
     ~Generator();
 };
 
-}
+}// namespace duk::material_generator
 
-#endif // DUK_MATERIAL_GENERATOR_GENERATOR_H
-
+#endif// DUK_MATERIAL_GENERATOR_GENERATOR_H

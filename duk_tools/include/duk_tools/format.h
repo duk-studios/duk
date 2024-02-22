@@ -4,8 +4,8 @@
 #ifndef DUK_LOG_FORMAT_H
 #define DUK_LOG_FORMAT_H
 
-#include <string>
 #include <sstream>
+#include <string>
 #include <vector>
 
 namespace duk::tools {
@@ -27,8 +27,8 @@ inline std::string to_str(const char* value) {
     return value;
 }
 
-template<typename ...Args>
-inline  std::string format(const std::string& base, Args&& ... args) {
+template<typename... Args>
+inline std::string format(const std::string& base, Args&&... args) {
     if constexpr (sizeof...(args) == 0) {
         return base;
     }
@@ -43,7 +43,6 @@ inline  std::string format(const std::string& base, Args&& ... args) {
     size_t tokenEnd = 0;
 
     while ((tokenStart = base.find('{', tokenStart))) {
-
         //TODO: allow n-braces
 
         auto substr = base.substr(tokenEnd, tokenStart - tokenEnd);
@@ -75,7 +74,6 @@ inline  std::string format(const std::string& base, Args&& ... args) {
     return oss.str();
 }
 
-}
+}// namespace duk::tools
 
-#endif // DUK_LOG_FORMAT_H
-
+#endif// DUK_LOG_FORMAT_H

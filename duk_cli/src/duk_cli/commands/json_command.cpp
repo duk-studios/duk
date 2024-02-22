@@ -4,14 +4,14 @@
 
 #include <duk_cli/commands/json_command.h>
 #include <duk_cli/file_generator.h>
-#include <duk_tools/file.h>
 #include <duk_log/log.h>
+#include <duk_tools/file.h>
 #include <rapidjson/document.h>
 
-#include <string>
-#include <regex>
-#include <fstream>
 #include <filesystem>
+#include <fstream>
+#include <regex>
+#include <string>
 
 namespace duk::cli {
 
@@ -122,11 +122,13 @@ static std::string generate_from_json_member_access(const ReflectedMemberDescrip
 }
 
 static std::string generate_from_json_method_content(const ReflectedClassDescription& classDescription) {
-    return generate_for_each(classDescription.members, [](const ReflectedMemberDescription& member) {
-        std::ostringstream oss;
-        oss << "object." << member.name << " = " << generate_from_json_member_access(member) << ';';
-        return oss.str();
-    }, "\n    ", false);
+    return generate_for_each(
+            classDescription.members, [](const ReflectedMemberDescription& member) {
+                std::ostringstream oss;
+                oss << "object." << member.name << " = " << generate_from_json_member_access(member) << ';';
+                return oss.str();
+            },
+            "\n    ", false);
 }
 
 static std::string generate_from_json_method(const ReflectedClassDescription& classDescription) {
@@ -136,7 +138,7 @@ static std::string generate_from_json_method(const ReflectedClassDescription& cl
 }
 
 static std::string toupper_str(std::string str) {
-    for (auto& c : str) {
+    for (auto& c: str) {
         c = std::toupper(c);
     }
     return str;
@@ -157,9 +159,8 @@ static std::string generate_from_json_file(const Reflector& reflector, const std
     generate_include_guard_start(oss, includeGuardName);
     oss << std::endl;
 
-    std::vector<std::string> includes {
-        "duk_import/json/types.h"
-    };
+    std::vector<std::string> includes{
+            "duk_import/json/types.h"};
 
     includes.insert(includes.end(), additionalIncludes.begin(), additionalIncludes.end());
 
@@ -167,7 +168,7 @@ static std::string generate_from_json_file(const Reflector& reflector, const std
     oss << std::endl;
     generate_namespace_start(oss, nameSpace);
 
-    for (const auto& classDescription : reflector.reflected_types()) {
+    for (const auto& classDescription: reflector.reflected_types()) {
         oss << detail::generate_from_json_method(classDescription) << std::endl;
     }
     oss << std::endl;
@@ -178,14 +179,12 @@ static std::string generate_from_json_file(const Reflector& reflector, const std
     return oss.str();
 }
 
-}
+}// namespace detail
 
 Reflector::Reflector(const std::string& content) {
-
     auto resourcesClasses = detail::extract_classes_with_token_content(content, detail::kSerializeResourceToken);
 
-    for (const auto& classContent : resourcesClasses) {
-
+    for (const auto& classContent: resourcesClasses) {
         auto tokens = detail::extract_tokens_from_class(classContent);
 
         ReflectedClassDescription reflectedClassDescription = {};
@@ -195,16 +194,13 @@ Reflector::Reflector(const std::string& content) {
 
             auto tokenType = detail::parse_token_type(token);
             switch (tokenType) {
-                case detail::TokenType::TYPE_KEYWORD:
-                {
+                case detail::TokenType::TYPE_KEYWORD: {
                     tokenIt++;
                     token = *tokenIt;
                     detail::assert_token_type(token, detail::TokenType::SYMBOL);
                     reflectedClassDescription.name = token;
-                }
-                    break;
-                case detail::TokenType::SYMBOL:
-                {
+                } break;
+                case detail::TokenType::SYMBOL: {
                     ReflectedMemberDescription reflectedTypeDescription = {};
                     reflectedTypeDescription.type = token;
                     tokenIt++;
@@ -213,8 +209,7 @@ Reflector::Reflector(const std::string& content) {
                     reflectedTypeDescription.name = token;
 
                     reflectedClassDescription.members.emplace_back(std::move(reflectedTypeDescription));
-                }
-                    break;
+                } break;
                 default:
                     duk::log::info("ignored token: {}", std::string(token));
                     break;
@@ -228,12 +223,10 @@ const std::vector<ReflectedClassDescription>& Reflector::reflected_types() const
     return m_reflectedClasses;
 }
 
-JsonCommand::JsonCommand(const JsonCommandCreateInfo& jsonCommandCreateInfo) :
-    m_inputFilepath(jsonCommandCreateInfo.inputFilepath),
-    m_outputFilepath(jsonCommandCreateInfo.outputFilepath),
-    m_nameSpace(jsonCommandCreateInfo.nameSpace),
-    m_additionalIncludes(jsonCommandCreateInfo.additionalIncludes) {
-
+JsonCommand::JsonCommand(const JsonCommandCreateInfo& jsonCommandCreateInfo) : m_inputFilepath(jsonCommandCreateInfo.inputFilepath),
+                                                                               m_outputFilepath(jsonCommandCreateInfo.outputFilepath),
+                                                                               m_nameSpace(jsonCommandCreateInfo.nameSpace),
+                                                                               m_additionalIncludes(jsonCommandCreateInfo.additionalIncludes) {
 }
 
 void JsonCommand::execute() {
@@ -246,9 +239,8 @@ void JsonCommand::execute() {
     const auto generatedContent = detail::generate_from_json_file(reflector,
                                                                   m_nameSpace,
                                                                   filename,
-                                                                  m_additionalIncludes
-    );
+                                                                  m_additionalIncludes);
 
     write_file(generatedContent, m_outputFilepath);
 }
-}
+}// namespace duk::cli

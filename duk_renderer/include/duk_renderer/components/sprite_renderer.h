@@ -5,8 +5,8 @@
 #ifndef DUK_RENDERER_SPRITE_RENDERER_H
 #define DUK_RENDERER_SPRITE_RENDERER_H
 
-#include <duk_renderer/resources/sprite.h>
 #include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/resources/sprite.h>
 
 namespace duk::renderer {
 
@@ -15,7 +15,7 @@ struct SpriteRenderer {
     MaterialResource material;
 };
 
-}
+}// namespace duk::renderer
 
 namespace duk::json {
 
@@ -25,7 +25,7 @@ inline void from_json<duk::renderer::SpriteRenderer>(const rapidjson::Value& jso
     object.material = from_json_member<duk::resource::Id>(jsonObject, "material");
 }
 
-}
+}// namespace duk::json
 
 namespace duk::resource {
 
@@ -35,6 +35,6 @@ void solve_resources(Solver* solver, duk::renderer::SpriteRenderer& spriteRender
     solver->solve(spriteRenderer.material);
 }
 
-}
+}// namespace duk::resource
 
-#endif //DUK_RENDERER_SPRITE_RENDERER_H
+#endif//DUK_RENDERER_SPRITE_RENDERER_H

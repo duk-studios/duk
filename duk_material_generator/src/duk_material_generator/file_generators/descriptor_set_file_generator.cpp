@@ -28,7 +28,8 @@ static std::string generate_bindings(const Reflector::Bindings& bindings) {
         oss << "        " << binding.name << " = " << binding.binding;
         return oss.str();
     });
-    oss << std::endl << "    }";
+    oss << std::endl
+        << "    }";
     return oss.str();
 }
 
@@ -52,7 +53,6 @@ static std::string descriptor_set_header_include_path(const Parser& parser, cons
     return oss.str();
 }
 
-
 const char* kDescriptorSetClassDeclarationTemplate = R"(
 class TemplateClassName {
 public:
@@ -70,12 +70,10 @@ const char* kDescriptorSetClassImplementationTemplate = R"(
 
 )";
 
-}
+}// namespace detail
 
-DescriptorSetFileGenerator::DescriptorSetFileGenerator(const Parser& parser, const Reflector& reflector, const ShaderDataSourceFileGenerator& shaderDataSourceFileGenerator) :
-    TypesFileGenerator(parser, reflector),
-    m_shaderDataSourceFileGenerator(shaderDataSourceFileGenerator) {
-
+DescriptorSetFileGenerator::DescriptorSetFileGenerator(const Parser& parser, const Reflector& reflector, const ShaderDataSourceFileGenerator& shaderDataSourceFileGenerator) : TypesFileGenerator(parser, reflector),
+                                                                                                                                                                               m_shaderDataSourceFileGenerator(shaderDataSourceFileGenerator) {
     m_fileName = detail::descriptor_set_file_name(m_parser);
     m_className = detail::descriptor_set_class_name(m_parser);
 
@@ -96,15 +94,13 @@ DescriptorSetFileGenerator::DescriptorSetFileGenerator(const Parser& parser, con
 
         write_file(oss.str(), filePath.string());
     }
-
 }
 
 void DescriptorSetFileGenerator::generate_header_file_content(std::ostringstream& oss) {
     std::string includes[] = {
             "duk_renderer/resources/materials/material_descriptor_set.h",
             m_shaderDataSourceFileGenerator.output_header_include_path(),
-            "duk_rhi/rhi.h"
-    };
+            "duk_rhi/rhi.h"};
 
     generate_include_guard_start(oss, m_fileName);
     oss << std::endl;
@@ -148,4 +144,4 @@ void DescriptorSetFileGenerator::generate_class_definition(std::ostringstream& o
     oss << classDefinition;
 }
 
-}
+}// namespace duk::material_generator

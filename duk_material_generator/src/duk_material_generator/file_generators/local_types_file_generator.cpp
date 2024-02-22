@@ -8,10 +8,7 @@
 
 namespace duk::material_generator {
 
-
-LocalTypesFileGenerator::LocalTypesFileGenerator(const Parser& parser, const Reflector& reflector) :
-    TypesFileGenerator(parser, reflector) {
-
+LocalTypesFileGenerator::LocalTypesFileGenerator(const Parser& parser, const Reflector& reflector) : TypesFileGenerator(parser, reflector) {
     std::ostringstream oss;
     generate_file_content(oss);
 
@@ -20,7 +17,6 @@ LocalTypesFileGenerator::LocalTypesFileGenerator(const Parser& parser, const Ref
     auto filepath = std::filesystem::path(parser.output_include_directory()) / (materialName + "_types.h");
 
     write_file(oss.str(), filepath.string());
-
 }
 
 void LocalTypesFileGenerator::generate_file_content(std::ostringstream& oss) {
@@ -47,8 +43,8 @@ void LocalTypesFileGenerator::generate_file_content(std::ostringstream& oss) {
 std::vector<BindingReflection> LocalTypesFileGenerator::extract_local_bindings() {
     const auto& sets = m_reflector.sets();
     std::vector<BindingReflection> bindings;
-    for (const auto& set : sets) {
-        for (auto& binding : set.bindings) {
+    for (const auto& set: sets) {
+        for (auto& binding: set.bindings) {
             if (m_parser.is_global_binding(binding.typeName)) {
                 continue;
             }
@@ -57,5 +53,4 @@ std::vector<BindingReflection> LocalTypesFileGenerator::extract_local_bindings()
     }
     return bindings;
 }
-}
-
+}// namespace duk::material_generator

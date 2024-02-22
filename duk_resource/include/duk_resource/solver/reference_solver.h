@@ -11,7 +11,6 @@ namespace duk::resource {
 
 class ReferenceSolver {
 public:
-
     explicit ReferenceSolver(Pools* pools);
 
     // Solve a given resource that already has a set Id
@@ -23,14 +22,12 @@ public:
     void solve(T& object);
 
 private:
-
     template<typename T>
     PoolT<ResourceT<T>>* find_pool();
 
 private:
     Pools* m_pools;
 };
-
 
 template<typename T>
 void ReferenceSolver::solve(ResourceT<T>& resource) {
@@ -51,7 +48,6 @@ PoolT<ResourceT<T>>* ReferenceSolver::find_pool() {
     return m_pools->get<PoolT<ResourceT<T>>>();
 }
 
-}
+}// namespace duk::resource
 
-#endif // DUK_RESOURCE_REFERENCE_SOLVER_H
-
+#endif// DUK_RESOURCE_REFERENCE_SOLVER_H

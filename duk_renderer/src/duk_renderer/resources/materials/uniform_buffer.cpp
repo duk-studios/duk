@@ -6,4 +6,3 @@
 namespace duk::renderer {
 
 }
-

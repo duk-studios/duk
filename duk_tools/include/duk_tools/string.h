@@ -13,4 +13,4 @@ std::string snake_to_pascal(const std::string& snakeCase);
 
 }
 
-#endif //DUK_TOOLS_STRING_H
+#endif//DUK_TOOLS_STRING_H

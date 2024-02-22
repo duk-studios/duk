@@ -4,13 +4,13 @@
 #ifndef DUK_TOOLS_BIT_BLOCK_H
 #define DUK_TOOLS_BIT_BLOCK_H
 
-#include <cstdint>
-#include <array>
 #include <algorithm>
-#include <limits>
+#include <array>
 #include <bit>
-#include <string>
+#include <cstdint>
+#include <limits>
 #include <sstream>
+#include <string>
 
 namespace duk::tools {
 
@@ -27,7 +27,6 @@ public:
     template<bool>
     class BitBlockIterator {
     public:
-
         BitBlockIterator(const BitBlock& block, size_t i);
 
         void next();
@@ -46,7 +45,6 @@ public:
     template<bool Set>
     class BitBlockView {
     public:
-
         using Iterator = BitBlockIterator<Set>;
 
         explicit BitBlockView(const BitBlock& block) : m_block(block) {}
@@ -60,7 +58,6 @@ public:
     };
 
 public:
-
     BitBlock();
 
     BitBlock(Container container);
@@ -109,9 +106,8 @@ private:
 
 template<size_t N>
 template<bool Set>
-BitBlock<N>::BitBlockIterator<Set>::BitBlockIterator(const BitBlock &block, size_t i) :
-    m_block(block),
-    m_i(i) {
+BitBlock<N>::BitBlockIterator<Set>::BitBlockIterator(const BitBlock& block, size_t i) : m_block(block),
+                                                                                        m_i(i) {
     next();
 }
 
@@ -121,8 +117,7 @@ void BitBlock<N>::BitBlockIterator<Set>::next() {
     if (m_i < N) {
         if constexpr (Set) {
             m_i += m_block.countr_zero(m_i);
-        }
-        else {
+        } else {
             m_i += m_block.countr_one(m_i);
         }
     }
@@ -130,7 +125,7 @@ void BitBlock<N>::BitBlockIterator<Set>::next() {
 
 template<size_t N>
 template<bool Set>
-BitBlock<N>::BitBlockIterator<Set> &BitBlock<N>::BitBlockIterator<Set>::operator++() {
+BitBlock<N>::BitBlockIterator<Set>& BitBlock<N>::BitBlockIterator<Set>::operator++() {
     m_i++;
     next();
     return *this;
@@ -144,7 +139,7 @@ size_t BitBlock<N>::BitBlockIterator<Set>::operator*() const {
 
 template<size_t N>
 template<bool Set>
-bool BitBlock<N>::BitBlockIterator<Set>::operator==(const BitBlock<N>::BitBlockIterator<Set> &rhs) const {
+bool BitBlock<N>::BitBlockIterator<Set>::operator==(const BitBlock<N>::BitBlockIterator<Set>& rhs) const {
     return m_i == rhs.m_i && &m_block == &rhs.m_block;
 }
 
@@ -172,9 +167,7 @@ BitBlock<N>::BitBlock() {
 }
 
 template<size_t N>
-BitBlock<N>::BitBlock(BitBlock::Container container) :
-    m_container(container) {
-
+BitBlock<N>::BitBlock(BitBlock::Container container) : m_container(container) {
 }
 
 template<size_t N>
@@ -307,7 +300,6 @@ size_t BitBlock<N>::countr_zero(size_t startIndex) const {
         // overflow to next block
         size_t acc = 0;
         while (block == 0) {
-
             // on the first iteration, we need to only accumulate the zeros after indexInBlock
             // for the following iterations indexInBlock will be zero, so we accumulate the entire block size
             acc += 64 - indexInBlock;
@@ -341,12 +333,11 @@ BitBlock<N>::BitBlockView<Set> BitBlock<N>::bits() {
 
 template<bool Set, size_t N, typename Predicate>
 void for_each_bit(const duk::tools::BitBlock<N>& bitBlock, const Predicate& predicate) {
-    for (auto bit : bitBlock.template bits<Set>()){
+    for (auto bit: bitBlock.template bits<Set>()) {
         predicate(bit);
     }
 }
 
-}
+}// namespace duk::tools
 
-#endif // DUK_TOOLS_BIT_BLOCK_H
-
+#endif// DUK_TOOLS_BIT_BLOCK_H

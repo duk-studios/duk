@@ -9,4 +9,4 @@ bool Sampler::operator==(const Sampler& rhs) const noexcept {
     return wrapMode == rhs.wrapMode && filter == rhs.filter;
 }
 
-}
+}// namespace duk::rhi

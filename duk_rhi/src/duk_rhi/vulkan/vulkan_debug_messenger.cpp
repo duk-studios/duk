@@ -8,8 +8,8 @@ namespace duk::rhi {
 
 namespace detail {
 
-log::Level level_from_severity(VkDebugUtilsMessageSeverityFlagBitsEXT severity){
-    switch (severity){
+log::Level level_from_severity(VkDebugUtilsMessageSeverityFlagBitsEXT severity) {
+    switch (severity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
             return log::Level::VERBOSE;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
@@ -21,13 +21,11 @@ log::Level level_from_severity(VkDebugUtilsMessageSeverityFlagBitsEXT severity){
     }
 }
 
-}
+}// namespace detail
 
-VulkanDebugMessenger::VulkanDebugMessenger() :
-    logger(nullptr),
-    enabledMessageSeverity(VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT),
-    enabledMessageTypes(0){
-
+VulkanDebugMessenger::VulkanDebugMessenger() : logger(nullptr),
+                                               enabledMessageSeverity(VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT),
+                                               enabledMessageTypes(0) {
 }
 
 void VulkanDebugMessenger::log(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -48,4 +46,4 @@ void VulkanDebugMessenger::log(VkDebugUtilsMessageSeverityFlagBitsEXT messageSev
     logger->print(detail::level_from_severity(messageSeverity), "Vulkan validation: {}", std::string(pCallbackData->pMessage));
 }
 
-} // duk::rhi
+}// namespace duk::rhi

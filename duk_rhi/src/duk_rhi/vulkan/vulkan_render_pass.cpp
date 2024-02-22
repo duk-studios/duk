@@ -1,16 +1,20 @@
 /// 23/04/2023
 /// vulkan_render_pass.cpp
 
-#include <duk_rhi/vulkan/vulkan_render_pass.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
+#include <duk_rhi/vulkan/vulkan_render_pass.h>
 
 namespace duk::rhi {
 
 VkAttachmentStoreOp convert_store_op(StoreOp storeOp) {
     VkAttachmentStoreOp converted;
-    switch (storeOp){
-        case StoreOp::STORE: converted = VK_ATTACHMENT_STORE_OP_STORE; break;
-        case StoreOp::DONT_CARE: converted = VK_ATTACHMENT_STORE_OP_DONT_CARE; break;
+    switch (storeOp) {
+        case StoreOp::STORE:
+            converted = VK_ATTACHMENT_STORE_OP_STORE;
+            break;
+        case StoreOp::DONT_CARE:
+            converted = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            break;
         default:
             throw std::invalid_argument("unhandled StoreOp for Vulkan");
     }
@@ -19,10 +23,16 @@ VkAttachmentStoreOp convert_store_op(StoreOp storeOp) {
 
 VkAttachmentLoadOp convert_load_op(LoadOp loadOp) {
     VkAttachmentLoadOp converted;
-    switch (loadOp){
-        case LoadOp::LOAD: converted = VK_ATTACHMENT_LOAD_OP_LOAD; break;
-        case LoadOp::CLEAR: converted = VK_ATTACHMENT_LOAD_OP_CLEAR; break;
-        case LoadOp::DONT_CARE: converted = VK_ATTACHMENT_LOAD_OP_DONT_CARE; break;
+    switch (loadOp) {
+        case LoadOp::LOAD:
+            converted = VK_ATTACHMENT_LOAD_OP_LOAD;
+            break;
+        case LoadOp::CLEAR:
+            converted = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            break;
+        case LoadOp::DONT_CARE:
+            converted = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            break;
         default:
             throw std::invalid_argument("unhandled StoreOp for Vulkan");
     }
@@ -43,11 +53,9 @@ VkAttachmentDescription convert_attachment_description(const AttachmentDescripti
     return converted;
 }
 
-VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRenderPassCreateInfo) :
-    m_colorAttachments(vulkanRenderPassCreateInfo.colorAttachments, vulkanRenderPassCreateInfo.colorAttachments + vulkanRenderPassCreateInfo.colorAttachmentCount),
-    m_device(vulkanRenderPassCreateInfo.device),
-    m_hash(duk::hash::kUndefinedHash) {
-
+VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRenderPassCreateInfo) : m_colorAttachments(vulkanRenderPassCreateInfo.colorAttachments, vulkanRenderPassCreateInfo.colorAttachments + vulkanRenderPassCreateInfo.colorAttachmentCount),
+                                                                                                   m_device(vulkanRenderPassCreateInfo.device),
+                                                                                                   m_hash(duk::hash::kUndefinedHash) {
     if (vulkanRenderPassCreateInfo.depthAttachment) {
         m_depthAttachment = *vulkanRenderPassCreateInfo.depthAttachment;
     }
@@ -88,7 +96,7 @@ VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRende
     renderPassCreateInfo.pSubpasses = &subpassDescription;
 
     auto result = vkCreateRenderPass(m_device, &renderPassCreateInfo, nullptr, &m_renderPass);
-    if (result != VK_SUCCESS){
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create a VkRenderPass");
     }
 
@@ -96,8 +104,7 @@ VulkanRenderPass::VulkanRenderPass(const VulkanRenderPassCreateInfo& vulkanRende
     for (int i = 0; i < m_clearValues.size(); i++) {
         if (i == m_clearValues.size() - 1) {
             m_clearValues[i].depthStencil = {1.0f, 0};
-        }
-        else {
+        } else {
             m_clearValues[i].color = {0.0f, 0.0f, 0.0f, 1.0f};
         }
     }
@@ -145,5 +152,4 @@ hash::Hash VulkanRenderPass::hash() const {
     return m_hash;
 }
 
-
-}
+}// namespace duk::rhi

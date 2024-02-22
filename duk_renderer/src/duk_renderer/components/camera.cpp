@@ -8,7 +8,7 @@
 
 namespace duk::renderer {
 
-static const glm::mat4 kDefaultProjection = glm::perspective(glm::radians(45.0f), 16.0f/9.0f, 0.1f, 1000.0f);
+static const glm::mat4 kDefaultProjection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
 
 glm::mat4 calculate_projection(const duk::scene::Object& object) {
     if (auto perspective = object.component<PerspectiveCamera>()) {
@@ -37,4 +37,4 @@ glm::mat4 calculate_view(const scene::Object& object) {
     return glm::lookAt(position, forward, up);
 }
 
-}
+}// namespace duk::renderer

@@ -9,7 +9,6 @@ namespace duk::renderer {
 
 class PhongDescriptors {
 public:
-
     enum Bindings : uint32_t {
         uCamera = 0,
         uTransform = 1,
@@ -30,10 +29,8 @@ public:
         glm::mat4x4 model;
         glm::mat4x4 invModel;
     };
-
-
 };
 
-} // namespace duk::renderer
+}// namespace duk::renderer
 
-#endif // DUK_RENDERER_PHONG_DESCRIPTORS_H
+#endif// DUK_RENDERER_PHONG_DESCRIPTORS_H

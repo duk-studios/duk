@@ -1,10 +1,10 @@
 /// 13/10/2023
 /// global_buffers.cpp
 
-#include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_renderer/components/camera.h>
-#include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/lighting.h>
+#include <duk_renderer/components/transform.h>
+#include <duk_renderer/resources/materials/globals/global_descriptors.h>
 
 namespace duk::renderer {
 
@@ -43,7 +43,7 @@ void GlobalDescriptors::update_camera(const scene::Object& cameraObject) {
 void GlobalDescriptors::update_lights(duk::scene::Objects& objects) {
     auto& lights = m_lightsUBO->data();
     lights.directionalLightCount = 0;
-    for (auto object : objects.all_with<DirectionalLight>()) {
+    for (auto object: objects.all_with<DirectionalLight>()) {
         auto directionalLightComponent = object.component<DirectionalLight>();
         auto& directionalLight = lights.directionalLights[lights.directionalLightCount++];
         directionalLight.direction = forward_direction_3d(object);
@@ -56,7 +56,7 @@ void GlobalDescriptors::update_lights(duk::scene::Objects& objects) {
     }
 
     lights.pointLightCount = 0;
-    for (auto object : objects.all_with<PointLight>()) {
+    for (auto object: objects.all_with<PointLight>()) {
         auto pointLightComponent = object.component<PointLight>();
         auto positionComponent = object.component<Position3D>();
         auto& pointLight = lights.pointLights[lights.pointLightCount++];
@@ -82,4 +82,4 @@ globals::LightsUBO* GlobalDescriptors::lights_ubo() {
     return m_lightsUBO.get();
 }
 
-}
+}// namespace duk::renderer

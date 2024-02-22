@@ -10,5 +10,4 @@ void register_components();
 
 }
 
-#endif // DUK_RENDERER_REGISTER_COMPONENTS_H
-
+#endif// DUK_RENDERER_REGISTER_COMPONENTS_H

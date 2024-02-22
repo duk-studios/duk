@@ -22,6 +22,6 @@ public:
     VkDebugUtilsMessageTypeFlagsEXT enabledMessageTypes;
 };
 
-} // duk::rhi
+}// namespace duk::rhi
 
-#endif //DUK_RHI_VULKANDEBUGMESSENGER_H
+#endif//DUK_RHI_VULKANDEBUGMESSENGER_H

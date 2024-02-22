@@ -20,18 +20,14 @@ public:
     using Iterator = typename std::array<T, N>::iterator;
     using ConstIterator = typename std::array<T, N>::const_iterator;
 
-    FixedVector() :
-        m_size(0) {
-
+    FixedVector() : m_size(0) {
     }
 
-    explicit FixedVector(size_t initialSize) :
-        m_size(0) {
+    explicit FixedVector(size_t initialSize) : m_size(0) {
         resize(initialSize);
     }
 
-    FixedVector(size_t initialSize, const T& initialValue) :
-        m_size(0) {
+    FixedVector(size_t initialSize, const T& initialValue) : m_size(0) {
         for (int i = 0; i < initialSize; i++) {
             push_back(initialValue);
         }
@@ -51,7 +47,7 @@ public:
     }
 
     FixedVector& operator=(FixedVector&& other) noexcept {
-        for (auto& value : other){
+        for (auto& value: other) {
             push_back(std::move(value));
         }
         other.clear();
@@ -62,30 +58,34 @@ public:
     }
 
     void push_back(const T& value) {
-        if (m_size >= N){
+        if (m_size >= N) {
             throw std::out_of_range("push_back on a full FixedVector");
         }
         m_array[m_size++] = value;
     }
 
     void push_back(T&& value) {
-        if (m_size >= N){
+        if (m_size >= N) {
             throw std::out_of_range("push_back on a full FixedVector");
         }
         m_array[m_size++] = std::move(value);
     }
 
-    template<typename ...Args>
-    T& emplace_back(Args&&... args) requires std::is_trivially_constructible_v<T> {
-        if (m_size >= N){
+    template<typename... Args>
+    T& emplace_back(Args&&... args)
+        requires std::is_trivially_constructible_v<T>
+    {
+        if (m_size >= N) {
             throw std::out_of_range("emplace_back on a full FixedVector");
         }
         return at(m_size++) = T(std::forward<Args>(args)...);
     }
 
-    template<typename ...Args>
-    T& emplace_back(Args&&... args) requires (std::is_trivially_constructible_v<T> == false) {
-        if (m_size >= N){
+    template<typename... Args>
+    T& emplace_back(Args&&... args)
+        requires(std::is_trivially_constructible_v<T> == false)
+    {
+        if (m_size >= N) {
             throw std::out_of_range("emplace_back on a full FixedVector");
         }
         const auto index = m_size++;
@@ -93,12 +93,16 @@ public:
         return at(index);
     }
 
-    void pop_back() requires std::is_trivially_destructible_v<T> {
+    void pop_back()
+        requires std::is_trivially_destructible_v<T>
+    {
         auto newSize = m_size - 1;
         m_size = newSize;
     }
 
-    void pop_back() requires (std::is_trivially_destructible_v<T> == false) {
+    void pop_back()
+        requires(std::is_trivially_destructible_v<T> == false)
+    {
         auto newSize = m_size - 1;
         destroy(at(newSize));
         m_size = newSize;
@@ -110,14 +114,13 @@ public:
     }
 
     void resize(size_t newSize) {
-        if (newSize > N){
+        if (newSize > N) {
             throw std::out_of_range("expand with newSize > N on FixedVector");
         }
 
         if (newSize > m_size) {
             append(newSize - m_size);
-        }
-        else if (newSize < m_size) {
+        } else if (newSize < m_size) {
             erase_at_end(m_size - newSize);
         }
     }
@@ -199,21 +202,24 @@ public:
     }
 
 private:
-
     void destroy(T& value) const {
         value.~T();
     }
 
-    template<typename ...Args>
+    template<typename... Args>
     void construct(T& value, Args&&... args) const {
-        ::new(&value) T(std::forward<Args>(args)...);
+        ::new (&value) T(std::forward<Args>(args)...);
     }
 
-    void append(size_t n) requires std::is_trivially_constructible_v<T> {
+    void append(size_t n)
+        requires std::is_trivially_constructible_v<T>
+    {
         m_size += n;
     }
 
-    void append(size_t n) requires (std::is_trivially_constructible_v<T> == false) {
+    void append(size_t n)
+        requires(std::is_trivially_constructible_v<T> == false)
+    {
         //construct new elements
         auto newSize = m_size + n;
         for (int i = m_size; i < newSize; i++) {
@@ -222,12 +228,16 @@ private:
         m_size = newSize;
     }
 
-    void erase_at_end(size_t n) requires std::is_trivially_destructible_v<T> {
+    void erase_at_end(size_t n)
+        requires std::is_trivially_destructible_v<T>
+    {
         assert(n <= m_size);
         m_size -= n;
     }
 
-    void erase_at_end(size_t n) requires (std::is_trivially_destructible_v<T> == false) {
+    void erase_at_end(size_t n)
+        requires(std::is_trivially_destructible_v<T> == false)
+    {
         assert(n <= m_size);
         //destroy excess elements
         auto newSize = m_size - n;
@@ -242,6 +252,6 @@ private:
     size_t m_size;
 };
 
-}
+}// namespace duk::tools
 
-#endif // DUK_TOOLS_FIXED_VECTOR_H
+#endif// DUK_TOOLS_FIXED_VECTOR_H

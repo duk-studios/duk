@@ -5,9 +5,7 @@
 
 namespace duk::resource {
 
-ReferenceSolver::ReferenceSolver(duk::resource::Pools* pools) :
-    m_pools(pools) {
-
+ReferenceSolver::ReferenceSolver(duk::resource::Pools* pools) : m_pools(pools) {
 }
 
-}
+}// namespace duk::resource

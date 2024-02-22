@@ -2,14 +2,12 @@
 // Created by Ricardo on 07/04/2023.
 //
 
-#include <duk_hash/data_source.h>
 #include <cassert>
+#include <duk_hash/data_source.h>
 
 namespace duk::hash {
 
-DataSource::DataSource() :
-    m_hash(hash::kUndefinedHash) {
-
+DataSource::DataSource() : m_hash(hash::kUndefinedHash) {
 }
 
 DataSource::~DataSource() = default;
@@ -23,4 +21,4 @@ hash::Hash DataSource::hash() const {
     return m_hash;
 }
 
-}
+}// namespace duk::hash

@@ -7,9 +7,7 @@
 
 namespace duk::renderer {
 
-ForwardRenderer::ForwardRenderer(const ForwardRendererCreateInfo& forwardRendererCreateInfo) :
-    Renderer(forwardRendererCreateInfo.rendererCreateInfo) {
-
+ForwardRenderer::ForwardRenderer(const ForwardRendererCreateInfo& forwardRendererCreateInfo) : Renderer(forwardRendererCreateInfo.rendererCreateInfo) {
     ForwardPassCreateInfo forwardPassCreateInfo = {};
     forwardPassCreateInfo.renderer = this;
 
@@ -24,7 +22,6 @@ ForwardRenderer::ForwardRenderer(const ForwardRendererCreateInfo& forwardRendere
 
     m_passes.push_back(forwardPass);
     m_passes.push_back(presentPass);
-
 }
 
-}
+}// namespace duk::renderer

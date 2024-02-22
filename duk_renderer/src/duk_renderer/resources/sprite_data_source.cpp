@@ -5,11 +5,9 @@
 
 namespace duk::renderer {
 
-SpriteDataSource::SpriteDataSource(const SpriteDataSourceCreateInfo& spriteDataSourceCreateInfo) :
-    m_imageId(spriteDataSourceCreateInfo.imageId),
-    m_imageMin(spriteDataSourceCreateInfo.imageMin),
-    m_imageMax(spriteDataSourceCreateInfo.imageMax) {
-
+SpriteDataSource::SpriteDataSource(const SpriteDataSourceCreateInfo& spriteDataSourceCreateInfo) : m_imageId(spriteDataSourceCreateInfo.imageId),
+                                                                                                   m_imageMin(spriteDataSourceCreateInfo.imageMin),
+                                                                                                   m_imageMax(spriteDataSourceCreateInfo.imageMax) {
 }
 
 duk::resource::Id SpriteDataSource::image_id() const {
@@ -32,4 +30,4 @@ hash::Hash SpriteDataSource::calculate_hash() const {
     return hash;
 }
 
-}
+}// namespace duk::renderer

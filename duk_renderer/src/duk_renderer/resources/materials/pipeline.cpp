@@ -1,20 +1,18 @@
 /// 08/09/2023
 /// pipeline.cpp
 
-#include <duk_renderer/resources/materials/pipeline.h>
-#include <duk_renderer/resources/materials/material.h>
 #include <duk_renderer/brushes/brush.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/resources/materials/pipeline.h>
 
 namespace duk::renderer {
 
 static constexpr int kDeleteUnusedPipelineAfterFrames = 512;
 
-Pipeline::Pipeline(const PipelineCreateInfo& pipelineCreateInfo) :
-    m_renderer(pipelineCreateInfo.renderer),
-    m_pipelineCache(m_renderer, pipelineCreateInfo.shaderDataSource) {
-
-    m_listener.listen(m_renderer->render_start_event(), [this]{
+Pipeline::Pipeline(const PipelineCreateInfo& pipelineCreateInfo) : m_renderer(pipelineCreateInfo.renderer),
+                                                                   m_pipelineCache(m_renderer, pipelineCreateInfo.shaderDataSource) {
+    m_listener.listen(m_renderer->render_start_event(), [this] {
         m_pipelineCache.clear_unused_pipelines();
     });
 }
@@ -41,11 +39,10 @@ void Pipeline::clear_unused_pipelines() {
 
 //------------------------------------
 
-Pipeline::PipelineCache::PipelineCache(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource) :
-    m_renderer(renderer),
-    m_shader(nullptr),
-    m_invertY(false),
-    m_cullModeMask(duk::rhi::GraphicsPipeline::CullMode::BACK) {
+Pipeline::PipelineCache::PipelineCache(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource) : m_renderer(renderer),
+                                                                                                                 m_shader(nullptr),
+                                                                                                                 m_invertY(false),
+                                                                                                                 m_cullModeMask(duk::rhi::GraphicsPipeline::CullMode::BACK) {
     update_shader(shaderDataSource);
 }
 
@@ -61,7 +58,6 @@ duk::rhi::GraphicsPipeline* Pipeline::PipelineCache::find_pipeline_for_params(co
 
     auto it = m_pipelines.find(hash);
     if (it == m_pipelines.end()) {
-
         duk::rhi::RHI::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
         pipelineCreateInfo.viewport = viewport_for_params(params);
         pipelineCreateInfo.scissor.extent.x = params.outputWidth;
@@ -130,7 +126,7 @@ void Pipeline::PipelineCache::clear_unused_pipelines() {
     std::vector<duk::hash::Hash> hashesToDelete;
     hashesToDelete.reserve(m_pipelines.size());
 
-    for (auto& [hash, entry] : m_pipelines) {
+    for (auto& [hash, entry]: m_pipelines) {
         entry.framesUnused++;
 
         if (entry.framesUnused > kDeleteUnusedPipelineAfterFrames) {
@@ -138,9 +134,9 @@ void Pipeline::PipelineCache::clear_unused_pipelines() {
         }
     }
 
-    for (auto hash : hashesToDelete) {
+    for (auto hash: hashesToDelete) {
         m_pipelines.erase(hash);
     }
 }
 
-}
+}// namespace duk::renderer

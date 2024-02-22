@@ -12,7 +12,6 @@ namespace duk::resource {
 
 class DependencySolver {
 public:
-
     template<typename T>
     void solve(ResourceT<T>& resource);
 
@@ -39,6 +38,6 @@ void DependencySolver::solve(T& object) {
     solve_resources(this, object);
 }
 
-}
+}// namespace duk::resource
 
-#endif // DUK_RESOURCE_DEPENDENCY_SOLVER_H
+#endif// DUK_RESOURCE_DEPENDENCY_SOLVER_H

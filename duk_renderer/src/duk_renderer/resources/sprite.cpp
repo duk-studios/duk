@@ -6,10 +6,9 @@
 
 namespace duk::renderer {
 
-Sprite::Sprite(const SpriteCreateInfo& spriteCreateInfo) :
-    m_imageMin(),
-    m_imageMax(),
-    m_size() {
+Sprite::Sprite(const SpriteCreateInfo& spriteCreateInfo) : m_imageMin(),
+                                                           m_imageMax(),
+                                                           m_size() {
     const auto dataSource = spriteCreateInfo.spriteDataSource;
     const auto imagePool = spriteCreateInfo.imagePool;
 
@@ -50,4 +49,4 @@ uint32_t Sprite::height() const {
     return m_size.y;
 }
 
-}
+}// namespace duk::renderer

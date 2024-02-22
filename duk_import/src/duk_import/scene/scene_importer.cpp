@@ -50,4 +50,4 @@ duk::scene::Scene* SceneImporter::find(duk::resource::Id id) {
     return it->second.get();
 }
 
-}
+}// namespace duk::import
