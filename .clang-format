@@ -4,6 +4,7 @@ AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: None
 AlignOperands: Align
+AlignConsecutiveDeclarations: None
 AllowAllArgumentsOnNextLine: false
 AllowAllConstructorInitializersOnNextLine: false
 AllowAllParametersOfDeclarationOnNextLine: false
@@ -18,10 +19,11 @@ AlwaysBreakTemplateDeclarations: Yes
 BreakBeforeBraces: Attach
 BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
-BreakConstructorInitializers: BeforeColon
-BreakInheritanceList: BeforeColon
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
 ColumnLimit: 0
 CompactNamespaces: false
+ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 8
 IndentCaseLabels: true
 IndentPPDirectives: None
@@ -51,5 +53,6 @@ SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 SortIncludes: CaseInsensitive
+PackConstructorInitializers: Never
 TabWidth: 4
 UseTab: Never
