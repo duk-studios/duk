@@ -59,6 +59,15 @@ T from_json_member(const rapidjson::Value& jsonObject, const char* memberName, c
 }
 
 template<typename T>
+void from_json_member(const rapidjson::Value& jsonObject, const char* memberName, T& value) {
+    auto it = jsonObject.FindMember(memberName);
+    if (it == jsonObject.MemberEnd()) {
+        return;
+    }
+    from_json<T>(it->value, value);
+}
+
+template<typename T>
 std::unique_ptr<T> make_unique_from_json_member(const rapidjson::Value& jsonObject, const char* memberName, const T& defaultValue) {
     return std::make_unique<T>(from_json_member<T>(jsonObject, memberName, defaultValue));
 }
