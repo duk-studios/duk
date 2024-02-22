@@ -13,9 +13,7 @@ set(DUK_SAMPLE_SOURCES
         src/duk_sample/application.cpp
         src/duk_sample/camera_system.h
         src/duk_sample/camera_system.cpp
-        src/duk_sample/sprite_system.h
-        src/duk_sample/sprite_system.cpp
-        )
+)
 
 add_executable(duk_sample ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
 
@@ -39,7 +37,6 @@ if (IS_MULTI_CONFIG)
 endif ()
 
 set(DUK_SAMPLE_RESOURCES
-        resources/resources.json
         resources/images/gold_basecolor.png
         resources/images/gold_basecolor.res
         resources/images/gold_specular.png

@@ -3,7 +3,6 @@
 
 #include <duk_sample/application.h>
 #include <duk_sample/camera_system.h>
-#include <duk_sample/sprite_system.h>
 #include <duk_engine/systems/render_system.h>
 #include <duk_import/scene/scene_importer.h>
 
