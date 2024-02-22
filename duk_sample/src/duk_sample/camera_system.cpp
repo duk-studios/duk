@@ -27,17 +27,16 @@ struct CameraController {
 
 }
 
-void CameraSystem::init() {
-
-    auto window = duk::engine::System::engine()->window();
-    auto scene = duk::engine::System::engine()->scene();
-    auto renderer = duk::engine::System::engine()->renderer();
+void CameraSystem::enter(engine::Engine& engine) {
+    auto window = engine.window();
+    auto scene = engine.scene();
+    auto renderer = engine.renderer();
 
     m_listener.listen(window->window_resize_event, [this](uint32_t width, uint32_t height) {
         detail::update_perspective(m_camera.component<duk::renderer::PerspectiveCamera>(), width, height);
     });
 
-    m_camera = scene->add_object();
+    m_camera = scene->objects().add_object();
 
     detail::update_perspective(m_camera.add<duk::renderer::PerspectiveCamera>(), renderer->render_width(), renderer->render_height());
 
@@ -52,11 +51,10 @@ void CameraSystem::init() {
     renderer->use_as_camera(m_camera);
 }
 
-void CameraSystem::update() {
+void CameraSystem::update(engine::Engine& engine) {
+    auto input = engine.input();
 
-    auto input = engine()->input();
-
-    const auto deltaTime = engine()->timer()->duration().count();
+    const auto deltaTime = engine.timer()->duration().count();
 
     auto [position, rotation, controller, perspective] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraController,duk::renderer::PerspectiveCamera>();
 
@@ -112,5 +110,8 @@ void CameraSystem::update() {
     position->value += inputOffset * controller->speed * deltaTime;
 }
 
+void CameraSystem::exit(engine::Engine& engine) {
+
+}
 }
 

@@ -16,9 +16,12 @@ public:
 
     using duk::engine::System::System;
 
-    void init() override;
+protected:
+    void enter(engine::Engine& engine) override;
 
-    void update() override;
+    void update(engine::Engine& engine) override;
+
+    void exit(engine::Engine& engine) override;
 
 private:
     duk::scene::Object m_camera;
