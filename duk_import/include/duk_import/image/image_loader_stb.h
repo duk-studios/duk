@@ -9,7 +9,7 @@
 
 namespace duk::import {
 
-class ImageLoaderStb : public ResourceLoader<duk::rhi::ImageDataSource> {
+class ImageLoaderStb : public ResourceLoader<std::unique_ptr<duk::rhi::ImageDataSource>> {
 public:
     ImageLoaderStb(const duk::rhi::RHICapabilities* rhiCapabilities);
 

@@ -5,6 +5,7 @@
 #ifndef DUK_ENGINE_ENGINE_H
 #define DUK_ENGINE_ENGINE_H
 
+#include <duk_engine/director.h>
 #include <duk_engine/input.h>
 #include <duk_engine/settings.h>
 #include <duk_engine/systems/system.h>
@@ -35,34 +36,24 @@ public:
 
     DUK_NO_DISCARD duk::import::Importer* importer();
 
-    DUK_NO_DISCARD duk::scene::Scene* scene();
+    DUK_NO_DISCARD Director* director();
 
     DUK_NO_DISCARD const duk::engine::Input* input() const;
 
     DUK_NO_DISCARD const duk::tools::Timer* timer() const;
 
-    template<typename T>
-    void register_component(const std::string& typeName);
-
 private:
-    std::string m_settingsPath;
     Settings m_settings;
     duk::event::Listener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;
     std::unique_ptr<duk::import::Importer> m_importer;
+    std::unique_ptr<duk::engine::Director> m_director;
     std::unique_ptr<duk::engine::Input> m_input;
     duk::resource::Pools m_pools;
-    duk::event::Dispatcher m_dispatcher;
-    duk::scene::Scene* m_scene;
     duk::tools::Timer m_timer;
     bool m_run;
 };
-
-template<typename T>
-void Engine::register_component(const std::string& typeName) {
-    duk::scene::ComponentRegistry::instance(true)->add<T>(typeName);
-}
 
 }// namespace duk::engine
 

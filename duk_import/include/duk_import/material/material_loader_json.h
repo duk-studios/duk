@@ -9,7 +9,7 @@
 
 namespace duk::import {
 
-class MaterialLoaderJson : public ResourceLoader<duk::renderer::MaterialDataSource> {
+class MaterialLoaderJson : public ResourceLoader<std::unique_ptr<duk::renderer::MaterialDataSource>> {
 public:
     bool accepts(const std::filesystem::path& path) override;
 

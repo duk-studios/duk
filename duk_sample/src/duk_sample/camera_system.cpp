@@ -28,7 +28,7 @@ struct CameraController {
 
 void CameraSystem::enter(engine::Engine& engine) {
     auto window = engine.window();
-    auto scene = engine.scene();
+    auto scene = engine.director()->scene();
     auto renderer = engine.renderer();
 
     m_listener.listen(window->window_resize_event, [this](uint32_t width, uint32_t height) {

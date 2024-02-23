@@ -9,11 +9,11 @@
 
 namespace duk::import {
 
-class SceneLoaderJson : public ResourceLoader<duk::scene::Scene> {
+class SceneLoaderJson : public ResourceLoader<std::shared_ptr<duk::scene::Scene>> {
 public:
     bool accepts(const std::filesystem::path& path) override;
 
-    std::unique_ptr<duk::scene::Scene> load(const std::filesystem::path& path) override;
+    std::shared_ptr<duk::scene::Scene> load(const std::filesystem::path& path) override;
 };
 
 }// namespace duk::import

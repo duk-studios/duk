@@ -47,7 +47,7 @@ const std::string& ImageImporter::tag() const {
 }
 
 void ImageImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
-    auto dataSource = ResourceImporterT<duk::rhi::ImageDataSource>::load(path);
+    auto dataSource = ResourceImporterT<std::unique_ptr<duk::rhi::ImageDataSource>>::load(path);
     m_imagePool->create(id, dataSource.get());
 }
 
