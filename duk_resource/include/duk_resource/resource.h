@@ -31,9 +31,13 @@ public:
 
     DUK_NO_DISCARD uint64_t value() const;
 
+    DUK_NO_DISCARD bool valid() const;
+
 private:
     uint64_t m_id;
 };
+
+static constexpr duk::resource::Id kInvalidId;
 
 template<typename T>
 class ResourceT;

@@ -22,6 +22,10 @@ uint64_t Id::value() const {
     return m_id;
 }
 
+bool Id::valid() const {
+    return m_id != 0;
+}
+
 Id Resource::id() const {
     return m_id;
 }

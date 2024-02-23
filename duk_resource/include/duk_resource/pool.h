@@ -38,7 +38,6 @@ public:
 
     DUK_NO_DISCARD ResourceT find_or_default(Id id, const ResourceT& def) const;
 
-protected:
     ResourceT insert(duk::resource::Id id, const std::shared_ptr<ResourceType>& resource);
 
 private:
