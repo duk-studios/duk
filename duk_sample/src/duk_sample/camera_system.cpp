@@ -6,7 +6,7 @@
 #include <duk_engine/engine.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/camera.h>
-#include "duk_log/log.h"
+#include <duk_platform/system.h>
 
 
 namespace duk::sample {
@@ -49,6 +49,8 @@ void CameraSystem::enter(engine::Engine& engine) {
 
 
     renderer->use_as_camera(m_camera);
+
+    duk::platform::System::create();
 }
 
 void CameraSystem::update(engine::Engine& engine) {
@@ -57,6 +59,10 @@ void CameraSystem::update(engine::Engine& engine) {
     const auto deltaTime = engine.timer()->duration().count();
 
     auto [position, rotation, controller, perspective] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraController,duk::renderer::PerspectiveCamera>();
+
+
+    auto cursor = duk::platform::System::instance()->cursor();
+    cursor->show(true);
 
     glm::vec3 rotationDir = glm::vec3(0);
     if (input->mouse(duk::platform::MouseButton::LEFT)) {

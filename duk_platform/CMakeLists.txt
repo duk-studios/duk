@@ -16,6 +16,7 @@ set(DUK_PLATFORM_SOURCES
         src/duk_platform/window_error.cpp
         src/duk_platform/win32/window_win_32.cpp
         src/duk_platform/win32/cursor_win_32.cpp
+        src/duk_platform/win32/system_win_32.cpp
         src/duk_platform/system.cpp
 )
 
