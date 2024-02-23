@@ -1,19 +1,18 @@
 /// 12/05/2023
 /// vulkan_command_scheduler.cpp
 
-#include <duk_rhi/vulkan/command/vulkan_command_scheduler.h>
-#include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 #include <duk_rhi/vulkan/command/vulkan_command_buffer.h>
+#include <duk_rhi/vulkan/command/vulkan_command_queue.h>
+#include <duk_rhi/vulkan/command/vulkan_command_scheduler.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.h>
 
 #include <grapphs/algorithms/bfs_traversal.h>
 
 namespace duk::rhi {
 
-VulkanCommandScheduler::VulkanCommandScheduler(const VulkanCommandSchedulerCreateInfo& commandSchedulerCreateInfo) :
-    m_device(commandSchedulerCreateInfo.device),
-    m_currentFramePtr(commandSchedulerCreateInfo.currentFramePtr) {
-
+VulkanCommandScheduler::VulkanCommandScheduler(const VulkanCommandSchedulerCreateInfo& commandSchedulerCreateInfo)
+    : m_device(commandSchedulerCreateInfo.device)
+    , m_currentFramePtr(commandSchedulerCreateInfo.currentFramePtr) {
     FrameCreateInfo frameCreateInfo = {};
     frameCreateInfo.device = m_device;
 
@@ -53,10 +52,9 @@ void VulkanCommandScheduler::schedule_after(std::size_t before, std::size_t afte
     frame.schedule_after(before, after, waitStages);
 }
 
-VulkanCommandScheduler::CommandNode::CommandNode(FutureCommand&& futureCommand) noexcept :
-    m_futureCommand(std::move(futureCommand)),
-    m_command(nullptr){
-
+VulkanCommandScheduler::CommandNode::CommandNode(FutureCommand&& futureCommand) noexcept
+    : m_futureCommand(std::move(futureCommand))
+    , m_command(nullptr) {
 }
 
 VulkanCommandScheduler::CommandNode::~CommandNode() = default;
@@ -84,8 +82,8 @@ Command* VulkanCommandScheduler::CommandNode::command() {
     return m_command;
 }
 
-VulkanCommandScheduler::Frame::Frame(const VulkanCommandScheduler::FrameCreateInfo& frameCreateInfo) :
-    m_device(frameCreateInfo.device) {
+VulkanCommandScheduler::Frame::Frame(const VulkanCommandScheduler::FrameCreateInfo& frameCreateInfo)
+    : m_device(frameCreateInfo.device) {
 }
 
 VulkanCommandScheduler::Frame::Frame(VulkanCommandScheduler::Frame&& other) noexcept = default;
@@ -123,7 +121,6 @@ void VulkanCommandScheduler::Frame::schedule_after(std::size_t before, std::size
 }
 
 void VulkanCommandScheduler::Frame::flush() {
-
     auto perNode = [this](std::size_t index) {
         auto commandNode = m_scheduledCommands.vertex(index)->get();
 
@@ -131,7 +128,7 @@ void VulkanCommandScheduler::Frame::flush() {
         std::vector<VkPipelineStageFlags> stages;
 
         auto& dependencies = m_commandDependencies[index];
-        for (auto dependency : dependencies) {
+        for (auto dependency: dependencies) {
             auto& dependencyCommandNode = *m_scheduledCommands.vertex(dependency.index);
             auto waitStages = convert_pipeline_stage_mask(dependency.waitStages);
             auto dependencyCommand = dependencyCommandNode->command();
@@ -166,4 +163,4 @@ bool VulkanCommandScheduler::Frame::Dependency::operator<(const VulkanCommandSch
 bool VulkanCommandScheduler::Frame::Dependency::operator==(const VulkanCommandScheduler::Frame::Dependency& rhs) const noexcept {
     return index == rhs.index;
 }
-}
+}// namespace duk::rhi

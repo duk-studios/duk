@@ -41,4 +41,4 @@ std::vector<char> File::load_text(const char* filepath) {
     return buffer;
 }
 
-}
+}// namespace duk::tools

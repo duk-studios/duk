@@ -1,15 +1,14 @@
 /// 08/06/2023
 /// vulkan_renderer_capabilities.cpp
 
-#include <duk_rhi/vulkan/vulkan_rhi_capabilities.h>
-#include <duk_rhi/vulkan/vulkan_physical_device.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
+#include <duk_rhi/vulkan/vulkan_physical_device.h>
+#include <duk_rhi/vulkan/vulkan_rhi_capabilities.h>
 
 namespace duk::rhi {
 
-VulkanRendererCapabilities::VulkanRendererCapabilities(const VulkanRendererCapabilitiesCreateInfo& rendererCapabilitiesCreateInfo) :
-    m_physicalDevice(rendererCapabilitiesCreateInfo.physicalDevice) {
-
+VulkanRendererCapabilities::VulkanRendererCapabilities(const VulkanRendererCapabilitiesCreateInfo& rendererCapabilitiesCreateInfo)
+    : m_physicalDevice(rendererCapabilitiesCreateInfo.physicalDevice) {
 }
 
 VulkanRendererCapabilities::~VulkanRendererCapabilities() = default;
@@ -24,4 +23,4 @@ bool VulkanRendererCapabilities::is_format_supported(PixelFormat format, Image::
     return m_physicalDevice->is_format_supported(vkFormat, VK_IMAGE_TILING_OPTIMAL, usage_format_features(usage));
 }
 
-}
+}// namespace duk::rhi

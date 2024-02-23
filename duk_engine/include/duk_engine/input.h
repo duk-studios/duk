@@ -6,8 +6,8 @@
 #define DUK_INPUT_H
 
 #include <duk_platform/window.h>
-#include <set>
 #include <glm/vec2.hpp>
+#include <set>
 
 namespace duk::engine {
 
@@ -34,18 +34,17 @@ public:
     glm::vec2 mouse_position() const;
     int32_t mouse_wheel() const;
 
-
 private:
     duk::event::Listener m_listener;
 
     std::set<duk::platform::Keys> m_pressedKeys, m_releasedKeys, m_keys;
     std::set<duk::platform::MouseButton> m_pressedMouseButton, m_releasedMouseButton, m_mouse;
 
-    glm::vec2 m_mousePos = glm::vec2(0,0);
-    glm::vec2 m_lastMousePos = glm::vec2(0,0);
-    glm::vec2 m_deltaMousePos = glm::vec2(0,0);
+    glm::vec2 m_mousePos = glm::vec2(0, 0);
+    glm::vec2 m_lastMousePos = glm::vec2(0, 0);
+    glm::vec2 m_deltaMousePos = glm::vec2(0, 0);
     int32_t m_mouseWheel = 0;
 };
 
-}
-#endif //DUK_INPUT_H
+}// namespace duk::engine
+#endif//DUK_INPUT_H

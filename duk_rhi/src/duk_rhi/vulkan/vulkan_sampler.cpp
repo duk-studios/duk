@@ -18,11 +18,21 @@ duk::hash::Hash calculate_hash(const Sampler& sampler) {
 VkSamplerAddressMode convert_wrap_mode(Sampler::WrapMode wrapMode) {
     VkSamplerAddressMode converted;
     switch (wrapMode) {
-        case Sampler::WrapMode::REPEAT: converted = VK_SAMPLER_ADDRESS_MODE_REPEAT; break;
-        case Sampler::WrapMode::MIRRORED_REPEAT: converted = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT; break;
-        case Sampler::WrapMode::CLAMP_TO_EDGE: converted = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE; break;
-        case Sampler::WrapMode::CLAMP_TO_BORDER: converted = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER; break;
-        case Sampler::WrapMode::MIRROR_CLAMP_TO_EDGE: converted = VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE; break;
+        case Sampler::WrapMode::REPEAT:
+            converted = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+            break;
+        case Sampler::WrapMode::MIRRORED_REPEAT:
+            converted = VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+            break;
+        case Sampler::WrapMode::CLAMP_TO_EDGE:
+            converted = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            break;
+        case Sampler::WrapMode::CLAMP_TO_BORDER:
+            converted = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+            break;
+        case Sampler::WrapMode::MIRROR_CLAMP_TO_EDGE:
+            converted = VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE;
+            break;
         default:
             throw std::invalid_argument("unhandled Sampler::WrapMode conversion");
     }
@@ -32,24 +42,29 @@ VkSamplerAddressMode convert_wrap_mode(Sampler::WrapMode wrapMode) {
 VkFilter convert_filter(Sampler::Filter filter) {
     VkFilter converted;
     switch (filter) {
-        case Sampler::Filter::NEAREST: converted = VK_FILTER_NEAREST; break;
-        case Sampler::Filter::LINEAR: converted = VK_FILTER_LINEAR; break;
-        case Sampler::Filter::CUBIC: converted = VK_FILTER_CUBIC_EXT; break;
+        case Sampler::Filter::NEAREST:
+            converted = VK_FILTER_NEAREST;
+            break;
+        case Sampler::Filter::LINEAR:
+            converted = VK_FILTER_LINEAR;
+            break;
+        case Sampler::Filter::CUBIC:
+            converted = VK_FILTER_CUBIC_EXT;
+            break;
         default:
             throw std::logic_error("unhandled Sampler::Filter conversion");
     }
     return converted;
 }
 
-}
+}// namespace detail
 
-VulkanSamplerCache::VulkanSamplerCache(const VulkanSamplerCacheCreateInfo& imageSamplerCacheCreateInfo) :
-    m_device(imageSamplerCacheCreateInfo.device) {
-
+VulkanSamplerCache::VulkanSamplerCache(const VulkanSamplerCacheCreateInfo& imageSamplerCacheCreateInfo)
+    : m_device(imageSamplerCacheCreateInfo.device) {
 }
 
 VulkanSamplerCache::~VulkanSamplerCache() {
-    for (auto [hash, sampler] : m_samplers) {
+    for (auto [hash, sampler]: m_samplers) {
         vkDestroySampler(m_device, sampler, nullptr);
     }
 }
@@ -95,4 +110,4 @@ VkSampler VulkanSamplerCache::get(const Sampler& sampler) {
 
     return it->second;
 }
-}
+}// namespace duk::rhi

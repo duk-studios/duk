@@ -8,8 +8,8 @@
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_sampler.h>
 
-#include <duk_macros/macros.h>
 #include <duk_hash/hash_combine.h>
+#include <duk_macros/macros.h>
 
 namespace duk::rhi {
 
@@ -21,7 +21,6 @@ struct VulkanDescriptorSetLayoutCacheCreateInfo {
 
 class VulkanDescriptorSetLayoutCache {
 public:
-
     explicit VulkanDescriptorSetLayoutCache(const VulkanDescriptorSetLayoutCacheCreateInfo& descriptorSetLayoutCacheCreateInfo);
 
     ~VulkanDescriptorSetLayoutCache();
@@ -31,23 +30,19 @@ public:
     DUK_NO_DISCARD const std::vector<VkDescriptorSetLayoutBinding>& get_bindings(const DescriptorSetDescription& descriptorSetDescription);
 
 private:
-
     struct CacheEntry {
         VkDescriptorSetLayout descriptorSetLayout;
         std::vector<VkDescriptorSetLayoutBinding> bindings;
     };
 
 private:
-
     static duk::hash::Hash calculate_hash(const DescriptorSetDescription& descriptorSetDescription);
 
     const CacheEntry& create_descriptor_set_layout(const DescriptorSetDescription& descriptorSetDescription, duk::hash::Hash hash);
 
 private:
-
     VkDevice m_device;
     std::unordered_map<duk::hash::Hash, CacheEntry> m_descriptorLayoutCache;
-
 };
 
 struct VulkanDescriptorSetCreateInfo {
@@ -60,7 +55,6 @@ struct VulkanDescriptorSetCreateInfo {
 
 class VulkanDescriptorSet : public DescriptorSet {
 public:
-
     explicit VulkanDescriptorSet(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo);
 
     ~VulkanDescriptorSet() override;
@@ -92,7 +86,6 @@ public:
     void flush() override;
 
 private:
-
     void update_hash();
 
     void update_descriptors_and_set(uint32_t imageIndex);
@@ -110,10 +103,8 @@ private:
     std::vector<VkDescriptorSet> m_descriptorSets;
     duk::hash::Hash m_descriptorSetHash;
     std::vector<duk::hash::Hash> m_descriptorSetHashes;
-
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_VULKAN_DESCRIPTOR_SET_H
-
+#endif// DUK_RHI_VULKAN_DESCRIPTOR_SET_H

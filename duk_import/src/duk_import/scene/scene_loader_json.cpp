@@ -12,7 +12,6 @@ bool SceneLoaderJson::accepts(const std::filesystem::path& path) {
 }
 
 std::unique_ptr<duk::scene::Scene> SceneLoaderJson::load(const std::filesystem::path& path) {
-
     auto content = duk::tools::File::load_text(path.string().c_str());
 
     rapidjson::Document document;
@@ -28,4 +27,4 @@ std::unique_ptr<duk::scene::Scene> SceneLoaderJson::load(const std::filesystem::
     return scene;
 }
 
-}
+}// namespace duk::import

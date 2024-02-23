@@ -6,9 +6,8 @@
 
 namespace duk::import {
 
-Importer::Importer(const ImporterCreateInfo& importerCreateInfo) :
-    m_pools(importerCreateInfo.pools) {
-
+Importer::Importer(const ImporterCreateInfo& importerCreateInfo)
+    : m_pools(importerCreateInfo.pools) {
 }
 
 Importer::~Importer() = default;
@@ -22,12 +21,17 @@ ResourceImporter* Importer::add_resource_importer(std::unique_ptr<ResourceImport
     return m_resourceImporters.emplace(tag, std::move(resourceImporter)).first->second.get();
 }
 
-void Importer::load_resources(const std::filesystem::path& path) {
-    if (!m_resourceSetImporter.accept(path)) {
-        throw std::invalid_argument("load_resources needs a valid directory path");
+void Importer::load_resource_set(const std::filesystem::path& path) {
+    std::filesystem::path directory = path;
+    if (!std::filesystem::is_directory(path)) {
+        directory = path.parent_path();
     }
 
-    m_resourceSet = m_resourceSetImporter.load(path);
+    if (!m_resourceSetImporter.accept(directory)) {
+        throw std::invalid_argument("load_resource_set needs a valid directory path");
+    }
+
+    m_resourceSet = m_resourceSetImporter.load(directory);
 }
 
 void Importer::load_resource(duk::resource::Id id) {
@@ -55,7 +59,7 @@ void Importer::load_resource(duk::resource::Id id) {
     duk::resource::DependencySolver dependencySolver;
     importer->solve_dependencies(resourceDescription.id, dependencySolver);
 
-    for (auto dependency : dependencySolver.dependencies()) {
+    for (auto dependency: dependencySolver.dependencies()) {
         load_resource(dependency);
     }
 
@@ -80,4 +84,4 @@ ResourceImporter* Importer::get_importer(const std::string& tag) {
     return it->second.get();
 }
 
-}
+}// namespace duk::import

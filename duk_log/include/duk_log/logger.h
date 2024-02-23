@@ -3,8 +3,8 @@
 #ifndef DUK_LOG_LOGGER_H
 #define DUK_LOG_LOGGER_H
 
-#include <duk_macros/macros.h>
 #include <duk_event/event.h>
+#include <duk_macros/macros.h>
 #include <duk_task/task_queue.h>
 #include <duk_tools/format.h>
 
@@ -22,15 +22,15 @@ T build_arg(T arg) {
     return T(arg);
 }
 
-static std::string build_arg(std::string_view arg)  {
+static std::string build_arg(std::string_view arg) {
     return std::string(arg);
 }
 
-static std::string build_arg(const char* arg)  {
+static std::string build_arg(const char* arg) {
     return std::string(arg);
 }
 
-}
+}// namespace detail
 
 enum Level : uint8_t {
     VERBOSE = 0,
@@ -43,23 +43,23 @@ enum Level : uint8_t {
 
 class Logger {
 public:
-
     using PrintEvent = duk::event::EventT<Level, const std::string&>;
 
 public:
-
     explicit Logger(Level minimumLevel);
 
     ~Logger();
 
-    template<typename ...Args>
+    template<typename... Args>
     auto print(Level level, const std::string& format, Args... args) {
-        return m_printQueue.enqueue([this](Level level, const std::string& format, auto... args) -> void {
-            if (level < m_minimumLevel) {
-                return;
-            }
-            dispatch_print(level, fmt::vformat(format, fmt::make_format_args(args...)));
-        }, level, format, detail::build_arg(args)...);
+        return m_printQueue.enqueue(
+                [this](Level level, const std::string& format, auto... args) -> void {
+                    if (level < m_minimumLevel) {
+                        return;
+                    }
+                    dispatch_print(level, fmt::vformat(format, fmt::make_format_args(args...)));
+                },
+                level, format, detail::build_arg(args)...);
     }
 
     void add_print_listener(event::Listener& listener, PrintEvent::Callback&& callback);
@@ -67,7 +67,6 @@ public:
     void wait();
 
 private:
-
     void dispatch_print(Level level, const std::string& message);
 
 private:
@@ -77,6 +76,6 @@ private:
     std::mutex m_printMutex;
 };
 
-}
+}// namespace duk::log
 
-#endif //DUK_LOG_LOGGER_H
+#endif//DUK_LOG_LOGGER_H

@@ -9,9 +9,9 @@
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_query_error.h>
 
+#include <memory>
 #include <span>
 #include <vector>
-#include <memory>
 
 namespace duk::rhi {
 
@@ -37,7 +37,7 @@ public:
 
     ~VulkanPhysicalDevice();
 
-    DUK_NO_DISCARD bool find_queue_family( VulkanQueueFamilyProperties& vulkanQueueFamilyProperties, VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags = 0) const;
+    DUK_NO_DISCARD bool find_queue_family(VulkanQueueFamilyProperties& vulkanQueueFamilyProperties, VkSurfaceKHR surface, VkQueueFlags requiredQueueFlags, VkQueueFlags prohibitedQueueFlags = 0) const;
 
     DUK_NO_DISCARD bool query_surface_details(VkSurfaceKHR surface, VulkanSurfaceDetails& surfaceDetails) const;
 
@@ -57,6 +57,6 @@ private:
     VkPhysicalDeviceMemoryProperties m_memoryProperties;
 };
 
-}
+}// namespace duk::rhi
 
-#endif //DUK_VULKAN_PHYSICAL_DEVICE_H
+#endif//DUK_VULKAN_PHYSICAL_DEVICE_H

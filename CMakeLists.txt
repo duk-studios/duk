@@ -4,7 +4,8 @@ project(duk)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/output)
 set(DUK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
-option(BUILD_DUK_SAMPLE "Enables building of duk_sample" ON)
+option(DUK_BUILD_SAMPLE "Enables building of duk_sample" ON)
+option(DUK_FORMAT_FILES "Enables format target" ON)
 
 add_subdirectory(external)
 
@@ -24,6 +25,39 @@ add_subdirectory(duk_renderer)
 add_subdirectory(duk_import)
 add_subdirectory(duk_cli)
 add_subdirectory(duk_engine)
-if (BUILD_DUK_SAMPLE)
+if (DUK_BUILD_SAMPLE)
     add_subdirectory(duk_sample)
+endif ()
+
+if (DUK_FORMAT_FILES)
+
+    find_program(CLANG_FORMAT_EXECUTABLE clang-format)
+
+    if (NOT CLANG_FORMAT_EXECUTABLE)
+        message(FATAL_ERROR "clang-format not found. Please make sure it is installed")
+    endif()
+
+    # Find all .cpp and .h files in directories starting with "duk_"
+    file(GLOB_RECURSE DUK_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/duk_*/*.cpp ${CMAKE_CURRENT_SOURCE_DIR}/duk_*/*.h)
+
+    # Add a custom target for formatting all source files
+    add_custom_target(
+            duk_format
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMAND ${CLANG_FORMAT_EXECUTABLE}
+            -i
+            ${DUK_FILES}
+            COMMENT "Formatting duk files"
+    )
+
+    add_custom_target(
+            duk_format_check
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            COMMAND ${CLANG_FORMAT_EXECUTABLE}
+            -i
+            ${DUK_FILES}
+            --dry-run
+            --Werror
+            COMMENT "Checking duk files formatting"
+    )
 endif ()

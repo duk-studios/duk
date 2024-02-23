@@ -71,6 +71,7 @@ set(DUK_SAMPLE_RESOURCES
         resources/scenes/empty.scn
         resources/scenes/scene.res
         resources/scenes/scene.scn
+        resources/sample.duk
 )
 add_custom_command(
         OUTPUT _resource_copy_timestamp.txt

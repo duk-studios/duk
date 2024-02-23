@@ -2,9 +2,9 @@
 /// image_importer_stb.cpp
 
 #include <duk_import/image/image_loader_stb.h>
+#include <fstream>
 #include <stb_image.h>
 #include <stdexcept>
-#include <fstream>
 
 namespace duk::import {
 
@@ -12,19 +12,23 @@ namespace detail {
 
 duk::rhi::PixelFormat build_pixel_format(int channelCount) {
     switch (channelCount) {
-        case 1: return duk::rhi::PixelFormat::R8U;
-        case 2: return duk::rhi::PixelFormat::RG8U;
-        case 3: return duk::rhi::PixelFormat::RGB8U;
-        case 4: return duk::rhi::PixelFormat::RGBA8U;
-        default: throw std::invalid_argument("unsupported channel count");
+        case 1:
+            return duk::rhi::PixelFormat::R8U;
+        case 2:
+            return duk::rhi::PixelFormat::RG8U;
+        case 3:
+            return duk::rhi::PixelFormat::RGB8U;
+        case 4:
+            return duk::rhi::PixelFormat::RGBA8U;
+        default:
+            throw std::invalid_argument("unsupported channel count");
     }
 }
 
-}
+}// namespace detail
 
-ImageLoaderStb::ImageLoaderStb(const duk::rhi::RHICapabilities* rhiCapabilities) :
-    m_rhiCapabilities(rhiCapabilities) {
-
+ImageLoaderStb::ImageLoaderStb(const duk::rhi::RHICapabilities* rhiCapabilities)
+    : m_rhiCapabilities(rhiCapabilities) {
 }
 
 bool ImageLoaderStb::accepts(const std::filesystem::path& path) {
@@ -36,7 +40,6 @@ bool ImageLoaderStb::accepts(const std::filesystem::path& path) {
 }
 
 std::unique_ptr<duk::rhi::ImageDataSource> ImageLoaderStb::load(const std::filesystem::path& path) {
-
     const auto pathStr = path.string();
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error("file does not exist: " + pathStr);
@@ -82,4 +85,4 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageLoaderStb::load(const std::files
     return image;
 }
 
-}
+}// namespace duk::import

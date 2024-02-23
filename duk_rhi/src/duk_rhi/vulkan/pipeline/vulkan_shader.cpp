@@ -3,8 +3,8 @@
 
 #include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
-#include <duk_rhi/vulkan/vulkan_vertex.h>
 #include <duk_rhi/vulkan/vulkan_flags.h>
+#include <duk_rhi/vulkan/vulkan_vertex.h>
 
 #include <stdexcept>
 
@@ -13,12 +13,24 @@ namespace duk::rhi {
 VkShaderStageFlagBits convert_module(Shader::Module::Bits module) {
     VkShaderStageFlagBits stage;
     switch (module) {
-        case Shader::Module::VERTEX: stage = VK_SHADER_STAGE_VERTEX_BIT; break;
-        case Shader::Module::TESSELLATION_CONTROL: stage = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT; break;
-        case Shader::Module::TESSELLATION_EVALUATION: stage = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT; break;
-        case Shader::Module::GEOMETRY: stage = VK_SHADER_STAGE_GEOMETRY_BIT; break;
-        case Shader::Module::FRAGMENT: stage = VK_SHADER_STAGE_FRAGMENT_BIT; break;
-        case Shader::Module::COMPUTE: stage = VK_SHADER_STAGE_COMPUTE_BIT; break;
+        case Shader::Module::VERTEX:
+            stage = VK_SHADER_STAGE_VERTEX_BIT;
+            break;
+        case Shader::Module::TESSELLATION_CONTROL:
+            stage = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+            break;
+        case Shader::Module::TESSELLATION_EVALUATION:
+            stage = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+            break;
+        case Shader::Module::GEOMETRY:
+            stage = VK_SHADER_STAGE_GEOMETRY_BIT;
+            break;
+        case Shader::Module::FRAGMENT:
+            stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+            break;
+        case Shader::Module::COMPUTE:
+            stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            break;
         default:
             throw std::runtime_error("tried to convert unsupported Shader::Module");
     }
@@ -29,39 +41,30 @@ VkShaderStageFlags convert_module_mask(Shader::Module::Mask moduleMask) {
     return convert_flags<Shader::Module>(moduleMask, convert_module);
 }
 
-VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
-    m_device(shaderCreateInfo.device),
-    m_hash(shaderCreateInfo.shaderDataSource->hash()),
-    m_moduleMask(shaderCreateInfo.shaderDataSource->module_mask()) {
-
+VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo)
+    : m_device(shaderCreateInfo.device)
+    , m_hash(shaderCreateInfo.shaderDataSource->hash())
+    , m_moduleMask(shaderCreateInfo.shaderDataSource->module_mask()) {
     auto shaderDataSource = shaderCreateInfo.shaderDataSource;
     if (shaderDataSource->valid_graphics_shader()) {
-        Shader::Module::Bits modules[] = {
-                Shader::Module::VERTEX,
-                Shader::Module::TESSELLATION_CONTROL,
-                Shader::Module::TESSELLATION_EVALUATION,
-                Shader::Module::GEOMETRY,
-                Shader::Module::FRAGMENT
-                };
+        Shader::Module::Bits modules[] = {Shader::Module::VERTEX, Shader::Module::TESSELLATION_CONTROL, Shader::Module::TESSELLATION_EVALUATION, Shader::Module::GEOMETRY, Shader::Module::FRAGMENT};
 
-        for (auto module : modules) {
+        for (auto module: modules) {
             create_shader_module(module, shaderDataSource);
         }
 
-    }
-    else if (shaderDataSource->valid_compute_shader()) {
+    } else if (shaderDataSource->valid_compute_shader()) {
         const bool created = create_shader_module(Shader::Module::COMPUTE, shaderDataSource);
         if (!created) {
             throw std::runtime_error("failed to create compute VkShaderModule");
         }
-    }
-    else {
+    } else {
         throw std::runtime_error("invalid ShaderDataSource provided to VulkanShader");
     }
 
     const auto& descriptorSetDescriptions = shaderDataSource->descriptor_set_descriptions();
     m_descriptorSetLayouts.reserve(descriptorSetDescriptions.size());
-    for (auto& descriptorSetDescription : descriptorSetDescriptions) {
+    for (auto& descriptorSetDescription: descriptorSetDescriptions) {
         m_descriptorSetLayouts.push_back(shaderCreateInfo.descriptorSetLayoutCache->get_layout(descriptorSetDescription));
     }
 
@@ -80,7 +83,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
     m_inputAttributes.reserve(vertexLayout.size());
     m_inputBindings.reserve(vertexLayout.size());
 
-    for (auto& format : vertexLayout) {
+    for (auto& format: vertexLayout) {
         VkVertexInputAttributeDescription inputAttributeDescription = {};
         inputAttributeDescription.binding = m_inputAttributes.size();
         inputAttributeDescription.location = inputAttributeDescription.binding;
@@ -99,7 +102,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo) :
 }
 
 VulkanShader::~VulkanShader() {
-    for (auto&[moduleType, module] : m_shaderModules) {
+    for (auto& [moduleType, module]: m_shaderModules) {
         vkDestroyShaderModule(m_device, module, nullptr);
     }
     vkDestroyPipelineLayout(m_device, m_pipelineLayout, nullptr);
@@ -156,7 +159,7 @@ bool VulkanShader::create_shader_module(Shader::Module::Bits type, const ShaderD
         throw std::runtime_error("failed to create VkShaderModule");
     }
 
-    auto[it, inserted] = m_shaderModules.emplace(type, shaderModule);
+    auto [it, inserted] = m_shaderModules.emplace(type, shaderModule);
     if (!inserted) {
         throw std::runtime_error("failed to insert shader module into unordered_map");
     }
@@ -164,4 +167,4 @@ bool VulkanShader::create_shader_module(Shader::Module::Bits type, const ShaderD
     return true;
 }
 
-}
+}// namespace duk::rhi

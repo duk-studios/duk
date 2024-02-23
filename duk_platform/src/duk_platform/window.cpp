@@ -23,18 +23,17 @@ std::shared_ptr<Window> create_win32_window(const WindowCreateInfo& windowCreate
 }
 #endif
 
-}
+}// namespace detail
 
 std::shared_ptr<Window> Window::create_window(const WindowCreateInfo& windowCreateInfo) {
 #if DUK_PLATFORM_IS_WINDOWS
-    return detail::create_win32_window(windowCreateInfo);        
+    return detail::create_win32_window(windowCreateInfo);
 #endif
 }
 
-
-Window::Window(const WindowCreateInfo& windowCreateInfo) :
-    m_width(windowCreateInfo.width),
-    m_height(windowCreateInfo.height){
+Window::Window(const WindowCreateInfo& windowCreateInfo)
+    : m_width(windowCreateInfo.width)
+    , m_height(windowCreateInfo.height) {
 }
 
 Window::~Window() = default;
@@ -46,4 +45,4 @@ uint32_t Window::width() const {
 uint32_t Window::height() const {
     return m_height;
 }
-}
+}// namespace duk::platform

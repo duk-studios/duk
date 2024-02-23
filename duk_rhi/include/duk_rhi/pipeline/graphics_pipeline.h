@@ -18,7 +18,6 @@ class RenderPass;
 
 class GraphicsPipeline {
 public:
-
     struct Viewport {
         glm::vec2 extent;
         glm::vec2 offset;
@@ -37,6 +36,7 @@ public:
             FRONT = 1 << 0,
             BACK = 1 << 1,
         };
+
         static constexpr uint32_t kCount = 3;
         using Mask = uint32_t;
     };
@@ -102,7 +102,6 @@ public:
     };
 
 public:
-
     virtual ~GraphicsPipeline();
 
     virtual void set_viewport(const Viewport& viewport) = 0;
@@ -151,17 +150,9 @@ public:
 
     DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 
-    DUK_NO_DISCARD static duk::hash::Hash hash_of(Viewport viewport,
-                                                  Scissor scissor,
-                                                  Blend blend,
-                                                  Shader* shader,
-                                                  RenderPass* renderPass,
-                                                  CullMode::Mask cullMode,
-                                                  bool depthTesting);
-
+    DUK_NO_DISCARD static duk::hash::Hash hash_of(Viewport viewport, Scissor scissor, Blend blend, Shader* shader, RenderPass* renderPass, CullMode::Mask cullMode, bool depthTesting);
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_PIPELINE_H
-
+#endif// DUK_RHI_PIPELINE_H

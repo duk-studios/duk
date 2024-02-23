@@ -5,17 +5,16 @@
 #ifndef DUK_RHI_VERTEX_TYPES_H
 #define DUK_RHI_VERTEX_TYPES_H
 
-#include <duk_rhi/vertex_layout.h>
 #include <duk_rhi/buffer.h>
+#include <duk_rhi/vertex_layout.h>
 #include <duk_tools/bit_block.h>
-#include <span>
 #include <memory>
+#include <span>
 
 namespace duk::renderer {
 
 class VertexAttributes {
 public:
-
     enum Type {
         POSITION = 0,
         NORMAL,
@@ -23,6 +22,7 @@ public:
         COLOR,
         COUNT
     };
+
     using Mask = duk::tools::BitBlock<COUNT>;
     using ConstIterator = Mask::BitBlockIterator<true>;
 
@@ -65,9 +65,7 @@ struct VertexColorUV {
 
 template<>
 inline VertexAttributes VertexAttributes::create<VertexColorUV>() {
-    VertexAttributes::Type attributes[] = {
-        VertexAttributes::POSITION, VertexAttributes::COLOR, VertexAttributes::UV
-    };
+    VertexAttributes::Type attributes[] = {VertexAttributes::POSITION, VertexAttributes::COLOR, VertexAttributes::UV};
     return VertexAttributes(attributes);
 }
 
@@ -81,13 +79,11 @@ struct VertexNormalUV {
 
 template<>
 inline VertexAttributes VertexAttributes::create<VertexNormalUV>() {
-    VertexAttributes::Type attributes[] = {
-            VertexAttributes::POSITION, VertexAttributes::NORMAL, VertexAttributes::UV
-    };
+    VertexAttributes::Type attributes[] = {VertexAttributes::POSITION, VertexAttributes::NORMAL, VertexAttributes::UV};
     return VertexAttributes(attributes);
 }
 
-}
+}// namespace duk::renderer
 
 // specialize std::hash for every vertex type
 namespace std {
@@ -118,6 +114,6 @@ struct hash<duk::renderer::VertexNormalUV> {
     }
 };
 
-}
+}// namespace std
 
-#endif //DUK_RHI_VERTEX_TYPES_H
+#endif//DUK_RHI_VERTEX_TYPES_H

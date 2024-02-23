@@ -22,9 +22,9 @@ void solve_resources(Solver* solver, YourType& obj) {
  */
 
 template<typename Solver, typename T>
-void solve_resources(Solver* solver, T& obj) {}
-
+void solve_resources(Solver* solver, T& obj) {
 }
 
-#endif // DUK_RESOURCE_SOLVER_H
+}// namespace duk::resource
 
+#endif// DUK_RESOURCE_SOLVER_H

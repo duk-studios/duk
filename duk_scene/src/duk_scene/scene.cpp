@@ -21,4 +21,4 @@ const Systems& Scene::systems() const {
     return m_systems;
 }
 
-}
+}// namespace duk::scene

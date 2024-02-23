@@ -12,11 +12,9 @@ namespace duk::material_generator {
 
 class TypesFileGenerator : public FileGenerator {
 public:
-
     TypesFileGenerator(const Parser& parser, const Reflector& reflector);
 
 protected:
-
     void generate_includes(std::ostringstream& oss);
 
     void generate_type(std::ostringstream& oss, const TypeReflection& type, uint32_t indentationLevel = 0);
@@ -40,7 +38,6 @@ protected:
     const Reflector& m_reflector;
 };
 
-}
+}// namespace duk::material_generator
 
-#endif // DUK_MATERIAL_GENERATOR_TYPES_FILE_GENERATOR_H
-
+#endif// DUK_MATERIAL_GENERATOR_TYPES_FILE_GENERATOR_H

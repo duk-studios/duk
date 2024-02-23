@@ -22,7 +22,6 @@ struct ImagePoolCreateInfo {
 
 class ImagePool : public duk::resource::PoolT<ImageResource> {
 public:
-
     explicit ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo);
 
     ImageResource create(duk::resource::Id resourceId, const duk::rhi::ImageDataSource* imageDataSource);
@@ -35,9 +34,8 @@ private:
     duk::renderer::Renderer* m_renderer;
     ImageResource m_whiteImage;
     ImageResource m_blackImage;
-
 };
 
-}
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_IMAGE_POOL_H
+#endif//DUK_RENDERER_IMAGE_POOL_H

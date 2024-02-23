@@ -1,6 +1,6 @@
 # This starter workflow is for a CMake project running on a single platform. There is a different starter workflow if you need cross-platform coverage.
 # See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-multi-platform.yml
-name: CMake on a single platform
+name: Windows Build
 
 on:
   push:
@@ -20,6 +20,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
+    - name: Install LLVM
+      run: choco install llvm
+
     - name: Checkout repository and submodules
       uses: actions/checkout@v3
       with:
@@ -30,8 +33,9 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
+    - name: Format check
+      run: cmake --build ${{github.workspace}}/build --target duk_format_check
+
     - name: Build
       # Build your program with the given configuration
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-

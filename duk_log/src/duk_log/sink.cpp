@@ -5,9 +5,8 @@
 
 namespace duk::log {
 
-Sink::Sink(Level minimumLevel) :
-    m_level(minimumLevel) {
-
+Sink::Sink(Level minimumLevel)
+    : m_level(minimumLevel) {
 }
 
 Sink::~Sink() = default;
@@ -21,4 +20,4 @@ void Sink::flush_from(Logger& logger) {
     });
 }
 
-}
+}// namespace duk::log

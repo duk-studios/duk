@@ -5,9 +5,8 @@
 
 namespace duk::engine {
 
-System::System(Engine& engine) :
-    m_engine(engine) {
-
+System::System(Engine& engine)
+    : m_engine(engine) {
 }
 
 void System::enter() {
@@ -22,4 +21,4 @@ void System::exit() {
     exit(m_engine);
 }
 
-}
+}// namespace duk::engine

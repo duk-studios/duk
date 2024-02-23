@@ -44,7 +44,6 @@ struct VulkanGraphicsPipelineCreateInfo {
 
 class VulkanGraphicsPipeline : public GraphicsPipeline {
 public:
-
     explicit VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreateInfo& pipelineCreateInfo);
 
     ~VulkanGraphicsPipeline() override;
@@ -91,7 +90,6 @@ public:
     DUK_NO_DISCARD hash::Hash hash() const override;
 
 private:
-
     void update_hash();
 
 private:
@@ -110,6 +108,5 @@ private:
     std::vector<duk::hash::Hash> m_pipelineHashes;
 };
 
-}
-#endif // DUK_RHI_VULKAN_PIPELINE_H
-
+}// namespace duk::rhi
+#endif// DUK_RHI_VULKAN_PIPELINE_H

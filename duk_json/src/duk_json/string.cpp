@@ -3,8 +3,8 @@
 
 #include <duk_json/string.h>
 
-#include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 namespace duk::json {
 
@@ -15,4 +15,4 @@ std::string to_string(const rapidjson::Value& value) {
     return buffer.GetString();
 }
 
-}
+}// namespace duk::json

@@ -5,7 +5,6 @@
 
 namespace duk::rhi {
 
-
 CommandQueue::CommandQueue() {
     m_taskQueue.start();
 }
@@ -14,4 +13,4 @@ CommandQueue::~CommandQueue() {
     m_taskQueue.stop();
 }
 
-}
+}// namespace duk::rhi

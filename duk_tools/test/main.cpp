@@ -15,7 +15,7 @@ int main() {
 
     std::cout << "BitBlock: " << bitBlock.to_string() << std::endl;
     std::cout << "Set bit indices: ";
-    for (auto bit : bitBlock.bits<true>()) {
+    for (auto bit: bitBlock.bits<true>()) {
         std::cout << bit << ',';
     }
     std::cout << std::endl;

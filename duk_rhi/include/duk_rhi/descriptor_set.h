@@ -4,8 +4,8 @@
 #ifndef DUK_RHI_DESCRIPTOR_SET_H
 #define DUK_RHI_DESCRIPTOR_SET_H
 
-#include <duk_rhi/descriptor.h>
 #include <duk_macros/macros.h>
+#include <duk_rhi/descriptor.h>
 
 namespace duk::rhi {
 
@@ -14,7 +14,6 @@ class Buffer;
 
 class DescriptorSet {
 public:
-
     virtual ~DescriptorSet();
 
     virtual void set(uint32_t binding, const Descriptor& descriptor) = 0;
@@ -32,10 +31,8 @@ public:
     DUK_NO_DISCARD virtual const Buffer* buffer(uint32_t binding) const = 0;
 
     virtual void flush() = 0;
-
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_DESCRIPTOR_SET_H
-
+#endif// DUK_RHI_DESCRIPTOR_SET_H

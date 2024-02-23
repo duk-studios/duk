@@ -18,7 +18,6 @@ struct SpritePoolCreateInfo {
 
 class SpritePool : public duk::resource::PoolT<SpriteResource> {
 public:
-
     explicit SpritePool(const SpritePoolCreateInfo& spritePoolCreateInfo);
 
     DUK_NO_DISCARD SpriteResource create(duk::resource::Id resourceId, const duk::renderer::SpriteDataSource* spriteDataSource);
@@ -30,6 +29,6 @@ private:
     SpriteResource m_whiteSquareSprite;
 };
 
-}
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_SPRITE_POOL_H
+#endif//DUK_RENDERER_SPRITE_POOL_H

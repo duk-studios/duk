@@ -5,8 +5,8 @@
 #define DUK_RHI_VULKAN_COMPUTE_PIPELINE_H
 
 #include <duk_rhi/pipeline/compute_pipeline.h>
-#include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
+#include <duk_rhi/vulkan/vulkan_import.h>
 
 namespace duk::rhi {
 
@@ -15,10 +15,8 @@ struct VulkanComputePipelineCreateInfo {
     VulkanShader* shader;
 };
 
-
 class VulkanComputePipeline : public ComputePipeline {
 public:
-
     explicit VulkanComputePipeline(const VulkanComputePipelineCreateInfo& computePipelineCreateInfo);
 
     ~VulkanComputePipeline() override;
@@ -43,8 +41,6 @@ private:
     duk::hash::Hash m_pipelineHash;
 };
 
+}// namespace duk::rhi
 
-}
-
-#endif // DUK_RHI_VULKAN_COMPUTE_PIPELINE_H
-
+#endif// DUK_RHI_VULKAN_COMPUTE_PIPELINE_H

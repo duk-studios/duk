@@ -13,7 +13,6 @@ enum Limits : uint64_t {
     MAX_OBJECTS = 65535,
 };
 
-}
+}// namespace duk::scene
 
-#endif // DUK_SCENE_LIMITS_H
-
+#endif// DUK_SCENE_LIMITS_H

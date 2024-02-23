@@ -5,23 +5,22 @@
 #ifndef DUK_ENGINE_ENGINE_H
 #define DUK_ENGINE_ENGINE_H
 
+#include <duk_engine/input.h>
+#include <duk_engine/settings.h>
 #include <duk_engine/systems/system.h>
-
-#include <duk_platform/window.h>
 #include <duk_import/importer.h>
+#include <duk_platform/window.h>
 #include <duk_renderer/forward/forward_renderer.h>
 #include <duk_tools/timer.h>
-#include <duk_engine/input.h>
 
 namespace duk::engine {
 
 struct EngineCreateInfo {
-    const char* applicationName;
+    std::string settingsPath;
 };
 
 class Engine {
 public:
-
     explicit Engine(const EngineCreateInfo& engineCreateInfo);
 
     ~Engine();
@@ -42,12 +41,12 @@ public:
 
     DUK_NO_DISCARD const duk::tools::Timer* timer() const;
 
-    void use_scene(duk::scene::Scene* scene);
-
     template<typename T>
     void register_component(const std::string& typeName);
 
 private:
+    std::string m_settingsPath;
+    Settings m_settings;
     duk::event::Listener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::ForwardRenderer> m_renderer;
@@ -65,6 +64,6 @@ void Engine::register_component(const std::string& typeName) {
     duk::scene::ComponentRegistry::instance(true)->add<T>(typeName);
 }
 
-}
+}// namespace duk::engine
 
-#endif //DUK_ENGINE_ENGINE_H
+#endif//DUK_ENGINE_ENGINE_H

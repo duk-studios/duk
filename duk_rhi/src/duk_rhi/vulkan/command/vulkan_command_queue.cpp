@@ -6,16 +6,15 @@
 
 namespace duk::rhi {
 
-VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo) :
-    m_device(commandQueueCreateInfo.device),
-    m_familyIndex(commandQueueCreateInfo.familyIndex),
-    m_index(commandQueueCreateInfo.index),
-    m_currentFramePtr(commandQueueCreateInfo.currentFramePtr),
-    m_currentImagePtr(commandQueueCreateInfo.currentImagePtr),
-    m_frameCount(commandQueueCreateInfo.frameCount),
-    m_queue(VK_NULL_HANDLE),
-    m_commandPool(VK_NULL_HANDLE) {
-
+VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo)
+    : m_device(commandQueueCreateInfo.device)
+    , m_familyIndex(commandQueueCreateInfo.familyIndex)
+    , m_index(commandQueueCreateInfo.index)
+    , m_currentFramePtr(commandQueueCreateInfo.currentFramePtr)
+    , m_currentImagePtr(commandQueueCreateInfo.currentImagePtr)
+    , m_frameCount(commandQueueCreateInfo.frameCount)
+    , m_queue(VK_NULL_HANDLE)
+    , m_commandPool(VK_NULL_HANDLE) {
     vkGetDeviceQueue(m_device, m_familyIndex, m_index, &m_queue);
 
     VkCommandPoolCreateInfo commandPoolCreateInfo = {};
@@ -24,7 +23,7 @@ VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& comma
     commandPoolCreateInfo.queueFamilyIndex = m_familyIndex;
 
     auto result = vkCreateCommandPool(m_device, &commandPoolCreateInfo, nullptr, &m_commandPool);
-    if (result != VK_SUCCESS){
+    if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkCommandPool");
     }
 
@@ -35,7 +34,7 @@ VulkanCommandQueue::VulkanCommandQueue(const VulkanCommandQueueCreateInfo& comma
     m_commandBufferPool = std::make_unique<VulkanCommandBufferPool>(commandBufferPoolCreateInfo);
 
     // resets command buffers for this frame
-    m_listener.listen(*commandQueueCreateInfo.prepareFrameEvent, [this](uint32_t){
+    m_listener.listen(*commandQueueCreateInfo.prepareFrameEvent, [this](uint32_t) {
         m_usedCommandBuffers = 0;
     });
 }
@@ -85,7 +84,7 @@ void VulkanCommandQueue::submit(const VkSubmitInfo& submitInfo, VkFence fence) {
 
 CommandBuffer* VulkanCommandQueue::next_command_buffer() {
     auto nextCommandBufferIndex = m_usedCommandBuffers++;
-    if (nextCommandBufferIndex < m_commandBuffers.size()){
+    if (nextCommandBufferIndex < m_commandBuffers.size()) {
         auto commandBuffer = m_commandBuffers[nextCommandBufferIndex].get();
         return commandBuffer;
     }
@@ -99,4 +98,4 @@ CommandBuffer* VulkanCommandQueue::next_command_buffer() {
     return m_commandBuffers.emplace_back(std::make_unique<VulkanCommandBuffer>(commandBufferCreateInfo)).get();
 }
 
-}
+}// namespace duk::rhi

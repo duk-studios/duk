@@ -6,10 +6,10 @@
 
 #include <duk_rhi/image.h>
 #include <duk_rhi/image_data_source.h>
-#include <duk_rhi/vulkan/vulkan_import.h>
-#include <duk_rhi/vulkan/vulkan_events.h>
-#include <duk_rhi/vulkan/vulkan_physical_device.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
+#include <duk_rhi/vulkan/vulkan_events.h>
+#include <duk_rhi/vulkan/vulkan_import.h>
+#include <duk_rhi/vulkan/vulkan_physical_device.h>
 
 #include <duk_macros/macros.h>
 
@@ -29,7 +29,6 @@ VkFormatFeatureFlags usage_format_features(Image::Usage usage);
 
 class VulkanImage : public Image {
 public:
-
     virtual void update(uint32_t imageIndex, VkPipelineStageFlags stageFlags) = 0;
 
     DUK_NO_DISCARD virtual VkImage image(uint32_t imageIndex) const = 0;
@@ -77,7 +76,6 @@ struct VulkanMemoryImageCreateInfo {
 
 class VulkanMemoryImage : public VulkanImage {
 public:
-
     explicit VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanImageCreateInfo);
 
     ~VulkanMemoryImage() override;
@@ -107,8 +105,8 @@ public:
     void clean();
 
     void clean(uint32_t imageIndex);
-private:
 
+private:
     DUK_NO_DISCARD uint32_t fix_index(uint32_t imageIndex) const;
 
 private:
@@ -137,7 +135,6 @@ struct VulkanSwapchainImageCreateInfo {
 
 class VulkanSwapchainImage : public VulkanImage {
 public:
-
     explicit VulkanSwapchainImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainImageCreateInfo);
 
     ~VulkanSwapchainImage() override;
@@ -176,7 +173,6 @@ private:
     duk::hash::Hash m_hash;
 };
 
-}
+}// namespace duk::rhi
 
-#endif // DUK_RHI_VULKAN_IMAGE_H
-
+#endif// DUK_RHI_VULKAN_IMAGE_H
