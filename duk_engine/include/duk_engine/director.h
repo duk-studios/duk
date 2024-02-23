@@ -5,8 +5,8 @@
 #define DUK_ENGINE_DIRECTOR_H
 
 #include <duk_import/importer.h>
-#include <duk_scene/scene_pool.h>
 #include <duk_renderer/renderer.h>
+#include <duk_scene/scene_pool.h>
 
 namespace duk::engine {
 

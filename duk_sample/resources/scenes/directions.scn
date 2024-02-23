@@ -1,7 +1,6 @@
 {
   "systems": [
-    "duk::sample::CameraSystem",
-    "duk::engine::RenderSystem"
+    "duk::sample::CameraSystem"
   ],
   "objects": [
     {
