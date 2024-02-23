@@ -18,7 +18,7 @@ const std::string& MaterialImporter::tag() const {
 }
 
 void MaterialImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
-    auto dataSource = ResourceImporterT<duk::renderer::MaterialDataSource>::load(path);
+    auto dataSource = ResourceImporterT<std::unique_ptr<duk::renderer::MaterialDataSource>>::load(path);
     m_materialPool->create(id, dataSource.get());
 }
 

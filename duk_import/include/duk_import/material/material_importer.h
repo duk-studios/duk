@@ -12,18 +12,11 @@
 
 namespace duk::import {
 
-class MaterialLoader {
-public:
-    virtual bool accepts(const std::filesystem::path& path) = 0;
-
-    virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) = 0;
-};
-
 struct MaterialImporterCreateInfo {
     duk::renderer::MaterialPool* materialPool;
 };
 
-class MaterialImporter : public ResourceImporterT<duk::renderer::MaterialDataSource> {
+class MaterialImporter : public ResourceImporterT<std::unique_ptr<duk::renderer::MaterialDataSource>> {
 public:
     explicit MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo);
 
