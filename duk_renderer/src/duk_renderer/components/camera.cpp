@@ -8,13 +8,17 @@
 
 namespace duk::renderer {
 
-static const glm::mat4 kDefaultProjection = glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.1f, 1000.0f);
-
-glm::mat4 calculate_projection(const duk::scene::Object& object) {
+glm::mat4 calculate_projection(const duk::scene::Object& object, uint32_t width, uint32_t height) {
+    float aspectRatio = (float)(width) / (float)(height);
+    float fovDegrees = 45.0f;
+    float zNear = 0.1f;
+    float zFar = 1000.f;
     if (auto perspective = object.component<PerspectiveCamera>()) {
-        return glm::perspective(glm::radians(perspective->fovDegrees), perspective->aspectRatio, perspective->zNear, perspective->zFar);
+        fovDegrees = perspective->fovDegrees;
+        zNear = perspective->zNear;
+        zFar = perspective->zFar;
     }
-    return kDefaultProjection;
+    return glm::perspective(glm::radians(fovDegrees), aspectRatio, zNear, zFar);
 }
 
 glm::mat4 calculate_view(const scene::Object& object) {
