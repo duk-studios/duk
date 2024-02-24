@@ -65,6 +65,10 @@ void CameraSystem::update(engine::Engine& engine) {
 
     auto object = objects.first_with<CameraController>();
 
+    if (!object) {
+        return;
+    }
+
     auto input = engine.input();
 
     const auto deltaTime = engine.timer()->duration().count();
