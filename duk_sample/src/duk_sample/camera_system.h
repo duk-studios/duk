@@ -11,6 +11,11 @@
 
 namespace duk::sample {
 
+struct CameraController {
+    float speed;
+    float rotationSpeed;
+};
+
 class CameraSystem : public duk::engine::System {
 public:
     using duk::engine::System::System;
@@ -21,12 +26,18 @@ protected:
     void update(engine::Engine& engine) override;
 
     void exit(engine::Engine& engine) override;
-
-private:
-    duk::scene::Object m_camera;
-    duk::event::Listener m_listener;
 };
 
 }// namespace duk::sample
+
+namespace duk::json {
+
+template<>
+inline void from_json<duk::sample::CameraController>(const rapidjson::Value& jsonObject, duk::sample::CameraController& cameraController) {
+    from_json_member(jsonObject, "speed", cameraController.speed);
+    from_json_member(jsonObject, "rotationSpeed", cameraController.rotationSpeed);
+}
+
+}// namespace duk::json
 
 #endif//DUK_SAMPLE_CAMERA_SYSTEM_H
