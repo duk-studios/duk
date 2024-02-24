@@ -2,7 +2,6 @@
 // Created by rov on 11/18/2023.
 //
 
-#include "duk_log/log.h"
 #include <duk_engine/engine.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
@@ -12,101 +11,87 @@ namespace duk::sample {
 
 namespace detail {
 
-static void update_perspective(duk::scene::Component<duk::renderer::PerspectiveCamera> perspectiveCamera, uint32_t width, uint32_t height) {
-    perspectiveCamera->zNear = 0.1f;
-    perspectiveCamera->zFar = 1000.f;
-    perspectiveCamera->aspectRatio = (float)width / (float)height;
-    perspectiveCamera->fovDegrees = 45.0f;
+static glm::vec3 input_rotation_direction(const duk::engine::Input* input) {
+    glm::vec3 direction(0);
+    if (input->mouse(duk::platform::MouseButton::LEFT)) {
+        direction = glm::vec3(-input->delta_mouse().y, -input->delta_mouse().x, 0);
+    } else {
+        if (input->key(duk::platform::Keys::UP_ARROW)) {
+            direction = glm::vec3(-1, 0, 0);
+        }
+        if (input->key(duk::platform::Keys::DOWN_ARROW)) {
+            direction = glm::vec3(1, 0, 0);
+        }
+        if (input->key(duk::platform::Keys::RIGHT_ARROW)) {
+            direction = glm::vec3(0, -1, 0);
+        }
+        if (input->key(duk::platform::Keys::LEFT_ARROW)) {
+            direction = glm::vec3(0, 1, 0);
+        }
+    }
+    return direction;
 }
 
-struct CameraController {
-    float speed;
-    float rotationSpeed;
-};
+static glm::vec3 input_move_direction(const duk::engine::Input* input) {
+    glm::vec3 direction(0);
+    if (input->key(duk::platform::Keys::W)) {
+        direction += glm::vec3(0.0f, 0.0f, -1.0f);
+    }
+    if (input->key(duk::platform::Keys::A)) {
+        direction += glm::vec3(-1.0f, 0.0f, 0.0f);
+    }
+    if (input->key(duk::platform::Keys::S)) {
+        direction += glm::vec3(0.0f, 0.0f, 1.0f);
+    }
+    if (input->key(duk::platform::Keys::D)) {
+        direction += glm::vec3(1.0f, 0.0f, 0.0f);
+    }
+    if (input->key(duk::platform::Keys::Q)) {
+        direction += glm::vec3(0.0f, 1.0f, 0.0f);
+    }
+    if (input->key(duk::platform::Keys::E)) {
+        direction += glm::vec3(0.0f, -1.0f, 0.0f);
+    }
+    return direction;
+}
 
 }// namespace detail
 
 void CameraSystem::enter(engine::Engine& engine) {
-    auto window = engine.window();
-    auto scene = engine.director()->scene();
-    auto renderer = engine.renderer();
-
-    m_listener.listen(window->window_resize_event, [this](uint32_t width, uint32_t height) {
-        detail::update_perspective(m_camera.component<duk::renderer::PerspectiveCamera>(), width, height);
-    });
-
-    m_camera = scene->objects().add_object();
-
-    detail::update_perspective(m_camera.add<duk::renderer::PerspectiveCamera>(), renderer->render_width(), renderer->render_height());
-
-    auto position = m_camera.add<duk::renderer::Position3D>();
-    position->value = glm::vec3(0, 0, 20);
-    m_camera.add<duk::renderer::Rotation3D>();
-    auto settings = m_camera.add<detail::CameraController>();
-    settings->speed = 10.0f;
-    settings->rotationSpeed = 50.0f;
-
-    renderer->use_as_camera(m_camera);
 }
 
 void CameraSystem::update(engine::Engine& engine) {
+    auto& objects = engine.director()->scene()->objects();
+
+    auto object = objects.first_with<CameraController>();
+
+    if (!object) {
+        return;
+    }
+
     auto input = engine.input();
 
     const auto deltaTime = engine.timer()->duration().count();
 
-    auto [position, rotation, controller, perspective] = m_camera.components<duk::renderer::Position3D, duk::renderer::Rotation3D, detail::CameraController, duk::renderer::PerspectiveCamera>();
+    auto controller = object.component<CameraController>();
 
-    glm::vec3 rotationDir = glm::vec3(0);
-    if (input->mouse(duk::platform::MouseButton::LEFT)) {
-        rotationDir = glm::vec3(-input->delta_mouse().y, -input->delta_mouse().x, 0);
-    } else {
-        if (input->key(duk::platform::Keys::UP_ARROW)) {
-            rotationDir = glm::vec3(-1, 0, 0);
-        }
-        if (input->key(duk::platform::Keys::DOWN_ARROW)) {
-            rotationDir = glm::vec3(1, 0, 0);
-        }
-        if (input->key(duk::platform::Keys::RIGHT_ARROW)) {
-            rotationDir = glm::vec3(0, -1, 0);
-        }
-        if (input->key(duk::platform::Keys::LEFT_ARROW)) {
-            rotationDir = glm::vec3(0, 1, 0);
-        }
+    auto rotation = object.component<duk::renderer::Rotation3D>();
+    glm::quat rotationValue(glm::vec3(0));
+    if (rotation) {
+        auto rotationDirection = detail::input_rotation_direction(input);
+        rotation->value = glm::normalize(rotation->value * glm::quat(glm::radians(rotationDirection * controller->rotationSpeed * deltaTime)));
+        rotationValue = rotation->value;
     }
 
-    auto inputOffset = glm::vec3(0.0f, 0.0f, 0.0f);
-
-    rotation->value = glm::normalize(rotation->value * glm::quat(glm::radians(rotationDir * controller->rotationSpeed * deltaTime)));
-
-    if (input->key(duk::platform::Keys::W)) {
-        inputOffset += glm::vec3(0.0f, 0.0f, -1.0f);
+    auto position = controller.object().component<duk::renderer::Position3D>();
+    if (position) {
+        auto moveDirection = detail::input_move_direction(input);
+        moveDirection = rotationValue * moveDirection;
+        position->value += moveDirection * controller->speed * deltaTime;
     }
-
-    if (input->key(duk::platform::Keys::A)) {
-        inputOffset += glm::vec3(-1.0f, 0.0f, 0.0f);
-    }
-
-    if (input->key(duk::platform::Keys::S)) {
-        inputOffset += glm::vec3(0.0f, 0.0f, 1.0f);
-    }
-
-    if (input->key(duk::platform::Keys::D)) {
-        inputOffset += glm::vec3(1.0f, 0.0f, 0.0f);
-    }
-
-    if (input->key(duk::platform::Keys::Q)) {
-        inputOffset += glm::vec3(0.0f, 1.0f, 0.0f);
-    }
-
-    if (input->key(duk::platform::Keys::E)) {
-        inputOffset += glm::vec3(0.0f, -1.0f, 0.0f);
-    }
-
-    inputOffset = rotation->value * inputOffset;
-
-    position->value += inputOffset * controller->speed * deltaTime;
 }
 
 void CameraSystem::exit(engine::Engine& engine) {
 }
+
 }// namespace duk::sample

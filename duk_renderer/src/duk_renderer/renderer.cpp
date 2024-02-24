@@ -24,9 +24,9 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
         rhiCreateInfo.logger = rendererCreateInfo.logger;
         rhiCreateInfo.deviceIndex = 0;
         rhiCreateInfo.applicationVersion = 1;
-        rhiCreateInfo.applicationName = "duk_application";
+        rhiCreateInfo.applicationName = rendererCreateInfo.applicationName;
         rhiCreateInfo.engineVersion = 1;
-        rhiCreateInfo.engineName = "duk_engine";
+        rhiCreateInfo.engineName = "duk::renderer::Renderer::m_rhi";
         rhiCreateInfo.api = rendererCreateInfo.api;
 
         m_rhi = duk::rhi::RHI::create_rhi(rhiCreateInfo);
@@ -38,7 +38,6 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
     m_mainQueue = m_rhi->create_command_queue(mainCommandQueueCreateInfo);
 
     m_scheduler = m_rhi->create_command_scheduler();
-    ;
 
     {
         GlobalDescriptorsCreateInfo globalDescriptorsCreateInfo = {};
@@ -54,7 +53,10 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 Renderer::~Renderer() = default;
 
 void Renderer::render(duk::scene::Scene* scene) {
-    // if no camera is set, return
+    // if rendering to a window, but it's minimized, skip
+    if (m_window && m_window->minimized()) {
+        return;
+    }
 
     m_rhi->prepare_frame();
 
@@ -152,14 +154,8 @@ Renderer::RenderStartEvent& Renderer::render_start_event() {
     return m_renderStart;
 }
 
-void Renderer::use_as_camera(const scene::Object& object) {
-    m_mainCameraObjectId = object.id();
-}
-
 void Renderer::update_global_descriptors(duk::scene::Objects& objects) {
-    if (objects.valid_object(m_mainCameraObjectId)) {
-        m_globalDescriptors->update_camera(objects.object(m_mainCameraObjectId));
-    }
+    m_globalDescriptors->update_cameras(objects, render_width(), render_height());
 
     m_globalDescriptors->update_lights(objects);
 }

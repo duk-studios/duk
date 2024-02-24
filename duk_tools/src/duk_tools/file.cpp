@@ -24,7 +24,7 @@ std::vector<uint8_t> File::load_bytes(const char* filepath) {
     return buffer;
 }
 
-std::vector<char> File::load_text(const char* filepath) {
+std::string File::load_text(const char* filepath) {
     std::ifstream file(filepath, std::ios_base::ate);
 
     if (!file) {
@@ -38,7 +38,7 @@ std::vector<char> File::load_text(const char* filepath) {
     file.seekg(0);
     file.read(buffer.data(), size);
 
-    return buffer;
+    return std::string(buffer.begin(), buffer.end());
 }
 
 }// namespace duk::tools

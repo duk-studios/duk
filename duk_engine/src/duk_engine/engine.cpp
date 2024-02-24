@@ -39,6 +39,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     forwardRendererCreateInfo.rendererCreateInfo.window = m_window.get();
     forwardRendererCreateInfo.rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
     forwardRendererCreateInfo.rendererCreateInfo.api = duk::rhi::API::VULKAN;
+    forwardRendererCreateInfo.rendererCreateInfo.applicationName = m_settings.name.c_str();
 
     m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
 

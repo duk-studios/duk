@@ -5,8 +5,8 @@
 #ifndef DUK_JSON_TYPES_H
 #define DUK_JSON_TYPES_H
 
+#include <duk_json/rapidjson.h>
 #include <glm/glm.hpp>
-#include <rapidjson/document.h>
 #include <sstream>
 
 namespace duk::json {

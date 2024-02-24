@@ -1,175 +1,1 @@
-{
-  "systems": [
-    "duk::sample::CameraSystem"
-  ],
-  "objects": [
-    {
-      "components": [
-        {
-          "type": "Position3D",
-          "value": "5;0;0"
-        },
-        {
-          "type": "Scale3D",
-          "value": "3;3;3"
-        },
-        {
-          "type": "Rotation3D",
-          "value": "0;0;-90"
-        },
-        {
-          "type": "MeshRenderer",
-          "mesh": 10004,
-          "material": 1000009
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "Position3D",
-          "value": "0;5;0"
-        },
-        {
-          "type": "Rotation3D",
-          "value": "0;0;0"
-        },
-        {
-          "type": "Scale3D",
-          "value": "3;3;3"
-        },
-        {
-          "type": "MeshRenderer",
-          "mesh": 10004,
-          "material": 1000007
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "Position3D",
-          "value": "0;0;5"
-        },
-        {
-          "type": "Scale3D",
-          "value": "3;3;3"
-        },
-        {
-          "type": "Rotation3D",
-          "value": "90;0;0"
-        },
-        {
-          "type": "MeshRenderer",
-          "mesh": 10004,
-          "material": 1000005
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "Position3D",
-          "value": "-5;0;0"
-        },
-        {
-          "type": "Scale3D",
-          "value": "3;3;3"
-        },
-        {
-          "type": "Rotation3D",
-          "value": "0;0;90"
-        },
-        {
-          "type": "MeshRenderer",
-          "mesh": 10004,
-          "material": 1000010
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "Position3D",
-          "value": "0;-5;0"
-        },
-        {
-          "type": "Scale3D",
-          "value": "3;3;3"
-        },
-        {
-          "type": "Rotation3D",
-          "value": "0;0;180"
-        },
-        {
-          "type": "MeshRenderer",
-          "mesh": 10004,
-          "material": 1000006
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "Position3D",
-          "value": "0;0;-5"
-        },
-        {
-          "type": "Scale3D",
-          "value": "3;3;3"
-        },
-        {
-          "type": "Rotation3D",
-          "value": "-90;0;0"
-        },
-        {
-          "type": "MeshRenderer",
-          "mesh": 10004,
-          "material": 1000008
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "Position3D",
-          "value": "0;0;-20"
-        },
-        {
-          "type": "Scale3D",
-          "value": "20;20;20"
-        },
-        {
-          "type": "Rotation3D",
-          "value": "0;0;0"
-        },
-        {
-          "type": "MeshRenderer",
-          "mesh": 10001,
-          "material": 1000013
-        }
-      ]
-    },
-    {
-      "components": [
-        {
-          "type": "PointLight",
-          "value": {
-            "color": "1;1;1",
-            "intensity": 2
-          },
-          "radius": 4000
-        },
-        {
-          "type": "MeshRenderer",
-          "mesh": 10003,
-          "material": 1000012
-        },
-        {
-          "type": "Scale3D",
-          "value": "0.3;0.3;0.3"
-        }
-      ]
-    }
-  ]
-}
+{  "systems":[    "duk::sample::CameraSystem"  ],  "objects":[    {      "components":[        {          "type":"duk::renderer::Position3D",          "value":"0;0;30"        },        {          "type":"duk::renderer::Rotation3D",          "value":"0;0;0"        },        {          "type":"duk::renderer::Camera"        },        {          "type":"duk::renderer::PerspectiveCamera",          "fov": 45.0,          "near": 0.1,          "far": 1000.0        },        {          "type":"duk::sample::CameraController",          "speed":10,          "rotationSpeed":50        }      ]    },    {      "components":[        {          "type":"duk::renderer::Position3D",          "value":"5;0;0"        },        {          "type":"duk::renderer::Scale3D",          "value":"3;3;3"        },        {          "type":"duk::renderer::Rotation3D",          "value":"0;0;-90"        },        {          "type":"duk::renderer::MeshRenderer",          "mesh":10004,          "material":1000009        }      ]    },    {      "components":[        {          "type":"duk::renderer::Position3D",          "value":"0;5;0"        },        {          "type":"duk::renderer::Rotation3D",          "value":"0;0;0"        },        {          "type":"duk::renderer::Scale3D",          "value":"3;3;3"        },        {          "type":"duk::renderer::MeshRenderer",          "mesh":10004,          "material":1000007        }      ]    },    {      "components":[        {          "type":"duk::renderer::Position3D",          "value":"0;0;5"        },        {          "type":"duk::renderer::Scale3D",          "value":"3;3;3"        },        {          "type":"duk::renderer::Rotation3D",          "value":"90;0;0"        },        {          "type":"duk::renderer::MeshRenderer",          "mesh":10004,          "material":1000005        }      ]    },    {      "components":[        {          "type":"duk::renderer::Position3D",          "value":"-5;0;0"        },        {          "type":"duk::renderer::Scale3D",          "value":"3;3;3"        },        {          "type":"duk::renderer::Rotation3D",          "value":"0;0;90"        },        {          "type":"duk::renderer::MeshRenderer",          "mesh":10004,          "material":1000010        }      ]    },    {      "components":[        {          "type":"duk::renderer::Position3D",          "value":"0;-5;0"        },        {          "type":"duk::renderer::Scale3D",          "value":"3;3;3"        },        {          "type":"duk::renderer::Rotation3D",          "value":"0;0;180"        },        {          "type":"duk::renderer::MeshRenderer",          "mesh":10004,          "material":1000006        }      ]    },    {      "components":[        {          "type":"duk::renderer::Position3D",          "value":"0;0;-5"        },        {          "type":"duk::renderer::Scale3D",          "value":"3;3;3"        },        {          "type":"duk::renderer::Rotation3D",          "value":"-90;0;0"        },        {          "type":"duk::renderer::MeshRenderer",          "mesh":10004,          "material":1000008        }      ]    },    {      "components":[        {          "type":"duk::renderer::Position3D",          "value":"0;0;-20"        },        {          "type":"duk::renderer::Scale3D",          "value":"20;20;20"        },        {          "type":"duk::renderer::Rotation3D",          "value":"0;0;0"        },        {          "type":"duk::renderer::MeshRenderer",          "mesh":10001,          "material":1000013        }      ]    },    {      "components":[        {          "type":"duk::renderer::PointLight",          "value":{            "color":"1;1;1",            "intensity":2          },          "radius":4000        },        {          "type":"duk::renderer::MeshRenderer",          "mesh":10003,          "material":1000012        },        {          "type":"duk::renderer::Scale3D",          "value":"0.3;0.3;0.3"        }      ]    }  ]}

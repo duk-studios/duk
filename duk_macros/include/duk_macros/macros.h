@@ -7,4 +7,8 @@
 
 #define DUK_NO_DISCARD [[nodiscard]]
 
+// Stringifies a macro
+#define DUK_STRINGIFY(x) DUK_DO_STRINGIFY(x)
+#define DUK_DO_STRINGIFY(x) #x
+
 #endif//DUK_MACROS_MACROS_H
