@@ -27,8 +27,8 @@ target_include_directories(duk_cli
 target_link_libraries(duk_cli
         PRIVATE
         duk_log
+        duk_json
         cxxopts::cxxopts
-        RapidJSON
         )
 
 set_target_properties(duk_cli PROPERTIES CXX_STANDARD 20)

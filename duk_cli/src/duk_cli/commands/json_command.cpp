@@ -4,9 +4,9 @@
 
 #include <duk_cli/commands/json_command.h>
 #include <duk_cli/file_generator.h>
+#include <duk_json/rapidjson.h>
 #include <duk_log/log.h>
 #include <duk_tools/file.h>
-#include <rapidjson/document.h>
 
 #include <filesystem>
 #include <fstream>
@@ -231,9 +231,8 @@ JsonCommand::JsonCommand(const JsonCommandCreateInfo& jsonCommandCreateInfo)
 }
 
 void JsonCommand::execute() {
-    auto buffer = duk::tools::File::load_text(m_inputFilepath.c_str());
-    std::string srcContent(buffer.begin(), buffer.end());
-    Reflector reflector(srcContent);
+    auto content = duk::tools::File::load_text(m_inputFilepath.c_str());
+    Reflector reflector(content);
 
     auto filename = std::filesystem::path(m_inputFilepath).filename().stem().string();
 
