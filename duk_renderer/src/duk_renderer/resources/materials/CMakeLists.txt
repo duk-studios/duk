@@ -192,8 +192,30 @@ add_custom_command(
         COMMENT "Generating global material files"
 )
 
+if (DUK_FORMAT_FILES)
+
+    find_program(CLANG_FORMAT_EXECUTABLE clang-format)
+
+    if (NOT CLANG_FORMAT_EXECUTABLE)
+        message(FATAL_ERROR "clang-format not found. Please install LLVM version 16.0.6")
+    endif()
+
+    set(FILES_TO_FORMAT ${GENERATED_FILES} ${GLOBAL_GENERATED_FILES})
+    set(FORMAT_STAMP "${CMAKE_CURRENT_BINARY_DIR}/stamps/format.stamp")
+
+    add_custom_command(
+            OUTPUT ${FORMAT_STAMP}
+            DEPENDS ${FILES_TO_FORMAT}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            COMMAND ${CLANG_FORMAT_EXECUTABLE} -i ${FILES_TO_FORMAT}
+            COMMAND ${CMAKE_COMMAND} -E touch ${FORMAT_STAMP}
+            COMMENT "Formatting generated files"
+    )
+
+endif ()
+
 add_custom_target(generate_material_files
-        DEPENDS duk_material_generator ${GENERATED_FILES} ${GLOBAL_GENERATED_FILES} ${OUTPUT_STAMP}
+        DEPENDS duk_material_generator ${GENERATED_FILES} ${GLOBAL_GENERATED_FILES} ${OUTPUT_STAMP} ${FORMAT_STAMP}
         COMMENT "Generating material files"
 )
 
