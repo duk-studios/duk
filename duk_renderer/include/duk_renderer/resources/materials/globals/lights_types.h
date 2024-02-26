@@ -1,8 +1,8 @@
 #ifndef DUK_RENDERER_LIGHTS_TYPES_H
 #define DUK_RENDERER_LIGHTS_TYPES_H
 
-#include <duk_renderer/resources/materials/storage_buffer.h>
 #include <duk_renderer/resources/materials/uniform_buffer.h>
+#include <duk_renderer/resources/materials/storage_buffer.h>
 #include <glm/glm.hpp>
 
 namespace duk::renderer::globals {
@@ -37,6 +37,6 @@ struct Lights {
 
 using LightsUBO = UniformBuffer<Lights>;
 
-}// namespace duk::renderer::globals
+} // namespace duk::renderer::globals
 
-#endif// DUK_RENDERER_LIGHTS_TYPES_H
+#endif // DUK_RENDERER_LIGHTS_TYPES_H

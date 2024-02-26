@@ -66,7 +66,9 @@ void CameraSystem::update(engine::Engine& engine) {
     glm::vec3 rotationDir = glm::vec3(0);
     if (input->mouse(duk::platform::MouseButton::LEFT)) {
         rotationDir = glm::vec3(-input->delta_mouse().y, -input->delta_mouse().x, 0);
+        cursor->set_cursor(duk::platform::CursorType::DRAG);
     } else {
+        cursor->set_cursor(duk::platform::CursorType::ARROW);
         if (input->key(duk::platform::Keys::UP_ARROW)) {
             rotationDir = glm::vec3(-1, 0, 0);
         }

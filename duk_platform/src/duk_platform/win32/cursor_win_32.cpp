@@ -6,25 +6,20 @@
 
 namespace duk::platform {
 
+CursorWin32::CursorWin32() {
+    m_cursorTypes[CursorType::ARROW] = LoadCursor(NULL, IDC_ARROW);
+    m_cursorTypes[CursorType::DRAG] = LoadCursor(NULL, IDC_SIZEALL);
+    m_cursorTypes[CursorType::TEXT] = LoadCursor(NULL, IDC_IBEAM);
+    m_cursorTypes[CursorType::BUSY] = LoadCursor(NULL, IDC_WAIT);
+    m_cursorTypes[CursorType::WORKING_BACKGROUND] = LoadCursor(NULL, IDC_APPSTARTING);
+    m_cursorTypes[CursorType::UNAVAILABLE] = LoadCursor(NULL, IDC_NO);
+}
+
 void duk::platform::CursorWin32::show(bool visible) {
     ShowCursor(visible);
 }
 
-void CursorWin32::set_cursor(CursorInfo cursorInfo) {
-    switch (cursorInfo) {
-        case NORMAL: {
-            SetSystemCursor(CopyCursor(0), 32512);
-        }
-            break;
-        case DRAG: {
-            SetSystemCursor(CopyCursor(0), 32646);
-        }
-            break;
-        case TEXT: {
-            SetSystemCursor(CopyCursor(0), 32513);
-        }
-            break;
-    }
+void CursorWin32::set_cursor(CursorType::Type cursorInfo) {
+    SetCursor(m_cursorTypes[cursorInfo]);
 }
-
 }

@@ -9,20 +9,22 @@
 
 namespace duk::platform {
 
-enum CursorInfo {
-    NORMAL,
-    DRAG,
-    TEXT
+struct CursorType {
+    enum Type {
+        ARROW,
+        DRAG,
+        TEXT,
+        BUSY,
+        WORKING_BACKGROUND,
+        UNAVAILABLE,
+    };
 };
 
 class Cursor {
 public:
 
     virtual void show(bool visible) = 0;
-    virtual void set_cursor(CursorInfo cursorInfo) = 0;
-
-private:
-
+    virtual void set_cursor(CursorType::Type cursorInfo) = 0;
 };
 }
 #endif //DUK_CURSOR_H

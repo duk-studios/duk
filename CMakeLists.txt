@@ -5,7 +5,7 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/output)
 set(DUK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(DUK_BUILD_SAMPLE "Enables building of duk_sample" ON)
-option(DUK_FORMAT_FILES "Enables format target" ON)
+option(DUK_FORMAT_FILES "Enables format target" OFF)
 
 add_subdirectory(external)
 
