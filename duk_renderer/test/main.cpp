@@ -87,16 +87,11 @@ int main() {
     auto cameraPosition = camera.add<duk::renderer::Position3D>();
     cameraPosition->value = glm::vec3(0, 0, 0);
     camera.add<duk::renderer::Rotation3D>();
+    camera.add<duk::renderer::Camera>();
     auto cameraPerspective = camera.add<duk::renderer::PerspectiveCamera>();
-    cameraPerspective->aspectRatio = (float)window->width() / (float)window->height();
     cameraPerspective->zFar = 1000.0f;
     cameraPerspective->zNear = 0.1f;
     cameraPerspective->fovDegrees = 60.0f;
-
-    //An event listener is set up to adjust the camera's aspect ratio when the window is resized.
-    listener.listen(window->window_resize_event, [cameraPerspective](uint32_t width, uint32_t height) {
-        cameraPerspective->aspectRatio = (float)width / (float)height;
-    });
 
     ////Adding a light to our scene.
     duk::scene::Object globalLight = objects.add_object();
@@ -130,9 +125,6 @@ int main() {
 
     //Show the window we created.
     window->show();
-
-    //Setting the camera we created to be rendered in our render.
-    renderer->use_as_camera(camera);
 
     //Creating a timer
     duk::tools::Timer timer;

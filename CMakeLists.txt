@@ -7,6 +7,11 @@ set(DUK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 option(DUK_BUILD_SAMPLE "Enables building of duk_sample" ON)
 option(DUK_FORMAT_FILES "Enables format target" OFF)
 
+if (MSVC)
+    # enable parallel build for msvc
+    add_definitions(/MP)
+endif ()
+
 add_subdirectory(external)
 
 add_subdirectory(duk_macros)

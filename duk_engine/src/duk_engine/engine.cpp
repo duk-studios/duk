@@ -3,7 +3,6 @@
 //
 
 #include <duk_engine/engine.h>
-#include <duk_engine/systems/render_system.h>
 #include <duk_import/image/image_importer.h>
 #include <duk_import/importer.h>
 #include <duk_import/material/material_importer.h>
@@ -12,13 +11,14 @@
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/sprite_pool.h>
+#include <duk_scene/scene_pool.h>
 
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
-    : m_settingsPath(engineCreateInfo.settingsPath)
-    , m_run(false) {
-    m_settings = load_settings(m_settingsPath);
+    : m_run(false) {
+    const auto& settingsPath = engineCreateInfo.settingsPath;
+    m_settings = load_settings(settingsPath);
 
     duk::platform::WindowCreateInfo windowCreateInfo = {};
     windowCreateInfo.windowTitle = m_settings.name.c_str();
@@ -39,12 +39,15 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     forwardRendererCreateInfo.rendererCreateInfo.window = m_window.get();
     forwardRendererCreateInfo.rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
     forwardRendererCreateInfo.rendererCreateInfo.api = duk::rhi::API::VULKAN;
+    forwardRendererCreateInfo.rendererCreateInfo.applicationName = m_settings.name.c_str();
 
     m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
 
     duk::import::ImporterCreateInfo importerCreateInfo = {};
     importerCreateInfo.pools = &m_pools;
     m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
+
+    m_importer->load_resource_set(settingsPath);
 
     /* init resources */
     // images
@@ -85,9 +88,23 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     }
 
     // scenes
-    { m_importer->add_resource_importer<duk::import::SceneImporter>(); }
+    {
+        duk::import::SceneImporterCreateInfo sceneImporterCreateInfo = {};
+        sceneImporterCreateInfo.scenePool = m_pools.create_pool<duk::scene::ScenePool>();
 
-    duk::scene::register_system<RenderSystem>(*this);
+        m_importer->add_resource_importer<duk::import::SceneImporter>(sceneImporterCreateInfo);
+    }
+
+    // director
+    {
+        DirectorCreateInfo directorCreateInfo = {};
+        directorCreateInfo.renderer = m_renderer.get();
+        directorCreateInfo.scenePool = m_pools.get<duk::scene::ScenePool>();
+        directorCreateInfo.importer = m_importer.get();
+        directorCreateInfo.firstScene = m_settings.scene;
+
+        m_director = std::make_unique<Director>(directorCreateInfo);
+    }
 
     duk::engine::InputCreateInfo inputCreateInfo = {};
     inputCreateInfo.window = m_window.get();
@@ -95,6 +112,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 }
 
 Engine::~Engine() {
+    m_director.reset();
     m_importer.reset();
     m_pools.clear();
 }
@@ -102,21 +120,10 @@ Engine::~Engine() {
 void Engine::run() {
     m_run = true;
 
-    m_importer->load_resource_set(m_settingsPath);
-
-    m_importer->load_resource(m_settings.scene);
-
-    auto sceneImporter = m_importer->get_importer_as<duk::import::SceneImporter>("scn");
-    m_scene = sceneImporter->find(m_settings.scene);
-
     m_window->show();
 
     // assume 60fps for the first frame
     m_timer.add_duration(std::chrono::milliseconds(16));
-
-    auto& systems = m_scene->systems();
-
-    systems.enter();
 
     while (m_run) {
         m_timer.start();
@@ -125,12 +132,10 @@ void Engine::run() {
 
         m_window->pool_events();
 
-        systems.update();
+        m_director->update();
 
         m_timer.stop();
     }
-
-    systems.exit();
 }
 
 duk::platform::Window* Engine::window() {
@@ -149,8 +154,8 @@ duk::import::Importer* Engine::importer() {
     return m_importer.get();
 }
 
-duk::scene::Scene* Engine::scene() {
-    return m_scene;
+Director* Engine::director() {
+    return m_director.get();
 }
 
 const duk::engine::Input* Engine::input() const {

@@ -24,6 +24,8 @@ private:
     Systems m_systems;
 };
 
+using SceneResource = duk::resource::ResourceT<Scene>;
+
 }// namespace duk::scene
 
 namespace duk::json {

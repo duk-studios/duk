@@ -31,13 +31,13 @@ public:
 
     virtual bool accepts(const std::filesystem::path& path) = 0;
 
-    virtual std::unique_ptr<DataSourceT> load(const std::filesystem::path& path) = 0;
+    virtual DataSourceT load(const std::filesystem::path& path) = 0;
 };
 
 template<typename DataSourceT>
 class ResourceImporterT : public ResourceImporter {
 public:
-    std::unique_ptr<DataSourceT> load(const std::filesystem::path& path);
+    DataSourceT load(const std::filesystem::path& path);
 
     template<typename LoaderT, typename... Args>
     void add_loader(Args&&... args)
@@ -48,7 +48,7 @@ private:
 };
 
 template<typename DataSourceT>
-std::unique_ptr<DataSourceT> ResourceImporterT<DataSourceT>::load(const std::filesystem::path& path) {
+DataSourceT ResourceImporterT<DataSourceT>::load(const std::filesystem::path& path) {
     for (auto& loader: m_loaders) {
         if (loader->accepts(path)) {
             return loader->load(path);

@@ -17,7 +17,7 @@ struct ImageImporterCreateInfo {
     duk::renderer::ImagePool* imagePool;
 };
 
-class ImageImporter : public ResourceImporterT<duk::rhi::ImageDataSource> {
+class ImageImporter : public ResourceImporterT<std::unique_ptr<duk::rhi::ImageDataSource>> {
 public:
     static std::unique_ptr<duk::rhi::ImageDataSource> create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height);
 

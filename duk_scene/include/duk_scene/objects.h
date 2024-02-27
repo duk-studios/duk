@@ -4,6 +4,9 @@
 #ifndef DUK_SCENE_OBJECTS_H
 #define DUK_SCENE_OBJECTS_H
 
+#include <array>
+#include <duk_json/string.h>
+#include <duk_log/log.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 #include <duk_scene/component_pool.h>
@@ -11,10 +14,7 @@
 #include <duk_tools/bit_block.h>
 #include <duk_tools/fixed_vector.h>
 #include <duk_tools/singleton.h>
-
-#include "duk_json/string.h"
-#include "duk_log/log.h"
-#include <array>
+#include <duk_tools/types.h>
 
 namespace duk::scene {
 
@@ -208,14 +208,14 @@ public:
     }
 
     template<typename T>
-    void add(const std::string& typeName) {
+    void add() {
         const auto index = component_index<T>();
         auto& entry = m_componentEntries.at(index);
         if (entry) {
             return;
         }
         entry = std::make_unique<ComponentEntryT<T>>();
-        m_componentNameToIndex.emplace(typeName, index);
+        m_componentNameToIndex.emplace(duk::tools::type_name_of<T>(), index);
     }
 
 private:
@@ -228,6 +228,11 @@ template<typename T>
 uint32_t ComponentRegistry::component_index() {
     static const auto index = s_componentIndexCounter++;
     return index;
+}
+
+template<typename T>
+void register_component() {
+    ComponentRegistry::instance(true)->add<T>();
 }
 
 class Objects {
@@ -295,6 +300,9 @@ public:
 
     template<typename... Ts>
     DUK_NO_DISCARD ObjectView all_with();
+
+    template<typename... Ts>
+    DUK_NO_DISCARD Object first_with();
 
     DUK_NO_DISCARD Object::ComponentView components(const Object::Id& id);
 
@@ -457,6 +465,14 @@ ComponentPoolT<T>* Objects::pool() {
 template<typename... Ts>
 Objects::ObjectView Objects::all_with() {
     return Objects::ObjectView(this, component_mask<Ts...>());
+}
+
+template<typename... Ts>
+Object Objects::first_with() {
+    for (auto object: all_with<Ts...>()) {
+        return object;
+    }
+    return Object();
 }
 
 template<typename T>

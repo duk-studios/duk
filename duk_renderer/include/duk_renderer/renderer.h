@@ -24,6 +24,7 @@ struct RendererCreateInfo {
     duk::platform::Window* window;
     duk::log::Logger* logger;
     duk::rhi::API api;
+    const char* applicationName;
 };
 
 class Renderer {
@@ -51,8 +52,6 @@ public:
 
     DUK_NO_DISCARD RenderStartEvent& render_start_event();
 
-    void use_as_camera(const duk::scene::Object& object);
-
 private:
     void update_global_descriptors(duk::scene::Objects& objects);
 
@@ -63,7 +62,6 @@ protected:
     std::shared_ptr<duk::rhi::CommandScheduler> m_scheduler;
     std::vector<std::shared_ptr<Pass>> m_passes;
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
-    duk::scene::Object::Id m_mainCameraObjectId;
     duk::event::EventVoid m_renderStart;
 };
 

@@ -7,13 +7,12 @@
 
 namespace duk::import {
 
-SceneImporter::SceneImporter() {
+SceneImporter::SceneImporter(const SceneImporterCreateInfo& sceneImporterCreateInfo)
+    : m_scenePool(sceneImporterCreateInfo.scenePool) {
     add_loader<SceneLoaderJson>();
 }
 
-SceneImporter::~SceneImporter() {
-    m_scenes.clear();
-}
+SceneImporter::~SceneImporter() = default;
 
 const std::string& SceneImporter::tag() const {
     static const std::string scnTag("scn");
@@ -21,13 +20,11 @@ const std::string& SceneImporter::tag() const {
 }
 
 void SceneImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
-    m_scenes.clear();
-    auto scene = ResourceImporterT<duk::scene::Scene>::load(path);
-    m_scenes.emplace(id, std::move(scene));
+    m_scenePool->insert(id, ResourceImporterT<std::shared_ptr<duk::scene::Scene>>::load(path));
 }
 
 void SceneImporter::solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) {
-    auto scene = find(id);
+    auto scene = m_scenePool->find(id);
     if (!scene) {
         throw std::logic_error("tried to solve dependencies of scene that was not loaded");
     }
@@ -35,19 +32,11 @@ void SceneImporter::solve_dependencies(const duk::resource::Id& id, duk::resourc
 }
 
 void SceneImporter::solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) {
-    auto scene = find(id);
+    auto scene = m_scenePool->find(id);
     if (!scene) {
         throw std::logic_error("tried to solve references of scene that was not loaded");
     }
     referenceSolver.solve(*scene);
-}
-
-duk::scene::Scene* SceneImporter::find(duk::resource::Id id) {
-    auto it = m_scenes.find(id);
-    if (it == m_scenes.end()) {
-        return nullptr;
-    }
-    return it->second.get();
 }
 
 }// namespace duk::import
