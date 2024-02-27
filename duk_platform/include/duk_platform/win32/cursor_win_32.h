@@ -6,7 +6,7 @@
 #define DUK_CURSOR_WIN_32_H
 
 #include <duk_platform/cursor.h>
-#include <array>
+#include <map>
 
 namespace duk::platform {
 
@@ -18,7 +18,7 @@ public:
 
 private:
 
-    std::array<HCURSOR, CursorType::Type::ARROW> m_cursorTypes;
+    std::map<CursorType::Type, HCURSOR> m_cursorTypes;
 };
 }
 #endif //DUK_CURSOR_WIN_32_H
