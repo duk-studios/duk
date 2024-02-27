@@ -3,24 +3,23 @@
 //
 
 #include <duk_engine/engine.h>
+#include <duk_platform/system.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_sample/camera_system.h>
-#include <duk_engine/engine.h>
-#include <duk_renderer/components/transform.h>
-#include <duk_renderer/components/camera.h>
-#include <duk_platform/system.h>
-
 
 namespace duk::sample {
 
 namespace detail {
 
-static glm::vec3 input_rotation_direction(const duk::engine::Input* input) {
+static glm::vec3 input_rotation_direction(const duk::engine::Input* input, duk::platform::Cursor* cursor) {
     glm::vec3 direction(0);
     if (input->mouse(duk::platform::MouseButton::LEFT)) {
+        cursor->set_cursor(duk::platform::CursorType::DRAG);
         direction = glm::vec3(-input->delta_mouse().y, -input->delta_mouse().x, 0);
     } else {
+        cursor->set_cursor(duk::platform::CursorType::ARROW);
+
         if (input->key(duk::platform::Keys::UP_ARROW)) {
             direction = glm::vec3(-1, 0, 0);
         }
@@ -63,6 +62,7 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 }// namespace detail
 
 void CameraSystem::enter(engine::Engine& engine) {
+    duk::platform::System::create();
 }
 
 void CameraSystem::update(engine::Engine& engine) {
@@ -75,6 +75,7 @@ void CameraSystem::update(engine::Engine& engine) {
     }
 
     auto input = engine.input();
+    auto cursor = duk::platform::System::instance()->cursor();
 
     const auto deltaTime = engine.timer()->duration().count();
 
@@ -83,7 +84,7 @@ void CameraSystem::update(engine::Engine& engine) {
     auto rotation = object.component<duk::renderer::Rotation3D>();
     glm::quat rotationValue(glm::vec3(0));
     if (rotation) {
-        auto rotationDirection = detail::input_rotation_direction(input);
+        auto rotationDirection = detail::input_rotation_direction(input, cursor);
         rotation->value = glm::normalize(rotation->value * glm::quat(glm::radians(rotationDirection * controller->rotationSpeed * deltaTime)));
         rotationValue = rotation->value;
     }

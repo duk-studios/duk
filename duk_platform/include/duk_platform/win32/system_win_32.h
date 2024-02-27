@@ -15,11 +15,11 @@ class SystemWin32 : public System {
 public:
     SystemWin32();
 
-    Cursor *cursor() override;
+    Cursor* cursor() override;
 
 private:
     std::unique_ptr<CursorWin32> m_cursor;
 };
 
-}
-#endif //DUK_SYSTEM_WIN_32_H
+}// namespace duk::platform
+#endif//DUK_SYSTEM_WIN_32_H

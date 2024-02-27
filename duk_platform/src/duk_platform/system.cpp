@@ -20,4 +20,4 @@ void System::create() {
 System* System::instance() {
     return s_instance;
 }
-}
+}// namespace duk::platform

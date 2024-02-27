@@ -17,8 +17,7 @@ public:
     void set_cursor(CursorType::Type cursorInfo) override;
 
 private:
-
     std::map<CursorType::Type, HCURSOR> m_cursorTypes;
 };
-}
-#endif //DUK_CURSOR_WIN_32_H
+}// namespace duk::platform
+#endif//DUK_CURSOR_WIN_32_H

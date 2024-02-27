@@ -4,7 +4,6 @@
 
 #include <duk_platform/win32/system_win_32.h>
 
-
 namespace duk::platform {
 
 SystemWin32::SystemWin32() {
@@ -14,4 +13,4 @@ SystemWin32::SystemWin32() {
 Cursor* SystemWin32::cursor() {
     return m_cursor.get();
 }
-}
+}// namespace duk::platform

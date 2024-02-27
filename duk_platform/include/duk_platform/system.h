@@ -20,8 +20,6 @@ public:
 private:
     static System* s_instance;
 };
-}
+}// namespace duk::platform
 
-
-
-#endif //DUK_SYSTEM_H
+#endif//DUK_SYSTEM_H
