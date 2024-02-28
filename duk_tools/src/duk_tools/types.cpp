@@ -31,7 +31,7 @@ std::string demangle(const char* _value) {
 
 std::string type_name_of(const type_info& _info) {
     std::string name = _info.name();
-    return name.substr(6);// Remove class prefix
+    return name.substr(name.find_first_of(' ') + 1);
 }
 
 #endif

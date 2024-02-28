@@ -5,12 +5,19 @@ set(DUK_PLATFORM_HEADERS
         include/duk_platform/key_codes.h
         include/duk_platform/window_error.h
         include/duk_platform/win32/window_win_32.h
+        include/duk_platform/cursor.h
+        include/duk_platform/win32/cursor_win_32.h
+        include/duk_platform/system.h
+        include/duk_platform/win32/system_win_32.h
         )
 
 set(DUK_PLATFORM_SOURCES
         src/duk_platform/window.cpp
         src/duk_platform/window_error.cpp
         src/duk_platform/win32/window_win_32.cpp
+        src/duk_platform/win32/cursor_win_32.cpp
+        src/duk_platform/win32/system_win_32.cpp
+        src/duk_platform/system.cpp
 )
 
 add_library(duk_platform STATIC ${DUK_PLATFORM_SOURCES} ${DUK_PLATFORM_HEADERS})

@@ -378,6 +378,9 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             key_event(detail::convert_key(keyCode), mods, action);
             return 0;
         }
+        case WM_SETCURSOR: {
+            return true;
+        }
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
