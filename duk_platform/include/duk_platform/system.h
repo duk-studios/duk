@@ -13,11 +13,11 @@ class System {
 public:
     static void create();
 
+    virtual ~System() = default;
+
     static System* instance();
 
     virtual Cursor* cursor() = 0;
-
-    virtual ~System() = default;
 
 private:
     static System* s_instance;

@@ -22,9 +22,9 @@ struct CursorType {
 
 class Cursor {
 public:
-    virtual void show(bool visible) = 0;
-    virtual void set_cursor(CursorType::Type cursorInfo) = 0;
     virtual ~Cursor() = default;
+    virtual void show(bool visible) = 0;
+    virtual void set_cursor(CursorType::Type cursorType) = 0;
 };
 }// namespace duk::platform
 #endif//DUK_PLATFORM_CURSOR_H

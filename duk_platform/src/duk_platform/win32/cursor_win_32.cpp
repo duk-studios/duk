@@ -13,16 +13,18 @@ CursorWin32::CursorWin32() {
     m_cursorTypes[CursorType::BUSY] = LoadCursor(NULL, IDC_WAIT);
     m_cursorTypes[CursorType::WORKING_BACKGROUND] = LoadCursor(NULL, IDC_APPSTARTING);
     m_cursorTypes[CursorType::UNAVAILABLE] = LoadCursor(NULL, IDC_NO);
+
+    SetCursor(m_cursorTypes[CursorType::ARROW]);
 }
 
 void duk::platform::CursorWin32::show(bool visible) {
     ShowCursor(visible);
 }
 
-void CursorWin32::set_cursor(CursorType::Type cursorInfo) {
-    if (m_currentCursor != cursorInfo) {
-        SetCursor(m_cursorTypes[cursorInfo]);
-        m_currentCursor = cursorInfo;
+void CursorWin32::set_cursor(CursorType::Type cursorType) {
+    if (m_currentCursorType != cursorType) {
+        SetCursor(m_cursorTypes[cursorType]);
+        m_currentCursorType = cursorType;
     }
 }
 }// namespace duk::platform
