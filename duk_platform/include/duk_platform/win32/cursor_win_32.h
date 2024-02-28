@@ -2,9 +2,10 @@
 // Created by sidao on 22/02/2024.
 //
 
-#ifndef DUK_CURSOR_WIN_32_H
-#define DUK_CURSOR_WIN_32_H
+#ifndef DUK_PLATFORM_CURSOR_WIN_32_H
+#define DUK_PLATFORM_CURSOR_WIN_32_H
 
+#include <duk_event/event.h>
 #include <duk_platform/cursor.h>
 #include <map>
 
@@ -18,6 +19,7 @@ public:
 
 private:
     std::map<CursorType::Type, HCURSOR> m_cursorTypes;
+    CursorType::Type m_currentCursor = CursorType::ARROW;
 };
 }// namespace duk::platform
-#endif//DUK_CURSOR_WIN_32_H
+#endif//DUK_PLATFORM_CURSOR_WIN_32_H

@@ -1,5 +1,4 @@
 # Try to find the glslc executable from the Vulkan SDK
-#find_program(GLSLC_EXECUTABLE glslc HINTS PATHS "${DUK_GLSLC_PATH}")
 set(GLSLC_EXECUTABLE "${DUK_GLSLC_PATH}")
 
 if (NOT GLSLC_EXECUTABLE)

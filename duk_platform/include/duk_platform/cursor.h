@@ -2,8 +2,8 @@
 // Created by sidao on 22/02/2024.
 //
 
-#ifndef DUK_CURSOR_H
-#define DUK_CURSOR_H
+#ifndef DUK_PLATFORM_CURSOR_H
+#define DUK_PLATFORM_CURSOR_H
 
 #include <windows.h>
 
@@ -24,6 +24,7 @@ class Cursor {
 public:
     virtual void show(bool visible) = 0;
     virtual void set_cursor(CursorType::Type cursorInfo) = 0;
+    virtual ~Cursor() = default;
 };
 }// namespace duk::platform
-#endif//DUK_CURSOR_H
+#endif//DUK_PLATFORM_CURSOR_H

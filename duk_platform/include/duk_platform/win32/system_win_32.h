@@ -2,8 +2,8 @@
 // Created by sidao on 22/02/2024.
 //
 
-#ifndef DUK_SYSTEM_WIN_32_H
-#define DUK_SYSTEM_WIN_32_H
+#ifndef DUK_PLATFORM_SYSTEM_WIN_32_H
+#define DUK_PLATFORM_SYSTEM_WIN_32_H
 
 #include <duk_platform/system.h>
 #include <duk_platform/win32/cursor_win_32.h>
@@ -22,4 +22,4 @@ private:
 };
 
 }// namespace duk::platform
-#endif//DUK_SYSTEM_WIN_32_H
+#endif//DUK_PLATFORM_SYSTEM_WIN_32_H

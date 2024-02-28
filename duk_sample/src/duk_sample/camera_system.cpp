@@ -19,7 +19,6 @@ static glm::vec3 input_rotation_direction(const duk::engine::Input* input, duk::
         direction = glm::vec3(-input->delta_mouse().y, -input->delta_mouse().x, 0);
     } else {
         cursor->set_cursor(duk::platform::CursorType::ARROW);
-
         if (input->key(duk::platform::Keys::UP_ARROW)) {
             direction = glm::vec3(-1, 0, 0);
         }
@@ -62,7 +61,7 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 }// namespace detail
 
 void CameraSystem::enter(engine::Engine& engine) {
-    duk::platform::System::create();
+
 }
 
 void CameraSystem::update(engine::Engine& engine) {
@@ -75,9 +74,9 @@ void CameraSystem::update(engine::Engine& engine) {
     }
 
     auto input = engine.input();
-    auto cursor = duk::platform::System::instance()->cursor();
 
     const auto deltaTime = engine.timer()->duration().count();
+    auto cursor = duk::platform::System::instance()->cursor();
 
     auto controller = object.component<CameraController>();
 

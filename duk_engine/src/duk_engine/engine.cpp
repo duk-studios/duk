@@ -12,11 +12,15 @@
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/sprite_pool.h>
 #include <duk_scene/scene_pool.h>
+#include <duk_platform/system.h>
 
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     : m_run(false) {
+
+    duk::platform::System::create();
+
     const auto& settingsPath = engineCreateInfo.settingsPath;
     m_settings = load_settings(settingsPath);
 

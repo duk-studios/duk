@@ -20,6 +20,9 @@ void duk::platform::CursorWin32::show(bool visible) {
 }
 
 void CursorWin32::set_cursor(CursorType::Type cursorInfo) {
-    SetCursor(m_cursorTypes[cursorInfo]);
+    if (m_currentCursor != cursorInfo) {
+        SetCursor(m_cursorTypes[cursorInfo]);
+        m_currentCursor = cursorInfo;
+    }
 }
 }// namespace duk::platform
