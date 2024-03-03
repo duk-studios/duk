@@ -32,7 +32,7 @@ public:
 
     glm::vec2 delta_mouse() const;
     glm::vec2 mouse_position() const;
-    int32_t mouse_wheel() const;
+    int16_t mouse_wheel() const;
 
 private:
     duk::event::Listener m_listener;
@@ -43,7 +43,7 @@ private:
     glm::vec2 m_mousePos = glm::vec2(0, 0);
     glm::vec2 m_lastMousePos = glm::vec2(0, 0);
     glm::vec2 m_deltaMousePos = glm::vec2(0, 0);
-    int32_t m_mouseWheel = 0;
+    int16_t m_mouseWheel = 0;
 };
 
 }// namespace duk::engine

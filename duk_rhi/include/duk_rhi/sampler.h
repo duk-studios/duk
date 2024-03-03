@@ -5,8 +5,8 @@
 #define DUK_RHI_IMAGE_SAMPLER_H
 
 #include <duk_hash/hash.h>
-#include <duk_json/types.h>
 #include <duk_macros/macros.h>
+#include <duk_serial/json_serializer.h>
 
 namespace duk::rhi {
 
@@ -50,7 +50,7 @@ struct hash<duk::rhi::Sampler> {
 
 }// namespace std
 
-namespace duk::json {
+namespace duk::serial {
 
 namespace detail {
 
@@ -86,24 +86,64 @@ static duk::rhi::Sampler::Filter parse_filter(const char* str) {
     throw std::invalid_argument("unknown filter name");
 }
 
+static std::string to_string(const duk::rhi::Sampler::WrapMode& wrapMode) {
+    switch (wrapMode) {
+        case rhi::Sampler::WrapMode::REPEAT:
+            return "repeat";
+        case rhi::Sampler::WrapMode::MIRRORED_REPEAT:
+            return "mirror-repeat";
+        case rhi::Sampler::WrapMode::CLAMP_TO_EDGE:
+            return "clamp-edge";
+        case rhi::Sampler::WrapMode::CLAMP_TO_BORDER:
+            return "clamp-border";
+        case rhi::Sampler::WrapMode::MIRROR_CLAMP_TO_EDGE:
+            return "mirror-clamp-edge";
+    }
+    throw std::invalid_argument("unknown duk::rhi::Sampler::WrapMode");
+}
+
+static std::string to_string(const duk::rhi::Sampler::Filter& filter) {
+    switch (filter) {
+        case rhi::Sampler::Filter::NEAREST:
+            return "nearest";
+        case rhi::Sampler::Filter::LINEAR:
+            return "linear";
+        case rhi::Sampler::Filter::CUBIC:
+            return "cubic";
+    }
+    throw std::invalid_argument("unknown duk::rhi::Sampler::Filter");
+}
+
 }// namespace detail
 
 template<>
-inline void from_json<duk::rhi::Sampler::WrapMode>(const rapidjson::Value& jsonObject, duk::rhi::Sampler::WrapMode& object) {
-    object = detail::parse_wrap_mode(from_json<const char*>(jsonObject));
+inline void from_json<duk::rhi::Sampler::WrapMode>(const rapidjson::Value& jsonObject, duk::rhi::Sampler::WrapMode& wrapMode) {
+    wrapMode = detail::parse_wrap_mode(jsonObject.GetString());
+}
+
+template<>
+inline void to_json<duk::rhi::Sampler::WrapMode>(const duk::rhi::Sampler::WrapMode& wrapMode, rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator) {
+    auto wrapModeStr = detail::to_string(wrapMode);
+    json.SetString(wrapModeStr.c_str(), wrapModeStr.size(), allocator);
 }
 
 template<>
 inline void from_json<duk::rhi::Sampler::Filter>(const rapidjson::Value& jsonObject, duk::rhi::Sampler::Filter& object) {
-    object = detail::parse_filter(from_json<const char*>(jsonObject));
+    object = detail::parse_filter(jsonObject.GetString());
 }
 
 template<>
-inline void from_json<duk::rhi::Sampler>(const rapidjson::Value& jsonObject, duk::rhi::Sampler& object) {
-    object.filter = from_json_member<duk::rhi::Sampler::Filter>(jsonObject, "filter", duk::rhi::Sampler::Filter::LINEAR);
-    object.wrapMode = from_json_member<duk::rhi::Sampler::WrapMode>(jsonObject, "wrap", duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE);
+inline void to_json<duk::rhi::Sampler::Filter>(const duk::rhi::Sampler::Filter& filter, rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator) {
+    auto filterStr = detail::to_string(filter);
+    json.SetString(filterStr.c_str(), filterStr.size(), allocator);
 }
 
-}// namespace duk::json
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::rhi::Sampler& object) {
+    visitor->visit_member(object.filter, MemberDescription("filter"));
+    visitor->visit_member(object.wrapMode, MemberDescription("wrap"));
+}
+
+}// namespace duk::serial
 
 #endif// DUK_RHI_IMAGE_SAMPLER_H

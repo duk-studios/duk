@@ -79,14 +79,14 @@ private:
 
 }// namespace duk::renderer
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::renderer::ColorMaterialDataSource>(const rapidjson::Value& jsonObject, duk::renderer::ColorMaterialDataSource& colorMaterialDataSource) {
-    colorMaterialDataSource.color = from_json_member<glm::vec4>(jsonObject, "color", glm::vec4(1));
-    colorMaterialDataSource.colorTexture = from_json_member<duk::renderer::Texture>(jsonObject, "texture");
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::ColorMaterialDataSource& materialDataSource) {
+    visitor->visit_member(materialDataSource.color, MemberDescription("color"));
+    visitor->visit_member_object(materialDataSource.colorTexture, MemberDescription("colorTexture"));
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 #endif// DUK_RENDERER_COLOR_MATERIAL_H

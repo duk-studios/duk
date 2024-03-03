@@ -30,14 +30,14 @@ protected:
 
 }// namespace duk::sample
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::sample::CameraController>(const rapidjson::Value& jsonObject, duk::sample::CameraController& cameraController) {
-    from_json_member(jsonObject, "speed", cameraController.speed);
-    from_json_member(jsonObject, "rotationSpeed", cameraController.rotationSpeed);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::sample::CameraController& cameraController) {
+    visitor->visit_member(cameraController.speed, MemberDescription("speed"));
+    visitor->visit_member(cameraController.rotationSpeed, MemberDescription("rotationSpeed"));
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 #endif//DUK_SAMPLE_CAMERA_SYSTEM_H

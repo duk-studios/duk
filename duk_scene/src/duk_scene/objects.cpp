@@ -7,6 +7,15 @@ namespace duk::scene {
 
 uint32_t ComponentRegistry::s_componentIndexCounter = 0;
 
+const std::string& ComponentRegistry::name_of(uint32_t index) const {
+    DUK_ASSERT(m_componentEntries[index] != nullptr);
+    return m_componentEntries[index]->name();
+}
+
+uint32_t ComponentRegistry::index_of(const std::string& componentTypeName) const {
+    return m_componentNameToIndex.at(componentTypeName);
+}
+
 Object::Id::Id()
     : Id(MAX_OBJECTS, 0) {
 }
@@ -61,51 +70,8 @@ void Object::destroy() const {
     m_objects->destroy_object(m_id);
 }
 
-Object::ComponentView Object::components() {
-    return m_objects->components(m_id);
-}
-
-Object::ComponentIterator::ComponentIterator(const ComponentMask& mask, uint32_t index)
-    : m_mask(mask)
-    , m_i(index) {
-    next();
-}
-
-bool Object::ComponentIterator::operator==(const Object::ComponentIterator& rhs) {
-    return (&m_mask) == (&rhs.m_mask) && m_i == rhs.m_i;
-}
-
-bool Object::ComponentIterator::operator!=(const Object::ComponentIterator& rhs) {
-    return !(*this == rhs);
-}
-
-Object::ComponentIterator Object::ComponentIterator::operator++() {
-    ++m_i;
-    next();
-    return *this;
-}
-
-uint32_t Object::ComponentIterator::operator*() {
-    return m_i;
-}
-
-void Object::ComponentIterator::next() {
-    if (m_i >= MAX_COMPONENTS) {
-        return;
-    }
-    m_i += m_mask.countr_zero(m_i);
-}
-
-Object::ComponentView::ComponentView(const ComponentMask& mask)
-    : m_mask(mask) {
-}
-
-Object::ComponentIterator Object::ComponentView::begin() {
-    return Object::ComponentIterator(m_mask, 0);
-}
-
-Object::ComponentIterator Object::ComponentView::end() {
-    return Object::ComponentIterator(m_mask, MAX_COMPONENTS);
+const ComponentMask& Object::component_mask() {
+    return m_objects->component_mask(m_id);
 }
 
 Objects::~Objects() {
@@ -160,9 +126,9 @@ void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
     m_componentMasks[index].reset(componentIndex);
 }
 
-Object::ComponentView Objects::components(const Object::Id& id) {
+const ComponentMask& Objects::component_mask(const Object::Id& id) const {
     assert(valid_object(id));
-    return Object::ComponentView(m_componentMasks.at(id.index()));
+    return m_componentMasks.at(id.index());
 }
 
 Objects::ObjectView::Iterator::Iterator(uint32_t i, Objects* scene, ComponentMask componentMask)

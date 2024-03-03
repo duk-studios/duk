@@ -91,16 +91,16 @@ private:
 
 }// namespace duk::renderer
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::renderer::PhongMaterialDataSource>(const rapidjson::Value& jsonObject, duk::renderer::PhongMaterialDataSource& phongMaterialDataSource) {
-    phongMaterialDataSource.albedo = from_json_member<glm::vec4>(jsonObject, "albedo", glm::vec4(1));
-    phongMaterialDataSource.albedoTexture = from_json_member<duk::renderer::Texture>(jsonObject, "albedo-texture");
-    phongMaterialDataSource.specular = from_json_member<float>(jsonObject, "specular", 1.0f);
-    phongMaterialDataSource.specularTexture = from_json_member<duk::renderer::Texture>(jsonObject, "specular-texture");
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::PhongMaterialDataSource& materialDataSource) {
+    visitor->visit_member(materialDataSource.albedo, MemberDescription("albedo"));
+    visitor->visit_member_object(materialDataSource.albedoTexture, MemberDescription("albedo-texture"));
+    visitor->visit_member(materialDataSource.specular, MemberDescription("specular"));
+    visitor->visit_member_object(materialDataSource.specularTexture, MemberDescription("specular-texture"));
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 #endif// DUK_RENDERER_PHONG_MATERIAL_H

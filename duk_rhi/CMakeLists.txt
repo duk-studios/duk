@@ -114,7 +114,7 @@ target_link_libraries(duk_rhi
         duk_platform
         duk_log
         duk_task
-        duk_json
+        duk_serial
 
         # external
         glm::glm
