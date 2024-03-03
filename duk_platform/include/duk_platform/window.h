@@ -28,7 +28,7 @@ public:
     using DestroyEvent = duk::event::EventVoid;
     using ResizeEvent = duk::event::EventT<uint32_t, uint32_t>;
     using MouseMovement = duk::event::EventT<uint32_t, uint32_t>;
-    using MouseWheelMovementEvent = duk::event::EventT<uint32_t, uint32_t>;
+    using MouseWheelMovementEvent = duk::event::EventT<KeyModifiers::Mask, int16_t>;
     using MouseButtonEvent = duk::event::EventT<MouseButton, KeyAction>;
     using KeyEvent = duk::event::EventT<Keys, KeyModifiers::Mask, KeyAction>;
 
