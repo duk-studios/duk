@@ -20,15 +20,15 @@ Settings load_settings(const std::string& path);
 
 }// namespace duk::engine
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::engine::Settings>(const rapidjson::Value& jsonObject, duk::engine::Settings& settings) {
-    from_json_member(jsonObject, "name", settings.name);
-    from_json_member(jsonObject, "scene", settings.scene);
-    from_json_member(jsonObject, "resolution", settings.resolution);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::engine::Settings& settings) {
+    visitor->visit_member(settings.name, MemberDescription("name"));
+    visitor->visit_member(settings.scene, MemberDescription("scene"));
+    visitor->visit_member(settings.resolution, MemberDescription("resolution"));
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 #endif// DUK_ENGINE_SETTINGS_H

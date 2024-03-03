@@ -16,7 +16,7 @@ namespace duk::import {
 
 struct ResourceDescription {
     std::string tag;
-    std::string path;
+    std::string file;
     duk::resource::Id id;
     std::set<std::string> aliases;
 };
@@ -40,5 +40,17 @@ public:
 };
 
 }// namespace duk::import
+
+namespace duk::serial {
+
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::import::ResourceDescription& resourceDescription) {
+    visitor->visit_member(resourceDescription.tag, "tag");
+    visitor->visit_member(resourceDescription.id, "id");
+    visitor->visit_member(resourceDescription.file, "file");
+    visitor->visit_member_array(resourceDescription.aliases, "aliases");
+}
+
+}// namespace duk::serial
 
 #endif//DUK_IMPORT_RESOURCE_SET_IMPORTER_H

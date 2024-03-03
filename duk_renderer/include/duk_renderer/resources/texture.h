@@ -54,14 +54,14 @@ struct hash<duk::renderer::Texture> {
 
 }// namespace std
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::renderer::Texture>(const rapidjson::Value& jsonObject, duk::renderer::Texture& object) {
-    object.image() = from_json_member<duk::resource::Id>(jsonObject, "image");
-    object.sampler() = from_json_member<duk::rhi::Sampler>(jsonObject, "sampler", duk::renderer::kDefaultTextureSampler);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::Texture& texture) {
+    visitor->template visit_member<duk::resource::Resource>(texture.image(), MemberDescription("image"));
+    visitor->visit_member_object(texture.sampler(), MemberDescription("sampler"));
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 #endif// DUK_RENDERER_TEXTURE_H

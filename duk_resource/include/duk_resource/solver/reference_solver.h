@@ -35,7 +35,7 @@ void ReferenceSolver::solve(ResourceT<T>& resource) {
     if (!pool) {
         throw std::logic_error("could not solve resource: pool not found");
     }
-    resource = pool->find(resource.id()).template as<T>();
+    resource = pool->find(resource.id());
 }
 
 template<typename T>

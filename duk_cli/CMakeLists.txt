@@ -27,7 +27,7 @@ target_include_directories(duk_cli
 target_link_libraries(duk_cli
         PRIVATE
         duk_log
-        duk_json
+        duk_serial
         cxxopts::cxxopts
         )
 

@@ -16,15 +16,15 @@ struct MeshRenderer {
 
 }// namespace duk::renderer
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::renderer::MeshRenderer>(const rapidjson::Value& jsonObject, duk::renderer::MeshRenderer& object) {
-    object.mesh = from_json_member<duk::resource::Id>(jsonObject, "mesh");
-    object.material = from_json_member<duk::resource::Id>(jsonObject, "material");
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::MeshRenderer& meshRenderer) {
+    visitor->template visit_member<duk::resource::Resource>(meshRenderer.mesh, MemberDescription("mesh"));
+    visitor->template visit_member<duk::resource::Resource>(meshRenderer.material, MemberDescription("material"));
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 namespace duk::resource {
 

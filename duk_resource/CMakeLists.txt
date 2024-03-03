@@ -19,7 +19,7 @@ add_library(duk_resource STATIC ${DUK_RESOURCE_HEADERS} ${DUK_RESOURCE_SOURCES})
 target_link_libraries(duk_resource
         PUBLIC
         duk_macros
-        duk_json
+        duk_serial
         )
 
 target_include_directories(duk_resource

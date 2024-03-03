@@ -5,12 +5,12 @@
 #define DUK_SCENE_OBJECTS_H
 
 #include <array>
-#include <duk_json/string.h>
 #include <duk_log/log.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 #include <duk_scene/component_pool.h>
 #include <duk_scene/limits.h>
+#include <duk_serial/json_serializer.h>
 #include <duk_tools/bit_block.h>
 #include <duk_tools/fixed_vector.h>
 #include <duk_tools/singleton.h>
@@ -46,38 +46,6 @@ public:
         uint32_t m_version;
     };
 
-    class ComponentIterator {
-    public:
-        ComponentIterator(const ComponentMask& mask, uint32_t index);
-
-        bool operator==(const ComponentIterator& rhs);
-
-        bool operator!=(const ComponentIterator& rhs);
-
-        ComponentIterator operator++();
-
-        uint32_t operator*();
-
-    private:
-        void next();
-
-    private:
-        const ComponentMask& m_mask;
-        uint32_t m_i;
-    };
-
-    class ComponentView {
-    public:
-        ComponentView(const ComponentMask& mask);
-
-        ComponentIterator begin();
-
-        ComponentIterator end();
-
-    private:
-        const ComponentMask& m_mask;
-    };
-
 public:
     Object();
 
@@ -93,6 +61,8 @@ public:
 
     void destroy() const;
 
+    const ComponentMask& component_mask();
+
     template<typename T, typename... Args>
     Component<T> add(Args&&... args);
 
@@ -107,8 +77,6 @@ public:
 
     template<typename... Ts>
     std::tuple<Component<Ts>...> components();
-
-    ComponentView components();
 
 private:
     Id m_id;
@@ -158,7 +126,11 @@ private:
 
         virtual void solve(duk::resource::DependencySolver* solver, Object& object) = 0;
 
-        virtual void build(Object& object, const rapidjson::Value& jsonObject) = 0;
+        virtual void visit(duk::serial::JsonReader* serializer, Object& object) = 0;
+
+        virtual void visit(duk::serial::JsonWriter* serializer, Object& object) = 0;
+
+        virtual const std::string& name() const = 0;
     };
 
     template<typename T>
@@ -174,8 +146,16 @@ private:
             solver->solve(component);
         }
 
-        void build(Object& object, const rapidjson::Value& jsonObject) override {
-            object.add<T>(json::from_json<T>(jsonObject));
+        void visit(duk::serial::JsonReader* reader, Object& object) override {
+            visit_object(reader, *object.add<T>());
+        }
+
+        void visit(duk::serial::JsonWriter* writer, Object& object) override {
+            visit_object(writer, *object.component<T>());
+        }
+
+        const std::string& name() const override {
+            return duk::tools::type_name_of<T>();
         }
     };
 
@@ -190,21 +170,22 @@ public:
         m_componentEntries.at(componentId)->solve(solver, object);
     }
 
-    void build_from_json(Object& object, const rapidjson::Value& jsonObject) {
-        const auto typeName = json::from_json_member<const char*>(jsonObject, "type");
-        if (!typeName) {
-            duk::log::warn("Missing \"type\" field from Component json object: {}", duk::json::to_string(jsonObject));
-            return;
-        }
-        const auto it = m_componentNameToIndex.find(typeName);
+    template<typename JsonVisitor>
+    void visit(JsonVisitor* visitor, Object& object, uint32_t componentId) {
+        auto& entry = m_componentEntries.at(componentId);
+        assert(entry);
+        m_componentEntries.at(componentId)->visit(visitor, object);
+    }
+
+    template<typename JsonVisitor>
+    void visit(JsonVisitor* visitor, Object& object, const std::string& componentName) {
+        const auto it = m_componentNameToIndex.find(componentName);
         if (it == m_componentNameToIndex.end()) {
-            duk::log::warn("Unregistered Component type: \"{}\"", typeName);
+            duk::log::warn("Unregistered Component type: \"{}\"", componentName);
             return;
         }
         const auto index = it->second;
-        auto& entry = m_componentEntries.at(index);
-        assert(entry);
-        entry->build(object, jsonObject);
+        visit(visitor, object, index);
     }
 
     template<typename T>
@@ -217,6 +198,10 @@ public:
         entry = std::make_unique<ComponentEntryT<T>>();
         m_componentNameToIndex.emplace(duk::tools::type_name_of<T>(), index);
     }
+
+    const std::string& name_of(uint32_t index) const;
+
+    uint32_t index_of(const std::string& componentTypeName) const;
 
 private:
     static uint32_t s_componentIndexCounter;
@@ -304,7 +289,7 @@ public:
     template<typename... Ts>
     DUK_NO_DISCARD Object first_with();
 
-    DUK_NO_DISCARD Object::ComponentView components(const Object::Id& id);
+    DUK_NO_DISCARD const ComponentMask& component_mask(const Object::Id& id) const;
 
     template<typename T, typename... Args>
     void add_component(const Object::Id& id, Args&&... args);
@@ -517,24 +502,92 @@ std::tuple<Component<Ts>...> Object::components() {
 
 }// namespace duk::scene
 
-namespace duk::json {
+namespace duk::serial {
+
+// Object serialization
+// As usual with arrays, we have to split our serialization into read and write.
+// Our components also have to be wrapped into a SerializedComponent, otherwise
+// we would not be able to serialize different types into a single array.
+// Maybe one day we can have a better solution for arrays like this,
+// but for now this is more than good enough
+struct SerializedComponent {
+    duk::scene::Object& object;
+    std::string type;
+};
+
+class SerializedComponents {
+public:
+    using iterator = std::vector<SerializedComponent>::iterator;
+
+    SerializedComponents(duk::scene::Object& object)
+        : m_object(object) {
+        auto registry = duk::scene::ComponentRegistry::instance();
+        const auto& componentMask = object.component_mask();
+        for (auto componentIndex: componentMask.bits<true>()) {
+            m_components.emplace_back(m_object, registry->name_of(componentIndex));
+        }
+    }
+
+    SerializedComponent& add() {
+        return m_components.emplace_back(m_object);
+    }
+
+    iterator begin() {
+        return m_components.begin();
+    }
+
+    iterator end() {
+        return m_components.end();
+    }
+
+private:
+    duk::scene::Object& m_object;
+    std::vector<SerializedComponent> m_components;
+};
+
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* serializer, SerializedComponent& component) {
+    serializer->visit_member(component.type, MemberDescription("type"));
+    duk::scene::ComponentRegistry::instance()->visit(serializer, component.object, component.type);
+}
 
 template<>
-inline void from_json<duk::scene::Objects>(const rapidjson::Value& jsonObject, duk::scene::Objects& objects) {
-    auto objectJsons = jsonObject.GetArray();
-
-    for (auto& objectJson: objectJsons) {
-        auto object = objects.add_object();
-
-        auto jsonComponents = objectJson["components"].GetArray();
-
-        for (auto& jsonComponent: jsonComponents) {
-            duk::scene::ComponentRegistry::instance()->build_from_json(object, jsonComponent);
-        }
+inline void read_array<SerializedComponents>(JsonReader* reader, SerializedComponents& components, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        reader->visit_member_object(components.add(), i);
     }
 }
 
-}// namespace duk::json
+template<>
+inline void write_array(JsonWriter* writer, SerializedComponents& components) {
+    for (auto& element: components) {
+        writer->visit_member_object(element, MemberDescription(nullptr));
+    }
+}
+
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::scene::Object& object) {
+    SerializedComponents serializedComponents(object);
+    visitor->visit_member_array(serializedComponents, MemberDescription("components"));
+}
+
+// Objects
+template<>
+inline void read_array<duk::scene::Objects>(JsonReader* reader, duk::scene::Objects& objects, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        auto object = objects.add_object();
+        reader->visit_member_object(object, MemberDescription(i));
+    }
+}
+
+template<>
+inline void write_array(JsonWriter* writer, duk::scene::Objects& objects) {
+    for (auto object: objects.all()) {
+        writer->visit_member_object(object, MemberDescription(nullptr));
+    }
+}
+
+}// namespace duk::serial
 
 namespace duk::resource {
 
@@ -547,7 +600,9 @@ template<typename Solver>
 void solve_resources(Solver* solver, duk::scene::Object& object) {
     auto componentRegistry = duk::scene::ComponentRegistry::instance(true);
 
-    for (auto componentId: object.components()) {
+    const auto& componentMask = object.component_mask();
+
+    for (auto componentId: componentMask.bits<true>()) {
         componentRegistry->solve(solver, object, componentId);
     }
 }

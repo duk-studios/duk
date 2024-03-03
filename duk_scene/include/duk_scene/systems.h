@@ -29,6 +29,8 @@ private:
         virtual ~SystemEntry() = default;
 
         virtual void build(Systems& systems) = 0;
+
+        virtual const std::string& name() = 0;
     };
 
     template<typename T, typename... Args>
@@ -36,7 +38,9 @@ private:
     public:
         SystemEntryT(Args&&... args);
 
-        void build(Systems& systems);
+        void build(Systems& systems) override;
+
+        const std::string& name() override;
 
     private:
         std::tuple<Args...> m_buildArgs;
@@ -49,12 +53,14 @@ public:
     template<typename T, typename... Args>
     void register_system(Args&&... args);
 
-    void build(const std::string& entryName, Systems& systems);
+    void build(const std::string& systemName, Systems& systems);
+
+    DUK_NO_DISCARD const std::string& system_name(size_t systemIndex) const;
 
 private:
     static size_t s_entryCounter;
-    std::vector<std::unique_ptr<SystemEntry>> m_entries;
-    std::unordered_map<std::string, size_t> m_entryNameToIndex;
+    std::vector<std::unique_ptr<SystemEntry>> m_systemEntries;
+    std::unordered_map<std::string, size_t> m_systemNameToIndex;
 };
 
 class Systems {
@@ -65,11 +71,19 @@ public:
 
         SystemIterator& operator++();
 
-        System* operator*();
+        SystemIterator& operator*();
 
-        bool operator==(const SystemIterator& rhs);
+        System* operator->();
 
-        bool operator!=(const SystemIterator& rhs);
+        DUK_NO_DISCARD bool operator==(const SystemIterator& rhs);
+
+        DUK_NO_DISCARD bool operator!=(const SystemIterator& rhs);
+
+        DUK_NO_DISCARD size_t container_index() const;
+
+        DUK_NO_DISCARD size_t system_index() const;
+
+        DUK_NO_DISCARD const std::string& system_name() const;
 
     private:
         Systems& m_systems;
@@ -94,8 +108,12 @@ public:
     SystemIterator end();
 
 private:
+    DUK_NO_DISCARD size_t system_index(size_t containerIndex) const;
+
+private:
     std::vector<std::unique_ptr<System>> m_container;
-    std::unordered_map<size_t, size_t> m_entryIndexToContainerIndex;
+    std::unordered_map<size_t, size_t> m_systemIndexToContainerIndex;
+    std::unordered_map<size_t, size_t> m_containerIndexToSystemIndex;
 };
 
 namespace detail {
@@ -119,6 +137,11 @@ void SystemRegistry::SystemEntryT<T, Args...>::build(Systems& systems) {
             m_buildArgs);
 }
 
+template<typename T, typename... Args>
+const std::string& SystemRegistry::SystemEntryT<T, Args...>::name() {
+    return duk::tools::type_name_of<T>();
+}
+
 template<typename T>
 size_t SystemRegistry::index() {
     static const auto index = s_entryCounter++;
@@ -128,14 +151,14 @@ size_t SystemRegistry::index() {
 template<typename T, typename... Args>
 void SystemRegistry::register_system(Args&&... args) {
     const auto index = SystemRegistry::index<T>();
-    if (m_entries.size() <= index) {
-        m_entries.resize(index + 1);
+    if (m_systemEntries.size() <= index) {
+        m_systemEntries.resize(index + 1);
     }
 
-    auto& entry = m_entries[index];
+    auto& entry = m_systemEntries[index];
     if (!entry) {
         entry = std::make_unique<SystemEntryT<T, Args...>>(std::forward<Args>(args)...);
-        m_entryNameToIndex.emplace(duk::tools::type_name_of<T>(), index);
+        m_systemNameToIndex.emplace(duk::tools::type_name_of<T>(), index);
     }
 }
 
@@ -143,19 +166,20 @@ template<typename T, typename... Args>
 void Systems::add(Args&&... args) {
     static const auto entryIndex = SystemRegistry::index<T>();
     const auto containerIndex = m_container.size();
-    if (m_entryIndexToContainerIndex.find(entryIndex) != m_entryIndexToContainerIndex.end()) {
+    if (m_systemIndexToContainerIndex.find(entryIndex) != m_systemIndexToContainerIndex.end()) {
         duk::log::warn("System of same type already exists, skipping");
         return;
     }
     m_container.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
-    m_entryIndexToContainerIndex.emplace(entryIndex, containerIndex);
+    m_systemIndexToContainerIndex.emplace(entryIndex, containerIndex);
+    m_containerIndexToSystemIndex.emplace(containerIndex, entryIndex);
 }
 
 template<typename T>
 T* Systems::get() {
     static const auto entryIndex = SystemRegistry::index<T>();
-    auto it = m_entryIndexToContainerIndex.find(entryIndex);
-    if (it == m_entryIndexToContainerIndex.end()) {
+    auto it = m_systemIndexToContainerIndex.find(entryIndex);
+    if (it == m_systemIndexToContainerIndex.end()) {
         return nullptr;
     }
     const auto containerIndex = it.second;
@@ -167,21 +191,32 @@ void register_system(Args&&... args) {
     SystemRegistry::instance(true)->register_system<T>(std::forward<Args>(args)...);
 }
 
-void build_system(const std::string& entryName, Systems& systems);
+void build_system(const std::string& systemName, Systems& systems);
+
+const std::string& system_name(size_t systemIndex);
 
 }// namespace duk::scene
 
-namespace duk::json {
+namespace duk::serial {
 
 template<>
-inline void from_json<duk::scene::Systems>(const rapidjson::Value& jsonObject, duk::scene::Systems& systems) {
-    auto jsonSystems = jsonObject.GetArray();
-    for (auto& jsonSystem: jsonSystems) {
-        const char* systemName = from_json<const char*>(jsonSystem);
+inline void read_array(JsonReader* reader, duk::scene::Systems& systems, size_t size) {
+    for (size_t i = 0; i < size; i++) {
+        std::string systemName;
+        reader->visit_member(systemName, i);
         duk::scene::build_system(systemName, systems);
     }
 }
 
-}// namespace duk::json
+template<>
+inline void write_array(JsonWriter* writer, duk::scene::Systems& systems) {
+    std::vector<std::string> systemNames;
+    for (auto system: systems) {
+        auto systemName = system.system_name();
+        writer->visit_member(systemName, MemberDescription(nullptr));
+    }
+}
+
+}// namespace duk::serial
 
 #endif// DUK_SCENE_SYSTEMS_H

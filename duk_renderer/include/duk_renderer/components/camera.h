@@ -24,19 +24,19 @@ glm::mat4 calculate_view(const duk::scene::Object& object);
 
 }// namespace duk::renderer
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::renderer::Camera>(const rapidjson::Value& jsonObject, duk::renderer::Camera& camera) {
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::Camera& camera) {
 }
 
-template<>
-inline void from_json<duk::renderer::PerspectiveCamera>(const rapidjson::Value& jsonObject, duk::renderer::PerspectiveCamera& perspectiveCamera) {
-    from_json_member(jsonObject, "fov", perspectiveCamera.fovDegrees);
-    from_json_member(jsonObject, "near", perspectiveCamera.zNear);
-    from_json_member(jsonObject, "far", perspectiveCamera.zFar);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::PerspectiveCamera& camera) {
+    visitor->visit_member(camera.fovDegrees, "fov");
+    visitor->visit_member(camera.zNear, "near");
+    visitor->visit_member(camera.zFar, "far");
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 #endif// DUK_RENDERER_CAMERA_H

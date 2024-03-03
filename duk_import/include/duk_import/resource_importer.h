@@ -4,7 +4,7 @@
 #ifndef DUK_IMPORT_RESOURCE_IMPORTER_H
 #define DUK_IMPORT_RESOURCE_IMPORTER_H
 
-#include "resource_set_importer.h"
+#include <duk_import/resource_set_importer.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 #include <filesystem>

@@ -4,7 +4,6 @@
 #ifndef DUK_RENDERER_LIGHTING_H
 #define DUK_RENDERER_LIGHTING_H
 
-#include <duk_json/types.h>
 #include <duk_scene/objects.h>
 #include <glm/glm.hpp>
 
@@ -26,25 +25,25 @@ struct PointLight {
 
 }// namespace duk::renderer
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::renderer::LightValue>(const rapidjson::Value& jsonObject, duk::renderer::LightValue& object) {
-    object.color = from_json<glm::vec3>(jsonObject["color"]);
-    object.intensity = from_json<float>(jsonObject["intensity"]);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::LightValue& light) {
+    visitor->visit_member(light.color, MemberDescription("color"));
+    visitor->visit_member(light.intensity, MemberDescription("intensity"));
 }
 
-template<>
-inline void from_json<duk::renderer::DirectionalLight>(const rapidjson::Value& jsonObject, duk::renderer::DirectionalLight& object) {
-    object.value = from_json<duk::renderer::LightValue>(jsonObject["value"]);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::DirectionalLight& light) {
+    visitor->visit_member_object(light.value, MemberDescription("value"));
 }
 
-template<>
-inline void from_json<duk::renderer::PointLight>(const rapidjson::Value& jsonObject, duk::renderer::PointLight& object) {
-    object.value = from_json<duk::renderer::LightValue>(jsonObject["value"]);
-    object.radius = from_json<float>(jsonObject["radius"]);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::PointLight& light) {
+    visitor->visit_member_object(light.value, MemberDescription("value"));
+    visitor->visit_member(light.radius, MemberDescription("radius"));
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 #endif// DUK_RENDERER_LIGHTING_H

@@ -9,17 +9,12 @@ namespace duk::engine {
 Settings load_settings(const std::string& path) {
     auto content = duk::tools::File::load_text(path.c_str());
 
-    rapidjson::Document document;
+    duk::serial::JsonReader reader(content.c_str());
 
-    auto& result = document.Parse(content.data());
+    Settings settings = {};
+    reader.visit(settings);
 
-    auto root = result.GetObject();
-
-    Settings projectSettings = {};
-
-    duk::json::from_json(root, projectSettings);
-
-    return projectSettings;
+    return settings;
 }
 
 }// namespace duk::engine

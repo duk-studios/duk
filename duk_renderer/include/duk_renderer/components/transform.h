@@ -4,7 +4,6 @@
 #ifndef DUK_RENDERER_TRANSFORM_H
 #define DUK_RENDERER_TRANSFORM_H
 
-#include <duk_json/types.h>
 #include <duk_scene/objects.h>
 
 #include <glm/gtc/quaternion.hpp>
@@ -44,38 +43,38 @@ glm::vec3 forward_direction_3d(const duk::scene::Object& object);
 
 }// namespace duk::renderer
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::renderer::Position3D>(const rapidjson::Value& jsonObject, duk::renderer::Position3D& object) {
-    object.value = from_json<glm::vec3>(jsonObject["value"]);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::Position3D& position) {
+    visitor->visit_member(position.value, MemberDescription("value"));
 }
 
-template<>
-inline void from_json<duk::renderer::Position2D>(const rapidjson::Value& jsonObject, duk::renderer::Position2D& object) {
-    object.value = from_json<glm::vec2>(jsonObject["value"]);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::Position2D& position) {
+    visitor->visit_member(position.value, MemberDescription("value"));
 }
 
-template<>
-inline void from_json<duk::renderer::Rotation3D>(const rapidjson::Value& jsonObject, duk::renderer::Rotation3D& object) {
-    object.value = glm::radians(from_json<glm::vec3>(jsonObject["value"]));// euler
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::Rotation3D& rotation) {
+    visitor->visit_member(rotation.value, MemberDescription("value"));
 }
 
-template<>
-inline void from_json<duk::renderer::Rotation2D>(const rapidjson::Value& jsonObject, duk::renderer::Rotation2D& object) {
-    object.value = glm::radians(from_json<float>(jsonObject["value"]));
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::Rotation2D& rotation) {
+    visitor->visit_member(rotation.value, MemberDescription("value"));
 }
 
-template<>
-inline void from_json<duk::renderer::Scale3D>(const rapidjson::Value& jsonObject, duk::renderer::Scale3D& object) {
-    object.value = from_json<glm::vec3>(jsonObject["value"]);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::Scale3D& scale) {
+    visitor->visit_member(scale.value, MemberDescription("value"));
 }
 
-template<>
-inline void from_json<duk::renderer::Scale2D>(const rapidjson::Value& jsonObject, duk::renderer::Scale2D& object) {
-    object.value = from_json<glm::vec2>(jsonObject["value"]);
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::renderer::Scale2D& scale) {
+    visitor->visit_member(scale.value, MemberDescription("value"));
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 #endif// DUK_RENDERER_TRANSFORM_H

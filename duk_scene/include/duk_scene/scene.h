@@ -28,15 +28,15 @@ using SceneResource = duk::resource::ResourceT<Scene>;
 
 }// namespace duk::scene
 
-namespace duk::json {
+namespace duk::serial {
 
-template<>
-inline void from_json<duk::scene::Scene>(const rapidjson::Value& jsonObject, duk::scene::Scene& scene) {
-    from_json_member(jsonObject, "objects", scene.objects());
-    from_json_member(jsonObject, "systems", scene.systems());
+template<typename JsonVisiter>
+void visit_object(JsonVisiter* visiter, duk::scene::Scene& scene) {
+    visiter->visit_member_array(scene.objects(), MemberDescription("objects"));
+    visiter->visit_member_array(scene.systems(), MemberDescription("systems"));
 }
 
-}// namespace duk::json
+}// namespace duk::serial
 
 namespace duk::resource {
 

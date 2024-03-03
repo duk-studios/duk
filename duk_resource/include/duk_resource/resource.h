@@ -5,8 +5,8 @@
 #ifndef DUK_RESOURCE_RESOURCE_H
 #define DUK_RESOURCE_RESOURCE_H
 
-#include <duk_json/types.h>
 #include <duk_macros/macros.h>
+#include <duk_serial/json_serializer.h>
 
 #include <memory>
 #include <typeindex>
@@ -39,38 +39,25 @@ private:
 
 static constexpr duk::resource::Id kInvalidId;
 
-template<typename T>
-class ResourceT;
-
 class Resource {
 public:
+    virtual ~Resource();
+
     DUK_NO_DISCARD Id id() const;
 
-    template<typename T>
-    DUK_NO_DISCARD ResourceT<T> as();
+    virtual void reset(Id id = kInvalidId);
 
-    template<typename T>
-    DUK_NO_DISCARD bool is() const;
+    DUK_NO_DISCARD virtual size_t use_count() const = 0;
 
-    DUK_NO_DISCARD size_t use_count() const;
+    DUK_NO_DISCARD virtual bool valid() const = 0;
 
-    DUK_NO_DISCARD bool valid() const;
-
-    DUK_NO_DISCARD operator bool() const;
-
-    void reset();
+    DUK_NO_DISCARD virtual operator bool() const = 0;
 
 protected:
-    template<typename T>
-    Resource(Id id, const std::shared_ptr<T>& resource);
+    Resource(Id id);
 
-    template<typename U>
-    friend class ResourceT;
-
+protected:
     Id m_id;
-    std::shared_ptr<void> m_resource;
-    // used for safe casting
-    std::type_index m_type;
 };
 
 template<typename T>
@@ -88,6 +75,14 @@ public:
     ResourceT(const ResourceT<U>& other)
         requires std::is_base_of_v<T, U>;
 
+    void reset(Id id = kInvalidId) override;
+
+    size_t use_count() const override;
+
+    bool valid() const override;
+
+    operator bool() const override;
+
     DUK_NO_DISCARD T* get();
 
     DUK_NO_DISCARD T* get() const;
@@ -99,38 +94,30 @@ public:
     DUK_NO_DISCARD T& operator*();
 
     DUK_NO_DISCARD T& operator*() const;
+
+private:
+    template<typename U>
+    ResourceT(Id id, const std::shared_ptr<U>& resource);
+
+    template<typename U>
+    friend class ResourceT;
+    std::shared_ptr<T> m_resource;
 };
 
 template<typename T>
-Resource::Resource(Id id, const std::shared_ptr<T>& resource)
-    : m_id(id)
-    , m_resource(resource)
-    , m_type(typeid(T)) {
-}
-
-template<typename T>
-ResourceT<T> Resource::as() {
-    return ResourceT<T>(m_id, std::reinterpret_pointer_cast<T>(m_resource));
-}
-
-template<typename T>
-bool Resource::is() const {
-    return m_type == typeid(T);
-}
-
-template<typename T>
 ResourceT<T>::ResourceT()
-    : ResourceT(Id(0), nullptr) {
+    : ResourceT(kInvalidId, nullptr) {
 }
 
 template<typename T>
 ResourceT<T>::ResourceT(Id id)
-    : Resource(id, std::shared_ptr<T>()) {
+    : ResourceT(id, std::shared_ptr<T>()) {
 }
 
 template<typename T>
 ResourceT<T>::ResourceT(Id id, const std::shared_ptr<T>& resource)
-    : Resource(id, resource) {
+    : Resource(id)
+    , m_resource(resource) {
 }
 
 template<typename T>
@@ -138,6 +125,27 @@ template<typename U>
 ResourceT<T>::ResourceT(const ResourceT<U>& other)
     requires std::is_base_of_v<T, U>
     : Resource(other.id(), other.m_resource) {
+}
+
+template<typename T>
+void ResourceT<T>::reset(Id id) {
+    Resource::reset(id);
+    m_resource.reset();
+}
+
+template<typename T>
+size_t ResourceT<T>::use_count() const {
+    return m_resource.use_count();
+}
+
+template<typename T>
+bool ResourceT<T>::valid() const {
+    return m_resource && m_id.value() != 0;
+}
+
+template<typename T>
+ResourceT<T>::operator bool() const {
+    return valid();
 }
 
 template<typename T>
@@ -172,14 +180,29 @@ T& ResourceT<T>::operator*() const {
 
 }// namespace duk::resource
 
-namespace duk::json {
+namespace duk::serial {
 
 template<>
-inline void from_json<duk::resource::Id>(const rapidjson::Value& jsonObject, duk::resource::Id& object) {
-    object = duk::resource::Id(from_json<uint64_t>(jsonObject));
+inline void from_json<duk::resource::Id>(const rapidjson::Value& jsonObject, duk::resource::Id& id) {
+    id = duk::resource::Id(jsonObject.Get<uint64_t>());
 }
 
-}// namespace duk::json
+template<>
+inline void to_json<duk::resource::Id>(const duk::resource::Id& id, rapidjson::Value& jsonObject, rapidjson::Document::AllocatorType& allocator) {
+    jsonObject.Set(id.value());
+}
+
+template<>
+inline void from_json<duk::resource::Resource>(const rapidjson::Value& jsonObject, duk::resource::Resource& resource) {
+    resource.reset(duk::resource::Id(jsonObject.Get<uint64_t>()));
+}
+
+template<>
+inline void to_json<duk::resource::Resource>(const duk::resource::Resource& resource, rapidjson::Value& jsonObject, rapidjson::Document::AllocatorType& allocator) {
+    jsonObject.Set<uint64_t>(resource.id().value());
+}
+
+}// namespace duk::serial
 
 namespace std {
 

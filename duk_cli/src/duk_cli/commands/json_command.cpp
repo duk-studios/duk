@@ -4,8 +4,8 @@
 
 #include <duk_cli/commands/json_command.h>
 #include <duk_cli/file_generator.h>
-#include <duk_json/rapidjson.h>
 #include <duk_log/log.h>
+#include <duk_serial/json_serializer.h>
 #include <duk_tools/file.h>
 
 #include <filesystem>

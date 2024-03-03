@@ -54,7 +54,7 @@ void Importer::load_resource(duk::resource::Id id) {
         throw std::runtime_error(fmt::format("Could not find an importer for tag \"{}\"", resourceDescription.tag));
     }
 
-    importer->load(resourceDescription.id, resourceDescription.path);
+    importer->load(resourceDescription.id, resourceDescription.file);
 
     duk::resource::DependencySolver dependencySolver;
     importer->solve_dependencies(resourceDescription.id, dependencySolver);

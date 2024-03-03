@@ -7,15 +7,19 @@ namespace duk::scene {
 
 size_t SystemRegistry::s_entryCounter = 0;
 
-void SystemRegistry::build(const std::string& entryName, Systems& systems) {
-    auto it = m_entryNameToIndex.find(entryName);
-    if (it == m_entryNameToIndex.end()) {
-        duk::log::warn("System entry name \"{}\" not registered", entryName);
+void SystemRegistry::build(const std::string& systemName, Systems& systems) {
+    auto it = m_systemNameToIndex.find(systemName);
+    if (it == m_systemNameToIndex.end()) {
+        duk::log::warn("System entry name \"{}\" not registered", systemName);
         return;
     }
     const auto index = it->second;
-    auto& entry = m_entries.at(index);
+    auto& entry = m_systemEntries.at(index);
     entry->build(systems);
+}
+
+const std::string& SystemRegistry::system_name(size_t systemIndex) const {
+    return m_systemEntries.at(systemIndex)->name();
 }
 
 System::~System() {
@@ -31,7 +35,11 @@ Systems::SystemIterator& Systems::SystemIterator::operator++() {
     return *this;
 }
 
-System* Systems::SystemIterator::operator*() {
+Systems::SystemIterator& Systems::SystemIterator::operator*() {
+    return *this;
+}
+
+System* Systems::SystemIterator::operator->() {
     return m_systems.m_container.at(m_i).get();
 }
 
@@ -41,6 +49,18 @@ bool Systems::SystemIterator::operator==(const Systems::SystemIterator& rhs) {
 
 bool Systems::SystemIterator::operator!=(const Systems::SystemIterator& rhs) {
     return !(*this == rhs);
+}
+
+size_t Systems::SystemIterator::container_index() const {
+    return m_i;
+}
+
+size_t Systems::SystemIterator::system_index() const {
+    return m_systems.system_index(m_i);
+}
+
+const std::string& Systems::SystemIterator::system_name() const {
+    return duk::scene::system_name(system_index());
 }
 
 Systems::SystemIterator Systems::begin() {
@@ -69,8 +89,16 @@ void Systems::exit() {
     }
 }
 
-void build_system(const std::string& entryName, Systems& systems) {
-    SystemRegistry::instance(true)->build(entryName, systems);
+size_t Systems::system_index(size_t containerIndex) const {
+    return m_containerIndexToSystemIndex.at(containerIndex);
+}
+
+void build_system(const std::string& systemName, Systems& systems) {
+    SystemRegistry::instance(true)->build(systemName, systems);
+}
+
+const std::string& system_name(size_t systemIndex) {
+    return SystemRegistry::instance()->system_name(systemIndex);
 }
 
 }// namespace duk::scene

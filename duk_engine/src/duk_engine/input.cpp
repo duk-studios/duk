@@ -46,7 +46,7 @@ duk::engine::Input::Input(const InputCreateInfo& inputCreateInfo) {
         m_deltaMousePos = m_mousePos - m_lastMousePos;
     });
 
-    m_listener.listen(inputCreateInfo.window->mouse_wheel_movement_event, [this](float x, float wheelDelta) {
+    m_listener.listen(inputCreateInfo.window->mouse_wheel_movement_event, [this](duk::platform::KeyModifiers::Mask mods, int16_t wheelDelta) {
         m_mouseWheel = wheelDelta;
     });
 }
@@ -92,7 +92,7 @@ glm::vec2 duk::engine::Input::mouse_position() const {
     return m_mousePos;
 }
 
-int32_t duk::engine::Input::mouse_wheel() const {
+int16_t duk::engine::Input::mouse_wheel() const {
     return m_mouseWheel;
 }
 

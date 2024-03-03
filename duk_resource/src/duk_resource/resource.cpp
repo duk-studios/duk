@@ -26,25 +26,18 @@ bool Id::valid() const {
     return m_id != 0;
 }
 
+Resource::~Resource() = default;
+
 Id Resource::id() const {
     return m_id;
 }
 
-size_t Resource::use_count() const {
-    return m_resource.use_count();
+void Resource::reset(Id id) {
+    m_id = id;
 }
 
-bool Resource::valid() const {
-    return m_resource && m_id.value() != 0;
-}
-
-Resource::operator bool() const {
-    return valid();
-}
-
-void Resource::reset() {
-    m_resource.reset();
-    m_id = Id(0);
+Resource::Resource(Id id)
+    : m_id(id) {
 }
 
 }// namespace duk::resource
