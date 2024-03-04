@@ -19,6 +19,12 @@ public:
 
     const Systems& systems() const;
 
+    void enter(Environment* environment);
+
+    void update(Environment* environment);
+
+    void exit(Environment* environment);
+
 private:
     Objects m_objects;
     Systems m_systems;

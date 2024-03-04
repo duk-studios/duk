@@ -22,9 +22,6 @@ const std::string& SystemRegistry::system_name(size_t systemIndex) const {
     return m_systemEntries.at(systemIndex)->name();
 }
 
-System::~System() {
-}
-
 Systems::SystemIterator::SystemIterator(Systems& systems, size_t i)
     : m_systems(systems)
     , m_i(i) {
@@ -71,21 +68,21 @@ Systems::SystemIterator Systems::end() {
     return Systems::SystemIterator(*this, m_container.size());
 }
 
-void Systems::enter() {
+void Systems::enter(Objects& objects, Environment* environment) {
     for (auto& system: m_container) {
-        system->enter();
+        system->enter(objects, environment);
     }
 }
 
-void Systems::update() {
+void Systems::update(Objects& objects, Environment* environment) {
     for (auto& system: m_container) {
-        system->update();
+        system->update(objects, environment);
     }
 }
 
-void Systems::exit() {
+void Systems::exit(Objects& objects, Environment* environment) {
     for (auto& system: m_container) {
-        system->exit();
+        system->exit(objects, environment);
     }
 }
 

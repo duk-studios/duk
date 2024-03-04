@@ -21,4 +21,16 @@ const Systems& Scene::systems() const {
     return m_systems;
 }
 
+void Scene::enter(Environment* environment) {
+    m_systems.enter(m_objects, environment);
+}
+
+void Scene::update(Environment* environment) {
+    m_systems.update(m_objects, environment);
+}
+
+void Scene::exit(Environment* environment) {
+    m_systems.exit(m_objects, environment);
+}
+
 }// namespace duk::scene

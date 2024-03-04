@@ -101,6 +101,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     // director
     {
         DirectorCreateInfo directorCreateInfo = {};
+        directorCreateInfo.environment = this;
         directorCreateInfo.renderer = m_renderer.get();
         directorCreateInfo.scenePool = m_pools.get<duk::scene::ScenePool>();
         directorCreateInfo.importer = m_importer.get();

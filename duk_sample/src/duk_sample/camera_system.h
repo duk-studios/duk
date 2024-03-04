@@ -5,9 +5,8 @@
 #ifndef DUK_SAMPLE_CAMERA_SYSTEM_H
 #define DUK_SAMPLE_CAMERA_SYSTEM_H
 
-#include <duk_engine/systems/system.h>
-#include <duk_event/event.h>
 #include <duk_scene/objects.h>
+#include <duk_scene/systems.h>
 
 namespace duk::sample {
 
@@ -16,16 +15,13 @@ struct CameraController {
     float rotationSpeed;
 };
 
-class CameraSystem : public duk::engine::System {
+class CameraSystem : public duk::scene::System {
 public:
-    using duk::engine::System::System;
+    void enter(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
 
-protected:
-    void enter(engine::Engine& engine) override;
+    void update(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
 
-    void update(engine::Engine& engine) override;
-
-    void exit(engine::Engine& engine) override;
+    void exit(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
 };
 
 }// namespace duk::sample

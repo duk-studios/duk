@@ -9,15 +9,24 @@
 
 namespace duk::scene {
 
+class Environment {
+public:
+    virtual ~Environment() = default;
+
+    template<typename T>
+    T* as()
+        requires std::is_base_of_v<Environment, T>;
+};
+
 class System {
 public:
-    virtual ~System();
+    virtual ~System() = default;
 
-    virtual void enter() = 0;
+    virtual void enter(Objects& objects, Environment* environment) = 0;
 
-    virtual void update() = 0;
+    virtual void update(Objects& objects, Environment* environment) = 0;
 
-    virtual void exit() = 0;
+    virtual void exit(Objects& objects, Environment* environment) = 0;
 };
 
 class Systems;
@@ -33,25 +42,20 @@ private:
         virtual const std::string& name() = 0;
     };
 
-    template<typename T, typename... Args>
+    template<typename T>
     class SystemEntryT : public SystemEntry {
     public:
-        SystemEntryT(Args&&... args);
-
         void build(Systems& systems) override;
 
         const std::string& name() override;
-
-    private:
-        std::tuple<Args...> m_buildArgs;
     };
 
 public:
     template<typename T>
     static size_t index();
 
-    template<typename T, typename... Args>
-    void register_system(Args&&... args);
+    template<typename T>
+    void register_system();
 
     void build(const std::string& systemName, Systems& systems);
 
@@ -91,17 +95,17 @@ public:
     };
 
 public:
-    template<typename T, typename... Args>
-    void add(Args&&... args);
+    template<typename T>
+    void add();
 
     template<typename T>
     T* get();
 
-    void enter();
+    void enter(Objects& objects, Environment* environment);
 
-    void update();
+    void update(Objects& objects, Environment* environment);
 
-    void exit();
+    void exit(Objects& objects, Environment* environment);
 
     SystemIterator begin();
 
@@ -116,29 +120,20 @@ private:
     std::unordered_map<size_t, size_t> m_containerIndexToSystemIndex;
 };
 
-namespace detail {
-template<typename T, typename... Args>
-static void build_system(Systems& systems, Args&&... args) {
-    systems.add<T>(std::forward<Args>(args)...);
-}
-}// namespace detail
-
-template<typename T, typename... Args>
-SystemRegistry::SystemEntryT<T, Args...>::SystemEntryT(Args&&... args)
-    : m_buildArgs(std::forward<Args>(args)...) {
+template<typename T>
+T* Environment::as()
+    requires std::is_base_of_v<Environment, T>
+{
+    return static_cast<T*>(this);
 }
 
-template<typename T, typename... Args>
-void SystemRegistry::SystemEntryT<T, Args...>::build(Systems& systems) {
-    std::apply(
-            [&systems](Args&&... args) {
-                systems.add<T>(std::forward<Args>(args)...);
-            },
-            m_buildArgs);
+template<typename T>
+void SystemRegistry::SystemEntryT<T>::build(Systems& systems) {
+    systems.add<T>();
 }
 
-template<typename T, typename... Args>
-const std::string& SystemRegistry::SystemEntryT<T, Args...>::name() {
+template<typename T>
+const std::string& SystemRegistry::SystemEntryT<T>::name() {
     return duk::tools::type_name_of<T>();
 }
 
@@ -148,8 +143,8 @@ size_t SystemRegistry::index() {
     return index;
 }
 
-template<typename T, typename... Args>
-void SystemRegistry::register_system(Args&&... args) {
+template<typename T>
+void SystemRegistry::register_system() {
     const auto index = SystemRegistry::index<T>();
     if (m_systemEntries.size() <= index) {
         m_systemEntries.resize(index + 1);
@@ -157,20 +152,20 @@ void SystemRegistry::register_system(Args&&... args) {
 
     auto& entry = m_systemEntries[index];
     if (!entry) {
-        entry = std::make_unique<SystemEntryT<T, Args...>>(std::forward<Args>(args)...);
+        entry = std::make_unique<SystemEntryT<T>>();
         m_systemNameToIndex.emplace(duk::tools::type_name_of<T>(), index);
     }
 }
 
-template<typename T, typename... Args>
-void Systems::add(Args&&... args) {
+template<typename T>
+void Systems::add() {
     static const auto entryIndex = SystemRegistry::index<T>();
     const auto containerIndex = m_container.size();
     if (m_systemIndexToContainerIndex.find(entryIndex) != m_systemIndexToContainerIndex.end()) {
         duk::log::warn("System of same type already exists, skipping");
         return;
     }
-    m_container.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+    m_container.emplace_back(std::make_unique<T>());
     m_systemIndexToContainerIndex.emplace(entryIndex, containerIndex);
     m_containerIndexToSystemIndex.emplace(containerIndex, entryIndex);
 }

@@ -60,11 +60,11 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 
 }// namespace detail
 
-void CameraSystem::enter(engine::Engine& engine) {
+void CameraSystem::enter(duk::scene::Objects& objects, duk::scene::Environment* environment) {
 }
 
-void CameraSystem::update(engine::Engine& engine) {
-    auto& objects = engine.director()->scene()->objects();
+void CameraSystem::update(duk::scene::Objects& objects, duk::scene::Environment* environment) {
+    auto engine = environment->as<duk::engine::Engine>();
 
     auto object = objects.first_with<CameraController>();
 
@@ -72,9 +72,9 @@ void CameraSystem::update(engine::Engine& engine) {
         return;
     }
 
-    auto input = engine.input();
+    auto input = engine->input();
 
-    const auto deltaTime = engine.timer()->duration().count();
+    const auto deltaTime = engine->timer()->duration().count();
     auto cursor = duk::platform::System::instance()->cursor();
 
     auto controller = object.component<CameraController>();
@@ -95,7 +95,7 @@ void CameraSystem::update(engine::Engine& engine) {
     }
 }
 
-void CameraSystem::exit(engine::Engine& engine) {
+void CameraSystem::exit(duk::scene::Objects& objects, duk::scene::Environment* environment) {
 }
 
 }// namespace duk::sample
