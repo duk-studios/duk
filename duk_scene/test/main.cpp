@@ -43,15 +43,15 @@ struct ComponentTest3 {
 
 class TestSystem : public duk::scene::System {
 public:
-    void enter() override {
+    void enter(duk::scene::Objects& objects, duk::scene::Environment* environment) override {
         duk::log::info("TestSystem::enter");
     }
 
-    void update() override {
+    void update(duk::scene::Objects& objects, duk::scene::Environment* environment) override {
         duk::log::info("TestSystem::update");
     }
 
-    void exit() override {
+    void exit(duk::scene::Objects& objects, duk::scene::Environment* environment) override {
         duk::log::info("TestSystem::exit");
     }
 };
