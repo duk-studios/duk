@@ -7,6 +7,7 @@
 
 #include <duk_rhi/rhi.h>
 #include <duk_rhi/vulkan/command/vulkan_command_queue.h>
+#include <duk_rhi/vulkan/command/vulkan_command_scheduler.h>
 #include <duk_rhi/vulkan/vulkan_debug_messenger.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_events.h>
@@ -43,7 +44,7 @@ public:
 
     DUK_NO_DISCARD std::shared_ptr<CommandQueue> create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
 
-    DUK_NO_DISCARD std::shared_ptr<CommandScheduler> create_command_scheduler() override;
+    DUK_NO_DISCARD CommandScheduler* command_scheduler() override;
 
     DUK_NO_DISCARD std::shared_ptr<Shader> create_shader(const ShaderCreateInfo& shaderCreateInfo) override;
 
@@ -78,6 +79,8 @@ private:
 
     void create_sampler_cache();
 
+    void create_command_scheduler();
+
 private:
     VkInstance m_instance;
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;
@@ -89,6 +92,7 @@ private:
     std::unique_ptr<VulkanResourceManager> m_resourceManager;
     std::unique_ptr<VulkanDescriptorSetLayoutCache> m_descriptorSetLayoutCache;
     std::unique_ptr<VulkanSamplerCache> m_samplerCache;
+    std::unique_ptr<VulkanCommandScheduler> m_commandScheduler;
 
     VulkanDebugMessenger m_debugMessenger;
     std::unordered_map<CommandQueue::Type::Mask, uint32_t> m_queueFamilyIndices;

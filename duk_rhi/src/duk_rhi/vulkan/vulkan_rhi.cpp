@@ -3,7 +3,6 @@
 //
 
 #include <duk_rhi/rhi_exception.h>
-#include <duk_rhi/vulkan/command/vulkan_command_scheduler.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
@@ -108,10 +107,12 @@ VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& vulkanRendererCreateInfo)
     create_resource_manager();
     create_descriptor_set_layout_cache();
     create_sampler_cache();
+    create_command_scheduler();
 }
 
 VulkanRHI::~VulkanRHI() {
     vkDeviceWaitIdle(m_device);
+    m_commandScheduler.reset();
     m_descriptorSetLayoutCache.reset();
     m_samplerCache.reset();
     m_swapchain.reset();
@@ -127,6 +128,7 @@ VulkanRHI::~VulkanRHI() {
 
 void VulkanRHI::prepare_frame() {
     m_currentFrame = (m_currentFrame + 1) % m_maxFramesInFlight;
+    m_commandScheduler->begin();
     m_prepareFrameEvent(m_currentFrame);
 }
 
@@ -176,13 +178,8 @@ std::shared_ptr<CommandQueue> VulkanRHI::create_command_queue(const CommandQueue
     return std::make_shared<VulkanCommandQueue>(vulkanCommandQueueCreateInfo);
 }
 
-std::shared_ptr<CommandScheduler> VulkanRHI::create_command_scheduler() {
-    VulkanCommandSchedulerCreateInfo commandSchedulerCreateInfo = {};
-    commandSchedulerCreateInfo.device = m_device;
-    commandSchedulerCreateInfo.frameCount = m_maxFramesInFlight;
-    commandSchedulerCreateInfo.currentFramePtr = &m_currentFrame;
-
-    return std::make_shared<VulkanCommandScheduler>(commandSchedulerCreateInfo);
+CommandScheduler* VulkanRHI::command_scheduler() {
+    return m_commandScheduler.get();
 }
 
 std::shared_ptr<Shader> VulkanRHI::create_shader(const RHI::ShaderCreateInfo& shaderCreateInfo) {
@@ -481,6 +478,15 @@ void VulkanRHI::create_sampler_cache() {
     samplerCacheCreateInfo.device = m_device;
 
     m_samplerCache = std::make_unique<VulkanSamplerCache>(samplerCacheCreateInfo);
+}
+
+void VulkanRHI::create_command_scheduler() {
+    VulkanCommandSchedulerCreateInfo commandSchedulerCreateInfo = {};
+    commandSchedulerCreateInfo.device = m_device;
+    commandSchedulerCreateInfo.frameCount = m_maxFramesInFlight;
+    commandSchedulerCreateInfo.currentFramePtr = &m_currentFrame;
+
+    m_commandScheduler = std::make_unique<VulkanCommandScheduler>(commandSchedulerCreateInfo);
 }
 
 }// namespace duk::rhi
