@@ -78,7 +78,7 @@ public:
 
     DUK_NO_DISCARD virtual std::shared_ptr<CommandQueue> create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
 
-    DUK_NO_DISCARD virtual std::shared_ptr<CommandScheduler> create_command_scheduler() = 0;
+    DUK_NO_DISCARD virtual CommandScheduler* command_scheduler() = 0;
 
     struct ShaderCreateInfo {
         const ShaderDataSource* shaderDataSource;

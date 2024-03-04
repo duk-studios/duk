@@ -29,6 +29,8 @@ public:
 
     ~VulkanCommandBuffer() override;
 
+    void clean(uint32_t imageIndex);
+
     DUK_NO_DISCARD VulkanCommandQueue* command_queue();
 
     DUK_NO_DISCARD VkCommandBuffer& handle();

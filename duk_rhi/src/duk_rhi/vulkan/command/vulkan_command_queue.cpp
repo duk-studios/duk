@@ -48,6 +48,11 @@ VulkanCommandQueue::~VulkanCommandQueue() {
     vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 }
 
+void VulkanCommandQueue::clean(uint32_t /*imageIndex*/) {
+    // no need to do anything, we just need to have this so VulkanResourceManager
+    // can keep track of how many frames it should wait before deleting this
+}
+
 uint32_t VulkanCommandQueue::index() const {
     return m_index;
 }

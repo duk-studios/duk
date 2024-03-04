@@ -59,7 +59,6 @@ protected:
     duk::platform::Window* m_window;
     std::shared_ptr<duk::rhi::RHI> m_rhi;
     std::shared_ptr<duk::rhi::CommandQueue> m_mainQueue;
-    std::shared_ptr<duk::rhi::CommandScheduler> m_scheduler;
     std::vector<std::shared_ptr<Pass>> m_passes;
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
     duk::event::EventVoid m_renderStart;

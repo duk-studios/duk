@@ -37,8 +37,6 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
     m_mainQueue = m_rhi->create_command_queue(mainCommandQueueCreateInfo);
 
-    m_scheduler = m_rhi->create_command_scheduler();
-
     {
         GlobalDescriptorsCreateInfo globalDescriptorsCreateInfo = {};
         globalDescriptorsCreateInfo.rhi = m_rhi.get();
@@ -59,8 +57,6 @@ void Renderer::render(duk::scene::Scene* scene) {
     }
 
     m_rhi->prepare_frame();
-
-    m_scheduler->begin();
 
     m_renderStart.emit();
 
@@ -83,15 +79,17 @@ void Renderer::render(duk::scene::Scene* scene) {
         commandBuffer->end();
     });
 
-    auto acquireImageCommand = m_scheduler->schedule(m_rhi->acquire_image_command());
-    auto mainPassCommand = m_scheduler->schedule(std::move(mainPass));
-    auto presentCommand = m_scheduler->schedule(m_rhi->present_command());
+    auto scheduler = m_rhi->command_scheduler();
+
+    auto acquireImageCommand = scheduler->schedule(m_rhi->acquire_image_command());
+    auto mainPassCommand = scheduler->schedule(std::move(mainPass));
+    auto presentCommand = scheduler->schedule(m_rhi->present_command());
 
     mainPassCommand.wait(acquireImageCommand, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT);
 
     presentCommand.wait(mainPassCommand);
 
-    m_scheduler->flush();
+    scheduler->flush();
 }
 
 uint32_t Renderer::render_width() const {

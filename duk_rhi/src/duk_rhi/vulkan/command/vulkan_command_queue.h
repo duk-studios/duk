@@ -33,6 +33,8 @@ public:
 
     ~VulkanCommandQueue() override;
 
+    void clean(uint32_t imageIndex);
+
     DUK_NO_DISCARD uint32_t index() const;
 
     DUK_NO_DISCARD uint32_t family_index() const;
