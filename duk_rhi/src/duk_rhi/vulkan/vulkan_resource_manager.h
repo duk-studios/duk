@@ -60,6 +60,8 @@ public:
 
     std::shared_ptr<VulkanRenderPass> create(const VulkanRenderPassCreateInfo& renderPassCreateInfo);
 
+    std::shared_ptr<VulkanCommandQueue> create(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo);
+
 private:
     template<typename T>
     struct DeletionEntry {
@@ -124,6 +126,8 @@ private:
     std::vector<DeletionEntry<VulkanFrameBuffer>> m_frameBuffersToDelete;
     std::vector<VulkanRenderPass*> m_renderPasses;
     std::vector<DeletionEntry<VulkanRenderPass>> m_renderPassesToDelete;
+    std::vector<VulkanCommandQueue*> m_commandQueues;
+    std::vector<DeletionEntry<VulkanCommandQueue>> m_commandQueuesToDelete;
 };
 
 }// namespace duk::rhi

@@ -175,7 +175,7 @@ std::shared_ptr<CommandQueue> VulkanRHI::create_command_queue(const CommandQueue
     vulkanCommandQueueCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
     vulkanCommandQueueCreateInfo.prepareFrameEvent = &m_prepareFrameEvent;
 
-    return std::make_shared<VulkanCommandQueue>(vulkanCommandQueueCreateInfo);
+    return m_resourceManager->create(vulkanCommandQueueCreateInfo);
 }
 
 CommandScheduler* VulkanRHI::command_scheduler() {

@@ -66,12 +66,15 @@ VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateIn
 }
 
 VulkanResourceManager::~VulkanResourceManager() {
+    // again, special case, because these are not created/destroyed with the swapchain
+    clean(m_commandQueuesToDelete);
     assert(m_frameBuffers.empty());
     assert(m_descriptorSets.empty());
     assert(m_images.empty());
     assert(m_buffers.empty());
     assert(m_graphicsPipelines.empty());
     assert(m_computePipelines.empty());
+    assert(m_commandQueues.empty());
 }
 
 void VulkanResourceManager::clean(uint32_t imageIndex) {
@@ -82,6 +85,9 @@ void VulkanResourceManager::clean(uint32_t imageIndex) {
     clean(m_graphicsPipelinesToDelete, imageIndex);
     clean(m_computePipelinesToDelete, imageIndex);
     clean(m_renderPassesToDelete, imageIndex);
+    // this is a special case, calling clean each frame won't really do anything internally.
+    // after all pending images are cleaned it will effectively safely destroy the command queue
+    clean(m_commandQueuesToDelete, imageIndex);
 }
 
 std::shared_ptr<VulkanBuffer> VulkanResourceManager::create(const VulkanBufferCreateInfo& bufferCreateInfo) {
@@ -110,6 +116,10 @@ std::shared_ptr<VulkanFrameBuffer> VulkanResourceManager::create(const VulkanFra
 
 std::shared_ptr<VulkanRenderPass> VulkanResourceManager::create(const VulkanRenderPassCreateInfo& renderPassCreateInfo) {
     return create(m_renderPasses, m_renderPassesToDelete, renderPassCreateInfo);
+}
+
+std::shared_ptr<VulkanCommandQueue> VulkanResourceManager::create(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo) {
+    return create(m_commandQueues, m_commandQueuesToDelete, commandQueueCreateInfo);
 }
 
 std::set<uint32_t> VulkanResourceManager::image_indices_set() const {
