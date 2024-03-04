@@ -11,6 +11,7 @@
 namespace duk::engine {
 
 struct DirectorCreateInfo {
+    duk::scene::Environment* environment;
     duk::renderer::Renderer* renderer;
     duk::import::Importer* importer;
     duk::scene::ScenePool* scenePool;
@@ -25,11 +26,17 @@ public:
 
     void update();
 
-    void load_scene(duk::resource::Id id);
+    void request_scene(duk::resource::Id id);
 
     duk::scene::Scene* scene();
 
 private:
+    duk::scene::SceneResource load_scene(duk::resource::Id id);
+
+    void replace_scene(duk::scene::SceneResource scene);
+
+private:
+    duk::scene::Environment* m_environment;
     duk::renderer::Renderer* m_renderer;
     duk::import::Importer* m_importer;
     duk::scene::ScenePool* m_scenePool;

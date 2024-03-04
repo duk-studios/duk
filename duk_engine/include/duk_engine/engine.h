@@ -8,7 +8,6 @@
 #include <duk_engine/director.h>
 #include <duk_engine/input.h>
 #include <duk_engine/settings.h>
-#include <duk_engine/systems/system.h>
 #include <duk_import/importer.h>
 #include <duk_platform/window.h>
 #include <duk_renderer/forward/forward_renderer.h>
@@ -20,7 +19,7 @@ struct EngineCreateInfo {
     std::string settingsPath;
 };
 
-class Engine {
+class Engine : public duk::scene::Environment {
 public:
     explicit Engine(const EngineCreateInfo& engineCreateInfo);
 
