@@ -46,6 +46,16 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
 
         auto material = meshRenderer->material.get();
 
+        if (!meshRenderer->material) {
+            duk::log::warn("MeshRenderer with no Material, skipping...");
+            continue;
+        }
+
+        if (!meshRenderer->mesh) {
+            duk::log::warn("MeshRenderer with no Mesh, skipping...");
+            continue;
+        }
+
         if (!material->instance_buffer()) {
             duk::log::warn("MeshRenderer with a Material with no InstanceBuffer detected, skipping...");
             continue;

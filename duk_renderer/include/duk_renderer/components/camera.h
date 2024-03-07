@@ -5,12 +5,22 @@
 #define DUK_RENDERER_CAMERA_H
 
 #include <duk_scene/objects.h>
+#include <duk_scene/systems.h>
 
 #include <glm/mat4x4.hpp>
 
 namespace duk::renderer {
 
-struct Camera {};
+struct Camera {
+    glm::mat4 view;
+    glm::mat4 invView;
+    glm::mat4 proj;
+    glm::mat4 invProj;
+    glm::mat4 vp;   // projection * view
+    glm::mat4 invVp;// inverse vp
+
+    glm::vec3 screen_to_world(const glm::vec2& screenSize, const glm::vec3& screenPosition) const;
+};
 
 struct PerspectiveCamera {
     float fovDegrees;
@@ -18,9 +28,14 @@ struct PerspectiveCamera {
     float zFar;
 };
 
-glm::mat4 calculate_projection(const duk::scene::Object& object, uint32_t width, uint32_t height);
+class CameraUpdateSystem : public duk::scene::System {
+public:
+    void enter(scene::Objects& objects, scene::Environment* environment) override;
 
-glm::mat4 calculate_view(const duk::scene::Object& object);
+    void update(scene::Objects& objects, scene::Environment* environment) override;
+
+    void exit(scene::Objects& objects, scene::Environment* environment) override;
+};
 
 }// namespace duk::renderer
 

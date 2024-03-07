@@ -5,7 +5,9 @@
 #include <duk_engine/engine.h>
 #include <duk_platform/system.h>
 #include <duk_renderer/components/camera.h>
+#include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/pools/material_pool.h>
 #include <duk_sample/camera_system.h>
 
 namespace duk::sample {
@@ -92,6 +94,21 @@ void CameraSystem::update(duk::scene::Objects& objects, duk::scene::Environment*
         auto moveDirection = detail::input_move_direction(input);
         moveDirection = rotationValue * moveDirection;
         position->value += moveDirection * controller->speed * deltaTime;
+    }
+
+    if (input->mouse_down(duk::platform::MouseButton::RIGHT)) {
+        auto camera = object.component<duk::renderer::Camera>();
+        auto worldPos = camera->screen_to_world(engine->window()->size(), glm::vec3(input->mouse_position(), -30));
+        duk::log::debug("World pos: {0},{1},{2}", worldPos.x, worldPos.y, worldPos.z);
+
+        auto newObject = objects.add_object();
+
+        auto position = newObject.add<duk::renderer::Position3D>();
+        position->value = worldPos;
+
+        auto meshRenderer = newObject.add<duk::renderer::MeshRenderer>();
+        meshRenderer->mesh = engine->pools()->get<duk::renderer::MeshPool>()->sphere();
+        meshRenderer->material = engine->pools()->get<duk::renderer::MaterialPool>()->find(duk::resource::Id(1000013));
     }
 }
 

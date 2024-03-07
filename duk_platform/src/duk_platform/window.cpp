@@ -45,4 +45,9 @@ uint32_t Window::width() const {
 uint32_t Window::height() const {
     return m_height;
 }
+
+glm::uvec2 Window::size() const {
+    return {m_width, m_height};
+}
+
 }// namespace duk::platform
