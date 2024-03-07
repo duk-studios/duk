@@ -5,7 +5,7 @@
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
 
-#include <duk_renderer/components/register_components.h>
+#include <duk_renderer/components/register_types.h>
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/material_pool.h>
 #include <duk_renderer/pools/mesh_pool.h>
@@ -45,7 +45,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
         m_globalDescriptors = std::make_unique<GlobalDescriptors>(globalDescriptorsCreateInfo);
     }
 
-    register_components();
+    register_types();
 }
 
 Renderer::~Renderer() = default;
@@ -153,7 +153,7 @@ Renderer::RenderStartEvent& Renderer::render_start_event() {
 }
 
 void Renderer::update_global_descriptors(duk::scene::Objects& objects) {
-    m_globalDescriptors->update_cameras(objects, render_width(), render_height());
+    m_globalDescriptors->update_cameras(objects);
 
     m_globalDescriptors->update_lights(objects);
 }

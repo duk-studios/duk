@@ -1,12 +1,12 @@
 /// 03/02/2024
-/// register_components.h
+/// register_types.h
 
 #ifndef DUK_RENDERER_REGISTER_COMPONENTS_H
 #define DUK_RENDERER_REGISTER_COMPONENTS_H
 
 namespace duk::renderer {
 
-void register_components();
+void register_types();
 
 }
 

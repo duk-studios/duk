@@ -27,7 +27,7 @@ GlobalDescriptors::GlobalDescriptors(const GlobalDescriptorsCreateInfo& globalDe
     }
 }
 
-void GlobalDescriptors::update_cameras(scene::Objects& objects, uint32_t width, uint32_t height) {
+void GlobalDescriptors::update_cameras(scene::Objects& objects) {
     uint32_t cameraCount = 0;
     for (auto object: objects.all_with<Camera>()) {
         cameraCount++;
@@ -35,11 +35,12 @@ void GlobalDescriptors::update_cameras(scene::Objects& objects, uint32_t width, 
             duk::log::warn("multiple cameras detected, unsupported at the moment");
             break;
         }
-        auto& camera = m_cameraUBO->data();
-        camera.proj = calculate_projection(object, width, height);
-        camera.view = calculate_view(object);
-        camera.invView = glm::inverse(camera.view);
-        camera.vp = camera.proj * camera.view;
+        auto camera = object.component<Camera>();
+        auto& uboData = m_cameraUBO->data();
+        uboData.proj = camera->proj;
+        uboData.view = camera->view;
+        uboData.invView = camera->invView;
+        uboData.vp = camera->vp;
         m_cameraUBO->flush();
     }
     if (cameraCount == 0) {
