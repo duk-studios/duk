@@ -9,6 +9,8 @@
 #include <duk_platform/key_codes.h>
 #include <duk_platform/window_error.h>
 
+#include <glm/glm.hpp>
+
 #include <cstdint>
 #include <memory>
 
@@ -42,6 +44,8 @@ public:
     DUK_NO_DISCARD uint32_t width() const;
 
     DUK_NO_DISCARD uint32_t height() const;
+
+    DUK_NO_DISCARD glm::uvec2 size() const;
 
     virtual void show() = 0;
 

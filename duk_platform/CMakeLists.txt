@@ -34,6 +34,7 @@ target_link_libraries(duk_platform
         duk_macros
         duk_hash
         duk_event
+        glm::glm
 
         )
 
