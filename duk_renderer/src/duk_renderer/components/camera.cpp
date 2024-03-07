@@ -39,7 +39,16 @@ static void update_cameras(duk::scene::Objects& objects, uint32_t width, uint32_
 
 }// namespace detail
 
+glm::vec3 Camera::screen_to_world(const glm::vec2& screenSize, const glm::vec3& screenPosition) const {
+    auto ndc = glm::vec3(screenPosition.x / screenSize.x, 1.0 - screenPosition.y / screenSize.y, detail::z_depth(proj, screenPosition.z)) * 2.0f - 1.0f;
 
+    auto localPos = invProj * glm::vec4(ndc, 1.0f);
+    localPos /= localPos.w;
+
+    auto worldPos = invView * localPos;
+
+    return worldPos;
+}
 
 void CameraUpdateSystem::enter(duk::scene::Objects& objects, duk::scene::Environment* environment) {
     CameraUpdateSystem::update(objects, environment);// update cameras on enter
