@@ -49,7 +49,7 @@ PhongInstanceBuffer::PhongInstanceBuffer(const PhongInstanceBufferCreateInfo& ph
     StorageBufferCreateInfo transformSBOCreateInfo = {};
     transformSBOCreateInfo.rhi = rhi;
     transformSBOCreateInfo.commandQueue = commandQueue;
-    transformSBOCreateInfo.initialSize = 1;
+    transformSBOCreateInfo.initialSize = 32;
     m_transformSBO = std::make_unique<StorageBuffer<PhongDescriptors::Transform>>(transformSBOCreateInfo);
 }
 
@@ -148,6 +148,7 @@ void PhongMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer, co
     m_descriptorSet->set(PhongDescriptors::uLights, drawParams.globalDescriptors->lights_ubo()->descriptor());
 
     // These might have changed
+    m_descriptorSet->set(PhongDescriptors::uTransform, m_instanceBuffer->transform_buffer()->descriptor());
     m_descriptorSet->set(PhongDescriptors::uBaseColor, m_albedo.descriptor());
     m_descriptorSet->set(PhongDescriptors::uSpecular, m_specular.descriptor());
 
