@@ -147,7 +147,7 @@ public:
     DUK_NO_DISCARD duk::hash::Hash hash() const override;
 
 private:
-    void update_data_hash();
+    void update_hash();
 
     std::unique_ptr<VulkanBufferMemory> create_buffer();
 
@@ -164,7 +164,7 @@ private:
     std::vector<std::unique_ptr<VulkanBufferMemory>> m_buffers;
     std::vector<duk::hash::Hash> m_bufferHashes;
     std::vector<uint8_t> m_data;
-    duk::hash::Hash m_dataHash;
+    duk::hash::Hash m_hash;
 };
 
 }// namespace duk::rhi

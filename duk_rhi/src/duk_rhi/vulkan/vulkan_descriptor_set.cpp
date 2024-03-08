@@ -265,6 +265,7 @@ void VulkanDescriptorSet::flush() {
 void VulkanDescriptorSet::update_hash() {
     duk::hash::Hash hash = 0;
     for (auto& descriptor: m_descriptors) {
+        descriptor.update_hash();
         duk::hash::hash_combine(hash, descriptor.hash());
     }
     duk::hash::hash_combine(hash, m_descriptors.size());
