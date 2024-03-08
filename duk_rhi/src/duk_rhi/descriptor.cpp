@@ -97,7 +97,8 @@ void Descriptor::update_hash() {
     switch (m_type) {
         case DescriptorType::UNIFORM_BUFFER:
         case DescriptorType::STORAGE_BUFFER:
-            duk::hash::hash_combine(hash, m_data.bufferDescriptor.buffer);
+            // use the internal buffer hash, it is recomputed everytime that the size of the buffer changes
+            duk::hash::hash_combine(hash, m_data.bufferDescriptor.buffer->hash());
             break;
         case DescriptorType::IMAGE_SAMPLER:
             duk::hash::hash_combine(hash, m_data.imageDescriptor.sampler);

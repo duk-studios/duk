@@ -63,7 +63,6 @@ public:
 
     DUK_NO_DISCARD bool operator==(const Descriptor& rhs) const noexcept;
 
-private:
     void update_hash();
 
 private:

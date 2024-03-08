@@ -202,7 +202,7 @@ VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo)
     , m_elementCount(bufferCreateInfo.elementCount)
     , m_elementSize(bufferCreateInfo.elementSize)
     , m_data(m_elementCount * m_elementSize, 0)
-    , m_dataHash(0) {
+    , m_hash(0) {
     create(bufferCreateInfo.imageCount);
 }
 
@@ -216,14 +216,14 @@ void VulkanBuffer::update(uint32_t imageIndex) {
     imageIndex = fix_index(imageIndex);
 
     auto& bufferHash = m_bufferHashes[imageIndex];
-    if (bufferHash != m_dataHash) {
+    if (bufferHash != m_hash) {
         auto& buffer = m_buffers[imageIndex];
         if (buffer->size() < m_data.size()) {
             // we need to resize this buffer
             buffer = create_buffer();
         }
         buffer->write(m_data.data(), m_data.size(), 0);
-        bufferHash = m_dataHash;
+        bufferHash = m_hash;
     }
 }
 
@@ -294,11 +294,13 @@ void VulkanBuffer::resize(size_t elementCount) {
 }
 
 void VulkanBuffer::flush() {
-    update_data_hash();
+    update_hash();
+
+    // reset our hashes, so we ensure that we are rewriting on the next update calls
+    std::fill(m_bufferHashes.begin(), m_bufferHashes.end(), 0);
 
     // static buffers updates as soon as we flush
-    // also check if hash changed, so we can avoid calling vkDeviceIdle unnecessarily
-    if (m_bufferHashes[0] != m_dataHash && m_updateFrequency == Buffer::UpdateFrequency::STATIC) {
+    if (m_updateFrequency == Buffer::UpdateFrequency::STATIC) {
         // this may be really expensive, we need to wait for the device to idle because it may be using this buffer while we update it
         // we could try using pipeline barriers to make sure that we only wait when necessary
         vkDeviceWaitIdle(m_device);
@@ -316,10 +318,10 @@ void VulkanBuffer::invalidate() {
 
     m_buffers[0]->read(m_data.data(), m_data.size(), 0);
 
-    update_data_hash();
+    update_hash();
 
     // update buffer hash, so we don't do a redundant write on the next update call
-    m_bufferHashes[0] = m_dataHash;
+    m_bufferHashes[0] = m_hash;
 }
 
 size_t VulkanBuffer::element_count() const {
@@ -343,12 +345,12 @@ CommandQueue* VulkanBuffer::command_queue() const {
 }
 
 duk::hash::Hash VulkanBuffer::hash() const {
-    return m_dataHash;
+    return m_hash;
 }
 
-void VulkanBuffer::update_data_hash() {
-    m_dataHash = 0;
-    duk::hash::hash_combine(m_dataHash, m_data.data(), m_data.size());
+void VulkanBuffer::update_hash() {
+    m_hash = 0;
+    duk::hash::hash_combine(m_hash, m_elementCount);
 }
 
 std::unique_ptr<VulkanBufferMemory> VulkanBuffer::create_buffer() {
