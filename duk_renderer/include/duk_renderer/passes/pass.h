@@ -14,7 +14,7 @@
 namespace duk {
 
 namespace scene {
-class Scene;
+class Objects;
 }
 
 namespace renderer {
@@ -62,15 +62,16 @@ class Pass {
 public:
     virtual ~Pass();
 
-    struct RenderParams {
-        duk::rhi::CommandBuffer* commandBuffer;
-        duk::scene::Scene* scene;
+    struct UpdateParams {
+        duk::scene::Objects* objects;
         GlobalDescriptors* globalDescriptors;
         uint32_t outputWidth;
         uint32_t outputHeight;
     };
 
-    virtual void render(const RenderParams& renderParams) = 0;
+    virtual void update(const UpdateParams& params) = 0;
+
+    virtual void render(duk::rhi::CommandBuffer* commandBuffer) = 0;
 };
 
 }// namespace renderer

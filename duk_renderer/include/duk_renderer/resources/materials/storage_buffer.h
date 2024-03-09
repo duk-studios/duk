@@ -49,28 +49,37 @@ public:
     void flush();
 
 private:
+    std::shared_ptr<duk::rhi::Buffer> create_buffer(size_t elementCount);
+
     T* ptr_at(size_t index);
 
     const T* const_ptr_at(size_t index) const;
 
 private:
     duk::rhi::RHI* m_rhi;
+    duk::rhi::CommandQueue* m_commandQueue;
     size_t m_size;
     std::shared_ptr<duk::rhi::Buffer> m_buffer;
 };
 
 template<typename T>
-StorageBuffer<T>::StorageBuffer(const StorageBufferCreateInfo& storageBufferCreateInfo)
-    : m_rhi(storageBufferCreateInfo.rhi)
-    , m_size(0) {
+std::shared_ptr<duk::rhi::Buffer> StorageBuffer<T>::create_buffer(size_t elementCount) {
     duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
-    bufferCreateInfo.commandQueue = storageBufferCreateInfo.commandQueue;
+    bufferCreateInfo.commandQueue = m_commandQueue;
     bufferCreateInfo.type = rhi::Buffer::Type::STORAGE;
     bufferCreateInfo.elementSize = sizeof(T);
-    bufferCreateInfo.elementCount = storageBufferCreateInfo.initialSize;
+    bufferCreateInfo.elementCount = elementCount;
     bufferCreateInfo.updateFrequency = rhi::Buffer::UpdateFrequency::DYNAMIC;
 
-    m_buffer = m_rhi->create_buffer(bufferCreateInfo);
+    return m_rhi->create_buffer(bufferCreateInfo);
+}
+
+template<typename T>
+StorageBuffer<T>::StorageBuffer(const StorageBufferCreateInfo& storageBufferCreateInfo)
+    : m_rhi(storageBufferCreateInfo.rhi)
+    , m_commandQueue(storageBufferCreateInfo.commandQueue)
+    , m_size(0) {
+    m_buffer = create_buffer(storageBufferCreateInfo.initialSize);
     flush();
 }
 
@@ -102,8 +111,10 @@ size_t StorageBuffer<T>::size() const {
 template<typename T>
 T& StorageBuffer<T>::next() {
     if (m_size >= m_buffer->element_count()) {
-        // create a new buffer and copy everything again
-        m_buffer->resize(std::ceil(m_size * std::numbers::phi_v<float>));
+        // create a new buffer and copy everything
+        auto buffer = create_buffer(std::ceil(m_size * std::numbers::phi_v<float>));
+        buffer->copy_from(m_buffer.get(), m_buffer->byte_size(), 0, 0);
+        m_buffer = buffer;
     }
     auto ptr = ptr_at(m_size++);
     ::new (ptr) T();

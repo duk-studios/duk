@@ -18,8 +18,12 @@ Pipeline::Pipeline(const PipelineCreateInfo& pipelineCreateInfo)
     });
 }
 
-void Pipeline::use(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
-    commandBuffer->bind_graphics_pipeline(m_pipelineCache.find_pipeline_for_params(params));
+void Pipeline::update(const DrawParams& params) {
+    m_currentPipeline = m_pipelineCache.find_pipeline_for_params(params);
+}
+
+void Pipeline::use(duk::rhi::CommandBuffer* commandBuffer) {
+    commandBuffer->bind_graphics_pipeline(m_currentPipeline);
 }
 
 void Pipeline::update_shader(duk::rhi::ShaderDataSource* shaderDataSource) {

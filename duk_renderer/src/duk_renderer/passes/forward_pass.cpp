@@ -32,16 +32,16 @@ static bool valid(const MeshDrawEntry& drawEntry) {
     return drawEntry.material != nullptr && drawEntry.mesh != nullptr && drawEntry.instanceCount > 0;
 }
 
-static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, MeshDrawData* drawData) {
+static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, MeshDrawData* drawData) {
     drawData->clear();
-    auto& objects = renderParams.scene->objects();
+    auto objects = params.objects;
     auto& meshes = drawData->meshes;
     auto& sortedMeshes = drawData->sortedMeshes;
     auto& drawEntries = drawData->drawEntries;
 
     std::set<Material*> uniqueMaterials;
 
-    for (auto object: objects.all_with<MeshRenderer>()) {
+    for (auto object: objects->all_with<MeshRenderer>()) {
         auto meshRenderer = object.component<MeshRenderer>();
 
         auto material = meshRenderer->material.get();
@@ -81,16 +81,12 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
     SortKey::sort_indices(meshes, sortedMeshes);
 
     MeshDrawEntry drawEntry = {};
-    drawEntry.params.renderPass = renderPass;
-    drawEntry.params.outputWidth = renderParams.outputWidth;
-    drawEntry.params.outputHeight = renderParams.outputHeight;
-    drawEntry.params.globalDescriptors = renderParams.globalDescriptors;
 
     for (auto sortedIndex: sortedMeshes) {
         auto& meshEntry = meshes[sortedIndex];
 
         // update instance buffer
-        meshEntry.material->instance_buffer()->insert(objects.object(meshEntry.objectId));
+        meshEntry.material->instance_buffer()->insert(objects->object(meshEntry.objectId));
 
         if (compatible(meshEntry, drawEntry)) {
             drawEntry.instanceCount++;
@@ -118,19 +114,17 @@ static void render_meshes(const Pass::RenderParams& renderParams, duk::rhi::Rend
         drawEntries.push_back(drawEntry);
     }
 
-    // mark all instance buffers for gpu upload
-    for (auto material: uniqueMaterials) {
-        material->instance_buffer()->flush();
-    }
+    // update materials
+    DrawParams drawParams = {};
+    drawParams.globalDescriptors = params.globalDescriptors;
+    drawParams.outputWidth = params.outputWidth;
+    drawParams.outputHeight = params.outputHeight;
+    drawParams.renderPass = renderPass;
 
-    // for each draw entry
-    Material* currentMaterial = nullptr;
-    for (auto& entry: drawEntries) {
-        if (currentMaterial != entry.material) {
-            currentMaterial = entry.material;
-            entry.material->bind(renderParams.commandBuffer, entry.params);
-        }
-        entry.mesh->draw(renderParams.commandBuffer, entry.instanceCount, entry.firstInstance);
+    for (auto material: uniqueMaterials) {
+        // flush instance buffers
+        material->instance_buffer()->flush();
+        material->update(drawParams);
     }
 }
 
@@ -149,9 +143,9 @@ static bool valid(const SpriteDrawEntry& drawEntry) {
     return drawEntry.material != nullptr && drawEntry.instanceCount > 0;
 }
 
-void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass* renderPass, SpriteDrawData* drawData) {
+static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, SpriteDrawData* drawData) {
     drawData->clear();
-    auto& objects = renderParams.scene->objects();
+    auto objects = params.objects;
     auto& sortedSprites = drawData->sortedSprites;
     auto& sprites = drawData->sprites;
     auto& drawEntries = drawData->drawEntries;
@@ -159,7 +153,7 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
 
     std::set<Material*> usedMaterials;
 
-    for (auto object: objects.all_with<SpriteRenderer>()) {
+    for (auto object: objects->all_with<SpriteRenderer>()) {
         auto spriteRenderer = object.component<SpriteRenderer>();
         auto material = spriteRenderer->material.get();
         auto sprite = spriteRenderer->sprite.get();
@@ -186,7 +180,7 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
     for (auto sortedIndex: sortedSprites) {
         auto& spriteEntry = sprites[sortedIndex];
 
-        auto object = objects.object(spriteEntry.objectId);
+        auto object = objects->object(spriteEntry.objectId);
 
         brush->push(spriteEntry.sprite, model_matrix_3d(object));
 
@@ -206,22 +200,14 @@ void render_sprites(const Pass::RenderParams& renderParams, duk::rhi::RenderPass
         drawEntries.push_back(drawEntry);
     }
 
-    auto& commandBuffer = renderParams.commandBuffer;
-
     DrawParams drawParams = {};
-    drawParams.globalDescriptors = renderParams.globalDescriptors;
-    drawParams.outputWidth = renderParams.outputWidth;
-    drawParams.outputHeight = renderParams.outputHeight;
+    drawParams.globalDescriptors = params.globalDescriptors;
+    drawParams.outputWidth = params.outputWidth;
+    drawParams.outputHeight = params.outputHeight;
     drawParams.renderPass = renderPass;
 
-    Material* currentMaterial = nullptr;
-
-    for (auto& entry: drawEntries) {
-        if (entry.material != currentMaterial) {
-            entry.material->bind(commandBuffer, drawParams);
-            currentMaterial = entry.material;
-        }
-        entry.brush->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
+    for (auto& material: usedMaterials) {
+        material->update(drawParams);
     }
 }
 
@@ -281,9 +267,13 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
 
 ForwardPass::~ForwardPass() = default;
 
-void ForwardPass::render(const RenderParams& renderParams) {
-    if (!m_colorImage || m_colorImage->width() != renderParams.outputWidth || m_colorImage->height() != renderParams.outputHeight) {
-        m_colorImage = m_renderer->create_color_image(renderParams.outputWidth, renderParams.outputHeight, detail::kColorFormat);
+PassConnection* ForwardPass::out_color() {
+    return &m_outColor;
+}
+
+void ForwardPass::update(const Pass::UpdateParams& params) {
+    if (!m_colorImage || m_colorImage->width() != params.outputWidth || m_colorImage->height() != params.outputHeight) {
+        m_colorImage = m_renderer->create_color_image(params.outputWidth, params.outputHeight, detail::kColorFormat);
 
         // recreate frame buffer in case image was resized
         m_frameBuffer.reset();
@@ -291,8 +281,8 @@ void ForwardPass::render(const RenderParams& renderParams) {
         m_outColor.update(m_colorImage.get());
     }
 
-    if (!m_depthImage || m_depthImage->width() != renderParams.outputWidth || m_depthImage->height() != renderParams.outputHeight) {
-        m_depthImage = m_renderer->create_depth_image(renderParams.outputWidth, renderParams.outputHeight);
+    if (!m_depthImage || m_depthImage->width() != params.outputWidth || m_depthImage->height() != params.outputHeight) {
+        m_depthImage = m_renderer->create_depth_image(params.outputWidth, params.outputHeight);
 
         // recreate frame buffer in case image was resized
         m_frameBuffer.reset();
@@ -309,17 +299,39 @@ void ForwardPass::render(const RenderParams& renderParams) {
         m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
     }
 
-    renderParams.commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
+    detail::update_meshes(params, m_renderPass.get(), &m_meshDrawData);
 
-    detail::render_meshes(renderParams, m_renderPass.get(), &m_meshDrawData);
-
-    detail::render_sprites(renderParams, m_renderPass.get(), &m_spriteDrawData);
-
-    renderParams.commandBuffer->end_render_pass();
+    detail::update_sprites(params, m_renderPass.get(), &m_spriteDrawData);
 }
 
-PassConnection* ForwardPass::out_color() {
-    return &m_outColor;
+void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
+    commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
+
+    // render meshes
+    {
+        Material* currentMaterial = nullptr;
+        for (auto& entry: m_meshDrawData.drawEntries) {
+            if (currentMaterial != entry.material) {
+                currentMaterial = entry.material;
+                entry.material->bind(commandBuffer);
+            }
+            entry.mesh->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
+        }
+    }
+
+    // render sprites
+    {
+        Material* currentMaterial = nullptr;
+        for (auto& entry: m_spriteDrawData.drawEntries) {
+            if (entry.material != currentMaterial) {
+                entry.material->bind(commandBuffer);
+                currentMaterial = entry.material;
+            }
+            entry.brush->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
+        }
+    }
+
+    commandBuffer->end_render_pass();
 }
 
 }// namespace duk::renderer

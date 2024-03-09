@@ -63,7 +63,9 @@ public:
 
     DUK_NO_DISCARD virtual uint32_t size() const = 0;
 
-    virtual void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& drawParams) = 0;
+    virtual void update(const DrawParams& params) = 0;
+
+    virtual void bind(duk::rhi::CommandBuffer* commandBuffer) = 0;
 };
 
 namespace detail {

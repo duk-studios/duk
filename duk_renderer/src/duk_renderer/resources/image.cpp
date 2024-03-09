@@ -17,6 +17,7 @@ Image::Image(const ImageCreateInfo& imageCreateInfo) {
     rhiImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::STATIC;
     rhiImageCreateInfo.usage = duk::rhi::Image::Usage::SAMPLED;
     rhiImageCreateInfo.initialLayout = duk::rhi::Image::Layout::SHADER_READ_ONLY;
+    rhiImageCreateInfo.dstStages = duk::rhi::PipelineStage::FRAGMENT_SHADER | duk::rhi::PipelineStage::VERTEX_SHADER | duk::rhi::PipelineStage::COMPUTE_SHADER;
 
     m_image = rhi->create_image(rhiImageCreateInfo);
 }

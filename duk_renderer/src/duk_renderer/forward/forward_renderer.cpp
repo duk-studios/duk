@@ -16,6 +16,7 @@ ForwardRenderer::ForwardRenderer(const ForwardRendererCreateInfo& forwardRendere
 
     PresentPassCreateInfo presentPassCreateInfo = {};
     presentPassCreateInfo.renderer = this;
+    presentPassCreateInfo.window = forwardRendererCreateInfo.rendererCreateInfo.window;
 
     auto presentPass = std::make_shared<PresentPass>(presentPassCreateInfo);
 

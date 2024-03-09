@@ -1,6 +1,7 @@
 /// 05/10/2023
 /// present_pass.cpp
 
+#include <duk_platform/window.h>
 #include <duk_renderer/passes/present_pass.h>
 #include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
 #include <duk_renderer/resources/materials/pipeline.h>
@@ -10,6 +11,14 @@ namespace duk::renderer {
 PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
     : m_renderer(presentPassCreateInfo.renderer)
     , m_inColor(duk::rhi::Access::SHADER_READ, duk::rhi::PipelineStage::FRAGMENT_SHADER, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
+    {
+        //ensure that we recreate the framebuffer on this frame
+        auto window = presentPassCreateInfo.window;
+        m_listener.listen(window->window_resize_event, [this](uint32_t width, uint32_t height) {
+            m_frameBuffer.reset();
+        });
+    }
+
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};
         colorAttachmentDescription.format = m_renderer->rhi()->present_image()->format();
@@ -48,7 +57,11 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
 
 PresentPass::~PresentPass() = default;
 
-void PresentPass::render(const Pass::RenderParams& renderParams) {
+PassConnection* PresentPass::in_color() {
+    return &m_inColor;
+}
+
+void PresentPass::update(const Pass::UpdateParams& params) {
     if (!m_inColor.image()) {
         return;
     }
@@ -57,7 +70,7 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
         return;
     }
 
-    if (!m_frameBuffer || m_frameBuffer->width() != renderParams.outputWidth || m_frameBuffer->height() != renderParams.outputHeight) {
+    if (!m_frameBuffer) {
         duk::rhi::Image* frameBufferAttachments[] = {m_renderer->rhi()->present_image()};
 
         duk::rhi::RHI::FrameBufferCreateInfo frameBufferCreateInfo = {};
@@ -70,8 +83,16 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
 
     m_fullscreenMaterialDescriptorSet->set_image(m_inColor.image());
 
-    auto commandBuffer = renderParams.commandBuffer;
+    DrawParams drawParams = {};
+    drawParams.globalDescriptors = params.globalDescriptors;
+    drawParams.outputWidth = params.outputWidth;
+    drawParams.outputHeight = params.outputHeight;
+    drawParams.renderPass = m_renderPass.get();
 
+    m_fullscreenMaterial->update(drawParams);
+}
+
+void PresentPass::render(duk::rhi::CommandBuffer* commandBuffer) {
     // use a pipeline barrier to make sure that inColor is ready
     {
         auto imageMemoryBarrier = m_inColor.image_memory_barrier();
@@ -85,22 +106,12 @@ void PresentPass::render(const Pass::RenderParams& renderParams) {
 
     commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
-    DrawParams drawParams = {};
-    drawParams.globalDescriptors = renderParams.globalDescriptors;
-    drawParams.outputWidth = renderParams.outputWidth;
-    drawParams.outputHeight = renderParams.outputHeight;
-    drawParams.renderPass = m_renderPass.get();
-
-    m_fullscreenMaterial->bind(commandBuffer, drawParams);
+    m_fullscreenMaterial->bind(commandBuffer);
 
     // a single triangle that will cover the entire screen
     commandBuffer->draw(3, 0, 1, 0);
 
     commandBuffer->end_render_pass();
-}
-
-PassConnection* PresentPass::in_color() {
-    return &m_inColor;
 }
 
 }// namespace duk::renderer

@@ -55,6 +55,8 @@ public:
 private:
     void update_global_descriptors(duk::scene::Objects& objects);
 
+    void update_passes(scene::Objects& objects);
+
 protected:
     duk::platform::Window* m_window;
     std::shared_ptr<duk::rhi::RHI> m_rhi;

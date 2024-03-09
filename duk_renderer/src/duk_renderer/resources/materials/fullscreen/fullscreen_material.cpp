@@ -46,7 +46,11 @@ void FullscreenMaterialDescriptorSet::set_image(duk::rhi::Image* image) {
     m_descriptorSet->flush();
 }
 
-void FullscreenMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
+void FullscreenMaterialDescriptorSet::update(const DrawParams& params) {
+    // nothing to update
+}
+
+void FullscreenMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer) {
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }
 
