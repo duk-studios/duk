@@ -5,6 +5,7 @@
 #include <duk_rhi/vulkan/vulkan_buffer.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
+#include <duk_rhi/vulkan/vulkan_resource_manager.h>
 
 #include <list>
 #include <stdexcept>
@@ -100,6 +101,12 @@ const std::vector<VkDescriptorSetLayoutBinding>& VulkanDescriptorSetLayoutCache:
     return create_descriptor_set_layout(descriptorSetDescription, hash).bindings;
 }
 
+duk::hash::Hash VulkanDescriptorSetLayoutCache::calculate_hash(const DescriptorSetDescription& descriptorSetDescription) {
+    duk::hash::Hash hash = 0;
+    duk::hash::hash_combine(hash, descriptorSetDescription);
+    return hash;
+}
+
 const VulkanDescriptorSetLayoutCache::CacheEntry& VulkanDescriptorSetLayoutCache::create_descriptor_set_layout(const DescriptorSetDescription& descriptorSetDescription, duk::hash::Hash hash) {
     const auto& descriptorBindings = descriptorSetDescription.bindings;
     std::vector<VkDescriptorSetLayoutBinding> bindings;
@@ -138,21 +145,14 @@ const VulkanDescriptorSetLayoutCache::CacheEntry& VulkanDescriptorSetLayoutCache
     return it->second;
 }
 
-duk::hash::Hash VulkanDescriptorSetLayoutCache::calculate_hash(const DescriptorSetDescription& descriptorSetDescription) {
-    duk::hash::Hash hash = 0;
-    duk::hash::hash_combine(hash, descriptorSetDescription);
-    return hash;
-}
-
 VulkanDescriptorSet::VulkanDescriptorSet(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo)
     : m_device(descriptorSetCreateInfo.device)
     , m_samplerCache(descriptorSetCreateInfo.samplerCache)
+    , m_resourceManager(descriptorSetCreateInfo.resourceManager)
     , m_descriptorSetDescription(descriptorSetCreateInfo.descriptorSetDescription)
     , m_descriptorSetLayout(descriptorSetCreateInfo.descriptorSetLayoutCache->get_layout(m_descriptorSetDescription))
     , m_descriptorBindings(descriptorSetCreateInfo.descriptorSetLayoutCache->get_bindings(m_descriptorSetDescription))
-    , m_descriptors(m_descriptorBindings.size())
-    , m_descriptorSetHash(duk::hash::kUndefinedHash)
-    , m_descriptorSetHashes(descriptorSetCreateInfo.imageCount, m_descriptorSetHash) {
+    , m_descriptors(m_descriptorBindings.size()) {
     create(descriptorSetCreateInfo.imageCount);
 }
 
@@ -193,7 +193,7 @@ void VulkanDescriptorSet::create(uint32_t imageCount) {
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate VkDescriptorSet");
     }
-    m_descriptorSetHashes.resize(imageCount, duk::hash::kUndefinedHash);
+    m_resourceManager->schedule_for_update(this);
 }
 
 void VulkanDescriptorSet::clean() {
@@ -201,7 +201,6 @@ void VulkanDescriptorSet::clean() {
         clean(i);
     }
     m_descriptorSets.clear();
-    m_descriptorSetHashes.clear();
 
     vkDestroyDescriptorPool(m_device, m_descriptorPool, nullptr);
 }
@@ -215,14 +214,53 @@ void VulkanDescriptorSet::clean(uint32_t imageIndex) {
 }
 
 void VulkanDescriptorSet::update(uint32_t imageIndex) {
-    assert(m_descriptorSetHash != duk::hash::kUndefinedHash);
+    auto& descriptorSet = m_descriptorSets[imageIndex];
 
-    if (m_descriptorSetHashes[imageIndex] == m_descriptorSetHash) {
-        update_descriptors(imageIndex);
-    } else {
-        m_descriptorSetHashes[imageIndex] = m_descriptorSetHash;
-        update_descriptors_and_set(imageIndex);
-    }
+    // we need to use lists here, because we do not want to invalidate references to its elements while adding new elements
+    std::list<VkDescriptorBufferInfo> bufferInfos;
+    std::list<VkDescriptorImageInfo> imageInfos;
+    std::vector<VkWriteDescriptorSet> writeDescriptors;
+
+    detail::iterate_descriptors(
+            m_descriptors.begin(), m_descriptors.end(),
+            [&](VulkanBuffer* buffer, uint32_t bindingIndex, const Descriptor& descriptor) {
+                VkWriteDescriptorSet writeDescriptor = {};
+                writeDescriptor.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                writeDescriptor.dstBinding = writeDescriptors.size();
+                writeDescriptor.descriptorType = convert_descriptor_type(descriptor.type());
+                writeDescriptor.descriptorCount = 1;
+                writeDescriptor.dstArrayElement = 0;
+                writeDescriptor.dstSet = descriptorSet;
+
+                VkDescriptorBufferInfo bufferInfo = {};
+                bufferInfo.buffer = buffer->handle(imageIndex);
+                bufferInfo.offset = 0;
+                bufferInfo.range = buffer->byte_size();
+                bufferInfos.push_back(bufferInfo);
+                writeDescriptor.pBufferInfo = &bufferInfos.back();
+                writeDescriptors.push_back(writeDescriptor);
+            },
+            [&](VulkanImage* image, uint32_t bindingIndex, const Descriptor& descriptor) {
+                VkWriteDescriptorSet writeDescriptor = {};
+                writeDescriptor.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                writeDescriptor.dstBinding = writeDescriptors.size();
+                writeDescriptor.descriptorType = convert_descriptor_type(descriptor.type());
+                writeDescriptor.descriptorCount = 1;
+                writeDescriptor.dstArrayElement = 0;
+                writeDescriptor.dstSet = descriptorSet;
+
+                VkDescriptorImageInfo imageInfo = {};
+                imageInfo.imageView = image->image_view(imageIndex);
+                imageInfo.imageLayout = convert_layout(descriptor.image_layout());
+                if (descriptor.type() == DescriptorType::IMAGE_SAMPLER) {
+                    imageInfo.sampler = m_samplerCache->get(descriptor.sampler());
+                }
+                imageInfos.push_back(imageInfo);
+                writeDescriptor.pImageInfo = &imageInfos.back();
+                writeDescriptors.push_back(writeDescriptor);
+            });
+
+    vkUpdateDescriptorSets(m_device, writeDescriptors.size(), writeDescriptors.data(), 0, nullptr);
 }
 
 VkDescriptorSet VulkanDescriptorSet::handle(uint32_t imageIndex) {
@@ -230,7 +268,7 @@ VkDescriptorSet VulkanDescriptorSet::handle(uint32_t imageIndex) {
 }
 
 void VulkanDescriptorSet::set(uint32_t binding, const Descriptor& descriptor) {
-    assert(m_descriptorSetDescription.bindings[binding].type == descriptor.type());
+    DUK_ASSERT(m_descriptorSetDescription.bindings[binding].type == descriptor.type());
     m_descriptors[binding] = descriptor;
 }
 
@@ -259,86 +297,7 @@ const Buffer* VulkanDescriptorSet::buffer(uint32_t binding) const {
 }
 
 void VulkanDescriptorSet::flush() {
-    update_hash();
-}
-
-void VulkanDescriptorSet::update_hash() {
-    duk::hash::Hash hash = 0;
-    for (auto& descriptor: m_descriptors) {
-        descriptor.update_hash();
-        duk::hash::hash_combine(hash, descriptor.hash());
-    }
-    duk::hash::hash_combine(hash, m_descriptors.size());
-    m_descriptorSetHash = hash;
-}
-
-void VulkanDescriptorSet::update_descriptors_and_set(uint32_t imageIndex) {
-    auto& descriptorSet = m_descriptorSets[imageIndex];
-
-    // we need to use lists here, because we do not want to invalidate references to its elements while adding new elements
-    std::list<VkDescriptorBufferInfo> bufferInfos;
-    std::list<VkDescriptorImageInfo> imageInfos;
-    std::vector<VkWriteDescriptorSet> writeDescriptors;
-
-    detail::iterate_descriptors(
-            m_descriptors.begin(), m_descriptors.end(),
-            [&](VulkanBuffer* buffer, uint32_t bindingIndex, const Descriptor& descriptor) {
-                buffer->update(imageIndex);
-
-                VkWriteDescriptorSet writeDescriptor = {};
-                writeDescriptor.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                writeDescriptor.dstBinding = writeDescriptors.size();
-                writeDescriptor.descriptorType = convert_descriptor_type(descriptor.type());
-                writeDescriptor.descriptorCount = 1;
-                writeDescriptor.dstArrayElement = 0;
-                writeDescriptor.dstSet = descriptorSet;
-
-                VkDescriptorBufferInfo bufferInfo = {};
-                bufferInfo.buffer = buffer->handle(imageIndex);
-                bufferInfo.offset = 0;
-                bufferInfo.range = buffer->byte_size();
-                bufferInfos.push_back(bufferInfo);
-                writeDescriptor.pBufferInfo = &bufferInfos.back();
-                writeDescriptors.push_back(writeDescriptor);
-            },
-            [&](VulkanImage* image, uint32_t bindingIndex, const Descriptor& descriptor) {
-                auto& bindingDescription = m_descriptorSetDescription.bindings[bindingIndex];
-                image->update(imageIndex, convert_module_mask(bindingDescription.moduleMask));
-
-                VkWriteDescriptorSet writeDescriptor = {};
-                writeDescriptor.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                writeDescriptor.dstBinding = writeDescriptors.size();
-                writeDescriptor.descriptorType = convert_descriptor_type(descriptor.type());
-                writeDescriptor.descriptorCount = 1;
-                writeDescriptor.dstArrayElement = 0;
-                writeDescriptor.dstSet = descriptorSet;
-
-                VkDescriptorImageInfo imageInfo = {};
-                imageInfo.imageView = image->image_view(imageIndex);
-                imageInfo.imageLayout = convert_layout(descriptor.image_layout());
-                if (descriptor.type() == DescriptorType::IMAGE_SAMPLER) {
-                    imageInfo.sampler = m_samplerCache->get(descriptor.sampler());
-                }
-                imageInfos.push_back(imageInfo);
-                writeDescriptor.pImageInfo = &imageInfos.back();
-                writeDescriptors.push_back(writeDescriptor);
-            });
-
-    vkUpdateDescriptorSets(m_device, writeDescriptors.size(), writeDescriptors.data(), 0, nullptr);
-}
-
-void VulkanDescriptorSet::update_descriptors(uint32_t imageIndex) {
-    auto& descriptorSet = m_descriptorSets[imageIndex];
-
-    detail::iterate_descriptors(
-            m_descriptors.begin(), m_descriptors.end(),
-            [imageIndex](VulkanBuffer* buffer, uint32_t bindingIndex, const Descriptor& descriptor) {
-                buffer->update(imageIndex);
-            },
-            [this, imageIndex](VulkanImage* image, uint32_t bindingIndex, const Descriptor& descriptor) {
-                auto& bindingDescription = m_descriptorSetDescription.bindings[bindingIndex];
-                image->update(imageIndex, convert_module_mask(bindingDescription.moduleMask));
-            });
+    m_resourceManager->schedule_for_update(this);
 }
 
 }// namespace duk::rhi

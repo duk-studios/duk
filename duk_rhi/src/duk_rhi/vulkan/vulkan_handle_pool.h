@@ -6,7 +6,7 @@
 
 #include <duk_rhi/vulkan/vulkan_import.h>
 
-#include <cassert>
+#include <duk_macros/assert.h>
 #include <vector>
 
 namespace duk::rhi {
@@ -19,7 +19,7 @@ public:
     }
 
     virtual ~VulkanHandlePool() {
-        assert(m_allocationCount == 0 && "memory leak on VulkanHandlePool destructor");
+        DUK_ASSERT(m_allocationCount == 0 && "memory leak on VulkanHandlePool destructor");
     }
 
     T allocate() {
@@ -34,7 +34,7 @@ public:
     }
 
     void free(T& resource) {
-        assert(m_allocationCount > 0 && "tried to free a resource on a VulkanHandlePool with no allocations");
+        DUK_ASSERT(m_allocationCount > 0 && "tried to free a resource on a VulkanHandlePool with no allocations");
         m_allocationCount--;
         m_resources.push_back(resource);
         resource = VK_NULL_HANDLE;

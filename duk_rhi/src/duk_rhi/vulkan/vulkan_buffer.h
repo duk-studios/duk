@@ -15,6 +15,8 @@
 
 namespace duk::rhi {
 
+class VulkanResourceManager;
+
 struct VulkanBufferMemoryCreateInfo {
     VkDevice device;
     VulkanPhysicalDevice* physicalDevice;
@@ -100,6 +102,7 @@ struct VulkanBufferCreateInfo {
     VulkanPhysicalDevice* physicalDevice;
     VulkanCommandQueue* commandQueue;
     uint32_t imageCount;
+    VulkanResourceManager* resourceManager;
 };
 
 class VulkanBuffer : public Buffer {
@@ -128,11 +131,7 @@ public:
 
     void copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) override;
 
-    void resize(size_t elementCount) override;
-
     void flush() override;
-
-    void invalidate() override;
 
     DUK_NO_DISCARD size_t element_count() const override;
 
@@ -144,14 +143,8 @@ public:
 
     DUK_NO_DISCARD CommandQueue* command_queue() const override;
 
-    DUK_NO_DISCARD duk::hash::Hash hash() const override;
-
 private:
-    void update_hash();
-
     std::unique_ptr<VulkanBufferMemory> create_buffer();
-
-    uint32_t fix_index(uint32_t imageIndex);
 
 private:
     VkDevice m_device;
@@ -162,9 +155,8 @@ private:
     size_t m_elementCount;
     size_t m_elementSize;
     std::vector<std::unique_ptr<VulkanBufferMemory>> m_buffers;
-    std::vector<duk::hash::Hash> m_bufferHashes;
     std::vector<uint8_t> m_data;
-    duk::hash::Hash m_hash;
+    VulkanResourceManager* m_resourceManager;
 };
 
 }// namespace duk::rhi

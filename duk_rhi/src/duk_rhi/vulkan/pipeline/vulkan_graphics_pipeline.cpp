@@ -5,6 +5,7 @@
 #include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
 #include <duk_rhi/vulkan/vulkan_flags.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
+#include <duk_rhi/vulkan/vulkan_resource_manager.h>
 
 #include <stdexcept>
 
@@ -186,19 +187,18 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreat
     : m_device(pipelineCreateInfo.device)
     , m_shader(pipelineCreateInfo.shader)
     , m_renderPass(pipelineCreateInfo.renderPass)
+    , m_resourceManager(pipelineCreateInfo.resourceManager)
     , m_viewport(pipelineCreateInfo.viewport)
     , m_scissor(pipelineCreateInfo.scissor)
     , m_cullModeMask(pipelineCreateInfo.cullModeMask)
     , m_blend(pipelineCreateInfo.blend)
     , m_topology(pipelineCreateInfo.topology)
     , m_fillMode(pipelineCreateInfo.fillMode)
-    , m_depthTesting(pipelineCreateInfo.depthTesting)
-    , m_hash(duk::hash::kUndefinedHash) {
+    , m_depthTesting(pipelineCreateInfo.depthTesting) {
     if (!m_shader->is_graphics_shader()) {
         throw std::invalid_argument("invalid shader type for GraphicsPipeline");
     }
     create(pipelineCreateInfo.imageCount);
-    update_hash();
 }
 
 VulkanGraphicsPipeline::~VulkanGraphicsPipeline() {
@@ -206,8 +206,8 @@ VulkanGraphicsPipeline::~VulkanGraphicsPipeline() {
 }
 
 void VulkanGraphicsPipeline::create(uint32_t imageCount) {
-    m_pipelineHashes.resize(imageCount, duk::hash::kUndefinedHash);
     m_pipelines.resize(imageCount);
+    m_resourceManager->schedule_for_update(this);
 }
 
 void VulkanGraphicsPipeline::clean(uint32_t imageIndex) {
@@ -223,16 +223,9 @@ void VulkanGraphicsPipeline::clean() {
         clean(i);
     }
     m_pipelines.clear();
-    m_pipelineHashes.clear();
 }
 
 void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
-    auto& pipelineHash = m_pipelineHashes[imageIndex];
-    if (pipelineHash == m_hash) {
-        return;
-    }
-    pipelineHash = m_hash;
-
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
     {
         auto& shaderModules = m_shader->shader_modules();
@@ -419,15 +412,7 @@ GraphicsPipeline::FillMode VulkanGraphicsPipeline::fill_mode() const {
 }
 
 void VulkanGraphicsPipeline::flush() {
-    update_hash();
-}
-
-hash::Hash VulkanGraphicsPipeline::hash() const {
-    return m_hash;
-}
-
-void VulkanGraphicsPipeline::update_hash() {
-    m_hash = hash_of(m_viewport, m_scissor, m_blend, m_shader, m_renderPass, m_cullModeMask, m_depthTesting);
+    m_resourceManager->schedule_for_update(this);
 }
 
 }// namespace duk::rhi

@@ -46,6 +46,8 @@ public:
 
     void clean(uint32_t imageIndex);
 
+    void update(uint32_t imageIndex);
+
     std::shared_ptr<VulkanBuffer> create(const VulkanBufferCreateInfo& bufferCreateInfo);
 
     std::shared_ptr<VulkanMemoryImage> create(const VulkanMemoryImageCreateInfo& imageCreateInfo);
@@ -62,72 +64,96 @@ public:
 
     std::shared_ptr<VulkanCommandQueue> create(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo);
 
+    void schedule_for_update(VulkanBuffer* buffer);
+
+    void schedule_for_update(VulkanMemoryImage* image);
+
+    void schedule_for_update(VulkanDescriptorSet* descriptorSet);
+
+    void schedule_for_update(VulkanFrameBuffer* frameBuffer);
+
+    void schedule_for_update(VulkanGraphicsPipeline* graphicsPipeline);
+
 private:
     template<typename T>
-    struct DeletionEntry {
-        T* resource;
-        std::set<uint32_t> pendingIndices;
+    struct ResourceSet {
+        std::vector<T*> all;
+        std::unordered_map<T*, std::set<uint32_t>> toDelete;
+        std::unordered_map<T*, std::set<uint32_t>> toUpdate;
     };
 
 private:
     DUK_NO_DISCARD std::set<uint32_t> image_indices_set() const;
 
-    template<typename ResourceT, typename CreateInfoT>
-    std::shared_ptr<ResourceT> create(std::vector<ResourceT*>& resources, std::vector<DeletionEntry<ResourceT>>& resourcesToDelete, const CreateInfoT& createInfo) {
-        auto deleter = [&resources, &resourcesToDelete, this](auto ptr) {
-            resources.erase(std::remove(resources.begin(), resources.end(), ptr), resources.end());
-            resourcesToDelete.push_back({ptr, image_indices_set()});
+    template<typename T, typename CreateInfoT>
+    std::shared_ptr<T> create(ResourceSet<T>& resourceSet, const CreateInfoT& createInfo) {
+        auto deleter = [&resourceSet, this](auto ptr) {
+            std::erase(resourceSet.all, ptr);
+            resourceSet.toUpdate.erase(ptr);
+            resourceSet.toDelete.emplace(ptr, image_indices_set());
         };
 
-        auto ptr = resources.emplace_back(new ResourceT(createInfo));
+        auto ptr = resourceSet.all.emplace_back(new T(createInfo));
 
         return {ptr, deleter};
     }
 
     template<typename T>
-    void clean(std::vector<DeletionEntry<T>>& resourcesToDelete, uint32_t imageIndex) {
-        std::vector<DeletionEntry<T>> aliveResources;
-        for (auto& deletionEntry: resourcesToDelete) {
-            deletionEntry.resource->clean(imageIndex);
-            deletionEntry.pendingIndices.erase(imageIndex);
-            if (deletionEntry.pendingIndices.empty()) {
-                delete deletionEntry.resource;
-                deletionEntry.resource = nullptr;
-            } else {
-                aliveResources.push_back(deletionEntry);
+    void update(ResourceSet<T>& resourceSet, uint32_t imageIndex) {
+        std::unordered_map<T*, std::set<uint32_t>> pendingResources;
+        for (auto& entry: resourceSet.toUpdate) {
+            auto& [resource, pendingImages] = entry;
+            resource->update(imageIndex);
+            pendingImages.erase(imageIndex);
+            if (!pendingImages.empty()) {
+                pendingResources.insert(entry);
             }
         }
-        aliveResources.swap(resourcesToDelete);
+        std::swap(pendingResources, resourceSet.toUpdate);
     }
 
     template<typename T>
-    void clean(std::vector<DeletionEntry<T>>& resourcesToDelete) {
-        for (auto& deletionEntry: resourcesToDelete) {
-            delete deletionEntry.resource;
+    void clean(ResourceSet<T>& resourceSet, uint32_t imageIndex) {
+        std::unordered_map<T*, std::set<uint32_t>> pendingResources;
+        for (auto& entry: resourceSet.toDelete) {
+            auto& [resource, pendingIndices] = entry;
+            resource->clean(imageIndex);
+            pendingIndices.erase(imageIndex);
+            if (pendingIndices.empty()) {
+                delete resource;
+            } else {
+                pendingResources.insert(entry);
+            }
         }
-        resourcesToDelete.clear();
+        std::swap(pendingResources, resourceSet.toDelete);
+    }
+
+    template<typename T>
+    void clean(ResourceSet<T>& resourceSet) {
+        for (auto& entry: resourceSet.toDelete) {
+            delete entry.first;
+        }
+        resourceSet.toDelete.clear();
+    }
+
+    template<typename T>
+    void schedule_for_update(ResourceSet<T>& resourceSet, T* resource) {
+        auto& imagesToUpdate = resourceSet.toUpdate[resource];
+        imagesToUpdate = image_indices_set();
     }
 
 private:
     VulkanSwapchain* m_swapchain;
     uint32_t m_imageCount;
     event::Listener m_listener;
-    std::vector<VulkanBuffer*> m_buffers;
-    std::vector<DeletionEntry<VulkanBuffer>> m_buffersToDelete;
-    std::vector<VulkanMemoryImage*> m_images;
-    std::vector<DeletionEntry<VulkanMemoryImage>> m_imagesToDelete;
-    std::vector<VulkanDescriptorSet*> m_descriptorSets;
-    std::vector<DeletionEntry<VulkanDescriptorSet>> m_descriptorSetsToDelete;
-    std::vector<VulkanGraphicsPipeline*> m_graphicsPipelines;
-    std::vector<DeletionEntry<VulkanGraphicsPipeline>> m_graphicsPipelinesToDelete;
-    std::vector<VulkanComputePipeline*> m_computePipelines;
-    std::vector<DeletionEntry<VulkanComputePipeline>> m_computePipelinesToDelete;
-    std::vector<VulkanFrameBuffer*> m_frameBuffers;
-    std::vector<DeletionEntry<VulkanFrameBuffer>> m_frameBuffersToDelete;
-    std::vector<VulkanRenderPass*> m_renderPasses;
-    std::vector<DeletionEntry<VulkanRenderPass>> m_renderPassesToDelete;
-    std::vector<VulkanCommandQueue*> m_commandQueues;
-    std::vector<DeletionEntry<VulkanCommandQueue>> m_commandQueuesToDelete;
+    ResourceSet<VulkanBuffer> m_buffers;
+    ResourceSet<VulkanMemoryImage> m_images;
+    ResourceSet<VulkanDescriptorSet> m_descriptorSets;
+    ResourceSet<VulkanFrameBuffer> m_frameBuffers;
+    ResourceSet<VulkanGraphicsPipeline> m_graphicsPipelines;
+    ResourceSet<VulkanComputePipeline> m_computePipelines;
+    ResourceSet<VulkanRenderPass> m_renderPasses;
+    ResourceSet<VulkanCommandQueue> m_commandQueues;
 };
 
 }// namespace duk::rhi

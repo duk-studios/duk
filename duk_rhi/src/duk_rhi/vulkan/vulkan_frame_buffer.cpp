@@ -3,6 +3,7 @@
 
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
+#include <duk_rhi/vulkan/vulkan_resource_manager.h>
 #include <duk_rhi/vulkan/vulkan_swapchain.h>
 
 #include <span>
@@ -12,10 +13,10 @@ namespace duk::rhi {
 VulkanFrameBuffer::VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFrameBufferCreateInfo)
     : m_device(vulkanFrameBufferCreateInfo.device)
     , m_renderPass(vulkanFrameBufferCreateInfo.renderPass)
+    , m_resourceManager(vulkanFrameBufferCreateInfo.resourceManager)
     , m_attachments(vulkanFrameBufferCreateInfo.attachments, vulkanFrameBufferCreateInfo.attachments + vulkanFrameBufferCreateInfo.attachmentCount) {
     create(vulkanFrameBufferCreateInfo.imageCount);
     update_extent();
-    update_hash();
 }
 
 VulkanFrameBuffer::~VulkanFrameBuffer() {
@@ -23,12 +24,6 @@ VulkanFrameBuffer::~VulkanFrameBuffer() {
 }
 
 void VulkanFrameBuffer::update(uint32_t imageIndex) {
-    auto& hash = m_frameBufferHashes[imageIndex];
-    if (hash == m_hash) {
-        return;
-    }
-    hash = m_hash;
-
     VkFramebufferCreateInfo framebufferCreateInfo = {};
     framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferCreateInfo.renderPass = m_renderPass->handle();
@@ -51,7 +46,7 @@ void VulkanFrameBuffer::update(uint32_t imageIndex) {
 
 void VulkanFrameBuffer::create(uint32_t imageCount) {
     m_frameBuffers.resize(imageCount);
-    m_frameBufferHashes.resize(imageCount, duk::hash::kUndefinedHash);
+    m_resourceManager->schedule_for_update(this);
 }
 
 void VulkanFrameBuffer::clean() {
@@ -59,7 +54,6 @@ void VulkanFrameBuffer::clean() {
         clean(i);
     }
     m_frameBuffers.clear();
-    m_frameBufferHashes.clear();
 }
 
 void VulkanFrameBuffer::clean(uint32_t imageIndex) {
@@ -82,19 +76,16 @@ uint32_t VulkanFrameBuffer::height() const {
     return m_height;
 }
 
+Image* VulkanFrameBuffer::at(uint32_t attachment) const {
+    return m_attachments.at(attachment);
+}
+
 void VulkanFrameBuffer::update_extent() {
     m_width = std::numeric_limits<uint32_t>::max();
     m_height = std::numeric_limits<uint32_t>::max();
     for (auto& attachment: m_attachments) {
         m_width = std::min(m_width, attachment->width());
         m_height = std::min(m_height, attachment->height());
-    }
-}
-
-void VulkanFrameBuffer::update_hash() {
-    m_hash = 0;
-    for (auto& attachment: m_attachments) {
-        duk::hash::hash_combine(m_hash, attachment->hash());
     }
 }
 

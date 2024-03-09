@@ -42,8 +42,6 @@ public:
     DUK_NO_DISCARD virtual size_t color_attachment_count() const = 0;
 
     DUK_NO_DISCARD virtual bool has_depth_attachment() const = 0;
-
-    DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 };
 
 }// namespace duk::rhi

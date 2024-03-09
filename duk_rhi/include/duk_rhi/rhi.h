@@ -60,6 +60,9 @@ public:
     /// called to start a new frame
     virtual void prepare_frame() = 0;
 
+    /// updates all GPU objects and makes them valid for rendering
+    virtual void update() = 0;
+
     /// returns a command that acquires the next image for presentation
     DUK_NO_DISCARD virtual Command* acquire_image_command() = 0;
 
@@ -129,6 +132,7 @@ public:
         Image::Layout initialLayout;
         Image::Usage usage;
         Image::UpdateFrequency updateFrequency;
+        PipelineStage::Mask dstStages;
         CommandQueue* commandQueue;
     };
 

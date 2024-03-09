@@ -13,6 +13,8 @@
 
 namespace duk::rhi {
 
+class VulkanResourceManager;
+
 VkDescriptorType convert_descriptor_type(DescriptorType descriptorType);
 
 struct VulkanDescriptorSetLayoutCacheCreateInfo {
@@ -49,6 +51,7 @@ struct VulkanDescriptorSetCreateInfo {
     VkDevice device;
     VulkanDescriptorSetLayoutCache* descriptorSetLayoutCache;
     VulkanSamplerCache* samplerCache;
+    VulkanResourceManager* resourceManager;
     uint32_t imageCount;
     DescriptorSetDescription descriptorSetDescription;
 };
@@ -86,23 +89,15 @@ public:
     void flush() override;
 
 private:
-    void update_hash();
-
-    void update_descriptors_and_set(uint32_t imageIndex);
-
-    void update_descriptors(uint32_t imageIndex);
-
-private:
     VkDevice m_device;
     VulkanSamplerCache* m_samplerCache;
+    VulkanResourceManager* m_resourceManager;
     DescriptorSetDescription m_descriptorSetDescription;
     VkDescriptorSetLayout m_descriptorSetLayout;
     std::vector<VkDescriptorSetLayoutBinding> m_descriptorBindings;
     std::vector<Descriptor> m_descriptors;
     VkDescriptorPool m_descriptorPool;
     std::vector<VkDescriptorSet> m_descriptorSets;
-    duk::hash::Hash m_descriptorSetHash;
-    std::vector<duk::hash::Hash> m_descriptorSetHashes;
 };
 
 }// namespace duk::rhi

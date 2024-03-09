@@ -5,6 +5,7 @@
 #define DUK_RHI_IMAGE_DATA_SOURCE_H
 
 #include <duk_hash/data_source.h>
+#include <duk_macros/assert.h>
 #include <duk_rhi/image.h>
 
 #include <cstring>
@@ -32,8 +33,8 @@ public:
     void read_pixels(PixelType* dst, size_t pixelCount, size_t pixelOffset) {
         const auto format = pixel_format();
         const auto pixelByteSize = format;
-        assert(pixelByteSize == sizeof(PixelType));
-        assert(pixel_count() >= pixelCount + pixelOffset);
+        DUK_ASSERT(pixelByteSize == sizeof(PixelType));
+        DUK_ASSERT(pixel_count() >= pixelCount + pixelOffset);
         read_bytes((void*)dst, pixelCount * pixelByteSize, pixelOffset * pixelByteSize);
     }
 };
@@ -45,28 +46,28 @@ public:
         : m_pixels(width * height)
         , m_width(width)
         , m_height(height) {
-        assert(width * height == m_pixels.size());
+        DUK_ASSERT(width * height == m_pixels.size());
     }
 
     ImageDataSourceT(std::vector<PixelType>&& pixels, uint32_t width, uint32_t height)
         : m_pixels(std::move(pixels))
         , m_width(width)
         , m_height(height) {
-        assert(width * height == m_pixels.size());
+        DUK_ASSERT(width * height == m_pixels.size());
     }
 
     ImageDataSourceT(const std::vector<PixelType>& pixels, uint32_t width, uint32_t height)
         : m_pixels(pixels)
         , m_width(width)
         , m_height(height) {
-        assert(width * height == m_pixels.size());
+        DUK_ASSERT(width * height == m_pixels.size());
     }
 
     ImageDataSourceT(const PixelType* pixels, uint32_t width, uint32_t height)
         : m_pixels(pixels, pixels + (width * height))
         , m_width(width)
         , m_height(height) {
-        assert(width * height == m_pixels.size());
+        DUK_ASSERT(width * height == m_pixels.size());
     }
 
     DUK_NO_DISCARD PixelType* data() {
@@ -118,7 +119,7 @@ public:
     }
 
     void read_bytes(void* dst, size_t size, size_t offset) const override {
-        assert(byte_count() >= size + offset);
+        DUK_ASSERT(byte_count() >= size + offset);
         const uint8_t* src = (const uint8_t*)m_pixels.data();
         memcpy(dst, (const void*)(src + offset), size);
     }

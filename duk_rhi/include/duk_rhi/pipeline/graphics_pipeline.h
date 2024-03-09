@@ -147,10 +147,6 @@ public:
     DUK_NO_DISCARD virtual FillMode fill_mode() const = 0;
 
     virtual void flush() = 0;
-
-    DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
-
-    DUK_NO_DISCARD static duk::hash::Hash hash_of(Viewport viewport, Scissor scissor, Blend blend, Shader* shader, RenderPass* renderPass, CullMode::Mask cullMode, bool depthTesting);
 };
 
 }// namespace duk::rhi

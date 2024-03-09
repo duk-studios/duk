@@ -157,11 +157,6 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
         m_requiresRecreation = true;
     });
 
-    VulkanSwapchainImageCreateInfo swapchainImageCreateInfo = {};
-    swapchainImageCreateInfo.device = m_device;
-
-    m_image = std::make_unique<VulkanSwapchainImage>(swapchainImageCreateInfo);
-
     VulkanImageAcquireCommandCreateInfo imageAcquireCommandCreateInfo = {};
     imageAcquireCommandCreateInfo.device = m_device;
     imageAcquireCommandCreateInfo.frameCount = swapchainCreateInfo.frameCount;
@@ -234,7 +229,14 @@ void VulkanSwapchain::create() {
         throw std::runtime_error("failed to create swapchain");
     }
 
-    m_image->create(m_surfaceFormat.format, m_extent.width, m_extent.height, m_swapchain);
+    VulkanSwapchainImageCreateInfo swapchainImageCreateInfo = {};
+    swapchainImageCreateInfo.device = m_device;
+    swapchainImageCreateInfo.format = m_surfaceFormat.format;
+    swapchainImageCreateInfo.width = m_extent.width;
+    swapchainImageCreateInfo.height = m_extent.height;
+    swapchainImageCreateInfo.swapchain = m_swapchain;
+
+    m_image = std::make_unique<VulkanSwapchainImage>(swapchainImageCreateInfo);
 
     VulkanSwapchainCreateEventInfo swapchainInfo = {};
     swapchainInfo.format = m_surfaceFormat.format;
@@ -248,7 +250,7 @@ void VulkanSwapchain::create() {
 void VulkanSwapchain::clean() {
     m_swapchainCleanEvent();
 
-    m_image->clean();
+    m_image.reset();
 
     if (m_swapchain) {
         vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);

@@ -87,8 +87,6 @@ void VulkanCommandBuffer::begin_render_pass(RenderPass* renderPass, FrameBuffer*
 
     auto imageIndex = *m_currentImagePtr;
 
-    vulkanFramebuffer->update(imageIndex);
-
     VkRenderPassBeginInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = vulkanRenderPass->handle();
@@ -113,8 +111,6 @@ void VulkanCommandBuffer::bind_graphics_pipeline(GraphicsPipeline* pipeline) {
 
     auto imageIndex = *m_currentImagePtr;
 
-    vulkanPipeline->update(imageIndex);
-
     vkCmdBindPipeline(m_currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->handle(*m_currentImagePtr));
 
     m_currentPipelineLayout = vulkanPipeline->pipeline_layout();
@@ -124,8 +120,6 @@ void VulkanCommandBuffer::bind_graphics_pipeline(GraphicsPipeline* pipeline) {
 void VulkanCommandBuffer::bind_compute_pipeline(ComputePipeline* pipeline) {
     auto vulkanPipeline = dynamic_cast<VulkanComputePipeline*>(pipeline);
 
-    vulkanPipeline->update(~0);
-
     vkCmdBindPipeline(m_currentCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->handle(*m_currentImagePtr));
 
     m_currentPipelineLayout = vulkanPipeline->pipeline_layout();
@@ -134,7 +128,7 @@ void VulkanCommandBuffer::bind_compute_pipeline(ComputePipeline* pipeline) {
 
 void VulkanCommandBuffer::bind_vertex_buffer(Buffer** buffers, uint32_t bufferCount) {
     static constexpr auto kMaxBufferCount = 32;
-    assert(bufferCount < kMaxBufferCount);
+    DUK_ASSERT(bufferCount < kMaxBufferCount);
 
     duk::tools::FixedVector<VkBuffer, kMaxBufferCount> bufferHandles;
     duk::tools::FixedVector<VkDeviceSize, kMaxBufferCount> offsets(bufferCount, 0);
@@ -143,7 +137,6 @@ void VulkanCommandBuffer::bind_vertex_buffer(Buffer** buffers, uint32_t bufferCo
         auto vulkanBuffer = dynamic_cast<VulkanBuffer*>(buffers[i]);
         VkBuffer handle = VK_NULL_HANDLE;
         if (vulkanBuffer) {
-            vulkanBuffer->update(*m_currentImagePtr);
             handle = vulkanBuffer->handle(*m_currentImagePtr);
         }
         bufferHandles.push_back(handle);
@@ -153,23 +146,21 @@ void VulkanCommandBuffer::bind_vertex_buffer(Buffer** buffers, uint32_t bufferCo
 }
 
 void VulkanCommandBuffer::bind_index_buffer(Buffer* buffer) {
-    assert(buffer->type() == Buffer::Type::INDEX_16 || buffer->type() == Buffer::Type::INDEX_32);
+    DUK_ASSERT(buffer->type() == Buffer::Type::INDEX_16 || buffer->type() == Buffer::Type::INDEX_32);
 
     auto currentImage = *m_currentImagePtr;
     auto indexType = buffer->type() == Buffer::Type::INDEX_16 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
 
     auto vulkanBuffer = dynamic_cast<VulkanBuffer*>(buffer);
-    vulkanBuffer->update(currentImage);
 
     vkCmdBindIndexBuffer(m_currentCommandBuffer, vulkanBuffer->handle(currentImage), 0, indexType);
 }
 
 void VulkanCommandBuffer::bind_descriptor_set(DescriptorSet* descriptorSet, uint32_t setIndex) {
-    assert(m_currentPipelineLayout != VK_NULL_HANDLE);
+    DUK_ASSERT(m_currentPipelineLayout != VK_NULL_HANDLE);
 
     auto currentImage = *m_currentImagePtr;
     auto vulkanDescriptorSet = dynamic_cast<VulkanDescriptorSet*>(descriptorSet);
-    vulkanDescriptorSet->update(currentImage);
 
     auto handle = vulkanDescriptorSet->handle(currentImage);
 
