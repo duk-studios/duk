@@ -23,7 +23,9 @@ class Pipeline {
 public:
     explicit Pipeline(const PipelineCreateInfo& pipelineCreateInfo);
 
-    void use(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params);
+    void update(const DrawParams& params);
+
+    void use(duk::rhi::CommandBuffer* commandBuffer);
 
     void update_shader(duk::rhi::ShaderDataSource* shaderDataSource);
 
@@ -70,6 +72,7 @@ private:
 private:
     Renderer* m_renderer;
     PipelineCache m_pipelineCache;
+    duk::rhi::GraphicsPipeline* m_currentPipeline;
     duk::event::Listener m_listener;
 };
 

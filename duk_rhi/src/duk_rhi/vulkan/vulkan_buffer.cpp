@@ -1,8 +1,10 @@
 /// 28/05/2023
 /// vulkan_buffer.cpp
 
+#include <duk_macros/assert.h>
 #include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
+#include <duk_rhi/vulkan/vulkan_resource_manager.h>
 
 #include <stdexcept>
 
@@ -113,7 +115,7 @@ VulkanBufferHostMemory::~VulkanBufferHostMemory() = default;
 
 void VulkanBufferHostMemory::write(void* src, size_t size, size_t offset) {
     map();
-    assert(m_mapped);
+    DUK_ASSERT(m_mapped);
     auto dst = (uint8_t*)m_mapped + offset;
     memcpy(dst, src, size);
     unmap();
@@ -202,126 +204,77 @@ VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& bufferCreateInfo)
     , m_elementCount(bufferCreateInfo.elementCount)
     , m_elementSize(bufferCreateInfo.elementSize)
     , m_data(m_elementCount * m_elementSize, 0)
-    , m_hash(0) {
+    , m_resourceManager(bufferCreateInfo.resourceManager) {
     create(bufferCreateInfo.imageCount);
 }
 
 VulkanBuffer::~VulkanBuffer() = default;
 
 VkBuffer VulkanBuffer::handle(uint32_t imageIndex) {
-    return m_buffers[fix_index(imageIndex)]->handle();
+    return m_buffers[imageIndex]->handle();
 }
 
 void VulkanBuffer::update(uint32_t imageIndex) {
-    imageIndex = fix_index(imageIndex);
-
-    auto& bufferHash = m_bufferHashes[imageIndex];
-    if (bufferHash != m_hash) {
-        auto& buffer = m_buffers[imageIndex];
-        if (buffer->size() < m_data.size()) {
-            // we need to resize this buffer
-            buffer = create_buffer();
-        }
-        buffer->write(m_data.data(), m_data.size(), 0);
-        bufferHash = m_hash;
+    auto& buffer = m_buffers[imageIndex];
+    if (buffer->size() < m_data.size()) {
+        // we need to resize this buffer
+        buffer = create_buffer();
     }
+    buffer->write(m_data.data(), m_data.size(), 0);
 }
 
 void VulkanBuffer::create(uint32_t imageCount) {
-    switch (m_updateFrequency) {
-        case UpdateFrequency::DYNAMIC:
-            m_buffers.resize(imageCount);
-            for (auto& buffer: m_buffers) {
-                buffer = create_buffer();
-            }
-            break;
-        case UpdateFrequency::STATIC:
-            m_buffers.emplace_back(create_buffer());
-            break;
-        default:
-            throw std::invalid_argument("unhandled Buffer::UpdateFrequency");
+    m_buffers.resize(imageCount);
+    for (auto& buffer: m_buffers) {
+        buffer = create_buffer();
     }
-
-    m_bufferHashes.resize(imageCount, 0);
+    m_resourceManager->schedule_for_update(this);
 }
 
 void VulkanBuffer::clean() {
     m_buffers.clear();
-    m_bufferHashes.clear();
 }
 
 void VulkanBuffer::clean(uint32_t imageIndex) {
-    auto& buffer = m_buffers[fix_index(imageIndex)];
+    auto& buffer = m_buffers[imageIndex];
     if (buffer) {
         buffer.reset();
     }
 }
 
 const uint8_t* VulkanBuffer::read_ptr(size_t offset) const {
-    assert(offset < m_data.size());
+    DUK_ASSERT(offset < m_data.size());
     return m_data.data() + offset;
 }
 
 void VulkanBuffer::read(void* dst, size_t size, size_t offset) {
-    assert(offset + size <= m_data.size());
+    DUK_ASSERT(offset + size <= m_data.size());
     memcpy(dst, m_data.data() + offset, size);
 }
 
 uint8_t* VulkanBuffer::write_ptr(size_t offset) {
-    assert(offset < m_data.size());
+    DUK_ASSERT(offset < m_data.size());
     return m_data.data() + offset;
 }
 
 void VulkanBuffer::write(void* src, size_t size, size_t offset) {
-    assert(offset + size <= m_data.size());
+    DUK_ASSERT(offset + size <= m_data.size());
     memcpy(m_data.data() + offset, src, size);
 }
 
 void VulkanBuffer::copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) {
     auto buffer = dynamic_cast<VulkanBuffer*>(srcBuffer);
-    assert(buffer);
-    assert(size + dstOffset <= m_data.size());
-    assert(size + srcOffset <= buffer->m_data.size());
+    DUK_ASSERT(buffer);
+    DUK_ASSERT(size + dstOffset <= m_data.size());
+    DUK_ASSERT(size + srcOffset <= buffer->m_data.size());
 
     auto srcPtr = buffer->m_data.data() + srcOffset;
     auto dstPtr = m_data.data() + dstOffset;
     memcpy(dstPtr, srcPtr, size);
 }
 
-void VulkanBuffer::resize(size_t elementCount) {
-    m_elementCount = elementCount;
-    m_data.resize(m_elementSize * elementCount);
-}
-
 void VulkanBuffer::flush() {
-    update_hash();
-
-    // reset our hashes, so we ensure that we are rewriting on the next update calls
-    std::fill(m_bufferHashes.begin(), m_bufferHashes.end(), 0);
-
-    // static buffers updates as soon as we flush
-    if (m_updateFrequency == Buffer::UpdateFrequency::STATIC) {
-        // this may be really expensive, we need to wait for the device to idle because it may be using this buffer while we update it
-        // we could try using pipeline barriers to make sure that we only wait when necessary
-        vkDeviceWaitIdle(m_device);
-
-        // updating a static buffer will use a vkQueueWaitIdle, which may also be expensive
-        update(0);
-    }
-}
-
-void VulkanBuffer::invalidate() {
-    assert(m_updateFrequency == Buffer::UpdateFrequency::SHARED);
-
-    // just as with flush, this is really expensive, and we could probably use a pipeline barrier to reduce idle time
-    vkDeviceWaitIdle(m_device);
-
-    m_buffers[0]->read(m_data.data(), m_data.size(), 0);
-
-    update_hash();
-
-    // update buffer hash, so we don't do a redundant write on the next update call
-    m_bufferHashes[0] = m_hash;
+    m_resourceManager->schedule_for_update(this);
 }
 
 size_t VulkanBuffer::element_count() const {
@@ -344,15 +297,6 @@ CommandQueue* VulkanBuffer::command_queue() const {
     return m_commandQueue;
 }
 
-duk::hash::Hash VulkanBuffer::hash() const {
-    return m_hash;
-}
-
-void VulkanBuffer::update_hash() {
-    m_hash = 0;
-    duk::hash::hash_combine(m_hash, m_elementCount);
-}
-
 std::unique_ptr<VulkanBufferMemory> VulkanBuffer::create_buffer() {
     VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
     bufferMemoryCreateInfo.device = m_device;
@@ -369,10 +313,6 @@ std::unique_ptr<VulkanBufferMemory> VulkanBuffer::create_buffer() {
         default:
             throw std::invalid_argument("unhandled Buffer::UpdateFrequency");
     }
-}
-
-uint32_t VulkanBuffer::fix_index(uint32_t imageIndex) {
-    return m_updateFrequency == Buffer::UpdateFrequency::DYNAMIC ? imageIndex : 0;
 }
 
 }// namespace duk::rhi

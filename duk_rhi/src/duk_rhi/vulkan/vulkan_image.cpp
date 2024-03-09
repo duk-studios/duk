@@ -2,7 +2,9 @@
 /// vulkan_image.cpp
 
 #include <duk_rhi/vulkan/command/vulkan_command_queue.h>
+#include <duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
+#include <duk_rhi/vulkan/vulkan_resource_manager.h>
 
 #include <stdexcept>
 
@@ -404,17 +406,18 @@ void VulkanImage::copy_buffer_to_image(VkCommandBuffer commandBuffer, const Copy
 VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanImageCreateInfo)
     : m_device(vulkanImageCreateInfo.device)
     , m_physicalDevice(vulkanImageCreateInfo.physicalDevice)
+    , m_resourceManager(vulkanImageCreateInfo.resourceManager)
     , m_usage(vulkanImageCreateInfo.usage)
     , m_updateFrequency(vulkanImageCreateInfo.updateFrequency)
     , m_layout(vulkanImageCreateInfo.initialLayout)
     , m_format(vulkanImageCreateInfo.imageDataSource->pixel_format())
+    , m_dstStage(vulkanImageCreateInfo.dstStages)
     , m_width(vulkanImageCreateInfo.imageDataSource->width())
     , m_height(vulkanImageCreateInfo.imageDataSource->height())
-    , m_dataSourceHash(vulkanImageCreateInfo.imageDataSource->hash())
+    , m_data(vulkanImageCreateInfo.imageDataSource->byte_count())
     , m_commandQueue(vulkanImageCreateInfo.commandQueue)
     , m_aspectFlags(detail::image_aspect(m_usage, m_format)) {
     if (vulkanImageCreateInfo.imageDataSource->has_data()) {
-        m_data.resize(vulkanImageCreateInfo.imageDataSource->byte_count());
         vulkanImageCreateInfo.imageDataSource->read_bytes(m_data.data(), m_data.size(), 0);
     }
 
@@ -425,17 +428,7 @@ VulkanMemoryImage::~VulkanMemoryImage() {
     clean();
 }
 
-void VulkanMemoryImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFlags) {
-    auto index = fix_index(imageIndex);
-    if (m_dataSourceHash == m_imageDataHashes[index]) {
-        return;
-    }
-    m_imageDataHashes[index] = m_dataSourceHash;
-
-    if (m_data.empty()) {
-        return;
-    }
-
+void VulkanMemoryImage::update(uint32_t imageIndex) {
     VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
     bufferMemoryCreateInfo.commandQueue = m_commandQueue;
     bufferMemoryCreateInfo.device = m_device;
@@ -456,47 +449,12 @@ void VulkanMemoryImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFl
     copyBufferToImageInfo.finalLayout = convert_layout(m_layout);
     copyBufferToImageInfo.width = m_width;
     copyBufferToImageInfo.height = m_height;
-    copyBufferToImageInfo.dstStageMask = stageFlags;
-    copyBufferToImageInfo.image = m_images[index];
+    copyBufferToImageInfo.dstStageMask = convert_pipeline_stage_mask(m_dstStage);
+    copyBufferToImageInfo.image = m_images[imageIndex];
 
     m_commandQueue->submit([&](VkCommandBuffer commandBuffer) {
         copy_buffer_to_image(commandBuffer, copyBufferToImageInfo);
     });
-}
-
-void VulkanMemoryImage::update(ImageDataSource* imageDataSource) {
-    auto hash = imageDataSource->hash();
-    if (m_dataSourceHash == hash) {
-        return;
-    }
-    m_dataSourceHash = hash;
-
-    if (imageDataSource->has_data()) {
-        m_data.resize(imageDataSource->byte_count());
-        imageDataSource->read_bytes(m_data.data(), m_data.size(), 0);
-    } else {
-        m_data.clear();
-    }
-
-    auto width = imageDataSource->width();
-    auto height = imageDataSource->height();
-    auto format = imageDataSource->pixel_format();
-
-    // if the size or format of the image changed, we need to recreate it immediately
-    // otherwise, we will just update the data when needed during descriptor set update
-    if (m_width != width || m_height != height || m_format != format) {
-        m_format = imageDataSource->pixel_format();
-        m_width = imageDataSource->width();
-        m_height = imageDataSource->height();
-        m_aspectFlags = detail::image_aspect(m_usage, m_format);
-
-        // guarantees that no one is using this image
-        vkDeviceWaitIdle(m_device);
-
-        auto imageCount = m_images.size();
-        clean();
-        create(imageCount);
-    }
 }
 
 PixelFormat VulkanMemoryImage::format() const {
@@ -512,11 +470,11 @@ uint32_t VulkanMemoryImage::height() const {
 }
 
 VkImage VulkanMemoryImage::image(uint32_t imageIndex) const {
-    return m_images[fix_index(imageIndex)];
+    return m_images[imageIndex];
 }
 
 VkImageView VulkanMemoryImage::image_view(uint32_t imageIndex) const {
-    return m_imageViews[fix_index(imageIndex)];
+    return m_imageViews[imageIndex];
 }
 
 uint32_t VulkanMemoryImage::image_count() const {
@@ -527,15 +485,7 @@ VkImageAspectFlags VulkanMemoryImage::image_aspect() const {
     return m_aspectFlags;
 }
 
-duk::hash::Hash VulkanMemoryImage::hash() const {
-    return m_dataSourceHash;
-}
-
 void VulkanMemoryImage::create(uint32_t imageCount) {
-    if (m_updateFrequency == Image::UpdateFrequency::STATIC) {
-        imageCount = 1;
-    }
-
     auto format = convert_pixel_format(m_format);
 
     if (!m_physicalDevice->is_format_supported(format, VK_IMAGE_TILING_OPTIMAL, usage_format_features(m_usage))) {
@@ -584,42 +534,12 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
         vkBindImageMemory(m_device, m_images[i], m_memories[i], 0);
     }
 
-    m_imageDataHashes.resize(imageCount, duk::hash::kUndefinedHash);
-
     VkImageSubresourceRange subresourceRange = {};
     subresourceRange.layerCount = 1;
     subresourceRange.baseArrayLayer = 0;
     subresourceRange.levelCount = 1;
     subresourceRange.baseMipLevel = 0;
     subresourceRange.aspectMask = m_aspectFlags;
-
-    if (!m_data.empty()) {
-        VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
-        bufferMemoryCreateInfo.commandQueue = m_commandQueue;
-        bufferMemoryCreateInfo.device = m_device;
-        bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
-        bufferMemoryCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        bufferMemoryCreateInfo.size = m_width * m_height * m_format.size();
-
-        VulkanBufferHostMemory bufferHostMemory(bufferMemoryCreateInfo);
-        bufferHostMemory.write(m_data.data(), m_data.size(), 0);
-
-        m_commandQueue->submit([this, &subresourceRange, &bufferHostMemory](VkCommandBuffer commandBuffer) {
-            CopyBufferToImageInfo copyBufferToImageInfo = {};
-            copyBufferToImageInfo.buffer = &bufferHostMemory;
-            copyBufferToImageInfo.subresourceRange = subresourceRange;
-            copyBufferToImageInfo.finalLayout = convert_layout(m_layout);
-            copyBufferToImageInfo.width = m_width;
-            copyBufferToImageInfo.height = m_height;
-            copyBufferToImageInfo.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
-
-            for (int i = 0; i < m_images.size(); i++) {
-                m_imageDataHashes[i] = m_dataSourceHash;
-                copyBufferToImageInfo.image = m_images[i];
-                copy_buffer_to_image(commandBuffer, copyBufferToImageInfo);
-            }
-        });
-    }
 
     VkImageViewCreateInfo viewInfo = {};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -636,6 +556,8 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
             throw std::runtime_error("failed to create texture image view!");
         }
     }
+
+    m_resourceManager->schedule_for_update(this);
 }
 
 void VulkanMemoryImage::clean() {
@@ -648,43 +570,69 @@ void VulkanMemoryImage::clean() {
 }
 
 void VulkanMemoryImage::clean(uint32_t imageIndex) {
-    auto validIndex = fix_index(imageIndex);
-    auto& imageView = m_imageViews[validIndex];
+    auto& imageView = m_imageViews[imageIndex];
     if (imageView) {
         vkDestroyImageView(m_device, imageView, nullptr);
         imageView = VK_NULL_HANDLE;
     }
 
-    auto& image = m_images[validIndex];
+    auto& image = m_images[imageIndex];
     if (image) {
         vkDestroyImage(m_device, image, nullptr);
         image = VK_NULL_HANDLE;
     }
 
-    auto& memory = m_memories[validIndex];
+    auto& memory = m_memories[imageIndex];
     if (memory) {
         vkFreeMemory(m_device, memory, nullptr);
         memory = VK_NULL_HANDLE;
     }
 }
 
-uint32_t VulkanMemoryImage::fix_index(uint32_t imageIndex) const {
-    return m_updateFrequency == Image::UpdateFrequency::STATIC ? 0 : imageIndex;
-}
-
 VulkanSwapchainImage::VulkanSwapchainImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainImageCreateInfo)
     : m_device(vulkanSwapchainImageCreateInfo.device)
-    , m_format(VK_FORMAT_UNDEFINED) {
+    , m_format(vulkanSwapchainImageCreateInfo.format)
+    , m_width(vulkanSwapchainImageCreateInfo.width)
+    , m_height(vulkanSwapchainImageCreateInfo.height) {
+    auto swapchain = vulkanSwapchainImageCreateInfo.swapchain;
+
+    uint32_t imageCount = 0;
+    vkGetSwapchainImagesKHR(m_device, swapchain, &imageCount, nullptr);
+
+    m_images.resize(imageCount);
+
+    vkGetSwapchainImagesKHR(m_device, swapchain, &imageCount, m_images.data());
+
+    m_imageViews.resize(imageCount);
+
+    VkImageSubresourceRange subresourceRange = {};
+    subresourceRange.layerCount = 1;
+    subresourceRange.baseArrayLayer = 0;
+    subresourceRange.levelCount = 1;
+    subresourceRange.baseMipLevel = 0;
+    subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+
+    for (uint32_t i = 0; i < imageCount; i++) {
+        VkImageViewCreateInfo viewInfo = {};
+        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        viewInfo.image = m_images[i];
+        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.format = m_format;
+        viewInfo.subresourceRange = subresourceRange;
+
+        auto result = vkCreateImageView(m_device, &viewInfo, nullptr, &m_imageViews[i]);
+
+        if (result != VK_SUCCESS) {
+            throw std::runtime_error("failed to create swapchain image view");
+        }
+    }
 }
 
 VulkanSwapchainImage::~VulkanSwapchainImage() {
-    clean();
-}
-
-void VulkanSwapchainImage::update(uint32_t imageIndex, VkPipelineStageFlags stageFlags) {
-}
-
-void VulkanSwapchainImage::update(ImageDataSource* imageDataSource) {
+    for (auto& imageView: m_imageViews) {
+        vkDestroyImageView(m_device, imageView, nullptr);
+    }
+    m_imageViews.clear();
 }
 
 VkImage VulkanSwapchainImage::image(uint32_t frameIndex) const {
@@ -713,60 +661,6 @@ uint32_t VulkanSwapchainImage::height() const {
 
 VkImageAspectFlags VulkanSwapchainImage::image_aspect() const {
     return VK_IMAGE_ASPECT_COLOR_BIT;
-}
-
-duk::hash::Hash VulkanSwapchainImage::hash() const {
-    return m_hash;
-}
-
-void VulkanSwapchainImage::create(VkFormat format, uint32_t width, uint32_t height, VkSwapchainKHR swapchain) {
-    m_format = format;
-    m_width = width;
-    m_height = height;
-
-    uint32_t imageCount = 0;
-    vkGetSwapchainImagesKHR(m_device, swapchain, &imageCount, nullptr);
-
-    m_images.resize(imageCount);
-
-    vkGetSwapchainImagesKHR(m_device, swapchain, &imageCount, m_images.data());
-
-    m_imageViews.resize(imageCount);
-
-    VkImageSubresourceRange subresourceRange = {};
-    subresourceRange.layerCount = 1;
-    subresourceRange.baseArrayLayer = 0;
-    subresourceRange.levelCount = 1;
-    subresourceRange.baseMipLevel = 0;
-    subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-    for (uint32_t i = 0; i < imageCount; i++) {
-        VkImageViewCreateInfo viewInfo = {};
-        viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        viewInfo.image = m_images[i];
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        viewInfo.format = format;
-        viewInfo.subresourceRange = subresourceRange;
-
-        auto result = vkCreateImageView(m_device, &viewInfo, nullptr, &m_imageViews[i]);
-
-        if (result != VK_SUCCESS) {
-            throw std::runtime_error("failed to create swapchain image view");
-        }
-    }
-
-    m_hash = 0;
-    duk::hash::hash_combine(m_hash, m_width);
-    duk::hash::hash_combine(m_hash, m_height);
-    duk::hash::hash_combine(m_hash, m_format);
-    duk::hash::hash_combine(m_hash, imageCount);
-}
-
-void VulkanSwapchainImage::clean() {
-    for (auto& imageView: m_imageViews) {
-        vkDestroyImageView(m_device, imageView, nullptr);
-    }
-    m_imageViews.clear();
 }
 
 }// namespace duk::rhi

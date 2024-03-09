@@ -41,7 +41,9 @@ public:
 
     ~ForwardPass() override;
 
-    void render(const RenderParams& renderParams) override;
+    void update(const UpdateParams& params) override;
+
+    void render(duk::rhi::CommandBuffer* commandBuffer) override;
 
     DUK_NO_DISCARD PassConnection* out_color();
 

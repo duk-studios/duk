@@ -20,51 +20,35 @@ static const uint32_t kPixelsPerUnit = 100;
 static const uint32_t kVerticesPerSprite = 4;
 static const uint32_t kIndicesPerSprite = 6;
 
+static std::shared_ptr<duk::rhi::Buffer> create_vertex_buffer(Renderer* renderer, size_t spriteCount, VertexAttributes::Type attribute) {
+    duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
+    bufferCreateInfo.type = duk::rhi::Buffer::Type::VERTEX;
+    bufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
+    bufferCreateInfo.commandQueue = renderer->main_command_queue();
+    bufferCreateInfo.elementCount = spriteCount * detail::kVerticesPerSprite;
+    bufferCreateInfo.elementSize = VertexAttributes::size_of(attribute);
+    return renderer->rhi()->create_buffer(bufferCreateInfo);
+}
+
+static std::shared_ptr<duk::rhi::Buffer> create_index_buffer(Renderer* renderer, size_t spriteCount) {
+    duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
+    bufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX_32;
+    bufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
+    bufferCreateInfo.commandQueue = renderer->main_command_queue();
+    bufferCreateInfo.elementCount = spriteCount * detail::kIndicesPerSprite;
+    bufferCreateInfo.elementSize = duk::rhi::index_size(duk::rhi::IndexType::UINT32);
+    return renderer->rhi()->create_buffer(bufferCreateInfo);
+}
+
 }// namespace detail
 
 SpriteBrush::SpriteBrush(const SpriteBrushCreateInfo& spriteBrushCreateInfo)
     : m_spriteCapacity(spriteBrushCreateInfo.initialSpriteCapacity)
+    , m_renderer(spriteBrushCreateInfo.renderer)
     , m_spriteCount(0) {
-    auto renderer = spriteBrushCreateInfo.renderer;
-
-    // position
-    {
-        duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
-        bufferCreateInfo.type = duk::rhi::Buffer::Type::VERTEX;
-        bufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
-        bufferCreateInfo.commandQueue = renderer->main_command_queue();
-        bufferCreateInfo.elementCount = m_spriteCapacity * detail::kVerticesPerSprite;
-        bufferCreateInfo.elementSize = VertexAttributes::size_of(VertexAttributes::POSITION);
-
-        m_vertexBuffers.at(VertexAttributes::POSITION) = renderer->rhi()->create_buffer(bufferCreateInfo);
-        ;
-    }
-
-    // uv
-    {
-        duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
-        bufferCreateInfo.type = duk::rhi::Buffer::Type::VERTEX;
-        bufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
-        bufferCreateInfo.commandQueue = renderer->main_command_queue();
-        bufferCreateInfo.elementCount = m_spriteCapacity * detail::kVerticesPerSprite;
-        bufferCreateInfo.elementSize = VertexAttributes::size_of(VertexAttributes::UV);
-
-        m_vertexBuffers.at(VertexAttributes::UV) = renderer->rhi()->create_buffer(bufferCreateInfo);
-        ;
-    }
-
-    // index
-    {
-        duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
-        bufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX_32;
-        bufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
-        bufferCreateInfo.commandQueue = renderer->main_command_queue();
-        bufferCreateInfo.elementCount = m_spriteCapacity * detail::kIndicesPerSprite;
-        bufferCreateInfo.elementSize = duk::rhi::index_size(duk::rhi::IndexType::UINT32);
-
-        m_indexBuffer = renderer->rhi()->create_buffer(bufferCreateInfo);
-        ;
-    }
+    m_vertexBuffers.at(VertexAttributes::POSITION) = detail::create_vertex_buffer(m_renderer, m_spriteCapacity, VertexAttributes::POSITION);
+    m_vertexBuffers.at(VertexAttributes::UV) = detail::create_vertex_buffer(m_renderer, m_spriteCapacity, VertexAttributes::UV);
+    m_indexBuffer = detail::create_index_buffer(m_renderer, m_spriteCapacity);
 }
 
 void SpriteBrush::push(const Sprite* sprite, const glm::mat4& model) {
@@ -125,16 +109,24 @@ void SpriteBrush::clear() {
 }
 
 void SpriteBrush::resize(uint32_t spriteCapacity) {
-    {
-        auto positionVertexBuffer = m_vertexBuffers.at(VertexAttributes::POSITION);
-        positionVertexBuffer->resize(spriteCapacity * VertexAttributes::size_of(VertexAttributes::POSITION) * detail::kVerticesPerSprite);
-    }
-    {
-        auto uvVertexBuffer = m_vertexBuffers.at(VertexAttributes::UV);
-        uvVertexBuffer->resize(spriteCapacity * VertexAttributes::size_of(VertexAttributes::UV) * detail::kVerticesPerSprite);
-    }
-    { m_indexBuffer->resize(spriteCapacity * duk::rhi::index_size(duk::rhi::IndexType::UINT32) * detail::kIndicesPerSprite); }
     m_spriteCapacity = spriteCapacity;
+    {
+        auto& positionBuffer = m_vertexBuffers.at(VertexAttributes::POSITION);
+        auto buffer = detail::create_vertex_buffer(m_renderer, m_spriteCapacity, VertexAttributes::POSITION);
+        buffer->copy_from(positionBuffer.get(), positionBuffer->byte_size(), 0, 0);
+        positionBuffer = buffer;
+    }
+    {
+        auto& uvVertexBuffer = m_vertexBuffers.at(VertexAttributes::UV);
+        auto buffer = detail::create_vertex_buffer(m_renderer, m_spriteCapacity, VertexAttributes::UV);
+        buffer->copy_from(uvVertexBuffer.get(), uvVertexBuffer->byte_size(), 0, 0);
+        uvVertexBuffer = buffer;
+    }
+    {
+        auto buffer = detail::create_index_buffer(m_renderer, m_spriteCapacity);
+        buffer->copy_from(m_indexBuffer.get(), m_indexBuffer->byte_size(), 0, 0);
+        m_indexBuffer = buffer;
+    }
 }
 
 void SpriteBrush::draw(duk::rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance) {

@@ -79,7 +79,9 @@ public:
 
     DUK_NO_DISCARD InstanceBuffer* instance_buffer() override;
 
-    void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& drawParams) override;
+    void update(const DrawParams& params) override;
+
+    void bind(duk::rhi::CommandBuffer* commandBuffer) override;
 
 private:
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;

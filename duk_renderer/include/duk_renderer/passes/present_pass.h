@@ -14,6 +14,7 @@ namespace duk::renderer {
 
 struct PresentPassCreateInfo {
     Renderer* renderer;
+    duk::platform::Window* window;
 };
 
 class PresentPass : public Pass {
@@ -22,12 +23,15 @@ public:
 
     ~PresentPass() override;
 
-    void render(const RenderParams& renderParams) override;
+    void update(const UpdateParams& params) override;
+
+    void render(duk::rhi::CommandBuffer* commandBuffer) override;
 
     PassConnection* in_color();
 
 private:
     Renderer* m_renderer;
+    duk::event::Listener m_listener;
     PassConnection m_inColor;
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;

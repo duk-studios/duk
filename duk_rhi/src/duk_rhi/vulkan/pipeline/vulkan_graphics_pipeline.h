@@ -27,12 +27,14 @@ VkPolygonMode convert_fill_mode(GraphicsPipeline::FillMode fillMode);
 
 class VulkanShader;
 class VulkanRenderPass;
+class VulkanResourceManager;
 
 struct VulkanGraphicsPipelineCreateInfo {
     VkDevice device;
     uint32_t imageCount;
     VulkanShader* shader;
     VulkanRenderPass* renderPass;
+    VulkanResourceManager* resourceManager;
     GraphicsPipeline::Viewport viewport;
     GraphicsPipeline::Scissor scissor;
     GraphicsPipeline::CullMode::Mask cullModeMask;
@@ -87,15 +89,11 @@ public:
 
     void flush() override;
 
-    DUK_NO_DISCARD hash::Hash hash() const override;
-
-private:
-    void update_hash();
-
 private:
     VkDevice m_device;
     VulkanShader* m_shader;
     VulkanRenderPass* m_renderPass;
+    VulkanResourceManager* m_resourceManager;
     GraphicsPipeline::Viewport m_viewport;
     GraphicsPipeline::Scissor m_scissor;
     GraphicsPipeline::CullMode::Mask m_cullModeMask;
@@ -104,8 +102,6 @@ private:
     GraphicsPipeline::FillMode m_fillMode;
     bool m_depthTesting;
     std::vector<VkPipeline> m_pipelines;
-    duk::hash::Hash m_hash;
-    std::vector<duk::hash::Hash> m_pipelineHashes;
 };
 
 }// namespace duk::rhi

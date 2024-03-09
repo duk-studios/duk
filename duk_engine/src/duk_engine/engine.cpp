@@ -136,6 +136,10 @@ void Engine::run() {
 
         m_window->pool_events();
 
+        while (m_window->minimized()) {
+            m_window->wait_events();
+        }
+
         m_director->update();
 
         m_timer.stop();

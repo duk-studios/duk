@@ -30,6 +30,7 @@ public:
     void draw(duk::rhi::CommandBuffer* commandBuffer, size_t instanceCount, size_t firstInstance) override;
 
 private:
+    Renderer* m_renderer;
     VertexBufferArray m_vertexBuffers;
     std::shared_ptr<duk::rhi::Buffer> m_indexBuffer;
     uint32_t m_spriteCount;

@@ -60,7 +60,9 @@ public:
 
     void set_color_texture(const Texture& colorTexture);
 
-    void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) override;
+    void update(const DrawParams& params) override;
+
+    void bind(duk::rhi::CommandBuffer* commandBuffer) override;
 
     uint32_t size() const override;
 

@@ -132,6 +132,10 @@ void VulkanRHI::prepare_frame() {
     m_prepareFrameEvent(m_currentFrame);
 }
 
+void VulkanRHI::update() {
+    m_resourceManager->update(m_swapchain ? *m_swapchain->current_image_ptr() : m_currentFrame);
+}
+
 Command* VulkanRHI::acquire_image_command() {
     if (!m_swapchain) {
         return nullptr;
@@ -203,6 +207,7 @@ std::shared_ptr<GraphicsPipeline> VulkanRHI::create_graphics_pipeline(const Grap
     vulkanPipelineCreateInfo.depthTesting = pipelineCreateInfo.depthTesting;
     vulkanPipelineCreateInfo.topology = pipelineCreateInfo.topology;
     vulkanPipelineCreateInfo.fillMode = pipelineCreateInfo.fillMode;
+    vulkanPipelineCreateInfo.resourceManager = m_resourceManager.get();
     return m_resourceManager->create(vulkanPipelineCreateInfo);
 }
 
@@ -232,6 +237,7 @@ std::shared_ptr<Buffer> VulkanRHI::create_buffer(const RHI::BufferCreateInfo& bu
     vulkanBufferCreateInfo.physicalDevice = m_physicalDevice.get();
     vulkanBufferCreateInfo.commandQueue = dynamic_cast<VulkanCommandQueue*>(bufferCreateInfo.commandQueue);
     vulkanBufferCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+    vulkanBufferCreateInfo.resourceManager = m_resourceManager.get();
     return m_resourceManager->create(vulkanBufferCreateInfo);
 }
 
@@ -245,6 +251,8 @@ std::shared_ptr<Image> VulkanRHI::create_image(const RHI::ImageCreateInfo& image
     memoryImageCreateInfo.initialLayout = imageCreateInfo.initialLayout;
     memoryImageCreateInfo.usage = imageCreateInfo.usage;
     memoryImageCreateInfo.updateFrequency = imageCreateInfo.updateFrequency;
+    memoryImageCreateInfo.dstStages = imageCreateInfo.dstStages;
+    memoryImageCreateInfo.resourceManager = m_resourceManager.get();
     return m_resourceManager->create(memoryImageCreateInfo);
 }
 
@@ -255,6 +263,7 @@ std::shared_ptr<DescriptorSet> VulkanRHI::create_descriptor_set(const RHI::Descr
     vulkanDescriptorSetCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
     vulkanDescriptorSetCreateInfo.samplerCache = m_samplerCache.get();
     vulkanDescriptorSetCreateInfo.imageCount = m_swapchain ? m_swapchain->image_count() : m_maxFramesInFlight;
+    vulkanDescriptorSetCreateInfo.resourceManager = m_resourceManager.get();
     return m_resourceManager->create(vulkanDescriptorSetCreateInfo);
 }
 
@@ -265,6 +274,7 @@ std::shared_ptr<FrameBuffer> VulkanRHI::create_frame_buffer(const RHI::FrameBuff
     vulkanFrameBufferCreateInfo.renderPass = dynamic_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
     vulkanFrameBufferCreateInfo.attachments = reinterpret_cast<VulkanImage**>(frameBufferCreateInfo.attachments);
     vulkanFrameBufferCreateInfo.attachmentCount = frameBufferCreateInfo.attachmentCount;
+    vulkanFrameBufferCreateInfo.resourceManager = m_resourceManager.get();
     return m_resourceManager->create(vulkanFrameBufferCreateInfo);
 }
 
@@ -331,12 +341,12 @@ void VulkanRHI::select_vk_physical_device(uint32_t deviceIndex) {
 
 void VulkanRHI::create_vk_surface(const VulkanRHICreateInfo& vulkanRendererCreateInfo) {
     auto window = vulkanRendererCreateInfo.renderHardwareInterfaceCreateInfo.window;
-    assert(window);
+    DUK_ASSERT(window);
 
 #if DUK_PLATFORM_IS_WINDOWS
 
     auto windowWin32 = dynamic_cast<platform::WindowWin32*>(window);
-    assert(windowWin32);
+    DUK_ASSERT(windowWin32);
 
     VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo = {};
     win32SurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;

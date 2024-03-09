@@ -58,22 +58,19 @@ void Renderer::render(duk::scene::Scene* scene) {
 
     m_rhi->prepare_frame();
 
-    m_renderStart.emit();
-
     update_global_descriptors(scene->objects());
 
-    auto mainPass = m_mainQueue->submit([this, scene](duk::rhi::CommandBuffer* commandBuffer) {
+    update_passes(scene->objects());
+
+    m_rhi->update();
+
+    m_renderStart.emit();
+
+    auto mainPass = m_mainQueue->submit([this](duk::rhi::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
 
-        Pass::RenderParams renderParams = {};
-        renderParams.commandBuffer = commandBuffer;
-        renderParams.scene = scene;
-        renderParams.globalDescriptors = m_globalDescriptors.get();
-        renderParams.outputWidth = render_width();
-        renderParams.outputHeight = render_height();
-
         for (auto& pass: m_passes) {
-            pass->render(renderParams);
+            pass->render(commandBuffer);
         }
 
         commandBuffer->end();
@@ -110,6 +107,7 @@ std::shared_ptr<duk::rhi::Image> Renderer::create_depth_image(uint32_t width, ui
     depthImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
     depthImageCreateInfo.imageDataSource = &depthImageDataSource;
     depthImageCreateInfo.commandQueue = m_mainQueue.get();
+    depthImageCreateInfo.dstStages = duk::rhi::PipelineStage::EARLY_FRAGMENT_TESTS;
 
     auto expectedDepthImage = m_rhi->create_image(depthImageCreateInfo);
 
@@ -130,6 +128,7 @@ std::shared_ptr<duk::rhi::Image> Renderer::create_color_image(uint32_t width, ui
     colorImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
     colorImageCreateInfo.imageDataSource = &colorImageDataSource;
     colorImageCreateInfo.commandQueue = m_mainQueue.get();
+    colorImageCreateInfo.dstStages = duk::rhi::PipelineStage::FRAGMENT_SHADER | duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT;
 
     auto expectedColorImage = m_rhi->create_image(colorImageCreateInfo);
 
@@ -156,6 +155,18 @@ void Renderer::update_global_descriptors(duk::scene::Objects& objects) {
     m_globalDescriptors->update_cameras(objects);
 
     m_globalDescriptors->update_lights(objects);
+}
+
+void Renderer::update_passes(scene::Objects& objects) {
+    Pass::UpdateParams updateParams = {};
+    updateParams.objects = &objects;
+    updateParams.globalDescriptors = m_globalDescriptors.get();
+    updateParams.outputWidth = render_width();
+    updateParams.outputHeight = render_height();
+
+    for (auto& pass: m_passes) {
+        pass->update(updateParams);
+    }
 }
 
 }// namespace duk::renderer

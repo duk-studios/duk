@@ -45,7 +45,9 @@ public:
 
     bool is_image(uint32_t index) override;
 
-    void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& drawParams) override;
+    void update(const DrawParams& params) override;
+
+    void bind(duk::rhi::CommandBuffer* commandBuffer) override;
 
 private:
     std::unique_ptr<UniformBuffer<SpriteColorDescriptors::Material>> m_materialUBO;

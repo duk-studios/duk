@@ -30,9 +30,14 @@ InstanceBuffer* Material::instance_buffer() {
     return m_descriptorSet->instance_buffer();
 }
 
-void Material::bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& drawParams) {
-    m_pipeline.use(commandBuffer, drawParams);
-    m_descriptorSet->bind(commandBuffer, drawParams);
+void Material::update(const DrawParams& drawParams) {
+    m_pipeline.update(drawParams);
+    m_descriptorSet->update(drawParams);
+}
+
+void Material::bind(duk::rhi::CommandBuffer* commandBuffer) {
+    m_pipeline.use(commandBuffer);
+    m_descriptorSet->bind(commandBuffer);
 }
 
 }// namespace duk::renderer

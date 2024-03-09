@@ -14,6 +14,7 @@ namespace duk::rhi {
 
 class VulkanSwapchain;
 class VulkanRenderPass;
+class VulkanResourceManager;
 
 struct VulkanFrameBufferCreateInfo {
     uint32_t imageCount;
@@ -21,6 +22,7 @@ struct VulkanFrameBufferCreateInfo {
     VulkanRenderPass* renderPass;
     VulkanImage** attachments;
     uint32_t attachmentCount;
+    VulkanResourceManager* resourceManager;
 };
 
 class VulkanFrameBuffer : public FrameBuffer {
@@ -35,6 +37,8 @@ public:
 
     DUK_NO_DISCARD uint32_t height() const override;
 
+    DUK_NO_DISCARD Image* at(uint32_t attachment) const override;
+
     void create(uint32_t imageCount);
 
     void clean();
@@ -46,17 +50,14 @@ public:
 private:
     void update_extent();
 
-    void update_hash();
-
 private:
     uint32_t m_width;
     uint32_t m_height;
     VkDevice m_device;
     VulkanRenderPass* m_renderPass;
+    VulkanResourceManager* m_resourceManager;
     std::vector<VulkanImage*> m_attachments;
     std::vector<VkFramebuffer> m_frameBuffers;
-    duk::hash::Hash m_hash;
-    std::vector<duk::hash::Hash> m_frameBufferHashes;
 };
 
 }// namespace duk::rhi

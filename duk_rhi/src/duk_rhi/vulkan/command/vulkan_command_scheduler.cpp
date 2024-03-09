@@ -78,7 +78,7 @@ void VulkanCommandScheduler::CommandNode::submit(VkFence& fence, uint32_t waitSe
 }
 
 Command* VulkanCommandScheduler::CommandNode::command() {
-    assert(m_command && "access to a command must happen after submission");
+    DUK_ASSERT(m_command && "access to a command must happen after submission");
     return m_command;
 }
 

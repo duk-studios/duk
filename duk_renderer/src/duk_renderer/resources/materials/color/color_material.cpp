@@ -105,16 +105,19 @@ void ColorMaterialDescriptorSet::set_color_texture(const Texture& colorTexture) 
     m_colorTexture = colorTexture;
 }
 
-void ColorMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
+void ColorMaterialDescriptorSet::update(const DrawParams& params) {
     // updates current camera UBO
     m_descriptorSet->set(ColorDescriptors::uCamera, params.globalDescriptors->camera_ubo()->descriptor());
 
     // these might have changed
     m_descriptorSet->set(ColorDescriptors::uBaseColor, m_colorTexture.descriptor());
+    m_descriptorSet->set(ColorDescriptors::uInstances, m_instanceBuffer->transform_buffer()->descriptor());
 
     // updates descriptor set in case some descriptor changed
     m_descriptorSet->flush();
+}
 
+void ColorMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer) {
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }
 

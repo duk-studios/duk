@@ -10,6 +10,8 @@
 
 namespace duk::rhi {
 
+class Image;
+
 class FrameBuffer {
 public:
     virtual ~FrameBuffer();
@@ -17,6 +19,8 @@ public:
     DUK_NO_DISCARD virtual uint32_t width() const = 0;
 
     DUK_NO_DISCARD virtual uint32_t height() const = 0;
+
+    DUK_NO_DISCARD virtual Image* at(uint32_t attachment) const = 0;
 };
 
 }// namespace duk::rhi

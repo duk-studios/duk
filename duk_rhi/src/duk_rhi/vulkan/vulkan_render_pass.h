@@ -46,15 +46,12 @@ public:
 
     DUK_NO_DISCARD bool has_depth_attachment() const override;
 
-    DUK_NO_DISCARD duk::hash::Hash hash() const override;
-
 private:
     std::vector<AttachmentDescription> m_colorAttachments;
     std::optional<AttachmentDescription> m_depthAttachment;
     VkDevice m_device;
     VkRenderPass m_renderPass;
     std::vector<VkClearValue> m_clearValues;
-    duk::hash::Hash m_hash;
 };
 
 }// namespace duk::rhi

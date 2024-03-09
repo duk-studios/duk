@@ -54,15 +54,11 @@ public:
 public:
     virtual ~Image();
 
-    virtual void update(ImageDataSource* imageDataSource) = 0;
-
     DUK_NO_DISCARD virtual PixelFormat format() const = 0;
 
     DUK_NO_DISCARD virtual uint32_t width() const = 0;
 
     DUK_NO_DISCARD virtual uint32_t height() const = 0;
-
-    DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 };
 
 }// namespace duk::rhi

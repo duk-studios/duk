@@ -34,6 +34,8 @@ public:
 
     void prepare_frame() override;
 
+    void update() override;
+
     DUK_NO_DISCARD Command* acquire_image_command() override;
 
     DUK_NO_DISCARD Command* present_command() override;

@@ -34,7 +34,9 @@ public:
 
     void set_image(duk::rhi::Image* image);
 
-    void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) override;
+    void update(const DrawParams& params) override;
+
+    void bind(duk::rhi::CommandBuffer* commandBuffer) override;
 
     uint32_t size() const override;
 

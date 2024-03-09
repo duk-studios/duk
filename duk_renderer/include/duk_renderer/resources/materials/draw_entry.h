@@ -32,7 +32,6 @@ struct MeshEntry {
 };
 
 struct MeshDrawEntry {
-    DrawParams params;
     Material* material;
     Mesh* mesh;
     uint32_t instanceCount;

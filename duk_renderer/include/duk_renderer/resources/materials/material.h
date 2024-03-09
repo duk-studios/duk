@@ -41,7 +41,9 @@ public:
 
     DUK_NO_DISCARD InstanceBuffer* instance_buffer();
 
-    void bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& drawParams);
+    void update(const DrawParams& drawParams);
+
+    void bind(duk::rhi::CommandBuffer* commandBuffer);
 
 private:
     Pipeline m_pipeline;

@@ -79,10 +79,12 @@ bool SpriteColorMaterialDescriptorSet::is_image(uint32_t index) {
     return index == SpriteColorDescriptors::uBaseColor;
 }
 
-void SpriteColorMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& params) {
+void SpriteColorMaterialDescriptorSet::update(const DrawParams& params) {
     m_descriptorSet->set(SpriteColorDescriptors::uCamera, params.globalDescriptors->camera_ubo()->descriptor());
     m_descriptorSet->flush();
+}
 
+void SpriteColorMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer) {
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }
 

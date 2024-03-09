@@ -142,18 +142,21 @@ bool PhongMaterialDescriptorSet::is_image(uint32_t index) {
     return index == PhongDescriptors::uBaseColor || index == PhongDescriptors::uSpecular;
 }
 
-void PhongMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer, const DrawParams& drawParams) {
+void PhongMaterialDescriptorSet::update(const DrawParams& params) {
     // update global UBOs
-    m_descriptorSet->set(PhongDescriptors::uCamera, drawParams.globalDescriptors->camera_ubo()->descriptor());
-    m_descriptorSet->set(PhongDescriptors::uLights, drawParams.globalDescriptors->lights_ubo()->descriptor());
+    m_descriptorSet->set(PhongDescriptors::uCamera, params.globalDescriptors->camera_ubo()->descriptor());
+    m_descriptorSet->set(PhongDescriptors::uLights, params.globalDescriptors->lights_ubo()->descriptor());
 
     // These might have changed
     m_descriptorSet->set(PhongDescriptors::uBaseColor, m_albedo.descriptor());
     m_descriptorSet->set(PhongDescriptors::uSpecular, m_specular.descriptor());
+    m_descriptorSet->set(PhongDescriptors::uTransform, m_instanceBuffer->transform_buffer()->descriptor());
 
     // updates descriptor set in case some descriptor changed
     m_descriptorSet->flush();
+}
 
+void PhongMaterialDescriptorSet::bind(duk::rhi::CommandBuffer* commandBuffer) {
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }
 

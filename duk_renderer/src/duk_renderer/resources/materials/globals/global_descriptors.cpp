@@ -44,7 +44,7 @@ void GlobalDescriptors::update_cameras(scene::Objects& objects) {
         m_cameraUBO->flush();
     }
     if (cameraCount == 0) {
-        duk::log::warn("no camera found in scene, nothing will be rendered");
+        duk::log::warn("no camera found in objects, nothing will be rendered");
     }
 }
 

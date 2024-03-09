@@ -7,8 +7,8 @@
 #include <duk_hash/hash.h>
 #include <duk_macros/macros.h>
 
-#include <cassert>
 #include <cstdint>
+#include <duk_macros/assert.h>
 #include <ranges>
 #include <type_traits>
 
@@ -20,8 +20,7 @@ class Buffer {
 public:
     enum class UpdateFrequency {
         STATIC,
-        DYNAMIC,
-        SHARED
+        DYNAMIC
     };
 
     enum class Type {
@@ -44,14 +43,14 @@ public:
     template<std::ranges::contiguous_range T>
     void read(T& dst, size_t startElement = 0) {
         constexpr size_t elementSize = sizeof(std::ranges::range_value_t<T>);
-        assert(elementSize == element_size());
+        DUK_ASSERT(elementSize == element_size());
         read((void*)std::data(dst), std::size(dst) * elementSize, startElement * elementSize);
     }
 
     template<typename T>
     void read(T& dst, size_t elementIndex = 0) {
         constexpr size_t elementSize = sizeof(T);
-        assert(elementSize == element_size());
+        DUK_ASSERT(elementSize == element_size());
         read((void*)&dst, elementSize, elementIndex * elementSize);
     }
 
@@ -64,26 +63,21 @@ public:
     template<std::ranges::contiguous_range T>
     void write(const T& src, size_t startElement = 0) {
         constexpr size_t elementSize = sizeof(std::ranges::range_value_t<T>);
-        assert(elementSize == element_size());
+        DUK_ASSERT(elementSize == element_size());
         write((void*)std::data(src), std::size(src) * elementSize, startElement * elementSize);
     }
 
     template<typename T>
     void write(const T& src, size_t elementIndex = 0) {
         constexpr size_t elementSize = sizeof(T);
-        assert(elementSize == element_size());
+        DUK_ASSERT(elementSize == element_size());
         write((void*)&src, elementSize, elementIndex * elementSize);
     }
 
     virtual void copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) = 0;
 
-    virtual void resize(size_t elementCount) = 0;
-
     /// flushes data to the GPU
     virtual void flush() = 0;
-
-    /// Invalidates CPU cache and fetches data from GPU
-    virtual void invalidate() = 0;
 
     DUK_NO_DISCARD virtual size_t element_count() const = 0;
 
@@ -94,8 +88,6 @@ public:
     DUK_NO_DISCARD virtual Type type() const = 0;
 
     DUK_NO_DISCARD virtual CommandQueue* command_queue() const = 0;
-
-    DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 };
 
 }// namespace duk::rhi

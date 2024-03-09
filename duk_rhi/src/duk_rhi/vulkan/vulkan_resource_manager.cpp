@@ -37,26 +37,6 @@ VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateIn
     if (m_swapchain) {
         m_listener.listen(*m_swapchain->create_event(), [this](const auto& swapchainInfo) {
             m_imageCount = swapchainInfo.imageCount;
-            detail::create(m_buffers, m_imageCount);
-            detail::create(m_images, m_imageCount);
-            detail::create(m_descriptorSets, m_imageCount);
-            detail::create(m_frameBuffers, m_imageCount);
-            detail::create(m_graphicsPipelines, m_imageCount);
-        });
-
-        m_listener.listen(*m_swapchain->clean_event(), [this] {
-            detail::clean(m_frameBuffers);
-            detail::clean(m_descriptorSets);
-            detail::clean(m_images);
-            detail::clean(m_buffers);
-            detail::clean(m_graphicsPipelines);
-            clean(m_frameBuffersToDelete);
-            clean(m_descriptorSetsToDelete);
-            clean(m_graphicsPipelinesToDelete);
-            clean(m_computePipelinesToDelete);
-            clean(m_imagesToDelete);
-            clean(m_buffersToDelete);
-            clean(m_renderPassesToDelete);
         });
     }
 
@@ -66,60 +46,74 @@ VulkanResourceManager::VulkanResourceManager(const VulkanResourceManagerCreateIn
 }
 
 VulkanResourceManager::~VulkanResourceManager() {
-    // again, special case, because these are not created/destroyed with the swapchain
-    clean(m_commandQueuesToDelete);
-    assert(m_frameBuffers.empty());
-    assert(m_descriptorSets.empty());
-    assert(m_images.empty());
-    assert(m_buffers.empty());
-    assert(m_graphicsPipelines.empty());
-    assert(m_computePipelines.empty());
-    assert(m_commandQueues.empty());
+    clean(m_commandQueues);
+    clean(m_graphicsPipelines);
+    clean(m_computePipelines);
+    clean(m_descriptorSets);
+    clean(m_frameBuffers);
+    clean(m_renderPasses);
+    clean(m_buffers);
+    clean(m_images);
+    DUK_ASSERT(m_renderPasses.all.empty());
+    DUK_ASSERT(m_frameBuffers.all.empty());
+    DUK_ASSERT(m_descriptorSets.all.empty());
+    DUK_ASSERT(m_images.all.empty());
+    DUK_ASSERT(m_buffers.all.empty());
+    DUK_ASSERT(m_graphicsPipelines.all.empty());
+    DUK_ASSERT(m_computePipelines.all.empty());
+    DUK_ASSERT(m_commandQueues.all.empty());
+}
+
+void VulkanResourceManager::update(uint32_t imageIndex) {
+    update(m_buffers, imageIndex);
+    update(m_images, imageIndex);
+    update(m_descriptorSets, imageIndex);
+    update(m_frameBuffers, imageIndex);
+    update(m_graphicsPipelines, imageIndex);
+    update(m_computePipelines, imageIndex);
 }
 
 void VulkanResourceManager::clean(uint32_t imageIndex) {
-    clean(m_descriptorSetsToDelete, imageIndex);
-    clean(m_frameBuffersToDelete, imageIndex);
-    clean(m_imagesToDelete, imageIndex);
-    clean(m_buffersToDelete, imageIndex);
-    clean(m_graphicsPipelinesToDelete, imageIndex);
-    clean(m_computePipelinesToDelete, imageIndex);
-    clean(m_renderPassesToDelete, imageIndex);
-    // this is a special case, calling clean each frame won't really do anything internally.
-    // after all pending images are cleaned it will effectively safely destroy the command queue
-    clean(m_commandQueuesToDelete, imageIndex);
+    clean(m_frameBuffers, imageIndex);
+    clean(m_descriptorSets, imageIndex);
+    clean(m_images, imageIndex);
+    clean(m_buffers, imageIndex);
+    clean(m_graphicsPipelines, imageIndex);
+    clean(m_computePipelines, imageIndex);
+    clean(m_renderPasses, imageIndex);
+    clean(m_commandQueues, imageIndex);
 }
 
 std::shared_ptr<VulkanBuffer> VulkanResourceManager::create(const VulkanBufferCreateInfo& bufferCreateInfo) {
-    return create(m_buffers, m_buffersToDelete, bufferCreateInfo);
+    return create(m_buffers, bufferCreateInfo);
 }
 
 std::shared_ptr<VulkanMemoryImage> VulkanResourceManager::create(const VulkanMemoryImageCreateInfo& imageCreateInfo) {
-    return create(m_images, m_imagesToDelete, imageCreateInfo);
+    return create(m_images, imageCreateInfo);
 }
 
 std::shared_ptr<VulkanDescriptorSet> VulkanResourceManager::create(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo) {
-    return create(m_descriptorSets, m_descriptorSetsToDelete, descriptorSetCreateInfo);
+    return create(m_descriptorSets, descriptorSetCreateInfo);
 }
 
 std::shared_ptr<VulkanGraphicsPipeline> VulkanResourceManager::create(const VulkanGraphicsPipelineCreateInfo& pipelineCreateInfo) {
-    return create(m_graphicsPipelines, m_graphicsPipelinesToDelete, pipelineCreateInfo);
+    return create(m_graphicsPipelines, pipelineCreateInfo);
 }
 
 std::shared_ptr<VulkanComputePipeline> VulkanResourceManager::create(const VulkanComputePipelineCreateInfo& pipelineCreateInfo) {
-    return create(m_computePipelines, m_computePipelinesToDelete, pipelineCreateInfo);
+    return create(m_computePipelines, pipelineCreateInfo);
 }
 
 std::shared_ptr<VulkanFrameBuffer> VulkanResourceManager::create(const VulkanFrameBufferCreateInfo& frameBufferCreateInfo) {
-    return create(m_frameBuffers, m_frameBuffersToDelete, frameBufferCreateInfo);
+    return create(m_frameBuffers, frameBufferCreateInfo);
 }
 
 std::shared_ptr<VulkanRenderPass> VulkanResourceManager::create(const VulkanRenderPassCreateInfo& renderPassCreateInfo) {
-    return create(m_renderPasses, m_renderPassesToDelete, renderPassCreateInfo);
+    return create(m_renderPasses, renderPassCreateInfo);
 }
 
 std::shared_ptr<VulkanCommandQueue> VulkanResourceManager::create(const VulkanCommandQueueCreateInfo& commandQueueCreateInfo) {
-    return create(m_commandQueues, m_commandQueuesToDelete, commandQueueCreateInfo);
+    return create(m_commandQueues, commandQueueCreateInfo);
 }
 
 std::set<uint32_t> VulkanResourceManager::image_indices_set() const {
@@ -129,4 +123,25 @@ std::set<uint32_t> VulkanResourceManager::image_indices_set() const {
     }
     return pendingIndices;
 }
+
+void VulkanResourceManager::schedule_for_update(VulkanBuffer* buffer) {
+    schedule_for_update(m_buffers, buffer);
+}
+
+void VulkanResourceManager::schedule_for_update(VulkanMemoryImage* image) {
+    schedule_for_update(m_images, image);
+}
+
+void VulkanResourceManager::schedule_for_update(VulkanDescriptorSet* descriptorSet) {
+    schedule_for_update(m_descriptorSets, descriptorSet);
+}
+
+void VulkanResourceManager::schedule_for_update(VulkanFrameBuffer* frameBuffer) {
+    schedule_for_update(m_frameBuffers, frameBuffer);
+}
+
+void VulkanResourceManager::schedule_for_update(VulkanGraphicsPipeline* graphicsPipeline) {
+    schedule_for_update(m_graphicsPipelines, graphicsPipeline);
+}
+
 }// namespace duk::rhi

@@ -51,8 +51,6 @@ public:
 
     DUK_NO_DISCARD DescriptorType type() const;
 
-    DUK_NO_DISCARD duk::hash::Hash hash() const;
-
     DUK_NO_DISCARD Image* image() const;
 
     DUK_NO_DISCARD Image::Layout image_layout() const;
@@ -60,10 +58,6 @@ public:
     DUK_NO_DISCARD Sampler sampler() const;
 
     DUK_NO_DISCARD Buffer* buffer() const;
-
-    DUK_NO_DISCARD bool operator==(const Descriptor& rhs) const noexcept;
-
-    void update_hash();
 
 private:
     struct ImageDescriptor {
@@ -83,7 +77,6 @@ private:
 
     Data m_data;
     DescriptorType m_type;
-    duk::hash::Hash m_hash;
 };
 
 }// namespace duk::rhi

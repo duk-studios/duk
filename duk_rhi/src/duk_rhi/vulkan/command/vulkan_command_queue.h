@@ -86,7 +86,7 @@ public:
         }
 
         auto vulkanCommandBuffer = dynamic_cast<VulkanCommandBuffer*>(m_currentCommandBuffer);
-        assert(vulkanCommandBuffer);
+        DUK_ASSERT(vulkanCommandBuffer);
 
         return vulkanCommandBuffer->handle();
     }
