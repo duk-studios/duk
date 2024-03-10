@@ -35,12 +35,12 @@ static void update_transform(duk::scene::Component<Transform> transform) {
 }
 
 static void update_transforms(duk::scene::Objects& objects) {
-    for (auto object : objects.all_with<Transform>()) {
+    for (auto object: objects.all_with<Transform>()) {
         update_transform(object);
     }
 }
 
-}
+}// namespace detail
 
 glm::vec3 forward(const Transform& transform) {
     return glm::vec3(transform.model * glm::vec4(0, 0, -1, 1));
@@ -55,7 +55,6 @@ void TransformUpdateSystem::update(duk::scene::Objects& objects, duk::scene::Env
 }
 
 void TransformUpdateSystem::exit(duk::scene::Objects& objects, duk::scene::Environment* environment) {
-
 }
 
 }// namespace duk::renderer

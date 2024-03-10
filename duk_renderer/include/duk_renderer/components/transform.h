@@ -40,7 +40,6 @@ public:
     void exit(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
 };
 
-
 }// namespace duk::renderer
 
 namespace duk::serial {
