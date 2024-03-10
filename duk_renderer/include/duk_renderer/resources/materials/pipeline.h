@@ -33,8 +33,6 @@ public:
 
     void cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask);
 
-    void clear_unused_pipelines();
-
 private:
     class PipelineCache {
     public:

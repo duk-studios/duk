@@ -29,9 +29,6 @@ struct RendererCreateInfo {
 
 class Renderer {
 public:
-    using RenderStartEvent = duk::event::EventVoid;
-
-public:
     explicit Renderer(const RendererCreateInfo& rendererCreateInfo);
 
     virtual ~Renderer();
@@ -50,8 +47,6 @@ public:
 
     DUK_NO_DISCARD duk::rhi::CommandQueue* main_command_queue() const;
 
-    DUK_NO_DISCARD RenderStartEvent& render_start_event();
-
 private:
     void update_global_descriptors(duk::scene::Objects& objects);
 
@@ -63,7 +58,6 @@ protected:
     std::shared_ptr<duk::rhi::CommandQueue> m_mainQueue;
     std::vector<std::shared_ptr<Pass>> m_passes;
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
-    duk::event::EventVoid m_renderStart;
 };
 
 }// namespace renderer
