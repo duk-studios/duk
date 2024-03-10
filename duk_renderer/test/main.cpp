@@ -99,7 +99,9 @@ int main() {
     auto scene = std::make_unique<duk::scene::Scene>();
 
     auto& systems = scene->systems();
-    // camera update system is responsible for updating our camera matrices
+    // TransformUpdateSystem updates our transform matrices
+    systems.add<duk::renderer::TransformUpdateSystem>();
+    // CameraUpdateSystem is responsible for updating our camera matrices, it must come after TransformUpdateSystem
     systems.add<duk::renderer::CameraUpdateSystem>();
 
     auto& objects = scene->objects();
@@ -109,6 +111,7 @@ int main() {
     duk::scene::Object camera = objects.add_object();
     auto cameraPosition = camera.add<duk::renderer::Position3D>();
     cameraPosition->value = glm::vec3(0, 0, 0);
+    camera.add<duk::renderer::Transform>();
     camera.add<duk::renderer::Rotation3D>();
     camera.add<duk::renderer::Camera>();
     auto cameraPerspective = camera.add<duk::renderer::PerspectiveCamera>();
@@ -118,6 +121,7 @@ int main() {
 
     ////Adding a light to our objects.
     duk::scene::Object globalLight = objects.add_object();
+    globalLight.add<duk::renderer::Transform>();
     auto globalLightPosition = globalLight.add<duk::renderer::Position3D>();
     globalLightPosition->value = glm::vec3(0, 4, -5);
     auto globalPointLight = globalLight.add<duk::renderer::PointLight>();
@@ -128,6 +132,7 @@ int main() {
     //Our cube has the Mesh Drawing component, that specifies what mesh type and material we are going to use.
     //Also our position and scale and rotation values.
     duk::scene::Object cubeObject = objects.add_object();
+    cubeObject.add<duk::renderer::Transform>();
     auto cubeMeshRenderer = cubeObject.add<duk::renderer::MeshRenderer>();
     cubeMeshRenderer->mesh = environment.pools()->get<duk::renderer::MeshPool>()->cube();
 
