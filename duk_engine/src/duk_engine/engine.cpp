@@ -38,13 +38,13 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         m_run = false;
     });
 
-    duk::renderer::ForwardRendererCreateInfo forwardRendererCreateInfo = {};
-    forwardRendererCreateInfo.rendererCreateInfo.window = m_window.get();
-    forwardRendererCreateInfo.rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
-    forwardRendererCreateInfo.rendererCreateInfo.api = duk::rhi::API::VULKAN;
-    forwardRendererCreateInfo.rendererCreateInfo.applicationName = m_settings.name.c_str();
+    duk::renderer::RendererCreateInfo rendererCreateInfo = {};
+    rendererCreateInfo.window = m_window.get();
+    rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
+    rendererCreateInfo.api = duk::rhi::API::VULKAN;
+    rendererCreateInfo.applicationName = m_settings.name.c_str();
 
-    m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
+    m_renderer = duk::renderer::make_forward_renderer(rendererCreateInfo);
 
     duk::import::ImporterCreateInfo importerCreateInfo = {};
     importerCreateInfo.pools = &m_pools;

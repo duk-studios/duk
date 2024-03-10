@@ -9,7 +9,6 @@
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
-#include <duk_renderer/forward/forward_renderer.h>
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/material_pool.h>
 #include <duk_renderer/pools/mesh_pool.h>
@@ -40,18 +39,13 @@ public:
             m_run = false;
         });
 
-        //Setting up rendererCreateInfo.
+        // Create renderer
         duk::renderer::RendererCreateInfo rendererCreateInfo = {};
         rendererCreateInfo.window = m_window.get();
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.logger = duk::log::Logging::instance(true)->default_logger();
 
-        //A forward renderer is created and associated with the window.
-        duk::renderer::ForwardRendererCreateInfo forwardRendererCreateInfo;
-        forwardRendererCreateInfo.rendererCreateInfo = rendererCreateInfo;
-
-        //Creating our renderer with the forwardRendererCreateInfo, and a objects.
-        m_renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
+        m_renderer = duk::renderer::make_forward_renderer(rendererCreateInfo);
 
         // mesh pool
         duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};

@@ -8,7 +8,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/renderer.h
         include/duk_renderer/vertex_types.h
         include/duk_renderer/sort.h
-        include/duk_renderer/forward/forward_renderer.h
         include/duk_renderer/brushes/mesh.h
         include/duk_renderer/brushes/mesh_data_source.h
         include/duk_renderer/brushes/sprite_brush.h
@@ -60,7 +59,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/renderer.cpp
         src/duk_renderer/sort.cpp
         src/duk_renderer/vertex_types.cpp
-        src/duk_renderer/forward/forward_renderer.cpp
         src/duk_renderer/brushes/mesh.cpp
         src/duk_renderer/brushes/mesh_data_source.cpp
         src/duk_renderer/brushes/sprite_brush.cpp
