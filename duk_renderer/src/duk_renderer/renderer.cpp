@@ -1,17 +1,13 @@
 /// 19/08/2023
 /// renderer.cpp
 
+#include <duk_platform/window.h>
+#include <duk_renderer/components/register_types.h>
+#include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/passes/pass.h>
+#include <duk_renderer/passes/present_pass.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
-
-#include <duk_renderer/components/register_types.h>
-#include <duk_renderer/pools/image_pool.h>
-#include <duk_renderer/pools/material_pool.h>
-#include <duk_renderer/pools/mesh_pool.h>
-#include <duk_renderer/pools/sprite_pool.h>
-
-#include <duk_platform/window.h>
 #include <duk_rhi/image_data_source.h>
 
 namespace duk::renderer {
@@ -161,6 +157,27 @@ void Renderer::update_passes(scene::Objects& objects) {
     for (auto& pass: m_passes) {
         pass->update(updateParams);
     }
+}
+
+std::unique_ptr<Renderer> make_forward_renderer(const RendererCreateInfo& rendererCreateInfo) {
+    auto renderer = std::make_unique<Renderer>(rendererCreateInfo);
+
+    ForwardPassCreateInfo forwardPassCreateInfo = {};
+    forwardPassCreateInfo.renderer = renderer.get();
+
+    auto forwardPass = renderer->add_pass<ForwardPass>(forwardPassCreateInfo);
+
+    if (rendererCreateInfo.window) {
+        PresentPassCreateInfo presentPassCreateInfo = {};
+        presentPassCreateInfo.renderer = renderer.get();
+        presentPassCreateInfo.window = rendererCreateInfo.window;
+
+        auto presentPass = renderer->add_pass<PresentPass>(presentPassCreateInfo);
+
+        forwardPass->out_color()->connect(presentPass->in_color());
+    }
+
+    return renderer;
 }
 
 }// namespace duk::renderer
