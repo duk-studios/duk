@@ -41,7 +41,7 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
 
     std::set<Material*> uniqueMaterials;
 
-    for (auto object: objects->all_with<MeshRenderer>()) {
+    for (auto object: objects->all_with<MeshRenderer, Transform>()) {
         auto meshRenderer = object.component<MeshRenderer>();
 
         auto material = meshRenderer->material.get();
@@ -153,7 +153,7 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
 
     std::set<Material*> usedMaterials;
 
-    for (auto object: objects->all_with<SpriteRenderer>()) {
+    for (auto object: objects->all_with<SpriteRenderer, Transform>()) {
         auto spriteRenderer = object.component<SpriteRenderer>();
         auto material = spriteRenderer->material.get();
         auto sprite = spriteRenderer->sprite.get();
@@ -182,7 +182,9 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
 
         auto object = objects->object(spriteEntry.objectId);
 
-        brush->push(spriteEntry.sprite, model_matrix_3d(object));
+        auto transform = object.component<Transform>();
+
+        brush->push(spriteEntry.sprite, transform->model);
 
         if (compatible(spriteEntry, drawEntry)) {
             drawEntry.instanceCount++;

@@ -54,9 +54,10 @@ PhongInstanceBuffer::PhongInstanceBuffer(const PhongInstanceBufferCreateInfo& ph
 }
 
 void PhongInstanceBuffer::insert(const scene::Object& object) {
-    auto& transform = m_transformSBO->next();
-    transform.model = duk::renderer::model_matrix_3d(object);
-    transform.invModel = glm::inverse(transform.model);
+    auto transform = object.component<Transform>();
+    auto& instance = m_transformSBO->next();
+    instance.model = transform->model;
+    instance.invModel = transform->invModel;
 }
 
 void PhongInstanceBuffer::clear() {

@@ -14,16 +14,15 @@ void register_types() {
     duk::scene::register_component<DirectionalLight>();
     duk::scene::register_component<PointLight>();
     duk::scene::register_component<Position3D>();
-    duk::scene::register_component<Position2D>();
     duk::scene::register_component<Rotation3D>();
-    duk::scene::register_component<Rotation2D>();
     duk::scene::register_component<Scale3D>();
-    duk::scene::register_component<Scale2D>();
+    duk::scene::register_component<Transform>();
     duk::scene::register_component<SpriteRenderer>();
     duk::scene::register_component<MeshRenderer>();
     duk::scene::register_component<Camera>();
     duk::scene::register_component<PerspectiveCamera>();
     duk::scene::register_system<CameraUpdateSystem>();
+    duk::scene::register_system<TransformUpdateSystem>();
 }
 
 }// namespace duk::renderer
