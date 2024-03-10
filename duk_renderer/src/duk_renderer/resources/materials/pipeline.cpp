@@ -3,7 +3,6 @@
 
 #include <duk_renderer/brushes/brush.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/resources/materials/material.h>
 #include <duk_renderer/resources/materials/pipeline.h>
 
 namespace duk::renderer {
@@ -13,13 +12,11 @@ static constexpr int kDeleteUnusedPipelineAfterFrames = 512;
 Pipeline::Pipeline(const PipelineCreateInfo& pipelineCreateInfo)
     : m_renderer(pipelineCreateInfo.renderer)
     , m_pipelineCache(m_renderer, pipelineCreateInfo.shaderDataSource) {
-    m_listener.listen(m_renderer->render_start_event(), [this] {
-        m_pipelineCache.clear_unused_pipelines();
-    });
 }
 
 void Pipeline::update(const DrawParams& params) {
     m_currentPipeline = m_pipelineCache.find_pipeline_for_params(params);
+    m_pipelineCache.clear_unused_pipelines();
 }
 
 void Pipeline::use(duk::rhi::CommandBuffer* commandBuffer) {
@@ -36,10 +33,6 @@ void Pipeline::invert_y(bool invert) {
 
 void Pipeline::cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask) {
     m_pipelineCache.cull_mode_mask(cullModeMask);
-}
-
-void Pipeline::clear_unused_pipelines() {
-    m_pipelineCache.clear_unused_pipelines();
 }
 
 //------------------------------------

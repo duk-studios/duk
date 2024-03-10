@@ -22,10 +22,11 @@ static glm::mat4 calculate_projection(const PerspectiveCamera& perspective, uint
 }
 
 static void update_camera(const duk::scene::Object& object, Camera& camera, PerspectiveCamera& perspective, uint32_t width, uint32_t height) {
+    auto transform = object.component<Transform>();
+    camera.view = transform->invModel;// the view is the inverse of the model
+    camera.invView = transform->model;
     camera.proj = detail::calculate_projection(perspective, width, height);
     camera.invProj = glm::inverse(camera.proj);
-    camera.invView = model_matrix_3d(object);// the model matrix is the inverse of the view
-    camera.view = glm::inverse(camera.invView);
     camera.vp = camera.proj * camera.view;
     camera.invVp = glm::inverse(camera.vp);
 }

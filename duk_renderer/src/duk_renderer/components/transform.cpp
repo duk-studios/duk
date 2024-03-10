@@ -9,7 +9,9 @@
 
 namespace duk::renderer {
 
-glm::mat4 model_matrix_3d(const duk::scene::Object& object) {
+namespace detail {
+
+static glm::mat4 calculate_model(const duk::scene::Object& object) {
     glm::mat4 model(1);
 
     if (auto position3D = object.component<Position3D>()) {
@@ -27,26 +29,32 @@ glm::mat4 model_matrix_3d(const duk::scene::Object& object) {
     return model;
 }
 
-glm::mat3 model_matrix_2d(const duk::scene::Object& object) {
-    glm::mat3 model(1);
-
-    if (auto position2D = object.component<Position2D>()) {
-        model = glm::translate(model, position2D->value);
-    }
-
-    if (auto rotation2D = object.component<Rotation2D>()) {
-        model = glm::rotate(model, rotation2D->value);
-    }
-
-    if (auto scale2D = object.component<Scale2D>()) {
-        model = glm::scale(model, scale2D->value);
-    }
-
-    return model;
+static void update_transform(duk::scene::Component<Transform> transform) {
+    transform->model = calculate_model(transform.object());
+    transform->invModel = glm::inverse(transform->model);
 }
 
-glm::vec3 forward_direction_3d(const scene::Object& object) {
-    return glm::vec3(model_matrix_3d(object) * glm::vec4(0, 0, 1, 0));
+static void update_transforms(duk::scene::Objects& objects) {
+    for (auto object: objects.all_with<Transform>()) {
+        update_transform(object);
+    }
+}
+
+}// namespace detail
+
+glm::vec3 forward(const Transform& transform) {
+    return glm::vec3(transform.model * glm::vec4(0, 0, -1, 1));
+}
+
+void TransformUpdateSystem::enter(duk::scene::Objects& objects, duk::scene::Environment* environment) {
+    detail::update_transforms(objects);
+}
+
+void TransformUpdateSystem::update(duk::scene::Objects& objects, duk::scene::Environment* environment) {
+    detail::update_transforms(objects);
+}
+
+void TransformUpdateSystem::exit(duk::scene::Objects& objects, duk::scene::Environment* environment) {
 }
 
 }// namespace duk::renderer

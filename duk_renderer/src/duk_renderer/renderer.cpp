@@ -60,8 +60,6 @@ void Renderer::render(duk::scene::Scene* scene) {
 
     m_rhi->update();
 
-    m_renderStart.emit();
-
     auto mainPass = m_mainQueue->submit([this](duk::rhi::CommandBuffer* commandBuffer) {
         commandBuffer->begin();
 
@@ -141,10 +139,6 @@ duk::rhi::RHI* Renderer::rhi() const {
 
 duk::rhi::CommandQueue* Renderer::main_command_queue() const {
     return m_mainQueue.get();
-}
-
-Renderer::RenderStartEvent& Renderer::render_start_event() {
-    return m_renderStart;
 }
 
 void Renderer::update_global_descriptors(duk::scene::Objects& objects) {

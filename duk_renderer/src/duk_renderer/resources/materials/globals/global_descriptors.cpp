@@ -54,7 +54,7 @@ void GlobalDescriptors::update_lights(duk::scene::Objects& objects) {
     for (auto object: objects.all_with<DirectionalLight>()) {
         auto directionalLightComponent = object.component<DirectionalLight>();
         auto& directionalLight = lights.directionalLights[lights.directionalLightCount++];
-        directionalLight.direction = forward_direction_3d(object);
+        directionalLight.direction = forward(*object.component<Transform>());
         directionalLight.value.color = directionalLightComponent->value.color;
         directionalLight.value.intensity = directionalLightComponent->value.intensity;
 

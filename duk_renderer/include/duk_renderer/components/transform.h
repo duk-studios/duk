@@ -5,41 +5,40 @@
 #define DUK_RENDERER_TRANSFORM_H
 
 #include <duk_scene/objects.h>
+#include <duk_scene/systems.h>
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/matrix.hpp>
 
 namespace duk::renderer {
 
-struct Position2D {
-    glm::vec2 value;
-};
-
 struct Position3D {
     glm::vec3 value;
-};
-
-struct Rotation2D {
-    float value;
 };
 
 struct Rotation3D {
     glm::quat value;
 };
 
-struct Scale2D {
-    glm::vec2 value{1};
-};
-
 struct Scale3D {
     glm::vec3 value{1};
 };
 
-glm::mat4 model_matrix_3d(const duk::scene::Object& object);
+struct Transform {
+    glm::mat4 model;
+    glm::mat4 invModel;
+};
 
-glm::mat3 model_matrix_2d(const duk::scene::Object& object);
+glm::vec3 forward(const Transform& transform);
 
-glm::vec3 forward_direction_3d(const duk::scene::Object& object);
+class TransformUpdateSystem : public duk::scene::System {
+public:
+    void enter(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
+
+    void update(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
+
+    void exit(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
+};
 
 }// namespace duk::renderer
 
@@ -51,17 +50,7 @@ void visit_object(JsonVisitor* visitor, duk::renderer::Position3D& position) {
 }
 
 template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::Position2D& position) {
-    visitor->visit_member(position.value, MemberDescription("value"));
-}
-
-template<typename JsonVisitor>
 void visit_object(JsonVisitor* visitor, duk::renderer::Rotation3D& rotation) {
-    visitor->visit_member(rotation.value, MemberDescription("value"));
-}
-
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::Rotation2D& rotation) {
     visitor->visit_member(rotation.value, MemberDescription("value"));
 }
 
@@ -71,8 +60,8 @@ void visit_object(JsonVisitor* visitor, duk::renderer::Scale3D& scale) {
 }
 
 template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::Scale2D& scale) {
-    visitor->visit_member(scale.value, MemberDescription("value"));
+void visit_object(JsonVisitor* visitor, duk::renderer::Transform& transform) {
+    // nothing for now
 }
 
 }// namespace duk::serial

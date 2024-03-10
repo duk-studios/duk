@@ -89,11 +89,13 @@ void CameraSystem::update(duk::scene::Objects& objects, duk::scene::Environment*
         rotationValue = rotation->value;
     }
 
-    auto position = controller.object().component<duk::renderer::Position3D>();
-    if (position) {
-        auto moveDirection = detail::input_move_direction(input);
-        moveDirection = rotationValue * moveDirection;
-        position->value += moveDirection * controller->speed * deltaTime;
+    {
+        auto position = controller.object().component<duk::renderer::Position3D>();
+        if (position) {
+            auto moveDirection = detail::input_move_direction(input);
+            moveDirection = rotationValue * moveDirection;
+            position->value += moveDirection * controller->speed * deltaTime;
+        }
     }
 
     if (input->mouse_down(duk::platform::MouseButton::RIGHT)) {
@@ -103,6 +105,7 @@ void CameraSystem::update(duk::scene::Objects& objects, duk::scene::Environment*
 
         auto newObject = objects.add_object();
 
+        newObject.add<duk::renderer::Transform>();
         auto position = newObject.add<duk::renderer::Position3D>();
         position->value = worldPos;
 

@@ -50,8 +50,9 @@ ColorInstanceBuffer::ColorInstanceBuffer(const ColorInstanceBufferCreateInfo& co
 }
 
 void ColorInstanceBuffer::insert(const scene::Object& object) {
-    auto& transform = m_transformSBO->next();
-    transform.model = model_matrix_3d(object);
+    auto transform = object.component<Transform>();
+    auto& instance = m_transformSBO->next();
+    instance.model = transform->model;
 }
 
 void ColorInstanceBuffer::clear() {
