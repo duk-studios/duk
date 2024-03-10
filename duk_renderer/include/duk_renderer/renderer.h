@@ -52,6 +52,9 @@ public:
 
     DUK_NO_DISCARD RenderStartEvent& render_start_event();
 
+    template<typename T, typename... Args>
+    T* add_pass(Args&&... args);
+
 private:
     void update_global_descriptors(duk::scene::Objects& objects);
 
@@ -65,6 +68,16 @@ protected:
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
     duk::event::EventVoid m_renderStart;
 };
+
+/// Creates a Renderer with a Forward Pass (and PresentPass if a window is provided)
+std::unique_ptr<Renderer> make_forward_renderer(const RendererCreateInfo& rendererCreateInfo);
+
+template<typename T, typename... Args>
+T* Renderer::add_pass(Args&&... args) {
+    auto pass = std::make_shared<T>(std::forward<Args>(args)...);
+    m_passes.push_back(pass);
+    return pass.get();
+}
 
 }// namespace renderer
 }// namespace duk
