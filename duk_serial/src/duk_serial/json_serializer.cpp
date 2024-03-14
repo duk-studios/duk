@@ -14,7 +14,7 @@ JsonReader::JsonReader(const char* jsonStr) {
     m_document.Parse(jsonStr);
 
     if (m_document.HasParseError()) {
-        throw std::runtime_error(fmt::format("failed to parse scene json: {}", rapidjson::GetParseError_En(m_document.GetParseError())));
+        throw std::runtime_error(fmt::format("failed to parse json: {}", rapidjson::GetParseError_En(m_document.GetParseError())));
     }
 }
 
