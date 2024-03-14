@@ -8,7 +8,7 @@ namespace duk::sample {
 
 Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     duk::engine::EngineCreateInfo engineCreateInfo = {};
-    engineCreateInfo.workingDirectory = applicationCreateInfo.engineSettingsPath;
+    engineCreateInfo.workingDirectory = applicationCreateInfo.engineWorkingDirectory;
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
