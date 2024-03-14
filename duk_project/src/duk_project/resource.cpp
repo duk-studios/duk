@@ -91,7 +91,7 @@ std::set<std::filesystem::path> resource_scan(Project* project) {
 
     std::set<std::filesystem::path> trackFiles;
     std::set<std::filesystem::path> resourceFiles;
-    for (const auto& entry: std::filesystem::recursive_directory_iterator(project->root)) {
+    for (const auto& entry: std::filesystem::recursive_directory_iterator(project->root / "resources")) {
         if (!entry.is_regular_file()) {
             continue;
         }
