@@ -14,11 +14,11 @@ namespace detail {
 
 static const auto kDukProjectFolder = ".duk";
 
-bool has_duk_project(const std::filesystem::path& path) {
+static bool has_duk_project(const std::filesystem::path& path) {
     return std::filesystem::exists(path / kDukProjectFolder);
 }
 
-std::filesystem::path find_project_root(std::filesystem::path path) {
+static std::filesystem::path find_project_root(std::filesystem::path path) {
     if (has_duk_project(path)) {
         return path;
     }
@@ -33,7 +33,7 @@ std::filesystem::path find_project_root(std::filesystem::path path) {
     return root;
 }
 
-void write_project_settings(const Project* project) {
+static void write_project_settings(const Project* project) {
 
     duk::engine::Settings settings = project->settings;
 
@@ -44,7 +44,7 @@ void write_project_settings(const Project* project) {
     file << writer.pretty_print();
 }
 
-void read_project_settings(Project* project) {
+static void read_project_settings(Project* project) {
     auto settingsPath = project->root / ".duk/settings.json";
     if (!std::filesystem::exists(settingsPath)) {
         throw std::runtime_error(fmt::format("settings.json not found at {}", settingsPath.string()));
