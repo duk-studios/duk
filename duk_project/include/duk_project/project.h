@@ -29,7 +29,6 @@ void open(Project* project, std::filesystem::path path);
 
 void update(Project* project);
 
-}
+}// namespace duk::project
 
-#endif // DUK_PROJECT_PROJECT_H
-
+#endif// DUK_PROJECT_PROJECT_H

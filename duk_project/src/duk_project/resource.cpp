@@ -1,17 +1,17 @@
 /// 04/03/2024
 /// resource.cpp
 
-#include <duk_project/resource.h>
 #include <duk_project/project.h>
+#include <duk_project/resource.h>
 
-#include <duk_import/resource_set_importer.h>
 #include <duk_import/importer.h>
+#include <duk_import/resource_set_importer.h>
 #include <duk_tools/file.h>
 
 #include <fmt/format.h>
 
-#include <random>
 #include <fstream>
+#include <random>
 
 namespace duk::project {
 
@@ -52,7 +52,7 @@ static bool has_resource_id(const Project* project, const duk::resource::Id& id)
 
 static duk::resource::Id resource_id_generate(const Project* project) {
     static std::random_device rd;
-    static std::mt19937 gen(rd()); // mersenne_twister_engine seeded with rd()
+    static std::mt19937 gen(rd());// mersenne_twister_engine seeded with rd()
     static std::uniform_int_distribution<uint64_t> distrib(duk::import::kMaxBuiltInResourceId.value() + 1, std::numeric_limits<uint64_t>::max());
 
     auto id = duk::resource::Id(distrib(gen));
@@ -82,7 +82,7 @@ static void add_resource(Project* project, const duk::resource::Id& id, const st
     project->resources.emplace(id, ResourceEntry{resourceFile, trackFile});
 }
 
-}
+}// namespace detail
 
 std::set<std::filesystem::path> resource_scan(Project* project) {
     if (!std::filesystem::exists(project->root)) {
@@ -99,20 +99,18 @@ std::set<std::filesystem::path> resource_scan(Project* project) {
         const auto extension = file.extension();
         if (extension == ".res") {
             trackFiles.insert(file);
-        }
-        else if (detail::is_resource(extension.string())) {
+        } else if (detail::is_resource(extension.string())) {
             resourceFiles.insert(entry);
         }
     }
 
     std::set<std::filesystem::path> untrackedResourceFiles;
-    for (auto resourceFile : resourceFiles) {
+    for (auto resourceFile: resourceFiles) {
         auto trackFile = std::filesystem::path(resourceFile).replace_extension(".res");
         if (trackFiles.find(trackFile) != trackFiles.end()) {
             auto resourceDescription = detail::read_resource_description(trackFile);
             detail::add_resource(project, resourceDescription.id, resourceFile, trackFile);
-        }
-        else {
+        } else {
             untrackedResourceFiles.insert(resourceFile);
         }
     }
@@ -147,4 +145,4 @@ void resource_track(Project* project, const std::filesystem::path& resource) {
     detail::add_resource(project, resourceDescription.id, resource, trackFilePath);
 }
 
-}
+}// namespace duk::project

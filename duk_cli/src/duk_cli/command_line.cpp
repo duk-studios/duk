@@ -5,8 +5,8 @@
 // duk_cli
 #include <duk_cli/command_line.h>
 #include <duk_cli/commands/init_command.h>
-#include <duk_cli/commands/update_command.h>
 #include <duk_cli/commands/status_command.h>
+#include <duk_cli/commands/update_command.h>
 
 // std
 #include <filesystem>
@@ -36,7 +36,6 @@ std::unique_ptr<Command> make_status_command() {
     return std::make_unique<StatusCommand>(statusCommandCreateInfo);
 }
 
-
 }// namespace detail
 
 Command::~Command() = default;
@@ -62,7 +61,6 @@ CommandLine::CommandLine(int argc, const char* argv[]) {
     }
 
     throw std::invalid_argument("unknown command: " + commandName);
-
 }
 
 Command* CommandLine::command() const {

@@ -11,7 +11,6 @@ namespace duk::cli {
 
 UpdateCommand::UpdateCommand(const UpdateCommandCreateInfo& initCommandCreateInfo)
     : m_path(initCommandCreateInfo.path) {
-
 }
 
 void UpdateCommand::execute() {
@@ -22,4 +21,4 @@ void UpdateCommand::execute() {
     duk::project::update(&project);
 }
 
-}
+}// namespace duk::cli

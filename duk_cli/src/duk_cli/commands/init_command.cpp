@@ -7,9 +7,8 @@
 
 namespace duk::cli {
 
-InitCommand::InitCommand(const InitCommandCreateInfo& initCommandCreateInfo) :
-    m_path(initCommandCreateInfo.path) {
-
+InitCommand::InitCommand(const InitCommandCreateInfo& initCommandCreateInfo)
+    : m_path(initCommandCreateInfo.path) {
 }
 
 void InitCommand::execute() {
@@ -17,4 +16,4 @@ void InitCommand::execute() {
     duk::project::init(&project, m_path);
 }
 
-}
+}// namespace duk::cli

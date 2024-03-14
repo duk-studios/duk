@@ -23,7 +23,6 @@ private:
     std::filesystem::path m_path;
 };
 
-}
+}// namespace duk::cli
 
-#endif // DUK_CLI_RESOURCE_COMMAND_H
-
+#endif// DUK_CLI_RESOURCE_COMMAND_H

@@ -6,8 +6,8 @@
 
 #include <duk_resource/resource.h>
 
-#include <string>
 #include <filesystem>
+#include <string>
 
 namespace duk::project {
 
@@ -19,7 +19,6 @@ std::set<std::filesystem::path> resource_scan(Project* project);
 
 void resource_track(Project* project, const std::filesystem::path& resource);
 
-}
+}// namespace duk::project
 
-#endif // DUK_PROJECT_RESOURCE_H
-
+#endif// DUK_PROJECT_RESOURCE_H

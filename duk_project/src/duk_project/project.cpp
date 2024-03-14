@@ -34,7 +34,6 @@ static std::filesystem::path find_project_root(std::filesystem::path path) {
 }
 
 static void write_project_settings(const Project* project) {
-
     duk::engine::Settings settings = project->settings;
 
     duk::serial::JsonWriter writer;
@@ -56,7 +55,7 @@ static void read_project_settings(Project* project) {
     reader.visit(project->settings);
 }
 
-}
+}// namespace detail
 
 void init(Project* project, std::filesystem::path path) {
     if (!std::filesystem::is_directory(path)) {
@@ -113,10 +112,10 @@ void update(Project* project) {
         return;
     }
 
-    for (auto& untrackedFile : untrackedFiles) {
+    for (auto& untrackedFile: untrackedFiles) {
         duk::log::info("Adding track file for {}", untrackedFile.string());
         resource_track(project, untrackedFile);
     }
 }
 
-}
+}// namespace duk::project
