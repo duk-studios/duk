@@ -9,8 +9,7 @@
 
 int main(int argc, const char* argv[]) {
     try {
-        // skip executable path argument
-        duk::cli::CommandLine commandLine(argc, argv);
+        duk::cli::CommandLine commandLine(argc - 1, argv + 1);
 
         commandLine.command()->execute();
     } catch (const std::exception& e) {

@@ -16,6 +16,7 @@
       <file path="$PROJECT_DIR$/duk_macros" />
       <file path="$PROJECT_DIR$/duk_material_generator" />
       <file path="$PROJECT_DIR$/duk_platform" />
+      <file path="$PROJECT_DIR$/duk_project" />
       <file path="$PROJECT_DIR$/duk_renderer" />
       <file path="$PROJECT_DIR$/duk_resource" />
       <file path="$PROJECT_DIR$/duk_rhi" />

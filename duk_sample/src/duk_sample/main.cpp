@@ -8,7 +8,7 @@
 
 int main() {
     duk::sample::ApplicationCreateInfo applicationCreateInfo = {};
-    applicationCreateInfo.engineSettingsPath = "./sample.duk";
+    applicationCreateInfo.engineWorkingDirectory = ".";
 
     try {
         duk::sample::Application application(applicationCreateInfo);
