@@ -17,7 +17,7 @@
 namespace duk::engine {
 
 struct EngineCreateInfo {
-    std::string settingsPath;
+    std::filesystem::path workingDirectory;
 };
 
 class Engine : public duk::renderer::Environment {
@@ -43,6 +43,7 @@ public:
     DUK_NO_DISCARD const duk::tools::Timer* timer() const;
 
 private:
+    std::filesystem::path m_workingDirectory;
     Settings m_settings;
     duk::event::Listener m_listener;
     std::shared_ptr<duk::platform::Window> m_window;

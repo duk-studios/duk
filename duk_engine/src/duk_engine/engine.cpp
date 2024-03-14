@@ -3,25 +3,31 @@
 //
 
 #include <duk_engine/engine.h>
+
 #include <duk_import/image/image_importer.h>
 #include <duk_import/importer.h>
 #include <duk_import/material/material_importer.h>
 #include <duk_import/scene/scene_importer.h>
+
 #include <duk_log/log.h>
+
 #include <duk_platform/system.h>
+
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/sprite_pool.h>
+
 #include <duk_scene/scene_pool.h>
 
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
-    : m_run(false) {
+    : m_run(false)
+    , m_workingDirectory(engineCreateInfo.workingDirectory) {
     duk::platform::System::create();
 
-    const auto& settingsPath = engineCreateInfo.settingsPath;
-    m_settings = load_settings(settingsPath);
+    const auto settingsPath = m_workingDirectory / ".duk/settings.json";
+    m_settings = load_settings(settingsPath.string());
 
     duk::platform::WindowCreateInfo windowCreateInfo = {};
     windowCreateInfo.windowTitle = m_settings.name.c_str();
@@ -50,7 +56,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     importerCreateInfo.pools = &m_pools;
     m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
 
-    m_importer->load_resource_set(settingsPath);
+    m_importer->load_resource_set(m_workingDirectory / "resources");
 
     /* init resources */
     // images
