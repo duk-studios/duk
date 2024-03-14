@@ -2,73 +2,67 @@
 // Created by rov on 12/15/2023.
 //
 
+// duk_cli
 #include <duk_cli/command_line.h>
-#include <duk_cli/commands/json_command.h>
+#include <duk_cli/commands/init_command.h>
+#include <duk_cli/commands/update_command.h>
+#include <duk_cli/commands/status_command.h>
 
-#include <cxxopts.hpp>
-#include <duk_log/log.h>
+// std
+#include <filesystem>
 
 namespace duk::cli {
 
 namespace detail {
 
-const char* kHelpMessage = R"(
-duk
-Usage:
-  duk [COMMAND...]
+std::unique_ptr<Command> make_init_command() {
+    InitCommandCreateInfo resourceCommandCreateInfo = {};
+    resourceCommandCreateInfo.path = std::filesystem::current_path();
 
- commands:
-    json
-
-)";
-
-std::unique_ptr<Command> make_json_generate_command(int argc, const char* argv[]) {
-    cxxopts::Options options("duk json generate");
-
-    options.add_options()("s, source", "Source file to parse", cxxopts::value<std::string>())("o, output", "Output file with generated methods", cxxopts::value<std::string>())(
-            "n, namespace", "Namespace for generated methods", cxxopts::value<std::string>())("i, includes", "Additional includes for generated file", cxxopts::value<std::vector<std::string>>());
-
-    auto result = options.parse(argc, argv);
-
-    JsonCommandCreateInfo jsonCommandCreateInfo = {};
-    jsonCommandCreateInfo.inputFilepath = result["source"].as<std::string>();
-    jsonCommandCreateInfo.outputFilepath = result["output"].as<std::string>();
-    jsonCommandCreateInfo.nameSpace = result["namespace"].as<std::string>();
-    jsonCommandCreateInfo.additionalIncludes = result["includes"].as<std::vector<std::string>>();
-
-    return std::make_unique<JsonCommand>(jsonCommandCreateInfo);
+    return std::make_unique<InitCommand>(resourceCommandCreateInfo);
 }
 
-std::unique_ptr<Command> make_json_command(int argc, const char* argv[]) {
-    if (argc < 1) {
-        throw std::invalid_argument("insufficient arguments for json command");
-    }
+std::unique_ptr<Command> make_update_command() {
+    UpdateCommandCreateInfo updateCommandCreateInfo = {};
+    updateCommandCreateInfo.path = std::filesystem::current_path();
 
-    std::string commandType = argv[1];
-
-    if (commandType == "generate") {
-        return make_json_generate_command(argc - 1, argv + 1);
-    } else {
-        throw std::invalid_argument("unknown json command: " + commandType);
-    }
+    return std::make_unique<UpdateCommand>(updateCommandCreateInfo);
 }
+
+std::unique_ptr<Command> make_status_command() {
+    StatusCommandCreateInfo statusCommandCreateInfo = {};
+    statusCommandCreateInfo.path = std::filesystem::current_path();
+
+    return std::make_unique<StatusCommand>(statusCommandCreateInfo);
+}
+
 
 }// namespace detail
 
 Command::~Command() = default;
 
 CommandLine::CommandLine(int argc, const char* argv[]) {
-    if (argc < 2) {
+    if (argc < 1) {
         throw std::invalid_argument("insufficient arguments");
     }
 
-    std::string commandName = argv[1];
+    std::string commandName = argv[0];
 
-    if (commandName == "json") {
-        m_command = detail::make_json_command(argc - 1, argv + 1);
-    } else {
-        throw std::invalid_argument("unknown command: " + commandName);
+    if (commandName == "init") {
+        m_command = detail::make_init_command();
+        return;
     }
+    if (commandName == "update") {
+        m_command = detail::make_update_command();
+        return;
+    }
+    if (commandName == "status") {
+        m_command = detail::make_status_command();
+        return;
+    }
+
+    throw std::invalid_argument("unknown command: " + commandName);
+
 }
 
 Command* CommandLine::command() const {
