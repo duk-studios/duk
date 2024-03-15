@@ -6,6 +6,7 @@
 
 #include <array>
 #include <duk_log/log.h>
+#include <duk_macros/assert.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 #include <duk_scene/component_pool.h>
@@ -15,7 +16,6 @@
 #include <duk_tools/fixed_vector.h>
 #include <duk_tools/singleton.h>
 #include <duk_tools/types.h>
-#include <duk_macros/assert.h>
 
 namespace duk::scene {
 
