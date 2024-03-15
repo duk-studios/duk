@@ -6,6 +6,7 @@
 
 #include <array>
 #include <duk_log/log.h>
+#include <duk_macros/assert.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 #include <duk_scene/component_pool.h>
@@ -341,37 +342,37 @@ Component<T>::Component(const Object& owner)
 
 template<typename T>
 T* Component<T>::operator->() {
-    assert(valid());
+    DUK_ASSERT(valid());
     return m_objects->template component<T>(m_ownerId);
 }
 
 template<typename T>
 T* Component<T>::operator->() const {
-    assert(valid());
+    DUK_ASSERT(valid());
     return m_objects->template component<T>(m_ownerId);
 }
 
 template<typename T>
 T& Component<T>::operator*() {
-    assert(valid());
+    DUK_ASSERT(valid());
     return *m_objects->template component<T>(m_ownerId);
 }
 
 template<typename T>
 T& Component<T>::operator*() const {
-    assert(valid());
+    DUK_ASSERT(valid());
     return *m_objects->template component<T>(m_ownerId);
 }
 
 template<typename T>
 T* Component<T>::get() {
-    assert(valid());
+    DUK_ASSERT(valid());
     return m_objects->template component<T>(m_ownerId);
 }
 
 template<typename T>
 T* Component<T>::get() const {
-    assert(valid());
+    DUK_ASSERT(valid());
     return m_objects->template component<T>(m_ownerId);
 }
 
@@ -394,8 +395,8 @@ Component<T>::operator bool() const {
 
 template<typename T, typename... Args>
 void Objects::add_component(const Object::Id& id, Args&&... args) {
-    assert(valid_object(id));
-    assert(!valid_component<T>(id));
+    DUK_ASSERT(valid_object(id));
+    DUK_ASSERT(!valid_component<T>(id));
     auto componentPool = pool<T>();
     componentPool->construct(id.index(), std::forward<Args>(args)...);
     m_componentMasks[id.index()].set(ComponentRegistry::component_index<T>());
@@ -403,21 +404,21 @@ void Objects::add_component(const Object::Id& id, Args&&... args) {
 
 template<typename T>
 void Objects::remove_component(const Object::Id& id) {
-    assert(valid_component<T>(id));
+    DUK_ASSERT(valid_component<T>(id));
     remove_component(id.index(), ComponentRegistry::component_index<T>());
     m_componentMasks[id.index()].reset(ComponentRegistry::component_index<T>());
 }
 
 template<typename T>
 T* Objects::component(const Object::Id& id) {
-    assert(valid_component<T>(id));
+    DUK_ASSERT(valid_component<T>(id));
     auto componentPool = pool<T>();
     return componentPool->get(id.index());
 }
 
 template<typename T>
 T* Objects::component(const Object::Id& id) const {
-    assert(valid_component<T>(id));
+    DUK_ASSERT(valid_component<T>(id));
     auto componentPool = pool<T>();
     return componentPool->get(id.index());
 }

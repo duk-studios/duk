@@ -20,6 +20,7 @@ struct Camera {
     glm::mat4 invVp;// inverse vp
 
     glm::vec3 screen_to_world(const glm::vec2& screenSize, const glm::vec3& screenPosition) const;
+    glm::vec3 screen_to_local(const glm::vec2& screenSize, const glm::vec3& screenPosition) const;
 };
 
 struct PerspectiveCamera {
