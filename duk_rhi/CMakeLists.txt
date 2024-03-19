@@ -52,6 +52,7 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_debug_messenger.h
         src/duk_rhi/vulkan/vulkan_debug_messenger.cpp
         src/duk_rhi/vulkan/vulkan_import.h
+        src/duk_rhi/vulkan/vulkan_import.cpp
         src/duk_rhi/vulkan/vulkan_physical_device.h
         src/duk_rhi/vulkan/vulkan_physical_device.cpp
         src/duk_rhi/vulkan/vulkan_query_error.h
@@ -121,7 +122,8 @@ target_link_libraries(duk_rhi
 
         grapphs::grapphs
 
-        volk::volk
+        volk::volk_headers
+        Vulkan::Vulkan
         )
 
 set_target_properties(duk_rhi PROPERTIES CXX_STANDARD 20)

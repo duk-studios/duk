@@ -23,6 +23,7 @@ target_include_directories(duk_log
 
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        ${TERMCOLOR_INCLUDE_DIRS}
         )
 
 target_link_libraries(duk_log
@@ -33,7 +34,6 @@ target_link_libraries(duk_log
         duk_tools
         duk_platform
         fmt::fmt
-        termcolor::termcolor
         )
 
 set_target_properties(duk_log PROPERTIES CXX_STANDARD 20)

@@ -26,11 +26,12 @@ set(DUK_IMPORT_SOURCES
 add_library(duk_import STATIC ${DUK_IMPORT_HEADERS} ${DUK_IMPORT_SOURCES})
 
 target_include_directories(duk_import
-     PUBLIC
-     include
+        PUBLIC
+        include
 
-     PRIVATE
-     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        ${Stb_INCLUDE_DIR}
      )
 
 target_link_libraries(duk_import
@@ -38,9 +39,6 @@ target_link_libraries(duk_import
         duk_macros
         duk_tools
         duk_renderer
-        RapidJSON
-        PRIVATE
-        stb_image
 )
 
 set_target_properties(duk_import PROPERTIES CXX_STANDARD 20)
