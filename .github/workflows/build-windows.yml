@@ -20,18 +20,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Install LLVM
-      run: choco install llvm
+    - name: Authenticate private registries
+      shell: bash
+      run: git config --global credential.https://github.com/duk-studios/vcpkg-registry.helper '!f() { echo username=unused; echo password=${{secrets.DUK_PERSONAL_ACCESS_TOKEN }}; }; f'
 
-    - name: Checkout repository and submodules
+    - name: Checkout repository
       uses: actions/checkout@v3
-      with:
-        submodules: recursive
+
+    - name: Setup vcpkg
+      uses: friendlyanon/setup-vcpkg@v1
+      with: { committish: 8d3649ba34aab36914ddd897958599aa0a91b08e }
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake
 
     - name: Format check
       run: cmake --build ${{github.workspace}}/build --target duk_format_check
