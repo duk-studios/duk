@@ -2,8 +2,11 @@
 /// image_importer_stb.cpp
 
 #include <duk_import/image/image_loader_stb.h>
-#include <fstream>
+
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#include <fstream>
 #include <stdexcept>
 
 namespace duk::import {

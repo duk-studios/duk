@@ -12,7 +12,18 @@ if (MSVC)
     add_definitions(/MP)
 endif ()
 
-add_subdirectory(external)
+find_package(cxxopts CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(RapidJSON CONFIG REQUIRED)
+find_package(Stb REQUIRED)
+# termcolor does not place the config files in the correct location, and even suggest using this
+# maybe we should use our own port of termcolor to fix this.
+find_path(TERMCOLOR_INCLUDE_DIRS "termcolor/termcolor.hpp" REQUIRED)
+find_package(volk CONFIG REQUIRED)
+find_package(Vulkan REQUIRED)
+find_package(grapphs CONFIG REQUIRED)
+find_package(spirv-reflect CONFIG REQUIRED)
 
 add_subdirectory(duk_macros)
 add_subdirectory(duk_tools)

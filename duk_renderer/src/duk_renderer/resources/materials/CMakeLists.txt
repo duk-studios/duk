@@ -1,10 +1,10 @@
 # Try to find the glslc executable from the Vulkan SDK
-find_program(GLSLC_EXECUTABLE glslc PATHS "${DUK_GLSLC_PATH}")
+find_program(GLSLC_EXECUTABLE glslc)
 
 if (GLSLC_EXECUTABLE)
-    message(STATUS "glslc found at (${DUK_GLSLC_PATH})")
+    message(STATUS "glslc found at (${GLSLC_EXECUTABLE})")
 else ()
-    message(WARNING "glslc not found at (${DUK_GLSLC_PATH}). Skipping material generation...")
+    message(WARNING "glslc not found. Skipping material generation...")
     return()
 endif()
 

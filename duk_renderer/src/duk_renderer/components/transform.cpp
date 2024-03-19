@@ -3,7 +3,7 @@
 
 #include <duk_renderer/components/transform.h>
 #include <duk_scene/objects.h>
-
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/matrix_transform_2d.hpp>
 

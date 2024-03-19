@@ -44,7 +44,7 @@ target_link_libraries(duk_material_generator
         PRIVATE
         duk_rhi
         cxxopts::cxxopts
-        spirv-reflect-static
+        spirv-reflect::spirv-reflect-static
 )
 
 set_target_properties(duk_material_generator PROPERTIES CXX_STANDARD 20)

@@ -23,7 +23,7 @@ target_link_libraries(duk_serial
         PUBLIC
         duk_log
         glm::glm
-        RapidJSON
+        rapidjson
         )
 
 set_target_properties(duk_serial PROPERTIES CXX_STANDARD 20)
