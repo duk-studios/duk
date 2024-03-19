@@ -21,7 +21,6 @@ target_include_directories(duk_project
 
 target_link_libraries(duk_project
         PUBLIC
-        fmt
         duk_resource
         duk_import
         duk_tools
