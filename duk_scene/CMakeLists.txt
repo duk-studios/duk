@@ -21,7 +21,8 @@ add_library(duk_scene STATIC ${DUK_SCENE_SOURCES} ${DUK_SCENE_HEADERS})
 
 target_include_directories(duk_scene
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
@@ -39,3 +40,13 @@ target_link_libraries(duk_scene
 set_target_properties(duk_scene PROPERTIES CXX_STANDARD 20)
 
 add_subdirectory(test)
+
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_scene
+        EXPORT duk-targets
+)

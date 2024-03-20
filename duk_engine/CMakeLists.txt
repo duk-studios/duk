@@ -22,7 +22,8 @@ add_library(duk_engine STATIC ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})
 
 target_include_directories(duk_engine
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
@@ -34,3 +35,13 @@ target_link_libraries(duk_engine
         )
 
 set_target_properties(duk_engine PROPERTIES CXX_STANDARD 20)
+
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_engine
+        EXPORT duk-targets
+)

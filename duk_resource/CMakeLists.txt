@@ -24,7 +24,8 @@ target_link_libraries(duk_resource
 
 target_include_directories(duk_resource
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
@@ -32,3 +33,12 @@ target_include_directories(duk_resource
 
 set_target_properties(duk_resource PROPERTIES CXX_STANDARD 20)
 
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_resource
+        EXPORT duk-targets
+)

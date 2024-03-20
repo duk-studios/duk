@@ -102,7 +102,8 @@ add_library(duk_rhi STATIC ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})
 
 target_include_directories(duk_rhi
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
@@ -127,3 +128,13 @@ target_link_libraries(duk_rhi
         )
 
 set_target_properties(duk_rhi PROPERTIES CXX_STANDARD 20)
+
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_rhi
+        EXPORT duk-targets
+)

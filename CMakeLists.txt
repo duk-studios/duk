@@ -25,6 +25,8 @@ find_package(Vulkan REQUIRED)
 find_package(grapphs CONFIG REQUIRED)
 find_package(spirv-reflect CONFIG REQUIRED)
 
+include(GNUInstallDirs)
+
 add_subdirectory(duk_macros)
 add_subdirectory(duk_tools)
 add_subdirectory(duk_hash)
@@ -45,6 +47,23 @@ add_subdirectory(duk_engine)
 if (DUK_BUILD_SAMPLE)
     add_subdirectory(duk_sample)
 endif ()
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+        cmake/config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_DATADIR}"
+        NO_SET_AND_CHECK_MACRO
+        )
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake" DESTINATION "${CMAKE_INSTALL_DATADIR}")
+
+install(
+        EXPORT duk-targets
+        NAMESPACE duk::
+        DESTINATION "${CMAKE_INSTALL_DATADIR}"
+)
 
 if (DUK_FORMAT_FILES)
 
