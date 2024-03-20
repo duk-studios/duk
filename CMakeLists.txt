@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 project(duk)
 
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/output)
 set(DUK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(DUK_BUILD_SAMPLE "Enables building of duk_sample" ON)
