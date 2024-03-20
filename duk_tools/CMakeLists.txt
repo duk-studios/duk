@@ -24,7 +24,8 @@ add_library(duk_tools STATIC ${DUK_TOOLS_HEADERS} ${DUK_TOOLS_SOURCES})
 
 target_include_directories(duk_tools
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
      )
@@ -38,3 +39,12 @@ set_target_properties(duk_tools PROPERTIES CXX_STANDARD 20)
 
 add_subdirectory(test)
 
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_tools
+        EXPORT duk-targets
+)

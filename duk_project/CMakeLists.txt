@@ -13,7 +13,8 @@ add_library(duk_project STATIC ${DUK_PROJECT_HEADERS} ${DUK_PROJECT_SOURCES})
 
 target_include_directories(duk_project
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
@@ -28,3 +29,13 @@ target_link_libraries(duk_project
         )
 
 set_target_properties(duk_project PROPERTIES CXX_STANDARD 20)
+
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_project
+        EXPORT duk-targets
+)

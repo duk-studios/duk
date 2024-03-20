@@ -14,7 +14,8 @@ add_library(duk_hash STATIC ${DUK_HASH_HEADERS} ${DUK_HASH_SOURCES})
 
 target_include_directories(duk_hash
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         )
 
 target_link_libraries(duk_hash
@@ -26,3 +27,13 @@ target_link_libraries(duk_hash
 set_target_properties(duk_hash PROPERTIES
         CXX_STANDARD 20
         )
+
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_hash
+        EXPORT duk-targets
+)
