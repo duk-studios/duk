@@ -180,4 +180,7 @@ const duk::tools::Timer* Engine::timer() const {
     return &m_timer;
 }
 
+duk::event::Dispatcher* Engine::dispatcher() {
+    return &m_dispatcher;
+}
 }// namespace duk::engine
