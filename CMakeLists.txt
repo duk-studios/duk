@@ -52,16 +52,16 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
         cmake/config.cmake.in
         "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake"
-        INSTALL_DESTINATION "${CMAKE_INSTALL_DATADIR}"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
         NO_SET_AND_CHECK_MACRO
         )
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake" DESTINATION "${CMAKE_INSTALL_DATADIR}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake" DESTINATION "${CMAKE_INSTALL_DATADIR}/duk")
 
 install(
         EXPORT duk-targets
         NAMESPACE duk::
-        DESTINATION "${CMAKE_INSTALL_DATADIR}"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
 )
 
 if (DUK_FORMAT_FILES)
