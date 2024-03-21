@@ -1,6 +1,7 @@
 {
   "name" : "duk",
   "version" : "0.1.0",
+  "description": "Duk is a 3D game engine written in C++",
   "dependencies" : [
     {
       "name" : "fmt",
