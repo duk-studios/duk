@@ -42,10 +42,13 @@ public:
 
     DUK_NO_DISCARD const duk::tools::Timer* timer() const;
 
+    DUK_NO_DISCARD duk::event::Dispatcher* dispatcher();
+
 private:
     std::filesystem::path m_workingDirectory;
     Settings m_settings;
     duk::event::Listener m_listener;
+    duk::event::Dispatcher m_dispatcher;
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::Renderer> m_renderer;
     std::unique_ptr<duk::import::Importer> m_importer;

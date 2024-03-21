@@ -156,6 +156,10 @@ Objects::ObjectView::Iterator Objects::ObjectView::Iterator::operator++(int) {
     return old;
 }
 
+Objects::ObjectView::Iterator Objects::ObjectView::Iterator::operator+(int value) const {
+    return Iterator(m_i + value, m_objects, m_componentMask);
+}
+
 bool Objects::ObjectView::Iterator::operator==(const Objects::ObjectView::Iterator& other) const {
     return m_i == other.m_i && m_objects == other.m_objects;
 }

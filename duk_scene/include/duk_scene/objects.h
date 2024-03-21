@@ -91,6 +91,8 @@ public:
 
     Component(const Object& owner);
 
+    Component();
+
     T* operator->();
 
     T* operator->() const;
@@ -237,6 +239,8 @@ public:
             // Post-increment operator (it++)
             DUK_NO_DISCARD Iterator operator++(int);
 
+            DUK_NO_DISCARD Iterator operator+(int value) const;
+
             // Equality operator (it1 == it2)
             DUK_NO_DISCARD bool operator==(const Iterator& other) const;
 
@@ -338,6 +342,12 @@ template<typename T>
 Component<T>::Component(const Object& owner)
     : m_ownerId(owner.id())
     , m_objects(owner.scene()) {
+}
+
+template<typename T>
+Component<T>::Component()
+    : m_ownerId()
+    , m_objects(nullptr) {
 }
 
 template<typename T>

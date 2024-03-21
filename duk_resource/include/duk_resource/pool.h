@@ -148,11 +148,7 @@ bool PoolT<ResourceT>::empty() const {
 
 template<typename ResourceT>
 ResourceT PoolT<ResourceT>::insert(duk::resource::Id id, const std::shared_ptr<ResourceType>& resource) {
-    auto [it, inserted] = m_objects.emplace(id, ResourceT(id, resource));
-
-    if (!inserted) {
-        throw std::runtime_error("failed to insert resource into pool");
-    }
+    auto [it, inserted] = m_objects.insert_or_assign(id, ResourceT(id, resource));
 
     return it->second;
 }
