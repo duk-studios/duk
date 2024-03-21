@@ -52,6 +52,7 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_debug_messenger.h
         src/duk_rhi/vulkan/vulkan_debug_messenger.cpp
         src/duk_rhi/vulkan/vulkan_import.h
+        src/duk_rhi/vulkan/vulkan_import.cpp
         src/duk_rhi/vulkan/vulkan_physical_device.h
         src/duk_rhi/vulkan/vulkan_physical_device.cpp
         src/duk_rhi/vulkan/vulkan_query_error.h
@@ -101,7 +102,8 @@ add_library(duk_rhi STATIC ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})
 
 target_include_directories(duk_rhi
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
@@ -121,7 +123,18 @@ target_link_libraries(duk_rhi
 
         grapphs::grapphs
 
-        volk::volk
+        volk::volk_headers
+        Vulkan::Vulkan
         )
 
 set_target_properties(duk_rhi PROPERTIES CXX_STANDARD 20)
+
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_rhi
+        EXPORT duk-targets
+)

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 project(duk)
 
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/output)
 set(DUK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(DUK_BUILD_SAMPLE "Enables building of duk_sample" ON)
@@ -12,7 +11,20 @@ if (MSVC)
     add_definitions(/MP)
 endif ()
 
-add_subdirectory(external)
+find_package(cxxopts CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(RapidJSON CONFIG REQUIRED)
+find_package(Stb REQUIRED)
+# termcolor does not place the config files in the correct location, and even suggest using this
+# maybe we should use our own port of termcolor to fix this.
+find_path(TERMCOLOR_INCLUDE_DIRS "termcolor/termcolor.hpp" REQUIRED)
+find_package(volk CONFIG REQUIRED)
+find_package(Vulkan REQUIRED)
+find_package(grapphs CONFIG REQUIRED)
+find_package(spirv-reflect CONFIG REQUIRED)
+
+include(GNUInstallDirs)
 
 add_subdirectory(duk_macros)
 add_subdirectory(duk_tools)
@@ -34,6 +46,23 @@ add_subdirectory(duk_engine)
 if (DUK_BUILD_SAMPLE)
     add_subdirectory(duk_sample)
 endif ()
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+        cmake/config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
+        NO_SET_AND_CHECK_MACRO
+        )
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake" DESTINATION "${CMAKE_INSTALL_DATADIR}/duk")
+
+install(
+        EXPORT duk-targets
+        NAMESPACE duk::
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
+)
 
 if (DUK_FORMAT_FILES)
 

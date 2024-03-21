@@ -6,6 +6,7 @@
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <sourceRoots>
+      <file path="$PROJECT_DIR$/cmake" />
       <file path="$PROJECT_DIR$/duk_cli" />
       <file path="$PROJECT_DIR$/duk_engine" />
       <file path="$PROJECT_DIR$/duk_event" />
@@ -25,9 +26,7 @@
       <file path="$PROJECT_DIR$/duk_serial" />
       <file path="$PROJECT_DIR$/duk_task" />
       <file path="$PROJECT_DIR$/duk_tools" />
-    </sourceRoots>
-    <libraryRoots>
       <file path="$PROJECT_DIR$/external" />
-    </libraryRoots>
+    </sourceRoots>
   </component>
 </project>

@@ -22,6 +22,31 @@ namespace detail {
 
 static std::vector<const char*> s_validationLayers = {"VK_LAYER_KHRONOS_validation"};
 
+static bool has_validation_layers() {
+    uint32_t layerCount;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+
+    for (const char* layerName: s_validationLayers) {
+        bool layerFound = false;
+
+        for (const auto& layerProperties: availableLayers) {
+            if (strcmp(layerName, layerProperties.layerName) == 0) {
+                layerFound = true;
+                break;
+            }
+        }
+
+        if (!layerFound) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 static std::vector<const char*> query_instance_extensions(bool hasValidationLayers) {
     std::vector<const char*> extensions = {VK_KHR_SURFACE_EXTENSION_NAME};
     if (hasValidationLayers) {
@@ -293,12 +318,14 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instanceCreateInfo.pApplicationInfo = &applicationInfo;
 
-    auto extensions = detail::query_instance_extensions(vulkanRendererCreateInfo.hasValidationLayers);
+    bool hasValidationLayers = vulkanRendererCreateInfo.hasValidationLayers && detail::has_validation_layers();
+
+    auto extensions = detail::query_instance_extensions(hasValidationLayers);
     instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
     instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-    if (vulkanRendererCreateInfo.hasValidationLayers) {
+    if (hasValidationLayers) {
         instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(detail::s_validationLayers.size());
         instanceCreateInfo.ppEnabledLayerNames = detail::s_validationLayers.data();
 

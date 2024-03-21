@@ -19,10 +19,12 @@ add_library(duk_log STATIC ${DUK_LOG_HEADERS} ${DUK_LOG_SOURCES})
 
 target_include_directories(duk_log
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        ${TERMCOLOR_INCLUDE_DIRS}
         )
 
 target_link_libraries(duk_log
@@ -32,10 +34,19 @@ target_link_libraries(duk_log
         duk_task
         duk_tools
         duk_platform
-        fmt::fmt
-        termcolor::termcolor
+        fmt::fmt-header-only
         )
 
 set_target_properties(duk_log PROPERTIES CXX_STANDARD 20)
 
 add_subdirectory(test)
+
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_log
+        EXPORT duk-targets
+)

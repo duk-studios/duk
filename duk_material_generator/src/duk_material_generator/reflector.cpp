@@ -4,6 +4,7 @@
 #include <duk_material_generator/reflector.h>
 #include <duk_tools/file.h>
 
+#define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
 #include <spirv_reflect.h>
 
 #include <iostream>

@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.24)
 project(duk_cli)
 
+if (NOT MSVC)
+        set(CMAKE_EXE_LINKER_FLAGS "-static")
+endif ()
+
+
 set(DUK_CLI_HEADERS
         include/duk_cli/command_line.h
         include/duk_cli/file_generator.h
@@ -38,3 +43,10 @@ target_link_libraries(duk_cli
         )
 
 set_target_properties(duk_cli PROPERTIES CXX_STANDARD 20)
+
+set_target_properties(duk_cli PROPERTIES OUTPUT_NAME duk)
+
+install(
+        TARGETS duk_cli
+        RUNTIME DESTINATION bin
+)
