@@ -20,7 +20,7 @@ void iterate_descriptors(const InputIterator& begin, const InputIterator& end, B
         auto& descriptor = *it;
         auto descriptorType = descriptor.type();
         if (descriptorType == DescriptorType::UNDEFINED) {
-            throw std::logic_error("tried to update a DescriptorSet with an undefined descriptor");
+            continue;
         }
 
         uint32_t index = std::distance(begin, it);
