@@ -11,6 +11,7 @@ set(DUK_HASH_SOURCES
         )
 
 add_library(duk_hash STATIC ${DUK_HASH_HEADERS} ${DUK_HASH_SOURCES})
+add_library(duk::duk_hash ALIAS duk_hash)
 
 target_include_directories(duk_hash
         PUBLIC

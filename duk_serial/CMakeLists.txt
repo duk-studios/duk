@@ -10,6 +10,7 @@ set(DUK_SERIAL_SOURCES
         )
 
 add_library(duk_serial STATIC ${DUK_SERIAL_HEADERS} ${DUK_SERIAL_SOURCES})
+add_library(duk::duk_serial ALIAS duk_serial)
 
 target_include_directories(duk_serial
         PUBLIC

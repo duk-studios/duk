@@ -78,6 +78,7 @@ Objects::~Objects() {
     for (auto object: all()) {
         object.destroy();
     }
+    update_destroy();
 }
 
 Object Objects::add_object() {
@@ -96,16 +97,10 @@ Object Objects::add_object() {
 }
 
 void Objects::destroy_object(const Object::Id& id) {
-    assert(valid_object(id));
-    auto index = id.index();
-    m_versions[index]++;
-    m_freeList.push_back(index);
-    std::sort(m_freeList.begin(), m_freeList.end());
-
-    auto componentMask = m_componentMasks[index];
-    duk::tools::for_each_bit<true>(componentMask, [index, this](size_t componentIndex) {
-        remove_component(index, componentIndex);
-    });
+    if (std::find(m_destroyedIds.begin(), m_destroyedIds.end(), id) != m_destroyedIds.end()) {
+        return;
+    }
+    m_destroyedIds.emplace_back(id);
 }
 
 Object Objects::object(const Object::Id& id) {
@@ -124,6 +119,22 @@ Objects::ObjectView Objects::all() {
 void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
     m_componentPools[componentIndex]->destruct(index);
     m_componentMasks[index].reset(componentIndex);
+}
+
+void Objects::update_destroy() {
+    if (!m_destroyedIds.empty()) {
+        for (auto& id: m_destroyedIds) {
+            auto index = id.index();
+            m_versions[index]++;
+            m_freeList.push_back(index);
+            auto componentMask = m_componentMasks[index];
+            for (auto componentIndex: componentMask.bits<true>()) {
+                remove_component(index, componentIndex);
+            }
+        }
+        std::sort(m_freeList.begin(), m_freeList.end());
+        m_destroyedIds.clear();
+    }
 }
 
 const ComponentMask& Objects::component_mask(const Object::Id& id) const {

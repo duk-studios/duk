@@ -16,6 +16,7 @@ set(DUK_LOG_SOURCES
         )
 
 add_library(duk_log STATIC ${DUK_LOG_HEADERS} ${DUK_LOG_SOURCES})
+add_library(duk::duk_log ALIAS duk_log)
 
 target_include_directories(duk_log
         PUBLIC

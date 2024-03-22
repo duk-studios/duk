@@ -8,6 +8,7 @@ set(DUK_TASK_SOURCES
         )
 
 add_library(duk_task STATIC ${DUK_TASK_HEADERS} ${DUK_TASK_SOURCES})
+add_library(duk::duk_task ALIAS duk_task)
 
 target_link_libraries(duk_task PUBLIC duk_macros)
 

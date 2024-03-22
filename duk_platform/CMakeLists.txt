@@ -21,6 +21,7 @@ set(DUK_PLATFORM_SOURCES
 )
 
 add_library(duk_platform STATIC ${DUK_PLATFORM_SOURCES} ${DUK_PLATFORM_HEADERS})
+add_library(duk::duk_platform ALIAS duk_platform)
 
 target_include_directories(duk_platform
         PUBLIC

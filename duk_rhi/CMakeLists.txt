@@ -99,6 +99,7 @@ set(DUK_RHI_SOURCES
         )
 
 add_library(duk_rhi STATIC ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})
+add_library(duk::duk_rhi ALIAS duk_rhi)
 
 target_include_directories(duk_rhi
         PUBLIC
