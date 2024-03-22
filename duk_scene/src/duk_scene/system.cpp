@@ -77,6 +77,7 @@ void Systems::enter(Objects& objects, Environment* environment) {
 void Systems::update(Objects& objects, Environment* environment) {
     for (auto& system: m_container) {
         system->update(objects, environment);
+        objects.update_destroy();
     }
 }
 

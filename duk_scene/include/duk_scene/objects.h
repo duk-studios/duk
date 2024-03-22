@@ -312,6 +312,8 @@ public:
     DUK_NO_DISCARD bool valid_component(const Object::Id& id) const;
 
 private:
+    friend class Systems;
+
     template<typename T>
     ComponentPoolT<T>* pool();
 
@@ -323,11 +325,14 @@ private:
 
     void remove_component(uint32_t index, uint32_t componentIndex);
 
+    void update_destroy();
+
 private:
     std::array<std::unique_ptr<ComponentPool>, MAX_COMPONENTS> m_componentPools;
     duk::tools::FixedVector<ComponentMask, MAX_OBJECTS> m_componentMasks;
     duk::tools::FixedVector<uint32_t, MAX_OBJECTS> m_versions;
     duk::tools::FixedVector<uint32_t, MAX_OBJECTS> m_freeList;
+    std::vector<Object::Id> m_destroyedIds;
 };
 
 // Component Implementation //
