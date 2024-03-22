@@ -15,6 +15,7 @@ set(DUK_RESOURCE_SOURCES
         )
 
 add_library(duk_resource STATIC ${DUK_RESOURCE_HEADERS} ${DUK_RESOURCE_SOURCES})
+add_library(duk::duk_resource ALIAS duk_resource)
 
 target_link_libraries(duk_resource
         PUBLIC

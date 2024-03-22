@@ -24,6 +24,7 @@ set(DUK_IMPORT_SOURCES
         )
 
 add_library(duk_import STATIC ${DUK_IMPORT_HEADERS} ${DUK_IMPORT_SOURCES})
+add_library(duk::duk_import ALIAS duk_import)
 
 target_include_directories(duk_import
         PUBLIC

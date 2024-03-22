@@ -18,6 +18,7 @@ set(DUK_SCENE_SOURCES
 )
 
 add_library(duk_scene STATIC ${DUK_SCENE_SOURCES} ${DUK_SCENE_HEADERS})
+add_library(duk::duk_scene ALIAS duk_scene)
 
 target_include_directories(duk_scene
         PUBLIC

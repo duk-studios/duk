@@ -19,6 +19,7 @@ set(DUK_ENGINE_SOURCES
         )
 
 add_library(duk_engine STATIC ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})
+add_library(duk::duk_engine ALIAS duk_engine)
 
 target_include_directories(duk_engine
         PUBLIC

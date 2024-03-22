@@ -103,6 +103,7 @@ set(DUK_RENDERER_SOURCES
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
+add_library(duk::duk_renderer ALIAS duk_renderer)
 
 target_include_directories(duk_renderer
         PUBLIC

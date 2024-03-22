@@ -10,6 +10,7 @@ set(DUK_PROJECT_SOURCES
         )
 
 add_library(duk_project STATIC ${DUK_PROJECT_HEADERS} ${DUK_PROJECT_SOURCES})
+add_library(duk::duk_project ALIAS duk_project)
 
 target_include_directories(duk_project
         PUBLIC

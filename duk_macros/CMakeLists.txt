@@ -9,6 +9,7 @@ set(DUK_MACROS_SOURCES
         )
 
 add_library(duk_macros STATIC ${DUK_MACROS_HEADERS} ${DUK_MACROS_SOURCES})
+add_library(duk::duk_macros ALIAS duk_macros)
 
 target_include_directories(duk_macros
         PUBLIC
