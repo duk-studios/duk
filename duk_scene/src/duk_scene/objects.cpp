@@ -123,12 +123,12 @@ void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
 
 void Objects::update_destroy() {
     if (!m_destroyedIds.empty()) {
-        for (auto& id : m_destroyedIds) {
+        for (auto& id: m_destroyedIds) {
             auto index = id.index();
             m_versions[index]++;
             m_freeList.push_back(index);
             auto componentMask = m_componentMasks[index];
-            for (auto componentIndex : componentMask.bits<true>()) {
+            for (auto componentIndex: componentMask.bits<true>()) {
                 remove_component(index, componentIndex);
             }
         }
