@@ -1,10 +1,20 @@
 cmake_minimum_required(VERSION 3.24)
-project(duk)
-
-set(DUK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(DUK_BUILD_SAMPLE "Enables building of duk_sample" ON)
 option(DUK_FORMAT_FILES "Enables format target" ON)
+option(DUK_VCPKG_INSTALL "Enables using vcpkg to install dependencies" ON)
+
+set(DUK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
+if (DUK_VCPKG_INSTALL)
+    include(cmake/vcpkg.cmake)
+endif ()
+
+project(duk)
+
+if (NOT CMAKE_DEBUG_POSTFIX)
+    set(CMAKE_DEBUG_POSTFIX d)
+endif ()
 
 if (MSVC)
     # enable parallel build for msvc
