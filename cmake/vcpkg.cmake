@@ -1,3 +1,5 @@
+include_guard()
+
 if (CMAKE_GENERATOR MATCHES "Ninja")
     set(VCPKG_TARGET_TRIPLET x64-mingw-static)
 endif()
