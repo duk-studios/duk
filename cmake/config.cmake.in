@@ -9,7 +9,6 @@ find_package(RapidJSON CONFIG REQUIRED)
 find_package(Stb REQUIRED)
 find_path(TERMCOLOR_INCLUDE_DIRS "termcolor/termcolor.hpp" REQUIRED)
 find_package(volk CONFIG REQUIRED)
-find_package(Vulkan REQUIRED)
 find_package(grapphs CONFIG REQUIRED)
 find_package(spirv-reflect CONFIG REQUIRED)
 

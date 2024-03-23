@@ -125,7 +125,6 @@ target_link_libraries(duk_rhi
         grapphs::grapphs
 
         volk::volk_headers
-        Vulkan::Vulkan
         )
 
 set_target_properties(duk_rhi PROPERTIES CXX_STANDARD 20)

@@ -2,10 +2,10 @@
 <project version="4">
   <component name="CMakeSharedSettings">
     <configurations>
-      <configuration PROFILE_NAME="Debug-MinGW" ENABLED="true" GENERATION_DIR="cmake-build-mingw" CONFIG_NAME="Debug" TOOLCHAIN_NAME="MinGW" GENERATION_OPTIONS="-G &quot;Ninja Multi-Config&quot;" />
-      <configuration PROFILE_NAME="Release-MinGW" ENABLED="false" GENERATION_DIR="cmake-build-mingw" CONFIG_NAME="Release" TOOLCHAIN_NAME="MinGW" GENERATION_OPTIONS="-G &quot;Ninja Multi-Config&quot; -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake" />
-      <configuration PROFILE_NAME="Debug-Visual Studio" ENABLED="true" GENERATION_DIR="cmake-build-vs-22" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G &quot;Visual Studio 17 2022&quot;" />
-      <configuration PROFILE_NAME="Release-Visual Studio" ENABLED="false" GENERATION_DIR="cmake-build-vs-22" CONFIG_NAME="Release" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G &quot;Visual Studio 17 2022&quot; -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.cmake" />
+      <configuration PROFILE_NAME="Debug-MinGW" ENABLED="true" GENERATION_DIR="cmake-build-mingw" CONFIG_NAME="Debug" TOOLCHAIN_NAME="MinGW" GENERATION_OPTIONS="-G &quot;Ninja Multi-Config&quot; -DCMAKE_INSTALL_PREFIX=../install/mingw" />
+      <configuration PROFILE_NAME="Release-MinGW" ENABLED="false" GENERATION_DIR="cmake-build-mingw" CONFIG_NAME="Release" TOOLCHAIN_NAME="MinGW" GENERATION_OPTIONS="-G &quot;Ninja Multi-Config&quot; -DCMAKE_INSTALL_PREFIX=../install/mingw" />
+      <configuration PROFILE_NAME="Debug-Visual Studio" ENABLED="true" GENERATION_DIR="cmake-build-vs-22" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G &quot;Visual Studio 17 2022&quot; -DCMAKE_INSTALL_PREFIX=../install/vs2022" />
+      <configuration PROFILE_NAME="Release-Visual Studio" ENABLED="false" GENERATION_DIR="cmake-build-vs-22" CONFIG_NAME="Release" TOOLCHAIN_NAME="Visual Studio" GENERATION_OPTIONS="-G &quot;Visual Studio 17 2022&quot; -DCMAKE_INSTALL_PREFIX=../install/vs2022" />
     </configurations>
   </component>
 </project>

@@ -30,7 +30,6 @@ find_package(Stb REQUIRED)
 # maybe we should use our own port of termcolor to fix this.
 find_path(TERMCOLOR_INCLUDE_DIRS "termcolor/termcolor.hpp" REQUIRED)
 find_package(volk CONFIG REQUIRED)
-find_package(Vulkan REQUIRED)
 find_package(grapphs CONFIG REQUIRED)
 find_package(spirv-reflect CONFIG REQUIRED)
 
