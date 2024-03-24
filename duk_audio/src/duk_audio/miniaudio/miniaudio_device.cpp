@@ -38,7 +38,7 @@ MiniaudioDevice::MiniaudioDevice(const MiniaudioDeviceCreateInfo& miniaudioEngin
         throw std::runtime_error(fmt::format("failed to initialize miniaudio device, error code: {}", (int)result));
     }
 
-    m_sourceNode = m_graph.add<AudioSourceNode>();
+    m_sourceNode = m_graph.add<AudioSourceNode>(32);
 }
 
 MiniaudioDevice::~MiniaudioDevice() {
@@ -54,7 +54,7 @@ void MiniaudioDevice::stop() {
 }
 
 void MiniaudioDevice::play(std::shared_ptr<AudioSource>& source, int32_t priority) {
-    m_sourceNode->play(source);
+    m_sourceNode->play(source, priority);
 }
 
 void MiniaudioDevice::data_callback(void* output, const void* input, ma_uint32 frameCount) {
