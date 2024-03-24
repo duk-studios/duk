@@ -1,0 +1,56 @@
+project(duk_audio)
+
+set(DUK_AUDIO_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+set(DUK_AUDIO_INC_DIR ${DUK_AUDIO_ROOT}/include/duk_audio)
+set(DUK_AUDIO_SRC_DIR ${DUK_AUDIO_ROOT}/src/duk_audio)
+
+set(DUK_AUDIO_HEADERS
+        include/duk_audio/audio_device.h
+        include/duk_audio/audio_source.h
+        include/duk_audio/audio_buffer.h
+        include/duk_audio/audio_graph.h
+        include/duk_audio/nodes/audio_source_node.h
+)
+
+set(DUK_AUDIO_SOURCES
+        src/duk_audio/audio_device.cpp
+        src/duk_audio/audio_graph.cpp
+        src/duk_audio/audio_source.cpp
+        src/duk_audio/nodes/audio_source_node.cpp
+        src/duk_audio/miniaudio/miniaudio_device.h
+        src/duk_audio/miniaudio/miniaudio_device.cpp
+        src/duk_audio/miniaudio/miniaudio_import.h
+        src/duk_audio/miniaudio/miniaudio_import.cpp
+)
+
+add_library(duk_audio STATIC ${DUK_AUDIO_SOURCES} ${DUK_AUDIO_HEADERS})
+add_library(duk::duk_audio ALIAS duk_audio)
+
+target_include_directories(duk_audio
+        PUBLIC
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        ${MINIAUDIO_INCLUDE_DIRS}
+)
+
+target_link_libraries(duk_audio
+        PUBLIC
+        duk_log
+        duk_platform
+)
+
+set_target_properties(duk_audio PROPERTIES CXX_STANDARD 20)
+
+add_subdirectory(test)
+
+install(
+        DIRECTORY include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(
+        TARGETS duk_audio
+        EXPORT duk-targets
+)
