@@ -95,7 +95,6 @@ AudioBufferT<TSample>::~AudioBufferT() {
 
 template<typename TSample>
 void AudioBufferT<TSample>::read_float(float* dst, uint32_t frameCount, uint32_t frameOffset, uint32_t dstChannelCount) {
-    static_assert(std::is_same_v<TSample, float>, "AudioBufferT only supports float types, for now");
     const float* src = m_data + (frameOffset * m_channelCount);
     for (uint32_t i = 0; i < frameCount; i++) {
         float* dstFrame = dst + (i * dstChannelCount);

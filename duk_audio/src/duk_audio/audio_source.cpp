@@ -22,4 +22,8 @@ uint32_t AudioSource::read_float(float* output, uint32_t frameCount, uint32_t ch
     return framesToRead;
 }
 
+bool AudioSource::is_playing() const {
+    return m_currentFrame < m_buffer->frame_count();
+}
+
 }

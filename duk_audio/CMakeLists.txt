@@ -9,6 +9,7 @@ set(DUK_AUDIO_HEADERS
         include/duk_audio/audio_source.h
         include/duk_audio/audio_buffer.h
         include/duk_audio/audio_graph.h
+        include/duk_audio/decode.h
         include/duk_audio/nodes/audio_source_node.h
 )
 
@@ -16,6 +17,7 @@ set(DUK_AUDIO_SOURCES
         src/duk_audio/audio_device.cpp
         src/duk_audio/audio_graph.cpp
         src/duk_audio/audio_source.cpp
+        src/duk_audio/decode.cpp
         src/duk_audio/nodes/audio_source_node.cpp
         src/duk_audio/miniaudio/miniaudio_device.h
         src/duk_audio/miniaudio/miniaudio_device.cpp

@@ -19,6 +19,8 @@ public:
 
     uint32_t read_float(float* output, uint32_t frameCount, uint32_t channelCount);
 
+    bool is_playing() const;
+
 private:
     std::shared_ptr<AudioBuffer> m_buffer;
     uint32_t m_currentFrame;
