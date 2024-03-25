@@ -29,8 +29,12 @@ static bool is_material_resource(const std::string& extension) {
     return extension == ".mat";
 }
 
+static bool is_audio_clip_resource(const std::string& extension) {
+    return extension == ".wav" || extension == ".mp3" || extension == ".ogg" || extension == ".flac";
+}
+
 static bool is_resource(const std::string& extension) {
-    return is_material_resource(extension) || is_image_resource(extension) || is_scene_resource(extension);
+    return is_material_resource(extension) || is_image_resource(extension) || is_scene_resource(extension) || is_audio_clip_resource(extension);
 }
 
 static std::string resource_tag(const std::string& extension) {
@@ -42,6 +46,9 @@ static std::string resource_tag(const std::string& extension) {
     }
     if (is_scene_resource(extension)) {
         return "scn";
+    }
+    if (is_audio_clip_resource(extension)) {
+        return "aud";
     }
     throw std::invalid_argument(fmt::format("Unknown resource tag \"{}\"", extension));
 }
