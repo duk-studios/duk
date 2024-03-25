@@ -12,6 +12,7 @@
 namespace duk::audio {
 
 class AudioBuffer;
+class AudioClip;
 
 enum class Backend {
     MINIAUDIO
@@ -25,10 +26,13 @@ struct AudioDeviceCreateInfo {
 
 class AudioDevice {
 public:
-
-    static std::shared_ptr<AudioDevice> create(const AudioDeviceCreateInfo& audioEngineCreateInfo);
+    static std::unique_ptr<AudioDevice> create(const AudioDeviceCreateInfo& audioEngineCreateInfo);
 
     virtual ~AudioDevice();
+
+    virtual uint32_t frame_rate() const = 0;
+
+    virtual uint32_t channel_count() const = 0;
 
     virtual void start() = 0;
 
@@ -36,14 +40,15 @@ public:
 
     virtual void update() = 0;
 
-    virtual AudioId play(std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority = 0) = 0;
+    virtual AudioId play(const std::shared_ptr<AudioBuffer>& buffer, bool loop = false, int32_t priority = 0) = 0;
+
+    AudioId play(const AudioClip* clip, bool loop = false, int32_t priority = 0);
 
     virtual void stop(const AudioId& id) = 0;
 
     virtual bool is_playing(const AudioId& id) const = 0;
-
 };
 
-}
+}// namespace duk::audio
 
-#endif //DUK_AUDIO_AUDIO_DEVICE
+#endif//DUK_AUDIO_AUDIO_DEVICE

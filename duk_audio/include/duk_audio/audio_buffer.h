@@ -13,7 +13,6 @@ namespace duk::audio {
 
 class AudioBuffer {
 public:
-
     virtual ~AudioBuffer() = default;
 
     virtual void read_float(float* dst, uint32_t frameCount, uint32_t frameOffset, uint32_t dstChannelCount) const = 0;
@@ -30,7 +29,6 @@ public:
 template<typename TSample>
 class AudioBufferT : public AudioBuffer {
 public:
-
     AudioBufferT();
 
     AudioBufferT(uint32_t frameCount, uint32_t channelCount);
@@ -66,13 +64,11 @@ private:
 template<typename TSample>
 AudioBufferT<TSample>::AudioBufferT()
     : AudioBufferT(0, 0) {
-
 }
 
 template<typename TSample>
 AudioBufferT<TSample>::AudioBufferT(uint32_t frameCount, uint32_t channelCount)
     : AudioBufferT(nullptr, frameCount, channelCount) {
-
 }
 
 template<typename TSample>
@@ -160,6 +156,6 @@ uint32_t AudioBufferT<TSample>::channel_count() const {
     return m_channelCount;
 }
 
-}
+}// namespace duk::audio
 
-#endif //DUK_AUDIO_AUDIO_BUFFER_H
+#endif//DUK_AUDIO_AUDIO_BUFFER_H

@@ -14,6 +14,8 @@ struct AudioId {
     uint32_t index;
 };
 
-}
+static constexpr AudioId kInvalidAudioId(0, ~0);
 
-#endif //DUK_AUDIO_ID_H
+}// namespace duk::audio
+
+#endif//DUK_AUDIO_ID_H

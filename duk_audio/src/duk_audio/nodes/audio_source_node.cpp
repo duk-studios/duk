@@ -2,11 +2,10 @@
 // Created by Ricardo on 24/03/2024.
 //
 
-#include <duk_audio/nodes/audio_source_node.h>
 #include <duk_audio/audio_buffer.h>
+#include <duk_audio/nodes/audio_source_node.h>
 
 #include <algorithm>
-#include <mutex>
 
 namespace duk::audio {
 
@@ -39,7 +38,6 @@ static uint32_t process_buffer_float(const AudioBuffer* buffer, float* output, u
 }
 
 static void process_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<AudioBuffer>& buffer, void* output, uint32_t frameCount, uint32_t channelCount) {
-
     const uint32_t kBufferSampleCount = 1024;
     float outputBuffer[kBufferSampleCount];
     const uint32_t kBufferFrameCount = kBufferSampleCount / channelCount;
@@ -65,8 +63,7 @@ static void process_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<Audi
         slot.deviceFrame = slot.hostFrame;
         slot.deviceLoop = slot.hostLoop;
         slot.syncDeviceFrame = false;
-    }
-    else {
+    } else {
         slot.hostFrame = slot.deviceFrame;
     }
 }
@@ -81,15 +78,14 @@ static void update_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<Audio
     slot.syncDeviceFrame = true;
 }
 
-}
+}// namespace detail
 
-AudioSourceNode::AudioSourceNode(uint32_t slotCount) :
-    m_slots(slotCount) {
-
+AudioSourceNode::AudioSourceNode(uint32_t slotCount)
+    : m_slots(slotCount) {
 }
 
 void AudioSourceNode::process(void* output, uint32_t frameCount, uint32_t channelCount) {
-    for (auto& slot : m_slots) {
+    for (auto& slot: m_slots) {
         if (auto buffer = slot.buffer.lock()) {
             detail::process_slot(slot, buffer, output, frameCount, channelCount);
         }
@@ -97,7 +93,7 @@ void AudioSourceNode::process(void* output, uint32_t frameCount, uint32_t channe
 }
 
 void AudioSourceNode::update() {
-    for (auto& slot : m_slots) {
+    for (auto& slot: m_slots) {
         if (auto buffer = slot.buffer.lock()) {
             if (slot.hostFrame == buffer->frame_count() && !slot.hostLoop) {
                 // our slot is finished, free it
@@ -107,8 +103,7 @@ void AudioSourceNode::update() {
     }
 }
 
-AudioId AudioSourceNode::play(std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) {
-
+AudioId AudioSourceNode::play(const std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) {
     // try to find unused slot, if not found then replace the one with the lowest priority
     int32_t lowestPriority = priority;
     uint32_t lowestPriorityIndex = m_slots.size();
@@ -155,4 +150,4 @@ void AudioSourceNode::stop(const AudioId& id) {
     slot.buffer.reset();
 }
 
-}
+}// namespace duk::audio

@@ -8,8 +8,8 @@
 #include <duk_macros/assert.h>
 
 #include <cstdint>
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace duk::audio {
 
@@ -24,12 +24,11 @@ public:
 
 class AudioGraph {
 public:
-
     void process(void* output, uint32_t frameCount, uint32_t channelCount);
 
     void update();
 
-    template<typename TNode, typename ...Args>
+    template<typename TNode, typename... Args>
     TNode* add(Args&&... args);
 
 private:
@@ -37,12 +36,12 @@ private:
 };
 
 template<typename TNode, typename... Args>
-TNode* AudioGraph::add(Args&& ... args) {
+TNode* AudioGraph::add(Args&&... args) {
     DUK_ASSERT(!m_node);
     m_node = std::make_unique<TNode>(std::forward<Args>(args)...);
     return (TNode*)m_node.get();
 }
 
-}
+}// namespace duk::audio
 
-#endif //DUK_AUDIO_AUDIO_GRAPH_H
+#endif//DUK_AUDIO_AUDIO_GRAPH_H

@@ -2,18 +2,18 @@
 // Created by Ricardo on 24/03/2024.
 //
 
-#include <duk_audio/audio_device.h>
 #include <duk_audio/audio_buffer.h>
+#include <duk_audio/audio_device.h>
 #include <duk_audio/decode.h>
 
 #include <duk_tools/file.h>
 
-#include <iostream>
 #include <cmath>
+#include <numbers>
 #include <thread>
 
 static std::shared_ptr<duk::audio::AudioBuffer> create_sin_buffer(float duration, float frequency, uint32_t frameRate, uint32_t channelCount) {
-    auto buffer = std::make_shared<duk::audio::AudioBufferT<float>>(duration * frameRate, channelCount);
+    auto buffer = std::make_shared<duk::audio::AudioBufferT<float>>((uint32_t)(duration * frameRate), channelCount);
 
     float* frame = buffer->data();
     for (uint32_t i = 0; i < buffer->frame_count(); i++) {
@@ -40,7 +40,6 @@ static std::shared_ptr<duk::audio::AudioBuffer> create_buffer(const char* filepa
 }
 
 int main() {
-
     const float kFrameRate = 48000;
     const uint32_t kChannelCount = 2;
 

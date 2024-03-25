@@ -17,4 +17,4 @@ void AudioGraph::update() {
     m_node->update();
 }
 
-}
+}// namespace duk::audio

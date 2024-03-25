@@ -9,6 +9,7 @@
 #include <duk_audio/audio_id.h>
 
 #include <atomic>
+#include <mutex>
 
 namespace duk::audio {
 
@@ -16,7 +17,6 @@ class AudioBuffer;
 
 class AudioSourceNode : public AudioNode {
 public:
-
     struct Slot {
         std::weak_ptr<AudioBuffer> buffer;
         uint32_t deviceFrame;
@@ -33,14 +33,13 @@ public:
     };
 
 public:
-
     AudioSourceNode(uint32_t slotCount);
 
     void process(void* output, uint32_t frameCount, uint32_t channelCount) override;
 
     void update() override;
 
-    AudioId play(std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority);
+    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority);
 
     void stop(const AudioId& id);
 
@@ -50,6 +49,6 @@ private:
     std::vector<Slot> m_slots;
 };
 
-}
+}// namespace duk::audio
 
-#endif //DUK_AUDIO_AUDIO_SOURCE_NODE_H
+#endif//DUK_AUDIO_AUDIO_SOURCE_NODE_H

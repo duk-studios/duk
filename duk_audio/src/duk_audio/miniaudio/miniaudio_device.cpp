@@ -18,18 +18,16 @@ static void data_callback(ma_device* device, void* output, const void* input, ma
     }
 }
 
-}
-
+}// namespace detail
 
 MiniaudioDevice::MiniaudioDevice(const MiniaudioDeviceCreateInfo& miniaudioEngineCreateInfo)
     : m_frameRate(miniaudioEngineCreateInfo.frameRate)
     , m_channelCount(miniaudioEngineCreateInfo.channelCount) {
-
     ma_device_config config;
     config = ma_device_config_init(ma_device_type_playback);
     config.playback.format = ma_format_f32;
-    config.playback.channels = miniaudioEngineCreateInfo.channelCount;
-    config.sampleRate = miniaudioEngineCreateInfo.frameRate;
+    config.playback.channels = m_channelCount;
+    config.sampleRate = m_frameRate;
     config.dataCallback = detail::data_callback;
     config.pUserData = this;
 
@@ -45,6 +43,14 @@ MiniaudioDevice::~MiniaudioDevice() {
     ma_device_uninit(&m_device);
 }
 
+uint32_t MiniaudioDevice::frame_rate() const {
+    return m_frameRate;
+}
+
+uint32_t MiniaudioDevice::channel_count() const {
+    return m_channelCount;
+}
+
 void MiniaudioDevice::start() {
     ma_device_start(&m_device);
 }
@@ -57,7 +63,7 @@ void MiniaudioDevice::update() {
     m_graph.update();
 }
 
-AudioId MiniaudioDevice::play(std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) {
+AudioId MiniaudioDevice::play(const std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) {
     return m_sourceNode->play(buffer, loop, priority);
 }
 
@@ -73,6 +79,5 @@ void MiniaudioDevice::data_callback(void* output, const void* input, ma_uint32 f
     m_graph.process(output, frameCount, m_channelCount);
 }
 
-
-} // audio
-} // duk
+}// namespace audio
+}// namespace duk

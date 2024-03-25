@@ -7,9 +7,8 @@
 
 #include <duk_audio/audio_device.h>
 #include <duk_audio/audio_graph.h>
+#include <duk_audio/miniaudio/miniaudio_import.h>
 #include <duk_audio/nodes/audio_source_node.h>
-#include <duk_audio/miniaudio/miniaudio_import.h>
-#include <duk_audio/miniaudio/miniaudio_import.h>
 
 namespace duk {
 namespace audio {
@@ -21,10 +20,13 @@ struct MiniaudioDeviceCreateInfo {
 
 class MiniaudioDevice : public AudioDevice {
 public:
-
     explicit MiniaudioDevice(const MiniaudioDeviceCreateInfo& miniaudioEngineCreateInfo);
 
     ~MiniaudioDevice() override;
+
+    uint32_t frame_rate() const override;
+
+    uint32_t channel_count() const override;
 
     void start() override;
 
@@ -32,7 +34,7 @@ public:
 
     void update() override;
 
-    AudioId play(std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) override;
+    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) override;
 
     void stop(const AudioId& id) override;
 
@@ -46,10 +48,9 @@ private:
     ma_device m_device;
     AudioGraph m_graph;
     AudioSourceNode* m_sourceNode;
-
 };
 
-} // audio
-} // duk
+}// namespace audio
+}// namespace duk
 
-#endif //DUK_AUDIO_MINIAUDIO_DEVICE_H
+#endif//DUK_AUDIO_MINIAUDIO_DEVICE_H
