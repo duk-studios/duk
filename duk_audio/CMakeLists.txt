@@ -6,7 +6,6 @@ set(DUK_AUDIO_SRC_DIR ${DUK_AUDIO_ROOT}/src/duk_audio)
 
 set(DUK_AUDIO_HEADERS
         include/duk_audio/audio_device.h
-        include/duk_audio/audio_source.h
         include/duk_audio/audio_buffer.h
         include/duk_audio/audio_graph.h
         include/duk_audio/decode.h
@@ -16,7 +15,6 @@ set(DUK_AUDIO_HEADERS
 set(DUK_AUDIO_SOURCES
         src/duk_audio/audio_device.cpp
         src/duk_audio/audio_graph.cpp
-        src/duk_audio/audio_source.cpp
         src/duk_audio/decode.cpp
         src/duk_audio/nodes/audio_source_node.cpp
         src/duk_audio/miniaudio/miniaudio_device.h

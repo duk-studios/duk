@@ -18,12 +18,16 @@ public:
     virtual ~AudioNode() = default;
 
     virtual void process(void* output, uint32_t frameCount, uint32_t channelCount) = 0;
+
+    virtual void update() = 0;
 };
 
 class AudioGraph {
 public:
 
     void process(void* output, uint32_t frameCount, uint32_t channelCount);
+
+    void update();
 
     template<typename TNode, typename ...Args>
     TNode* add(Args&&... args);

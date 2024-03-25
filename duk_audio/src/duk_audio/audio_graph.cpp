@@ -13,4 +13,8 @@ void AudioGraph::process(void* output, uint32_t frameCount, uint32_t channelCoun
     m_node->process(output, frameCount, channelCount);
 }
 
+void AudioGraph::update() {
+    m_node->update();
+}
+
 }

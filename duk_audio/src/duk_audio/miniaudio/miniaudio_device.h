@@ -7,7 +7,6 @@
 
 #include <duk_audio/audio_device.h>
 #include <duk_audio/audio_graph.h>
-#include <duk_audio/audio_source.h>
 #include <duk_audio/nodes/audio_source_node.h>
 #include <duk_audio/miniaudio/miniaudio_import.h>
 #include <duk_audio/miniaudio/miniaudio_import.h>
@@ -31,7 +30,13 @@ public:
 
     void stop() override;
 
-    void play(std::shared_ptr<AudioSource>& source, int32_t priority) override;
+    void update() override;
+
+    AudioId play(std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) override;
+
+    void stop(const AudioId& id) override;
+
+    bool is_playing(const AudioId& id) const override;
 
     void data_callback(void* output, const void* input, uint32_t frameCount);
 

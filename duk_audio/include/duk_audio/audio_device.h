@@ -5,11 +5,13 @@
 #ifndef DUK_AUDIO_AUDIO_DEVICE
 #define DUK_AUDIO_AUDIO_DEVICE
 
+#include <duk_audio/audio_id.h>
+
 #include <memory>
 
 namespace duk::audio {
 
-class AudioSource;
+class AudioBuffer;
 
 enum class Backend {
     MINIAUDIO
@@ -32,7 +34,13 @@ public:
 
     virtual void stop() = 0;
 
-    virtual void play(std::shared_ptr<AudioSource>& source, int32_t priority = 0) = 0;
+    virtual void update() = 0;
+
+    virtual AudioId play(std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority = 0) = 0;
+
+    virtual void stop(const AudioId& id) = 0;
+
+    virtual bool is_playing(const AudioId& id) const = 0;
 
 };
 

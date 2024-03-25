@@ -53,13 +53,26 @@ void MiniaudioDevice::stop() {
     ma_device_stop(&m_device);
 }
 
-void MiniaudioDevice::play(std::shared_ptr<AudioSource>& source, int32_t priority) {
-    m_sourceNode->play(source, priority);
+void MiniaudioDevice::update() {
+    m_graph.update();
+}
+
+AudioId MiniaudioDevice::play(std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) {
+    return m_sourceNode->play(buffer, loop, priority);
+}
+
+void MiniaudioDevice::stop(const AudioId& id) {
+    m_sourceNode->stop(id);
+}
+
+bool MiniaudioDevice::is_playing(const AudioId& id) const {
+    return m_sourceNode->is_playing(id);
 }
 
 void MiniaudioDevice::data_callback(void* output, const void* input, ma_uint32 frameCount) {
     m_graph.process(output, frameCount, m_channelCount);
 }
+
 
 } // audio
 } // duk
