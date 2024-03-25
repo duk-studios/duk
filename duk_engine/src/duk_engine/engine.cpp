@@ -4,6 +4,7 @@
 
 #include <duk_engine/engine.h>
 
+#include <duk_import/audio/audio_clip_importer.h>
 #include <duk_import/image/image_importer.h>
 #include <duk_import/importer.h>
 #include <duk_import/material/material_importer.h>
@@ -44,19 +45,32 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         m_run = false;
     });
 
-    duk::renderer::RendererCreateInfo rendererCreateInfo = {};
-    rendererCreateInfo.window = m_window.get();
-    rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
-    rendererCreateInfo.api = duk::rhi::API::VULKAN;
-    rendererCreateInfo.applicationName = m_settings.name.c_str();
+    {
+        duk::renderer::RendererCreateInfo rendererCreateInfo = {};
+        rendererCreateInfo.window = m_window.get();
+        rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
+        rendererCreateInfo.api = duk::rhi::API::VULKAN;
+        rendererCreateInfo.applicationName = m_settings.name.c_str();
 
-    m_renderer = duk::renderer::make_forward_renderer(rendererCreateInfo);
+        m_renderer = duk::renderer::make_forward_renderer(rendererCreateInfo);
+    }
 
-    duk::import::ImporterCreateInfo importerCreateInfo = {};
-    importerCreateInfo.pools = &m_pools;
-    m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
+    {
+        duk::audio::AudioDeviceCreateInfo audioDeviceCreateInfo = {};
+        audioDeviceCreateInfo.backend = audio::Backend::MINIAUDIO;
+        audioDeviceCreateInfo.channelCount = 2;
+        audioDeviceCreateInfo.frameRate = 48000;
 
-    m_importer->load_resource_set(m_workingDirectory / "resources");
+        m_audio = duk::audio::AudioDevice::create(audioDeviceCreateInfo);
+    }
+
+    {
+        duk::import::ImporterCreateInfo importerCreateInfo = {};
+        importerCreateInfo.pools = &m_pools;
+        m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
+
+        m_importer->load_resource_set(m_workingDirectory / "resources");
+    }
 
     /* init resources */
     // images
@@ -104,6 +118,19 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         m_importer->add_resource_importer<duk::import::SceneImporter>(sceneImporterCreateInfo);
     }
 
+    // audio
+    {
+        duk::audio::AudioClipPoolCreateInfo audioClipPoolCreateInfo = {};
+        audioClipPoolCreateInfo.device = m_audio.get();
+
+        auto audioClipPool = m_pools.create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
+
+        duk::import::AudioClipImporterCreateInfo audioClipImporterCreateInfo = {};
+        audioClipImporterCreateInfo.audioClipPool = audioClipPool;
+
+        m_importer->add_resource_importer<duk::import::AudioClipImporter>(audioClipImporterCreateInfo);
+    }
+
     // director
     {
         DirectorCreateInfo directorCreateInfo = {};
@@ -135,6 +162,8 @@ void Engine::run() {
     // assume 60fps for the first frame
     m_timer.add_duration(std::chrono::milliseconds(16));
 
+    m_audio->start();
+
     while (m_run) {
         m_timer.start();
 
@@ -145,6 +174,8 @@ void Engine::run() {
         while (m_window->minimized()) {
             m_window->wait_events();
         }
+
+        m_audio->update();
 
         m_director->update();
 
@@ -158,6 +189,10 @@ duk::platform::Window* Engine::window() {
 
 duk::renderer::Renderer* Engine::renderer() {
     return m_renderer.get();
+}
+
+duk::audio::AudioDevice* Engine::audio() {
+    return m_audio.get();
 }
 
 duk::resource::Pools* Engine::pools() {
@@ -183,4 +218,5 @@ const duk::tools::Timer* Engine::timer() const {
 duk::event::Dispatcher* Engine::dispatcher() {
     return &m_dispatcher;
 }
+
 }// namespace duk::engine

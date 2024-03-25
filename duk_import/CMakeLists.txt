@@ -2,6 +2,7 @@ project(duk_import)
 
 set(DUK_IMPORT_HEADERS
         include/duk_import/importer.h
+        include/duk_import/audio/audio_clip_importer.h
         include/duk_import/image/image_importer.h
         include/duk_import/image/image_loader_stb.h
         include/duk_import/material/material_importer.h
@@ -13,6 +14,7 @@ set(DUK_IMPORT_HEADERS
         )
 set(DUK_IMPORT_SOURCES
         src/duk_import/importer.cpp
+        src/duk_import/audio/audio_clip_importer.cpp
         src/duk_import/image/image_importer.cpp
         src/duk_import/image/image_loader_stb.cpp
         src/duk_import/material/material_importer.cpp
@@ -41,6 +43,7 @@ target_link_libraries(duk_import
         duk_macros
         duk_tools
         duk_renderer
+        duk_audio
 )
 
 set_target_properties(duk_import PROPERTIES CXX_STANDARD 20)

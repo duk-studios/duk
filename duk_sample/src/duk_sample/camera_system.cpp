@@ -112,6 +112,8 @@ void CameraSystem::update(duk::scene::Objects& objects, duk::scene::Environment*
         auto meshRenderer = newObject.add<duk::renderer::MeshRenderer>();
         meshRenderer->mesh = engine->pools()->get<duk::renderer::MeshPool>()->sphere();
         meshRenderer->material = engine->pools()->get<duk::renderer::MaterialPool>()->find(duk::resource::Id(1000013));
+
+        controller->audioPlayer.play(engine->audio(), controller->spawnClip.get());
     }
 }
 
