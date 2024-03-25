@@ -5,6 +5,7 @@
 #ifndef DUK_ENGINE_ENGINE_H
 #define DUK_ENGINE_ENGINE_H
 
+#include <duk_audio/audio_device.h>
 #include <duk_engine/director.h>
 #include <duk_engine/input.h>
 #include <duk_engine/settings.h>
@@ -32,6 +33,8 @@ public:
 
     DUK_NO_DISCARD duk::renderer::Renderer* renderer() override;
 
+    DUK_NO_DISCARD duk::audio::AudioDevice* audio();
+
     DUK_NO_DISCARD duk::resource::Pools* pools();
 
     DUK_NO_DISCARD duk::import::Importer* importer();
@@ -51,6 +54,7 @@ private:
     duk::event::Dispatcher m_dispatcher;
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::Renderer> m_renderer;
+    std::unique_ptr<duk::audio::AudioDevice> m_audio;
     std::unique_ptr<duk::import::Importer> m_importer;
     std::unique_ptr<duk::engine::Director> m_director;
     std::unique_ptr<duk::engine::Input> m_input;
