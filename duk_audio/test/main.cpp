@@ -4,13 +4,13 @@
 
 #include <duk_audio/audio_device.h>
 #include <duk_audio/audio_buffer.h>
-#include <duk_audio/audio_source.h>
 #include <duk_audio/decode.h>
 
 #include <duk_tools/file.h>
 
 #include <iostream>
 #include <cmath>
+#include <thread>
 
 static std::shared_ptr<duk::audio::AudioBuffer> create_sin_buffer(float duration, float frequency, uint32_t frameRate, uint32_t channelCount) {
     auto buffer = std::make_shared<duk::audio::AudioBufferT<float>>(duration * frameRate, channelCount);
@@ -34,7 +34,7 @@ static std::shared_ptr<duk::audio::AudioBuffer> create_buffer(const char* filepa
 
     auto content = duk::tools::File::load_bytes(filepath);
 
-    duk::audio::decode_wav(content.data(), content.size(), buffer.get(), channelCount, frameRate);
+    duk::audio::decode(content.data(), content.size(), buffer.get(), channelCount, frameRate);
 
     return buffer;
 }
@@ -51,14 +51,23 @@ int main() {
 
     auto audioDevice = duk::audio::AudioDevice::create(audioDeviceCreateInfo);
 
-    auto buffer = create_buffer("file_example_WAV_1MG.wav", kChannelCount, kFrameRate);
-    auto audioSource = std::make_shared<duk::audio::AudioSource>(buffer);
-
+    auto buffer = create_buffer("sample.flac", kChannelCount, kFrameRate);
+    auto buffer2 = create_buffer("sample.wav", kChannelCount, kFrameRate);
     audioDevice->start();
 
-    audioDevice->play(audioSource);
+    auto id1 = audioDevice->play(buffer, false, 100);
 
-    while (audioSource->is_playing()) {}
+    std::this_thread::sleep_for(std::chrono::seconds(5));
+
+    auto id2 = audioDevice->play(buffer2, false);
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    audioDevice->stop(id1);
+
+    while (audioDevice->is_playing(id2)) {
+        audioDevice->update();
+    }
 
     audioDevice->stop();
 
