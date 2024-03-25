@@ -3,3 +3,4 @@ duk_audio/test/sample.flac filter=lfs diff=lfs merge=lfs -text
 duk_audio/test/sample.mp3 filter=lfs diff=lfs merge=lfs -text
 duk_audio/test/sample.ogg filter=lfs diff=lfs merge=lfs -text
 duk_audio/test/sample.wav filter=lfs diff=lfs merge=lfs -text
+duk_sample/resources/clips/spawn.wav filter=lfs diff=lfs merge=lfs -text
