@@ -26,8 +26,6 @@ class PoolT : public Pool {
 public:
     using ResourceType = typename ResourceT::Type;
 
-    ~PoolT() override;
-
     void clean();
 
     DUK_NO_DISCARD size_t size() const;
@@ -116,12 +114,6 @@ ResourceT PoolT<ResourceT>::find_or_default(Id id, const ResourceT& def) const {
         return it;
     }
     return def;
-}
-
-template<typename ResourceT>
-PoolT<ResourceT>::~PoolT() {
-    clean();
-    assert(empty());
 }
 
 template<typename ResourceT>
