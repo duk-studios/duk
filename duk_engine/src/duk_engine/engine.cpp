@@ -3,22 +3,21 @@
 //
 
 #include <duk_engine/engine.h>
+#include <duk_engine/resources/scene/scene_importer.h>
+#include <duk_engine/systems/register_types.h>
 
 #include <duk_import/audio/audio_clip_importer.h>
 #include <duk_import/image/image_importer.h>
 #include <duk_import/importer.h>
 #include <duk_import/material/material_importer.h>
-#include <duk_import/scene/scene_importer.h>
 
 #include <duk_log/log.h>
 
-#include <duk_platform/system.h>
+#include <duk_platform/systems.h>
 
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/sprite_pool.h>
-
-#include <duk_objects/scene_pool.h>
 
 namespace duk::engine {
 
@@ -26,6 +25,8 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     : m_run(false)
     , m_workingDirectory(engineCreateInfo.workingDirectory) {
     duk::platform::System::create();
+
+    register_types();
 
     const auto settingsPath = m_workingDirectory / ".duk/settings.json";
     m_settings = load_settings(settingsPath.string());
@@ -112,10 +113,10 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
     // scenes
     {
-        duk::import::SceneImporterCreateInfo sceneImporterCreateInfo = {};
-        sceneImporterCreateInfo.scenePool = m_pools.create_pool<duk::scene::ScenePool>();
+        SceneImporterCreateInfo sceneImporterCreateInfo = {};
+        sceneImporterCreateInfo.scenePool = m_pools.create_pool<ScenePool>();
 
-        m_importer->add_resource_importer<duk::import::SceneImporter>(sceneImporterCreateInfo);
+        m_importer->add_resource_importer<SceneImporter>(sceneImporterCreateInfo);
     }
 
     // audio
@@ -134,9 +135,8 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     // director
     {
         DirectorCreateInfo directorCreateInfo = {};
-        directorCreateInfo.environment = this;
         directorCreateInfo.renderer = m_renderer.get();
-        directorCreateInfo.scenePool = m_pools.get<duk::scene::ScenePool>();
+        directorCreateInfo.scenePool = m_pools.get<ScenePool>();
         directorCreateInfo.importer = m_importer.get();
         directorCreateInfo.firstScene = m_settings.scene;
 
@@ -177,7 +177,7 @@ void Engine::run() {
 
         m_audio->update();
 
-        m_director->update();
+        m_director->update(*this);
 
         m_timer.stop();
     }

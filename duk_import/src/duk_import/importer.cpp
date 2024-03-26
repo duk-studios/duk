@@ -2,7 +2,6 @@
 /// importer.cpp
 
 #include <duk_import/importer.h>
-#include <duk_import/scene/scene_loader_json.h>
 
 namespace duk::import {
 

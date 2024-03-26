@@ -2,12 +2,12 @@
 // Created by rov on 1/9/2024.
 //
 
+#include <duk_objects/objects.h>
 #include <duk_renderer/brushes/sprite_brush.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/renderer.h>
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/index_types.h>
-#include <duk_objects/objects.h>
 #include <duk_tools/fixed_vector.h>
 
 #include <numbers>

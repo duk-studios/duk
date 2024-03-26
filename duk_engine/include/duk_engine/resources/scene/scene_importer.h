@@ -2,20 +2,22 @@
 // Created by rov on 12/7/2023.
 //
 
-#ifndef DUK_IMPORT_SCENE_IMPORTER_H
-#define DUK_IMPORT_SCENE_IMPORTER_H
+#ifndef DUK_ENGINE_SCENE_IMPORTER_H
+#define DUK_ENGINE_SCENE_IMPORTER_H
+
+#include <duk_engine/resources/scene/scene_pool.h>
 
 #include <duk_import/resource_importer.h>
-#include <duk_objects/scene_pool.h>
+
 #include <filesystem>
 
-namespace duk::import {
+namespace duk::engine {
 
 struct SceneImporterCreateInfo {
-    duk::scene::ScenePool* scenePool;
+    ScenePool* scenePool;
 };
 
-class SceneImporter : public ResourceImporterT<std::shared_ptr<duk::scene::Scene>> {
+class SceneImporter : public duk::import::ResourceImporter {
 public:
     SceneImporter(const SceneImporterCreateInfo& sceneImporterCreateInfo);
 
@@ -30,9 +32,9 @@ public:
     void solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) override;
 
 private:
-    duk::scene::ScenePool* m_scenePool;
+    ScenePool* m_scenePool;
 };
 
-}// namespace duk::import
+}// namespace duk::engine
 
-#endif//DUK_IMPORT_SCENE_IMPORTER_H
+#endif//DUK_ENGINE_SCENE_IMPORTER_H

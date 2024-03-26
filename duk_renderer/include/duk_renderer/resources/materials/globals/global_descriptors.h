@@ -20,7 +20,7 @@ class GlobalDescriptors {
 public:
     explicit GlobalDescriptors(const GlobalDescriptorsCreateInfo& globalDescriptorsCreateInfo);
 
-    void update_cameras(scene::Objects& objects);
+    void update_cameras(duk::scene::Objects& objects);
 
     void update_lights(duk::scene::Objects& objects);
 

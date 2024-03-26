@@ -13,7 +13,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/brushes/sprite_brush.h
         include/duk_renderer/brushes/brush.h
         include/duk_renderer/brushes/generic_brush.h
-        include/duk_renderer/components/environment.h
         include/duk_renderer/components/mesh_renderer.h
         include/duk_renderer/components/sprite_renderer.h
         include/duk_renderer/components/transform.h

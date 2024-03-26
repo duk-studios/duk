@@ -3,7 +3,7 @@
 //
 
 #include <duk_engine/engine.h>
-#include <duk_platform/system.h>
+#include <duk_platform/systems.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
@@ -62,21 +62,19 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 
 }// namespace detail
 
-void CameraSystem::enter(duk::scene::Objects& objects, duk::scene::Environment* environment) {
+void CameraSystem::enter(duk::scene::Objects& objects, duk::engine::Engine& engine) {
 }
 
-void CameraSystem::update(duk::scene::Objects& objects, duk::scene::Environment* environment) {
-    auto engine = environment->as<duk::engine::Engine>();
-
+void CameraSystem::update(duk::scene::Objects& objects, duk::engine::Engine& engine) {
     auto object = objects.first_with<CameraController>();
 
     if (!object) {
         return;
     }
 
-    auto input = engine->input();
+    auto input = engine.input();
 
-    const auto deltaTime = engine->timer()->duration().count();
+    const auto deltaTime = engine.timer()->duration().count();
     auto cursor = duk::platform::System::instance()->cursor();
 
     auto controller = object.component<CameraController>();
@@ -100,7 +98,7 @@ void CameraSystem::update(duk::scene::Objects& objects, duk::scene::Environment*
 
     if (input->mouse_down(duk::platform::MouseButton::RIGHT)) {
         auto camera = object.component<duk::renderer::Camera>();
-        auto worldPos = camera->screen_to_world(engine->window()->size(), glm::vec3(input->mouse_position(), -30));
+        auto worldPos = duk::renderer::screen_to_world(camera, engine.window()->size(), glm::vec3(input->mouse_position(), -30));
         duk::log::debug("World pos: {0},{1},{2}", worldPos.x, worldPos.y, worldPos.z);
 
         auto newObject = objects.add_object();
@@ -110,14 +108,14 @@ void CameraSystem::update(duk::scene::Objects& objects, duk::scene::Environment*
         position->value = worldPos;
 
         auto meshRenderer = newObject.add<duk::renderer::MeshRenderer>();
-        meshRenderer->mesh = engine->pools()->get<duk::renderer::MeshPool>()->sphere();
-        meshRenderer->material = engine->pools()->get<duk::renderer::MaterialPool>()->find(duk::resource::Id(1000013));
+        meshRenderer->mesh = engine.pools()->get<duk::renderer::MeshPool>()->sphere();
+        meshRenderer->material = engine.pools()->get<duk::renderer::MaterialPool>()->find(duk::resource::Id(1000013));
 
-        controller->audioPlayer.play(engine->audio(), controller->spawnClip.get());
+        controller->audioPlayer.play(engine.audio(), controller->spawnClip.get());
     }
 }
 
-void CameraSystem::exit(duk::scene::Objects& objects, duk::scene::Environment* environment) {
+void CameraSystem::exit(duk::scene::Objects& objects, duk::engine::Engine& engine) {
 }
 
 }// namespace duk::sample

@@ -1,11 +1,9 @@
 /// 20/08/2023
 /// transform.cpp
 
-#include <duk_renderer/components/transform.h>
 #include <duk_objects/objects.h>
-#define GLM_ENABLE_EXPERIMENTAL
+#include <duk_renderer/components/transform.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/matrix_transform_2d.hpp>
 
 namespace duk::renderer {
 
@@ -29,32 +27,21 @@ static glm::mat4 calculate_model(const duk::scene::Object& object) {
     return model;
 }
 
-static void update_transform(duk::scene::Component<Transform> transform) {
-    transform->model = calculate_model(transform.object());
-    transform->invModel = glm::inverse(transform->model);
-}
-
-static void update_transforms(duk::scene::Objects& objects) {
-    for (auto object: objects.all_with<Transform>()) {
-        update_transform(object);
-    }
-}
-
 }// namespace detail
 
 glm::vec3 forward(const Transform& transform) {
     return glm::vec3(transform.model * glm::vec4(0, 0, -1, 1));
 }
 
-void TransformUpdateSystem::enter(duk::scene::Objects& objects, duk::scene::Environment* environment) {
-    detail::update_transforms(objects);
+void update_transform(const duk::scene::Component<Transform>& transform) {
+    transform->model = detail::calculate_model(transform.object());
+    transform->invModel = glm::inverse(transform->model);
 }
 
-void TransformUpdateSystem::update(duk::scene::Objects& objects, duk::scene::Environment* environment) {
-    detail::update_transforms(objects);
-}
-
-void TransformUpdateSystem::exit(duk::scene::Objects& objects, duk::scene::Environment* environment) {
+void update_transforms(duk::scene::Objects& objects) {
+    for (auto object: objects.all_with<Transform>()) {
+        update_transform(object);
+    }
 }
 
 }// namespace duk::renderer

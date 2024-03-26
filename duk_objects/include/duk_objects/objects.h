@@ -7,10 +7,10 @@
 #include <array>
 #include <duk_log/log.h>
 #include <duk_macros/assert.h>
-#include <duk_resource/solver/dependency_solver.h>
-#include <duk_resource/solver/reference_solver.h>
 #include <duk_objects/component_pool.h>
 #include <duk_objects/limits.h>
+#include <duk_resource/solver/dependency_solver.h>
+#include <duk_resource/solver/reference_solver.h>
 #include <duk_serial/json_serializer.h>
 #include <duk_tools/bit_block.h>
 #include <duk_tools/fixed_vector.h>
@@ -320,9 +320,9 @@ public:
     template<typename T>
     DUK_NO_DISCARD bool valid_component(const Object::Id& id) const;
 
-private:
-    friend class Systems;
+    void update();
 
+private:
     template<typename T>
     ComponentPoolT<T>* pool();
 
@@ -333,8 +333,6 @@ private:
     static ComponentMask component_mask();
 
     void remove_component(uint32_t index, uint32_t componentIndex);
-
-    void update_destroy();
 
 private:
     std::array<std::unique_ptr<ComponentPool>, MAX_COMPONENTS> m_componentPools;

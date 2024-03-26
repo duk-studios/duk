@@ -13,7 +13,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
     duk::scene::register_component<CameraController>();
-    duk::scene::register_system<CameraSystem>();
+    duk::engine::register_system<CameraSystem>();
 }
 
 Application::~Application() = default;

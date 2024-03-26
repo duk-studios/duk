@@ -27,7 +27,7 @@ GlobalDescriptors::GlobalDescriptors(const GlobalDescriptorsCreateInfo& globalDe
     }
 }
 
-void GlobalDescriptors::update_cameras(scene::Objects& objects) {
+void GlobalDescriptors::update_cameras(duk::scene::Objects& objects) {
     uint32_t cameraCount = 0;
     for (auto object: objects.all_with<Camera>()) {
         cameraCount++;

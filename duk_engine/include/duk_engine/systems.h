@@ -1,32 +1,25 @@
 /// 21/02/2024
 /// system.h
 
-#ifndef DUK_OBJECTS_SYSTEMS_H
-#define DUK_OBJECTS_SYSTEMS_H
+#ifndef DUK_ENGINE_SYSTEMS_H
+#define DUK_ENGINE_SYSTEMS_H
 
 #include <duk_objects/objects.h>
 #include <duk_tools/types.h>
 
-namespace duk::scene {
+namespace duk::engine {
 
-class Environment {
-public:
-    virtual ~Environment() = default;
-
-    template<typename T>
-    T* as()
-        requires std::is_base_of_v<Environment, T>;
-};
+class Engine;
 
 class System {
 public:
     virtual ~System() = default;
 
-    virtual void enter(Objects& objects, Environment* environment) = 0;
+    virtual void enter(duk::scene::Objects& objects, Engine& engine) = 0;
 
-    virtual void update(Objects& objects, Environment* environment) = 0;
+    virtual void update(duk::scene::Objects& objects, Engine& engine) = 0;
 
-    virtual void exit(Objects& objects, Environment* environment) = 0;
+    virtual void exit(duk::scene::Objects& objects, Engine& engine) = 0;
 };
 
 class Systems;
@@ -101,11 +94,11 @@ public:
     template<typename T>
     T* get();
 
-    void enter(Objects& objects, Environment* environment);
+    void enter(duk::scene::Objects& objects, Engine& engine);
 
-    void update(Objects& objects, Environment* environment);
+    void update(duk::scene::Objects& objects, Engine& engine);
 
-    void exit(Objects& objects, Environment* environment);
+    void exit(duk::scene::Objects& objects, Engine& engine);
 
     SystemIterator begin();
 
@@ -119,13 +112,6 @@ private:
     std::unordered_map<size_t, size_t> m_systemIndexToContainerIndex;
     std::unordered_map<size_t, size_t> m_containerIndexToSystemIndex;
 };
-
-template<typename T>
-T* Environment::as()
-    requires std::is_base_of_v<Environment, T>
-{
-    return static_cast<T*>(this);
-}
 
 template<typename T>
 void SystemRegistry::SystemEntryT<T>::build(Systems& systems) {
@@ -190,21 +176,21 @@ void build_system(const std::string& systemName, Systems& systems);
 
 const std::string& system_name(size_t systemIndex);
 
-}// namespace duk::scene
+}// namespace duk::engine
 
 namespace duk::serial {
 
 template<>
-inline void read_array(JsonReader* reader, duk::scene::Systems& systems, size_t size) {
+inline void read_array(JsonReader* reader, duk::engine::Systems& systems, size_t size) {
     for (size_t i = 0; i < size; i++) {
         std::string systemName;
         reader->visit_member(systemName, i);
-        duk::scene::build_system(systemName, systems);
+        duk::engine::build_system(systemName, systems);
     }
 }
 
 template<>
-inline void write_array(JsonWriter* writer, duk::scene::Systems& systems) {
+inline void write_array(JsonWriter* writer, duk::engine::Systems& systems) {
     std::vector<std::string> systemNames;
     for (auto system: systems) {
         auto systemName = system.system_name();
@@ -214,4 +200,4 @@ inline void write_array(JsonWriter* writer, duk::scene::Systems& systems) {
 
 }// namespace duk::serial
 
-#endif// DUK_OBJECTS_SYSTEMS_H
+#endif// DUK_ENGINE_SYSTEMS_H

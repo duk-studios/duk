@@ -1,43 +1,43 @@
 /// 21/02/2024
 /// scene.h
 
-#ifndef DUK_OBJECTS_SCENE_H
-#define DUK_OBJECTS_SCENE_H
+#ifndef DUK_ENGINE_SCENE_H
+#define DUK_ENGINE_SCENE_H
 
+#include <duk_engine/systems.h>
 #include <duk_objects/objects.h>
-#include <duk_objects/systems.h>
 
-namespace duk::scene {
+namespace duk::engine {
 
 class Scene {
 public:
-    Objects& objects();
+    duk::scene::Objects& objects();
 
-    const Objects& objects() const;
+    const duk::scene::Objects& objects() const;
 
     Systems& systems();
 
     const Systems& systems() const;
 
-    void enter(Environment* environment);
+    void enter(Engine& engine);
 
-    void update(Environment* environment);
+    void update(Engine& engine);
 
-    void exit(Environment* environment);
+    void exit(Engine& engine);
 
 private:
-    Objects m_objects;
+    duk::scene::Objects m_objects;
     Systems m_systems;
 };
 
 using SceneResource = duk::resource::ResourceT<Scene>;
 
-}// namespace duk::scene
+}// namespace duk::engine
 
 namespace duk::serial {
 
 template<typename JsonVisiter>
-void visit_object(JsonVisiter* visiter, duk::scene::Scene& scene) {
+void visit_object(JsonVisiter* visiter, duk::engine::Scene& scene) {
     visiter->visit_member_array(scene.objects(), MemberDescription("objects"));
     visiter->visit_member_array(scene.systems(), MemberDescription("systems"));
 }
@@ -47,10 +47,10 @@ void visit_object(JsonVisiter* visiter, duk::scene::Scene& scene) {
 namespace duk::resource {
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::scene::Scene& scene) {
+void solve_resources(Solver* solver, duk::engine::Scene& scene) {
     solver->solve(scene.objects());
 }
 
 }// namespace duk::resource
 
-#endif// DUK_OBJECTS_SCENE_H
+#endif// DUK_ENGINE_SCENE_H

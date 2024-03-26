@@ -46,7 +46,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
 Renderer::~Renderer() = default;
 
-void Renderer::render(duk::scene::Scene* scene) {
+void Renderer::render(duk::scene::Objects& objects) {
     // if rendering to a window, but it's minimized, skip
     if (m_window && m_window->minimized()) {
         return;
@@ -54,9 +54,9 @@ void Renderer::render(duk::scene::Scene* scene) {
 
     m_rhi->prepare_frame();
 
-    update_global_descriptors(scene->objects());
+    update_global_descriptors(objects);
 
-    update_passes(scene->objects());
+    update_passes(objects);
 
     m_rhi->update();
 

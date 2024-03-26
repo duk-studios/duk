@@ -4,17 +4,11 @@ set(DUK_OBJECTS_HEADERS
         include/duk_objects/objects.h
         include/duk_objects/component_pool.h
         include/duk_objects/limits.h
-        include/duk_objects/scene.h
-        include/duk_objects/systems.h
-        include/duk_objects/scene_pool.h
 )
 
 set(DUK_OBJECTS_SOURCES
         src/duk_objects/objects.cpp
         src/duk_objects/component_pool.cpp
-        src/duk_objects/scene.cpp
-        src/duk_objects/system.cpp
-        src/duk_objects/scene_pool.cpp
 )
 
 add_library(duk_objects STATIC ${DUK_OBJECTS_SOURCES} ${DUK_OBJECTS_HEADERS})

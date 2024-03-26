@@ -5,8 +5,8 @@
 #define DUK_RENDERER_RENDERER_H
 
 #include <duk_log/logger.h>
+#include <duk_objects/objects.h>
 #include <duk_rhi/rhi.h>
-#include <duk_objects/scene.h>
 
 namespace duk {
 
@@ -33,7 +33,7 @@ public:
 
     virtual ~Renderer();
 
-    void render(duk::scene::Scene* scene);
+    void render(duk::scene::Objects& objects);
 
     DUK_NO_DISCARD uint32_t render_width() const;
 

@@ -82,7 +82,7 @@ Objects::~Objects() {
     for (auto object: all()) {
         object.destroy();
     }
-    update_destroy();
+    update();
 }
 
 Object Objects::add_object() {
@@ -125,7 +125,7 @@ void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
     m_componentMasks[index].reset(componentIndex);
 }
 
-void Objects::update_destroy() {
+void Objects::update() {
     if (!m_destroyedIds.empty()) {
         for (auto& id: m_destroyedIds) {
             auto index = id.index();

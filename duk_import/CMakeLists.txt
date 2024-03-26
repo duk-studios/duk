@@ -8,8 +8,6 @@ set(DUK_IMPORT_HEADERS
         include/duk_import/material/material_importer.h
         include/duk_import/material/material_loader_json.h
         include/duk_import/resource_set_importer.h
-        include/duk_import/scene/scene_importer.h
-        include/duk_import/scene/scene_loader_json.h
         include/duk_import/resource_importer.h
         )
 set(DUK_IMPORT_SOURCES
@@ -20,8 +18,6 @@ set(DUK_IMPORT_SOURCES
         src/duk_import/material/material_importer.cpp
         src/duk_import/material/material_loader_json.cpp
         src/duk_import/resource_set_importer.cpp
-        src/duk_import/scene/scene_importer.cpp
-        src/duk_import/scene/scene_loader_json.cpp
         src/duk_import/resource_importer.cpp
         )
 

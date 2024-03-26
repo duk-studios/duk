@@ -11,7 +11,6 @@
 #include <duk_engine/settings.h>
 #include <duk_import/importer.h>
 #include <duk_platform/window.h>
-#include <duk_renderer/components/environment.h>
 #include <duk_renderer/renderer.h>
 #include <duk_tools/timer.h>
 
@@ -21,7 +20,7 @@ struct EngineCreateInfo {
     std::filesystem::path workingDirectory;
 };
 
-class Engine : public duk::renderer::Environment {
+class Engine {
 public:
     explicit Engine(const EngineCreateInfo& engineCreateInfo);
 
@@ -29,9 +28,9 @@ public:
 
     void run();
 
-    DUK_NO_DISCARD duk::platform::Window* window() override;
+    DUK_NO_DISCARD duk::platform::Window* window();
 
-    DUK_NO_DISCARD duk::renderer::Renderer* renderer() override;
+    DUK_NO_DISCARD duk::renderer::Renderer* renderer();
 
     DUK_NO_DISCARD duk::audio::AudioDevice* audio();
 

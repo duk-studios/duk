@@ -1,9 +1,9 @@
 /// 21/02/2024
 /// system.cpp
 
-#include <duk_objects/systems.h>
+#include <duk_engine/systems.h>
 
-namespace duk::scene {
+namespace duk::engine {
 
 size_t SystemRegistry::s_entryCounter = 0;
 
@@ -57,7 +57,7 @@ size_t Systems::SystemIterator::system_index() const {
 }
 
 const std::string& Systems::SystemIterator::system_name() const {
-    return duk::scene::system_name(system_index());
+    return duk::engine::system_name(system_index());
 }
 
 Systems::SystemIterator Systems::begin() {
@@ -68,22 +68,22 @@ Systems::SystemIterator Systems::end() {
     return Systems::SystemIterator(*this, m_container.size());
 }
 
-void Systems::enter(Objects& objects, Environment* environment) {
+void Systems::enter(duk::scene::Objects& objects, Engine& engine) {
     for (auto& system: m_container) {
-        system->enter(objects, environment);
+        system->enter(objects, engine);
     }
 }
 
-void Systems::update(Objects& objects, Environment* environment) {
+void Systems::update(duk::scene::Objects& objects, Engine& engine) {
     for (auto& system: m_container) {
-        system->update(objects, environment);
-        objects.update_destroy();
+        system->update(objects, engine);
+        objects.update();
     }
 }
 
-void Systems::exit(Objects& objects, Environment* environment) {
+void Systems::exit(duk::scene::Objects& objects, Engine& engine) {
     for (auto& system: m_container) {
-        system->exit(objects, environment);
+        system->exit(objects, engine);
     }
 }
 
@@ -99,4 +99,4 @@ const std::string& system_name(size_t systemIndex) {
     return SystemRegistry::instance()->system_name(systemIndex);
 }
 
-}// namespace duk::scene
+}// namespace duk::engine

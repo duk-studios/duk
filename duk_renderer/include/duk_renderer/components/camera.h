@@ -5,7 +5,6 @@
 #define DUK_RENDERER_CAMERA_H
 
 #include <duk_objects/objects.h>
-#include <duk_objects/systems.h>
 
 #include <glm/mat4x4.hpp>
 
@@ -18,9 +17,6 @@ struct Camera {
     glm::mat4 invProj;
     glm::mat4 vp;   // projection * view
     glm::mat4 invVp;// inverse vp
-
-    glm::vec3 screen_to_world(const glm::vec2& screenSize, const glm::vec3& screenPosition) const;
-    glm::vec3 screen_to_local(const glm::vec2& screenSize, const glm::vec3& screenPosition) const;
 };
 
 struct PerspectiveCamera {
@@ -29,14 +25,13 @@ struct PerspectiveCamera {
     float zFar;
 };
 
-class CameraUpdateSystem : public duk::scene::System {
-public:
-    void enter(scene::Objects& objects, scene::Environment* environment) override;
+glm::vec3 screen_to_local(const duk::scene::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition);
 
-    void update(scene::Objects& objects, scene::Environment* environment) override;
+glm::vec3 screen_to_world(const duk::scene::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition);
 
-    void exit(scene::Objects& objects, scene::Environment* environment) override;
-};
+void update_camera(const duk::scene::Component<Camera>& camera, const duk::scene::Component<PerspectiveCamera>& perspectiveCamera, uint32_t width, uint32_t height);
+
+void update_cameras(duk::scene::Objects& objects, uint32_t width, uint32_t height);
 
 }// namespace duk::renderer
 
