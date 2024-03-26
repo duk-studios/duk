@@ -338,9 +338,9 @@ private:
 
 private:
     std::array<std::unique_ptr<ComponentPool>, MAX_COMPONENTS> m_componentPools;
-    duk::tools::FixedVector<ComponentMask, MAX_OBJECTS> m_componentMasks;
-    duk::tools::FixedVector<uint32_t, MAX_OBJECTS> m_versions;
-    duk::tools::FixedVector<uint32_t, MAX_OBJECTS> m_freeList;
+    std::vector<ComponentMask> m_componentMasks;
+    std::vector<uint32_t> m_versions;
+    std::vector<uint32_t> m_freeList;
     std::vector<Object::Id> m_destroyedIds;
 };
 
