@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_GLOBAL_DESCRIPTORS_H
 #define DUK_RENDERER_GLOBAL_DESCRIPTORS_H
 
-#include <duk_scene/objects.h>
+#include <duk_objects/objects.h>
 
 #include <duk_renderer/resources/materials/globals/camera_types.h>
 #include <duk_renderer/resources/materials/globals/lights_types.h>
@@ -20,9 +20,9 @@ class GlobalDescriptors {
 public:
     explicit GlobalDescriptors(const GlobalDescriptorsCreateInfo& globalDescriptorsCreateInfo);
 
-    void update_cameras(scene::Objects& objects);
+    void update_cameras(duk::objects::Objects& objects);
 
-    void update_lights(duk::scene::Objects& objects);
+    void update_lights(duk::objects::Objects& objects);
 
     globals::CameraUBO* camera_ubo();
 

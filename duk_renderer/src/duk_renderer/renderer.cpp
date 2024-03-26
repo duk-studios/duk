@@ -2,7 +2,6 @@
 /// renderer.cpp
 
 #include <duk_platform/window.h>
-#include <duk_renderer/components/register_types.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/passes/present_pass.h>
@@ -40,13 +39,11 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
         m_globalDescriptors = std::make_unique<GlobalDescriptors>(globalDescriptorsCreateInfo);
     }
-
-    register_types();
 }
 
 Renderer::~Renderer() = default;
 
-void Renderer::render(duk::scene::Scene* scene) {
+void Renderer::render(duk::objects::Objects& objects) {
     // if rendering to a window, but it's minimized, skip
     if (m_window && m_window->minimized()) {
         return;
@@ -54,9 +51,9 @@ void Renderer::render(duk::scene::Scene* scene) {
 
     m_rhi->prepare_frame();
 
-    update_global_descriptors(scene->objects());
+    update_global_descriptors(objects);
 
-    update_passes(scene->objects());
+    update_passes(objects);
 
     m_rhi->update();
 
@@ -141,13 +138,13 @@ duk::rhi::CommandQueue* Renderer::main_command_queue() const {
     return m_mainQueue.get();
 }
 
-void Renderer::update_global_descriptors(duk::scene::Objects& objects) {
+void Renderer::update_global_descriptors(duk::objects::Objects& objects) {
     m_globalDescriptors->update_cameras(objects);
 
     m_globalDescriptors->update_lights(objects);
 }
 
-void Renderer::update_passes(scene::Objects& objects) {
+void Renderer::update_passes(objects::Objects& objects) {
     Pass::UpdateParams updateParams = {};
     updateParams.objects = &objects;
     updateParams.globalDescriptors = m_globalDescriptors.get();

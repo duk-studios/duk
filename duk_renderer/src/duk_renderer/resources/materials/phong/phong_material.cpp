@@ -53,7 +53,7 @@ PhongInstanceBuffer::PhongInstanceBuffer(const PhongInstanceBufferCreateInfo& ph
     m_transformSBO = std::make_unique<StorageBuffer<PhongDescriptors::Transform>>(transformSBOCreateInfo);
 }
 
-void PhongInstanceBuffer::insert(const scene::Object& object) {
+void PhongInstanceBuffer::insert(const objects::Object& object) {
     auto transform = object.component<Transform>();
     auto& instance = m_transformSBO->next();
     instance.model = transform->model;

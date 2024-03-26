@@ -8,7 +8,7 @@
 #include <duk_rhi/rhi.h>
 #include <duk_renderer/brushes/mesh.h>
 #include <duk_platform/window.h>
-#include <duk_scene/scene.h>
+#include <duk_objects/objects.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>
@@ -68,13 +68,13 @@ int main() {
     duk::renderer::ForwardRendererCreateInfo forwardRendererCreateInfo;
     forwardRendererCreateInfo.rendererCreateInfo = rendererCreateInfo;
 
-    //Creating our renderer with the forwardRendererCreateInfo, and a scene.
+    //Creating our renderer with the forwardRendererCreateInfo, and a objects.
     auto renderer = std::make_unique<duk::renderer::ForwardRenderer>(forwardRendererCreateInfo);
-    auto scene = std::make_unique<duk::scene::Objects>();
+    auto objects = std::make_unique<duk::objects::Objects>();
 
-    //Adding our first object to the scene, a camera.
+    //Adding our first object to the objects, a camera.
     //Setup the camera position, and adding the Perspective Component to it.
-    duk::scene::Object camera = scene->add_object();
+    duk::objects::Object camera = objects->add_object();
     auto cameraPosition = camera.add<duk::renderer::Position3D>();  
     cameraPosition->value = glm::vec3(0,0,0);
     camera.add<duk::renderer::Rotation3D>();
@@ -89,18 +89,18 @@ int main() {
         cameraPerspective->aspectRatio = (float)width / (float)height;
     });
 
-    ////Adding a light to our scene.
-    duk::scene::Object globalLight = scene->add_object();
+    ////Adding a light to our objects.
+    duk::objects::Object globalLight = objects->add_object();
     auto globalLightPosition = globalLight.add<duk::renderer::Position3D>();
     globalLightPosition->value = glm::vec3(0,4,-5);
     auto globalPointLight = globalLight.add<duk::renderer::PointLight>();
     globalPointLight->value.color = glm::vec3(1.0f,0.0f,0.0f);
     globalPointLight->value.intensity = 5.0f;
 
-    //And finally adding the cube to the scene.
+    //And finally adding the cube to the objects.
     //Our cube has the Mesh Drawing component, that specifies what mesh type and material we are going to use.
     //Also our position and scale and rotation values.
-    duk::scene::Object cubeObject = scene->add_object();
+    duk::objects::Object cubeObject = objects->add_object();
     auto cubeMeshDrawing = cubeObject.add<duk::renderer::MeshDrawing>();
     cubeMeshDrawing->mesh = renderer->mesh_pool()->cube();
     cubeMeshDrawing->material = renderer->material_pool()->create_phong(duk::pool::Id(666));
@@ -130,8 +130,8 @@ int main() {
         //Rotating the cube in the X value by the timer total duration. 
         cubeRotation->value = glm::vec3(timer.total_duration().count(), 45.0f, 0.0f);
 
-        //Telling to our renderer to render the scene we want.
-        renderer->render(scene.get());
+        //Telling to our renderer to render the objects we want.
+        renderer->render(objects.get());
 
         timer.stop();
     }

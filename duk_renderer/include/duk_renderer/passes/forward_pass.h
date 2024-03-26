@@ -15,17 +15,17 @@ namespace duk::renderer {
 class Renderer;
 
 struct MeshDrawData {
-    duk::tools::FixedVector<MeshEntry, scene::MAX_OBJECTS> meshes;
-    duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> sortedMeshes;
-    duk::tools::FixedVector<MeshDrawEntry, scene::MAX_OBJECTS> drawEntries;
+    duk::tools::FixedVector<MeshEntry, objects::MAX_OBJECTS> meshes;
+    duk::tools::FixedVector<uint16_t, objects::MAX_OBJECTS> sortedMeshes;
+    duk::tools::FixedVector<MeshDrawEntry, objects::MAX_OBJECTS> drawEntries;
 
     void clear();
 };
 
 struct SpriteDrawData {
-    duk::tools::FixedVector<SpriteEntry, scene::MAX_OBJECTS> sprites;
-    duk::tools::FixedVector<uint16_t, scene::MAX_OBJECTS> sortedSprites;
-    duk::tools::FixedVector<SpriteDrawEntry, scene::MAX_OBJECTS> drawEntries;
+    duk::tools::FixedVector<SpriteEntry, objects::MAX_OBJECTS> sprites;
+    duk::tools::FixedVector<uint16_t, objects::MAX_OBJECTS> sortedSprites;
+    duk::tools::FixedVector<SpriteDrawEntry, objects::MAX_OBJECTS> drawEntries;
     std::unique_ptr<SpriteBrush> brush;
 
     void clear();

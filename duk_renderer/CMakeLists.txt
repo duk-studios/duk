@@ -8,12 +8,12 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/renderer.h
         include/duk_renderer/vertex_types.h
         include/duk_renderer/sort.h
+        include/duk_renderer/register_types.h
         include/duk_renderer/brushes/mesh.h
         include/duk_renderer/brushes/mesh_data_source.h
         include/duk_renderer/brushes/sprite_brush.h
         include/duk_renderer/brushes/brush.h
         include/duk_renderer/brushes/generic_brush.h
-        include/duk_renderer/components/environment.h
         include/duk_renderer/components/mesh_renderer.h
         include/duk_renderer/components/sprite_renderer.h
         include/duk_renderer/components/transform.h
@@ -49,7 +49,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/pools/mesh_pool.h
         include/duk_renderer/pools/material_pool.h
         include/duk_renderer/pools/sprite_pool.h
-        include/duk_renderer/components/register_types.h
         include/duk_renderer/resources/texture.h
         include/duk_renderer/resources/image.h
         include/duk_renderer/resources/materials/material_descriptor_set.h
@@ -59,6 +58,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/renderer.cpp
         src/duk_renderer/sort.cpp
         src/duk_renderer/vertex_types.cpp
+        src/duk_renderer/register_types.cpp
         src/duk_renderer/brushes/mesh.cpp
         src/duk_renderer/brushes/mesh_data_source.cpp
         src/duk_renderer/brushes/sprite_brush.cpp
@@ -96,7 +96,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/pools/mesh_pool.cpp
         src/duk_renderer/pools/material_pool.cpp
         src/duk_renderer/pools/sprite_pool.cpp
-        src/duk_renderer/components/register_types.cpp
         src/duk_renderer/resources/texture.cpp
         src/duk_renderer/resources/image.cpp
         src/duk_renderer/resources/materials/material_descriptor_set.cpp
@@ -115,7 +114,7 @@ target_include_directories(duk_renderer
 
 target_link_libraries(duk_renderer
         PUBLIC
-        duk_scene
+        duk_objects
         duk_rhi
         duk_resource
         )

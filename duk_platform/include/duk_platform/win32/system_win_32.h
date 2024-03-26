@@ -5,7 +5,7 @@
 #ifndef DUK_PLATFORM_SYSTEM_WIN_32_H
 #define DUK_PLATFORM_SYSTEM_WIN_32_H
 
-#include <duk_platform/system.h>
+#include <duk_platform/systems.h>
 #include <duk_platform/win32/cursor_win_32.h>
 #include <memory>
 

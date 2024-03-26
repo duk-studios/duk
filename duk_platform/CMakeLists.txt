@@ -7,7 +7,7 @@ set(DUK_PLATFORM_HEADERS
         include/duk_platform/win32/window_win_32.h
         include/duk_platform/cursor.h
         include/duk_platform/win32/cursor_win_32.h
-        include/duk_platform/system.h
+        include/duk_platform/systems.h
         include/duk_platform/win32/system_win_32.h
         )
 

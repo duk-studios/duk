@@ -4,8 +4,7 @@
 #ifndef DUK_RENDERER_TRANSFORM_H
 #define DUK_RENDERER_TRANSFORM_H
 
-#include <duk_scene/objects.h>
-#include <duk_scene/systems.h>
+#include <duk_objects/objects.h>
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/matrix.hpp>
@@ -31,14 +30,9 @@ struct Transform {
 
 glm::vec3 forward(const Transform& transform);
 
-class TransformUpdateSystem : public duk::scene::System {
-public:
-    void enter(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
+void update_transform(const duk::objects::Component<Transform>& transform);
 
-    void update(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
-
-    void exit(duk::scene::Objects& objects, duk::scene::Environment* environment) override;
-};
+void update_transforms(duk::objects::Objects& objects);
 
 }// namespace duk::renderer
 

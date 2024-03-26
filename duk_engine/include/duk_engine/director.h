@@ -4,17 +4,17 @@
 #ifndef DUK_ENGINE_DIRECTOR_H
 #define DUK_ENGINE_DIRECTOR_H
 
+#include <duk_engine/resources/scene/scene_pool.h>
+
 #include <duk_import/importer.h>
 #include <duk_renderer/renderer.h>
-#include <duk_scene/scene_pool.h>
 
 namespace duk::engine {
 
 struct DirectorCreateInfo {
-    duk::scene::Environment* environment;
     duk::renderer::Renderer* renderer;
     duk::import::Importer* importer;
-    duk::scene::ScenePool* scenePool;
+    ScenePool* scenePool;
     duk::resource::Id firstScene;
 };
 
@@ -24,23 +24,20 @@ public:
 
     ~Director();
 
-    void update();
+    void update(Engine& engine);
 
     void request_scene(duk::resource::Id id);
 
-    duk::scene::Scene* scene();
+    Scene* scene();
 
 private:
-    duk::scene::SceneResource load_scene(duk::resource::Id id);
-
-    void replace_scene(duk::scene::SceneResource scene);
+    void load_scene(Engine& engine, duk::resource::Id id);
 
 private:
-    duk::scene::Environment* m_environment;
     duk::renderer::Renderer* m_renderer;
     duk::import::Importer* m_importer;
-    duk::scene::ScenePool* m_scenePool;
-    duk::scene::SceneResource m_scene;
+    ScenePool* m_scenePool;
+    SceneResource m_scene;
     duk::resource::Id m_requestedSceneId;
 };
 

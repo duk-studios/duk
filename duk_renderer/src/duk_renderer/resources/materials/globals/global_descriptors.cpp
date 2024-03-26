@@ -27,7 +27,7 @@ GlobalDescriptors::GlobalDescriptors(const GlobalDescriptorsCreateInfo& globalDe
     }
 }
 
-void GlobalDescriptors::update_cameras(scene::Objects& objects) {
+void GlobalDescriptors::update_cameras(duk::objects::Objects& objects) {
     uint32_t cameraCount = 0;
     for (auto object: objects.all_with<Camera>()) {
         cameraCount++;
@@ -48,7 +48,7 @@ void GlobalDescriptors::update_cameras(scene::Objects& objects) {
     }
 }
 
-void GlobalDescriptors::update_lights(duk::scene::Objects& objects) {
+void GlobalDescriptors::update_lights(duk::objects::Objects& objects) {
     auto& lights = m_lightsUBO->data();
     lights.directionalLightCount = 0;
     for (auto object: objects.all_with<DirectionalLight>()) {

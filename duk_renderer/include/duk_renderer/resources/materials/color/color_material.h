@@ -35,7 +35,7 @@ class ColorInstanceBuffer : public InstanceBuffer {
 public:
     ColorInstanceBuffer(const ColorInstanceBufferCreateInfo& phongInstanceBufferCreateInfo);
 
-    void insert(const scene::Object& object) override;
+    void insert(const objects::Object& object) override;
 
     void clear() override;
 
