@@ -11,9 +11,9 @@ namespace duk::engine {
 
 class Scene {
 public:
-    duk::scene::Objects& objects();
+    duk::objects::Objects& objects();
 
-    const duk::scene::Objects& objects() const;
+    const duk::objects::Objects& objects() const;
 
     Systems& systems();
 
@@ -26,7 +26,7 @@ public:
     void exit(Engine& engine);
 
 private:
-    duk::scene::Objects m_objects;
+    duk::objects::Objects m_objects;
     Systems m_systems;
 };
 

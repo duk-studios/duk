@@ -1,10 +1,10 @@
 # duk_objects
-- Defines a data-oriented scene composed of objects and components.
+- Defines a data-oriented objects composed of objects and components.
 - Each object is simply an id which is used to access its components.
 
 # Usage
 ```cpp
-#include <duk_objects/scene.h>
+#include <duk_objects/objects.h>
 #include <iostream>
 
 //Creating components 
@@ -41,29 +41,29 @@ struct ComponentTest3 {
 
 int main() {
 
-    //The scene which is in use
-    auto scene = std::make_unique<duk::scene::Objects>();
+    //The objects which is in use
+    auto objects = std::make_unique<duk::objects::Objects>();
     
-    //Adding a new object to the scene
-    auto obj0 = scene->add_object();
+    //Adding a new object to the objects
+    auto obj0 = objects->add_object();
 
     //Adding a new component to this object
     obj0.add<ComponentTest>();
 
-    //Adding new objects to the scene with new components
-    auto obj1 = scene->add_object();
+    //Adding new objects to the objects with new components
+    auto obj1 = objects->add_object();
     obj1.add<ComponentTest2>();
-    auto obj2 = scene->add_object();
+    auto obj2 = objects->add_object();
     obj2.add<ComponentTest>();
     obj2.add<ComponentTest2>();
     obj2.add<ComponentTest3>();
     
-    scene->add_object();
-    scene->add_object();
+    objects->add_object();
+    objects->add_object();
 
-    //Iterating through all the scene objects with specified components
+    //Iterating through all the objects objects with specified components
     //The objects that have any component type like: ComponentTest, ComponentTest2, ComponentTest3, will be listed below
-    for (auto object : scene->all_with<ComponentTest, ComponentTest2, ComponentTest3>()) {
+    for (auto object : objects->all_with<ComponentTest, ComponentTest2, ComponentTest3>()) {
         std::cout << "Id: " << object.id().index() << std::endl;
         
         auto [comp1, comp2, comp3] = object.components<ComponentTest, ComponentTest2, ComponentTest3>();
@@ -73,10 +73,10 @@ int main() {
     }
 
     //Removing the Component from obj with id
-    scene->remove_component<ComponentTest>(obj0.id());
+    objects->remove_component<ComponentTest>(obj0.id());
 
-    //Destroying object from scene
-    scene->destroy_object(obj0.id());
+    //Destroying object from objects
+    objects->destroy_object(obj0.id());
 
     return 0;
 }

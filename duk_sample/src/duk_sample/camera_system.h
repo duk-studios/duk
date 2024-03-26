@@ -21,11 +21,11 @@ struct CameraController {
 
 class CameraSystem : public duk::engine::System {
 public:
-    void enter(duk::scene::Objects& objects, duk::engine::Engine& environment) override;
+    void enter(duk::objects::Objects& objects, duk::engine::Engine& environment) override;
 
-    void update(duk::scene::Objects& objects, duk::engine::Engine& environment) override;
+    void update(duk::objects::Objects& objects, duk::engine::Engine& environment) override;
 
-    void exit(duk::scene::Objects& objects, duk::engine::Engine& environment) override;
+    void exit(duk::objects::Objects& objects, duk::engine::Engine& environment) override;
 };
 
 }// namespace duk::sample

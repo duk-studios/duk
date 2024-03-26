@@ -11,16 +11,16 @@
 namespace duk::renderer {
 
 void register_types() {
-    duk::scene::register_component<DirectionalLight>();
-    duk::scene::register_component<PointLight>();
-    duk::scene::register_component<Position3D>();
-    duk::scene::register_component<Rotation3D>();
-    duk::scene::register_component<Scale3D>();
-    duk::scene::register_component<Transform>();
-    duk::scene::register_component<SpriteRenderer>();
-    duk::scene::register_component<MeshRenderer>();
-    duk::scene::register_component<Camera>();
-    duk::scene::register_component<PerspectiveCamera>();
+    duk::objects::register_component<DirectionalLight>();
+    duk::objects::register_component<PointLight>();
+    duk::objects::register_component<Position3D>();
+    duk::objects::register_component<Rotation3D>();
+    duk::objects::register_component<Scale3D>();
+    duk::objects::register_component<Transform>();
+    duk::objects::register_component<SpriteRenderer>();
+    duk::objects::register_component<MeshRenderer>();
+    duk::objects::register_component<Camera>();
+    duk::objects::register_component<PerspectiveCamera>();
 }
 
 }// namespace duk::renderer

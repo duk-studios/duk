@@ -11,11 +11,11 @@ namespace duk::engine {
 
 class TransformUpdateSystem : public System {
 public:
-    void enter(duk::scene::Objects& objects, Engine& engine) override;
+    void enter(duk::objects::Objects& objects, Engine& engine) override;
 
-    void update(duk::scene::Objects& objects, Engine& engine) override;
+    void update(duk::objects::Objects& objects, Engine& engine) override;
 
-    void exit(duk::scene::Objects& objects, Engine& engine) override;
+    void exit(duk::objects::Objects& objects, Engine& engine) override;
 };
 
 }// namespace duk::engine

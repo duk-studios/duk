@@ -40,7 +40,7 @@ class PhongInstanceBuffer : public InstanceBuffer {
 public:
     PhongInstanceBuffer(const PhongInstanceBufferCreateInfo& phongInstanceBufferCreateInfo);
 
-    void insert(const scene::Object& object) override;
+    void insert(const objects::Object& object) override;
 
     void clear() override;
 

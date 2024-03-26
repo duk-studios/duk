@@ -3,7 +3,7 @@
 
 #include <duk_objects/component_pool.h>
 
-namespace duk::scene {
+namespace duk::objects {
 
 ComponentPool::~ComponentPool() = default;
 

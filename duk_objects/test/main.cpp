@@ -2,7 +2,7 @@
 // Created by Ricardo on 20/07/2023.
 //
 
-#include <duk_objects/scene.h>
+#include <duk_objects/objects.h>
 #include <iostream>
 
 struct TestData {
@@ -41,20 +41,6 @@ struct ComponentTest3 {
     }
 };
 
-class TestSystem : public duk::scene::System {
-public:
-    void enter(duk::scene::Objects& objects, duk::scene::Environment* environment) override {
-        duk::log::info("TestSystem::enter");
-    }
-
-    void update(duk::scene::Objects& objects, duk::scene::Environment* environment) override {
-        duk::log::info("TestSystem::update");
-    }
-
-    void exit(duk::scene::Objects& objects, duk::scene::Environment* environment) override {
-        duk::log::info("TestSystem::exit");
-    }
-};
 
 namespace duk::serial {
 
@@ -81,50 +67,23 @@ void visit_object(JsonVisitor* visitor, ComponentTest3& componentTest) {
 
 }// namespace duk::serial
 
-int test_serialization(duk::scene::Scene* scene) {
-    duk::scene::register_component<ComponentTest>();
-    duk::scene::register_component<ComponentTest2>();
-    duk::scene::register_component<ComponentTest3>();
-    duk::scene::register_system<TestSystem>();
-
-    duk::serial::JsonWriter writer;
-
-    writer.visit(*scene);
-
-    auto sceneJson = writer.print();
-
-    duk::log::debug("Scene serialized: {}", sceneJson).wait();
-
-    duk::serial::JsonReader reader(sceneJson.c_str());
-
-    auto newScene = std::make_unique<duk::scene::Scene>();
-
-    reader.visit(*newScene);
-
-    writer.visit(*newScene);
-
-    auto newSceneJson = writer.print();
-
-    duk::log::debug("New scene serialized: {}", newSceneJson).wait();
-
-    DUK_ASSERT(sceneJson == newSceneJson);
-
-    return 0;
-}
-
 int main() {
-    //The scene which is in use
-    auto scene = std::make_unique<duk::scene::Scene>();
-    scene->systems().add<TestSystem>();
-    auto& objects = scene->objects();
 
-    //Adding a new object to the scene
+    // register our component types
+    duk::objects::register_component<ComponentTest>();
+    duk::objects::register_component<ComponentTest2>();
+    duk::objects::register_component<ComponentTest3>();
+
+    //The objects which is in use
+    duk::objects::Objects objects;
+
+    //Adding a new object to the objects
     auto obj0 = objects.add_object();
 
     //Adding a new component to this object
     obj0.add<ComponentTest>();
 
-    //Adding new objects to the scene with new components
+    //Adding new objects to the objects with new components
     auto obj1 = objects.add_object();
     obj1.add<ComponentTest2>();
     auto obj2 = objects.add_object();
@@ -136,7 +95,7 @@ int main() {
     objects.add_object();
     objects.add_object();
 
-    //Iterating through all the scene objects with specified components
+    //Iterating through all the objects with specified components
     //The objects that have any component type like: ComponentTest, ComponentTest2, ComponentTest3, will be listed below
     for (auto object: objects.all_with<ComponentTest, ComponentTest2, ComponentTest3>()) {
         std::cout << "Id: " << object.id().index() << std::endl;
@@ -150,10 +109,11 @@ int main() {
     //Removing the Component from obj with id
     obj0.remove<ComponentTest>();
 
-    //Destroying object from scene
+    //Destroying object from objects
     obj1.destroy();
 
-    test_serialization(scene.get());
+    // updating destroys all objects marked for destruction (via destroy)
+    objects.update();
 
     return 0;
 }

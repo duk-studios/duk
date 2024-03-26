@@ -9,7 +9,7 @@ namespace duk::renderer {
 
 namespace detail {
 
-static glm::mat4 calculate_model(const duk::scene::Object& object) {
+static glm::mat4 calculate_model(const duk::objects::Object& object) {
     glm::mat4 model(1);
 
     if (auto position3D = object.component<Position3D>()) {
@@ -33,12 +33,12 @@ glm::vec3 forward(const Transform& transform) {
     return glm::vec3(transform.model * glm::vec4(0, 0, -1, 1));
 }
 
-void update_transform(const duk::scene::Component<Transform>& transform) {
+void update_transform(const duk::objects::Component<Transform>& transform) {
     transform->model = detail::calculate_model(transform.object());
     transform->invModel = glm::inverse(transform->model);
 }
 
-void update_transforms(duk::scene::Objects& objects) {
+void update_transforms(duk::objects::Objects& objects) {
     for (auto object: objects.all_with<Transform>()) {
         update_transform(object);
     }

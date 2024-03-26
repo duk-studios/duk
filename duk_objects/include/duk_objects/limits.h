@@ -6,13 +6,13 @@
 
 #include <cstdint>
 
-namespace duk::scene {
+namespace duk::objects {
 
 enum Limits : uint64_t {
     MAX_COMPONENTS = 128,
     MAX_OBJECTS = 65535,
 };
 
-}// namespace duk::scene
+}// namespace duk::objects
 
 #endif// DUK_OBJECTS_LIMITS_H

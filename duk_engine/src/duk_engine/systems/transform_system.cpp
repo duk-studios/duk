@@ -6,15 +6,15 @@
 
 namespace duk::engine {
 
-void TransformUpdateSystem::enter(duk::scene::Objects& objects, Engine& engine) {
+void TransformUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
     duk::renderer::update_transforms(objects);
 }
 
-void TransformUpdateSystem::update(duk::scene::Objects& objects, Engine& engine) {
+void TransformUpdateSystem::update(duk::objects::Objects& objects, Engine& engine) {
     duk::renderer::update_transforms(objects);
 }
 
-void TransformUpdateSystem::exit(duk::scene::Objects& objects, Engine& engine) {
+void TransformUpdateSystem::exit(duk::objects::Objects& objects, Engine& engine) {
 }
 
 }// namespace duk::engine

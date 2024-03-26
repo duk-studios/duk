@@ -15,11 +15,11 @@ class System {
 public:
     virtual ~System() = default;
 
-    virtual void enter(duk::scene::Objects& objects, Engine& engine) = 0;
+    virtual void enter(duk::objects::Objects& objects, Engine& engine) = 0;
 
-    virtual void update(duk::scene::Objects& objects, Engine& engine) = 0;
+    virtual void update(duk::objects::Objects& objects, Engine& engine) = 0;
 
-    virtual void exit(duk::scene::Objects& objects, Engine& engine) = 0;
+    virtual void exit(duk::objects::Objects& objects, Engine& engine) = 0;
 };
 
 class Systems;
@@ -94,11 +94,11 @@ public:
     template<typename T>
     T* get();
 
-    void enter(duk::scene::Objects& objects, Engine& engine);
+    void enter(duk::objects::Objects& objects, Engine& engine);
 
-    void update(duk::scene::Objects& objects, Engine& engine);
+    void update(duk::objects::Objects& objects, Engine& engine);
 
-    void exit(duk::scene::Objects& objects, Engine& engine);
+    void exit(duk::objects::Objects& objects, Engine& engine);
 
     SystemIterator begin();
 

@@ -5,11 +5,11 @@
 
 namespace duk::engine {
 
-duk::scene::Objects& Scene::objects() {
+duk::objects::Objects& Scene::objects() {
     return m_objects;
 }
 
-const duk::scene::Objects& Scene::objects() const {
+const duk::objects::Objects& Scene::objects() const {
     return m_objects;
 }
 

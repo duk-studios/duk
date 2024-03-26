@@ -12,7 +12,7 @@
 #include <utility>
 #include <vector>
 
-namespace duk::scene {
+namespace duk::objects {
 
 class ComponentPool {
 public:
@@ -97,6 +97,6 @@ const T* ComponentPoolT<T>::get(uint32_t index) const {
     return m_chunks[chunkIndex] + indexInChunk;
 }
 
-}// namespace duk::scene
+}// namespace duk::objects
 
 #endif// DUK_OBJECTS_COMPONENT_H

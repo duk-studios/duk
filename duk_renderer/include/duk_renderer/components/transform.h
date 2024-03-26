@@ -30,9 +30,9 @@ struct Transform {
 
 glm::vec3 forward(const Transform& transform);
 
-void update_transform(const duk::scene::Component<Transform>& transform);
+void update_transform(const duk::objects::Component<Transform>& transform);
 
-void update_transforms(duk::scene::Objects& objects);
+void update_transforms(duk::objects::Objects& objects);
 
 }// namespace duk::renderer
 

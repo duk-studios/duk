@@ -1,5 +1,5 @@
 /// 06/07/2023
-/// scene.h
+/// objects.h
 
 #ifndef DUK_OBJECTS_OBJECTS_H
 #define DUK_OBJECTS_OBJECTS_H
@@ -17,7 +17,7 @@
 #include <duk_tools/singleton.h>
 #include <duk_tools/types.h>
 
-namespace duk::scene {
+namespace duk::objects {
 
 namespace detail {
 
@@ -56,7 +56,7 @@ public:
 public:
     Object();
 
-    Object(uint32_t index, uint32_t version, Objects* scene);
+    Object(uint32_t index, uint32_t version, Objects* objects);
 
     DUK_NO_DISCARD Id id() const;
 
@@ -64,7 +64,7 @@ public:
 
     DUK_NO_DISCARD operator bool() const;
 
-    DUK_NO_DISCARD Objects* scene() const;
+    DUK_NO_DISCARD Objects* objects() const;
 
     void destroy() const;
 
@@ -238,7 +238,7 @@ public:
     public:
         class Iterator {
         public:
-            Iterator(uint32_t index, Objects* scene, ComponentMask componentMask);
+            Iterator(uint32_t index, Objects* objects, ComponentMask componentMask);
             // Dereference operator (*)
             DUK_NO_DISCARD Object operator*() const;
 
@@ -269,7 +269,7 @@ public:
         };
 
     public:
-        ObjectView(Objects* scene, ComponentMask componentMask);
+        ObjectView(Objects* objects, ComponentMask componentMask);
 
         DUK_NO_DISCARD Iterator begin();
 
@@ -353,7 +353,7 @@ Component<T>::Component(const Object::Id& ownerId, Objects* objects)
 template<typename T>
 Component<T>::Component(const Object& owner)
     : m_ownerId(owner.id())
-    , m_objects(owner.scene()) {
+    , m_objects(owner.objects()) {
 }
 
 template<typename T>
@@ -524,7 +524,7 @@ std::tuple<Component<Ts>...> Object::components() {
     return std::make_tuple(component<Ts>()...);
 }
 
-}// namespace duk::scene
+}// namespace duk::objects
 
 namespace duk::serial {
 
@@ -535,7 +535,7 @@ namespace duk::serial {
 // Maybe one day we can have a better solution for arrays like this,
 // but for now this is more than good enough
 struct SerializedComponent {
-    duk::scene::Object& object;
+    duk::objects::Object& object;
     std::string type;
 };
 
@@ -543,9 +543,9 @@ class SerializedComponents {
 public:
     using iterator = std::vector<SerializedComponent>::iterator;
 
-    SerializedComponents(duk::scene::Object& object)
+    SerializedComponents(duk::objects::Object& object)
         : m_object(object) {
-        auto registry = duk::scene::ComponentRegistry::instance();
+        auto registry = duk::objects::ComponentRegistry::instance();
         const auto& componentMask = object.component_mask();
         for (auto componentIndex: componentMask.bits<true>()) {
             m_components.emplace_back(m_object, registry->name_of(componentIndex));
@@ -565,14 +565,14 @@ public:
     }
 
 private:
-    duk::scene::Object& m_object;
+    duk::objects::Object& m_object;
     std::vector<SerializedComponent> m_components;
 };
 
 template<typename JsonVisitor>
 void visit_object(JsonVisitor* serializer, SerializedComponent& component) {
     serializer->visit_member(component.type, MemberDescription("type"));
-    duk::scene::ComponentRegistry::instance()->visit(serializer, component.object, component.type);
+    duk::objects::ComponentRegistry::instance()->visit(serializer, component.object, component.type);
 }
 
 template<>
@@ -590,14 +590,14 @@ inline void write_array(JsonWriter* writer, SerializedComponents& components) {
 }
 
 template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::scene::Object& object) {
+void visit_object(JsonVisitor* visitor, duk::objects::Object& object) {
     SerializedComponents serializedComponents(object);
     visitor->visit_member_array(serializedComponents, MemberDescription("components"));
 }
 
 // Objects
 template<>
-inline void read_array<duk::scene::Objects>(JsonReader* reader, duk::scene::Objects& objects, size_t size) {
+inline void read_array<duk::objects::Objects>(JsonReader* reader, duk::objects::Objects& objects, size_t size) {
     for (size_t i = 0; i < size; i++) {
         auto object = objects.add_object();
         reader->visit_member_object(object, MemberDescription(i));
@@ -605,7 +605,7 @@ inline void read_array<duk::scene::Objects>(JsonReader* reader, duk::scene::Obje
 }
 
 template<>
-inline void write_array(JsonWriter* writer, duk::scene::Objects& objects) {
+inline void write_array(JsonWriter* writer, duk::objects::Objects& objects) {
     for (auto object: objects.all()) {
         writer->visit_member_object(object, MemberDescription(nullptr));
     }
@@ -616,13 +616,13 @@ inline void write_array(JsonWriter* writer, duk::scene::Objects& objects) {
 namespace duk::resource {
 
 template<typename Solver, typename T>
-void solve_resources(Solver* solver, duk::scene::Component<T>& component) {
+void solve_resources(Solver* solver, duk::objects::Component<T>& component) {
     solver->solve(*component);
 }
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::scene::Object& object) {
-    auto componentRegistry = duk::scene::ComponentRegistry::instance();
+void solve_resources(Solver* solver, duk::objects::Object& object) {
+    auto componentRegistry = duk::objects::ComponentRegistry::instance();
 
     const auto& componentMask = object.component_mask();
 
@@ -632,7 +632,7 @@ void solve_resources(Solver* solver, duk::scene::Object& object) {
 }
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::scene::Objects& objects) {
+void solve_resources(Solver* solver, duk::objects::Objects& objects) {
     for (auto object: objects.all()) {
         solver->solve(object);
     }

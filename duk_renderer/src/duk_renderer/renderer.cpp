@@ -46,7 +46,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
 Renderer::~Renderer() = default;
 
-void Renderer::render(duk::scene::Objects& objects) {
+void Renderer::render(duk::objects::Objects& objects) {
     // if rendering to a window, but it's minimized, skip
     if (m_window && m_window->minimized()) {
         return;
@@ -141,13 +141,13 @@ duk::rhi::CommandQueue* Renderer::main_command_queue() const {
     return m_mainQueue.get();
 }
 
-void Renderer::update_global_descriptors(duk::scene::Objects& objects) {
+void Renderer::update_global_descriptors(duk::objects::Objects& objects) {
     m_globalDescriptors->update_cameras(objects);
 
     m_globalDescriptors->update_lights(objects);
 }
 
-void Renderer::update_passes(scene::Objects& objects) {
+void Renderer::update_passes(objects::Objects& objects) {
     Pass::UpdateParams updateParams = {};
     updateParams.objects = &objects;
     updateParams.globalDescriptors = m_globalDescriptors.get();

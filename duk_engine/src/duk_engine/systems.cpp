@@ -68,20 +68,20 @@ Systems::SystemIterator Systems::end() {
     return Systems::SystemIterator(*this, m_container.size());
 }
 
-void Systems::enter(duk::scene::Objects& objects, Engine& engine) {
+void Systems::enter(duk::objects::Objects& objects, Engine& engine) {
     for (auto& system: m_container) {
         system->enter(objects, engine);
     }
 }
 
-void Systems::update(duk::scene::Objects& objects, Engine& engine) {
+void Systems::update(duk::objects::Objects& objects, Engine& engine) {
     for (auto& system: m_container) {
         system->update(objects, engine);
         objects.update();
     }
 }
 
-void Systems::exit(duk::scene::Objects& objects, Engine& engine) {
+void Systems::exit(duk::objects::Objects& objects, Engine& engine) {
     for (auto& system: m_container) {
         system->exit(objects, engine);
     }

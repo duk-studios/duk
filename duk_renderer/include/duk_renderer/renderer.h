@@ -33,7 +33,7 @@ public:
 
     virtual ~Renderer();
 
-    void render(duk::scene::Objects& objects);
+    void render(duk::objects::Objects& objects);
 
     DUK_NO_DISCARD uint32_t render_width() const;
 
@@ -51,9 +51,9 @@ public:
     T* add_pass(Args&&... args);
 
 private:
-    void update_global_descriptors(duk::scene::Objects& objects);
+    void update_global_descriptors(duk::objects::Objects& objects);
 
-    void update_passes(scene::Objects& objects);
+    void update_passes(objects::Objects& objects);
 
 protected:
     duk::platform::Window* m_window;

@@ -21,7 +21,7 @@ static glm::mat4 calculate_projection(const PerspectiveCamera& perspective, uint
 
 }// namespace detail
 
-glm::vec3 screen_to_local(const duk::scene::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition) {
+glm::vec3 screen_to_local(const duk::objects::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition) {
     auto ndc = glm::vec3(screenPosition.x / screenSize.x, 1.0 - screenPosition.y / screenSize.y, detail::z_depth(camera->proj, screenPosition.z)) * 2.0f - 1.0f;
 
     auto localPos = camera->invProj * glm::vec4(ndc, 1.0f);
@@ -30,14 +30,14 @@ glm::vec3 screen_to_local(const duk::scene::Component<Camera>& camera, const glm
     return localPos;
 }
 
-glm::vec3 screen_to_world(const duk::scene::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition) {
+glm::vec3 screen_to_world(const duk::objects::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition) {
     auto local = screen_to_local(camera, screenSize, screenPosition);
     auto worldPos = camera->invView * glm::vec4(local, 1);
 
     return worldPos;
 }
 
-void update_camera(const duk::scene::Component<Camera>& camera, const duk::scene::Component<PerspectiveCamera>& perspectiveCamera, uint32_t width, uint32_t height) {
+void update_camera(const duk::objects::Component<Camera>& camera, const duk::objects::Component<PerspectiveCamera>& perspectiveCamera, uint32_t width, uint32_t height) {
     auto transform = camera.object().component<Transform>();
     camera->view = transform->invModel;// the view is the inverse of the model
     camera->invView = transform->model;
@@ -47,7 +47,7 @@ void update_camera(const duk::scene::Component<Camera>& camera, const duk::scene
     camera->invVp = glm::inverse(camera->vp);
 }
 
-void update_cameras(duk::scene::Objects& objects, uint32_t width, uint32_t height) {
+void update_cameras(duk::objects::Objects& objects, uint32_t width, uint32_t height) {
     for (auto object: objects.all_with<Camera, PerspectiveCamera>()) {
         auto [camera, perspective] = object.components<Camera, PerspectiveCamera>();
         update_camera(camera, perspective, width, height);

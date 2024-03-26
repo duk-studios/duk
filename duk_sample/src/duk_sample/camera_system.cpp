@@ -62,10 +62,10 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 
 }// namespace detail
 
-void CameraSystem::enter(duk::scene::Objects& objects, duk::engine::Engine& engine) {
+void CameraSystem::enter(duk::objects::Objects& objects, duk::engine::Engine& engine) {
 }
 
-void CameraSystem::update(duk::scene::Objects& objects, duk::engine::Engine& engine) {
+void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& engine) {
     auto object = objects.first_with<CameraController>();
 
     if (!object) {
@@ -115,7 +115,7 @@ void CameraSystem::update(duk::scene::Objects& objects, duk::engine::Engine& eng
     }
 }
 
-void CameraSystem::exit(duk::scene::Objects& objects, duk::engine::Engine& engine) {
+void CameraSystem::exit(duk::objects::Objects& objects, duk::engine::Engine& engine) {
 }
 
 }// namespace duk::sample

@@ -1,9 +1,9 @@
 /// 06/07/2023
-/// scene.cpp
+/// objects.cpp
 
 #include <duk_objects/objects.h>
 
-namespace duk::scene {
+namespace duk::objects {
 
 ComponentRegistry g_componentRegistry;
 
@@ -49,9 +49,9 @@ Object::Object()
     : Object(MAX_OBJECTS, 0, nullptr) {
 }
 
-Object::Object(uint32_t index, uint32_t version, Objects* scene)
+Object::Object(uint32_t index, uint32_t version, Objects* objects)
     : m_id(index, version)
-    , m_objects(scene) {
+    , m_objects(objects) {
 }
 
 Object::Id Object::id() const {
@@ -66,7 +66,7 @@ Object::operator bool() const {
     return valid();
 }
 
-Objects* Object::scene() const {
+Objects* Object::objects() const {
     return m_objects;
 }
 
@@ -146,10 +146,10 @@ const ComponentMask& Objects::component_mask(const Object::Id& id) const {
     return m_componentMasks.at(id.index());
 }
 
-Objects::ObjectView::Iterator::Iterator(uint32_t i, Objects* scene, ComponentMask componentMask)
+Objects::ObjectView::Iterator::Iterator(uint32_t i, Objects* objects, ComponentMask componentMask)
     : m_i(i)
     , m_freeListCursor(0)
-    , m_objects(scene)
+    , m_objects(objects)
     , m_componentMask(componentMask) {
     next();
 }
@@ -202,8 +202,8 @@ bool Objects::ObjectView::Iterator::valid_object() {
     return freeList[m_freeListCursor] != m_i;
 }
 
-Objects::ObjectView::ObjectView(Objects* scene, ComponentMask componentMask)
-    : m_objects(scene)
+Objects::ObjectView::ObjectView(Objects* objects, ComponentMask componentMask)
+    : m_objects(objects)
     , m_componentMask(componentMask) {
 }
 
@@ -223,4 +223,4 @@ Objects::ObjectView::Iterator Objects::ObjectView::end() const {
     return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
 }
 
-}// namespace duk::scene
+}// namespace duk::objects

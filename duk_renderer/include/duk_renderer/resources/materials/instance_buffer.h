@@ -14,7 +14,7 @@ class InstanceBuffer {
 public:
     virtual ~InstanceBuffer() = default;
 
-    virtual void insert(const duk::scene::Object& object) = 0;
+    virtual void insert(const duk::objects::Object& object) = 0;
 
     virtual void clear() = 0;
 

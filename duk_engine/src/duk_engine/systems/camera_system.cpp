@@ -9,17 +9,17 @@
 
 namespace duk::engine {
 
-void CameraUpdateSystem::enter(duk::scene::Objects& objects, Engine& engine) {
+void CameraUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
     auto renderer = engine.renderer();
     duk::renderer::update_cameras(objects, renderer->render_width(), renderer->render_height());
 }
 
-void CameraUpdateSystem::update(duk::scene::Objects& objects, Engine& engine) {
+void CameraUpdateSystem::update(duk::objects::Objects& objects, Engine& engine) {
     auto renderer = engine.renderer();
     duk::renderer::update_cameras(objects, renderer->render_width(), renderer->render_height());
 }
 
-void CameraUpdateSystem::exit(duk::scene::Objects& objects, Engine& engine) {
+void CameraUpdateSystem::exit(duk::objects::Objects& objects, Engine& engine) {
 }
 
 }// namespace duk::engine

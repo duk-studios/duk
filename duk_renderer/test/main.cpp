@@ -3,10 +3,9 @@
 //
 
 #include <duk_log/log.h>
-#include <duk_objects/scene.h>
+#include <duk_objects/objects.h>
 #include <duk_platform/window.h>
 #include <duk_renderer/components/camera.h>
-#include <duk_renderer/components/environment.h>
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
@@ -19,9 +18,9 @@
 #include <duk_tools/timer.h>
 #include <iostream>
 
-class ExampleEnvironment : public duk::renderer::Environment {
+class Application  {
 public:
-    ExampleEnvironment() {
+    Application() {
         duk::platform::WindowCreateInfo windowCreateInfo = {"RendererWindow", 640, 720};
 
         //The result of window creation is checked, and if successful, the program proceeds
@@ -63,11 +62,11 @@ public:
         m_pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
     }
 
-    duk::platform::Window* window() override {
+    duk::platform::Window* window() {
         return m_window.get();
     }
 
-    duk::renderer::Renderer* renderer() override {
+    duk::renderer::Renderer* renderer() {
         return m_renderer.get();
     }
 
@@ -88,21 +87,13 @@ private:
 };
 
 int main() {
-    ExampleEnvironment environment;
+    Application application;
 
-    auto scene = std::make_unique<duk::scene::Scene>();
-
-    auto& systems = scene->systems();
-    // TransformUpdateSystem updates our transform matrices
-    systems.add<duk::renderer::TransformUpdateSystem>();
-    // CameraUpdateSystem is responsible for updating our camera matrices, it must come after TransformUpdateSystem
-    systems.add<duk::renderer::CameraUpdateSystem>();
-
-    auto& objects = scene->objects();
+    duk::objects::Objects objects;
 
     //Adding our first object to the objects, a camera.
     //Setup the camera position, and adding the Perspective Component to it.
-    duk::scene::Object camera = objects.add_object();
+    duk::objects::Object camera = objects.add_object();
     auto cameraPosition = camera.add<duk::renderer::Position3D>();
     cameraPosition->value = glm::vec3(0, 0, 0);
     camera.add<duk::renderer::Transform>();
@@ -114,7 +105,7 @@ int main() {
     cameraPerspective->fovDegrees = 60.0f;
 
     ////Adding a light to our objects.
-    duk::scene::Object globalLight = objects.add_object();
+    duk::objects::Object globalLight = objects.add_object();
     globalLight.add<duk::renderer::Transform>();
     auto globalLightPosition = globalLight.add<duk::renderer::Position3D>();
     globalLightPosition->value = glm::vec3(0, 4, -5);
@@ -125,13 +116,13 @@ int main() {
     //And finally adding the cube to the objects.
     //Our cube has the Mesh Drawing component, that specifies what mesh type and material we are going to use.
     //Also our position and scale and rotation values.
-    duk::scene::Object cubeObject = objects.add_object();
+    duk::objects::Object cubeObject = objects.add_object();
     cubeObject.add<duk::renderer::Transform>();
     auto cubeMeshRenderer = cubeObject.add<duk::renderer::MeshRenderer>();
-    cubeMeshRenderer->mesh = environment.pools()->get<duk::renderer::MeshPool>()->cube();
+    cubeMeshRenderer->mesh = application.pools()->get<duk::renderer::MeshPool>()->cube();
 
-    auto imagePool = environment.pools()->get<duk::renderer::ImagePool>();
-    auto materialPool = environment.pools()->get<duk::renderer::MaterialPool>();
+    auto imagePool = application.pools()->get<duk::renderer::ImagePool>();
+    auto materialPool = application.pools()->get<duk::renderer::MaterialPool>();
 
     // Create a phong material
     duk::renderer::PhongMaterialDataSource phongMaterialDataSource = {};
@@ -149,28 +140,29 @@ int main() {
     cubeRotation->value = glm::radians(glm::vec3(30, 45, 0));
 
     //Show the window we created.
-    environment.window()->show();
+    application.window()->show();
 
     //Creating a timer
     duk::tools::Timer timer;
 
     //Our main loop
-    while (environment.run()) {
+    while (application.run()) {
         timer.start();
 
-        environment.window()->pool_events();
+        application.window()->pool_events();
 
-        while (environment.window()->minimized()) {
-            environment.window()->wait_events();
+        while (application.window()->minimized()) {
+            application.window()->wait_events();
         }
+
+        duk::renderer::update_transforms(objects);
+        duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());
 
         //Rotating the cube in the X value by the timer total duration.
         cubeRotation->value = glm::vec3(timer.total_duration().count(), 45.0f, 0.0f);
 
-        scene->update(&environment);
-
         //Telling to our renderer to render the objects we want.
-        environment.renderer()->render(scene.get());
+        application.renderer()->render(objects);
 
         timer.stop();
     }

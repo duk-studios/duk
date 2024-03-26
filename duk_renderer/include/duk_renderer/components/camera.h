@@ -25,13 +25,13 @@ struct PerspectiveCamera {
     float zFar;
 };
 
-glm::vec3 screen_to_local(const duk::scene::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition);
+glm::vec3 screen_to_local(const duk::objects::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition);
 
-glm::vec3 screen_to_world(const duk::scene::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition);
+glm::vec3 screen_to_world(const duk::objects::Component<Camera>& camera, const glm::vec2& screenSize, const glm::vec3& screenPosition);
 
-void update_camera(const duk::scene::Component<Camera>& camera, const duk::scene::Component<PerspectiveCamera>& perspectiveCamera, uint32_t width, uint32_t height);
+void update_camera(const duk::objects::Component<Camera>& camera, const duk::objects::Component<PerspectiveCamera>& perspectiveCamera, uint32_t width, uint32_t height);
 
-void update_cameras(duk::scene::Objects& objects, uint32_t width, uint32_t height);
+void update_cameras(duk::objects::Objects& objects, uint32_t width, uint32_t height);
 
 }// namespace duk::renderer
 

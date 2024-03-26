@@ -13,7 +13,7 @@
 
 namespace duk {
 
-namespace scene {
+namespace objects {
 class Objects;
 }
 
@@ -63,7 +63,7 @@ public:
     virtual ~Pass();
 
     struct UpdateParams {
-        duk::scene::Objects* objects;
+        duk::objects::Objects* objects;
         GlobalDescriptors* globalDescriptors;
         uint32_t outputWidth;
         uint32_t outputHeight;
