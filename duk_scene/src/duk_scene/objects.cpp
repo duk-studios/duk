@@ -5,7 +5,11 @@
 
 namespace duk::scene {
 
-uint32_t ComponentRegistry::s_componentIndexCounter = 0;
+ComponentRegistry g_componentRegistry;
+
+ComponentRegistry* ComponentRegistry::instance() {
+    return &g_componentRegistry;
+}
 
 const std::string& ComponentRegistry::name_of(uint32_t index) const {
     DUK_ASSERT(m_componentEntries[index] != nullptr);

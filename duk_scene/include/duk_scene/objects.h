@@ -116,7 +116,7 @@ private:
     Objects* m_objects;
 };
 
-class ComponentRegistry : public duk::tools::Singleton<ComponentRegistry> {
+class ComponentRegistry {
 private:
     // Unfortunately we have to duplicate the solve method for each solver type.
     // At the moment I could not think of a more elegant solution, this is not as simple
@@ -163,8 +163,7 @@ private:
     };
 
 public:
-    template<typename T>
-    DUK_NO_DISCARD static uint32_t component_index();
+    static ComponentRegistry* instance();
 
     template<typename Solver>
     void solve(Solver* solver, Object& object, uint32_t componentId) {
@@ -193,34 +192,38 @@ public:
 
     template<typename T>
     void add() {
-        const auto index = component_index<T>();
-        auto& entry = m_componentEntries.at(index);
-        if (entry) {
+        const auto& name = duk::tools::type_name_of<T>();
+        auto it = m_componentNameToIndex.find(name);
+        if (it != m_componentNameToIndex.end()) {
             return;
         }
-        entry = std::make_unique<ComponentEntryT<T>>();
-        m_componentNameToIndex.emplace(duk::tools::type_name_of<T>(), index);
+        const auto index = m_componentIndexCounter++;
+        m_componentEntries.at(index) = std::make_unique<ComponentEntryT<T>>();
+        m_componentNameToIndex.emplace(name, index);
     }
 
     const std::string& name_of(uint32_t index) const;
 
     uint32_t index_of(const std::string& componentTypeName) const;
 
+    template<typename T>
+    uint32_t index_of() const;
+
 private:
-    static uint32_t s_componentIndexCounter;
+    uint32_t m_componentIndexCounter;
     std::array<std::unique_ptr<ComponentEntry>, MAX_COMPONENTS> m_componentEntries;
     std::unordered_map<std::string, uint32_t> m_componentNameToIndex;
 };
 
 template<typename T>
-uint32_t ComponentRegistry::component_index() {
-    static const auto index = s_componentIndexCounter++;
+uint32_t ComponentRegistry::index_of() const {
+    static const uint32_t index = index_of(duk::tools::type_name_of<T>());
     return index;
 }
 
 template<typename T>
 void register_component() {
-    ComponentRegistry::instance(true)->add<T>();
+    ComponentRegistry::instance()->add<T>();
 }
 
 class Objects {
@@ -414,14 +417,15 @@ void Objects::add_component(const Object::Id& id, Args&&... args) {
     DUK_ASSERT(!valid_component<T>(id));
     auto componentPool = pool<T>();
     componentPool->construct(id.index(), std::forward<Args>(args)...);
-    m_componentMasks[id.index()].set(ComponentRegistry::component_index<T>());
+    m_componentMasks[id.index()].set(ComponentRegistry::instance()->index_of<T>());
 }
 
 template<typename T>
 void Objects::remove_component(const Object::Id& id) {
     DUK_ASSERT(valid_component<T>(id));
-    remove_component(id.index(), ComponentRegistry::component_index<T>());
-    m_componentMasks[id.index()].reset(ComponentRegistry::component_index<T>());
+    const auto index = ComponentRegistry::instance()->index_of<T>();
+    remove_component(id.index(), index);
+    m_componentMasks[id.index()].reset(index);
 }
 
 template<typename T>
@@ -443,14 +447,14 @@ bool Objects::valid_component(const Object::Id& id) const {
     if (!valid_object(id)) {
         return false;
     }
-    const auto componentIndex = ComponentRegistry::component_index<T>();
-    return m_componentMasks[id.index()].test(componentIndex);
+    const auto index = ComponentRegistry::instance()->index_of<T>();
+    return m_componentMasks[id.index()].test(index);
 }
 
 template<typename T>
 ComponentPoolT<T>* Objects::pool() {
-    const auto componentIndex = ComponentRegistry::component_index<T>();
-    auto& pool = m_componentPools[componentIndex];
+    const auto index = ComponentRegistry::instance()->index_of<T>();
+    auto& pool = m_componentPools[index];
     if (!pool) {
         pool = std::make_unique<ComponentPoolT<T>>(MAX_OBJECTS);
     }
@@ -479,7 +483,7 @@ Object Objects::first_with() {
 template<typename T>
 ComponentMask Objects::component_mask() {
     ComponentMask mask;
-    mask.set(ComponentRegistry::component_index<T>());
+    mask.set(ComponentRegistry::instance()->index_of<T>());
     return mask;
 }
 
@@ -614,7 +618,7 @@ void solve_resources(Solver* solver, duk::scene::Component<T>& component) {
 
 template<typename Solver>
 void solve_resources(Solver* solver, duk::scene::Object& object) {
-    auto componentRegistry = duk::scene::ComponentRegistry::instance(true);
+    auto componentRegistry = duk::scene::ComponentRegistry::instance();
 
     const auto& componentMask = object.component_mask();
 
