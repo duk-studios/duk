@@ -14,27 +14,33 @@ namespace duk::rhi {
 
 namespace detail {
 
-template<typename InputIterator, typename BufferPredicate, typename ImagePredicate>
-void iterate_descriptors(const InputIterator& begin, const InputIterator& end, BufferPredicate bufferPredicate, ImagePredicate imagePredicate) {
+template<typename InputIterator, typename BufferPredicate, typename ImagePredicate, typename UndefinedPredicate>
+void iterate_descriptors(const InputIterator& begin, const InputIterator& end, BufferPredicate bufferPredicate, ImagePredicate imagePredicate, UndefinedPredicate undefinedPredicate) {
     for (auto it = begin; it != end; it++) {
-        auto& descriptor = *it;
-        auto descriptorType = descriptor.type();
-        if (descriptorType == DescriptorType::UNDEFINED) {
-            continue;
-        }
-
         uint32_t index = std::distance(begin, it);
+        auto& descriptor = *it;
 
+        auto descriptorType = descriptor.type();
         switch (descriptorType) {
+            case DescriptorType::UNDEFINED: {
+                if (!undefinedPredicate(index)) {
+                    return;
+                }
+                break;
+            }
             case DescriptorType::UNIFORM_BUFFER:
             case DescriptorType::STORAGE_BUFFER: {
-                bufferPredicate(dynamic_cast<VulkanBuffer*>(descriptor.buffer()), index, descriptor);
+                if (!bufferPredicate(dynamic_cast<VulkanBuffer*>(descriptor.buffer()), index, descriptor)) {
+                    return;
+                }
                 break;
             }
             case DescriptorType::IMAGE:
             case DescriptorType::STORAGE_IMAGE:
             case DescriptorType::IMAGE_SAMPLER: {
-                imagePredicate(dynamic_cast<VulkanImage*>(descriptor.image()), index, descriptor);
+                if (!imagePredicate(dynamic_cast<VulkanImage*>(descriptor.image()), index, descriptor)) {
+                    return;
+                }
                 break;
             }
             default:
@@ -221,6 +227,8 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
     std::list<VkDescriptorImageInfo> imageInfos;
     std::vector<VkWriteDescriptorSet> writeDescriptors;
 
+    bool hasUndefinedDescriptor = false;
+
     detail::iterate_descriptors(
             m_descriptors.begin(), m_descriptors.end(),
             [&](VulkanBuffer* buffer, uint32_t bindingIndex, const Descriptor& descriptor) {
@@ -239,6 +247,7 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
                 bufferInfos.push_back(bufferInfo);
                 writeDescriptor.pBufferInfo = &bufferInfos.back();
                 writeDescriptors.push_back(writeDescriptor);
+                return true;
             },
             [&](VulkanImage* image, uint32_t bindingIndex, const Descriptor& descriptor) {
                 VkWriteDescriptorSet writeDescriptor = {};
@@ -258,7 +267,17 @@ void VulkanDescriptorSet::update(uint32_t imageIndex) {
                 imageInfos.push_back(imageInfo);
                 writeDescriptor.pImageInfo = &imageInfos.back();
                 writeDescriptors.push_back(writeDescriptor);
+                return true;
+            },
+            [&](uint32_t undefinedBindingIndex) {
+                hasUndefinedDescriptor = true;
+                // return false so we stop iterating our descriptors
+                return false;
             });
+    // do not update if we have an undefined descriptor
+    if (hasUndefinedDescriptor) {
+        return;
+    }
 
     vkUpdateDescriptorSets(m_device, writeDescriptors.size(), writeDescriptors.data(), 0, nullptr);
 }

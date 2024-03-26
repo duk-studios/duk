@@ -12,6 +12,8 @@
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
 #include <duk_rhi/vulkan/vulkan_rhi.h>
 
+#include <duk_log/log.h>
+
 #if DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/window_win_32.h>
 #endif
@@ -59,9 +61,25 @@ static std::vector<const char*> query_instance_extensions(bool hasValidationLaye
     return extensions;
 }
 
+duk::log::Level log_level_from_severity(VkDebugUtilsMessageSeverityFlagBitsEXT severity) {
+    switch (severity) {
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+            return log::Level::VERBOSE;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+            return log::Level::INFO;
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            return log::Level::WARN;
+        default:
+            return log::Level::FATAL;
+    }
+}
+
 static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageTypes, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) {
-    auto debugMessanger = (VulkanDebugMessenger*)pUserData;
-    debugMessanger->log(messageSeverity, messageTypes, pCallbackData);
+    auto logger = (duk::log::Logger*)pUserData;
+    if (!logger) {
+        return VK_FALSE;
+    }
+    logger->print(detail::log_level_from_severity(messageSeverity), "Vulkan validation: {}", std::string(pCallbackData->pMessage));
     return VK_FALSE;
 }
 
@@ -145,6 +163,9 @@ VulkanRHI::~VulkanRHI() {
     vkDestroyDevice(m_device, nullptr);
     if (m_surface) {
         vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+    }
+    if (m_debugMessenger) {
+        vkDestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
     }
     vkDestroyInstance(m_instance, nullptr);
 
@@ -324,20 +345,16 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
     instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
     instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
 
-    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
+    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
     if (hasValidationLayers) {
         instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(detail::s_validationLayers.size());
         instanceCreateInfo.ppEnabledLayerNames = detail::s_validationLayers.data();
 
-        debugCreateInfo = {};
         debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
         debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
         debugCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         debugCreateInfo.pfnUserCallback = detail::debug_callback;
-        debugCreateInfo.pUserData = &m_debugMessenger;
-        m_debugMessenger.enabledMessageTypes = debugCreateInfo.messageType;
-        m_debugMessenger.enabledMessageSeverity = debugCreateInfo.messageSeverity;
-        m_debugMessenger.logger = rendererCreateInfo.logger;
+        debugCreateInfo.pUserData = rendererCreateInfo.logger;
 
         instanceCreateInfo.pNext = &debugCreateInfo;
     } else {
@@ -351,6 +368,16 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& vulkanRendererCrea
     }
 
     volkLoadInstanceOnly(m_instance);
+
+    if (hasValidationLayers) {
+        result = vkCreateDebugUtilsMessengerEXT(m_instance, &debugCreateInfo, nullptr, &m_debugMessenger);
+        if (result != VK_SUCCESS) {
+            // non-critical, just log and proceed
+            if (rendererCreateInfo.logger) {
+                duk::log::warn(rendererCreateInfo.logger, "failed to create vulkan validation layer debug messenger");
+            }
+        }
+    }
 }
 
 void VulkanRHI::select_vk_physical_device(uint32_t deviceIndex) {
