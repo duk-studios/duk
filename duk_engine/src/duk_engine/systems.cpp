@@ -5,7 +5,23 @@
 
 namespace duk::engine {
 
-size_t SystemRegistry::s_entryCounter = 0;
+namespace detail {
+
+SystemRegistry g_systemRegistry;
+
+}
+
+const std::string& SystemRegistry::system_name(size_t systemIndex) const {
+    return m_systemEntries.at(systemIndex)->name();
+}
+
+SystemRegistry* SystemRegistry::instance() {
+    return &detail::g_systemRegistry;
+}
+
+uint32_t SystemRegistry::index_of(const std::string& systemName) {
+    return m_systemNameToIndex.at(systemName);
+}
 
 void SystemRegistry::build(const std::string& systemName, Systems& systems) {
     auto it = m_systemNameToIndex.find(systemName);
@@ -16,10 +32,6 @@ void SystemRegistry::build(const std::string& systemName, Systems& systems) {
     const auto index = it->second;
     auto& entry = m_systemEntries.at(index);
     entry->build(systems);
-}
-
-const std::string& SystemRegistry::system_name(size_t systemIndex) const {
-    return m_systemEntries.at(systemIndex)->name();
 }
 
 Systems::SystemIterator::SystemIterator(Systems& systems, size_t i)
@@ -92,7 +104,7 @@ size_t Systems::system_index(size_t containerIndex) const {
 }
 
 void build_system(const std::string& systemName, Systems& systems) {
-    SystemRegistry::instance(true)->build(systemName, systems);
+    SystemRegistry::instance()->build(systemName, systems);
 }
 
 const std::string& system_name(size_t systemIndex) {

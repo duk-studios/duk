@@ -24,7 +24,7 @@ public:
 
 class Systems;
 
-class SystemRegistry : public duk::tools::Singleton<SystemRegistry> {
+class SystemRegistry {
 private:
     class SystemEntry {
     public:
@@ -44,18 +44,22 @@ private:
     };
 
 public:
-    template<typename T>
-    static size_t index();
+
+    static SystemRegistry* instance();
+
+    uint32_t index_of(const std::string& systemName);
 
     template<typename T>
-    void register_system();
+    uint32_t index_of();
+
+    template<typename T>
+    void add();
 
     void build(const std::string& systemName, Systems& systems);
 
     DUK_NO_DISCARD const std::string& system_name(size_t systemIndex) const;
 
 private:
-    static size_t s_entryCounter;
     std::vector<std::unique_ptr<SystemEntry>> m_systemEntries;
     std::unordered_map<std::string, size_t> m_systemNameToIndex;
 };
@@ -124,28 +128,26 @@ const std::string& SystemRegistry::SystemEntryT<T>::name() {
 }
 
 template<typename T>
-size_t SystemRegistry::index() {
-    static const auto index = s_entryCounter++;
+uint32_t SystemRegistry::index_of() {
+    static const auto index = index_of(duk::tools::type_name_of<T>());
     return index;
 }
 
 template<typename T>
-void SystemRegistry::register_system() {
-    const auto index = SystemRegistry::index<T>();
-    if (m_systemEntries.size() <= index) {
-        m_systemEntries.resize(index + 1);
+void SystemRegistry::add() {
+    const auto& name = duk::tools::type_name_of<T>();
+    auto it = m_systemNameToIndex.find(name);
+    if (it != m_systemNameToIndex.end()) {
+        return;
     }
-
-    auto& entry = m_systemEntries[index];
-    if (!entry) {
-        entry = std::make_unique<SystemEntryT<T>>();
-        m_systemNameToIndex.emplace(duk::tools::type_name_of<T>(), index);
-    }
+    const auto index = m_systemEntries.size();
+    m_systemEntries.emplace_back(std::make_unique<SystemEntryT<T>>());
+    m_systemNameToIndex.emplace(name, index);
 }
 
 template<typename T>
 void Systems::add() {
-    static const auto entryIndex = SystemRegistry::index<T>();
+    static const auto entryIndex = SystemRegistry::instance()->index_of<T>();
     const auto containerIndex = m_container.size();
     if (m_systemIndexToContainerIndex.find(entryIndex) != m_systemIndexToContainerIndex.end()) {
         duk::log::warn("System of same type already exists, skipping");
@@ -158,7 +160,7 @@ void Systems::add() {
 
 template<typename T>
 T* Systems::get() {
-    static const auto entryIndex = SystemRegistry::index<T>();
+    static const auto entryIndex = SystemRegistry::instance()->index_of<T>();
     auto it = m_systemIndexToContainerIndex.find(entryIndex);
     if (it == m_systemIndexToContainerIndex.end()) {
         return nullptr;
@@ -169,7 +171,7 @@ T* Systems::get() {
 
 template<typename T, typename... Args>
 void register_system(Args&&... args) {
-    SystemRegistry::instance(true)->register_system<T>(std::forward<Args>(args)...);
+    SystemRegistry::instance()->add<T>(std::forward<Args>(args)...);
 }
 
 void build_system(const std::string& systemName, Systems& systems);
