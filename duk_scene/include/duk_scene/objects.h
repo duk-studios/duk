@@ -19,6 +19,12 @@
 
 namespace duk::scene {
 
+namespace detail {
+
+static constexpr uint32_t kComponentsPerChunk = 32;
+
+}
+
 class Objects;
 
 template<typename T>
@@ -456,7 +462,7 @@ ComponentPoolT<T>* Objects::pool() {
     const auto index = ComponentRegistry::instance()->index_of<T>();
     auto& pool = m_componentPools[index];
     if (!pool) {
-        pool = std::make_unique<ComponentPoolT<T>>(MAX_OBJECTS);
+        pool = std::make_unique<ComponentPoolT<T>>(detail::kComponentsPerChunk);
     }
 
     auto componentPool = dynamic_cast<ComponentPoolT<T>*>(pool.get());

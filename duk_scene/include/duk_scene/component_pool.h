@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <utility>
+#include <vector>
 
 namespace duk::scene {
 
@@ -23,7 +24,7 @@ public:
 template<typename T>
 class ComponentPoolT : public ComponentPool {
 public:
-    explicit ComponentPoolT(uint32_t componentCount);
+    explicit ComponentPoolT(uint32_t componentsPerChunk);
 
     ~ComponentPoolT() override;
 
@@ -37,24 +38,22 @@ public:
     DUK_NO_DISCARD const T* get(uint32_t index) const;
 
 private:
-    uint32_t m_componentCount;
-    T* m_components;
-    uint32_t m_allocationCount;
+    uint32_t m_componentsPerChunk;
+    mutable std::vector<T*> m_chunks;
 };
 
 // Implementations //
 
 template<typename T>
-ComponentPoolT<T>::ComponentPoolT(uint32_t componentCount)
-    : m_componentCount(componentCount)
-    , m_components((T*)malloc(componentCount * sizeof(T)))
-    , m_allocationCount(0) {
+ComponentPoolT<T>::ComponentPoolT(uint32_t componentsPerChunk)
+    : m_componentsPerChunk(componentsPerChunk) {
 }
 
 template<typename T>
 ComponentPoolT<T>::~ComponentPoolT() {
-    assert(m_allocationCount == 0);
-    free(m_components);
+    for (auto& chunk: m_chunks) {
+        free(chunk);
+    }
 }
 
 template<typename T>
@@ -62,26 +61,40 @@ template<typename... Args>
 void ComponentPoolT<T>::construct(uint32_t index, Args&&... args) {
     auto ptr = get(index);
     ::new (ptr) T(std::forward<Args>(args)...);
-    m_allocationCount++;
 }
 
 template<typename T>
 void ComponentPoolT<T>::destruct(uint32_t index) {
     auto ptr = get(index);
     ptr->~T();
-    m_allocationCount--;
 }
 
 template<typename T>
 T* ComponentPoolT<T>::get(uint32_t index) {
-    assert(index < m_componentCount);
-    return m_components + index;
+    const uint32_t chunkIndex = index / m_componentsPerChunk;
+    const uint32_t indexInChunk = index % m_componentsPerChunk;
+    if (chunkIndex >= m_chunks.size()) {
+        m_chunks.resize(chunkIndex + 1, nullptr);
+    }
+    auto& chunk = m_chunks[chunkIndex];
+    if (!chunk) {
+        chunk = (T*)malloc(sizeof(T) * m_componentsPerChunk);
+    }
+    return chunk + indexInChunk;
 }
 
 template<typename T>
 const T* ComponentPoolT<T>::get(uint32_t index) const {
-    assert(index < m_componentCount);
-    return m_components + index;
+    const uint32_t chunkIndex = index / m_componentsPerChunk;
+    const uint32_t indexInChunk = index % m_componentsPerChunk;
+    if (chunkIndex >= m_chunks.size()) {
+        m_chunks.resize(chunkIndex + 1, nullptr);
+    }
+    auto& chunk = m_chunks[chunkIndex];
+    if (!chunk) {
+        chunk = (T*)malloc(sizeof(T) * m_componentsPerChunk);
+    }
+    return m_chunks[chunkIndex] + indexInChunk;
 }
 
 }// namespace duk::scene
