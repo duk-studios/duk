@@ -4,9 +4,9 @@
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/mesh_renderer.h>
-#include <duk_renderer/components/register_types.h>
 #include <duk_renderer/components/sprite_renderer.h>
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/register_types.h>
 
 namespace duk::renderer {
 

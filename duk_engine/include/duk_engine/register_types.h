@@ -7,7 +7,7 @@
 
 namespace duk::engine {
 
-void register_types();
+extern void register_types();
 
 }
 

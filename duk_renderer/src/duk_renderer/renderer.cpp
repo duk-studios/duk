@@ -2,7 +2,6 @@
 /// renderer.cpp
 
 #include <duk_platform/window.h>
-#include <duk_renderer/components/register_types.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/passes/present_pass.h>
@@ -40,8 +39,6 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
         m_globalDescriptors = std::make_unique<GlobalDescriptors>(globalDescriptorsCreateInfo);
     }
-
-    register_types();
 }
 
 Renderer::~Renderer() = default;

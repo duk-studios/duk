@@ -4,7 +4,6 @@
 
 #include <duk_engine/engine.h>
 #include <duk_engine/resources/scene/scene_importer.h>
-#include <duk_engine/systems/register_types.h>
 
 #include <duk_import/audio/audio_clip_importer.h>
 #include <duk_import/image/image_importer.h>
@@ -25,8 +24,6 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     : m_run(false)
     , m_workingDirectory(engineCreateInfo.workingDirectory) {
     duk::platform::System::create();
-
-    register_types();
 
     const auto settingsPath = m_workingDirectory / ".duk/settings.json";
     m_settings = load_settings(settingsPath.string());
