@@ -8,7 +8,6 @@
 #include <duk_rhi/rhi.h>
 #include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 #include <duk_rhi/vulkan/command/vulkan_command_scheduler.h>
-#include <duk_rhi/vulkan/vulkan_debug_messenger.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_events.h>
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
@@ -85,6 +84,7 @@ private:
 
 private:
     VkInstance m_instance;
+    VkDebugUtilsMessengerEXT m_debugMessenger;
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;
     std::unique_ptr<VulkanRendererCapabilities> m_rendererCapabilities;
     VkSurfaceKHR m_surface;
@@ -95,8 +95,6 @@ private:
     std::unique_ptr<VulkanDescriptorSetLayoutCache> m_descriptorSetLayoutCache;
     std::unique_ptr<VulkanSamplerCache> m_samplerCache;
     std::unique_ptr<VulkanCommandScheduler> m_commandScheduler;
-
-    VulkanDebugMessenger m_debugMessenger;
     std::unordered_map<CommandQueue::Type::Mask, uint32_t> m_queueFamilyIndices;
 
     uint32_t m_currentFrame;

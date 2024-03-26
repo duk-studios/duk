@@ -49,8 +49,6 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_sampler.cpp
         src/duk_rhi/vulkan/command/vulkan_command_queue.h
         src/duk_rhi/vulkan/command/vulkan_command_queue.cpp
-        src/duk_rhi/vulkan/vulkan_debug_messenger.h
-        src/duk_rhi/vulkan/vulkan_debug_messenger.cpp
         src/duk_rhi/vulkan/vulkan_import.h
         src/duk_rhi/vulkan/vulkan_import.cpp
         src/duk_rhi/vulkan/vulkan_physical_device.h
