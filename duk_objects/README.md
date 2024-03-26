@@ -1,10 +1,10 @@
-# duk_scene
+# duk_objects
 - Defines a data-oriented scene composed of objects and components.
 - Each object is simply an id which is used to access its components.
 
 # Usage
 ```cpp
-#include <duk_scene/scene.h>
+#include <duk_objects/scene.h>
 #include <iostream>
 
 //Creating components 

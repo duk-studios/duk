@@ -1,8 +1,8 @@
 /// 06/07/2023
 /// limits.h
 
-#ifndef DUK_SCENE_LIMITS_H
-#define DUK_SCENE_LIMITS_H
+#ifndef DUK_OBJECTS_LIMITS_H
+#define DUK_OBJECTS_LIMITS_H
 
 #include <cstdint>
 
@@ -15,4 +15,4 @@ enum Limits : uint64_t {
 
 }// namespace duk::scene
 
-#endif// DUK_SCENE_LIMITS_H
+#endif// DUK_OBJECTS_LIMITS_H

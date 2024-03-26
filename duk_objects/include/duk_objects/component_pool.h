@@ -1,8 +1,8 @@
 /// 06/07/2023
 /// component.h
 
-#ifndef DUK_SCENE_COMPONENT_H
-#define DUK_SCENE_COMPONENT_H
+#ifndef DUK_OBJECTS_COMPONENT_H
+#define DUK_OBJECTS_COMPONENT_H
 
 #include <duk_macros/macros.h>
 
@@ -99,4 +99,4 @@ const T* ComponentPoolT<T>::get(uint32_t index) const {
 
 }// namespace duk::scene
 
-#endif// DUK_SCENE_COMPONENT_H
+#endif// DUK_OBJECTS_COMPONENT_H

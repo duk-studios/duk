@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_INSTANCE_BUFFER_H
 #define DUK_RENDERER_INSTANCE_BUFFER_H
 
-#include <duk_scene/objects.h>
+#include <duk_objects/objects.h>
 
 namespace duk::renderer {
 

@@ -4,8 +4,8 @@
 #ifndef DUK_RENDERER_TRANSFORM_H
 #define DUK_RENDERER_TRANSFORM_H
 
-#include <duk_scene/objects.h>
-#include <duk_scene/systems.h>
+#include <duk_objects/objects.h>
+#include <duk_objects/systems.h>
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/matrix.hpp>

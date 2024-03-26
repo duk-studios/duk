@@ -1,16 +1,16 @@
 /// 06/07/2023
 /// scene.h
 
-#ifndef DUK_SCENE_OBJECTS_H
-#define DUK_SCENE_OBJECTS_H
+#ifndef DUK_OBJECTS_OBJECTS_H
+#define DUK_OBJECTS_OBJECTS_H
 
 #include <array>
 #include <duk_log/log.h>
 #include <duk_macros/assert.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
-#include <duk_scene/component_pool.h>
-#include <duk_scene/limits.h>
+#include <duk_objects/component_pool.h>
+#include <duk_objects/limits.h>
 #include <duk_serial/json_serializer.h>
 #include <duk_tools/bit_block.h>
 #include <duk_tools/fixed_vector.h>
@@ -642,4 +642,4 @@ void solve_resources(Solver* solver, duk::scene::Objects& objects) {
 
 }// namespace duk::resource
 
-#endif// DUK_SCENE_OBJECTS_H
+#endif// DUK_OBJECTS_OBJECTS_H

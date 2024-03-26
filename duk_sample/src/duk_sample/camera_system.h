@@ -7,8 +7,8 @@
 
 #include <duk_audio/audio_clip.h>
 #include <duk_audio/audio_player.h>
-#include <duk_scene/objects.h>
-#include <duk_scene/systems.h>
+#include <duk_objects/objects.h>
+#include <duk_objects/systems.h>
 
 namespace duk::sample {
 

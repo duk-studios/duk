@@ -6,7 +6,7 @@
 #define DUK_RENDERER_ENVIRONMENT_H
 
 #include <duk_platform/window.h>
-#include <duk_scene/systems.h>
+#include <duk_objects/systems.h>
 
 namespace duk::renderer {
 

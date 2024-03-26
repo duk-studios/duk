@@ -7,7 +7,7 @@
 #include <duk_renderer/renderer.h>
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/index_types.h>
-#include <duk_scene/objects.h>
+#include <duk_objects/objects.h>
 #include <duk_tools/fixed_vector.h>
 
 #include <numbers>

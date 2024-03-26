@@ -2,7 +2,7 @@
 // Created by Ricardo on 20/07/2023.
 //
 
-#include <duk_scene/scene.h>
+#include <duk_objects/scene.h>
 #include <iostream>
 
 struct TestData {

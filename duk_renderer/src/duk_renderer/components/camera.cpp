@@ -5,7 +5,7 @@
 #include <duk_renderer/components/environment.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/renderer.h>
-#include <duk_scene/objects.h>
+#include <duk_objects/objects.h>
 #include <glm/ext/matrix_clip_space.hpp>
 
 namespace duk::renderer {

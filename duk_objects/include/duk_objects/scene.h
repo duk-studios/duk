@@ -1,11 +1,11 @@
 /// 21/02/2024
 /// scene.h
 
-#ifndef DUK_SCENE_SCENE_H
-#define DUK_SCENE_SCENE_H
+#ifndef DUK_OBJECTS_SCENE_H
+#define DUK_OBJECTS_SCENE_H
 
-#include <duk_scene/objects.h>
-#include <duk_scene/systems.h>
+#include <duk_objects/objects.h>
+#include <duk_objects/systems.h>
 
 namespace duk::scene {
 
@@ -53,4 +53,4 @@ void solve_resources(Solver* solver, duk::scene::Scene& scene) {
 
 }// namespace duk::resource
 
-#endif// DUK_SCENE_SCENE_H
+#endif// DUK_OBJECTS_SCENE_H

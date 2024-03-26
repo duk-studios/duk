@@ -1,10 +1,10 @@
 project(duk_serial_test)
 
-set(DUK_SCENE_TEST_SOURCES
+set(DUK_OBJECTS_TEST_SOURCES
         main.cpp
 )
 
-add_executable(duk_serial_test ${DUK_SCENE_TEST_SOURCES})
+add_executable(duk_serial_test ${DUK_OBJECTS_TEST_SOURCES})
 
 target_include_directories(duk_serial_test
         PRIVATE

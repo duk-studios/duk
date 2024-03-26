@@ -8,7 +8,7 @@
 #include <duk_rhi/rhi.h>
 #include <duk_renderer/brushes/mesh.h>
 #include <duk_platform/window.h>
-#include <duk_scene/scene.h>
+#include <duk_objects/scene.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>

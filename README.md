@@ -13,7 +13,7 @@ There are many modules, each one exposing a specific set of features:
 - [duk_log](./duk_log/README.md):
 - [duk_resource](duk_resource/README.md):
 - [duk_rhi](./duk_rhi/README.md):
-- [duk_scene](./duk_scene/README.md):
+- [duk_objects](./duk_objects/README.md):
 - [duk_renderer](./duk_renderer/README.md):
 - [duk_import](./duk_import/README.md):
 - [duk_engine](./duk_engine/README.md):

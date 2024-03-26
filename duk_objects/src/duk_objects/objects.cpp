@@ -1,7 +1,7 @@
 /// 06/07/2023
 /// scene.cpp
 
-#include <duk_scene/objects.h>
+#include <duk_objects/objects.h>
 
 namespace duk::scene {
 

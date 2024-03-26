@@ -6,7 +6,7 @@
 #define DUK_IMPORT_SCENE_IMPORTER_H
 
 #include <duk_import/resource_importer.h>
-#include <duk_scene/scene_pool.h>
+#include <duk_objects/scene_pool.h>
 #include <filesystem>
 
 namespace duk::import {

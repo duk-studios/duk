@@ -1,10 +1,10 @@
 /// 21/02/2024
 /// system.h
 
-#ifndef DUK_SCENE_SYSTEMS_H
-#define DUK_SCENE_SYSTEMS_H
+#ifndef DUK_OBJECTS_SYSTEMS_H
+#define DUK_OBJECTS_SYSTEMS_H
 
-#include <duk_scene/objects.h>
+#include <duk_objects/objects.h>
 #include <duk_tools/types.h>
 
 namespace duk::scene {
@@ -214,4 +214,4 @@ inline void write_array(JsonWriter* writer, duk::scene::Systems& systems) {
 
 }// namespace duk::serial
 
-#endif// DUK_SCENE_SYSTEMS_H
+#endif// DUK_OBJECTS_SYSTEMS_H

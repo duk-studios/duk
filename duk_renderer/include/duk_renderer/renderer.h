@@ -6,7 +6,7 @@
 
 #include <duk_log/logger.h>
 #include <duk_rhi/rhi.h>
-#include <duk_scene/scene.h>
+#include <duk_objects/scene.h>
 
 namespace duk {
 

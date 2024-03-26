@@ -18,7 +18,7 @@
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/sprite_pool.h>
 
-#include <duk_scene/scene_pool.h>
+#include <duk_objects/scene_pool.h>
 
 namespace duk::engine {
 

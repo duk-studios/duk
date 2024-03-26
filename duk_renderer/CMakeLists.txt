@@ -115,7 +115,7 @@ target_include_directories(duk_renderer
 
 target_link_libraries(duk_renderer
         PUBLIC
-        duk_scene
+        duk_objects
         duk_rhi
         duk_resource
         )

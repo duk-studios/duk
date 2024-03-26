@@ -15,7 +15,7 @@
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_rhi/rhi.h>
-#include <duk_scene/scene.h>
+#include <duk_objects/scene.h>
 #include <duk_tools/timer.h>
 #include <iostream>
 
