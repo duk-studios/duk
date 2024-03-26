@@ -41,7 +41,6 @@ struct ComponentTest3 {
     }
 };
 
-
 namespace duk::serial {
 
 template<typename JsonVisitor>
@@ -68,7 +67,6 @@ void visit_object(JsonVisitor* visitor, ComponentTest3& componentTest) {
 }// namespace duk::serial
 
 int main() {
-
     // register our component types
     duk::objects::register_component<ComponentTest>();
     duk::objects::register_component<ComponentTest2>();

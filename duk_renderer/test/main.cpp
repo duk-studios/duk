@@ -18,7 +18,7 @@
 #include <duk_tools/timer.h>
 #include <iostream>
 
-class Application  {
+class Application {
 public:
     Application() {
         duk::platform::WindowCreateInfo windowCreateInfo = {"RendererWindow", 640, 720};

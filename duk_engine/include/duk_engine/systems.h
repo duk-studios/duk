@@ -44,7 +44,6 @@ private:
     };
 
 public:
-
     static SystemRegistry* instance();
 
     uint32_t index_of(const std::string& systemName);

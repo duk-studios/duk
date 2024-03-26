@@ -7,7 +7,6 @@
 #include <duk_log/log.h>
 
 int main() {
-
     duk::sample::ApplicationCreateInfo applicationCreateInfo = {};
     applicationCreateInfo.engineWorkingDirectory = ".";
 

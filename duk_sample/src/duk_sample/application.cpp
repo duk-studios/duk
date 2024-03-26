@@ -1,9 +1,9 @@
 /// 03/06/2023
 /// application.cpp
 
+#include <duk_engine/register_types.h>
 #include <duk_sample/application.h>
 #include <duk_sample/camera_system.h>
-#include <duk_engine/register_types.h>
 
 namespace duk::sample {
 
@@ -15,10 +15,9 @@ static void register_types() {
     duk::engine::register_system<CameraSystem>();
 }
 
-}
+}// namespace detail
 
 Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
-
     detail::register_types();
 
     duk::engine::EngineCreateInfo engineCreateInfo = {};
