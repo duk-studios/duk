@@ -1,8 +1,8 @@
 //
 // Created by Ricardo on 23/03/2024.
 //
-#include <duk_audio/audio_clip.h>
 #include <duk_audio/audio_device.h>
+#include <duk_audio/clip/audio_clip.h>
 #include <duk_audio/miniaudio/miniaudio_device.h>
 
 namespace duk::audio {
