@@ -9,11 +9,11 @@
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
-#include <duk_renderer/pools/image_pool.h>
-#include <duk_renderer/pools/material_pool.h>
-#include <duk_renderer/pools/mesh_pool.h>
+#include <duk_renderer/image/image_pool.h>
+#include <duk_renderer/material/globals/global_descriptors.h>
+#include <duk_renderer/material/material_pool.h>
+#include <duk_renderer/mesh/mesh_pool.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_rhi/rhi.h>
 #include <duk_tools/timer.h>
 #include <iostream>

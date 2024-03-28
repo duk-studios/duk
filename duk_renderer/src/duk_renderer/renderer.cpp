@@ -2,11 +2,11 @@
 /// renderer.cpp
 
 #include <duk_platform/window.h>
+#include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/passes/present_pass.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/resources/materials/globals/global_descriptors.h>
 #include <duk_rhi/image_data_source.h>
 
 namespace duk::renderer {

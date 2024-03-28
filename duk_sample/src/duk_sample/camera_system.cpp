@@ -5,9 +5,7 @@
 #include <duk_engine/engine.h>
 #include <duk_platform/systems.h>
 #include <duk_renderer/components/camera.h>
-#include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
-#include <duk_renderer/pools/material_pool.h>
 #include <duk_sample/camera_system.h>
 
 namespace duk::sample {

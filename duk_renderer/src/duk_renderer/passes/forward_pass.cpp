@@ -2,14 +2,14 @@
 /// forward_pass.cpp
 
 #include "duk_renderer/components/transform.h"
-#include <duk_renderer/brushes/mesh.h>
-#include <duk_renderer/brushes/sprite_brush.h>
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/sprite_renderer.h>
+#include <duk_renderer/material/material.h>
+#include <duk_renderer/material/pipeline.h>
+#include <duk_renderer/mesh/mesh.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/resources/materials/material.h>
-#include <duk_renderer/resources/materials/pipeline.h>
+#include <duk_renderer/sprite/sprite_brush.h>
 
 namespace duk::renderer {
 

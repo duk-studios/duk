@@ -9,11 +9,10 @@
 
 #include <duk_audio/clip/audio_clip_importer.h>
 
-#include <duk_renderer/pools/image_pool.h>
-#include <duk_renderer/pools/mesh_pool.h>
-#include <duk_renderer/pools/sprite_pool.h>
-#include <duk_renderer/resources/image_importer.h>
-#include <duk_renderer/resources/materials/material_importer.h>
+#include <duk_renderer/image/image_importer.h>
+#include <duk_renderer/material/material_importer.h>
+#include <duk_renderer/mesh/mesh_pool.h>
+#include <duk_renderer/sprite/sprite_pool.h>
 
 #include <duk_log/log.h>
 

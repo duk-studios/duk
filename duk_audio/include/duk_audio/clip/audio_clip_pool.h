@@ -5,8 +5,8 @@
 #ifndef DUK_AUDIO_AUDIO_CLIP_POOL_H
 #define DUK_AUDIO_AUDIO_CLIP_POOL_H
 
-#include <duk_audio/clip/audio_clip.h>
 #include <duk_audio/audio_device.h>
+#include <duk_audio/clip/audio_clip.h>
 
 #include <duk_resource/pool.h>
 
