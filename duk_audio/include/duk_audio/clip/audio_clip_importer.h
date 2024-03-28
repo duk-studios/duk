@@ -7,7 +7,7 @@
 
 #include <duk_resource/importer.h>
 
-#include <duk_audio/audio_clip_pool.h>
+#include <duk_audio/clip/audio_clip_pool.h>
 
 namespace duk::audio {
 

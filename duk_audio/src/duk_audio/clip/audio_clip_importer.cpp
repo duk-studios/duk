@@ -2,7 +2,7 @@
 // Created by Ricardo on 25/03/2024.
 //
 
-#include <duk_audio/audio_clip_importer.h>
+#include <duk_audio/clip/audio_clip_importer.h>
 
 #include <duk_tools/file.h>
 
