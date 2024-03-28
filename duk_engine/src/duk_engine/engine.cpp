@@ -5,18 +5,17 @@
 #include <duk_engine/engine.h>
 #include <duk_engine/resources/scene/scene_importer.h>
 
-#include <duk_import/audio/audio_clip_importer.h>
-#include <duk_import/image/image_importer.h>
-#include <duk_import/importer.h>
-#include <duk_import/material/material_importer.h>
-
-#include <duk_log/log.h>
-
-#include <duk_platform/systems.h>
+#include <duk_audio/audio_clip_importer.h>
 
 #include <duk_renderer/pools/image_pool.h>
 #include <duk_renderer/pools/mesh_pool.h>
 #include <duk_renderer/pools/sprite_pool.h>
+#include <duk_renderer/resources/image_importer.h>
+#include <duk_renderer/resources/materials/material_importer.h>
+
+#include <duk_log/log.h>
+
+#include <duk_platform/systems.h>
 
 namespace duk::engine {
 
@@ -63,9 +62,9 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     }
 
     {
-        duk::import::ImporterCreateInfo importerCreateInfo = {};
+        duk::resource::ImporterCreateInfo importerCreateInfo = {};
         importerCreateInfo.pools = &m_pools;
-        m_importer = std::make_unique<duk::import::Importer>(importerCreateInfo);
+        m_importer = std::make_unique<duk::resource::Importer>(importerCreateInfo);
 
         m_importer->load_resource_set(m_workingDirectory / "resources");
     }
@@ -77,10 +76,10 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         imagePoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
 
-        duk::import::ImageImporterCreateInfo imageImporterCreateInfo = {};
+        duk::renderer::ImageImporterCreateInfo imageImporterCreateInfo = {};
         imageImporterCreateInfo.rhiCapabilities = m_renderer->rhi()->capabilities();
         imageImporterCreateInfo.imagePool = m_pools.get<duk::renderer::ImagePool>();
-        m_importer->add_resource_importer<duk::import::ImageImporter>(imageImporterCreateInfo);
+        m_importer->add_resource_importer<duk::renderer::ImageImporter>(imageImporterCreateInfo);
     }
 
     // materials
@@ -89,9 +88,9 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         materialPoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
 
-        duk::import::MaterialImporterCreateInfo materialImporterCreateInfo = {};
+        duk::renderer::MaterialImporterCreateInfo materialImporterCreateInfo = {};
         materialImporterCreateInfo.materialPool = m_pools.get<duk::renderer::MaterialPool>();
-        m_importer->add_resource_importer<duk::import::MaterialImporter>(materialImporterCreateInfo);
+        m_importer->add_resource_importer<duk::renderer::MaterialImporter>(materialImporterCreateInfo);
     }
 
     // meshes
@@ -123,10 +122,10 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
         auto audioClipPool = m_pools.create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
 
-        duk::import::AudioClipImporterCreateInfo audioClipImporterCreateInfo = {};
+        duk::audio::AudioClipImporterCreateInfo audioClipImporterCreateInfo = {};
         audioClipImporterCreateInfo.audioClipPool = audioClipPool;
 
-        m_importer->add_resource_importer<duk::import::AudioClipImporter>(audioClipImporterCreateInfo);
+        m_importer->add_resource_importer<duk::audio::AudioClipImporter>(audioClipImporterCreateInfo);
     }
 
     // director
@@ -196,7 +195,7 @@ duk::resource::Pools* Engine::pools() {
     return &m_pools;
 }
 
-duk::import::Importer* Engine::importer() {
+duk::resource::Importer* Engine::importer() {
     return m_importer.get();
 }
 

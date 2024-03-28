@@ -5,18 +5,19 @@
 #ifndef DUK_MATERIAL_IMPORTER_H
 #define DUK_MATERIAL_IMPORTER_H
 
-#include <duk_import/resource_importer.h>
+#include <duk_resource/importer.h>
+
 #include <duk_renderer/pools/material_pool.h>
 
 #include <filesystem>
 
-namespace duk::import {
+namespace duk::renderer {
 
 struct MaterialImporterCreateInfo {
-    duk::renderer::MaterialPool* materialPool;
+    MaterialPool* materialPool;
 };
 
-class MaterialImporter : public ResourceImporterT<std::unique_ptr<duk::renderer::MaterialDataSource>> {
+class MaterialImporter : public duk::resource::ResourceImporter {
 public:
     explicit MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo);
 
@@ -29,9 +30,9 @@ public:
     void solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) override;
 
 private:
-    duk::renderer::MaterialPool* m_materialPool;
+    MaterialPool* m_materialPool;
 };
 
-}// namespace duk::import
+}// namespace duk::renderer
 
 #endif//DUK_MATERIAL_IMPORTER_H

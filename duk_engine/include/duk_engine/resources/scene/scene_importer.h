@@ -7,7 +7,7 @@
 
 #include <duk_engine/resources/scene/scene_pool.h>
 
-#include <duk_import/resource_importer.h>
+#include <duk_resource/importer.h>
 
 #include <filesystem>
 
@@ -17,7 +17,7 @@ struct SceneImporterCreateInfo {
     ScenePool* scenePool;
 };
 
-class SceneImporter : public duk::import::ResourceImporter {
+class SceneImporter : public duk::resource::ResourceImporter {
 public:
     SceneImporter(const SceneImporterCreateInfo& sceneImporterCreateInfo);
 

@@ -1,8 +1,8 @@
 /// 12/11/2023
 /// pixel.h
 
-#ifndef DUK_IMPORT_PIXEL_H
-#define DUK_IMPORT_PIXEL_H
+#ifndef DUK_RHI_PIXEL_H
+#define DUK_RHI_PIXEL_H
 
 #include <duk_hash/hash.h>
 #include <duk_macros/macros.h>
@@ -209,4 +209,4 @@ struct hash<duk::rhi::PixelFormat> {
 };
 
 }// namespace std
-#endif// DUK_IMPORT_PIXEL_H
+#endif// DUK_RHI_PIXEL_H

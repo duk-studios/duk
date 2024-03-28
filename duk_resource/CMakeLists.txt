@@ -3,6 +3,7 @@ project(duk_resource)
 set(DUK_RESOURCE_HEADERS
         include/duk_resource/resource.h
         include/duk_resource/pool.h
+        include/duk_resource/importer.h
         include/duk_resource/solver/reference_solver.h
         include/duk_resource/solver/dependency_solver.h
         include/duk_resource/solver/solver.h
@@ -10,6 +11,7 @@ set(DUK_RESOURCE_HEADERS
 set(DUK_RESOURCE_SOURCES
         src/duk_resource/resource.cpp
         src/duk_resource/pool.cpp
+        src/duk_resource/importer.cpp
         src/duk_resource/solver/reference_solver.cpp
         src/duk_resource/solver/dependency_solver.cpp
         )

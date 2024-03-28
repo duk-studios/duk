@@ -1,11 +1,11 @@
 /// 12/11/2023
 /// image_importer.cpp
 
-#include <duk_import/image/image_importer.h>
-#include <duk_import/image/image_loader_stb.h>
 #include <duk_renderer/pools/image_pool.h>
+#include <duk_renderer/resources/image_importer.h>
+#include <duk_renderer/resources/image_loader_stb.h>
 
-namespace duk::import {
+namespace duk::renderer {
 
 std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height) {
     switch (format) {
@@ -38,7 +38,7 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* dat
 
 ImageImporter::ImageImporter(const ImageImporterCreateInfo& imageImporterCreateInfo)
     : m_imagePool(imageImporterCreateInfo.imagePool) {
-    add_loader<ImageLoaderStb>(imageImporterCreateInfo.rhiCapabilities);
+    m_loaders.emplace_back(std::make_unique<ImageLoaderStb>(imageImporterCreateInfo.rhiCapabilities));
 }
 
 const std::string& ImageImporter::tag() const {
@@ -47,8 +47,14 @@ const std::string& ImageImporter::tag() const {
 }
 
 void ImageImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
-    auto dataSource = ResourceImporterT<std::unique_ptr<duk::rhi::ImageDataSource>>::load(path);
-    m_imagePool->create(id, dataSource.get());
+    for (auto& loader: m_loaders) {
+        if (loader->accepts(path)) {
+            auto dataSource = loader->load(path);
+            m_imagePool->create(id, dataSource.get());
+            return;
+        }
+    }
+    throw std::runtime_error(fmt::format("failed to find suitable image loader for ({})", path.string()));
 }
 
-}// namespace duk::import
+}// namespace duk::renderer

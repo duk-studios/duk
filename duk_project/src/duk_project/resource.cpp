@@ -4,8 +4,7 @@
 #include <duk_project/project.h>
 #include <duk_project/resource.h>
 
-#include <duk_import/importer.h>
-#include <duk_import/resource_set_importer.h>
+#include <duk_resource/importer.h>
 #include <duk_tools/file.h>
 
 #include <fmt/format.h>
@@ -60,7 +59,7 @@ static bool has_resource_id(const Project* project, const duk::resource::Id& id)
 static duk::resource::Id resource_id_generate(const Project* project) {
     static std::random_device rd;
     static std::mt19937 gen(rd());// mersenne_twister_engine seeded with rd()
-    static std::uniform_int_distribution<uint64_t> distrib(duk::import::kMaxBuiltInResourceId.value() + 1, std::numeric_limits<uint64_t>::max());
+    static std::uniform_int_distribution<uint64_t> distrib(duk::resource::kMaxBuiltInResourceId.value() + 1, std::numeric_limits<uint64_t>::max());
 
     auto id = duk::resource::Id(distrib(gen));
     while (has_resource_id(project, id)) {
@@ -72,11 +71,11 @@ static duk::resource::Id resource_id_generate(const Project* project) {
     return id;
 }
 
-static duk::import::ResourceDescription read_resource_description(const std::filesystem::path& path) {
+static duk::resource::ResourceDescription read_resource_description(const std::filesystem::path& path) {
     auto json = duk::tools::File::load_text(path.string().c_str());
     duk::serial::JsonReader reader(json.c_str());
 
-    duk::import::ResourceDescription resourceDescription = {};
+    duk::resource::ResourceDescription resourceDescription = {};
     reader.visit(resourceDescription);
 
     return resourceDescription;
@@ -136,7 +135,7 @@ void resource_track(Project* project, const std::filesystem::path& resource) {
         throw std::invalid_argument(fmt::format("resource \"{}\" is not a resource", resource.string()));
     }
 
-    duk::import::ResourceDescription resourceDescription = {};
+    duk::resource::ResourceDescription resourceDescription = {};
     resourceDescription.file = std::filesystem::relative(resource, resource.parent_path()).string();
     resourceDescription.tag = detail::resource_tag(extension);
     resourceDescription.id = detail::resource_id_generate(project);

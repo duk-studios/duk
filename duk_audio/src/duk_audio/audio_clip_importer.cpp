@@ -2,10 +2,11 @@
 // Created by Ricardo on 25/03/2024.
 //
 
-#include <duk_import/audio/audio_clip_importer.h>
+#include <duk_audio/audio_clip_importer.h>
+
 #include <duk_tools/file.h>
 
-namespace duk::import {
+namespace duk::audio {
 
 AudioClipImporter::AudioClipImporter(const AudioClipImporterCreateInfo& audioClipImporterCreateInfo)
     : m_audioClipPool(audioClipImporterCreateInfo.audioClipPool) {
@@ -23,4 +24,4 @@ void AudioClipImporter::load(const duk::resource::Id& id, const std::filesystem:
     m_audioClipPool->create(id, duk::tools::File::load_bytes(path.string().c_str()));
 }
 
-}// namespace duk::import
+}// namespace duk::audio

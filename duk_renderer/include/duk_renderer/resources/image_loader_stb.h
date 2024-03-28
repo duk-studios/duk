@@ -1,15 +1,16 @@
 /// 12/11/2023
 /// image_importer_stb.h
 
-#ifndef DUK_IMPORT_IMAGE_IMPORTER_STB_H
-#define DUK_IMPORT_IMAGE_IMPORTER_STB_H
+#ifndef DUK_RENDERER_IMAGE_IMPORTER_STB_H
+#define DUK_RENDERER_IMAGE_IMPORTER_STB_H
 
-#include <duk_import/image/image_importer.h>
+#include <duk_renderer/resources/image_importer.h>
+
 #include <duk_rhi/rhi_capabilities.h>
 
-namespace duk::import {
+namespace duk::renderer {
 
-class ImageLoaderStb : public ResourceLoader<std::unique_ptr<duk::rhi::ImageDataSource>> {
+class ImageLoaderStb : public ImageLoader {
 public:
     ImageLoaderStb(const duk::rhi::RHICapabilities* rhiCapabilities);
 
@@ -21,6 +22,6 @@ private:
     const duk::rhi::RHICapabilities* m_rhiCapabilities;
 };
 
-}// namespace duk::import
+}// namespace duk::renderer
 
-#endif// DUK_IMPORT_IMAGE_IMPORTER_STB_H
+#endif// DUK_RENDERER_IMAGE_IMPORTER_STB_H

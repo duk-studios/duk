@@ -1,7 +1,7 @@
 /// 12/11/2023
 /// image_importer_stb.cpp
 
-#include <duk_import/image/image_loader_stb.h>
+#include <duk_renderer/resources/image_loader_stb.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -9,7 +9,7 @@
 #include <fstream>
 #include <stdexcept>
 
-namespace duk::import {
+namespace duk::renderer {
 
 namespace detail {
 
@@ -88,4 +88,4 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageLoaderStb::load(const std::files
     return image;
 }
 
-}// namespace duk::import
+}// namespace duk::renderer

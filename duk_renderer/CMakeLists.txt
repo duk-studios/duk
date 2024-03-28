@@ -21,12 +21,18 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/components/lighting.h
         include/duk_renderer/resources/sprite.h
         include/duk_renderer/resources/sprite_data_source.h
+        include/duk_renderer/resources/texture.h
+        include/duk_renderer/resources/image.h
+        include/duk_renderer/resources/image_importer.h
+        include/duk_renderer/resources/image_loader_stb.h
         include/duk_renderer/resources/materials/globals/global_descriptors.h
         include/duk_renderer/resources/materials/pipeline.h
         include/duk_renderer/resources/materials/material.h
+        include/duk_renderer/resources/materials/material_importer.h
         include/duk_renderer/resources/materials/instance_buffer.h
         include/duk_renderer/resources/materials/uniform_buffer.h
         include/duk_renderer/resources/materials/storage_buffer.h
+        include/duk_renderer/resources/materials/material_descriptor_set.h
         include/duk_renderer/resources/materials/color/color_material.h
         include/duk_renderer/resources/materials/color/color_shader_data_source.h
         include/duk_renderer/resources/materials/color/color_descriptors.h
@@ -49,9 +55,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/pools/mesh_pool.h
         include/duk_renderer/pools/material_pool.h
         include/duk_renderer/pools/sprite_pool.h
-        include/duk_renderer/resources/texture.h
-        include/duk_renderer/resources/image.h
-        include/duk_renderer/resources/materials/material_descriptor_set.h
 )
 
 set(DUK_RENDERER_SOURCES
@@ -71,11 +74,17 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/components/lighting.cpp
         src/duk_renderer/resources/sprite.cpp
         src/duk_renderer/resources/sprite_data_source.cpp
+        src/duk_renderer/resources/texture.cpp
+        src/duk_renderer/resources/image.cpp
+        src/duk_renderer/resources/image_importer.cpp
+        src/duk_renderer/resources/image_loader_stb.cpp
         src/duk_renderer/resources/materials/pipeline.cpp
         src/duk_renderer/resources/materials/material.cpp
+        src/duk_renderer/resources/materials/material_importer.cpp
         src/duk_renderer/resources/materials/instance_buffer.cpp
         src/duk_renderer/resources/materials/uniform_buffer.cpp
         src/duk_renderer/resources/materials/storage_buffer.cpp
+        src/duk_renderer/resources/materials/material_descriptor_set.cpp
         src/duk_renderer/resources/materials/color/color_material.cpp
         src/duk_renderer/resources/materials/color/color_shader_data_source.cpp
         src/duk_renderer/resources/materials/color/color_descriptors.cpp
@@ -96,9 +105,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/pools/mesh_pool.cpp
         src/duk_renderer/pools/material_pool.cpp
         src/duk_renderer/pools/sprite_pool.cpp
-        src/duk_renderer/resources/texture.cpp
-        src/duk_renderer/resources/image.cpp
-        src/duk_renderer/resources/materials/material_descriptor_set.cpp
         )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

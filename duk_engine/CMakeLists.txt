@@ -46,7 +46,7 @@ target_include_directories(duk_engine
 target_link_libraries(duk_engine
         PUBLIC
         duk_renderer
-        duk_import
+        duk_audio
         )
 
 set_target_properties(duk_engine PROPERTIES CXX_STANDARD 20)
