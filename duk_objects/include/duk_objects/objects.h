@@ -74,7 +74,6 @@ public:
     }
 
 private:
-
     T* get_chunk(uint32_t chunkIndex) const {
         if (chunkIndex >= m_chunks.size()) {
             m_chunks.resize(chunkIndex + 1, nullptr);
@@ -91,14 +90,14 @@ private:
     mutable std::vector<T*> m_chunks;
 };
 
-}
+}// namespace detail
 
 class Objects;
 
 template<typename T>
 class Component;
 
-using ComponentMask = duk::tools::BitBlock<MAX_COMPONENTS>;
+using ComponentMask = duk::tools::BitBlock<detail::kMaxComponents>;
 
 class Object {
 public:
@@ -136,7 +135,7 @@ public:
 
     void destroy() const;
 
-    const ComponentMask& component_mask();
+    const ComponentMask& component_mask() const;
 
     template<typename T, typename... Args>
     Component<T> add(Args&&... args);
@@ -199,6 +198,8 @@ private:
     public:
         virtual ~ComponentEntry() = default;
 
+        virtual void copy(const Object& src, Object& dst) = 0;
+
         virtual void solve(duk::resource::ReferenceSolver* solver, Object& object) = 0;
 
         virtual void solve(duk::resource::DependencySolver* solver, Object& object) = 0;
@@ -213,6 +214,10 @@ private:
     template<typename T>
     class ComponentEntryT : public ComponentEntry {
     public:
+        void copy(const Object& src, Object& dst) override {
+            dst.add<T>(*src.component<T>());
+        }
+
         void solve(duk::resource::ReferenceSolver* solver, Object& object) override {
             auto component = Component<T>(object);
             solver->solve(component);
@@ -238,6 +243,12 @@ private:
 
 public:
     static ComponentRegistry* instance();
+
+    void copy_component(const Object& src, Object& dst, uint32_t componentId) {
+        auto& entry = m_componentEntries.at(componentId);
+        assert(entry);
+        m_componentEntries.at(componentId)->copy(src, dst);
+    }
 
     template<typename Solver>
     void solve(Solver* solver, Object& object, uint32_t componentId) {
@@ -357,6 +368,11 @@ public:
 
     Object add_object();
 
+    /// builds a new object which is an exact copy of the original object
+    Object copy_object(const Object& src);
+
+    Object copy_objects(Objects& src);
+
     void destroy_object(const Object::Id& id);
 
     DUK_NO_DISCARD Object object(const Object::Id& id);
@@ -409,6 +425,8 @@ private:
     std::vector<uint32_t> m_freeList;
     std::vector<Object::Id> m_destroyedIds;
 };
+
+using ObjectsResource = duk::resource::ResourceT<Objects>;
 
 // Component Implementation //
 
@@ -564,8 +582,6 @@ ComponentMask Objects::component_mask() {
     return component_mask<T1>() | component_mask<T2, Ts...>();
 }
 
-// From object.h //
-
 template<typename T, typename... Args>
 Component<T> Object::add(Args&&... args) {
     m_objects->template add_component<T>(m_id, std::forward<Args>(args)...);
@@ -677,6 +693,11 @@ inline void write_array(JsonWriter* writer, duk::objects::Objects& objects) {
     for (auto object: objects.all()) {
         writer->visit_member_object(object, MemberDescription(nullptr));
     }
+}
+
+template<typename JsonVisitor>
+void visit_object(JsonVisitor* visitor, duk::objects::Objects& objects) {
+    visitor->visit_member_array(objects, MemberDescription("objects"));
 }
 
 }// namespace duk::serial

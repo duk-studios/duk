@@ -100,6 +100,26 @@ Object Objects::add_object() {
     return {index, 0, this};
 }
 
+Object Objects::copy_object(const Object& src) {
+    auto dst = add_object();
+    auto originalComponentMask = src.component_mask();
+    for (auto componentIndex: originalComponentMask.bits<true>()) {
+        ComponentRegistry::instance()->copy_component(src, dst, componentIndex);
+    }
+    return dst;
+}
+
+Object Objects::copy_objects(Objects& src) {
+    Object root;
+    for (auto obj: src.all()) {
+        auto copy = copy_object(obj);
+        if (!root.valid()) {
+            root = copy;
+        }
+    }
+    return root;
+}
+
 void Objects::destroy_object(const Object::Id& id) {
     if (std::find(m_destroyedIds.begin(), m_destroyedIds.end(), id) != m_destroyedIds.end()) {
         return;

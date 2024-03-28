@@ -2,13 +2,13 @@ project(duk_objects)
 
 set(DUK_OBJECTS_HEADERS
         include/duk_objects/objects.h
-        include/duk_objects/component_pool.h
-        include/duk_objects/limits.h
-)
+        include/duk_objects/objects_pool.h
+        include/duk_objects/objects_importer.h)
 
 set(DUK_OBJECTS_SOURCES
         src/duk_objects/objects.cpp
-        src/duk_objects/component_pool.cpp
+        src/duk_objects/objects_pool.cpp
+        src/duk_objects/objects_importer.cpp
 )
 
 add_library(duk_objects STATIC ${DUK_OBJECTS_SOURCES} ${DUK_OBJECTS_HEADERS})
