@@ -5,6 +5,8 @@
 #include <duk_engine/engine.h>
 #include <duk_engine/resources/scene/scene_importer.h>
 
+#include <duk_objects/objects_importer.h>
+
 #include <duk_audio/audio_clip_importer.h>
 
 #include <duk_renderer/pools/image_pool.h>
@@ -107,11 +109,17 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         m_pools.create_pool<duk::renderer::SpritePool>(spritePoolCreateInfo);
     }
 
+    // objects
+    {
+        duk::objects::ObjectsImporterCreateInfo objectsImporterCreateInfo = {};
+        objectsImporterCreateInfo.objectsPool = m_pools.create_pool<duk::objects::ObjectsPool>();
+        m_importer->add_resource_importer<duk::objects::ObjectsImporter>(objectsImporterCreateInfo);
+    }
+
     // scenes
     {
         SceneImporterCreateInfo sceneImporterCreateInfo = {};
         sceneImporterCreateInfo.scenePool = m_pools.create_pool<ScenePool>();
-
         m_importer->add_resource_importer<SceneImporter>(sceneImporterCreateInfo);
     }
 
