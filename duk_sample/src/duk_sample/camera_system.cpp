@@ -5,9 +5,7 @@
 #include <duk_engine/engine.h>
 #include <duk_platform/systems.h>
 #include <duk_renderer/components/camera.h>
-#include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
-#include <duk_renderer/pools/material_pool.h>
 #include <duk_sample/camera_system.h>
 
 namespace duk::sample {
@@ -99,17 +97,9 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
     if (input->mouse_down(duk::platform::MouseButton::RIGHT)) {
         auto camera = object.component<duk::renderer::Camera>();
         auto worldPos = duk::renderer::screen_to_world(camera, engine.window()->size(), glm::vec3(input->mouse_position(), -30));
-        duk::log::debug("World pos: {0},{1},{2}", worldPos.x, worldPos.y, worldPos.z);
 
-        auto newObject = objects.add_object();
-
-        newObject.add<duk::renderer::Transform>();
-        auto position = newObject.add<duk::renderer::Position3D>();
+        auto position = objects.copy_objects(*controller->sphere).component<duk::renderer::Position3D>();
         position->value = worldPos;
-
-        auto meshRenderer = newObject.add<duk::renderer::MeshRenderer>();
-        meshRenderer->mesh = engine.pools()->get<duk::renderer::MeshPool>()->sphere();
-        meshRenderer->material = engine.pools()->get<duk::renderer::MaterialPool>()->find(duk::resource::Id(1000013));
 
         controller->audioPlayer.play(engine.audio(), controller->spawnClip.get());
     }

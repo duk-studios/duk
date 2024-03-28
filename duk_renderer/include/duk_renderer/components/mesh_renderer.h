@@ -4,8 +4,8 @@
 #ifndef DUK_RENDERER_MESH_RENDERER_H
 #define DUK_RENDERER_MESH_RENDERER_H
 
-#include <duk_renderer/pools/mesh_pool.h>
-#include <duk_renderer/resources/materials/material.h>
+#include <duk_renderer/material/material.h>
+#include <duk_renderer/mesh/mesh_pool.h>
 
 namespace duk::renderer {
 

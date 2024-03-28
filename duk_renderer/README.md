@@ -6,7 +6,7 @@
 ```cpp
 #include <iostream>
 #include <duk_rhi/rhi.h>
-#include <duk_renderer/brushes/mesh.h>
+#include <duk_renderer/mesh/mesh.h>
 #include <duk_platform/window.h>
 #include <duk_objects/objects.h>
 #include <duk_renderer/renderer.h>
@@ -16,7 +16,7 @@
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/forward/forward_renderer.h>
 #include <duk_renderer/materials/globals/global_descriptors.h>
-#include <duk_renderer/pools/mesh_pool.h>
+#include <duk_renderer/mesh/mesh_pool.h>
 #include <duk_tools/timer.h>
 #include <duk_log/log.h>
 

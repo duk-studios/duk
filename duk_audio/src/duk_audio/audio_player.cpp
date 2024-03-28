@@ -2,9 +2,9 @@
 // Created by Ricardo on 25/03/2024.
 //
 
-#include <duk_audio/audio_clip.h>
 #include <duk_audio/audio_device.h>
 #include <duk_audio/audio_player.h>
+#include <duk_audio/clip/audio_clip.h>
 
 namespace duk::audio {
 

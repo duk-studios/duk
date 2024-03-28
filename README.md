@@ -15,7 +15,6 @@ There are many modules, each one exposing a specific set of features:
 - [duk_rhi](./duk_rhi/README.md):
 - [duk_objects](./duk_objects/README.md):
 - [duk_renderer](./duk_renderer/README.md):
-- [duk_import](./duk_import/README.md):
 - [duk_engine](./duk_engine/README.md):
 
 # Building

@@ -82,7 +82,7 @@ static void insert_referenced_types_from_bindings(const Reflector& reflector, st
     }
 }
 
-static const std::string kTypesFileIncludes[] = {"duk_renderer/resources/materials/uniform_buffer.h", "duk_renderer/resources/materials/storage_buffer.h", "glm/glm.hpp"};
+static const std::string kTypesFileIncludes[] = {"duk_renderer/material/uniform_buffer.h", "duk_renderer/material/storage_buffer.h", "glm/glm.hpp"};
 
 }// namespace detail
 

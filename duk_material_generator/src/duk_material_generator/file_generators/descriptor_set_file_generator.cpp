@@ -45,7 +45,7 @@ static std::vector<BindingReflection> extract_local_bindings(const Parser& parse
 
 static std::string descriptor_set_header_include_path(const Parser& parser, const std::string& fileName) {
     auto absoluteIncludeDirectory = parser.output_include_directory();
-    auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/resources/materials/");
+    auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/material/");
     auto relativeIncludeDirectory = absoluteIncludeDirectory.substr(startIncludePos);
     std::ostringstream oss;
     oss << relativeIncludeDirectory << '/' << fileName << ".h";
@@ -97,7 +97,7 @@ DescriptorSetFileGenerator::DescriptorSetFileGenerator(const Parser& parser, con
 }
 
 void DescriptorSetFileGenerator::generate_header_file_content(std::ostringstream& oss) {
-    std::string includes[] = {"duk_renderer/resources/materials/material_descriptor_set.h", m_shaderDataSourceFileGenerator.output_header_include_path(), "duk_rhi/rhi.h"};
+    std::string includes[] = {"duk_renderer/material/material_descriptor_set.h", m_shaderDataSourceFileGenerator.output_header_include_path(), "duk_rhi/rhi.h"};
 
     generate_include_guard_start(oss, m_fileName);
     oss << std::endl;

@@ -21,7 +21,7 @@ uint32_t ComponentRegistry::index_of(const std::string& componentTypeName) const
 }
 
 Object::Id::Id()
-    : Id(MAX_OBJECTS, 0) {
+    : Id(detail::kMaxObjects, 0) {
 }
 
 Object::Id::Id(uint32_t index, uint32_t version)
@@ -46,7 +46,7 @@ bool Object::Id::operator!=(const Object::Id& rhs) const {
 }
 
 Object::Object()
-    : Object(MAX_OBJECTS, 0, nullptr) {
+    : Object(detail::kMaxObjects, 0, nullptr) {
 }
 
 Object::Object(uint32_t index, uint32_t version, Objects* objects)
@@ -74,7 +74,7 @@ void Object::destroy() const {
     m_objects->destroy_object(m_id);
 }
 
-const ComponentMask& Object::component_mask() {
+const ComponentMask& Object::component_mask() const {
     return m_objects->component_mask(m_id);
 }
 
@@ -98,6 +98,26 @@ Object Objects::add_object() {
     m_componentMasks.resize(m_versions.size());
     m_versions[index] = 0;
     return {index, 0, this};
+}
+
+Object Objects::copy_object(const Object& src) {
+    auto dst = add_object();
+    auto originalComponentMask = src.component_mask();
+    for (auto componentIndex: originalComponentMask.bits<true>()) {
+        ComponentRegistry::instance()->copy_component(src, dst, componentIndex);
+    }
+    return dst;
+}
+
+Object Objects::copy_objects(Objects& src) {
+    Object root;
+    for (auto obj: src.all()) {
+        auto copy = copy_object(obj);
+        if (!root.valid()) {
+            root = copy;
+        }
+    }
+    return root;
 }
 
 void Objects::destroy_object(const Object::Id& id) {

@@ -5,8 +5,8 @@
 #ifndef DUK_RENDERER_SPRITE_RENDERER_H
 #define DUK_RENDERER_SPRITE_RENDERER_H
 
-#include <duk_renderer/resources/materials/material.h>
-#include <duk_renderer/resources/sprite.h>
+#include <duk_renderer/material/material.h>
+#include <duk_renderer/sprite/sprite.h>
 
 namespace duk::renderer {
 

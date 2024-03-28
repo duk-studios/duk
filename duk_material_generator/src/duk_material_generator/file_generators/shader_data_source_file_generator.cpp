@@ -17,7 +17,7 @@ static std::string shader_data_source_file_name(const Parser& parser) {
 
 static std::string shader_header_include_path(const Parser& parser, const std::string& fileName) {
     auto absoluteIncludeDirectory = parser.output_include_directory();
-    auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/resources/materials/");
+    auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/material/");
     auto relativeIncludeDirectory = absoluteIncludeDirectory.substr(startIncludePos);
     std::ostringstream oss;
     oss << relativeIncludeDirectory << '/' << fileName << ".h";

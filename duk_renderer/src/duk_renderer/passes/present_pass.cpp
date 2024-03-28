@@ -2,9 +2,9 @@
 /// present_pass.cpp
 
 #include <duk_platform/window.h>
+#include <duk_renderer/material/fullscreen/fullscreen_material.h>
+#include <duk_renderer/material/pipeline.h>
 #include <duk_renderer/passes/present_pass.h>
-#include <duk_renderer/resources/materials/fullscreen/fullscreen_material.h>
-#include <duk_renderer/resources/materials/pipeline.h>
 
 namespace duk::renderer {
 
