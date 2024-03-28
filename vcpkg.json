@@ -12,6 +12,7 @@
     "spirv-reflect",
     "rapidjson",
     "cxxopts",
-    "grapphs"
+    "grapphs",
+    "freetype"
   ]
 }

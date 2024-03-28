@@ -123,6 +123,7 @@ target_link_libraries(duk_renderer
         duk_objects
         duk_rhi
         duk_resource
+        Freetype::Freetype
         )
 
 set_target_properties(duk_renderer PROPERTIES CXX_STANDARD 20)
