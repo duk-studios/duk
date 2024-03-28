@@ -4,24 +4,92 @@
 #ifndef DUK_OBJECTS_OBJECTS_H
 #define DUK_OBJECTS_OBJECTS_H
 
-#include <array>
 #include <duk_log/log.h>
+
 #include <duk_macros/assert.h>
-#include <duk_objects/component_pool.h>
-#include <duk_objects/limits.h>
+
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
+
 #include <duk_serial/json_serializer.h>
+
 #include <duk_tools/bit_block.h>
 #include <duk_tools/fixed_vector.h>
 #include <duk_tools/singleton.h>
 #include <duk_tools/types.h>
+
+#include <array>
 
 namespace duk::objects {
 
 namespace detail {
 
 static constexpr uint32_t kComponentsPerChunk = 32;
+static constexpr uint32_t kMaxComponents = 128;
+static constexpr uint32_t kMaxObjects = std::numeric_limits<uint32_t>::max();
+
+class ComponentPool {
+public:
+    virtual ~ComponentPool() = default;
+
+    virtual void destruct(uint32_t index) = 0;
+};
+
+template<typename T>
+class ComponentPoolT : public ComponentPool {
+public:
+    explicit ComponentPoolT(uint32_t componentsPerChunk)
+        : m_componentsPerChunk(componentsPerChunk) {
+    }
+
+    ~ComponentPoolT() override {
+        for (auto& chunk: m_chunks) {
+            free(chunk);
+        }
+    }
+
+    template<typename... Args>
+    void construct(uint32_t index, Args&&... args) {
+        auto ptr = get(index);
+        ::new (ptr) T(std::forward<Args>(args)...);
+    }
+
+    void destruct(uint32_t index) override {
+        auto ptr = get(index);
+        ptr->~T();
+    }
+
+    DUK_NO_DISCARD T* get(uint32_t index) {
+        const uint32_t chunkIndex = index / m_componentsPerChunk;
+        const uint32_t indexInChunk = index % m_componentsPerChunk;
+        auto chunk = get_chunk(chunkIndex);
+        return chunk + indexInChunk;
+    }
+
+    DUK_NO_DISCARD const T* get(uint32_t index) const {
+        const uint32_t chunkIndex = index / m_componentsPerChunk;
+        const uint32_t indexInChunk = index % m_componentsPerChunk;
+        auto chunk = get_chunk(chunkIndex);
+        return chunk + indexInChunk;
+    }
+
+private:
+
+    T* get_chunk(uint32_t chunkIndex) const {
+        if (chunkIndex >= m_chunks.size()) {
+            m_chunks.resize(chunkIndex + 1, nullptr);
+        }
+        auto& chunk = m_chunks[chunkIndex];
+        if (!chunk) {
+            chunk = (T*)malloc(sizeof(T) * m_componentsPerChunk);
+        }
+        return chunk;
+    }
+
+private:
+    uint32_t m_componentsPerChunk;
+    mutable std::vector<T*> m_chunks;
+};
 
 }
 
@@ -217,7 +285,7 @@ public:
 
 private:
     uint32_t m_componentIndexCounter;
-    std::array<std::unique_ptr<ComponentEntry>, MAX_COMPONENTS> m_componentEntries;
+    std::array<std::unique_ptr<ComponentEntry>, detail::kMaxComponents> m_componentEntries;
     std::unordered_map<std::string, uint32_t> m_componentNameToIndex;
 };
 
@@ -324,7 +392,7 @@ public:
 
 private:
     template<typename T>
-    ComponentPoolT<T>* pool();
+    detail::ComponentPoolT<T>* pool();
 
     template<typename T>
     static ComponentMask component_mask();
@@ -335,7 +403,7 @@ private:
     void remove_component(uint32_t index, uint32_t componentIndex);
 
 private:
-    std::array<std::unique_ptr<ComponentPool>, MAX_COMPONENTS> m_componentPools;
+    std::array<std::unique_ptr<detail::ComponentPool>, detail::kMaxComponents> m_componentPools;
     std::vector<ComponentMask> m_componentMasks;
     std::vector<uint32_t> m_versions;
     std::vector<uint32_t> m_freeList;
@@ -456,14 +524,14 @@ bool Objects::valid_component(const Object::Id& id) const {
 }
 
 template<typename T>
-ComponentPoolT<T>* Objects::pool() {
+detail::ComponentPoolT<T>* Objects::pool() {
     const auto index = ComponentRegistry::instance()->index_of<T>();
     auto& pool = m_componentPools[index];
     if (!pool) {
-        pool = std::make_unique<ComponentPoolT<T>>(detail::kComponentsPerChunk);
+        pool = std::make_unique<detail::ComponentPoolT<T>>(detail::kComponentsPerChunk);
     }
 
-    auto componentPool = dynamic_cast<ComponentPoolT<T>*>(pool.get());
+    auto componentPool = dynamic_cast<detail::ComponentPoolT<T>*>(pool.get());
     if (!componentPool) {
         throw std::logic_error("invalid pool type allocated");
     }
