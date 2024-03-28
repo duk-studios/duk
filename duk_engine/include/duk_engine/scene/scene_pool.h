@@ -4,7 +4,7 @@
 #ifndef DUK_ENGINE_SCENE_POOL_H
 #define DUK_ENGINE_SCENE_POOL_H
 
-#include <duk_engine/resources/scene/scene.h>
+#include <duk_engine/scene/scene.h>
 
 #include <duk_resource/pool.h>
 

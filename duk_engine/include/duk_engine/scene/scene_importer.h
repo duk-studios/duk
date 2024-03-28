@@ -5,7 +5,7 @@
 #ifndef DUK_ENGINE_SCENE_IMPORTER_H
 #define DUK_ENGINE_SCENE_IMPORTER_H
 
-#include <duk_engine/resources/scene/scene_pool.h>
+#include <duk_engine/scene/scene_pool.h>
 
 #include <duk_resource/importer.h>
 

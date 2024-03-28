@@ -2,7 +2,7 @@
 // Created by rov on 12/7/2023.
 //
 
-#include <duk_engine/resources/scene/scene_importer.h>
+#include <duk_engine/scene/scene_importer.h>
 
 #include <duk_tools/file.h>
 

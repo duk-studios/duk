@@ -3,7 +3,7 @@
 //
 
 #include <duk_engine/engine.h>
-#include <duk_engine/resources/scene/scene_importer.h>
+#include <duk_engine/scene/scene_importer.h>
 
 #include <duk_objects/objects_importer.h>
 
