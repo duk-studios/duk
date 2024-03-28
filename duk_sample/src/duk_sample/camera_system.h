@@ -16,6 +16,7 @@ struct CameraController {
     float speed;
     float rotationSpeed;
     duk::audio::AudioClipResource spawnClip;
+    duk::objects::ObjectsResource sphere;
     duk::audio::AudioPlayer audioPlayer;
 };
 
@@ -37,6 +38,7 @@ void visit_object(JsonVisitor* visitor, duk::sample::CameraController& cameraCon
     visitor->visit_member(cameraController.speed, MemberDescription("speed"));
     visitor->visit_member(cameraController.rotationSpeed, MemberDescription("rotationSpeed"));
     visitor->template visit_member<duk::resource::Resource>(cameraController.spawnClip, MemberDescription("spawnClip"));
+    visitor->template visit_member<duk::resource::Resource>(cameraController.sphere, MemberDescription("sphere"));
 }
 
 }// namespace duk::serial
@@ -46,6 +48,7 @@ namespace duk::resource {
 template<typename Solver>
 void solve_resources(Solver* solver, duk::sample::CameraController& cameraController) {
     solver->solve(cameraController.spawnClip);
+    solver->solve(cameraController.sphere);
 }
 
 }// namespace duk::resource

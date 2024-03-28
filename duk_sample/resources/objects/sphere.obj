@@ -1,0 +1,23 @@
+{
+  "objects": [
+    {
+      "components": [
+        {
+          "type": "duk::renderer::Transform"
+        },
+        {
+          "type": "duk::renderer::Position3D"
+        },
+        {
+          "type": "duk::renderer::Scale3D",
+          "value": "3;2.5;4.235"
+        },
+        {
+          "type": "duk::renderer::MeshRenderer",
+          "mesh": 10003,
+          "material": 1000011
+        }
+      ]
+    }
+  ]
+}
