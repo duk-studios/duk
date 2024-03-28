@@ -86,7 +86,7 @@ namespace duk::serial {
 template<typename JsonVisitor>
 void visit_object(JsonVisitor* visitor, duk::renderer::ColorMaterialDataSource& materialDataSource) {
     visitor->visit_member(materialDataSource.color, MemberDescription("color"));
-    visitor->visit_member_object(materialDataSource.colorTexture, MemberDescription("colorTexture"));
+    visitor->visit_member_object(materialDataSource.colorTexture, MemberDescription("texture"));
 }
 
 }// namespace duk::serial
