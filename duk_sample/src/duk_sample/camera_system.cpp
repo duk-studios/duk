@@ -6,6 +6,7 @@
 #include <duk_platform/systems.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/material/material_pool.h>
 #include <duk_sample/camera_system.h>
 
 namespace duk::sample {
@@ -61,6 +62,21 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 }// namespace detail
 
 void CameraSystem::enter(duk::objects::Objects& objects, duk::engine::Engine& engine) {
+
+    auto renderer = engine.renderer();
+    auto font = objects.first_with<CameraController>().component<CameraController>()->font;
+
+    auto atlas = font->build_atlas(14, renderer->rhi(), renderer->main_command_queue());
+
+
+    auto phongMaterial = engine.pools()->get<duk::renderer::MaterialPool>()->find(duk::resource::Id(1000013));
+    auto phongDescriptorSet = dynamic_cast<duk::renderer::PhongMaterialDescriptorSet*>(phongMaterial->descriptor_set());
+
+    duk::renderer::Texture texture = {};
+    texture.image() = atlas->image();
+    texture.sampler() = { duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER };
+
+    phongDescriptorSet->set_albedo_texture(texture);
 }
 
 void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& engine) {
