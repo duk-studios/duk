@@ -5,15 +5,18 @@
 #define DUK_RENDERER_IMAGE_H
 
 #include <duk_resource/resource.h>
+
 #include <duk_rhi/descriptor.h>
 #include <duk_rhi/image.h>
+#include <duk_rhi/rhi.h>
 
 namespace duk::renderer {
 
 class Renderer;
 
 struct ImageCreateInfo {
-    Renderer* renderer;
+    duk::rhi::RHI* rhi;
+    duk::rhi::CommandQueue* commandQueue;
     const duk::rhi::ImageDataSource* imageDataSource;
 };
 

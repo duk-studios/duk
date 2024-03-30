@@ -27,7 +27,8 @@ ImagePool::ImagePool(const ImagePoolCreateInfo& imagePoolCreateInfo)
 ImageResource ImagePool::create(duk::resource::Id resourceId, const duk::rhi::ImageDataSource* imageDataSource) {
     ImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.imageDataSource = imageDataSource;
-    imageCreateInfo.renderer = m_renderer;
+    imageCreateInfo.rhi = m_renderer->rhi();
+    imageCreateInfo.commandQueue = m_renderer->main_command_queue();
 
     return insert(resourceId, std::make_shared<Image>(imageCreateInfo));
 }

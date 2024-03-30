@@ -25,6 +25,10 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/image/image_pool.h
         include/duk_renderer/image/image_importer.h
         include/duk_renderer/image/image_loader_stb.h
+        include/duk_renderer/font/font.h
+        include/duk_renderer/font/font_atlas.h
+        include/duk_renderer/font/font_pool.h
+        include/duk_renderer/font/font_importer.h
         include/duk_renderer/mesh/mesh.h
         include/duk_renderer/mesh/mesh_data_source.h
         include/duk_renderer/mesh/mesh_pool.h
@@ -81,6 +85,16 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/image/image_pool.cpp
         src/duk_renderer/image/image_importer.cpp
         src/duk_renderer/image/image_loader_stb.cpp
+        src/duk_renderer/font/font.cpp
+        src/duk_renderer/font/font_atlas.cpp
+        src/duk_renderer/font/font_pool.cpp
+        src/duk_renderer/font/font_importer.cpp
+        src/duk_renderer/font/freetype/freetype_import.h
+        src/duk_renderer/font/freetype/freetype_import.cpp
+        src/duk_renderer/font/freetype/freetype_font.h
+        src/duk_renderer/font/freetype/freetype_font.cpp
+        src/duk_renderer/font/freetype/freetype_font_loader.h
+        src/duk_renderer/font/freetype/freetype_font_loader.cpp
         src/duk_renderer/material/pipeline.cpp
         src/duk_renderer/material/material.cpp
         src/duk_renderer/material/material_importer.cpp

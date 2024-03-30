@@ -36,8 +36,12 @@ static bool is_objects_resource(const std::string& extension) {
     return extension == ".obj";
 }
 
+static bool is_font_resource(const std::string& extension) {
+    return extension == ".ttf";
+}
+
 static bool is_resource(const std::string& extension) {
-    return is_material_resource(extension) || is_image_resource(extension) || is_scene_resource(extension) || is_audio_clip_resource(extension) || is_objects_resource(extension);
+    return is_material_resource(extension) || is_image_resource(extension) || is_scene_resource(extension) || is_audio_clip_resource(extension) || is_objects_resource(extension) || is_font_resource(extension);
 }
 
 static std::string resource_tag(const std::string& extension) {
@@ -55,6 +59,9 @@ static std::string resource_tag(const std::string& extension) {
     }
     if (is_objects_resource(extension)) {
         return "obj";
+    }
+    if (is_font_resource(extension)) {
+        return "fnt";
     }
     throw std::invalid_argument(fmt::format("Unknown resource tag \"{}\"", extension));
 }

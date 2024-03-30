@@ -7,9 +7,8 @@
 namespace duk::renderer {
 
 Image::Image(const ImageCreateInfo& imageCreateInfo) {
-    auto renderer = imageCreateInfo.renderer;
-    auto rhi = renderer->rhi();
-    auto commandQueue = renderer->main_command_queue();
+    auto rhi = imageCreateInfo.rhi;
+    auto commandQueue = imageCreateInfo.commandQueue;
 
     duk::rhi::RHI::ImageCreateInfo rhiImageCreateInfo = {};
     rhiImageCreateInfo.commandQueue = commandQueue;

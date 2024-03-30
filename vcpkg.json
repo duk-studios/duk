@@ -13,6 +13,11 @@
     "rapidjson",
     "cxxopts",
     "grapphs",
-    "freetype"
+    {
+      "name": "freetype",
+      "features": [
+        "error-strings"
+      ]
+    }
   ]
 }
