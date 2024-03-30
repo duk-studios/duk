@@ -112,87 +112,88 @@ uint32_t operator|(uint32_t mask, PixelFormat pixelFormat);
 
 uint32_t operator&(uint32_t mask, PixelFormat pixelFormat);
 
+template<typename TPixel>
+PixelFormat pixel_format_of() = delete;
+
 template<typename ChannelType, uint32_t ChannelCount>
 struct Pixel {
-    static PixelFormat format() = delete;
-
     std::array<ChannelType, ChannelCount> channels;
 };
 
 using PixelR8S = Pixel<int8_t, 1>;
 
 template<>
-inline PixelFormat PixelR8S::format() {
+inline PixelFormat pixel_format_of<PixelR8S>() {
     return PixelFormat::R8S;
 }
 
 using PixelR8U = Pixel<uint8_t, 1>;
 
 template<>
-inline PixelFormat PixelR8U::format() {
+inline PixelFormat pixel_format_of<PixelR8U>() {
     return PixelFormat::R8U;
 }
 
 using PixelRG8S = Pixel<int8_t, 2>;
 
 template<>
-inline PixelFormat PixelRG8S::format() {
+inline PixelFormat pixel_format_of<PixelRG8S>() {
     return PixelFormat::RG8S;
 }
 
 using PixelRG8U = Pixel<uint8_t, 2>;
 
 template<>
-inline PixelFormat PixelRG8U::format() {
+inline PixelFormat pixel_format_of<PixelRG8U>() {
     return PixelFormat::RG8U;
 }
 
 using PixelRGB8S = Pixel<int8_t, 3>;
 
 template<>
-inline PixelFormat PixelRGB8S::format() {
+inline PixelFormat pixel_format_of<PixelRGB8S>() {
     return PixelFormat::RGB8S;
 }
 
 using PixelRGB8U = Pixel<uint8_t, 3>;
 
 template<>
-inline PixelFormat PixelRGB8U::format() {
+inline PixelFormat pixel_format_of<PixelRGB8U>() {
     return PixelFormat::RGB8U;
 }
 
 using PixelRGBA8S = Pixel<int8_t, 4>;
 
 template<>
-inline PixelFormat PixelRGBA8S::format() {
+inline PixelFormat pixel_format_of<PixelRGBA8S>() {
     return PixelFormat::RGBA8S;
 }
 
 using PixelRGBA8U = Pixel<uint8_t, 4>;
 
 template<>
-inline PixelFormat PixelRGBA8U::format() {
+inline PixelFormat pixel_format_of<PixelRGBA8U>() {
     return PixelFormat::RGBA8U;
 }
 
 using PixelRGBA32S = Pixel<int32_t, 4>;
 
 template<>
-inline PixelFormat PixelRGBA32S::format() {
+inline PixelFormat pixel_format_of<PixelRGBA32S>() {
     return PixelFormat::RGBA32S;
 }
 
 using PixelRGBA32U = Pixel<uint32_t, 4>;
 
 template<>
-inline PixelFormat PixelRGBA32U::format() {
+inline PixelFormat pixel_format_of<PixelRGBA32U>() {
     return PixelFormat::RGBA32U;
 }
 
 using PixelRGBA32F = Pixel<float, 4>;
 
 template<>
-inline PixelFormat PixelRGBA32F::format() {
+inline PixelFormat pixel_format_of<PixelRGBA32F>() {
     return PixelFormat::RGBA32F;
 }
 
