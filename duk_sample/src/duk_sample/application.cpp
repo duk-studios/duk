@@ -4,6 +4,7 @@
 #include <duk_engine/register_types.h>
 #include <duk_sample/application.h>
 #include <duk_sample/camera_system.h>
+#include <duk_sample/stats_system.h>
 
 namespace duk::sample {
 
@@ -12,7 +13,9 @@ namespace detail {
 static void register_types() {
     duk::engine::register_types();
     duk::objects::register_component<CameraController>();
+    duk::objects::register_component<Stats>();
     duk::engine::register_system<CameraSystem>();
+    duk::engine::register_system<StatsSystem>();
 }
 
 }// namespace detail
