@@ -254,6 +254,15 @@ inline void to_json<glm::quat>(const glm::quat& quat, rapidjson::Value& jsonObje
     to_json<glm::vec3>(glm::eulerAngles(quat), jsonObject, allocator);
 }
 
+template<typename T>
+void from_json(const rapidjson::Value& jsonObject, std::vector<T>& vector) {
+    DUK_ASSERT(jsonObject.IsArray());
+    auto jsonArray = jsonObject.GetArray();
+    for (auto& jsonElement: jsonArray) {
+        from_json(jsonElement, vector.emplace_back());
+    }
+}
+
 template<>
 inline void read_array(JsonReader* reader, std::set<std::string>& set, size_t size) {
     for (size_t i = 0; i < size; ++i) {

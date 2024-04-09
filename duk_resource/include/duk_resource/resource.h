@@ -202,6 +202,11 @@ inline void to_json<duk::resource::Resource>(const duk::resource::Resource& reso
     jsonObject.Set<uint64_t>(resource.id().value());
 }
 
+template<typename T>
+void from_json(const rapidjson::Value& jsonObject, duk::resource::ResourceT<T>& resource) {
+    resource.reset(duk::resource::Id(jsonObject.Get<uint64_t>()));
+}
+
 }// namespace duk::serial
 
 namespace std {
