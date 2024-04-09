@@ -152,6 +152,9 @@ public:
     template<typename... Ts>
     std::tuple<Component<Ts>...> components();
 
+    template<typename... Ts>
+    std::tuple<Component<Ts>...> components() const;
+
 private:
     Id m_id;
     Objects* m_objects;
@@ -605,6 +608,11 @@ Component<T> Object::component() const {
 
 template<typename... Ts>
 std::tuple<Component<Ts>...> Object::components() {
+    return std::make_tuple(component<Ts>()...);
+}
+
+template<typename... Ts>
+std::tuple<Component<Ts>...> Object::components() const {
     return std::make_tuple(component<Ts>()...);
 }
 
