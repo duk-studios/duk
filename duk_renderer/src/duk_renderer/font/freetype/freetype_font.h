@@ -16,15 +16,13 @@ struct FreetypeFontCreateInfo {
 };
 
 class FreetypeFont : public Font {
-private:
-
 public:
 
     explicit FreetypeFont(const FreetypeFontCreateInfo& freetypeFontCreateInfo);
 
     ~FreetypeFont() override;
 
-    FontAtlas* build_atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) override;
+    FontAtlas* atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) override;
 
 private:
     std::vector<uint8_t> m_fontData;

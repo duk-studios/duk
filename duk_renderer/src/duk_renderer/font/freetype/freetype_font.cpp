@@ -10,7 +10,7 @@ namespace duk::renderer {
 
 namespace detail {
 
-static const std::string kDefaultChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*(){}[]";
+static const std::string kDefaultChars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*(){}[]:.;?";
 
 }
 
@@ -36,7 +36,7 @@ FreetypeFont::~FreetypeFont() {
     }
 }
 
-FontAtlas* FreetypeFont::build_atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) {
+FontAtlas* FreetypeFont::atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) {
 
     {
         auto it = m_atlases.find(fontSize);
@@ -116,6 +116,11 @@ FontAtlas* FreetypeFont::build_atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk:
         }
 
         auto slot = m_face->glyph;
+
+        // compute uvs
+        glyph.uvMin = (glm::vec2)glyph.min / (glm::vec2)imageSize;
+        glyph.uvMax = (glm::vec2)glyph.max / (glm::vec2)imageSize;
+        std::swap(glyph.uvMin.y, glyph.uvMax.y);
 
         const auto& size = glyph.metrics.size;
         const auto& min = glyph.min;

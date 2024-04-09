@@ -39,4 +39,14 @@ FontAtlas::~FontAtlas() = default;
 ImageResource FontAtlas::image() const {
     return m_image;
 }
+
+const duk::renderer::Glyph& duk::renderer::FontAtlas::glyph(char chr) const {
+    auto it = m_glyphs.find(chr);
+    if (it != m_glyphs.end()) {
+        return it->second;
+    }
+    return m_glyphs.at('?');
+}
+
 } // duk::renderer
+

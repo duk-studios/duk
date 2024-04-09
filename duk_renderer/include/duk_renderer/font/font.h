@@ -16,7 +16,7 @@ public:
 
     virtual ~Font();
 
-    virtual FontAtlas* build_atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) = 0;
+    virtual FontAtlas* atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) = 0;
 
 };
 

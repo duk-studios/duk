@@ -25,9 +25,12 @@ struct Glyph {
 
     char chr;
 
-    // coordinates in the atlas
     glm::ivec2 min;
     glm::ivec2 max;
+
+    // coordinates in the atlas
+    glm::vec2 uvMin;
+    glm::vec2 uvMax;
 };
 
 struct FontAtlasCreateInfo {
@@ -46,6 +49,8 @@ public:
     ~FontAtlas();
 
     ImageResource image() const;
+
+    const Glyph& glyph(char chr) const;
 
 private:
     ImageResource m_image;
