@@ -180,6 +180,7 @@ add_subdirectory(color)
 add_subdirectory(fullscreen)
 add_subdirectory(phong)
 add_subdirectory(sprites/sprite_color)
+add_subdirectory(text)
 
 foreach (PACKED_ENTRY ${GENERATE_MATERIAL_ENTRIES})
     add_material_generate_command(${PACKED_ENTRY})

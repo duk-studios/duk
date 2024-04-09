@@ -52,6 +52,9 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/material/sprites/sprite_color/sprite_color_material.h
         include/duk_renderer/material/sprites/sprite_color/sprite_color_shader_data_source.h
         include/duk_renderer/material/sprites/sprite_color/sprite_color_descriptors.h
+        include/duk_renderer/material/text/text_material.h
+        include/duk_renderer/material/text/text_descriptors.h
+        include/duk_renderer/material/text/text_shader_data_source.h
         include/duk_renderer/material/globals/lights_types.h
         include/duk_renderer/material/globals/camera_types.h
         include/duk_renderer/material/draw_entry.h
@@ -114,6 +117,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/material/sprites/sprite_color/sprite_color_material.cpp
         src/duk_renderer/material/sprites/sprite_color/sprite_color_shader_data_source.cpp
         src/duk_renderer/material/sprites/sprite_color/sprite_color_descriptors.cpp
+        src/duk_renderer/material/text/text_material.cpp
+        src/duk_renderer/material/text/text_descriptors.cpp
+        src/duk_renderer/material/text/text_shader_data_source.cpp
         src/duk_renderer/material/globals/global_descriptors.cpp
         src/duk_renderer/material/material_pool.cpp
         src/duk_renderer/passes/forward_pass.cpp
