@@ -2,6 +2,7 @@
 /// register_types.cpp
 
 #include <duk_renderer/components/camera.h>
+#include <duk_renderer/components/canvas.h>
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/sprite_renderer.h>
@@ -20,6 +21,8 @@ void register_types() {
     duk::objects::register_component<SpriteRenderer>();
     duk::objects::register_component<MeshRenderer>();
     duk::objects::register_component<Camera>();
+    duk::objects::register_component<Canvas>();
+    duk::objects::register_component<CanvasTransform>();
     duk::objects::register_component<PerspectiveCamera>();
 }
 

@@ -141,6 +141,8 @@ duk::rhi::CommandQueue* Renderer::main_command_queue() const {
 void Renderer::update_global_descriptors(duk::objects::Objects& objects) {
     m_globalDescriptors->update_cameras(objects);
 
+    m_globalDescriptors->update_canvas(objects);
+
     m_globalDescriptors->update_lights(objects);
 }
 
