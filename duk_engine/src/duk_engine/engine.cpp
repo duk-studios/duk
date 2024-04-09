@@ -9,9 +9,9 @@
 
 #include <duk_audio/clip/audio_clip_importer.h>
 
+#include <duk_renderer/font/font_importer.h>
 #include <duk_renderer/image/image_importer.h>
 #include <duk_renderer/material/material_importer.h>
-#include <duk_renderer/font/font_importer.h>
 #include <duk_renderer/mesh/mesh_pool.h>
 #include <duk_renderer/sprite/sprite_pool.h>
 

@@ -1,10 +1,10 @@
 /// 05/10/2023
 /// forward_pass.cpp
 
-#include <duk_renderer/components/transform.h>
-#include <duk_renderer/components/text_renderer.h>
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/sprite_renderer.h>
+#include <duk_renderer/components/text_renderer.h>
+#include <duk_renderer/components/transform.h>
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/material/pipeline.h>
 #include <duk_renderer/mesh/mesh.h>
@@ -379,7 +379,7 @@ void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
 
     // render texts
     {
-        for (auto& entry : m_textDrawData.drawEntries) {
+        for (auto& entry: m_textDrawData.drawEntries) {
             entry.material->bind(commandBuffer);
             entry.mesh->draw(commandBuffer);
         }

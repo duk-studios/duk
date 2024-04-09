@@ -6,8 +6,8 @@
 #include <duk_engine/systems.h>
 #include <duk_engine/systems/camera_system.h>
 #include <duk_engine/systems/canvas_system.h>
-#include <duk_engine/systems/transform_system.h>
 #include <duk_engine/systems/text_system.h>
+#include <duk_engine/systems/transform_system.h>
 
 #include <duk_renderer/register_types.h>
 

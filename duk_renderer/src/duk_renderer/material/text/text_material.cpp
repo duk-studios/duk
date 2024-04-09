@@ -1,12 +1,12 @@
 //
 // Created by Ricardo on 05/04/2024.
 //
+#include <duk_renderer/components/canvas.h>
+#include <duk_renderer/components/transform.h>
+#include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/material/text/text_material.h>
 #include <duk_renderer/material/text/text_shader_data_source.h>
-#include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/components/transform.h>
-#include <duk_renderer/components/canvas.h>
 
 namespace duk::renderer {
 
@@ -19,7 +19,6 @@ static const TextShaderDataSource kColorShaderDataSource;
 TextMaterialDataSource::TextMaterialDataSource()
     : color(glm::vec4(1))
     , atlasTexture() {
-
 }
 
 const rhi::ShaderDataSource* TextMaterialDataSource::shader_data_source() const {
@@ -87,12 +86,10 @@ void TextMaterialDescriptorSet::set_instance(const objects::Object& object) {
     if (transform) {
         model = transform->model;
         m_useCanvas = false;
-    }
-    else if (canvasTransform) {
+    } else if (canvasTransform) {
         model = canvasTransform->model;
         m_useCanvas = true;
-    }
-    else {
+    } else {
         model = glm::mat4(1);
     }
     m_instanceUBO->flush();
@@ -102,8 +99,7 @@ void TextMaterialDescriptorSet::update(const DrawParams& params) {
     // updates current camera UBO
     if (m_useCanvas) {
         m_descriptorSet->set(TextDescriptors::uCamera, params.globalDescriptors->canvas_ubo()->descriptor());
-    }
-    else {
+    } else {
         m_descriptorSet->set(TextDescriptors::uCamera, params.globalDescriptors->camera_ubo()->descriptor());
     }
 
@@ -123,4 +119,4 @@ uint32_t TextMaterialDescriptorSet::size() const {
     return TextDescriptors::kDescriptorCount;
 }
 
-}
+}// namespace duk::renderer

@@ -12,7 +12,6 @@ namespace duk::renderer {
 
 class FreetypeFontLoader : public FontLoader {
 public:
-
     FreetypeFontLoader();
 
     ~FreetypeFontLoader() override;
@@ -20,10 +19,11 @@ public:
     bool accepts(const std::filesystem::path& path) override;
 
     std::shared_ptr<Font> load(const std::filesystem::path& path) override;
+
 private:
     FT_Library m_library;
 };
 
-} // duk::renderer
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_FREETYPE_FONT_LOADER_H
+#endif//DUK_RENDERER_FREETYPE_FONT_LOADER_H

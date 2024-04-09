@@ -30,13 +30,13 @@ static duk::hash::Hash calculate_hash(const FontAtlas* atlas, const std::string_
 
 static constexpr uint32_t kTextChunk = 64;
 
-}
+}// namespace detail
 
 TextMesh::TextMesh(const TextMeshCreateInfo& textBrushCreateInfo)
-        : m_renderer(textBrushCreateInfo.renderer)
-        , m_textCapacity(0)
-        , m_textCount(0)
-        , m_hash(0) {
+    : m_renderer(textBrushCreateInfo.renderer)
+    , m_textCapacity(0)
+    , m_textCount(0)
+    , m_hash(0) {
     reserve(detail::kTextChunk);
 }
 
@@ -65,8 +65,7 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
         std::string::size_type wordEnd;
         if (chr == '\n' || chr == ' ') {
             wordEnd = text.find_first_not_of(" \n", wordStart);
-        }
-        else  {
+        } else {
             wordEnd = text.find_first_of(" \n", wordStart);
         }
 
@@ -88,7 +87,7 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
     std::vector<Line> lines;
     lines.reserve(kMaxLines);
     auto* currentLine = &lines.emplace_back();
-    for (const auto& word : words) {
+    for (const auto& word: words) {
         int32_t wordWidth = 0;
         int32_t lastCharSpilling = 0;
         for (auto i = 0; i < word.size(); i++) {
@@ -104,7 +103,7 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
             }
         }
         if ((currentLine->width + wordWidth) >= textRenderer.size.x && !currentLine->words.empty()) {
-            currentLine->width += lastCharSpilling; // remove spilling from last word
+            currentLine->width += lastCharSpilling;// remove spilling from last word
             if (lines.size() >= kMaxLines) {
                 // line would be outsize of the text box, cut off text
                 break;
@@ -114,7 +113,6 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
         currentLine->words.emplace_back(word);
         currentLine->width += wordWidth;
     }
-
 
     // build mesh by lines, taking alignment options into account
     m_textCount = 0;
@@ -135,8 +133,7 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
     }
     pen.y -= (textRenderer.size.y / 2) + kLineHeight;
 
-    for (const auto& line : lines) {
-
+    for (const auto& line: lines) {
         switch (textRenderer.horiAlignment) {
             case TextHoriAlignment::LEFT:
                 pen.x = 0;
@@ -150,20 +147,19 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
         }
         pen.x -= textRenderer.size.x / 2;
 
-        for (const auto& word : line.words) {
-            for (auto chr : word) {
+        for (const auto& word: line.words) {
+            for (auto chr: word) {
                 const auto& glyph = atlas->glyph(chr);
                 const auto bearing = glm::vec2(glyph.metrics.bearing) / kPixelsPerUnit;
                 const auto size = glm::vec2(glyph.metrics.size) / kPixelsPerUnit;
                 const auto advance = glyph.metrics.advance / kPixelsPerUnit;
 
-                glm::vec2 min = glm::vec2(pen.x + bearing.x, pen.y + bearing.y - size.y); // bottom left
-                glm::vec2 max = glm::vec2(min.x + size.x, min.y + size.y); // upper right
-
+                glm::vec2 min = glm::vec2(pen.x + bearing.x, pen.y + bearing.y - size.y);// bottom left
+                glm::vec2 max = glm::vec2(min.x + size.x, min.y + size.y);               // upper right
 
                 if (min == max) {
                     pen.x += advance;
-                    continue; //empty character, skip
+                    continue;//empty character, skip
                 }
 
                 // write positions
@@ -206,11 +202,7 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
 }
 
 void TextMesh::draw(duk::rhi::CommandBuffer* commandBuffer) {
-
-    duk::rhi::Buffer* buffers[] = {
-            m_positionBuffer.get(),
-            m_texCoordBuffer.get()
-    };
+    duk::rhi::Buffer* buffers[] = {m_positionBuffer.get(), m_texCoordBuffer.get()};
 
     commandBuffer->bind_vertex_buffer(buffers, std::size(buffers));
 
@@ -247,7 +239,6 @@ void TextMesh::reserve(uint32_t textCount) {
 }
 
 void update_text_renderer(Renderer* renderer, const objects::Component<TextRenderer>& textRenderer) {
-
     auto atlas = textRenderer->font->atlas(textRenderer->fontSize, renderer->rhi(), renderer->main_command_queue());
 
     auto& material = textRenderer->material;
@@ -281,4 +272,4 @@ void update_text_renderer(Renderer* renderer, const objects::Component<TextRende
     descriptorSet->set_instance(textRenderer.object());
 }
 
-}
+}// namespace duk::renderer

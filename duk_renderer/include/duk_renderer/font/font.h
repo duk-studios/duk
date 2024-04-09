@@ -13,15 +13,13 @@ namespace duk::renderer {
 
 class Font {
 public:
-
     virtual ~Font();
 
     virtual FontAtlas* atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) = 0;
-
 };
 
 using FontResource = duk::resource::ResourceT<Font>;
 
-}
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_FONT_H
+#endif//DUK_RENDERER_FONT_H

@@ -4,8 +4,8 @@
 
 #include <duk_renderer/font/font_atlas.h>
 
-#include <duk_rhi/rhi.h>
 #include <duk_rhi/image_data_source.h>
+#include <duk_rhi/rhi.h>
 
 namespace duk::rhi {
 
@@ -14,7 +14,7 @@ inline PixelFormat pixel_format_of<uint8_t>() {
     return PixelFormat::R8U;
 }
 
-}
+}// namespace duk::rhi
 
 namespace duk::renderer {
 
@@ -29,7 +29,7 @@ FontAtlas::FontAtlas(const FontAtlasCreateInfo& fontAtlasCreateInfo) {
 
     m_image = std::make_shared<Image>(imageCreateInfo);
 
-    for (auto& glyph : fontAtlasCreateInfo.glyphs) {
+    for (auto& glyph: fontAtlasCreateInfo.glyphs) {
         m_glyphs[glyph.chr] = glyph;
     }
 }
@@ -48,5 +48,4 @@ const duk::renderer::Glyph& duk::renderer::FontAtlas::glyph(char chr) const {
     return m_glyphs.at('?');
 }
 
-} // duk::renderer
-
+}// namespace duk::renderer

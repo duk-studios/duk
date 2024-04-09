@@ -15,7 +15,6 @@
 namespace duk::renderer {
 
 struct Glyph {
-
     // metrics, already in final pixel size
     struct {
         glm::ivec2 size;
@@ -43,7 +42,6 @@ struct FontAtlasCreateInfo {
 
 class FontAtlas {
 public:
-
     explicit FontAtlas(const FontAtlasCreateInfo& fontAtlasCreateInfo);
 
     ~FontAtlas();
@@ -57,6 +55,6 @@ private:
     std::unordered_map<char, Glyph> m_glyphs;
 };
 
-} // duk::renderer
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_FONT_ATLAS_H
+#endif//DUK_RENDERER_FONT_ATLAS_H

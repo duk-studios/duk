@@ -2,8 +2,8 @@
 // Created by Ricardo on 29/03/2024.
 //
 
-#include <duk_renderer/font/freetype/freetype_font_loader.h>
 #include <duk_renderer/font/freetype/freetype_font.h>
+#include <duk_renderer/font/freetype/freetype_font_loader.h>
 
 #include <duk_tools/file.h>
 
@@ -37,4 +37,4 @@ std::shared_ptr<Font> FreetypeFontLoader::load(const std::filesystem::path& path
     return std::make_shared<FreetypeFont>(freetypeFontCreateInfo);
 }
 
-} // duk::renderer
+}// namespace duk::renderer

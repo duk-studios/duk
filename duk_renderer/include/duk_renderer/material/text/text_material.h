@@ -5,9 +5,9 @@
 #ifndef DUK_RENDERER_TEXT_MATERIAL_H
 #define DUK_RENDERER_TEXT_MATERIAL_H
 
-#include <duk_renderer/material/text/text_descriptors.h>
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/material/storage_buffer.h>
+#include <duk_renderer/material/text/text_descriptors.h>
 #include <duk_renderer/material/uniform_buffer.h>
 
 namespace duk::renderer {
@@ -67,4 +67,4 @@ void visit_object(JsonVisitor* visitor, duk::renderer::TextMaterialDataSource& m
 
 }// namespace duk::serial
 
-#endif //DUK_RENDERER_TEXT_MATERIAL_H
+#endif//DUK_RENDERER_TEXT_MATERIAL_H

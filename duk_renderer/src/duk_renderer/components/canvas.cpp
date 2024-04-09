@@ -19,4 +19,4 @@ void update_canvas_transform(const duk::objects::Component<Canvas>& canvas, cons
     canvasTransform->model = glm::translate(glm::mat4(1), glm::vec3(position - pivotOffset, 0.0));
 }
 
-}
+}// namespace duk::renderer

@@ -11,15 +11,13 @@ namespace duk::engine {
 
 class TextUpdateSystem : public System {
 public:
-
     void enter(objects::Objects& objects, Engine& engine) override;
 
     void update(objects::Objects& objects, Engine& engine) override;
 
     void exit(objects::Objects& objects, Engine& engine) override;
-
 };
 
-}
+}// namespace duk::engine
 
-#endif //DUK_RENDERER_TEXT_SYSTEM_H
+#endif//DUK_RENDERER_TEXT_SYSTEM_H

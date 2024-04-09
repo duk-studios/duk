@@ -11,7 +11,6 @@ namespace duk::engine {
 
 class CanvasUpdateSystem : public System {
 public:
-
     void enter(objects::Objects& objects, Engine& engine) override;
 
     void update(objects::Objects& objects, Engine& engine) override;
@@ -20,9 +19,8 @@ public:
 
 private:
     duk::event::Listener m_listener;
-
 };
 
-}
+}// namespace duk::engine
 
-#endif //DUK_ENGINE_CANVAS_SYSTEM_H
+#endif//DUK_ENGINE_CANVAS_SYSTEM_H

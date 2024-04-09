@@ -5,6 +5,5 @@
 #include <duk_renderer/font/font_pool.h>
 
 namespace duk {
-namespace renderer {
-} // renderer
-} // duk
+namespace renderer {}// namespace renderer
+}// namespace duk

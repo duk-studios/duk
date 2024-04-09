@@ -143,8 +143,7 @@ void Pipeline::PipelineCache::blend(bool enabled) {
         m_blend.alphaBlendOp = rhi::GraphicsPipeline::Blend::Operator::ADD;
         m_blend.srcAlphaBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ONE;
         m_blend.dstAlphaBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ZERO;
-    }
-    else {
+    } else {
         m_blend.enabled = false;
     }
 }

@@ -39,7 +39,7 @@ void update_canvas(const duk::objects::Component<Canvas>& canvas, uint32_t width
 
 void update_canvas_transform(const duk::objects::Component<Canvas>& canvas, const duk::objects::Component<CanvasTransform>& canvasTransform);
 
-}
+}// namespace duk::renderer
 
 namespace duk::serial {
 
@@ -55,6 +55,6 @@ void visit_object(JsonVisitor* visitor, duk::renderer::CanvasTransform& canvasTr
     visitor->visit_member(canvasTransform.size, MemberDescription("size"));
 }
 
-}
+}// namespace duk::serial
 
-#endif //DUK_RENDERER_CANVAS_H
+#endif//DUK_RENDERER_CANVAS_H

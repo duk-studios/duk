@@ -16,17 +16,11 @@ static const std::string kDefaultChars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJK
 
 FreetypeFont::FreetypeFont(const FreetypeFontCreateInfo& freetypeFontCreateInfo)
     : m_fontData(std::move(freetypeFontCreateInfo.fontData)) {
-
-    auto error = FT_New_Memory_Face(freetypeFontCreateInfo.library,
-                                    (const FT_Byte*)m_fontData.data(),
-                                    m_fontData.size(),
-                                    0,
-                                    &m_face);
+    auto error = FT_New_Memory_Face(freetypeFontCreateInfo.library, (const FT_Byte*)m_fontData.data(), m_fontData.size(), 0, &m_face);
 
     if (error) {
         throw std::runtime_error(build_freetype_error_message("failed to create freetype face", error));
     }
-
 }
 
 FreetypeFont::~FreetypeFont() {
@@ -37,14 +31,12 @@ FreetypeFont::~FreetypeFont() {
 }
 
 FontAtlas* FreetypeFont::atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) {
-
     {
         auto it = m_atlases.find(fontSize);
         if (it != m_atlases.end() && it->second) {
             return it->second.get();
         }
     }
-
 
     auto error = FT_Set_Char_Size(m_face, fontSize * 64, 0, 100, 0);
     if (error) {
@@ -55,9 +47,7 @@ FontAtlas* FreetypeFont::atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::
 
     const auto& charSet = detail::kDefaultChars;
     for (uint32_t i = 0; i < charSet.size(); i++) {
-
         const auto chr = charSet[i];
-
 
         error = FT_Load_Char(m_face, chr, FT_LOAD_BITMAP_METRICS_ONLY);
         if (error) {
@@ -83,13 +73,11 @@ FontAtlas* FreetypeFont::atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::
         return lhs.metrics.size.y > rhs.metrics.size.y;
     });
 
-
     /// place each glyph on the upper right of the previous one (starting at the upper left)
     const int32_t kMaxWidth = 256;
     glm::ivec2 pen(kMaxWidth, 0);
 
-    for (auto& glyph : glyphs) {
-
+    for (auto& glyph: glyphs) {
         /// if a glyph would be outside of the determined maximum width of the image, wrap into next row
         if (pen.x + glyph.metrics.size.x > kMaxWidth) {
             pen.x = 0;
@@ -107,8 +95,7 @@ FontAtlas* FreetypeFont::atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::
     std::vector<uint8_t> image(imageSize.x * imageSize.y);
 
     // load and copy glyphs bitmap data into the image buffer
-    for (auto& glyph : glyphs) {
-
+    for (auto& glyph: glyphs) {
         error = FT_Load_Char(m_face, glyph.chr, FT_LOAD_RENDER);
         if (error) {
             duk::log::debug("failed to load/render char \'{}\', reason: ", glyph.chr, FT_Error_String(error));
@@ -154,4 +141,4 @@ FontAtlas* FreetypeFont::atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::
     return atlas.get();
 }
 
-} // duk::renderer
+}// namespace duk::renderer

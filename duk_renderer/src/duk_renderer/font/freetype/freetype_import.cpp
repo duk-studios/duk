@@ -11,4 +11,4 @@ std::string build_freetype_error_message(const char* format, FT_Error error) {
     return fmt::format("{0}. error: {1}", format, FT_Error_String(error));
 }
 
-}
+}// namespace duk::renderer

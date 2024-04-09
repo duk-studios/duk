@@ -13,7 +13,6 @@
 namespace duk::sample {
 
 void StatsSystem::enter(objects::Objects& objects, engine::Engine& engine) {
-
 }
 
 void StatsSystem::update(objects::Objects& objects, engine::Engine& engine) {
@@ -43,7 +42,6 @@ void StatsSystem::update(objects::Objects& objects, engine::Engine& engine) {
 }
 
 void StatsSystem::exit(objects::Objects& objects, engine::Engine& engine) {
-
 }
 
-} // duk::sample
+}// namespace duk::sample

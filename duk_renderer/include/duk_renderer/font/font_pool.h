@@ -13,6 +13,6 @@ namespace duk::renderer {
 
 class FontPool : public duk::resource::PoolT<FontResource> {};
 
-} // duk::renderer
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_FONT_POOL_H
+#endif//DUK_RENDERER_FONT_POOL_H

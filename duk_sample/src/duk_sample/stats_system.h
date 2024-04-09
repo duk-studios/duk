@@ -17,7 +17,6 @@ struct Stats {
 
 class StatsSystem : public duk::engine::System {
 public:
-
     void enter(objects::Objects& objects, engine::Engine& engine) override;
 
     void update(objects::Objects& objects, engine::Engine& engine) override;
@@ -25,7 +24,7 @@ public:
     void exit(objects::Objects& objects, engine::Engine& engine) override;
 };
 
-} // duk::sample
+}// namespace duk::sample
 
 namespace duk::serial {
 
@@ -36,4 +35,4 @@ void visit_object(JsonVisitor* visitor, duk::sample::Stats& stats) {
 
 }// namespace duk::serial
 
-#endif //DUK_STATS_SYSTEM_H
+#endif//DUK_STATS_SYSTEM_H

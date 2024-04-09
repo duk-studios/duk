@@ -18,7 +18,7 @@ const std::string& FontImporter::tag() const {
 }
 
 void FontImporter::load(const resource::Id& id, const std::filesystem::path& path) {
-    for (auto& loader : m_loaders) {
+    for (auto& loader: m_loaders) {
         if (loader->accepts(path)) {
             m_fontPool->insert(id, loader->load(path));
             return;
@@ -27,4 +27,4 @@ void FontImporter::load(const resource::Id& id, const std::filesystem::path& pat
     throw std::runtime_error(fmt::format("failed to find font loader for {}", path.string()));
 }
 
-} // duk::renderer
+}// namespace duk::renderer

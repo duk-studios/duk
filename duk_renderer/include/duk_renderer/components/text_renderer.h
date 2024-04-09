@@ -18,7 +18,6 @@ struct TextMeshCreateInfo {
 
 class TextMesh {
 public:
-
     TextMesh(const TextMeshCreateInfo& textBrushCreateInfo);
 
     void update_text(const FontAtlas* atlas, const TextRenderer& textRenderer);
@@ -26,7 +25,6 @@ public:
     void draw(duk::rhi::CommandBuffer* commandBuffer);
 
 private:
-
     void reserve(uint32_t textCount);
 
 private:
@@ -64,7 +62,7 @@ struct TextRenderer {
 
 void update_text_renderer(Renderer* renderer, const duk::objects::Component<TextRenderer>& textRenderer);
 
-}
+}// namespace duk::renderer
 
 namespace duk::serial {
 
@@ -85,10 +83,14 @@ static inline duk::renderer::TextHoriAlignment parse_text_hori_alignment(const c
 
 static inline std::string to_string(duk::renderer::TextHoriAlignment textAlignment) {
     switch (textAlignment) {
-        case renderer::TextHoriAlignment::LEFT: return "left";
-        case renderer::TextHoriAlignment::MIDDLE: return "middle";
-        case renderer::TextHoriAlignment::RIGHT: return "right";
-        default: throw std::invalid_argument(fmt::format("invalid TextHoriAlignment value: {}", (int)textAlignment));
+        case renderer::TextHoriAlignment::LEFT:
+            return "left";
+        case renderer::TextHoriAlignment::MIDDLE:
+            return "middle";
+        case renderer::TextHoriAlignment::RIGHT:
+            return "right";
+        default:
+            throw std::invalid_argument(fmt::format("invalid TextHoriAlignment value: {}", (int)textAlignment));
     }
 }
 
@@ -107,14 +109,18 @@ static inline duk::renderer::TextVertAlignment parse_text_vert_alignment(const c
 
 static inline std::string to_string(duk::renderer::TextVertAlignment textAlignment) {
     switch (textAlignment) {
-        case renderer::TextVertAlignment::TOP: return "top";
-        case renderer::TextVertAlignment::MIDDLE: return "middle";
-        case renderer::TextVertAlignment::BOTTOM: return "bottom";
-        default: throw std::invalid_argument(fmt::format("invalid TextVertAlignment value: {}", (int)textAlignment));
+        case renderer::TextVertAlignment::TOP:
+            return "top";
+        case renderer::TextVertAlignment::MIDDLE:
+            return "middle";
+        case renderer::TextVertAlignment::BOTTOM:
+            return "bottom";
+        default:
+            throw std::invalid_argument(fmt::format("invalid TextVertAlignment value: {}", (int)textAlignment));
     }
 }
 
-}
+}// namespace detail
 
 template<>
 inline void from_json<duk::renderer::TextHoriAlignment>(const rapidjson::Value& jsonObject, duk::renderer::TextHoriAlignment& textAlignment) {
@@ -150,7 +156,7 @@ void visit_object(JsonVisitor* visitor, duk::renderer::TextRenderer& textRendere
     visitor->visit_member(textRenderer.vertAlignment, MemberDescription("vertAlignment"));
 }
 
-}
+}// namespace duk::serial
 
 namespace duk::resource {
 
@@ -161,5 +167,4 @@ void solve_resources(Solver* solver, duk::renderer::TextRenderer& textRenderer) 
 
 }// namespace duk::resource
 
-
-#endif //DUK_RENDERER_TEXT_RENDERER_H
+#endif//DUK_RENDERER_TEXT_RENDERER_H

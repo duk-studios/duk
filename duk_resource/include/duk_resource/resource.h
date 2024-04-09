@@ -126,7 +126,6 @@ template<typename T>
 ResourceT<T>::ResourceT(const std::shared_ptr<T>& resource)
     : Resource(kInvalidId)
     , m_resource(resource) {
-
 }
 
 template<typename T>

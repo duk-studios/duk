@@ -17,7 +17,6 @@ struct FreetypeFontCreateInfo {
 
 class FreetypeFont : public Font {
 public:
-
     explicit FreetypeFont(const FreetypeFontCreateInfo& freetypeFontCreateInfo);
 
     ~FreetypeFont() override;
@@ -30,6 +29,6 @@ private:
     std::unordered_map<uint32_t, std::unique_ptr<FontAtlas>> m_atlases;
 };
 
-} // duk::renderer
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_FREETYPE_FONT_H
+#endif//DUK_RENDERER_FREETYPE_FONT_H

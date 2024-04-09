@@ -16,4 +16,4 @@ extern std::string build_freetype_error_message(const char* format, FT_Error err
 
 }
 
-#endif //DUK_RENDERER_FREETYPE_IMPORT_H
+#endif//DUK_RENDERER_FREETYPE_IMPORT_H

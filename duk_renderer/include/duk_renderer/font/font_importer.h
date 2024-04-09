@@ -13,7 +13,6 @@ namespace duk::renderer {
 
 class FontLoader {
 public:
-
     virtual ~FontLoader() = default;
 
     virtual bool accepts(const std::filesystem::path& path) = 0;
@@ -27,7 +26,6 @@ struct FontImporterCreateInfo {
 
 class FontImporter : public duk::resource::ResourceImporter {
 public:
-
     explicit FontImporter(const FontImporterCreateInfo& fontImporterCreateInfo);
 
     const std::string& tag() const override;
@@ -39,6 +37,6 @@ private:
     std::vector<std::unique_ptr<FontLoader>> m_loaders;
 };
 
-} // duk::renderer
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_FONT_IMPORTER_H
+#endif//DUK_RENDERER_FONT_IMPORTER_H
