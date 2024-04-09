@@ -35,13 +35,23 @@ void Pipeline::cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullMod
     m_pipelineCache.cull_mode_mask(cullModeMask);
 }
 
+void Pipeline::blend(bool enabled) {
+    m_pipelineCache.blend(enabled);
+}
+
+void Pipeline::depth_test(bool enabled) {
+    m_pipelineCache.depth_test(enabled);
+}
+
 //------------------------------------
 
 Pipeline::PipelineCache::PipelineCache(Renderer* renderer, const duk::rhi::ShaderDataSource* shaderDataSource)
     : m_renderer(renderer)
     , m_shader(nullptr)
+    , m_cullModeMask(duk::rhi::GraphicsPipeline::CullMode::BACK)
+    , m_blend({})
     , m_invertY(false)
-    , m_cullModeMask(duk::rhi::GraphicsPipeline::CullMode::BACK) {
+    , m_depthTest(true) {
     update_shader(shaderDataSource);
 }
 
@@ -66,7 +76,8 @@ duk::rhi::GraphicsPipeline* Pipeline::PipelineCache::find_pipeline_for_params(co
         pipelineCreateInfo.topology = duk::rhi::GraphicsPipeline::Topology::TRIANGLE_LIST;
         pipelineCreateInfo.shader = m_shader.get();
         pipelineCreateInfo.renderPass = params.renderPass;
-        pipelineCreateInfo.depthTesting = true;
+        pipelineCreateInfo.depthTesting = m_depthTest;
+        pipelineCreateInfo.blend = m_blend;
 
         auto expectedPipeline = m_renderer->rhi()->create_graphics_pipeline(pipelineCreateInfo);
         if (!expectedPipeline) {
@@ -96,6 +107,8 @@ duk::hash::Hash Pipeline::PipelineCache::hash_for_params(const DrawParams& param
     hash::hash_combine(hash, params.outputWidth);
     hash::hash_combine(hash, params.outputHeight);
     hash::hash_combine(hash, m_invertY);
+    hash::hash_combine(hash, m_blend.enabled);
+    hash::hash_combine(hash, m_depthTest);
     hash::hash_combine(hash, m_cullModeMask);
     hash::hash_combine(hash, m_shader->hash());
     return hash;
@@ -119,6 +132,25 @@ void Pipeline::PipelineCache::invert_y(bool invert) {
 
 void Pipeline::PipelineCache::cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask) {
     m_cullModeMask = cullModeMask;
+}
+
+void Pipeline::PipelineCache::blend(bool enabled) {
+    if (enabled) {
+        m_blend.enabled = true;
+        m_blend.colorBlendOp = rhi::GraphicsPipeline::Blend::Operator::ADD;
+        m_blend.srcColorBlendFactor = rhi::GraphicsPipeline::Blend::Factor::SRC_ALPHA;
+        m_blend.dstColorBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC_ALPHA;
+        m_blend.alphaBlendOp = rhi::GraphicsPipeline::Blend::Operator::ADD;
+        m_blend.srcAlphaBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ONE;
+        m_blend.dstAlphaBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ZERO;
+    }
+    else {
+        m_blend.enabled = false;
+    }
+}
+
+void Pipeline::PipelineCache::depth_test(bool enabled) {
+    m_depthTest = enabled;
 }
 
 void Pipeline::PipelineCache::clear_unused_pipelines() {

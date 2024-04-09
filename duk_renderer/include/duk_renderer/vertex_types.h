@@ -54,6 +54,7 @@ private:
 };
 
 using VertexBufferArray = std::array<std::shared_ptr<duk::rhi::Buffer>, VertexAttributes::COUNT>;
+using VertexBufferRefArray = std::array<duk::rhi::Buffer*, VertexAttributes::COUNT>;
 
 // ---------------------------
 

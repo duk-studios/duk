@@ -17,6 +17,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/components/lighting.h
         include/duk_renderer/components/mesh_renderer.h
         include/duk_renderer/components/sprite_renderer.h
+        include/duk_renderer/components/text_renderer.h
         include/duk_renderer/components/transform.h
         include/duk_renderer/sprite/sprite.h
         include/duk_renderer/sprite/sprite_brush.h
@@ -78,6 +79,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/components/lighting.cpp
         src/duk_renderer/components/mesh_renderer.cpp
         src/duk_renderer/components/sprite_renderer.cpp
+        src/duk_renderer/components/text_renderer.cpp
         src/duk_renderer/components/transform.cpp
         src/duk_renderer/sprite/sprite.cpp
         src/duk_renderer/sprite/sprite_data_source.cpp
