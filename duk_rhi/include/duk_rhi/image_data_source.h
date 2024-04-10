@@ -95,7 +95,7 @@ public:
     }
 
     DUK_NO_DISCARD PixelFormat pixel_format() const override {
-        return PixelType::format();
+        return pixel_format_of<PixelType>();
     }
 
     DUK_NO_DISCARD size_t pixel_count() const override {
@@ -130,7 +130,7 @@ protected:
         duk::hash::hash_combine(hash, m_pixels.data(), byte_count());
         duk::hash::hash_combine(hash, m_width);
         duk::hash::hash_combine(hash, m_height);
-        duk::hash::hash_combine(hash, PixelType::format());
+        duk::hash::hash_combine(hash, pixel_format());
         return hash;
     }
 

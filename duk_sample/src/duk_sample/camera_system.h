@@ -9,6 +9,7 @@
 #include <duk_audio/clip/audio_clip.h>
 #include <duk_engine/systems.h>
 #include <duk_objects/objects.h>
+#include <duk_renderer/font/font.h>
 
 namespace duk::sample {
 
@@ -17,6 +18,7 @@ struct CameraController {
     float rotationSpeed;
     duk::audio::AudioClipResource spawnClip;
     duk::objects::ObjectsResource sphere;
+    duk::renderer::FontResource font;
     duk::audio::AudioPlayer audioPlayer;
 };
 
@@ -39,6 +41,7 @@ void visit_object(JsonVisitor* visitor, duk::sample::CameraController& cameraCon
     visitor->visit_member(cameraController.rotationSpeed, MemberDescription("rotationSpeed"));
     visitor->template visit_member<duk::resource::Resource>(cameraController.spawnClip, MemberDescription("spawnClip"));
     visitor->template visit_member<duk::resource::Resource>(cameraController.sphere, MemberDescription("sphere"));
+    visitor->template visit_member<duk::resource::Resource>(cameraController.font, MemberDescription("font"));
 }
 
 }// namespace duk::serial
@@ -49,6 +52,7 @@ template<typename Solver>
 void solve_resources(Solver* solver, duk::sample::CameraController& cameraController) {
     solver->solve(cameraController.spawnClip);
     solver->solve(cameraController.sphere);
+    solver->solve(cameraController.font);
 }
 
 }// namespace duk::resource

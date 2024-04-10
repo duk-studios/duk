@@ -12,11 +12,13 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/brush.h
         include/duk_renderer/generic_brush.h
         include/duk_renderer/texture.h
+        include/duk_renderer/components/camera.h
+        include/duk_renderer/components/canvas.h
+        include/duk_renderer/components/lighting.h
         include/duk_renderer/components/mesh_renderer.h
         include/duk_renderer/components/sprite_renderer.h
+        include/duk_renderer/components/text_renderer.h
         include/duk_renderer/components/transform.h
-        include/duk_renderer/components/camera.h
-        include/duk_renderer/components/lighting.h
         include/duk_renderer/sprite/sprite.h
         include/duk_renderer/sprite/sprite_brush.h
         include/duk_renderer/sprite/sprite_data_source.h
@@ -25,6 +27,10 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/image/image_pool.h
         include/duk_renderer/image/image_importer.h
         include/duk_renderer/image/image_loader_stb.h
+        include/duk_renderer/font/font.h
+        include/duk_renderer/font/font_atlas.h
+        include/duk_renderer/font/font_pool.h
+        include/duk_renderer/font/font_importer.h
         include/duk_renderer/mesh/mesh.h
         include/duk_renderer/mesh/mesh_data_source.h
         include/duk_renderer/mesh/mesh_pool.h
@@ -48,6 +54,9 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/material/sprites/sprite_color/sprite_color_material.h
         include/duk_renderer/material/sprites/sprite_color/sprite_color_shader_data_source.h
         include/duk_renderer/material/sprites/sprite_color/sprite_color_descriptors.h
+        include/duk_renderer/material/text/text_material.h
+        include/duk_renderer/material/text/text_descriptors.h
+        include/duk_renderer/material/text/text_shader_data_source.h
         include/duk_renderer/material/globals/lights_types.h
         include/duk_renderer/material/globals/camera_types.h
         include/duk_renderer/material/draw_entry.h
@@ -65,11 +74,13 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/brush.cpp
         src/duk_renderer/generic_brush.cpp
         src/duk_renderer/texture.cpp
+        src/duk_renderer/components/camera.cpp
+        src/duk_renderer/components/canvas.cpp
+        src/duk_renderer/components/lighting.cpp
         src/duk_renderer/components/mesh_renderer.cpp
         src/duk_renderer/components/sprite_renderer.cpp
+        src/duk_renderer/components/text_renderer.cpp
         src/duk_renderer/components/transform.cpp
-        src/duk_renderer/components/camera.cpp
-        src/duk_renderer/components/lighting.cpp
         src/duk_renderer/sprite/sprite.cpp
         src/duk_renderer/sprite/sprite_data_source.cpp
         src/duk_renderer/sprite/sprite_pool.cpp
@@ -81,6 +92,16 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/image/image_pool.cpp
         src/duk_renderer/image/image_importer.cpp
         src/duk_renderer/image/image_loader_stb.cpp
+        src/duk_renderer/font/font.cpp
+        src/duk_renderer/font/font_atlas.cpp
+        src/duk_renderer/font/font_pool.cpp
+        src/duk_renderer/font/font_importer.cpp
+        src/duk_renderer/font/freetype/freetype_import.h
+        src/duk_renderer/font/freetype/freetype_import.cpp
+        src/duk_renderer/font/freetype/freetype_font.h
+        src/duk_renderer/font/freetype/freetype_font.cpp
+        src/duk_renderer/font/freetype/freetype_font_loader.h
+        src/duk_renderer/font/freetype/freetype_font_loader.cpp
         src/duk_renderer/material/pipeline.cpp
         src/duk_renderer/material/material.cpp
         src/duk_renderer/material/material_importer.cpp
@@ -100,6 +121,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/material/sprites/sprite_color/sprite_color_material.cpp
         src/duk_renderer/material/sprites/sprite_color/sprite_color_shader_data_source.cpp
         src/duk_renderer/material/sprites/sprite_color/sprite_color_descriptors.cpp
+        src/duk_renderer/material/text/text_material.cpp
+        src/duk_renderer/material/text/text_descriptors.cpp
+        src/duk_renderer/material/text/text_shader_data_source.cpp
         src/duk_renderer/material/globals/global_descriptors.cpp
         src/duk_renderer/material/material_pool.cpp
         src/duk_renderer/passes/forward_pass.cpp
@@ -123,6 +147,7 @@ target_link_libraries(duk_renderer
         duk_objects
         duk_rhi
         duk_resource
+        Freetype::Freetype
         )
 
 set_target_properties(duk_renderer PROPERTIES CXX_STANDARD 20)

@@ -1,9 +1,10 @@
 /// 05/10/2023
 /// forward_pass.cpp
 
-#include "duk_renderer/components/transform.h"
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/sprite_renderer.h>
+#include <duk_renderer/components/text_renderer.h>
+#include <duk_renderer/components/transform.h>
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/material/pipeline.h>
 #include <duk_renderer/mesh/mesh.h>
@@ -16,6 +17,43 @@ namespace duk::renderer {
 namespace detail {
 
 static constexpr auto kColorFormat = duk::rhi::PixelFormat::RGBA8U;
+
+static void update_texts(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, TextDrawData* drawData) {
+    drawData->clear();
+    auto objects = params.objects;
+    auto& drawEntries = drawData->drawEntries;
+
+    std::set<Material*> uniqueMaterials;
+
+    for (auto object: objects->all_with<TextRenderer>()) {
+        auto textRenderer = object.component<TextRenderer>();
+
+        if (!textRenderer->material || !textRenderer->mesh) {
+            duk::log::warn("TextRenderer with no material and/or mesh, missing call to update_text_renderer");
+            continue;
+        }
+
+        auto material = textRenderer->material.get();
+        uniqueMaterials.insert(material);
+
+        TextDrawEntry textEntry = {};
+        textEntry.material = material;
+        textEntry.mesh = textRenderer->mesh.get();
+
+        drawEntries.emplace_back(textEntry);
+    }
+
+    // update materials
+    DrawParams drawParams = {};
+    drawParams.globalDescriptors = params.globalDescriptors;
+    drawParams.outputWidth = params.outputWidth;
+    drawParams.outputHeight = params.outputHeight;
+    drawParams.renderPass = renderPass;
+
+    for (auto material: uniqueMaterials) {
+        material->update(drawParams);
+    }
+}
 
 static SortKey calculate_mesh_sort_key(const MeshRenderer* param) {
     SortKey::Flags flags = {};
@@ -228,6 +266,10 @@ void SpriteDrawData::clear() {
     drawEntries.clear();
 }
 
+void TextDrawData::clear() {
+    drawEntries.clear();
+}
+
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
     : m_renderer(forwardPassCreateInfo.renderer)
     , m_outColor(duk::rhi::Access::COLOR_ATTACHMENT_WRITE, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
@@ -301,6 +343,8 @@ void ForwardPass::update(const Pass::UpdateParams& params) {
         m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
     }
 
+    detail::update_texts(params, m_renderPass.get(), &m_textDrawData);
+
     detail::update_meshes(params, m_renderPass.get(), &m_meshDrawData);
 
     detail::update_sprites(params, m_renderPass.get(), &m_spriteDrawData);
@@ -330,6 +374,14 @@ void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
                 currentMaterial = entry.material;
             }
             entry.brush->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
+        }
+    }
+
+    // render texts
+    {
+        for (auto& entry: m_textDrawData.drawEntries) {
+            entry.material->bind(commandBuffer);
+            entry.mesh->draw(commandBuffer);
         }
     }
 

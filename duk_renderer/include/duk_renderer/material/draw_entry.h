@@ -14,6 +14,7 @@ class Brush;
 class Mesh;
 class Sprite;
 class SpriteBrush;
+class TextMesh;
 class Material;
 class GlobalDescriptors;
 
@@ -50,6 +51,11 @@ struct SpriteDrawEntry {
     Material* material;
     size_t instanceCount;
     size_t firstInstance;
+};
+
+struct TextDrawEntry {
+    TextMesh* mesh;
+    Material* material;
 };
 
 // specialization for duk_renderer/sort.h sort_key

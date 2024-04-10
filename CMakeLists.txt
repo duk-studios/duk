@@ -31,6 +31,7 @@ find_path(MINIAUDIO_INCLUDE_DIRS "miniaudio.h" REQUIRED)
 find_package(volk CONFIG REQUIRED)
 find_package(grapphs CONFIG REQUIRED)
 find_package(spirv-reflect CONFIG REQUIRED)
+find_package(Freetype REQUIRED)
 
 include(GNUInstallDirs)
 

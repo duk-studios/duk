@@ -22,14 +22,19 @@ public:
 
     void update_cameras(duk::objects::Objects& objects);
 
+    void update_canvas(duk::objects::Objects& objects);
+
     void update_lights(duk::objects::Objects& objects);
 
     globals::CameraUBO* camera_ubo();
+
+    globals::CameraUBO* canvas_ubo();
 
     globals::LightsUBO* lights_ubo();
 
 private:
     std::unique_ptr<globals::CameraUBO> m_cameraUBO;
+    std::unique_ptr<globals::CameraUBO> m_canvasCameraUBO;
     std::unique_ptr<globals::LightsUBO> m_lightsUBO;
 };
 

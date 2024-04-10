@@ -9,6 +9,7 @@
 
 #include <duk_audio/clip/audio_clip_importer.h>
 
+#include <duk_renderer/font/font_importer.h>
 #include <duk_renderer/image/image_importer.h>
 #include <duk_renderer/material/material_importer.h>
 #include <duk_renderer/mesh/mesh_pool.h>
@@ -83,6 +84,12 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         m_importer->add_resource_importer<duk::renderer::ImageImporter>(imageImporterCreateInfo);
     }
 
+    {
+        duk::renderer::FontImporterCreateInfo fontImporterCreateInfo = {};
+        fontImporterCreateInfo.fontPool = m_pools.create_pool<duk::renderer::FontPool>();
+        m_importer->add_resource_importer<duk::renderer::FontImporter>(fontImporterCreateInfo);
+    }
+
     // materials
     {
         duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
@@ -153,8 +160,8 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
 Engine::~Engine() {
     m_director.reset();
-    m_importer.reset();
     m_pools.clear();
+    m_importer.reset();
 }
 
 void Engine::run() {

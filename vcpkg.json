@@ -12,6 +12,12 @@
     "spirv-reflect",
     "rapidjson",
     "cxxopts",
-    "grapphs"
+    "grapphs",
+    {
+      "name": "freetype",
+      "features": [
+        "error-strings"
+      ]
+    }
   ]
 }

@@ -13,6 +13,8 @@ set(DUK_SAMPLE_SOURCES
         src/duk_sample/application.cpp
         src/duk_sample/camera_system.h
         src/duk_sample/camera_system.cpp
+        src/duk_sample/stats_system.h
+        src/duk_sample/stats_system.cpp
 )
 
 add_executable(duk_sample ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})

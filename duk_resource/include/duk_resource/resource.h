@@ -71,6 +71,8 @@ public:
 
     ResourceT(Id id, const std::shared_ptr<T>& resource);
 
+    ResourceT(const std::shared_ptr<T>& resource);
+
     template<typename U>
     ResourceT(const ResourceT<U>& other)
         requires std::is_base_of_v<T, U>;
@@ -117,6 +119,12 @@ ResourceT<T>::ResourceT(Id id)
 template<typename T>
 ResourceT<T>::ResourceT(Id id, const std::shared_ptr<T>& resource)
     : Resource(id)
+    , m_resource(resource) {
+}
+
+template<typename T>
+ResourceT<T>::ResourceT(const std::shared_ptr<T>& resource)
+    : Resource(kInvalidId)
     , m_resource(resource) {
 }
 

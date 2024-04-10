@@ -33,6 +33,10 @@ public:
 
     void cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask);
 
+    void blend(bool enabled);
+
+    void depth_test(bool enabled);
+
 private:
     class PipelineCache {
     public:
@@ -45,6 +49,10 @@ private:
         void invert_y(bool invert);
 
         void cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask);
+
+        void blend(bool enabled);
+
+        void depth_test(bool enabled);
 
         void clear_unused_pipelines();
 
@@ -64,7 +72,9 @@ private:
         Renderer* m_renderer;
         std::shared_ptr<duk::rhi::Shader> m_shader;
         duk::rhi::GraphicsPipeline::CullMode::Mask m_cullModeMask;
+        duk::rhi::GraphicsPipeline::Blend m_blend;
         bool m_invertY;
+        bool m_depthTest;
     };
 
 private:
