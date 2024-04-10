@@ -11,21 +11,14 @@
 
 namespace duk::renderer {
 
-struct Position3D {
-    glm::vec3 value;
-};
-
-struct Rotation3D {
-    glm::quat value;
-};
-
-struct Scale3D {
-    glm::vec3 value{1};
-};
-
 struct Transform {
-    glm::mat4 model;
-    glm::mat4 invModel;
+    glm::vec3 position{0};
+    glm::quat rotation{glm::vec3(0)};
+    glm::vec3 scale{1};
+
+    // internal use
+    glm::mat4 model{1};
+    glm::mat4 invModel{1};
 };
 
 glm::vec3 forward(const Transform& transform);
@@ -39,23 +32,10 @@ void update_transforms(duk::objects::Objects& objects);
 namespace duk::serial {
 
 template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::Position3D& position) {
-    visitor->visit_member(position.value, MemberDescription("value"));
-}
-
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::Rotation3D& rotation) {
-    visitor->visit_member(rotation.value, MemberDescription("value"));
-}
-
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::Scale3D& scale) {
-    visitor->visit_member(scale.value, MemberDescription("value"));
-}
-
-template<typename JsonVisitor>
 void visit_object(JsonVisitor* visitor, duk::renderer::Transform& transform) {
-    // nothing for now
+    visitor->visit_member(transform.position, MemberDescription("position"));
+    visitor->visit_member(transform.rotation, MemberDescription("rotation"));
+    visitor->visit_member(transform.scale, MemberDescription("scale"));
 }
 
 }// namespace duk::serial

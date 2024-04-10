@@ -9,21 +9,11 @@ namespace duk::renderer {
 
 namespace detail {
 
-static glm::mat4 calculate_model(const duk::objects::Object& object) {
+static glm::mat4 calculate_model(const Transform& transform) {
     glm::mat4 model(1);
-
-    if (auto position3D = object.component<Position3D>()) {
-        model = glm::translate(model, position3D->value);
-    }
-
-    if (auto rotation3D = object.component<Rotation3D>()) {
-        model *= glm::mat4_cast(rotation3D->value);
-    }
-
-    if (auto scale3D = object.component<Scale3D>()) {
-        model = glm::scale(model, scale3D->value);
-    }
-
+    model = glm::translate(model, transform.position);
+    model *= glm::mat4_cast(transform.rotation);
+    model = glm::scale(model, transform.scale);
     return model;
 }
 
@@ -34,7 +24,7 @@ glm::vec3 forward(const Transform& transform) {
 }
 
 void update_transform(const duk::objects::Component<Transform>& transform) {
-    transform->model = detail::calculate_model(transform.object());
+    transform->model = detail::calculate_model(*transform);
     transform->invModel = glm::inverse(transform->model);
 }
 

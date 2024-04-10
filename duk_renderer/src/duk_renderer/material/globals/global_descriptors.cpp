@@ -86,9 +86,9 @@ void GlobalDescriptors::update_lights(duk::objects::Objects& objects) {
     lights.pointLightCount = 0;
     for (auto object: objects.all_with<PointLight>()) {
         auto pointLightComponent = object.component<PointLight>();
-        auto positionComponent = object.component<Position3D>();
+        auto transform = object.component<Transform>();
         auto& pointLight = lights.pointLights[lights.pointLightCount++];
-        pointLight.position = positionComponent ? positionComponent->value : glm::vec3(0);
+        pointLight.position = transform ? transform->position : glm::vec3(0);
         pointLight.linear = 0.14f;
         pointLight.quadratic = 0.07f;
         pointLight.value.color = pointLightComponent->value.color;

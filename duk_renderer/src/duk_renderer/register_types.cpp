@@ -15,9 +15,6 @@ namespace duk::renderer {
 void register_types() {
     duk::objects::register_component<DirectionalLight>();
     duk::objects::register_component<PointLight>();
-    duk::objects::register_component<Position3D>();
-    duk::objects::register_component<Rotation3D>();
-    duk::objects::register_component<Scale3D>();
     duk::objects::register_component<Transform>();
     duk::objects::register_component<SpriteRenderer>();
     duk::objects::register_component<MeshRenderer>();

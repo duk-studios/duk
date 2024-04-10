@@ -94,10 +94,8 @@ int main() {
     //Adding our first object to the objects, a camera.
     //Setup the camera position, and adding the Perspective Component to it.
     duk::objects::Object camera = objects.add_object();
-    auto cameraPosition = camera.add<duk::renderer::Position3D>();
-    cameraPosition->value = glm::vec3(0, 0, 0);
-    camera.add<duk::renderer::Transform>();
-    camera.add<duk::renderer::Rotation3D>();
+    auto cameraTransform = camera.add<duk::renderer::Transform>();
+    cameraTransform->position = glm::vec3(0, 0, 0);
     camera.add<duk::renderer::Camera>();
     auto cameraPerspective = camera.add<duk::renderer::PerspectiveCamera>();
     cameraPerspective->zFar = 1000.0f;
@@ -106,9 +104,8 @@ int main() {
 
     ////Adding a light to our objects.
     duk::objects::Object globalLight = objects.add_object();
-    globalLight.add<duk::renderer::Transform>();
-    auto globalLightPosition = globalLight.add<duk::renderer::Position3D>();
-    globalLightPosition->value = glm::vec3(0, 4, -5);
+    auto globalLightTransform = globalLight.add<duk::renderer::Transform>();
+    globalLightTransform->position = glm::vec3(0, 4, -5);
     auto globalPointLight = globalLight.add<duk::renderer::PointLight>();
     globalPointLight->value.color = glm::vec3(1.0f, 1.0f, 1.0f);
     globalPointLight->value.intensity = 5.0f;
@@ -132,12 +129,10 @@ int main() {
     phongMaterialDataSource.specularTexture = imagePool->white_image();
     phongMaterialDataSource.update_hash();
     cubeMeshRenderer->material = materialPool->create(duk::resource::Id(666), &phongMaterialDataSource);
-    auto cubePosition = cubeObject.add<duk::renderer::Position3D>();
-    cubePosition->value = glm::vec3(0, 0, -10);
-    auto cubeScale = cubeObject.add<duk::renderer::Scale3D>();
-    cubeScale->value = glm::vec3(1.0f, 1.0f, 1.0f);
-    auto cubeRotation = cubeObject.add<duk::renderer::Rotation3D>();
-    cubeRotation->value = glm::radians(glm::vec3(30, 45, 0));
+    auto cubeTransform = cubeObject.add<duk::renderer::Transform>();
+    cubeTransform->position = glm::vec3(0, 0, -10);
+    cubeTransform->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+    cubeTransform->rotation = glm::radians(glm::vec3(30, 45, 0));
 
     //Show the window we created.
     application.window()->show();
@@ -159,7 +154,7 @@ int main() {
         duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());
 
         //Rotating the cube in the X value by the timer total duration.
-        cubeRotation->value = glm::vec3(timer.total_duration().count(), 45.0f, 0.0f);
+        cubeTransform->rotation = glm::vec3(timer.total_duration().count(), 45.0f, 0.0f);
 
         //Telling to our renderer to render the objects we want.
         application.renderer()->render(objects);
