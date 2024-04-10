@@ -77,29 +77,24 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
 
     auto controller = object.component<CameraController>();
 
-    auto rotation = object.component<duk::renderer::Rotation3D>();
-    glm::quat rotationValue(glm::vec3(0));
-    if (rotation) {
-        auto rotationDirection = detail::input_rotation_direction(input, cursor);
-        rotation->value = glm::normalize(rotation->value * glm::quat(glm::radians(rotationDirection * controller->rotationSpeed * deltaTime)));
-        rotationValue = rotation->value;
+    auto transform = object.component<duk::renderer::Transform>();
+    if (!transform) {
+        duk::log::fatal("No transform attached to CameraController, skipping CameraSystem");
+        return;
     }
+    auto rotationDirection = detail::input_rotation_direction(input, cursor);
+    transform->rotation = glm::normalize(transform->rotation * glm::quat(glm::radians(rotationDirection * controller->rotationSpeed * deltaTime)));
 
-    {
-        auto position = controller.object().component<duk::renderer::Position3D>();
-        if (position) {
-            auto moveDirection = detail::input_move_direction(input);
-            moveDirection = rotationValue * moveDirection;
-            position->value += moveDirection * controller->speed * deltaTime;
-        }
-    }
+    auto moveDirection = detail::input_move_direction(input);
+    moveDirection = transform->rotation * moveDirection;
+    transform->position += moveDirection * controller->speed * deltaTime;
 
     if (input->mouse_down(duk::platform::MouseButton::RIGHT)) {
         auto camera = object.component<duk::renderer::Camera>();
         auto worldPos = duk::renderer::screen_to_world(camera, engine.window()->size(), glm::vec3(input->mouse_position(), -30));
 
-        auto position = objects.copy_objects(*controller->sphere).component<duk::renderer::Position3D>();
-        position->value = worldPos;
+        auto sphereTransform = objects.copy_objects(*controller->sphere).component<duk::renderer::Transform>();
+        sphereTransform->position = worldPos;
 
         controller->audioPlayer.play(engine.audio(), controller->spawnClip.get());
     }

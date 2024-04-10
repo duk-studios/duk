@@ -6,12 +6,6 @@
           "type": "duk::renderer::Transform"
         },
         {
-          "type": "duk::renderer::Position3D"
-        },
-        {
-          "type": "duk::renderer::Scale3D"
-        },
-        {
           "type": "duk::renderer::MeshRenderer",
           "mesh": 10003,
           "material": 1000013
