@@ -12,7 +12,8 @@ size_t Pools::s_poolIndexCounter;
 
 void Pools::clear() {
     for (auto it = m_pools.rbegin(); it != m_pools.rend(); it++) {
-        it->reset();
+        auto& pool = *it;
+        pool->clean();
     }
 }
 
