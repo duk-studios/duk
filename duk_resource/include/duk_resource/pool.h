@@ -19,6 +19,7 @@ namespace duk::resource {
 class Pool {
 public:
     virtual ~Pool();
+    virtual void clean() = 0;
 };
 
 template<typename ResourceT>
@@ -26,7 +27,7 @@ class PoolT : public Pool {
 public:
     using ResourceType = typename ResourceT::Type;
 
-    void clean();
+    void clean() override;
 
     DUK_NO_DISCARD size_t size() const;
 
@@ -55,6 +56,8 @@ public:
         requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
 
     void clear();
+
+    void clear_unused();
 
 private:
     template<typename T>

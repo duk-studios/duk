@@ -2,6 +2,7 @@
 /// director.cpp
 
 #include <duk_engine/director.h>
+#include <duk_engine/engine.h>
 
 namespace duk::engine {
 
@@ -53,6 +54,8 @@ void Director::load_scene(Engine& engine, duk::resource::Id id) {
     if (m_scene) {
         m_scene->enter(engine);
     }
+
+    engine.pools()->clear();
 }
 
 }// namespace duk::engine
