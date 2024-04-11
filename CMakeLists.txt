@@ -21,6 +21,7 @@ if (MSVC)
     add_definitions(/MP)
 endif ()
 
+# Changes here NEED to be reflected in cmake/config.cmake.in
 find_package(cxxopts CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
