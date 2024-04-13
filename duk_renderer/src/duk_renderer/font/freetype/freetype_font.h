@@ -13,6 +13,7 @@ namespace duk::renderer {
 struct FreetypeFontCreateInfo {
     std::vector<uint8_t> fontData;
     FT_Library library;
+    Renderer* renderer;
 };
 
 class FreetypeFont : public Font {
@@ -21,12 +22,12 @@ public:
 
     ~FreetypeFont() override;
 
-    FontAtlas* atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) override;
+    FontAtlas* atlas() override;
 
 private:
     std::vector<uint8_t> m_fontData;
     FT_Face m_face;
-    std::unordered_map<uint32_t, std::unique_ptr<FontAtlas>> m_atlases;
+    std::unique_ptr<FontAtlas> m_atlas;
 };
 
 }// namespace duk::renderer

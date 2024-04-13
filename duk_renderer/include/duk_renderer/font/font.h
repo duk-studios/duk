@@ -15,7 +15,7 @@ class Font {
 public:
     virtual ~Font();
 
-    virtual FontAtlas* atlas(uint32_t fontSize, duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) = 0;
+    virtual FontAtlas* atlas() = 0;
 };
 
 using FontResource = duk::resource::ResourceT<Font>;

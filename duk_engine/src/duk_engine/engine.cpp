@@ -84,9 +84,11 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         m_importer->add_resource_importer<duk::renderer::ImageImporter>(imageImporterCreateInfo);
     }
 
+    // font
     {
         duk::renderer::FontImporterCreateInfo fontImporterCreateInfo = {};
         fontImporterCreateInfo.fontPool = m_pools.create_pool<duk::renderer::FontPool>();
+        fontImporterCreateInfo.renderer = m_renderer.get();
         m_importer->add_resource_importer<duk::renderer::FontImporter>(fontImporterCreateInfo);
     }
 
