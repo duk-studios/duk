@@ -71,54 +71,30 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     }
 
     /* init pools */
-    // images
     {
         duk::renderer::ImagePoolCreateInfo imagePoolCreateInfo = {};
         imagePoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
-    }
 
-    // font
-    {
-        m_pools.create_pool<duk::renderer::FontPool>();
-    }
-
-    // materials
-    {
         duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
         materialPoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
-    }
 
-    // meshes
-    {
         duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};
         meshPoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::MeshPool>(meshPoolCreateInfo);
-    }
 
-    // sprites
-    {
         duk::renderer::SpritePoolCreateInfo spritePoolCreateInfo = {};
         spritePoolCreateInfo.imagePool = m_pools.get<duk::renderer::ImagePool>();
         m_pools.create_pool<duk::renderer::SpritePool>(spritePoolCreateInfo);
-    }
 
-    // objects
-    {
-        m_pools.create_pool<duk::objects::ObjectsPool>();
-    }
-
-    // scenes
-    {
-        m_pools.create_pool<ScenePool>();
-    }
-
-    // audio
-    {
         duk::audio::AudioClipPoolCreateInfo audioClipPoolCreateInfo = {};
         audioClipPoolCreateInfo.device = m_audio.get();
         m_pools.create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
+
+        m_pools.create_pool<duk::renderer::FontPool>();
+        m_pools.create_pool<duk::objects::ObjectsPool>();
+        m_pools.create_pool<ScenePool>();
     }
 
     // director
