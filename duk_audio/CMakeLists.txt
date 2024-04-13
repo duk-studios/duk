@@ -10,6 +10,7 @@ set(DUK_AUDIO_HEADERS
         include/duk_audio/audio_graph.h
         include/duk_audio/decode.h
         include/duk_audio/audio_player.h
+        include/duk_audio/register_types.h
         include/duk_audio/clip/audio_clip.h
         include/duk_audio/clip/audio_clip_pool.h
         include/duk_audio/clip/audio_clip_handler.h
@@ -21,6 +22,7 @@ set(DUK_AUDIO_SOURCES
         src/duk_audio/audio_graph.cpp
         src/duk_audio/decode.cpp
         src/duk_audio/audio_player.cpp
+        src/duk_audio/register_types.cpp
         src/duk_audio/clip/audio_clip.cpp
         src/duk_audio/clip/audio_clip_pool.cpp
         src/duk_audio/clip/audio_clip_handler.cpp

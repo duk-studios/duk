@@ -15,7 +15,13 @@ class Font {
 public:
     virtual ~Font();
 
-    virtual FontAtlas* atlas() = 0;
+    struct BuildAtlasParams {
+        duk::rhi::RHI* rhi;
+        duk::rhi::CommandQueue* commandQueue;
+        uint32_t fontSize;
+    };
+
+    virtual FontAtlas* atlas(const BuildAtlasParams& buildAtlasParams) = 0;
 };
 
 using FontResource = duk::resource::ResourceT<Font>;

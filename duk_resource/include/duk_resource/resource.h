@@ -39,6 +39,9 @@ private:
 
 static constexpr duk::resource::Id kInvalidId;
 
+// 1,000,000 reserved for built-in resources
+static constexpr Id kMaxBuiltInResourceId(1000000);
+
 class Resource {
 public:
     virtual ~Resource();

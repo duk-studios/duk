@@ -7,24 +7,15 @@
 
 namespace duk::renderer {
 
-FontHandler::FontHandler(const FontHandlerCreateInfo& fontHandlerCreateInfo)
-    : m_fontPool(fontHandlerCreateInfo.fontPool) {
-    {
-        FreetypeFontLoaderCreateInfo freetypeFontLoaderCreateInfo = {};
-        freetypeFontLoaderCreateInfo.renderer = fontHandlerCreateInfo.renderer;
-        m_loaders.emplace_back(std::make_unique<FreetypeFontLoader>(freetypeFontLoaderCreateInfo));
-    }
+FontHandler::FontHandler()
+    : ResourceHandlerT("fnt") {
+    m_loaders.emplace_back(std::make_unique<FreetypeFontLoader>());
 }
 
-const std::string& FontHandler::tag() const {
-    static const std::string tag = "fnt";
-    return tag;
-}
-
-void FontHandler::load(const resource::Id& id, const std::filesystem::path& path) {
+void FontHandler::load(FontPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     for (auto& loader: m_loaders) {
         if (loader->accepts(path)) {
-            m_fontPool->insert(id, loader->load(path));
+            pool->insert(id, loader->load(path));
             return;
         }
     }

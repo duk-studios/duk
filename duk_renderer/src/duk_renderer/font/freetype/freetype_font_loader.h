@@ -10,13 +10,9 @@
 
 namespace duk::renderer {
 
-struct FreetypeFontLoaderCreateInfo {
-    Renderer* renderer;
-};
-
 class FreetypeFontLoader : public FontLoader {
 public:
-    FreetypeFontLoader(const FreetypeFontLoaderCreateInfo& freetypeFontLoaderCreateInfo);
+    FreetypeFontLoader();
 
     ~FreetypeFontLoader() override;
 
@@ -26,7 +22,6 @@ public:
 
 private:
     FT_Library m_library;
-    Renderer* m_renderer;
 };
 
 }// namespace duk::renderer

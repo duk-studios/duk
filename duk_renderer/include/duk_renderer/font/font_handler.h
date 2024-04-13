@@ -25,16 +25,14 @@ struct FontHandlerCreateInfo {
     Renderer* renderer;
 };
 
-class FontHandler : public duk::resource::ResourceHandler {
+class FontHandler : public duk::resource::ResourceHandlerT<FontPool> {
 public:
-    explicit FontHandler(const FontHandlerCreateInfo& fontHandlerCreateInfo);
+    FontHandler();
 
-    const std::string& tag() const override;
-
-    void load(const resource::Id& id, const std::filesystem::path& path) override;
+protected:
+    void load(FontPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 
 private:
-    FontPool* m_fontPool;
     std::vector<std::unique_ptr<FontLoader>> m_loaders;
 };
 

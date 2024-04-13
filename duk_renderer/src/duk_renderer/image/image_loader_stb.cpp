@@ -30,10 +30,6 @@ duk::rhi::PixelFormat build_pixel_format(int channelCount) {
 
 }// namespace detail
 
-ImageLoaderStb::ImageLoaderStb(const duk::rhi::RHICapabilities* rhiCapabilities)
-    : m_rhiCapabilities(rhiCapabilities) {
-}
-
 bool ImageLoaderStb::accepts(const std::filesystem::path& path) {
     const auto extension = path.extension().string();
     if (extension != ".png" && extension != ".jpg" && extension != ".jpeg") {
@@ -63,15 +59,14 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageLoaderStb::load(const std::files
         throw std::runtime_error("failed to read image memory");
     }
 
-    auto format = detail::build_pixel_format(channelCount);
-
-    // it would be better to allow the image to be created on whatever format it currently has
-    // and later on convert it manually if needed
-    if (!m_rhiCapabilities->is_format_supported(format, duk::rhi::Image::Usage::SAMPLED)) {
-        // we assume that at least RGBA8U is supported
+    // for now we simply treat every RGB image as RGBA.
+    // once the RHI is able to detect incompatibility and
+    // correct them as needed we can remove this
+    if (channelCount == 3) {
         channelCount = 4;
-        format = detail::build_pixel_format(channelCount);
     }
+
+    auto format = detail::build_pixel_format(channelCount);
 
     void* data = stbi_load_from_memory(buffer.data(), static_cast<int>(buffer.size()), &width, &height, &channelCount, channelCount);
 

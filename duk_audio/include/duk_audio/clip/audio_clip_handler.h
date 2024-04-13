@@ -11,20 +11,12 @@
 
 namespace duk::audio {
 
-struct AudioClipHandlerCreateInfo {
-    AudioClipPool* audioClipPool;
-};
-
-class AudioClipHandler : public duk::resource::ResourceHandler {
+class AudioClipHandler : public duk::resource::ResourceHandlerT<AudioClipPool> {
 public:
-    explicit AudioClipHandler(const AudioClipHandlerCreateInfo& audioClipHandlerCreateInfo);
+    AudioClipHandler();
 
-    const std::string& tag() const override;
-
-    void load(const duk::resource::Id& id, const std::filesystem::path& path) override;
-
-private:
-    AudioClipPool* m_audioClipPool;
+protected:
+    void load(AudioClipPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };
 
 }// namespace duk::audio

@@ -13,26 +13,12 @@
 
 namespace duk::engine {
 
-struct SceneHandlerCreateInfo {
-    ScenePool* scenePool;
-};
-
-class SceneHandler : public duk::resource::ResourceHandler {
+class SceneHandler : public duk::resource::ResourceHandlerT<ScenePool> {
 public:
-    SceneHandler(const SceneHandlerCreateInfo& sceneHandlerCreateInfo);
+    SceneHandler();
 
-    ~SceneHandler();
-
-    const std::string& tag() const override;
-
-    void load(const duk::resource::Id& id, const std::filesystem::path& path) override;
-
-    void solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) override;
-
-    void solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) override;
-
-private:
-    ScenePool* m_scenePool;
+protected:
+    void load(ScenePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };
 
 }// namespace duk::engine

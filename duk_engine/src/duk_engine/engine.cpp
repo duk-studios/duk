@@ -64,32 +64,23 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     }
 
     {
-        duk::resource::HandlerCreateInfo handlerCreateInfo = {};
-        handlerCreateInfo.pools = &m_pools;
-        m_handler = std::make_unique<duk::resource::Handler>(handlerCreateInfo);
-
-        m_handler->load_resource_set(m_workingDirectory / "resources");
+        duk::resource::ResourceSetCreateInfo resourceSetCreateInfo = {};
+        resourceSetCreateInfo.path = m_workingDirectory / "resources";
+        resourceSetCreateInfo.pools = &m_pools;
+        m_resources = std::make_unique<duk::resource::ResourceSet>(resourceSetCreateInfo);
     }
 
-    /* init resources */
+    /* init pools */
     // images
     {
         duk::renderer::ImagePoolCreateInfo imagePoolCreateInfo = {};
         imagePoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
-
-        duk::renderer::ImageHandlerCreateInfo imageHandlerCreateInfo = {};
-        imageHandlerCreateInfo.rhiCapabilities = m_renderer->rhi()->capabilities();
-        imageHandlerCreateInfo.imagePool = m_pools.get<duk::renderer::ImagePool>();
-        m_handler->add_resource_handler<duk::renderer::ImageHandler>(imageHandlerCreateInfo);
     }
 
     // font
     {
-        duk::renderer::FontHandlerCreateInfo fontHandlerCreateInfo = {};
-        fontHandlerCreateInfo.fontPool = m_pools.create_pool<duk::renderer::FontPool>();
-        fontHandlerCreateInfo.renderer = m_renderer.get();
-        m_handler->add_resource_handler<duk::renderer::FontHandler>(fontHandlerCreateInfo);
+        m_pools.create_pool<duk::renderer::FontPool>();
     }
 
     // materials
@@ -97,10 +88,6 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
         materialPoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
-
-        duk::renderer::MaterialHandlerCreateInfo materialHandlerCreateInfo = {};
-        materialHandlerCreateInfo.materialPool = m_pools.get<duk::renderer::MaterialPool>();
-        m_handler->add_resource_handler<duk::renderer::MaterialHandler>(materialHandlerCreateInfo);
     }
 
     // meshes
@@ -119,37 +106,26 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
     // objects
     {
-        duk::objects::ObjectsHandlerCreateInfo objectsHandlerCreateInfo = {};
-        objectsHandlerCreateInfo.objectsPool = m_pools.create_pool<duk::objects::ObjectsPool>();
-        m_handler->add_resource_handler<duk::objects::ObjectsHandler>(objectsHandlerCreateInfo);
+        m_pools.create_pool<duk::objects::ObjectsPool>();
     }
 
     // scenes
     {
-        SceneHandlerCreateInfo sceneHandlerCreateInfo = {};
-        sceneHandlerCreateInfo.scenePool = m_pools.create_pool<ScenePool>();
-        m_handler->add_resource_handler<SceneHandler>(sceneHandlerCreateInfo);
+        m_pools.create_pool<ScenePool>();
     }
 
     // audio
     {
         duk::audio::AudioClipPoolCreateInfo audioClipPoolCreateInfo = {};
         audioClipPoolCreateInfo.device = m_audio.get();
-
-        auto audioClipPool = m_pools.create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
-
-        duk::audio::AudioClipHandlerCreateInfo audioClipHandlerCreateInfo = {};
-        audioClipHandlerCreateInfo.audioClipPool = audioClipPool;
-
-        m_handler->add_resource_handler<duk::audio::AudioClipHandler>(audioClipHandlerCreateInfo);
+        m_pools.create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
     }
 
     // director
     {
         DirectorCreateInfo directorCreateInfo = {};
         directorCreateInfo.renderer = m_renderer.get();
-        directorCreateInfo.scenePool = m_pools.get<ScenePool>();
-        directorCreateInfo.handler = m_handler.get();
+        directorCreateInfo.resources = m_resources.get();
         directorCreateInfo.firstScene = m_settings.scene;
 
         m_director = std::make_unique<Director>(directorCreateInfo);
@@ -163,7 +139,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 Engine::~Engine() {
     m_director.reset();
     m_pools.clear();
-    m_handler.reset();
+    m_resources.reset();
 }
 
 void Engine::run() {
@@ -211,8 +187,8 @@ duk::resource::Pools* Engine::pools() {
     return &m_pools;
 }
 
-duk::resource::Handler* Engine::handler() {
-    return m_handler.get();
+duk::resource::ResourceSet* Engine::resources() {
+    return m_resources.get();
 }
 
 Director* Engine::director() {

@@ -3,7 +3,6 @@
 
 #include <duk_renderer/image/image_handler.h>
 #include <duk_renderer/image/image_loader_stb.h>
-#include <duk_renderer/image/image_pool.h>
 
 namespace duk::renderer {
 
@@ -36,21 +35,16 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageHandler::create(const void* data
     }
 }
 
-ImageHandler::ImageHandler(const ImageHandlerCreateInfo& imageHandlerCreateInfo)
-    : m_imagePool(imageHandlerCreateInfo.imagePool) {
-    m_loaders.emplace_back(std::make_unique<ImageLoaderStb>(imageHandlerCreateInfo.rhiCapabilities));
+ImageHandler::ImageHandler()
+    : ResourceHandlerT("img") {
+    m_loaders.emplace_back(std::make_unique<ImageLoaderStb>());
 }
 
-const std::string& ImageHandler::tag() const {
-    static const std::string imgTag("img");
-    return imgTag;
-}
-
-void ImageHandler::load(const duk::resource::Id& id, const std::filesystem::path& path) {
+void ImageHandler::load(ImagePool* pool, const resource::Id& id, const std::filesystem::path& path) {
     for (auto& loader: m_loaders) {
         if (loader->accepts(path)) {
             auto dataSource = loader->load(path);
-            m_imagePool->create(id, dataSource.get());
+            pool->create(id, dataSource.get());
             return;
         }
     }

@@ -6,6 +6,7 @@
 
 #include <duk_resource/pool.h>
 #include <duk_resource/resource.h>
+#include <duk_resource/file.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 
@@ -13,96 +14,119 @@
 
 namespace duk::resource {
 
-// 1,000,000 reserved for built-in resources
-static constexpr Id kMaxBuiltInResourceId(1000000);
-
-struct HandlerCreateInfo {
-    Pools* pools;
-};
-
 class ResourceHandler {
 public:
     virtual ~ResourceHandler() = default;
 
     virtual const std::string& tag() const = 0;
 
-    virtual void load(const Id& id, const std::filesystem::path& path) = 0;
+    virtual void load(Pools* pools, const Id& id, const std::filesystem::path& path) = 0;
 
-    virtual void solve_dependencies(const Id& id, DependencySolver& dependencySolver);
+    virtual void solve_dependencies(Pools* pools, const Id& id, DependencySolver& dependencySolver) = 0;
 
-    virtual void solve_references(const Id& id, ReferenceSolver& referenceSolver);
+    virtual void solve_references(Pools* pools, const Id& id, ReferenceSolver& referenceSolver) = 0;
 };
 
-struct ResourceDescription {
-    std::string tag;
-    std::string file;
-    Id id;
-    std::set<std::string> aliases;
-};
-
-bool operator==(const ResourceDescription& lhs, const ResourceDescription& rhs);
-
-bool operator<(const ResourceDescription& lhs, const ResourceDescription& rhs);
-
-struct ResourceSet {
-    std::unordered_map<duk::resource::Id, ResourceDescription> resources;
-    std::unordered_map<std::string, duk::resource::Id> aliases;
-};
-
-class Handler {
+template<typename TPool>
+class ResourceHandlerT : public ResourceHandler {
 public:
-    explicit Handler(const HandlerCreateInfo& handlerCreateInfo);
 
-    ~Handler();
+    explicit ResourceHandlerT(const char* tag);
 
-    ResourceHandler* add_resource_handler(std::unique_ptr<ResourceHandler> resourceHandler);
+    const std::string& tag() const final;
 
-    template<typename T, typename... Args>
-    T* add_resource_handler(Args&&... args);
+    void load(Pools* pools, const Id& id, const std::filesystem::path& path) override;
 
-    void load_resource_set(const std::filesystem::path& path);
+    void solve_dependencies(Pools* pools, const Id& id, DependencySolver& dependencySolver) override;
 
-    void load_resource(Id id);
+    void solve_references(Pools* pools, const Id& id, ReferenceSolver& referenceSolver) override;
 
-    Id find_id(const std::string& alias);
+protected:
 
-    ResourceHandler* get_handler(const std::string& tag);
-
-    template<typename T>
-    T* get_handler_as(const std::string& tag);
+    virtual void load(TPool* pool, const Id& id, const std::filesystem::path& path) = 0;
 
 private:
-    Pools* m_pools;
-    std::unordered_map<std::string, std::unique_ptr<ResourceHandler>> m_resourceHandlers;
-    ResourceSet m_resourceSet;
+
+    static TPool* find_pool(Pools* pools);
+
+    std::string m_tag;
 };
 
-template<typename T, typename... Args>
-T* Handler::add_resource_handler(Args&&... args) {
-    return dynamic_cast<T*>(add_resource_handler(std::make_unique<T>(std::forward<Args>(args)...)));
+class ResourceRegistry {
+public:
+
+    static ResourceRegistry* instance();
+
+    template<typename TResourceHandler>
+    void add();
+
+    ResourceHandler* find_handler(const std::string& tag);
+
+private:
+    std::unordered_map<std::string, std::unique_ptr<ResourceHandler>> m_handlers;
+};
+
+template<typename TResourceHandler>
+void register_handler() {
+    ResourceRegistry::instance()->add<TResourceHandler>();
 }
 
-template<typename T>
-T* Handler::get_handler_as(const std::string& tag) {
-    auto handler = get_handler(tag);
-    if (handler->tag() != tag) {
-        return nullptr;
+template<typename TPool>
+ResourceHandlerT<TPool>::ResourceHandlerT(const char* tag)
+    : m_tag(tag) {
+}
+
+template<typename TPool>
+const std::string& ResourceHandlerT<TPool>::tag() const {
+    return m_tag;
+}
+
+template<typename TPool>
+void ResourceHandlerT<TPool>::load(Pools* pools, const Id& id, const std::filesystem::path& path) {
+    auto pool = find_pool(pools);
+    load(pool, id, path);
+}
+
+template<typename TPool>
+void ResourceHandlerT<TPool>::solve_dependencies(Pools* pools, const Id& id, DependencySolver& dependencySolver) {
+    auto pool = find_pool(pools);
+    auto resource = pool->find(id);
+    if (!resource) {
+        throw std::out_of_range(fmt::format("Resource ({}) not found in a pool", id.value()));
     }
-    return dynamic_cast<T*>(handler);
+    dependencySolver.solve(*resource);
+}
+
+template<typename TPool>
+void ResourceHandlerT<TPool>::solve_references(Pools* pools, const Id& id, ReferenceSolver& referenceSolver) {
+    auto pool = find_pool(pools);
+    auto resource = pool->find(id);
+    if (!resource) {
+        throw std::out_of_range(fmt::format("Resource ({}) not found in a pool", id.value()));
+    }
+    referenceSolver.solve(*resource);
+}
+
+template<typename TPool>
+TPool* ResourceHandlerT<TPool>::find_pool(Pools* pools) {
+    auto pool = pools->get<TPool>();
+    if (!pool) {
+        throw std::logic_error("Failed to find valid pool for ResourceHandlerT");
+    }
+    return pool;
+}
+
+template<typename TResourceHandler>
+void ResourceRegistry::add() {
+    static bool alreadyAdded = false;
+    if (alreadyAdded) {
+        return;
+    }
+    auto handler = std::make_unique<TResourceHandler>();
+    m_handlers.emplace(handler->tag(), std::move(handler));
+    alreadyAdded = true;
 }
 
 }// namespace duk::resource
-
-namespace duk::serial {
-
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::resource::ResourceDescription& resourceDescription) {
-    visitor->visit_member(resourceDescription.tag, "tag");
-    visitor->visit_member(resourceDescription.id, "id");
-    visitor->visit_member(resourceDescription.file, "file");
-    visitor->visit_member_array(resourceDescription.aliases, "aliases");
-}
-
-}// namespace duk::serial
 
 #endif// DUK_RESOURCE_HANDLER_H

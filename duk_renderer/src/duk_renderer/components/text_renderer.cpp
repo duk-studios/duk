@@ -246,7 +246,12 @@ void TextMesh::reserve(uint32_t textCount) {
 }
 
 void update_text_renderer(Renderer* renderer, const objects::Component<TextRenderer>& textRenderer) {
-    auto atlas = textRenderer->font->atlas();
+    Font::BuildAtlasParams buildAtlasParams = {};
+    buildAtlasParams.rhi = renderer->rhi();
+    buildAtlasParams.commandQueue = renderer->main_command_queue();
+    buildAtlasParams.fontSize = textRenderer->fontSize;
+
+    auto atlas = textRenderer->font->atlas(buildAtlasParams);
 
     auto& material = textRenderer->material;
     auto& mesh = textRenderer->mesh;

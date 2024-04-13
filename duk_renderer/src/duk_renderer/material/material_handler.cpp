@@ -56,16 +56,11 @@ std::unique_ptr<MaterialDataSource> parse_material_json(const std::string& json)
 
 }// namespace detail
 
-MaterialHandler::MaterialHandler(const MaterialHandlerCreateInfo& materialHandlerCreateInfo)
-    : m_materialPool(materialHandlerCreateInfo.materialPool) {
+MaterialHandler::MaterialHandler()
+    : ResourceHandlerT("mat") {
 }
 
-const std::string& MaterialHandler::tag() const {
-    static const std::string matTag("mat");
-    return matTag;
-}
-
-void MaterialHandler::load(const duk::resource::Id& id, const std::filesystem::path& path) {
+void MaterialHandler::load(MaterialPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error(fmt::format("material at ({}) does not exist", path.string()));
     }
@@ -76,23 +71,6 @@ void MaterialHandler::load(const duk::resource::Id& id, const std::filesystem::p
 
     auto jsonContent = duk::tools::File::load_text(path.string().c_str());
     auto dataSource = detail::parse_material_json(jsonContent);
-    m_materialPool->create(id, dataSource.get());
+    pool->create(id, dataSource.get());
 }
-
-void MaterialHandler::solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) {
-    auto material = m_materialPool->find(id);
-    if (!material) {
-        throw std::logic_error("tried to solve dependencies of resource that was not loaded");
-    }
-    dependencySolver.solve(*material);
-}
-
-void MaterialHandler::solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) {
-    auto material = m_materialPool->find(id);
-    if (!material) {
-        throw std::logic_error("tried to solve references of resource that was not loaded");
-    }
-    referenceSolver.solve(*material);
-}
-
 }// namespace duk::renderer
