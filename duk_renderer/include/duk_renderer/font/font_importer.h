@@ -22,6 +22,7 @@ public:
 
 struct FontImporterCreateInfo {
     FontPool* fontPool;
+    Renderer* renderer;
 };
 
 class FontImporter : public duk::resource::ResourceImporter {

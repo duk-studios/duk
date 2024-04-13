@@ -9,7 +9,8 @@
 
 namespace duk::renderer {
 
-FreetypeFontLoader::FreetypeFontLoader() {
+FreetypeFontLoader::FreetypeFontLoader(const FreetypeFontLoaderCreateInfo& freetypeFontLoaderCreateInfo)
+    : m_renderer(freetypeFontLoaderCreateInfo.renderer) {
     auto error = FT_Init_FreeType(&m_library);
     if (error) {
         throw std::runtime_error(build_freetype_error_message("failed to initialize freetype library", error));
@@ -33,6 +34,7 @@ std::shared_ptr<Font> FreetypeFontLoader::load(const std::filesystem::path& path
     FreetypeFontCreateInfo freetypeFontCreateInfo = {};
     freetypeFontCreateInfo.library = m_library;
     freetypeFontCreateInfo.fontData = duk::tools::File::load_bytes(path.string().c_str());
+    freetypeFontCreateInfo.renderer = m_renderer;
 
     return std::make_shared<FreetypeFont>(freetypeFontCreateInfo);
 }

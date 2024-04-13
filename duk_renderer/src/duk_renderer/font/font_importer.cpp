@@ -9,7 +9,11 @@ namespace duk::renderer {
 
 FontImporter::FontImporter(const FontImporterCreateInfo& fontImporterCreateInfo)
     : m_fontPool(fontImporterCreateInfo.fontPool) {
-    m_loaders.emplace_back(std::make_unique<FreetypeFontLoader>());
+    {
+        FreetypeFontLoaderCreateInfo freetypeFontLoaderCreateInfo = {};
+        freetypeFontLoaderCreateInfo.renderer = fontImporterCreateInfo.renderer;
+        m_loaders.emplace_back(std::make_unique<FreetypeFontLoader>(freetypeFontLoaderCreateInfo));
+    }
 }
 
 const std::string& FontImporter::tag() const {
