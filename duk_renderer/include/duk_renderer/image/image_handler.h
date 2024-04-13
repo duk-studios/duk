@@ -1,10 +1,10 @@
 /// 12/11/2023
-/// image_importer.h
+/// image_handler.h
 
-#ifndef DUK_RENDERER_IMAGE_IMPORTER_H
-#define DUK_RENDERER_IMAGE_IMPORTER_H
+#ifndef DUK_RENDERER_IMAGE_HANDLER_H
+#define DUK_RENDERER_IMAGE_HANDLER_H
 
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 
 #include <duk_renderer/renderer.h>
 
@@ -21,16 +21,16 @@ public:
     virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) = 0;
 };
 
-struct ImageImporterCreateInfo {
+struct ImageHandlerCreateInfo {
     duk::rhi::RHICapabilities* rhiCapabilities;
     ImagePool* imagePool;
 };
 
-class ImageImporter : public duk::resource::ResourceImporter {
+class ImageHandler : public duk::resource::ResourceHandler {
 public:
     static std::unique_ptr<duk::rhi::ImageDataSource> create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height);
 
-    explicit ImageImporter(const ImageImporterCreateInfo& imageImporterCreateInfo);
+    explicit ImageHandler(const ImageHandlerCreateInfo& imageHandlerCreateInfo);
 
     const std::string& tag() const override;
 
@@ -43,4 +43,4 @@ private:
 
 }// namespace duk::renderer
 
-#endif// DUK_RENDERER_IMAGE_IMPORTER_H
+#endif// DUK_RENDERER_IMAGE_HANDLER_H

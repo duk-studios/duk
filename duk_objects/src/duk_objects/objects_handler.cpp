@@ -2,25 +2,25 @@
 // Created by Ricardo on 28/03/2024.
 //
 
-#include <duk_objects/objects_importer.h>
+#include <duk_objects/objects_handler.h>
 
 #include <duk_tools/file.h>
 
 namespace duk::objects {
 
-ObjectsImporter::ObjectsImporter(const ObjectsImporterCreateInfo& objectsImporterCreateInfo)
-    : m_objectsPool(objectsImporterCreateInfo.objectsPool) {
+ObjectsHandler::ObjectsHandler(const ObjectsHandlerCreateInfo& objectsHandlerCreateInfo)
+    : m_objectsPool(objectsHandlerCreateInfo.objectsPool) {
 }
 
-ObjectsImporter::~ObjectsImporter() {
+ObjectsHandler::~ObjectsHandler() {
 }
 
-const std::string& ObjectsImporter::tag() const {
+const std::string& ObjectsHandler::tag() const {
     static const std::string tag = "obj";
     return tag;
 }
 
-void ObjectsImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
+void ObjectsHandler::load(const duk::resource::Id& id, const std::filesystem::path& path) {
     auto content = duk::tools::File::load_text(path.string().c_str());
 
     duk::serial::JsonReader reader(content.c_str());
@@ -32,7 +32,7 @@ void ObjectsImporter::load(const duk::resource::Id& id, const std::filesystem::p
     m_objectsPool->insert(id, objects);
 }
 
-void ObjectsImporter::solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) {
+void ObjectsHandler::solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) {
     auto objects = m_objectsPool->find(id);
     if (!objects) {
         throw std::logic_error("tried to solve dependencies of objects that were not loaded");
@@ -40,7 +40,7 @@ void ObjectsImporter::solve_dependencies(const duk::resource::Id& id, duk::resou
     dependencySolver.solve(*objects);
 }
 
-void ObjectsImporter::solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) {
+void ObjectsHandler::solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) {
     auto objects = m_objectsPool->find(id);
     if (!objects) {
         throw std::logic_error("tried to solve references of objects that were not loaded");

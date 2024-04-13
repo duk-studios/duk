@@ -25,19 +25,19 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/sprite/sprite_pool.h
         include/duk_renderer/image/image.h
         include/duk_renderer/image/image_pool.h
-        include/duk_renderer/image/image_importer.h
+        include/duk_renderer/image/image_handler.h
         include/duk_renderer/image/image_loader_stb.h
         include/duk_renderer/font/font.h
         include/duk_renderer/font/font_atlas.h
         include/duk_renderer/font/font_pool.h
-        include/duk_renderer/font/font_importer.h
+        include/duk_renderer/font/font_handler.h
         include/duk_renderer/mesh/mesh.h
         include/duk_renderer/mesh/mesh_data_source.h
         include/duk_renderer/mesh/mesh_pool.h
         include/duk_renderer/material/globals/global_descriptors.h
         include/duk_renderer/material/pipeline.h
         include/duk_renderer/material/material.h
-        include/duk_renderer/material/material_importer.h
+        include/duk_renderer/material/material_handler.h
         include/duk_renderer/material/instance_buffer.h
         include/duk_renderer/material/uniform_buffer.h
         include/duk_renderer/material/storage_buffer.h
@@ -90,12 +90,12 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/mesh/mesh_pool.cpp
         src/duk_renderer/image/image.cpp
         src/duk_renderer/image/image_pool.cpp
-        src/duk_renderer/image/image_importer.cpp
+        src/duk_renderer/image/image_handler.cpp
         src/duk_renderer/image/image_loader_stb.cpp
         src/duk_renderer/font/font.cpp
         src/duk_renderer/font/font_atlas.cpp
         src/duk_renderer/font/font_pool.cpp
-        src/duk_renderer/font/font_importer.cpp
+        src/duk_renderer/font/font_handler.cpp
         src/duk_renderer/font/freetype/freetype_import.h
         src/duk_renderer/font/freetype/freetype_import.cpp
         src/duk_renderer/font/freetype/freetype_font.h
@@ -104,7 +104,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/font/freetype/freetype_font_loader.cpp
         src/duk_renderer/material/pipeline.cpp
         src/duk_renderer/material/material.cpp
-        src/duk_renderer/material/material_importer.cpp
+        src/duk_renderer/material/material_handler.cpp
         src/duk_renderer/material/instance_buffer.cpp
         src/duk_renderer/material/uniform_buffer.cpp
         src/duk_renderer/material/storage_buffer.cpp

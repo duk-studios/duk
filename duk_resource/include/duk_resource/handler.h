@@ -1,8 +1,8 @@
 /// 13/11/2023
-/// importer.h
+/// handler.h
 
-#ifndef DUK_RESOURCE_IMPORTER_H
-#define DUK_RESOURCE_IMPORTER_H
+#ifndef DUK_RESOURCE_HANDLER_H
+#define DUK_RESOURCE_HANDLER_H
 
 #include <duk_resource/pool.h>
 #include <duk_resource/resource.h>
@@ -16,13 +16,13 @@ namespace duk::resource {
 // 1,000,000 reserved for built-in resources
 static constexpr Id kMaxBuiltInResourceId(1000000);
 
-struct ImporterCreateInfo {
+struct HandlerCreateInfo {
     Pools* pools;
 };
 
-class ResourceImporter {
+class ResourceHandler {
 public:
-    virtual ~ResourceImporter() = default;
+    virtual ~ResourceHandler() = default;
 
     virtual const std::string& tag() const = 0;
 
@@ -49,16 +49,16 @@ struct ResourceSet {
     std::unordered_map<std::string, duk::resource::Id> aliases;
 };
 
-class Importer {
+class Handler {
 public:
-    explicit Importer(const ImporterCreateInfo& importerCreateInfo);
+    explicit Handler(const HandlerCreateInfo& handlerCreateInfo);
 
-    ~Importer();
+    ~Handler();
 
-    ResourceImporter* add_resource_importer(std::unique_ptr<ResourceImporter> resourceImporter);
+    ResourceHandler* add_resource_handler(std::unique_ptr<ResourceHandler> resourceHandler);
 
     template<typename T, typename... Args>
-    T* add_resource_importer(Args&&... args);
+    T* add_resource_handler(Args&&... args);
 
     void load_resource_set(const std::filesystem::path& path);
 
@@ -66,29 +66,29 @@ public:
 
     Id find_id(const std::string& alias);
 
-    ResourceImporter* get_importer(const std::string& tag);
+    ResourceHandler* get_handler(const std::string& tag);
 
     template<typename T>
-    T* get_importer_as(const std::string& tag);
+    T* get_handler_as(const std::string& tag);
 
 private:
     Pools* m_pools;
-    std::unordered_map<std::string, std::unique_ptr<ResourceImporter>> m_resourceImporters;
+    std::unordered_map<std::string, std::unique_ptr<ResourceHandler>> m_resourceHandlers;
     ResourceSet m_resourceSet;
 };
 
 template<typename T, typename... Args>
-T* Importer::add_resource_importer(Args&&... args) {
-    return dynamic_cast<T*>(add_resource_importer(std::make_unique<T>(std::forward<Args>(args)...)));
+T* Handler::add_resource_handler(Args&&... args) {
+    return dynamic_cast<T*>(add_resource_handler(std::make_unique<T>(std::forward<Args>(args)...)));
 }
 
 template<typename T>
-T* Importer::get_importer_as(const std::string& tag) {
-    auto importer = get_importer(tag);
-    if (importer->tag() != tag) {
+T* Handler::get_handler_as(const std::string& tag) {
+    auto handler = get_handler(tag);
+    if (handler->tag() != tag) {
         return nullptr;
     }
-    return dynamic_cast<T*>(importer);
+    return dynamic_cast<T*>(handler);
 }
 
 }// namespace duk::resource
@@ -105,4 +105,4 @@ void visit_object(JsonVisitor* visitor, duk::resource::ResourceDescription& reso
 
 }// namespace duk::serial
 
-#endif// DUK_RESOURCE_IMPORTER_H
+#endif// DUK_RESOURCE_HANDLER_H

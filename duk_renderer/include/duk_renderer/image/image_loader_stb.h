@@ -1,10 +1,10 @@
 /// 12/11/2023
-/// image_importer_stb.h
+/// image_handler_stb.h
 
-#ifndef DUK_RENDERER_IMAGE_IMPORTER_STB_H
-#define DUK_RENDERER_IMAGE_IMPORTER_STB_H
+#ifndef DUK_RENDERER_IMAGE_LOADER_STB_H
+#define DUK_RENDERER_IMAGE_LOADER_STB_H
 
-#include <duk_renderer/image/image_importer.h>
+#include <duk_renderer/image/image_handler.h>
 
 #include <duk_rhi/rhi_capabilities.h>
 
@@ -24,4 +24,4 @@ private:
 
 }// namespace duk::renderer
 
-#endif// DUK_RENDERER_IMAGE_IMPORTER_STB_H
+#endif// DUK_RENDERER_IMAGE_LOADER_STB_H

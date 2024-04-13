@@ -2,24 +2,24 @@
 // Created by Ricardo on 28/03/2024.
 //
 
-#ifndef DUK_OBJECTS_IMPORTER_H
-#define DUK_OBJECTS_IMPORTER_H
+#ifndef DUK_OBJECTS_HANDLER_H
+#define DUK_OBJECTS_HANDLER_H
 
 #include <duk_objects/objects_pool.h>
 
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 
 namespace duk::objects {
 
-struct ObjectsImporterCreateInfo {
+struct ObjectsHandlerCreateInfo {
     ObjectsPool* objectsPool;
 };
 
-class ObjectsImporter : public duk::resource::ResourceImporter {
+class ObjectsHandler : public duk::resource::ResourceHandler {
 public:
-    ObjectsImporter(const ObjectsImporterCreateInfo& objectsImporterCreateInfo);
+    ObjectsHandler(const ObjectsHandlerCreateInfo& objectsHandlerCreateInfo);
 
-    ~ObjectsImporter() override;
+    ~ObjectsHandler() override;
 
     const std::string& tag() const override;
 
@@ -35,4 +35,4 @@ private:
 
 }// namespace duk::objects
 
-#endif//DUK_OBJECTS_IMPORTER_H
+#endif//DUK_OBJECTS_HANDLER_H

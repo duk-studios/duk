@@ -2,22 +2,22 @@
 // Created by Ricardo on 25/03/2024.
 //
 
-#ifndef DUK_AUDIO_AUDIO_CLIP_IMPORTER_H
-#define DUK_AUDIO_AUDIO_CLIP_IMPORTER_H
+#ifndef DUK_AUDIO_AUDIO_CLIP_HANDLER_H
+#define DUK_AUDIO_AUDIO_CLIP_HANDLER_H
 
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 
 #include <duk_audio/clip/audio_clip_pool.h>
 
 namespace duk::audio {
 
-struct AudioClipImporterCreateInfo {
+struct AudioClipHandlerCreateInfo {
     AudioClipPool* audioClipPool;
 };
 
-class AudioClipImporter : public duk::resource::ResourceImporter {
+class AudioClipHandler : public duk::resource::ResourceHandler {
 public:
-    explicit AudioClipImporter(const AudioClipImporterCreateInfo& audioClipImporterCreateInfo);
+    explicit AudioClipHandler(const AudioClipHandlerCreateInfo& audioClipHandlerCreateInfo);
 
     const std::string& tag() const override;
 
@@ -29,4 +29,4 @@ private:
 
 }// namespace duk::audio
 
-#endif//DUK_AUDIO_AUDIO_CLIP_IMPORTER_H
+#endif//DUK_AUDIO_AUDIO_CLIP_HANDLER_H

@@ -1,7 +1,7 @@
 /// 13/11/2023
-/// importer.cpp
+/// handler.cpp
 
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 
 #include <duk_log/log.h>
 
@@ -63,28 +63,28 @@ bool operator<(const ResourceDescription& lhs, const ResourceDescription& rhs) {
     return lhs.id < rhs.id;
 }
 
-void ResourceImporter::solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) {
+void ResourceHandler::solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) {
 }
 
-void ResourceImporter::solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) {
+void ResourceHandler::solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) {
 }
 
-Importer::Importer(const ImporterCreateInfo& importerCreateInfo)
-    : m_pools(importerCreateInfo.pools) {
+Handler::Handler(const HandlerCreateInfo& handlerCreateInfo)
+    : m_pools(handlerCreateInfo.pools) {
 }
 
-Importer::~Importer() = default;
+Handler::~Handler() = default;
 
-ResourceImporter* Importer::add_resource_importer(std::unique_ptr<ResourceImporter> resourceImporter) {
-    const auto& tag = resourceImporter->tag();
-    auto it = m_resourceImporters.find(tag);
-    if (it != m_resourceImporters.end()) {
-        throw std::logic_error(fmt::format("a ResourceImporter with tag \"{}\" already exists in this importer", tag));
+ResourceHandler* Handler::add_resource_handler(std::unique_ptr<ResourceHandler> resourceHandler) {
+    const auto& tag = resourceHandler->tag();
+    auto it = m_resourceHandlers.find(tag);
+    if (it != m_resourceHandlers.end()) {
+        throw std::logic_error(fmt::format("a ResourceHandler with tag \"{}\" already exists in this handler", tag));
     }
-    return m_resourceImporters.emplace(tag, std::move(resourceImporter)).first->second.get();
+    return m_resourceHandlers.emplace(tag, std::move(resourceHandler)).first->second.get();
 }
 
-void Importer::load_resource_set(const std::filesystem::path& path) {
+void Handler::load_resource_set(const std::filesystem::path& path) {
     std::filesystem::path directory = path;
     if (!std::filesystem::is_directory(path)) {
         directory = path.parent_path();
@@ -92,7 +92,7 @@ void Importer::load_resource_set(const std::filesystem::path& path) {
     m_resourceSet = detail::load_resource_set(directory);
 }
 
-void Importer::load_resource(Id id) {
+void Handler::load_resource(Id id) {
     if (id < kMaxBuiltInResourceId) {
         // this is a builtin resource, skip
         return;
@@ -107,25 +107,25 @@ void Importer::load_resource(Id id) {
 
     const auto& resourceDescription = resourceIt->second;
 
-    auto importer = get_importer(resourceDescription.tag);
-    if (!importer) {
-        throw std::runtime_error(fmt::format("Could not find an importer for tag \"{}\"", resourceDescription.tag));
+    auto handler = get_handler(resourceDescription.tag);
+    if (!handler) {
+        throw std::runtime_error(fmt::format("Could not find an handler for tag \"{}\"", resourceDescription.tag));
     }
 
-    importer->load(resourceDescription.id, resourceDescription.file);
+    handler->load(resourceDescription.id, resourceDescription.file);
 
     DependencySolver dependencySolver;
-    importer->solve_dependencies(resourceDescription.id, dependencySolver);
+    handler->solve_dependencies(resourceDescription.id, dependencySolver);
 
     for (auto dependency: dependencySolver.dependencies()) {
         load_resource(dependency);
     }
 
     ReferenceSolver referenceSolver(m_pools);
-    importer->solve_references(resourceDescription.id, referenceSolver);
+    handler->solve_references(resourceDescription.id, referenceSolver);
 }
 
-Id Importer::find_id(const std::string& alias) {
+Id Handler::find_id(const std::string& alias) {
     auto& aliases = m_resourceSet.aliases;
     auto it = aliases.find(alias);
     if (it == aliases.end()) {
@@ -134,9 +134,9 @@ Id Importer::find_id(const std::string& alias) {
     return it->second;
 }
 
-ResourceImporter* Importer::get_importer(const std::string& tag) {
-    auto it = m_resourceImporters.find(tag);
-    if (it == m_resourceImporters.end()) {
+ResourceHandler* Handler::get_handler(const std::string& tag) {
+    auto it = m_resourceHandlers.find(tag);
+    if (it == m_resourceHandlers.end()) {
         return nullptr;
     }
     return it->second.get();

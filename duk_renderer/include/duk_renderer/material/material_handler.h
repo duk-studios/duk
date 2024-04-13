@@ -2,10 +2,10 @@
 // Created by rov on 12/2/2023.
 //
 
-#ifndef DUK_MATERIAL_IMPORTER_H
-#define DUK_MATERIAL_IMPORTER_H
+#ifndef DUK_MATERIAL_HANDLER_H
+#define DUK_MATERIAL_HANDLER_H
 
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 
 #include <duk_renderer/material/material_pool.h>
 
@@ -13,13 +13,13 @@
 
 namespace duk::renderer {
 
-struct MaterialImporterCreateInfo {
+struct MaterialHandlerCreateInfo {
     MaterialPool* materialPool;
 };
 
-class MaterialImporter : public duk::resource::ResourceImporter {
+class MaterialHandler : public duk::resource::ResourceHandler {
 public:
-    explicit MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo);
+    explicit MaterialHandler(const MaterialHandlerCreateInfo& materialHandlerCreateInfo);
 
     const std::string& tag() const override;
 
@@ -35,4 +35,4 @@ private:
 
 }// namespace duk::renderer
 
-#endif//DUK_MATERIAL_IMPORTER_H
+#endif//DUK_MATERIAL_HANDLER_H

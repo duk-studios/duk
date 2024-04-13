@@ -8,7 +8,7 @@ namespace duk::engine {
 
 Director::Director(const DirectorCreateInfo& directorCreateInfo)
     : m_renderer(directorCreateInfo.renderer)
-    , m_importer(directorCreateInfo.importer)
+    , m_handler(directorCreateInfo.handler)
     , m_scenePool(directorCreateInfo.scenePool)
     , m_requestedSceneId(directorCreateInfo.firstScene) {
 }
@@ -41,7 +41,7 @@ Scene* Director::scene() {
 }
 
 void Director::load_scene(Engine& engine, duk::resource::Id id) {
-    m_importer->load_resource(id);
+    m_handler->load_resource(id);
 
     auto scene = m_scenePool->find(id);
     if (!scene) {

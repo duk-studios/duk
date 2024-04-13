@@ -4,7 +4,7 @@
 #include <duk_project/project.h>
 #include <duk_project/resource.h>
 
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 #include <duk_tools/file.h>
 
 #include <fmt/format.h>

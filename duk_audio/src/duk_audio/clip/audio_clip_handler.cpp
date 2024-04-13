@@ -2,22 +2,22 @@
 // Created by Ricardo on 25/03/2024.
 //
 
-#include <duk_audio/clip/audio_clip_importer.h>
+#include <duk_audio/clip/audio_clip_handler.h>
 
 #include <duk_tools/file.h>
 
 namespace duk::audio {
 
-AudioClipImporter::AudioClipImporter(const AudioClipImporterCreateInfo& audioClipImporterCreateInfo)
-    : m_audioClipPool(audioClipImporterCreateInfo.audioClipPool) {
+AudioClipHandler::AudioClipHandler(const AudioClipHandlerCreateInfo& audioClipHandlerCreateInfo)
+    : m_audioClipPool(audioClipHandlerCreateInfo.audioClipPool) {
 }
 
-const std::string& AudioClipImporter::tag() const {
+const std::string& AudioClipHandler::tag() const {
     static const std::string tag = "aud";
     return tag;
 }
 
-void AudioClipImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
+void AudioClipHandler::load(const duk::resource::Id& id, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {
         throw std::invalid_argument(fmt::format("failed to load AudioClip, path ({}) does not exist", path.string()));
     }

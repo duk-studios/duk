@@ -7,13 +7,13 @@
 #include <duk_engine/scene/scene_pool.h>
 
 #include <duk_renderer/renderer.h>
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 
 namespace duk::engine {
 
 struct DirectorCreateInfo {
     duk::renderer::Renderer* renderer;
-    duk::resource::Importer* importer;
+    duk::resource::Handler* handler;
     ScenePool* scenePool;
     duk::resource::Id firstScene;
 };
@@ -35,7 +35,7 @@ private:
 
 private:
     duk::renderer::Renderer* m_renderer;
-    duk::resource::Importer* m_importer;
+    duk::resource::Handler* m_handler;
     ScenePool* m_scenePool;
     SceneResource m_scene;
     duk::resource::Id m_requestedSceneId;

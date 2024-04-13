@@ -11,7 +11,7 @@
 #include <duk_engine/settings.h>
 #include <duk_platform/window.h>
 #include <duk_renderer/renderer.h>
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 #include <duk_tools/timer.h>
 
 #include <filesystem>
@@ -38,7 +38,7 @@ public:
 
     DUK_NO_DISCARD duk::resource::Pools* pools();
 
-    DUK_NO_DISCARD duk::resource::Importer* importer();
+    DUK_NO_DISCARD duk::resource::Handler* handler();
 
     DUK_NO_DISCARD Director* director();
 
@@ -56,7 +56,7 @@ private:
     std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::Renderer> m_renderer;
     std::unique_ptr<duk::audio::AudioDevice> m_audio;
-    std::unique_ptr<duk::resource::Importer> m_importer;
+    std::unique_ptr<duk::resource::Handler> m_handler;
     std::unique_ptr<duk::engine::Director> m_director;
     std::unique_ptr<duk::engine::Input> m_input;
     duk::resource::Pools m_pools;

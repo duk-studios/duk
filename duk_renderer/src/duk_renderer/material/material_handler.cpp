@@ -2,7 +2,7 @@
 // Created by rov on 12/2/2023.
 //
 
-#include <duk_renderer/material/material_importer.h>
+#include <duk_renderer/material/material_handler.h>
 
 #include <duk_tools/file.h>
 
@@ -56,16 +56,16 @@ std::unique_ptr<MaterialDataSource> parse_material_json(const std::string& json)
 
 }// namespace detail
 
-MaterialImporter::MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo)
-    : m_materialPool(materialImporterCreateInfo.materialPool) {
+MaterialHandler::MaterialHandler(const MaterialHandlerCreateInfo& materialHandlerCreateInfo)
+    : m_materialPool(materialHandlerCreateInfo.materialPool) {
 }
 
-const std::string& MaterialImporter::tag() const {
+const std::string& MaterialHandler::tag() const {
     static const std::string matTag("mat");
     return matTag;
 }
 
-void MaterialImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
+void MaterialHandler::load(const duk::resource::Id& id, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error(fmt::format("material at ({}) does not exist", path.string()));
     }
@@ -79,7 +79,7 @@ void MaterialImporter::load(const duk::resource::Id& id, const std::filesystem::
     m_materialPool->create(id, dataSource.get());
 }
 
-void MaterialImporter::solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) {
+void MaterialHandler::solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) {
     auto material = m_materialPool->find(id);
     if (!material) {
         throw std::logic_error("tried to solve dependencies of resource that was not loaded");
@@ -87,7 +87,7 @@ void MaterialImporter::solve_dependencies(const duk::resource::Id& id, duk::reso
     dependencySolver.solve(*material);
 }
 
-void MaterialImporter::solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) {
+void MaterialHandler::solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) {
     auto material = m_materialPool->find(id);
     if (!material) {
         throw std::logic_error("tried to solve references of resource that was not loaded");

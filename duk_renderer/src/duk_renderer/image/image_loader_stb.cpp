@@ -1,5 +1,5 @@
 /// 12/11/2023
-/// image_importer_stb.cpp
+/// image_handler_stb.cpp
 
 #include <duk_renderer/image/image_loader_stb.h>
 
@@ -79,7 +79,7 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageLoaderStb::load(const std::files
         throw std::runtime_error("failed to decode image: " + std::string(stbi_failure_reason()));
     }
 
-    auto image = ImageImporter::create(data, format, width, height);
+    auto image = ImageHandler::create(data, format, width, height);
 
     image->update_hash();
 

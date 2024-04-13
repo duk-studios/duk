@@ -2,26 +2,26 @@
 // Created by rov on 12/7/2023.
 //
 
-#ifndef DUK_ENGINE_SCENE_IMPORTER_H
-#define DUK_ENGINE_SCENE_IMPORTER_H
+#ifndef DUK_ENGINE_SCENE_HANDLER_H
+#define DUK_ENGINE_SCENE_HANDLER_H
 
 #include <duk_engine/scene/scene_pool.h>
 
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 
 #include <filesystem>
 
 namespace duk::engine {
 
-struct SceneImporterCreateInfo {
+struct SceneHandlerCreateInfo {
     ScenePool* scenePool;
 };
 
-class SceneImporter : public duk::resource::ResourceImporter {
+class SceneHandler : public duk::resource::ResourceHandler {
 public:
-    SceneImporter(const SceneImporterCreateInfo& sceneImporterCreateInfo);
+    SceneHandler(const SceneHandlerCreateInfo& sceneHandlerCreateInfo);
 
-    ~SceneImporter();
+    ~SceneHandler();
 
     const std::string& tag() const override;
 
@@ -37,4 +37,4 @@ private:
 
 }// namespace duk::engine
 
-#endif//DUK_ENGINE_SCENE_IMPORTER_H
+#endif//DUK_ENGINE_SCENE_HANDLER_H

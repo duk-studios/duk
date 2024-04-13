@@ -1,13 +1,13 @@
 /// 12/11/2023
-/// image_importer.cpp
+/// image_handler.cpp
 
-#include <duk_renderer/image/image_importer.h>
+#include <duk_renderer/image/image_handler.h>
 #include <duk_renderer/image/image_loader_stb.h>
 #include <duk_renderer/image/image_pool.h>
 
 namespace duk::renderer {
 
-std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height) {
+std::unique_ptr<duk::rhi::ImageDataSource> ImageHandler::create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height) {
     switch (format) {
         case duk::rhi::PixelFormat::R8S:
             return std::make_unique<duk::rhi::ImageDataSourceR8S>(reinterpret_cast<const duk::rhi::PixelR8S*>(data), width, height);
@@ -36,17 +36,17 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageImporter::create(const void* dat
     }
 }
 
-ImageImporter::ImageImporter(const ImageImporterCreateInfo& imageImporterCreateInfo)
-    : m_imagePool(imageImporterCreateInfo.imagePool) {
-    m_loaders.emplace_back(std::make_unique<ImageLoaderStb>(imageImporterCreateInfo.rhiCapabilities));
+ImageHandler::ImageHandler(const ImageHandlerCreateInfo& imageHandlerCreateInfo)
+    : m_imagePool(imageHandlerCreateInfo.imagePool) {
+    m_loaders.emplace_back(std::make_unique<ImageLoaderStb>(imageHandlerCreateInfo.rhiCapabilities));
 }
 
-const std::string& ImageImporter::tag() const {
+const std::string& ImageHandler::tag() const {
     static const std::string imgTag("img");
     return imgTag;
 }
 
-void ImageImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
+void ImageHandler::load(const duk::resource::Id& id, const std::filesystem::path& path) {
     for (auto& loader: m_loaders) {
         if (loader->accepts(path)) {
             auto dataSource = loader->load(path);
