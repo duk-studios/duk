@@ -18,7 +18,8 @@ inline PixelFormat pixel_format_of<uint8_t>() {
 
 namespace duk::renderer {
 
-FontAtlas::FontAtlas(const FontAtlasCreateInfo& fontAtlasCreateInfo) {
+FontAtlas::FontAtlas(const FontAtlasCreateInfo& fontAtlasCreateInfo)
+    : m_fontSize(fontAtlasCreateInfo.fontSize) {
     duk::rhi::ImageDataSourceT<uint8_t> imageDataSource(fontAtlasCreateInfo.bitmap, fontAtlasCreateInfo.bitmapSize.x, fontAtlasCreateInfo.bitmapSize.y);
     imageDataSource.update_hash();
 
@@ -40,12 +41,23 @@ ImageResource FontAtlas::image() const {
     return m_image;
 }
 
-const duk::renderer::Glyph& duk::renderer::FontAtlas::glyph(char chr) const {
+bool FontAtlas::find_glyph(char chr, Glyph& glyph, uint32_t fontSize) const {
     auto it = m_glyphs.find(chr);
     if (it != m_glyphs.end()) {
-        return it->second;
+        glyph = it->second;
+        scale_for(glyph, fontSize);
+        return true;
     }
-    return m_glyphs.at('?');
+    glyph = m_glyphs.at(' ');
+    scale_for(glyph, fontSize);
+    return false;
+}
+
+void FontAtlas::scale_for(Glyph& glyph, uint32_t fontSize) const {
+    auto scale = (float)fontSize / (float)m_fontSize;
+    glyph.metrics.advance *= scale;
+    glyph.metrics.size = glm::vec2(glyph.metrics.size) * scale;
+    glyph.metrics.bearing = glm::vec2(glyph.metrics.bearing) * scale;
 }
 
 }// namespace duk::renderer

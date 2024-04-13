@@ -55,7 +55,7 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
     }
 
     const float kPixelsPerUnit = 1.f;
-    const float kLineHeight = textRenderer.fontSize + (textRenderer.fontSize * (1.f / 4.f));
+    const float kLineHeight = textRenderer.fontSize + textRenderer.fontSize * (1.f / 4.f);
 
     // get words
     std::vector<std::string_view> words;
@@ -93,7 +93,9 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
         for (auto i = 0; i < word.size(); i++) {
             auto chr = word[i];
 
-            const auto& glyph = atlas->glyph(chr);
+            Glyph glyph;
+            atlas->find_glyph(chr, glyph, textRenderer.fontSize);
+
             wordWidth += glyph.metrics.advance;
             if (i == word.size() - 1) {
                 // keep track of the last character spilling,
@@ -149,7 +151,9 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
 
         for (const auto& word: line.words) {
             for (auto chr: word) {
-                const auto& glyph = atlas->glyph(chr);
+                Glyph glyph;
+                atlas->find_glyph(chr, glyph, textRenderer.fontSize);
+
                 const auto bearing = glm::vec2(glyph.metrics.bearing) / kPixelsPerUnit;
                 const auto size = glm::vec2(glyph.metrics.size) / kPixelsPerUnit;
                 const auto advance = glyph.metrics.advance / kPixelsPerUnit;
@@ -239,7 +243,7 @@ void TextMesh::reserve(uint32_t textCount) {
 }
 
 void update_text_renderer(Renderer* renderer, const objects::Component<TextRenderer>& textRenderer) {
-    auto atlas = textRenderer->font->atlas(textRenderer->fontSize, renderer->rhi(), renderer->main_command_queue());
+    auto atlas = textRenderer->font->atlas();
 
     auto& material = textRenderer->material;
     auto& mesh = textRenderer->mesh;

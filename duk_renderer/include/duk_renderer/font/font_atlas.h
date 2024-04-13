@@ -38,6 +38,7 @@ struct FontAtlasCreateInfo {
     std::vector<Glyph> glyphs;
     std::vector<uint8_t> bitmap;
     glm::ivec2 bitmapSize;
+    uint32_t fontSize;
 };
 
 class FontAtlas {
@@ -48,9 +49,12 @@ public:
 
     ImageResource image() const;
 
-    const Glyph& glyph(char chr) const;
+    bool find_glyph(char chr, Glyph& glyph, uint32_t fontSize) const;
+
+    void scale_for(Glyph& glyph, uint32_t fontSize) const;
 
 private:
+    uint32_t m_fontSize;
     ImageResource m_image;
     std::unordered_map<char, Glyph> m_glyphs;
 };
