@@ -6,6 +6,8 @@
 #include <duk_renderer/material/text/text_material.h>
 #include <duk_renderer/renderer.h>
 
+#include <duk_renderer/components/transform.h>
+
 namespace duk::renderer {
 
 namespace detail {
@@ -40,7 +42,7 @@ TextMesh::TextMesh(const TextMeshCreateInfo& textBrushCreateInfo)
     reserve(detail::kTextChunk);
 }
 
-void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRenderer) {
+void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRenderer, float pixelsPerUnit) {
     const auto& text = textRenderer.text;
     auto hash = detail::calculate_hash(atlas, text);
     if (hash == m_hash) {
@@ -54,7 +56,6 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
         reserve(newMaxTextCount);
     }
 
-    const float kPixelsPerUnit = 1.f;
     const float kLineHeight = textRenderer.fontSize + textRenderer.fontSize * (1.f / 4.f);
 
     // get words
@@ -134,6 +135,7 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
             break;
     }
     pen.y -= (textRenderer.size.y / 2) + kLineHeight;
+    pen.y /= pixelsPerUnit;
 
     for (const auto& line: lines) {
         switch (textRenderer.horiAlignment) {
@@ -148,15 +150,16 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
                 break;
         }
         pen.x -= textRenderer.size.x / 2;
+        pen.x /= pixelsPerUnit;
 
         for (const auto& word: line.words) {
             for (auto chr: word) {
                 Glyph glyph;
                 atlas->find_glyph(chr, glyph, textRenderer.fontSize);
 
-                const auto bearing = glm::vec2(glyph.metrics.bearing) / kPixelsPerUnit;
-                const auto size = glm::vec2(glyph.metrics.size) / kPixelsPerUnit;
-                const auto advance = glyph.metrics.advance / kPixelsPerUnit;
+                const auto bearing = glm::vec2(glyph.metrics.bearing) / pixelsPerUnit;
+                const auto size = glm::vec2(glyph.metrics.size) / pixelsPerUnit;
+                const auto advance = glyph.metrics.advance / pixelsPerUnit;
 
                 glm::vec2 min = glm::vec2(pen.x + bearing.x, pen.y + bearing.y - size.y);// bottom left
                 glm::vec2 max = glm::vec2(min.x + size.x, min.y + size.y);               // upper right
@@ -260,7 +263,7 @@ void update_text_renderer(Renderer* renderer, const objects::Component<TextRende
         material = std::make_shared<Material>(materialCreateInfo);
         auto pipeline = material->pipeline();
         pipeline->blend(true);
-        pipeline->cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::NONE);
+        pipeline->cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::BACK);
         pipeline->depth_test(false);
     }
 
@@ -270,7 +273,9 @@ void update_text_renderer(Renderer* renderer, const objects::Component<TextRende
         mesh = std::make_shared<TextMesh>(textMeshCreateInfo);
     }
 
-    mesh->update_text(atlas, *textRenderer);
+    const bool isWorldSpace = textRenderer.object().component<Transform>().valid();
+
+    mesh->update_text(atlas, *textRenderer, isWorldSpace ? 100 : 1);
 
     auto descriptorSet = dynamic_cast<TextMaterialDescriptorSet*>(material->descriptor_set());
     descriptorSet->set_instance(textRenderer.object());

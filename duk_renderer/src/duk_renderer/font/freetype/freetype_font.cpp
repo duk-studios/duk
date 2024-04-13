@@ -103,7 +103,7 @@ FreetypeFont::FreetypeFont(const FreetypeFontCreateInfo& freetypeFontCreateInfo)
         /// if a glyph would be outside of the determined maximum width of the image, wrap into next row
         if (pen.x + bitmap.width > kMaxWidth) {
             pen.x = 0;
-            pen.y += bitmap.height + 1;
+            pen.y += bitmap.height;
         }
 
         glyph.min.x = pen.x;

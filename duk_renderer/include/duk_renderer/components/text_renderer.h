@@ -20,7 +20,7 @@ class TextMesh {
 public:
     TextMesh(const TextMeshCreateInfo& textBrushCreateInfo);
 
-    void update_text(const FontAtlas* atlas, const TextRenderer& textRenderer);
+    void update_text(const FontAtlas* atlas, const TextRenderer& textRenderer, float pixelsPerUnit);
 
     void draw(duk::rhi::CommandBuffer* commandBuffer);
 
