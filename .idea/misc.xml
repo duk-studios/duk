@@ -31,6 +31,7 @@
     </sourceRoots>
     <excludeRoots>
       <file path="$PROJECT_DIR$/install" />
+      <file path="$PROJECT_DIR$/venv" />
     </excludeRoots>
   </component>
 </project>
