@@ -17,6 +17,8 @@ class MaterialHandler : public duk::resource::ResourceHandlerT<MaterialPool> {
 public:
     explicit MaterialHandler();
 
+    bool accepts(const std::string& extension) const override;
+
 protected:
     void load(MaterialPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };

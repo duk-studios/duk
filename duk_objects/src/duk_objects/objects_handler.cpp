@@ -11,6 +11,10 @@ namespace duk::objects {
 ObjectsHandler::ObjectsHandler() : ResourceHandlerT("obj"){
 }
 
+bool ObjectsHandler::accepts(const std::string& extension) const {
+    return extension == ".obj";
+}
+
 void ObjectsHandler::load(ObjectsPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     auto content = duk::tools::File::load_text(path.string().c_str());
 

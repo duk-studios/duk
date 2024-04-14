@@ -12,6 +12,12 @@ FontHandler::FontHandler()
     m_loaders.emplace_back(std::make_unique<FreetypeFontLoader>());
 }
 
+bool FontHandler::accepts(const std::string& extension) const {
+    return std::ranges::any_of(m_loaders, [&extension](const auto& loader) {
+        return loader->accepts(extension);
+    });
+}
+
 void FontHandler::load(FontPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     for (auto& loader: m_loaders) {
         if (loader->accepts(path)) {

@@ -60,6 +60,10 @@ MaterialHandler::MaterialHandler()
     : ResourceHandlerT("mat") {
 }
 
+bool MaterialHandler::accepts(const std::string& extension) const {
+    return extension == ".mat";
+}
+
 void MaterialHandler::load(MaterialPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error(fmt::format("material at ({}) does not exist", path.string()));

@@ -20,7 +20,7 @@ public:
 
     virtual ~ImageLoader() = default;
 
-    virtual bool accepts(const std::filesystem::path& path) = 0;
+    virtual bool accepts(const std::filesystem::path& extension) = 0;
 
     virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) = 0;
 };
@@ -30,6 +30,8 @@ public:
     static std::unique_ptr<duk::rhi::ImageDataSource> create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height);
 
     ImageHandler();
+
+    bool accepts(const std::string& extension) const override;
 
 protected:
     void load(ImagePool* pool, const resource::Id& id, const std::filesystem::path& path) override;

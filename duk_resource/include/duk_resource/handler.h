@@ -20,6 +20,8 @@ public:
 
     virtual const std::string& tag() const = 0;
 
+    virtual bool accepts(const std::string& extension) const = 0;
+
     virtual void load(Pools* pools, const Id& id, const std::filesystem::path& path) = 0;
 
     virtual void solve_dependencies(Pools* pools, const Id& id, DependencySolver& dependencySolver) = 0;
@@ -61,6 +63,8 @@ public:
     void add();
 
     ResourceHandler* find_handler(const std::string& tag);
+
+    ResourceHandler* find_handler_for_extension(const std::string& extension);
 
 private:
     std::unordered_map<std::string, std::unique_ptr<ResourceHandler>> m_handlers;

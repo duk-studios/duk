@@ -30,8 +30,7 @@ duk::rhi::PixelFormat build_pixel_format(int channelCount) {
 
 }// namespace detail
 
-bool ImageLoaderStb::accepts(const std::filesystem::path& path) {
-    const auto extension = path.extension().string();
+bool ImageLoaderStb::accepts(const std::filesystem::path& extension) {
     if (extension != ".png" && extension != ".jpg" && extension != ".jpeg") {
         return false;
     }

@@ -16,7 +16,7 @@ public:
 
     ~FreetypeFontLoader() override;
 
-    bool accepts(const std::filesystem::path& path) override;
+    bool accepts(const std::filesystem::path& extension) override;
 
     std::shared_ptr<Font> load(const std::filesystem::path& path) override;
 

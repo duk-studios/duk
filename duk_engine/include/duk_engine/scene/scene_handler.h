@@ -17,6 +17,8 @@ class SceneHandler : public duk::resource::ResourceHandlerT<ScenePool> {
 public:
     SceneHandler();
 
+    bool accepts(const std::string& extension) const override;
+
 protected:
     void load(ScenePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };

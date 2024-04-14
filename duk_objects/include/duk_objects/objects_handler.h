@@ -15,6 +15,8 @@ class ObjectsHandler : public duk::resource::ResourceHandlerT<ObjectsPool> {
 public:
     ObjectsHandler();
 
+    bool accepts(const std::string& extension) const override;
+
 protected:
     void load(ObjectsPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };

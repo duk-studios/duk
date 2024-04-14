@@ -15,6 +15,8 @@ class AudioClipHandler : public duk::resource::ResourceHandlerT<AudioClipPool> {
 public:
     AudioClipHandler();
 
+    bool accepts(const std::string& extension) const override;
+
 protected:
     void load(AudioClipPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };

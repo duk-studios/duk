@@ -5,6 +5,8 @@
 
 #include <duk_log/log.h>
 
+#include <ranges>
+
 namespace duk::resource {
 
 ResourceRegistry g_resourceRegistry;
@@ -19,6 +21,15 @@ ResourceHandler* ResourceRegistry::find_handler(const std::string& tag) {
         return nullptr;
     }
     return it->second.get();
+}
+
+ResourceHandler* ResourceRegistry::find_handler_for_extension(const std::string& extension) {
+    for (auto& handler: m_handlers | std::views::values) {
+        if (handler->accepts(extension)) {
+            return handler.get();
+        }
+    }
+    return nullptr;
 }
 
 }// namespace duk::resource

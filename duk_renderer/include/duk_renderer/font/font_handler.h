@@ -15,7 +15,7 @@ class FontLoader {
 public:
     virtual ~FontLoader() = default;
 
-    virtual bool accepts(const std::filesystem::path& path) = 0;
+    virtual bool accepts(const std::filesystem::path& extension) = 0;
 
     virtual std::shared_ptr<Font> load(const std::filesystem::path& path) = 0;
 };
@@ -28,6 +28,8 @@ struct FontHandlerCreateInfo {
 class FontHandler : public duk::resource::ResourceHandlerT<FontPool> {
 public:
     FontHandler();
+
+    bool accepts(const std::string& extension) const override;
 
 protected:
     void load(FontPool* pool, const resource::Id& id, const std::filesystem::path& path) override;

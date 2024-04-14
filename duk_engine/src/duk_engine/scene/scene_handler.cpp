@@ -13,6 +13,10 @@ SceneHandler::SceneHandler() :
 
 }
 
+bool SceneHandler::accepts(const std::string& extension) const {
+    return extension == ".scn";
+}
+
 void SceneHandler::load(ScenePool* pool, const resource::Id& id, const std::filesystem::path& path) {
     auto content = duk::tools::File::load_text(path.string().c_str());
 

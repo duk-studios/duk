@@ -20,8 +20,7 @@ FreetypeFontLoader::~FreetypeFontLoader() {
     FT_Done_FreeType(m_library);
 }
 
-bool FreetypeFontLoader::accepts(const std::filesystem::path& path) {
-    const auto extension = path.extension();
+bool FreetypeFontLoader::accepts(const std::filesystem::path& extension) {
     return extension == ".ttf";
 }
 
