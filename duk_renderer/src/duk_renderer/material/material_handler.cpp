@@ -2,7 +2,7 @@
 // Created by rov on 12/2/2023.
 //
 
-#include <duk_renderer/material/material_importer.h>
+#include <duk_renderer/material/material_handler.h>
 
 #include <duk_tools/file.h>
 
@@ -56,16 +56,15 @@ std::unique_ptr<MaterialDataSource> parse_material_json(const std::string& json)
 
 }// namespace detail
 
-MaterialImporter::MaterialImporter(const MaterialImporterCreateInfo& materialImporterCreateInfo)
-    : m_materialPool(materialImporterCreateInfo.materialPool) {
+MaterialHandler::MaterialHandler()
+    : ResourceHandlerT("mat") {
 }
 
-const std::string& MaterialImporter::tag() const {
-    static const std::string matTag("mat");
-    return matTag;
+bool MaterialHandler::accepts(const std::string& extension) const {
+    return extension == ".mat";
 }
 
-void MaterialImporter::load(const duk::resource::Id& id, const std::filesystem::path& path) {
+void MaterialHandler::load(MaterialPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error(fmt::format("material at ({}) does not exist", path.string()));
     }
@@ -76,23 +75,6 @@ void MaterialImporter::load(const duk::resource::Id& id, const std::filesystem::
 
     auto jsonContent = duk::tools::File::load_text(path.string().c_str());
     auto dataSource = detail::parse_material_json(jsonContent);
-    m_materialPool->create(id, dataSource.get());
+    pool->create(id, dataSource.get());
 }
-
-void MaterialImporter::solve_dependencies(const duk::resource::Id& id, duk::resource::DependencySolver& dependencySolver) {
-    auto material = m_materialPool->find(id);
-    if (!material) {
-        throw std::logic_error("tried to solve dependencies of resource that was not loaded");
-    }
-    dependencySolver.solve(*material);
-}
-
-void MaterialImporter::solve_references(const duk::resource::Id& id, duk::resource::ReferenceSolver& referenceSolver) {
-    auto material = m_materialPool->find(id);
-    if (!material) {
-        throw std::logic_error("tried to solve references of resource that was not loaded");
-    }
-    referenceSolver.solve(*material);
-}
-
 }// namespace duk::renderer

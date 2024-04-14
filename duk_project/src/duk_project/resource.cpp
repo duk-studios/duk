@@ -4,7 +4,7 @@
 #include <duk_project/project.h>
 #include <duk_project/resource.h>
 
-#include <duk_resource/importer.h>
+#include <duk_resource/handler.h>
 #include <duk_tools/file.h>
 
 #include <fmt/format.h>
@@ -16,58 +16,20 @@ namespace duk::project {
 
 namespace detail {
 
-static bool is_scene_resource(const std::string& extension) {
-    return extension == ".scn";
-}
-
-static bool is_image_resource(const std::string& extension) {
-    return extension == ".png" || extension == ".jpg" || extension == ".jpeg";
-}
-
-static bool is_material_resource(const std::string& extension) {
-    return extension == ".mat";
-}
-
-static bool is_audio_clip_resource(const std::string& extension) {
-    return extension == ".wav" || extension == ".mp3" || extension == ".ogg" || extension == ".flac";
-}
-
-static bool is_objects_resource(const std::string& extension) {
-    return extension == ".obj";
-}
-
-static bool is_font_resource(const std::string& extension) {
-    return extension == ".ttf";
-}
-
 static bool is_resource(const std::string& extension) {
-    return is_material_resource(extension) || is_image_resource(extension) || is_scene_resource(extension) || is_audio_clip_resource(extension) || is_objects_resource(extension) || is_font_resource(extension);
+    const auto handler = duk::resource::ResourceRegistry::instance()->find_handler_for_extension(extension);
+    return handler != nullptr;
 }
 
 static std::string resource_tag(const std::string& extension) {
-    if (is_material_resource(extension)) {
-        return "mat";
-    }
-    if (is_image_resource(extension)) {
-        return "img";
-    }
-    if (is_scene_resource(extension)) {
-        return "scn";
-    }
-    if (is_audio_clip_resource(extension)) {
-        return "aud";
-    }
-    if (is_objects_resource(extension)) {
-        return "obj";
-    }
-    if (is_font_resource(extension)) {
-        return "fnt";
+    if (const auto handler = duk::resource::ResourceRegistry::instance()->find_handler_for_extension(extension)) {
+        return handler->tag();
     }
     throw std::invalid_argument(fmt::format("Unknown resource tag \"{}\"", extension));
 }
 
 static bool has_resource_id(const Project* project, const duk::resource::Id& id) {
-    return project->resources.find(id) != project->resources.end();
+    return project->resources.contains(id);
 }
 
 static duk::resource::Id resource_id_generate(const Project* project) {
@@ -85,14 +47,14 @@ static duk::resource::Id resource_id_generate(const Project* project) {
     return id;
 }
 
-static duk::resource::ResourceDescription read_resource_description(const std::filesystem::path& path) {
+static duk::resource::ResourceFile read_resource_file(const std::filesystem::path& path) {
     auto json = duk::tools::File::load_text(path.string().c_str());
     duk::serial::JsonReader reader(json.c_str());
 
-    duk::resource::ResourceDescription resourceDescription = {};
-    reader.visit(resourceDescription);
+    duk::resource::ResourceFile resourceFile = {};
+    reader.visit(resourceFile);
 
-    return resourceDescription;
+    return resourceFile;
 }
 
 static void add_resource(Project* project, const duk::resource::Id& id, const std::filesystem::path& resourceFile, const std::filesystem::path& trackFile) {
@@ -125,13 +87,13 @@ std::set<std::filesystem::path> resource_scan(Project* project) {
     }
 
     std::set<std::filesystem::path> untrackedResourceFiles;
-    for (auto resourceFile: resourceFiles) {
-        auto trackFile = std::filesystem::path(resourceFile).replace_extension(".res");
+    for (auto resourceFilepath: resourceFiles) {
+        auto trackFile = std::filesystem::path(resourceFilepath).replace_extension(".res");
         if (trackFiles.find(trackFile) != trackFiles.end()) {
-            auto resourceDescription = detail::read_resource_description(trackFile);
-            detail::add_resource(project, resourceDescription.id, resourceFile, trackFile);
+            auto resourceFile = detail::read_resource_file(trackFile);
+            detail::add_resource(project, resourceFile.id, resourceFilepath, trackFile);
         } else {
-            untrackedResourceFiles.insert(resourceFile);
+            untrackedResourceFiles.insert(resourceFilepath);
         }
     }
 
@@ -149,20 +111,20 @@ void resource_track(Project* project, const std::filesystem::path& resource) {
         throw std::invalid_argument(fmt::format("resource \"{}\" is not a resource", resource.string()));
     }
 
-    duk::resource::ResourceDescription resourceDescription = {};
-    resourceDescription.file = std::filesystem::relative(resource, resource.parent_path()).string();
-    resourceDescription.tag = detail::resource_tag(extension);
-    resourceDescription.id = detail::resource_id_generate(project);
+    duk::resource::ResourceFile resourceFile = {};
+    resourceFile.file = std::filesystem::relative(resource, resource.parent_path()).string();
+    resourceFile.tag = detail::resource_tag(extension);
+    resourceFile.id = detail::resource_id_generate(project);
 
     duk::serial::JsonWriter writer;
-    writer.visit(resourceDescription);
+    writer.visit(resourceFile);
 
     auto trackFilePath = std::filesystem::path(resource).replace_extension(".res");
     std::ofstream file(trackFilePath);
 
     file << writer.pretty_print();
 
-    detail::add_resource(project, resourceDescription.id, resource, trackFilePath);
+    detail::add_resource(project, resourceFile.id, resource, trackFilePath);
 }
 
 }// namespace duk::project

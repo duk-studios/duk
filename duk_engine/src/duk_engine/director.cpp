@@ -8,8 +8,7 @@ namespace duk::engine {
 
 Director::Director(const DirectorCreateInfo& directorCreateInfo)
     : m_renderer(directorCreateInfo.renderer)
-    , m_importer(directorCreateInfo.importer)
-    , m_scenePool(directorCreateInfo.scenePool)
+    , m_resources(directorCreateInfo.resources)
     , m_requestedSceneId(directorCreateInfo.firstScene) {
 }
 
@@ -41,9 +40,9 @@ Scene* Director::scene() {
 }
 
 void Director::load_scene(Engine& engine, duk::resource::Id id) {
-    m_importer->load_resource(id);
+    m_resources->load(id);
 
-    auto scene = m_scenePool->find(id);
+    auto scene = m_resources->pools()->get<ScenePool>()->find(id);
     if (!scene) {
         throw std::runtime_error(fmt::format("failed to load scene with id \"{}\"", m_requestedSceneId.value()));
     }
@@ -55,7 +54,7 @@ void Director::load_scene(Engine& engine, duk::resource::Id id) {
         m_scene->enter(engine);
     }
 
-    engine.pools()->clear();
+    m_resources->pools()->clear();
 }
 
 }// namespace duk::engine

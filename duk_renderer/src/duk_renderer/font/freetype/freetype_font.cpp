@@ -9,12 +9,6 @@
 
 namespace duk::renderer {
 
-namespace detail {
-
-static const std::string kDefaultChars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*(){}[]:.;?";
-
-}
-
 FreetypeFont::FreetypeFont(const FreetypeFontCreateInfo& freetypeFontCreateInfo)
     : m_fontData(std::move(freetypeFontCreateInfo.fontData)) {
     auto error = FT_New_Memory_Face(freetypeFontCreateInfo.library, (const FT_Byte*)m_fontData.data(), m_fontData.size(), 0, &m_face);
@@ -22,10 +16,30 @@ FreetypeFont::FreetypeFont(const FreetypeFontCreateInfo& freetypeFontCreateInfo)
     if (error) {
         throw std::runtime_error(build_freetype_error_message("failed to create freetype face", error));
     }
+}
 
-    const uint32_t kFontSize = 128;
+FreetypeFont::~FreetypeFont() {
+    auto error = FT_Done_Face(m_face);
+    if (error) {
+        duk::log::fatal(build_freetype_error_message("failed to delete freetype face", error));
+    }
+}
 
-    error = FT_Set_Char_Size(m_face, kFontSize * 64, 0, 100, 0);
+FontAtlas* FreetypeFont::atlas(const BuildAtlasParams& buildAtlasParams) {
+    // similar font sizes can get away with
+    constexpr auto kFontSizeStep = 8;
+
+    // always a multiple of step
+    const auto fontSize = ((buildAtlasParams.fontSize / kFontSizeStep) + 1) * kFontSizeStep;
+
+    {
+        auto it = m_atlases.find(fontSize);
+        if (it != m_atlases.end()) {
+            return it->second.get();
+        }
+    }
+
+    auto error = FT_Set_Char_Size(m_face, fontSize * 64, 0, 100, 0);
     if (error) {
         throw std::runtime_error(build_freetype_error_message("failed to set freetype char size", error));
     }
@@ -39,7 +53,6 @@ FreetypeFont::FreetypeFont(const FreetypeFontCreateInfo& freetypeFontCreateInfo)
     std::vector<Glyph> glyphs;
     std::unordered_map<char, Bitmap> glyphBitmaps;
 
-    const auto& charSet = detail::kDefaultChars;
     for (uint32_t i = 32; i < 127; i++) {
         const char chr = (char)i;
 
@@ -57,13 +70,6 @@ FreetypeFont::FreetypeFont(const FreetypeFontCreateInfo& freetypeFontCreateInfo)
             duk::log::debug("failed to render char \'{}\' bitmap, reason: {}", chr, FT_Error_String(error));
             continue;
         }
-
-        // sdf disabled, for now
-        // error = FT_Render_Glyph(slot, FT_RENDER_MODE_SDF);
-        // if (error) {
-        //     duk::log::debug("failed to render char \'{}\' sdf, reason: {}", chr, FT_Error_String(error));
-        //     continue;
-        // }
 
         Glyph glyph = {};
         glyph.chr = chr;
@@ -149,29 +155,20 @@ FreetypeFont::FreetypeFont(const FreetypeFontCreateInfo& freetypeFontCreateInfo)
         }
     }
 
-    // create font atlas
-    auto renderer = freetypeFontCreateInfo.renderer;
-
     FontAtlasCreateInfo fontAtlasCreateInfo = {};
     fontAtlasCreateInfo.glyphs = std::move(glyphs);
     fontAtlasCreateInfo.bitmap = std::move(image);
     fontAtlasCreateInfo.bitmapSize = imageSize;
-    fontAtlasCreateInfo.rhi = renderer->rhi();
-    fontAtlasCreateInfo.commandQueue = renderer->main_command_queue();
-    fontAtlasCreateInfo.fontSize = kFontSize;
+    fontAtlasCreateInfo.rhi = buildAtlasParams.rhi;
+    fontAtlasCreateInfo.commandQueue = buildAtlasParams.commandQueue;
+    fontAtlasCreateInfo.fontSize = fontSize;
 
-    m_atlas = std::make_unique<FontAtlas>(fontAtlasCreateInfo);
-}
-
-FreetypeFont::~FreetypeFont() {
-    auto error = FT_Done_Face(m_face);
-    if (error) {
-        duk::log::fatal(build_freetype_error_message("failed to delete freetype face", error));
+    auto [it, inserted] = m_atlases.emplace(fontSize, std::make_unique<FontAtlas>(fontAtlasCreateInfo));
+    if (!inserted) {
+        duk::log::fatal("Failed to cache font atlas");
+        return nullptr;
     }
-}
-
-FontAtlas* FreetypeFont::atlas() {
-    return m_atlas.get();
+    return it->second.get();
 }
 
 }// namespace duk::renderer
