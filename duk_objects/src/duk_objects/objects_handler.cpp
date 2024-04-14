@@ -8,7 +8,8 @@
 
 namespace duk::objects {
 
-ObjectsHandler::ObjectsHandler() : ResourceHandlerT("obj"){
+ObjectsHandler::ObjectsHandler()
+    : ResourceHandlerT("obj") {
 }
 
 bool ObjectsHandler::accepts(const std::string& extension) const {

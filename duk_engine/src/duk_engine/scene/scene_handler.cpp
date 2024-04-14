@@ -8,9 +8,8 @@
 
 namespace duk::engine {
 
-SceneHandler::SceneHandler() :
-    ResourceHandlerT("scn") {
-
+SceneHandler::SceneHandler()
+    : ResourceHandlerT("scn") {
 }
 
 bool SceneHandler::accepts(const std::string& extension) const {

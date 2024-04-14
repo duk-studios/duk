@@ -12,8 +12,8 @@
 #include <duk_platform/window.h>
 #include <duk_renderer/renderer.h>
 #include <duk_resource/handler.h>
-#include <duk_tools/timer.h>
 #include <duk_resource/set.h>
+#include <duk_tools/timer.h>
 
 #include <filesystem>
 

@@ -14,4 +14,4 @@ bool operator<(const ResourceFile& lhs, const ResourceFile& rhs) {
     return lhs.id < rhs.id;
 }
 
-}
+}// namespace duk::resource

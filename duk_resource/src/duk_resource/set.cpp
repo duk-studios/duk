@@ -1,8 +1,8 @@
 //
 // Created by Ricardo on 13/04/2024.
 //
-#include <duk_resource/set.h>
 #include <duk_resource/handler.h>
+#include <duk_resource/set.h>
 
 #include <duk_tools/file.h>
 
@@ -25,7 +25,7 @@ ResourceFile load_resource_file(const std::filesystem::path& path) {
     return resourceFile;
 }
 
-}
+}// namespace detail
 
 ResourceSet::ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo)
     : m_pools(resourceSetCreateInfo.pools) {
@@ -88,4 +88,4 @@ Pools* ResourceSet::pools() const {
     return m_pools;
 }
 
-}
+}// namespace duk::resource

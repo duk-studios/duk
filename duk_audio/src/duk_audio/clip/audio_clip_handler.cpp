@@ -8,8 +8,8 @@
 
 namespace duk::audio {
 
-AudioClipHandler::AudioClipHandler() :
-    ResourceHandlerT("aud") {
+AudioClipHandler::AudioClipHandler()
+    : ResourceHandlerT("aud") {
 }
 
 bool AudioClipHandler::accepts(const std::string& extension) const {

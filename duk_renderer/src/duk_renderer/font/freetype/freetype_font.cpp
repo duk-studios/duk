@@ -26,7 +26,6 @@ FreetypeFont::~FreetypeFont() {
 }
 
 FontAtlas* FreetypeFont::atlas(const BuildAtlasParams& buildAtlasParams) {
-
     // similar font sizes can get away with
     constexpr auto kFontSizeStep = 8;
 

@@ -12,4 +12,4 @@ void register_types() {
     duk::resource::register_handler<AudioClipHandler>();
 }
 
-}
+}// namespace duk::audio

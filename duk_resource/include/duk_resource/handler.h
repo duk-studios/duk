@@ -4,9 +4,9 @@
 #ifndef DUK_RESOURCE_HANDLER_H
 #define DUK_RESOURCE_HANDLER_H
 
+#include <duk_resource/file.h>
 #include <duk_resource/pool.h>
 #include <duk_resource/resource.h>
-#include <duk_resource/file.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 
@@ -32,7 +32,6 @@ public:
 template<typename TPool>
 class ResourceHandlerT : public ResourceHandler {
 public:
-
     explicit ResourceHandlerT(const char* tag);
 
     const std::string& tag() const final;
@@ -44,11 +43,9 @@ public:
     void solve_references(Pools* pools, const Id& id, ReferenceSolver& referenceSolver) override;
 
 protected:
-
     virtual void load(TPool* pool, const Id& id, const std::filesystem::path& path) = 0;
 
 private:
-
     static TPool* find_pool(Pools* pools);
 
     std::string m_tag;
@@ -56,7 +53,6 @@ private:
 
 class ResourceRegistry {
 public:
-
     static ResourceRegistry* instance();
 
     template<typename TResourceHandler>

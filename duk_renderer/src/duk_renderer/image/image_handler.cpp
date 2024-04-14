@@ -48,7 +48,8 @@ bool ImageHandler::accepts(const std::string& extension) const {
 
 void ImageHandler::load(ImagePool* pool, const resource::Id& id, const std::filesystem::path& path) {
     for (auto& loader: m_loaders) {
-        if (loader->accepts(path)) {
+        auto extension = path.extension();
+        if (loader->accepts(extension)) {
             auto dataSource = loader->load(path);
             pool->create(id, dataSource.get());
             return;

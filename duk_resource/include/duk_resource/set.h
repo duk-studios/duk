@@ -19,7 +19,6 @@ struct ResourceSetCreateInfo {
 
 class ResourceSet {
 public:
-
     explicit ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo);
 
     void load(Id id);
@@ -32,6 +31,6 @@ private:
     std::unordered_map<std::string, Id> m_resourceIdAliases;
 };
 
-}
+}// namespace duk::resource
 
-#endif //DUK_RESOURCE_SET_H
+#endif//DUK_RESOURCE_SET_H

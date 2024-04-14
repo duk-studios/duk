@@ -20,7 +20,8 @@ bool FontHandler::accepts(const std::string& extension) const {
 
 void FontHandler::load(FontPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     for (auto& loader: m_loaders) {
-        if (loader->accepts(path)) {
+        auto extension = path.extension();
+        if (loader->accepts(extension)) {
             pool->insert(id, loader->load(path));
             return;
         }

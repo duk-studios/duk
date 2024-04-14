@@ -7,8 +7,8 @@
 
 #include <duk_resource/resource.h>
 
-#include <string>
 #include <set>
+#include <string>
 
 namespace duk::resource {
 
@@ -23,7 +23,7 @@ bool operator==(const ResourceFile& lhs, const ResourceFile& rhs);
 
 bool operator<(const ResourceFile& lhs, const ResourceFile& rhs);
 
-}
+}// namespace duk::resource
 
 namespace duk::serial {
 
@@ -37,4 +37,4 @@ void visit_object(JsonVisitor* visitor, duk::resource::ResourceFile& resourceFil
 
 }// namespace duk::serial
 
-#endif //DUK_RESOURCE_FILE_H
+#endif//DUK_RESOURCE_FILE_H

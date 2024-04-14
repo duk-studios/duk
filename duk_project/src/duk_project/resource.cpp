@@ -87,7 +87,7 @@ std::set<std::filesystem::path> resource_scan(Project* project) {
     }
 
     std::set<std::filesystem::path> untrackedResourceFiles;
-    for (auto resourceFilepath : resourceFiles) {
+    for (auto resourceFilepath: resourceFiles) {
         auto trackFile = std::filesystem::path(resourceFilepath).replace_extension(".res");
         if (trackFiles.find(trackFile) != trackFiles.end()) {
             auto resourceFile = detail::read_resource_file(trackFile);

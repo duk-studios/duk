@@ -6,8 +6,8 @@
 
 #include <duk_resource/handler.h>
 
-#include <duk_renderer/renderer.h>
 #include <duk_renderer/image/image_pool.h>
+#include <duk_renderer/renderer.h>
 
 #include <duk_rhi/image_data_source.h>
 
@@ -17,7 +17,6 @@ namespace duk::renderer {
 
 class ImageLoader {
 public:
-
     virtual ~ImageLoader() = default;
 
     virtual bool accepts(const std::filesystem::path& extension) = 0;
