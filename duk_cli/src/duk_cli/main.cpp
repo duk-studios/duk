@@ -3,12 +3,15 @@
 //
 
 #include <duk_cli/command_line.h>
-#include <duk_cli/commands/json_command.h>
 
 #include <duk_log/log.h>
 
+#include <duk_engine/register_types.h>
+
 int main(int argc, const char* argv[]) {
     try {
+        duk::engine::register_types();
+
         duk::cli::CommandLine commandLine(argc - 1, argv + 1);
 
         commandLine.command()->execute();
