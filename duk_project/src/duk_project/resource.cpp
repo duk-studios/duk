@@ -48,8 +48,9 @@ static duk::resource::Id resource_id_generate(const Project* project) {
 }
 
 static duk::resource::ResourceFile read_resource_file(const std::filesystem::path& path) {
-    auto json = duk::tools::File::load_text(path.string().c_str());
-    duk::serial::JsonReader reader(json.c_str());
+    auto json = duk::tools::load_text(path);
+    std::string jsonString(json.begin(), json.end());
+    duk::serial::JsonReader reader(jsonString.c_str());
 
     duk::resource::ResourceFile resourceFile = {};
     reader.visit(resourceFile);

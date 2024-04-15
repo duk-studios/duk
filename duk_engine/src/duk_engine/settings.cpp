@@ -7,9 +7,11 @@
 namespace duk::engine {
 
 Settings load_settings(const std::string& path) {
-    auto content = duk::tools::load_bytes(path);
+    auto content = duk::tools::load_text(path);
 
-    duk::serial::JsonReader reader(content);
+    std::string jsonString(content.begin(), content.end());
+
+    duk::serial::JsonReader reader(jsonString.c_str());
 
     Settings settings = {};
     reader.visit(settings);

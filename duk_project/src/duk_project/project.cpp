@@ -49,9 +49,9 @@ static void read_project_settings(Project* project) {
         throw std::runtime_error(fmt::format("settings.json not found at {}", settingsPath.string()));
     }
 
-    auto settingsJson = duk::tools::File::load_text(settingsPath.string().c_str());
-
-    duk::serial::JsonReader reader(settingsJson.c_str());
+    auto settingsJson = duk::tools::load_text(settingsPath);
+    std::string jsonString(settingsJson.begin(), settingsJson.end());
+    duk::serial::JsonReader reader(jsonString.c_str());
     reader.visit(project->settings);
 }
 

@@ -18,8 +18,8 @@ bool SceneHandler::accepts(const std::string& extension) const {
 
 void SceneHandler::load(ScenePool* pool, const resource::Id& id, const std::filesystem::path& path) {
     auto content = duk::tools::load_bytes(path);
-
-    duk::serial::JsonReader reader(content);
+    std::string jsonString(content.begin(), content.end());
+    duk::serial::JsonReader reader(jsonString.c_str());
 
     auto scene = std::make_shared<Scene>();
 

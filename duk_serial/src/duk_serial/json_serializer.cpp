@@ -18,16 +18,6 @@ JsonReader::JsonReader(const char* jsonStr) {
     }
 }
 
-JsonReader::JsonReader(std::vector<uint8_t>& jsonVector) {
-    std::string jsonString(jsonVector.begin(), jsonVector.end());
-
-    m_document.Parse(jsonString.c_str());
-
-    if (m_document.HasParseError()) {
-        throw std::runtime_error(fmt::format("failed to parse json: {}", rapidjson::GetParseError_En(m_document.GetParseError())));
-    }
-}
-
 JsonReader::JsonReader(rapidjson::Document&& document)
     : m_document(std::move(document)) {
     m_valueStack.push(&m_document);
