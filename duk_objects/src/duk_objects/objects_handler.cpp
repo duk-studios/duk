@@ -17,9 +17,9 @@ bool ObjectsHandler::accepts(const std::string& extension) const {
 }
 
 void ObjectsHandler::load(ObjectsPool* pool, const resource::Id& id, const std::filesystem::path& path) {
-    auto content = duk::tools::File::load_text(path.string().c_str());
+    auto content = duk::tools::load_bytes(path.string().c_str());
 
-    duk::serial::JsonReader reader(content.c_str());
+    duk::serial::JsonReader reader(content);
 
     auto objects = std::make_shared<Objects>();
 

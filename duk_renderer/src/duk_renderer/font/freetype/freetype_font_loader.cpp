@@ -31,7 +31,7 @@ std::shared_ptr<Font> FreetypeFontLoader::load(const std::filesystem::path& path
 
     FreetypeFontCreateInfo freetypeFontCreateInfo = {};
     freetypeFontCreateInfo.library = m_library;
-    freetypeFontCreateInfo.fontData = duk::tools::File::load_bytes(path.string().c_str());
+    freetypeFontCreateInfo.fontData = duk::tools::load_bytes(path.string().c_str());
 
     return std::make_shared<FreetypeFont>(freetypeFontCreateInfo);
 }

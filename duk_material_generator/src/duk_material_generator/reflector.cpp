@@ -225,7 +225,7 @@ static void remove_unsupported_attributes(std::vector<SpvReflectInterfaceVariabl
 Reflector::Reflector(const Parser& parser)
     : m_parser(parser) {
     for (const auto& [module, spvPath]: m_parser.input_spv_paths()) {
-        const auto spvCode = duk::tools::File::load_bytes(spvPath.c_str());
+        const auto spvCode = duk::tools::load_bytes(spvPath.c_str());
 
         reflect_spv(spvCode, module);
     }

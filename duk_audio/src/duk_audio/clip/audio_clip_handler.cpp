@@ -20,6 +20,6 @@ void AudioClipHandler::load(AudioClipPool* pool, const resource::Id& id, const s
     if (!std::filesystem::exists(path)) {
         throw std::invalid_argument(fmt::format("failed to load AudioClip, path ({}) does not exist", path.string()));
     }
-    pool->create(id, duk::tools::File::load_bytes(path.string().c_str()));
+    pool->create(id, duk::tools::load_bytes(path.string().c_str()));
 }
 }// namespace duk::audio

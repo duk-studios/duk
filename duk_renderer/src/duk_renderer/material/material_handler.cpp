@@ -54,6 +54,16 @@ std::unique_ptr<MaterialDataSource> parse_material_json(const std::string& json)
     return std::move(material.dataSource);
 }
 
+std::unique_ptr<MaterialDataSource> parse_material_json(std::vector<uint8_t>& jsonVector) {
+    std::string jsonString(jsonVector.begin(), jsonVector.end());
+    duk::serial::JsonReader reader(jsonString.c_str());
+
+    duk::serial::detail::SerializedMaterial material;
+    reader.visit(material);
+
+    return std::move(material.dataSource);
+}
+
 }// namespace detail
 
 MaterialHandler::MaterialHandler()
@@ -73,7 +83,7 @@ void MaterialHandler::load(MaterialPool* pool, const resource::Id& id, const std
         throw std::runtime_error(fmt::format("tried to load material at ({}), which does not have the correct extension", path.string()));
     }
 
-    auto jsonContent = duk::tools::File::load_text(path.string().c_str());
+    auto jsonContent = duk::tools::load_bytes(path);
     auto dataSource = detail::parse_material_json(jsonContent);
     pool->create(id, dataSource.get());
 }
