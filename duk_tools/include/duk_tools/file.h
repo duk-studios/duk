@@ -14,8 +14,8 @@
 namespace duk::tools {
 
 template<typename T>
-std::vector<uint8_t> load_text(const T& filepath) {
-    std::ifstream file(filepath, std::ios::ate | std::ios::binary);
+std::string load_text(const T& filepath) {
+    std::ifstream file(filepath);
 
     if (!file) {
         std::ostringstream oss;
@@ -23,11 +23,10 @@ std::vector<uint8_t> load_text(const T& filepath) {
         throw std::runtime_error(oss.str());
     }
 
-    std::vector<uint8_t> buffer(file.tellg());
-    file.seekg(0);
-    file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
-
-    return buffer;
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    std::string result = buffer.str();
+    return result;
 }
 
 template<typename T>

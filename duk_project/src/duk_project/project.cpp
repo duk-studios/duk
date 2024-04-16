@@ -50,8 +50,7 @@ static void read_project_settings(Project* project) {
     }
 
     auto settingsJson = duk::tools::load_text(settingsPath);
-    std::string jsonString(settingsJson.begin(), settingsJson.end());
-    duk::serial::JsonReader reader(jsonString.c_str());
+    duk::serial::JsonReader reader(settingsJson.c_str());
     reader.visit(project->settings);
 }
 

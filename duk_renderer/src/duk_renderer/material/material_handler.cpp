@@ -73,9 +73,8 @@ void MaterialHandler::load(MaterialPool* pool, const resource::Id& id, const std
         throw std::runtime_error(fmt::format("tried to load material at ({}), which does not have the correct extension", path.string()));
     }
 
-    auto content = duk::tools::load_bytes(path);
-    std::string jsonString(content.begin(), content.end());
-    auto dataSource = detail::parse_material_json(jsonString.c_str());
+    auto content = duk::tools::load_text(path);
+    auto dataSource = detail::parse_material_json(content);
     pool->create(id, dataSource.get());
 }
 }// namespace duk::renderer
