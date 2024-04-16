@@ -231,7 +231,7 @@ JsonCommand::JsonCommand(const JsonCommandCreateInfo& jsonCommandCreateInfo)
 }
 
 void JsonCommand::execute() {
-    auto content = duk::tools::File::load_text(m_inputFilepath.c_str());
+    auto content = duk::tools::load_text(m_inputFilepath);
     Reflector reflector(content);
 
     auto filename = std::filesystem::path(m_inputFilepath).filename().stem().string();

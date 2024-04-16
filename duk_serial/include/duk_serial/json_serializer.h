@@ -41,7 +41,6 @@ void write_array(JsonWriter* writer, T& array) = delete;
 class JsonReader {
 public:
     JsonReader(const char* jsonStr);
-
     JsonReader(rapidjson::Document&& document);
 
     /* serializer interface */
