@@ -13,10 +13,9 @@ namespace duk::resource {
 namespace detail {
 
 ResourceFile load_resource_file(const std::filesystem::path& path) {
-    auto content = duk::tools::load_bytes(path);
-    std::string jsonString(content.begin(), content.end());
+    auto content = duk::tools::load_text(path);
 
-    duk::serial::JsonReader reader(jsonString.c_str());
+    duk::serial::JsonReader reader(content.c_str());
 
     ResourceFile resourceFile = {};
     reader.visit(resourceFile);
