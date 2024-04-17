@@ -39,8 +39,7 @@ static void write_project_settings(const Project* project) {
     duk::serial::JsonWriter writer;
     writer.visit(settings);
 
-    std::ofstream file(project->root / ".duk/settings.json");
-    file << writer.pretty_print();
+    duk::tools::save_text(project->root / ".duk/settings.json", writer.pretty_print());
 }
 
 static void read_project_settings(Project* project) {
