@@ -15,10 +15,9 @@ namespace detail {
 ResourceFile load_resource_file(const std::filesystem::path& path) {
     auto content = duk::tools::File::load_text(path.string().c_str());
 
-    duk::serial::JsonReader reader(content.c_str());
-
     ResourceFile resourceFile = {};
-    reader.visit(resourceFile);
+    duk::serial::read_json(content, resourceFile);
+
     // convert relative path into absolute path
     resourceFile.file = (path.parent_path() / resourceFile.file).string();
 
@@ -71,7 +70,11 @@ void ResourceSet::load(const Id id) {
         throw std::runtime_error(fmt::format("Failed to find a ResourceHandler for tag ({})", resourceFile.tag));
     }
 
-    handler->load(m_pools, resourceFile.id, resourceFile.file);
+    try {
+        handler->load(m_pools, resourceFile.id, resourceFile.file);
+    } catch (const std::exception& e) {
+        throw std::runtime_error(fmt::format("Failed to load resource '{}' at '{}', reason: {}\n", resourceFile.id.value(), resourceFile.file, e.what()));
+    }
 
     DependencySolver dependencySolver;
     handler->solve_dependencies(m_pools, id, dependencySolver);

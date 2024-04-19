@@ -6,7 +6,7 @@
 #define DUK_RESOURCE_RESOURCE_H
 
 #include <duk_macros/macros.h>
-#include <duk_serial/json_serializer.h>
+#include <duk_serial/json/types.h>
 
 #include <memory>
 #include <typeindex>
@@ -199,23 +199,18 @@ inline void from_json<duk::resource::Id>(const rapidjson::Value& jsonObject, duk
 }
 
 template<>
-inline void to_json<duk::resource::Id>(const duk::resource::Id& id, rapidjson::Value& jsonObject, rapidjson::Document::AllocatorType& allocator) {
-    jsonObject.Set(id.value());
-}
-
-template<>
-inline void from_json<duk::resource::Resource>(const rapidjson::Value& jsonObject, duk::resource::Resource& resource) {
-    resource.reset(duk::resource::Id(jsonObject.Get<uint64_t>()));
-}
-
-template<>
-inline void to_json<duk::resource::Resource>(const duk::resource::Resource& resource, rapidjson::Value& jsonObject, rapidjson::Document::AllocatorType& allocator) {
-    jsonObject.Set<uint64_t>(resource.id().value());
+inline void to_json<duk::resource::Id>(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Id& id) {
+    json.Set(id.value());
 }
 
 template<typename T>
 void from_json(const rapidjson::Value& jsonObject, duk::resource::ResourceT<T>& resource) {
     resource.reset(duk::resource::Id(jsonObject.Get<uint64_t>()));
+}
+
+template<typename T>
+void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::ResourceT<T>& resource) {
+    json.Set<uint64_t>(resource.id().value());
 }
 
 }// namespace duk::serial
