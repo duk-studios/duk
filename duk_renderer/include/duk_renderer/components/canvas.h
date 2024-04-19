@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_CANVAS_H
 #define DUK_RENDERER_CANVAS_H
 
-#include <duk_serial/json_serializer.h>
+#include <duk_serial/json/serializer.h>
 
 #include <duk_objects/objects.h>
 
@@ -37,22 +37,34 @@ struct CanvasTransform {
 
 void update_canvas(const duk::objects::Component<Canvas>& canvas, uint32_t width, uint32_t height);
 
-void update_canvas_transform(const duk::objects::Component<Canvas>& canvas, const duk::objects::Component<CanvasTransform>& canvasTransform);
+void update_canvas_transform(const duk::objects::Component<Canvas>& canvas, duk::objects::Component<CanvasTransform>& canvasTransform);
 
 }// namespace duk::renderer
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::Canvas& canvas) {
+template<>
+inline void from_json<duk::renderer::Canvas>(const rapidjson::Value& json, duk::renderer::Canvas& canvas) {
 }
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::CanvasTransform& canvasTransform) {
-    visitor->visit_member(canvasTransform.anchor, MemberDescription("anchor"));
-    visitor->visit_member(canvasTransform.pivot, MemberDescription("pivot"));
-    visitor->visit_member(canvasTransform.position, MemberDescription("position"));
-    visitor->visit_member(canvasTransform.size, MemberDescription("size"));
+template<>
+inline void to_json<duk::renderer::Canvas>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::Canvas& canvas) {
+}
+
+template<>
+inline void from_json<duk::renderer::CanvasTransform>(const rapidjson::Value& json, duk::renderer::CanvasTransform& canvasTransform) {
+    from_json_member(json, "anchor", canvasTransform.anchor);
+    from_json_member(json, "pivot", canvasTransform.pivot);
+    from_json_member(json, "position", canvasTransform.position);
+    from_json_member(json, "size", canvasTransform.size);
+}
+
+template<>
+inline void to_json<duk::renderer::CanvasTransform>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::CanvasTransform& canvasTransform) {
+    to_json_member(document, json, "anchor", canvasTransform.anchor);
+    to_json_member(document, json, "pivot", canvasTransform.pivot);
+    to_json_member(document, json, "position", canvasTransform.position);
+    to_json_member(document, json, "size", canvasTransform.size);
 }
 
 }// namespace duk::serial

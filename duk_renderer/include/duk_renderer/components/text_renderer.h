@@ -129,9 +129,9 @@ inline void from_json<duk::renderer::TextHoriAlignment>(const rapidjson::Value& 
 }
 
 template<>
-inline void to_json<duk::renderer::TextHoriAlignment>(const duk::renderer::TextHoriAlignment& textAlignment, rapidjson::Value& jsonObject, rapidjson::Document::AllocatorType& allocator) {
+inline void to_json<duk::renderer::TextHoriAlignment>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::TextHoriAlignment& textAlignment) {
     auto str = detail::to_string(textAlignment);
-    jsonObject.SetString(str.c_str(), str.size(), allocator);
+    json.SetString(str.c_str(), str.size(), document.GetAllocator());
 }
 
 template<>
@@ -141,19 +141,29 @@ inline void from_json<duk::renderer::TextVertAlignment>(const rapidjson::Value& 
 }
 
 template<>
-inline void to_json<duk::renderer::TextVertAlignment>(const duk::renderer::TextVertAlignment& textAlignment, rapidjson::Value& jsonObject, rapidjson::Document::AllocatorType& allocator) {
+inline void to_json<duk::renderer::TextVertAlignment>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::TextVertAlignment& textAlignment) {
     auto str = detail::to_string(textAlignment);
-    jsonObject.SetString(str.c_str(), str.size(), allocator);
+    json.SetString(str.c_str(), str.size(), document.GetAllocator());
 }
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::TextRenderer& textRenderer) {
-    visitor->template visit_member<duk::resource::Resource>(textRenderer.font, MemberDescription("font"));
-    visitor->visit_member(textRenderer.fontSize, MemberDescription("fontSize"));
-    visitor->visit_member(textRenderer.text, MemberDescription("text"));
-    visitor->visit_member(textRenderer.size, MemberDescription("size"));
-    visitor->visit_member(textRenderer.horiAlignment, MemberDescription("horiAlignment"));
-    visitor->visit_member(textRenderer.vertAlignment, MemberDescription("vertAlignment"));
+template<>
+inline void from_json<duk::renderer::TextRenderer>(const rapidjson::Value& json, duk::renderer::TextRenderer& textRenderer) {
+    from_json_member(json, "font", textRenderer.font);
+    from_json_member(json, "fontSize", textRenderer.fontSize);
+    from_json_member(json, "text", textRenderer.text);
+    from_json_member(json, "size", textRenderer.size);
+    from_json_member(json, "horiAlignment", textRenderer.horiAlignment);
+    from_json_member(json, "vertAlignment", textRenderer.vertAlignment);
+}
+
+template<>
+inline void to_json<duk::renderer::TextRenderer>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::TextRenderer& textRenderer) {
+    to_json_member(document, json, "font", textRenderer.font);
+    to_json_member(document, json, "fontSize", textRenderer.fontSize);
+    to_json_member(document, json, "text", textRenderer.text);
+    to_json_member(document, json, "size", textRenderer.size);
+    to_json_member(document, json, "horiAlignment", textRenderer.horiAlignment);
+    to_json_member(document, json, "vertAlignment", textRenderer.vertAlignment);
 }
 
 }// namespace duk::serial

@@ -1,8 +1,8 @@
 #ifndef DUK_RENDERER_COLOR_DESCRIPTORS_H
 #define DUK_RENDERER_COLOR_DESCRIPTORS_H
 
-#include <duk_renderer/material/color/color_shader_data_source.h>
 #include <duk_renderer/material/material_descriptor_set.h>
+#include <duk_renderer/material/color/color_shader_data_source.h>
 #include <duk_rhi/rhi.h>
 
 namespace duk::renderer {

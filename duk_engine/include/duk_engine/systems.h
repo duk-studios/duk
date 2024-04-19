@@ -65,19 +65,25 @@ private:
 
 class Systems {
 public:
+    template<bool isConst>
     class SystemIterator {
     public:
-        SystemIterator(Systems& systems, size_t i);
+        using SystemsType = duk::tools::maybe_const_t<Systems, isConst>;
+        using SystemType = duk::tools::maybe_const_t<System, isConst>;
+
+        SystemIterator(SystemsType& systems, size_t i);
 
         SystemIterator& operator++();
 
-        SystemIterator& operator*();
+        SystemIterator operator*() const;
 
-        System* operator->();
+        SystemType* operator->();
 
-        DUK_NO_DISCARD bool operator==(const SystemIterator& rhs);
+        SystemType* operator->() const;
 
-        DUK_NO_DISCARD bool operator!=(const SystemIterator& rhs);
+        DUK_NO_DISCARD bool operator==(const SystemIterator& rhs) const;
+
+        DUK_NO_DISCARD bool operator!=(const SystemIterator& rhs) const;
 
         DUK_NO_DISCARD size_t container_index() const;
 
@@ -86,7 +92,7 @@ public:
         DUK_NO_DISCARD const std::string& system_name() const;
 
     private:
-        Systems& m_systems;
+        SystemsType& m_systems;
         size_t m_i;
     };
 
@@ -103,9 +109,13 @@ public:
 
     void exit(duk::objects::Objects& objects, Engine& engine);
 
-    SystemIterator begin();
+    SystemIterator<false> begin();
 
-    SystemIterator end();
+    SystemIterator<false> end();
+
+    SystemIterator<true> begin() const;
+
+    SystemIterator<true> end() const;
 
 private:
     DUK_NO_DISCARD size_t system_index(size_t containerIndex) const;
@@ -115,6 +125,15 @@ private:
     std::unordered_map<size_t, size_t> m_systemIndexToContainerIndex;
     std::unordered_map<size_t, size_t> m_containerIndexToSystemIndex;
 };
+
+template<typename T, typename... Args>
+void register_system(Args&&... args) {
+    SystemRegistry::instance()->add<T>(std::forward<Args>(args)...);
+}
+
+void build_system(const std::string& systemName, Systems& systems);
+
+const std::string& system_name(size_t systemIndex);
 
 template<typename T>
 void SystemRegistry::SystemEntryT<T>::build(Systems& systems) {
@@ -144,6 +163,58 @@ void SystemRegistry::add() {
     m_systemNameToIndex.emplace(name, index);
 }
 
+template<bool isConst>
+Systems::SystemIterator<isConst>::SystemIterator(SystemsType& systems, size_t i)
+    : m_systems(systems)
+    , m_i(i) {
+}
+
+template<bool isConst>
+Systems::SystemIterator<isConst>& Systems::SystemIterator<isConst>::operator++() {
+    ++m_i;
+    return *this;
+}
+
+template<bool isConst>
+Systems::SystemIterator<isConst> Systems::SystemIterator<isConst>::operator*() const {
+    return *this;
+}
+
+template<bool isConst>
+typename Systems::SystemIterator<isConst>::SystemType* Systems::SystemIterator<isConst>::operator->() {
+    return m_systems.m_container.at(m_i).get();
+}
+
+template<bool isConst>
+typename Systems::SystemIterator<isConst>::SystemType* Systems::SystemIterator<isConst>::operator->() const {
+    return m_systems.m_container.at(m_i).get();
+}
+
+template<bool isConst>
+bool Systems::SystemIterator<isConst>::operator==(const SystemIterator& rhs) const {
+    return &m_systems == &rhs.m_systems && m_i == rhs.m_i;
+}
+
+template<bool isConst>
+bool Systems::SystemIterator<isConst>::operator!=(const SystemIterator& rhs) const {
+    return !(*this == rhs);
+}
+
+template<bool isConst>
+size_t Systems::SystemIterator<isConst>::container_index() const {
+    return m_i;
+}
+
+template<bool isConst>
+size_t Systems::SystemIterator<isConst>::system_index() const {
+    return m_systems.system_index(m_i);
+}
+
+template<bool isConst>
+const std::string& Systems::SystemIterator<isConst>::system_name() const {
+    return duk::engine::system_name(system_index());
+}
+
 template<typename T>
 void Systems::add() {
     static const auto entryIndex = SystemRegistry::instance()->index_of<T>();
@@ -168,34 +239,28 @@ T* Systems::get() {
     return dynamic_cast<T*>(m_container.at(containerIndex).get());
 }
 
-template<typename T, typename... Args>
-void register_system(Args&&... args) {
-    SystemRegistry::instance()->add<T>(std::forward<Args>(args)...);
-}
-
-void build_system(const std::string& systemName, Systems& systems);
-
-const std::string& system_name(size_t systemIndex);
-
 }// namespace duk::engine
 
 namespace duk::serial {
 
 template<>
-inline void read_array(JsonReader* reader, duk::engine::Systems& systems, size_t size) {
-    for (size_t i = 0; i < size; i++) {
+inline void from_json<duk::engine::Systems>(const rapidjson::Value& json, duk::engine::Systems& systems) {
+    auto jsonSystemsArray = json.GetArray();
+    for (auto& jsonSystem: jsonSystemsArray) {
         std::string systemName;
-        reader->visit_member(systemName, i);
+        from_json(jsonSystem, systemName);
         duk::engine::build_system(systemName, systems);
     }
 }
 
 template<>
-inline void write_array(JsonWriter* writer, duk::engine::Systems& systems) {
-    std::vector<std::string> systemNames;
-    for (auto system: systems) {
-        auto systemName = system.system_name();
-        writer->visit_member(systemName, MemberDescription(nullptr));
+inline void to_json<duk::engine::Systems>(rapidjson::Document& document, rapidjson::Value& json, const duk::engine::Systems& systems) {
+    auto jsonSystemsArray = json.SetArray().GetArray();
+    for (auto it: systems) {
+        const auto& systemName = it.system_name();
+        rapidjson::Value jsonSystem;
+        jsonSystem.SetString(systemName.c_str(), systemName.size(), document.GetAllocator());
+        jsonSystemsArray.PushBack(std::move(jsonSystem), document.GetAllocator());
     }
 }
 

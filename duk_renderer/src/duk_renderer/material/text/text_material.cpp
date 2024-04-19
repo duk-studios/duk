@@ -1,12 +1,15 @@
 //
 // Created by Ricardo on 05/04/2024.
 //
-#include <duk_renderer/components/canvas.h>
-#include <duk_renderer/components/transform.h>
-#include <duk_renderer/material/globals/global_descriptors.h>
+
 #include <duk_renderer/material/text/text_material.h>
+#include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/material/text/text_shader_data_source.h>
 #include <duk_renderer/renderer.h>
+
+// has to come last
+#include <duk_renderer/components/transform.h>
+#include <duk_renderer/components/canvas.h>
 
 namespace duk::renderer {
 

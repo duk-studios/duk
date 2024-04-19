@@ -5,6 +5,7 @@
 #define DUK_ENGINE_SETTINGS_H
 
 #include <duk_resource/resource.h>
+#include <duk_serial/json/serializer.h>
 #include <glm/vec2.hpp>
 #include <string>
 
@@ -22,11 +23,18 @@ Settings load_settings(const std::string& path);
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::engine::Settings& settings) {
-    visitor->visit_member(settings.name, MemberDescription("name"));
-    visitor->visit_member(settings.scene, MemberDescription("scene"));
-    visitor->visit_member(settings.resolution, MemberDescription("resolution"));
+template<>
+inline void from_json<duk::engine::Settings>(const rapidjson::Value& json, duk::engine::Settings& settings) {
+    from_json_member(json, "name", settings.name);
+    from_json_member(json, "scene", settings.scene);
+    from_json_member(json, "resolution", settings.resolution);
+}
+
+template<>
+inline void to_json<duk::engine::Settings>(rapidjson::Document& document, rapidjson::Value& json, const duk::engine::Settings& settings) {
+    to_json_member(document, json, "name", settings.name);
+    to_json_member(document, json, "scene", settings.scene);
+    to_json_member(document, json, "resolution", settings.resolution);
 }
 
 }// namespace duk::serial

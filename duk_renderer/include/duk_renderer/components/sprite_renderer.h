@@ -19,10 +19,16 @@ struct SpriteRenderer {
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::SpriteRenderer& spriteRenderer) {
-    visitor->template visit_member<duk::resource::Resource>(spriteRenderer.sprite, MemberDescription("sprite"));
-    visitor->template visit_member<duk::resource::Resource>(spriteRenderer.material, MemberDescription("material"));
+template<>
+inline void from_json<duk::renderer::SpriteRenderer>(const rapidjson::Value& json, duk::renderer::SpriteRenderer& spriteRenderer) {
+    from_json_member(json, "sprite", spriteRenderer.sprite);
+    from_json_member(json, "material", spriteRenderer.material);
+}
+
+template<>
+inline void to_json<duk::renderer::SpriteRenderer>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::SpriteRenderer& spriteRenderer) {
+    to_json_member(document, json, "sprite", spriteRenderer.sprite);
+    to_json_member(document, json, "material", spriteRenderer.material);
 }
 
 }// namespace duk::serial

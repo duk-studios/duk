@@ -6,19 +6,23 @@
 
 #include <duk_tools/file.h>
 
-namespace duk::serial {
-
-namespace detail {
+namespace duk::renderer {
 
 struct SerializedMaterial {
     std::string type;
     std::unique_ptr<duk::renderer::MaterialDataSource> dataSource;
 };
 
+}// namespace duk::renderer
+
+namespace duk::serial {
+
+namespace detail {
+
 template<typename T>
-std::unique_ptr<T> read_material_data_source(JsonReader* reader) {
+std::unique_ptr<T> read_material_data_source(const rapidjson::Value& json) {
     auto dataSource = std::make_unique<T>();
-    visit_object(reader, *dataSource);
+    from_json(json, *dataSource);
     dataSource->update_hash();
     return dataSource;
 }
@@ -26,14 +30,14 @@ std::unique_ptr<T> read_material_data_source(JsonReader* reader) {
 }// namespace detail
 
 template<>
-inline void visit_object(JsonReader* reader, detail::SerializedMaterial& material) {
-    reader->visit_member(material.type, MemberDescription("type"));
+inline void from_json<duk::renderer::SerializedMaterial>(const rapidjson::Value& json, duk::renderer::SerializedMaterial& material) {
+    from_json_member(json, "type", material.type);
     if (material.type == "Color") {
-        material.dataSource = detail::read_material_data_source<duk::renderer::ColorMaterialDataSource>(reader);
+        material.dataSource = detail::read_material_data_source<duk::renderer::ColorMaterialDataSource>(json);
         return;
     }
     if (material.type == "Phong") {
-        material.dataSource = detail::read_material_data_source<duk::renderer::PhongMaterialDataSource>(reader);
+        material.dataSource = detail::read_material_data_source<duk::renderer::PhongMaterialDataSource>(json);
         return;
     }
     throw std::runtime_error(fmt::format("unknown material type: \"{}\"", material.type));
@@ -46,11 +50,8 @@ namespace duk::renderer {
 namespace detail {
 
 std::unique_ptr<MaterialDataSource> parse_material_json(const std::string& json) {
-    duk::serial::JsonReader reader(json.c_str());
-
-    duk::serial::detail::SerializedMaterial material;
-    reader.visit(material);
-
+    SerializedMaterial material;
+    duk::serial::read_json(json, material);
     return std::move(material.dataSource);
 }
 
