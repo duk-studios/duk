@@ -24,6 +24,8 @@ struct CameraController {
 
 class CameraSystem : public duk::engine::System {
 public:
+    explicit CameraSystem();
+
     void enter(duk::objects::Objects& objects, duk::engine::Engine& environment) override;
 
     void update(duk::objects::Objects& objects, duk::engine::Engine& environment) override;

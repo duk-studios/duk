@@ -8,6 +8,10 @@
 
 namespace duk::engine {
 
+TextUpdateSystem::TextUpdateSystem()
+    : System(kMainThreadGroup) {
+}
+
 void TextUpdateSystem::enter(objects::Objects& objects, Engine& engine) {
 }
 

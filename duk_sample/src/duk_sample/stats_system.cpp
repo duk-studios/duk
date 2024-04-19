@@ -8,9 +8,11 @@
 
 #include <duk_renderer/components/text_renderer.h>
 
-#include <algorithm>
-
 namespace duk::sample {
+
+StatsSystem::StatsSystem()
+    : System(kMainThreadGroup) {
+}
 
 void StatsSystem::enter(objects::Objects& objects, engine::Engine& engine) {
 }

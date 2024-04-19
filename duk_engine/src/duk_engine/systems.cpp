@@ -11,6 +11,18 @@ SystemRegistry g_systemRegistry;
 
 }
 
+System::System(uint32_t groupMask)
+    : m_groupMask(groupMask) {
+}
+
+uint32_t System::group_mask() {
+    return m_groupMask;
+}
+
+bool System::belongs(uint32_t groupMask) {
+    return (m_groupMask & groupMask) == m_groupMask;
+}
+
 const std::string& SystemRegistry::system_name(size_t systemIndex) const {
     return m_systemEntries.at(systemIndex)->name();
 }
@@ -86,8 +98,12 @@ void Systems::enter(duk::objects::Objects& objects, Engine& engine) {
     }
 }
 
-void Systems::update(duk::objects::Objects& objects, Engine& engine) {
+void Systems::update(duk::objects::Objects& objects, Engine& engine, uint32_t activeGroupMask) {
     for (auto& system: m_container) {
+        if (!system->belongs(activeGroupMask)) {
+            continue;
+        }
+
         system->update(objects, engine);
         objects.update();
     }

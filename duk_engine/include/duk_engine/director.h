@@ -29,6 +29,10 @@ public:
 
     Scene* scene();
 
+    void enable(uint32_t systemGroup);
+
+    void disable(uint32_t systemGroup);
+
 private:
     void load_scene(Engine& engine, duk::resource::Id id);
 
@@ -37,6 +41,9 @@ private:
     duk::resource::ResourceSet* m_resources;
     SceneResource m_scene;
     duk::resource::Id m_requestedSceneId;
+
+private:
+    uint32_t m_activeSystemGroup;
 };
 
 }// namespace duk::engine

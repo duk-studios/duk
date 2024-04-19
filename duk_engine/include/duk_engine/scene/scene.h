@@ -21,7 +21,7 @@ public:
 
     void enter(Engine& engine);
 
-    void update(Engine& engine);
+    void update(Engine& engine, uint32_t activeSystemsGroup);
 
     void exit(Engine& engine);
 

@@ -4,10 +4,12 @@
 
 #include <duk_engine/engine.h>
 #include <duk_engine/systems/camera_system.h>
-
 #include <duk_renderer/components/camera.h>
 
 namespace duk::engine {
+CameraUpdateSystem::CameraUpdateSystem()
+    : System(kMainThreadGroup) {
+}
 
 void CameraUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
     auto renderer = engine.renderer();

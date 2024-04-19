@@ -11,6 +11,8 @@ namespace duk::engine {
 
 class CameraUpdateSystem : public System {
 public:
+    explicit CameraUpdateSystem();
+
     void enter(duk::objects::Objects& objects, Engine& engine) override;
 
     void update(duk::objects::Objects& objects, Engine& engine) override;

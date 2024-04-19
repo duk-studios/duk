@@ -25,8 +25,8 @@ void Scene::enter(Engine& engine) {
     m_systems.enter(m_objects, engine);
 }
 
-void Scene::update(Engine& engine) {
-    m_systems.update(m_objects, engine);
+void Scene::update(Engine& engine, uint32_t activeSystemsGroup) {
+    m_systems.update(m_objects, engine, activeSystemsGroup);
 }
 
 void Scene::exit(Engine& engine) {

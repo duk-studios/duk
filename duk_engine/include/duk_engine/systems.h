@@ -7,12 +7,18 @@
 #include <duk_objects/objects.h>
 #include <duk_tools/types.h>
 
+static constexpr uint32_t kMainThreadGroup = 1 << 0;
+static constexpr uint32_t kGameplayGroup = 1 << 1;
+static constexpr uint32_t kPhysicsThreadGroup = 1 << 2;
+
 namespace duk::engine {
 
 class Engine;
 
 class System {
 public:
+    System(uint32_t groupMask);
+
     virtual ~System() = default;
 
     virtual void enter(duk::objects::Objects& objects, Engine& engine) = 0;
@@ -20,6 +26,13 @@ public:
     virtual void update(duk::objects::Objects& objects, Engine& engine) = 0;
 
     virtual void exit(duk::objects::Objects& objects, Engine& engine) = 0;
+
+    uint32_t group_mask();
+
+    bool belongs(uint32_t groupMask);
+
+private:
+    uint32_t m_groupMask;
 };
 
 class Systems;
@@ -99,7 +112,7 @@ public:
 
     void enter(duk::objects::Objects& objects, Engine& engine);
 
-    void update(duk::objects::Objects& objects, Engine& engine);
+    void update(duk::objects::Objects& objects, Engine& engine, uint32_t activeGroupMask);
 
     void exit(duk::objects::Objects& objects, Engine& engine);
 
