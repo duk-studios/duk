@@ -32,7 +32,7 @@ static std::shared_ptr<duk::audio::AudioBuffer> create_sin_buffer(float duration
 static std::shared_ptr<duk::audio::AudioBuffer> create_buffer(const char* filepath, uint32_t channelCount, uint32_t frameRate) {
     auto buffer = std::make_shared<duk::audio::AudioBufferT<float>>();
 
-    auto content = duk::tools::File::load_bytes(filepath);
+    auto content = duk::tools::load_bytes(filepath);
 
     duk::audio::decode(content.data(), content.size(), buffer.get(), channelCount, frameRate);
 

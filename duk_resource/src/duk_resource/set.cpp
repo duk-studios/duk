@@ -13,7 +13,7 @@ namespace duk::resource {
 namespace detail {
 
 ResourceFile load_resource_file(const std::filesystem::path& path) {
-    auto content = duk::tools::File::load_text(path.string().c_str());
+    auto content = duk::tools::load_text(path);
 
     ResourceFile resourceFile = {};
     duk::serial::read_json(content, resourceFile);
