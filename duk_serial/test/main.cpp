@@ -3,7 +3,7 @@
 //
 
 #include <duk_log/log.h>
-#include <duk_serial/json_serializer.h>
+#include <duk_serial/json/serializer.h>
 #include <string>
 #include <vector>
 
