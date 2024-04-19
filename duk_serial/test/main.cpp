@@ -25,38 +25,42 @@ struct Poo {
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, Foo& foo) {
-    visitor->visit_member(foo.a, MemberDescription("a"));
-    visitor->visit_member(foo.b, MemberDescription("b"));
-}
-
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, Boo& boo) {
-    visitor->visit_member(boo.var1, MemberDescription("var1"));
-    visitor->visit_member_object(boo.foo, MemberDescription("foo"));
-    visitor->visit_member(boo.var2, MemberDescription("var2"));
+template<>
+inline void from_json<Foo>(const rapidjson::Value& json, Foo& foo) {
+    from_json_member(json, "a", foo.a);
+    from_json_member(json, "b", foo.b);
 }
 
 template<>
-void read_array<std::vector<Boo>>(JsonReader* reader, std::vector<Boo>& vector, size_t size) {
-    vector.reserve(size);
-    for (size_t i = 0; i < size; i++) {
-        reader->visit_member_object(vector.emplace_back(), MemberDescription(i));
-    }
+inline void to_json<Foo>(rapidjson::Document& document, rapidjson::Value& json, const Foo& foo) {
+    to_json_member(document, json, "a", foo.a);
+    to_json_member(document, json, "b", foo.b);
 }
 
 template<>
-void write_array<std::vector<Boo>>(JsonWriter* writer, std::vector<Boo>& vector) {
-    for (size_t i = 0; i < vector.size(); i++) {
-        writer->visit_member_object(vector[i], MemberDescription(i));
-    }
+inline void from_json<Boo>(const rapidjson::Value& json, Boo& boo) {
+    from_json_member(json, "foo", boo.foo);
+    from_json_member(json, "var1", boo.var1);
+    from_json_member(json, "var2", boo.var2);
 }
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, Poo& poo) {
-    visitor->visit_member_array(poo.boos, MemberDescription("boos"));
-    visitor->visit_member(poo.a, MemberDescription("a"));
+template<>
+inline void to_json<Boo>(rapidjson::Document& document, rapidjson::Value& json, const Boo& boo) {
+    to_json_member(document, json, "foo", boo.foo);
+    to_json_member(document, json, "var1", boo.var1);
+    to_json_member(document, json, "var2", boo.var2);
+}
+
+template<>
+inline void from_json<Poo>(const rapidjson::Value& json, Poo& poo) {
+    from_json_member(json, "boos", poo.boos);
+    from_json_member(json, "a", poo.a);
+}
+
+template<>
+inline void to_json<Poo>(rapidjson::Document& document, rapidjson::Value& json, const Poo& poo) {
+    to_json_member(document, json, "boos", poo.boos);
+    to_json_member(document, json, "a", poo.a);
 }
 
 }// namespace duk::serial
@@ -97,15 +101,17 @@ const char* pooJsonStr = R"(
 )";
 
 int main() {
-    duk::serial::JsonReader jsonReader(pooJsonStr);
+    // rapidjson::Value jsonValue;
+    // std::vector<Foo> foos;
+    // duk::serial::from_json<Foo>(jsonValue, foos);
 
     Poo poo = {};
-    jsonReader.visit(poo);
+    duk::serial::read_json(pooJsonStr, poo);
 
-    duk::serial::JsonWriter jsonWriter;
-    jsonWriter.visit(poo);
+    std::ostringstream oss;
+    duk::serial::write_json(oss, poo, true);
 
-    duk::log::debug("{}", jsonWriter.pretty_print()).wait();
+    duk::log::debug("{}", oss.str()).wait();
 
     return 0;
 }
