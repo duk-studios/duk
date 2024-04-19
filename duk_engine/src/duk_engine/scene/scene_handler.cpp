@@ -18,11 +18,9 @@ bool SceneHandler::accepts(const std::string& extension) const {
 
 void SceneHandler::load(ScenePool* pool, const resource::Id& id, const std::filesystem::path& path) {
     auto content = duk::tools::load_text(path);
-    duk::serial::JsonReader reader(content.c_str());
 
     auto scene = std::make_shared<Scene>();
-
-    reader.visit(*scene);
+    duk::serial::read_json(content, *scene);
 
     pool->insert(id, scene);
 }

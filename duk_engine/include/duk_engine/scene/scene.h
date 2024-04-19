@@ -36,10 +36,16 @@ using SceneResource = duk::resource::ResourceT<Scene>;
 
 namespace duk::serial {
 
-template<typename JsonVisiter>
-void visit_object(JsonVisiter* visiter, duk::engine::Scene& scene) {
-    visiter->visit_member_array(scene.objects(), MemberDescription("objects"));
-    visiter->visit_member_array(scene.systems(), MemberDescription("systems"));
+template<>
+inline void from_json<duk::engine::Scene>(const rapidjson::Value& json, duk::engine::Scene& scene) {
+    from_json_member(json, "objects", scene.objects());
+    from_json_member(json, "systems", scene.systems());
+}
+
+template<>
+inline void to_json<duk::engine::Scene>(rapidjson::Document& document, rapidjson::Value& json, const duk::engine::Scene& scene) {
+    to_json_member(document, json, "objects", scene.objects());
+    to_json_member(document, json, "systems", scene.systems());
 }
 
 }// namespace duk::serial

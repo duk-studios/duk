@@ -2,6 +2,7 @@
 // Created by Ricardo on 20/07/2023.
 //
 
+#include <duk_resource/resource.h>
 #include <duk_objects/objects.h>
 #include <iostream>
 
@@ -17,7 +18,7 @@ struct ComponentTest {
     uint32_t c;
 
     ~ComponentTest() {
-        std::cout << "Destructor ComponentTest" << std::endl;
+        duk::log::debug("Destructor ComponentTest");
     }
 };
 
@@ -27,7 +28,7 @@ struct ComponentTest2 {
     uint32_t c;
 
     ~ComponentTest2() {
-        std::cout << "Destructor ComponentTest2" << std::endl;
+        duk::log::debug("Destructor ComponentTest2");
     }
 };
 
@@ -37,31 +38,53 @@ struct ComponentTest3 {
     uint32_t c;
 
     ~ComponentTest3() {
-        std::cout << "Destructor ComponentTest3" << std::endl;
+        duk::log::debug("Destructor ComponentTest3");
     }
 };
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, ComponentTest& componentTest) {
-    visitor->visit_member(componentTest.a, MemberDescription("a"));
-    visitor->visit_member(componentTest.b, MemberDescription("b"));
-    visitor->visit_member(componentTest.c, MemberDescription("c"));
+template<>
+inline void from_json<ComponentTest>(const rapidjson::Value& json, ComponentTest& componentTest) {
+    from_json_member(json, "a", componentTest.a);
+    from_json_member(json, "b", componentTest.b);
+    from_json_member(json, "c", componentTest.c);
 }
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, ComponentTest2& componentTest) {
-    visitor->template visit_member<duk::resource::Resource>(componentTest.res, MemberDescription("res"));
-    visitor->visit_member(componentTest.b, MemberDescription("b"));
-    visitor->visit_member(componentTest.c, MemberDescription("c"));
+template<>
+inline void to_json<ComponentTest>(rapidjson::Document& document, rapidjson::Value& json, const ComponentTest& componentTest) {
+    to_json_member(document, json, "a", componentTest.a);
+    to_json_member(document, json, "b", componentTest.b);
+    to_json_member(document, json, "c", componentTest.c);
 }
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, ComponentTest3& componentTest) {
-    visitor->visit_member(componentTest.a, MemberDescription("a"));
-    visitor->visit_member(componentTest.b, MemberDescription("b"));
-    visitor->visit_member(componentTest.c, MemberDescription("c"));
+template<>
+inline void from_json<ComponentTest2>(const rapidjson::Value& json, ComponentTest2& componentTest) {
+    // from_json(json["res"], componentTest.res);
+    from_json_member(json, "res", componentTest.res);
+    from_json_member(json, "b", componentTest.b);
+    from_json_member(json, "c", componentTest.c);
+}
+
+template<>
+inline void to_json<ComponentTest2>(rapidjson::Document& document, rapidjson::Value& json, const ComponentTest2& componentTest) {
+    to_json_member(document, json, "res", componentTest.res);
+    to_json_member(document, json, "b", componentTest.b);
+    to_json_member(document, json, "c", componentTest.c);
+}
+
+template<>
+inline void from_json<ComponentTest3>(const rapidjson::Value& json, ComponentTest3& componentTest) {
+    from_json_member(json, "a", componentTest.a);
+    from_json_member(json, "b", componentTest.b);
+    from_json_member(json, "c", componentTest.c);
+}
+
+template<>
+inline void to_json<ComponentTest3>(rapidjson::Document& document, rapidjson::Value& json, const ComponentTest3& componentTest) {
+    to_json_member(document, json, "a", componentTest.a);
+    to_json_member(document, json, "b", componentTest.b);
+    to_json_member(document, json, "c", componentTest.c);
 }
 
 }// namespace duk::serial
@@ -112,6 +135,24 @@ int main() {
 
     // updating destroys all objects marked for destruction (via destroy)
     objects.update();
+
+    std::ostringstream oss;
+    duk::serial::write_json(oss, objects, true);
+
+    auto json = oss.str();
+
+    duk::log::debug("objects json: {}", json);
+
+    duk::objects::Objects objects2;
+
+    duk::serial::read_json(json, objects2);
+
+    std::ostringstream oss2;
+    duk::serial::write_json(oss2, objects2, true);
+
+    auto json2 = oss2.str();
+    duk::log::debug("objects json2: {}", json2).wait();
+    DUK_ASSERT(json == json2);
 
     return 0;
 }

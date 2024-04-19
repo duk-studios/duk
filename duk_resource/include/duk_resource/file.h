@@ -7,6 +7,8 @@
 
 #include <duk_resource/resource.h>
 
+#include <duk_serial/json/serializer.h>
+
 #include <set>
 #include <string>
 
@@ -27,12 +29,20 @@ bool operator<(const ResourceFile& lhs, const ResourceFile& rhs);
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::resource::ResourceFile& resourceFile) {
-    visitor->visit_member(resourceFile.tag, "tag");
-    visitor->visit_member(resourceFile.id, "id");
-    visitor->visit_member(resourceFile.file, "file");
-    visitor->visit_member_array(resourceFile.aliases, "aliases");
+template<>
+inline void from_json<duk::resource::ResourceFile>(const rapidjson::Value& json, duk::resource::ResourceFile& resourceFile) {
+    from_json_member(json, "tag", resourceFile.tag);
+    from_json_member(json, "id", resourceFile.id);
+    from_json_member(json, "file", resourceFile.file);
+    from_json_member(json, "aliases", resourceFile.aliases, true);
+}
+
+template<>
+inline void to_json<duk::resource::ResourceFile>(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::ResourceFile& resourceFile) {
+    to_json_member(document, json, "tag", resourceFile.tag);
+    to_json_member(document, json, "id", resourceFile.id);
+    to_json_member(document, json, "file", resourceFile.file);
+    to_json_member(document, json, "aliases", resourceFile.aliases);
 }
 
 }// namespace duk::serial

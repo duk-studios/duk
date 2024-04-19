@@ -95,12 +95,20 @@ private:
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::PhongMaterialDataSource& materialDataSource) {
-    visitor->visit_member(materialDataSource.albedo, MemberDescription("albedo"));
-    visitor->visit_member_object(materialDataSource.albedoTexture, MemberDescription("albedo-texture"));
-    visitor->visit_member(materialDataSource.specular, MemberDescription("specular"));
-    visitor->visit_member_object(materialDataSource.specularTexture, MemberDescription("specular-texture"));
+template<>
+inline void from_json<duk::renderer::PhongMaterialDataSource>(const rapidjson::Value& json, duk::renderer::PhongMaterialDataSource& materialDataSource) {
+    from_json_member(json, "albedo", materialDataSource.albedo);
+    from_json_member(json, "albedo-texture", materialDataSource.albedoTexture);
+    from_json_member(json, "specular", materialDataSource.specular);
+    from_json_member(json, "specular-texture", materialDataSource.specularTexture);
+}
+
+template<>
+inline void to_json<duk::renderer::PhongMaterialDataSource>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::PhongMaterialDataSource& materialDataSource) {
+    to_json_member(document, json, "albedo", materialDataSource.albedo);
+    to_json_member(document, json, "albedo-texture", materialDataSource.albedoTexture);
+    to_json_member(document, json, "specular", materialDataSource.specular);
+    to_json_member(document, json, "specular-texture", materialDataSource.specularTexture);
 }
 
 }// namespace duk::serial

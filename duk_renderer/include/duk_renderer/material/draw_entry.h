@@ -26,7 +26,7 @@ struct DrawParams {
 };
 
 struct MeshEntry {
-    duk::objects::Object::Id objectId;
+    duk::objects::Id objectId;
     Mesh* mesh{};
     Material* material{};
     SortKey sortKey{};
@@ -40,7 +40,7 @@ struct MeshDrawEntry {
 };
 
 struct SpriteEntry {
-    duk::objects::Object::Id objectId;
+    duk::objects::Id objectId;
     Material* material{};
     Sprite* sprite{};
     SortKey sortKey{};

@@ -6,7 +6,7 @@
 
 #include <duk_hash/hash.h>
 #include <duk_macros/macros.h>
-#include <duk_serial/json_serializer.h>
+#include <duk_serial/json/serializer.h>
 
 namespace duk::rhi {
 
@@ -122,9 +122,9 @@ inline void from_json<duk::rhi::Sampler::WrapMode>(const rapidjson::Value& jsonO
 }
 
 template<>
-inline void to_json<duk::rhi::Sampler::WrapMode>(const duk::rhi::Sampler::WrapMode& wrapMode, rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator) {
+inline void to_json<duk::rhi::Sampler::WrapMode>(rapidjson::Document& document, rapidjson::Value& json, const duk::rhi::Sampler::WrapMode& wrapMode) {
     auto wrapModeStr = detail::to_string(wrapMode);
-    json.SetString(wrapModeStr.c_str(), wrapModeStr.size(), allocator);
+    json.SetString(wrapModeStr.c_str(), wrapModeStr.size(), document.GetAllocator());
 }
 
 template<>
@@ -133,15 +133,21 @@ inline void from_json<duk::rhi::Sampler::Filter>(const rapidjson::Value& jsonObj
 }
 
 template<>
-inline void to_json<duk::rhi::Sampler::Filter>(const duk::rhi::Sampler::Filter& filter, rapidjson::Value& json, rapidjson::Document::AllocatorType& allocator) {
+inline void to_json<duk::rhi::Sampler::Filter>(rapidjson::Document& document, rapidjson::Value& json, const duk::rhi::Sampler::Filter& filter) {
     auto filterStr = detail::to_string(filter);
-    json.SetString(filterStr.c_str(), filterStr.size(), allocator);
+    json.SetString(filterStr.c_str(), filterStr.size(), document.GetAllocator());
 }
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::rhi::Sampler& object) {
-    visitor->visit_member(object.filter, MemberDescription("filter"));
-    visitor->visit_member(object.wrapMode, MemberDescription("wrap"));
+template<>
+inline void from_json<duk::rhi::Sampler>(const rapidjson::Value& json, duk::rhi::Sampler& sampler) {
+    from_json_member(json, "filter", sampler.filter);
+    from_json_member(json, "wrap", sampler.wrapMode);
+}
+
+template<>
+inline void to_json<duk::rhi::Sampler>(rapidjson::Document& document, rapidjson::Value& json, const duk::rhi::Sampler& sampler) {
+    to_json_member(document, json, "filter", sampler.filter);
+    to_json_member(document, json, "wrap", sampler.wrapMode);
 }
 
 }// namespace duk::serial

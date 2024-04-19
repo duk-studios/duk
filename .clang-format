@@ -54,7 +54,7 @@ SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-SortIncludes: CaseInsensitive
+SortIncludes: Never
 PackConstructorInitializers: Never
 TabWidth: 4
 UseTab: Never

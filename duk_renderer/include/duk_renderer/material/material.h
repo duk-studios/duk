@@ -4,7 +4,6 @@
 #ifndef DUK_RENDERER_MATERIAL_H
 #define DUK_RENDERER_MATERIAL_H
 
-#include <duk_log/log.h>
 #include <duk_renderer/material/draw_entry.h>
 #include <duk_renderer/material/material_descriptor_set.h>
 #include <duk_renderer/material/pipeline.h>

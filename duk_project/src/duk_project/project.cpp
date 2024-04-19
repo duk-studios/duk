@@ -36,10 +36,10 @@ static std::filesystem::path find_project_root(std::filesystem::path path) {
 static void write_project_settings(const Project* project) {
     duk::engine::Settings settings = project->settings;
 
-    duk::serial::JsonWriter writer;
-    writer.visit(settings);
+    std::ostringstream oss;
+    duk::serial::write_json(oss, settings, true);
 
-    duk::tools::save_text(project->root / ".duk/settings.json", writer.pretty_print());
+    duk::tools::save_text(project->root / ".duk/settings.json", oss.str());
 }
 
 static void read_project_settings(Project* project) {
@@ -49,8 +49,7 @@ static void read_project_settings(Project* project) {
     }
 
     auto settingsJson = duk::tools::load_text(settingsPath);
-    duk::serial::JsonReader reader(settingsJson.c_str());
-    reader.visit(project->settings);
+    duk::serial::read_json(settingsJson, project->settings);
 }
 
 }// namespace detail

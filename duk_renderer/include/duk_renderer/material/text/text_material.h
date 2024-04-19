@@ -60,9 +60,14 @@ private:
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::TextMaterialDataSource& materialDataSource) {
-    visitor->visit_member(materialDataSource.color, MemberDescription("color"));
+template<>
+inline void from_json<duk::renderer::TextMaterialDataSource>(const rapidjson::Value& json, duk::renderer::TextMaterialDataSource& materialDataSource) {
+    from_json_member(json, "color", materialDataSource.color);
+}
+
+template<>
+inline void to_json<duk::renderer::TextMaterialDataSource>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::TextMaterialDataSource& materialDataSource) {
+    to_json_member(document, json, "color", materialDataSource.color);
 }
 
 }// namespace duk::serial

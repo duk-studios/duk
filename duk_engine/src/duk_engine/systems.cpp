@@ -34,50 +34,20 @@ void SystemRegistry::build(const std::string& systemName, Systems& systems) {
     entry->build(systems);
 }
 
-Systems::SystemIterator::SystemIterator(Systems& systems, size_t i)
-    : m_systems(systems)
-    , m_i(i) {
+Systems::SystemIterator<false> Systems::begin() {
+    return SystemIterator<false>(*this, 0);
 }
 
-Systems::SystemIterator& Systems::SystemIterator::operator++() {
-    ++m_i;
-    return *this;
+Systems::SystemIterator<false> Systems::end() {
+    return SystemIterator<false>(*this, m_container.size());
 }
 
-Systems::SystemIterator& Systems::SystemIterator::operator*() {
-    return *this;
+Systems::SystemIterator<true> Systems::begin() const {
+    return SystemIterator<true>(*this, 0);
 }
 
-System* Systems::SystemIterator::operator->() {
-    return m_systems.m_container.at(m_i).get();
-}
-
-bool Systems::SystemIterator::operator==(const Systems::SystemIterator& rhs) {
-    return &m_systems == &rhs.m_systems && m_i == rhs.m_i;
-}
-
-bool Systems::SystemIterator::operator!=(const Systems::SystemIterator& rhs) {
-    return !(*this == rhs);
-}
-
-size_t Systems::SystemIterator::container_index() const {
-    return m_i;
-}
-
-size_t Systems::SystemIterator::system_index() const {
-    return m_systems.system_index(m_i);
-}
-
-const std::string& Systems::SystemIterator::system_name() const {
-    return duk::engine::system_name(system_index());
-}
-
-Systems::SystemIterator Systems::begin() {
-    return Systems::SystemIterator(*this, 0);
-}
-
-Systems::SystemIterator Systems::end() {
-    return Systems::SystemIterator(*this, m_container.size());
+Systems::SystemIterator<true> Systems::end() const {
+    return SystemIterator<true>(*this, 0);
 }
 
 void Systems::enter(duk::objects::Objects& objects, Engine& engine) {

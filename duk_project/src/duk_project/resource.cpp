@@ -49,10 +49,9 @@ static duk::resource::Id resource_id_generate(const Project* project) {
 
 static duk::resource::ResourceFile read_resource_file(const std::filesystem::path& path) {
     auto json = duk::tools::load_text(path);
-    duk::serial::JsonReader reader(json.c_str());
 
     duk::resource::ResourceFile resourceFile = {};
-    reader.visit(resourceFile);
+    duk::serial::read_json(json, resourceFile);
 
     return resourceFile;
 }
@@ -116,13 +115,13 @@ void resource_track(Project* project, const std::filesystem::path& resource) {
     resourceFile.tag = detail::resource_tag(extension);
     resourceFile.id = detail::resource_id_generate(project);
 
-    duk::serial::JsonWriter writer;
-    writer.visit(resourceFile);
+    std::ostringstream oss;
+    duk::serial::write_json(oss, resourceFile, true);
 
     auto trackFilePath = std::filesystem::path(resource).replace_extension(".res");
     std::ofstream file(trackFilePath);
 
-    file << writer.pretty_print();
+    file << oss.str();
 
     detail::add_resource(project, resourceFile.id, resource, trackFilePath);
 }

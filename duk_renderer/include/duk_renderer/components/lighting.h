@@ -27,21 +27,38 @@ struct PointLight {
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::LightValue& light) {
-    visitor->visit_member(light.color, MemberDescription("color"));
-    visitor->visit_member(light.intensity, MemberDescription("intensity"));
+template<>
+inline void from_json<duk::renderer::LightValue>(const rapidjson::Value& json, duk::renderer::LightValue& light) {
+    from_json_member(json, "color", light.color);
+    from_json_member(json, "intensity", light.intensity);
 }
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::DirectionalLight& light) {
-    visitor->visit_member_object(light.value, MemberDescription("value"));
+template<>
+inline void to_json<duk::renderer::LightValue>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::LightValue& light) {
+    to_json_member(document, json, "color", light.color);
+    to_json_member(document, json, "intensity", light.intensity);
 }
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::PointLight& light) {
-    visitor->visit_member_object(light.value, MemberDescription("value"));
-    visitor->visit_member(light.radius, MemberDescription("radius"));
+template<>
+inline void from_json<duk::renderer::DirectionalLight>(const rapidjson::Value& json, duk::renderer::DirectionalLight& light) {
+    from_json_member(json, "value", light.value);
+}
+
+template<>
+inline void to_json<duk::renderer::DirectionalLight>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::DirectionalLight& light) {
+    to_json_member(document, json, "value", light.value);
+}
+
+template<>
+inline void from_json<duk::renderer::PointLight>(const rapidjson::Value& json, duk::renderer::PointLight& light) {
+    from_json_member(json, "value", light.value);
+    from_json_member(json, "radius", light.radius);
+}
+
+template<>
+inline void to_json<duk::renderer::PointLight>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::PointLight& light) {
+    to_json_member(document, json, "value", light.value);
+    to_json_member(document, json, "radius", light.radius);
 }
 
 }// namespace duk::serial

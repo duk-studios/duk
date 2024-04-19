@@ -18,7 +18,6 @@ struct CameraController {
     float rotationSpeed;
     duk::audio::AudioClipResource spawnClip;
     duk::objects::ObjectsResource sphere;
-    duk::renderer::FontResource font;
     duk::audio::AudioPlayer audioPlayer;
 };
 
@@ -35,13 +34,20 @@ public:
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::sample::CameraController& cameraController) {
-    visitor->visit_member(cameraController.speed, MemberDescription("speed"));
-    visitor->visit_member(cameraController.rotationSpeed, MemberDescription("rotationSpeed"));
-    visitor->template visit_member<duk::resource::Resource>(cameraController.spawnClip, MemberDescription("spawnClip"));
-    visitor->template visit_member<duk::resource::Resource>(cameraController.sphere, MemberDescription("sphere"));
-    visitor->template visit_member<duk::resource::Resource>(cameraController.font, MemberDescription("font"));
+template<>
+inline void from_json<duk::sample::CameraController>(const rapidjson::Value& json, duk::sample::CameraController& cameraController) {
+    from_json_member(json, "speed", cameraController.speed);
+    from_json_member(json, "rotationSpeed", cameraController.rotationSpeed);
+    from_json_member(json, "spawnClip", cameraController.spawnClip);
+    from_json_member(json, "sphere", cameraController.sphere);
+}
+
+template<>
+inline void to_json<duk::sample::CameraController>(rapidjson::Document& document, rapidjson::Value& json, const duk::sample::CameraController& cameraController) {
+    to_json_member(document, json, "speed", cameraController.speed);
+    to_json_member(document, json, "rotationSpeed", cameraController.rotationSpeed);
+    to_json_member(document, json, "spawnClip", cameraController.spawnClip);
+    to_json_member(document, json, "sphere", cameraController.sphere);
 }
 
 }// namespace duk::serial
@@ -52,7 +58,6 @@ template<typename Solver>
 void solve_resources(Solver* solver, duk::sample::CameraController& cameraController) {
     solver->solve(cameraController.spawnClip);
     solver->solve(cameraController.sphere);
-    solver->solve(cameraController.font);
 }
 
 }// namespace duk::resource

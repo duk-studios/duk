@@ -18,10 +18,16 @@ struct MeshRenderer {
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::MeshRenderer& meshRenderer) {
-    visitor->template visit_member<duk::resource::Resource>(meshRenderer.mesh, MemberDescription("mesh"));
-    visitor->template visit_member<duk::resource::Resource>(meshRenderer.material, MemberDescription("material"));
+template<>
+inline void from_json<duk::renderer::MeshRenderer>(const rapidjson::Value& json, duk::renderer::MeshRenderer& meshRenderer) {
+    from_json_member(json, "mesh", meshRenderer.mesh);
+    from_json_member(json, "material", meshRenderer.material);
+}
+
+template<>
+inline void to_json<duk::renderer::MeshRenderer>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::MeshRenderer& meshRenderer) {
+    to_json_member(document, json, "mesh", meshRenderer.mesh);
+    to_json_member(document, json, "material", meshRenderer.material);
 }
 
 }// namespace duk::serial

@@ -5,7 +5,7 @@
 #define DUK_RENDERER_TEXTURE_H
 
 #include <duk_renderer/image/image.h>
-#include <duk_resource/resource.h>
+
 #include <duk_rhi/descriptor.h>
 #include <duk_rhi/sampler.h>
 
@@ -56,10 +56,16 @@ struct hash<duk::renderer::Texture> {
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::Texture& texture) {
-    visitor->template visit_member<duk::resource::Resource>(texture.image(), MemberDescription("image"));
-    visitor->visit_member_object(texture.sampler(), MemberDescription("sampler"));
+template<>
+inline void from_json<duk::renderer::Texture>(const rapidjson::Value& json, duk::renderer::Texture& texture) {
+    from_json_member(json, "image", texture.image());
+    from_json_member(json, "sampler", texture.sampler());
+}
+
+template<>
+inline void to_json<duk::renderer::Texture>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::Texture& texture) {
+    to_json_member(document, json, "image", texture.image());
+    to_json_member(document, json, "sampler", texture.sampler());
 }
 
 }// namespace duk::serial

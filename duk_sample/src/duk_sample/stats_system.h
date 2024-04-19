@@ -28,9 +28,14 @@ public:
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::sample::Stats& stats) {
-    visitor->visit_member(stats.sampleCount, MemberDescription("sampleCount"));
+template<>
+inline void from_json<duk::sample::Stats>(const rapidjson::Value& json, duk::sample::Stats& stats) {
+    from_json_member(json, "sampleCount", stats.sampleCount);
+}
+
+template<>
+inline void to_json<duk::sample::Stats>(rapidjson::Document& document, rapidjson::Value& json, const duk::sample::Stats& stats) {
+    to_json_member(document, json, "sampleCount", stats.sampleCount);
 }
 
 }// namespace duk::serial

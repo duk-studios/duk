@@ -30,7 +30,7 @@ void update_transform(const duk::objects::Component<Transform>& transform) {
 
 void update_transforms(duk::objects::Objects& objects) {
     for (auto object: objects.all_with<Transform>()) {
-        update_transform(object);
+        update_transform(object.component<Transform>());
     }
 }
 

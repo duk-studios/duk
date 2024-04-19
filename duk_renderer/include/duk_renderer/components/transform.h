@@ -31,11 +31,18 @@ void update_transforms(duk::objects::Objects& objects);
 
 namespace duk::serial {
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::renderer::Transform& transform) {
-    visitor->visit_member(transform.position, MemberDescription("position"));
-    visitor->visit_member(transform.rotation, MemberDescription("rotation"));
-    visitor->visit_member(transform.scale, MemberDescription("scale"));
+template<>
+inline void from_json<duk::renderer::Transform>(const rapidjson::Value& json, duk::renderer::Transform& transform) {
+    from_json_member(json, "rotation", transform.rotation);
+    from_json_member(json, "position", transform.position);
+    from_json_member(json, "scale", transform.scale);
+}
+
+template<>
+inline void to_json<duk::renderer::Transform>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::Transform& transform) {
+    to_json_member(document, json, "position", transform.position);
+    to_json_member(document, json, "rotation", transform.rotation);
+    to_json_member(document, json, "scale", transform.scale);
 }
 
 }// namespace duk::serial

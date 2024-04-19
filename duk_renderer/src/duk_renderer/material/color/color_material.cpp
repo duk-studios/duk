@@ -6,6 +6,7 @@
 #include <duk_renderer/material/color/color_material.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/material/color/color_shader_data_source.h>
 
 namespace duk::renderer {
 
