@@ -11,11 +11,11 @@
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 
-#include <duk_serial/json_serializer.h>
+#include <duk_serial/json/types.h>
+#include <duk_serial/json/serializer.h>
 
 #include <duk_tools/bit_block.h>
 #include <duk_tools/fixed_vector.h>
-#include <duk_tools/singleton.h>
 #include <duk_tools/types.h>
 
 #include <array>
@@ -94,36 +94,38 @@ private:
 
 class Objects;
 
-template<typename T>
-class Component;
+template<typename T, bool isConst>
+class ComponentHandle;
 
 using ComponentMask = duk::tools::BitBlock<detail::kMaxComponents>;
 
-class Object {
+class Id {
 public:
-    class Id {
-    public:
-        Id();
+    Id();
 
-        explicit Id(uint32_t index, uint32_t version);
+    explicit Id(uint32_t index, uint32_t version);
 
-        DUK_NO_DISCARD uint32_t index() const;
+    DUK_NO_DISCARD uint32_t index() const;
 
-        DUK_NO_DISCARD uint32_t version() const;
+    DUK_NO_DISCARD uint32_t version() const;
 
-        bool operator==(const Id& rhs) const;
+    bool operator==(const Id& rhs) const;
 
-        bool operator!=(const Id& rhs) const;
+    bool operator!=(const Id& rhs) const;
 
-    private:
-        uint32_t m_index;
-        uint32_t m_version;
-    };
+private:
+    uint32_t m_index;
+    uint32_t m_version;
+};
 
+template<bool isConst>
+class ObjectHandle {
 public:
-    Object();
+    using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
 
-    Object(uint32_t index, uint32_t version, Objects* objects);
+    ObjectHandle();
+
+    ObjectHandle(uint32_t index, uint32_t version, ObjectsType* objects);
 
     DUK_NO_DISCARD Id id() const;
 
@@ -131,66 +133,79 @@ public:
 
     DUK_NO_DISCARD operator bool() const;
 
-    DUK_NO_DISCARD Objects* objects() const;
+    DUK_NO_DISCARD ObjectsType* objects() const;
 
     void destroy() const;
 
     const ComponentMask& component_mask() const;
 
     template<typename T, typename... Args>
-    Component<T> add(Args&&... args);
+    ComponentHandle<T, isConst> add(Args&&... args);
 
     template<typename T>
     void remove();
 
     template<typename T>
-    Component<T> component();
+    ComponentHandle<T, isConst> component();
 
     template<typename T>
-    Component<T> component() const;
+    const ComponentHandle<T, isConst> component() const;
 
     template<typename... Ts>
-    std::tuple<Component<Ts>...> components();
+    std::tuple<ComponentHandle<Ts, isConst>...> components();
 
     template<typename... Ts>
-    std::tuple<Component<Ts>...> components() const;
+    std::tuple<const ComponentHandle<Ts, isConst>...> components() const;
 
 private:
     Id m_id;
-    Objects* m_objects;
+    ObjectsType* m_objects;
 };
 
-template<typename T>
-class Component {
+using Object = ObjectHandle<false>;
+
+using ConstObject = ObjectHandle<true>;
+
+template<typename T, bool isConst>
+class ComponentHandle {
 public:
-    Component(const Object::Id& ownerId, Objects* objects);
+    using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
+    using Type = duk::tools::maybe_const_t<T, isConst>;
 
-    Component(const Object& owner);
+    ComponentHandle(const Id& ownerId, ObjectsType* objects);
 
-    Component();
+    ComponentHandle(const ObjectHandle<isConst>& owner);
 
-    T* operator->();
+    ComponentHandle();
 
-    T* operator->() const;
+    Type* operator->();
 
-    T& operator*();
+    Type* operator->() const;
 
-    T& operator*() const;
+    Type& operator*();
 
-    T* get();
+    Type& operator*() const;
 
-    T* get() const;
+    Type* get();
+
+    Type* get() const;
 
     DUK_NO_DISCARD bool valid() const;
 
     DUK_NO_DISCARD explicit operator bool() const;
 
-    DUK_NO_DISCARD Object object() const;
+    DUK_NO_DISCARD ObjectHandle<isConst> object() const;
 
 private:
-    Object::Id m_ownerId;
-    Objects* m_objects;
+    Id m_ownerId;
+    ObjectsType* m_objects;
 };
+
+template<typename T>
+using Component = ComponentHandle<T, false>;
+
+template<typename T>
+using ConstComponent = ComponentHandle<T, true>;
 
 class ComponentRegistry {
 private:
@@ -201,15 +216,15 @@ private:
     public:
         virtual ~ComponentEntry() = default;
 
-        virtual void copy(const Object& src, Object& dst) = 0;
+        virtual void copy(const ObjectHandle<true>& src, ObjectHandle<false>& dst) = 0;
 
-        virtual void solve(duk::resource::ReferenceSolver* solver, Object& object) = 0;
+        virtual void solve(duk::resource::ReferenceSolver* solver, ObjectHandle<false>& object) = 0;
 
-        virtual void solve(duk::resource::DependencySolver* solver, Object& object) = 0;
+        virtual void solve(duk::resource::DependencySolver* solver, ObjectHandle<false>& object) = 0;
 
-        virtual void visit(duk::serial::JsonReader* serializer, Object& object) = 0;
+        virtual void from_json(const rapidjson::Value& json, ObjectHandle<false>& object) = 0;
 
-        virtual void visit(duk::serial::JsonWriter* serializer, Object& object) = 0;
+        virtual void to_json(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) = 0;
 
         virtual const std::string& name() const = 0;
     };
@@ -217,26 +232,28 @@ private:
     template<typename T>
     class ComponentEntryT : public ComponentEntry {
     public:
-        void copy(const Object& src, Object& dst) override {
-            dst.add<T>(*src.component<T>());
+        void copy(const ObjectHandle<true>& src, ObjectHandle<false>& dst) override {
+            auto dstComponent = dst.add<T>();
+            const auto srcComponent = src.component<T>();
+            *dstComponent = *srcComponent;
         }
 
-        void solve(duk::resource::ReferenceSolver* solver, Object& object) override {
-            auto component = Component<T>(object);
+        void solve(duk::resource::ReferenceSolver* solver, ObjectHandle<false>& object) override {
+            auto component = ComponentHandle<T, false>(object);
             solver->solve(component);
         }
 
-        void solve(duk::resource::DependencySolver* solver, Object& object) override {
-            auto component = Component<T>(object);
+        void solve(duk::resource::DependencySolver* solver, ObjectHandle<false>& object) override {
+            auto component = ComponentHandle<T, false>(object);
             solver->solve(component);
         }
 
-        void visit(duk::serial::JsonReader* reader, Object& object) override {
-            visit_object(reader, *object.add<T>());
+        void from_json(const rapidjson::Value& json, ObjectHandle<false>& object) override {
+            duk::serial::from_json(json, *object.add<T>());
         }
 
-        void visit(duk::serial::JsonWriter* writer, Object& object) override {
-            visit_object(writer, *object.component<T>());
+        void to_json(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) override {
+            duk::serial::to_json(document, json, *object.component<T>());
         }
 
         const std::string& name() const override {
@@ -247,35 +264,49 @@ private:
 public:
     static ComponentRegistry* instance();
 
-    void copy_component(const Object& src, Object& dst, uint32_t componentId) {
+    ComponentRegistry()
+        : m_componentIndexCounter(0) {
+    }
+
+    void copy_component(const ObjectHandle<true>& src, ObjectHandle<false>& dst, uint32_t componentId) {
         auto& entry = m_componentEntries.at(componentId);
         assert(entry);
         m_componentEntries.at(componentId)->copy(src, dst);
     }
 
     template<typename Solver>
-    void solve(Solver* solver, Object& object, uint32_t componentId) {
+    void solve(Solver* solver, ObjectHandle<false>& object, uint32_t componentId) {
         auto& entry = m_componentEntries.at(componentId);
         assert(entry);
         m_componentEntries.at(componentId)->solve(solver, object);
     }
 
-    template<typename JsonVisitor>
-    void visit(JsonVisitor* visitor, Object& object, uint32_t componentId) {
+    void from_json(const rapidjson::Value& json, ObjectHandle<false>& object, uint32_t componentId) {
         auto& entry = m_componentEntries.at(componentId);
         assert(entry);
-        m_componentEntries.at(componentId)->visit(visitor, object);
+        m_componentEntries.at(componentId)->from_json(json, object);
     }
 
-    template<typename JsonVisitor>
-    void visit(JsonVisitor* visitor, Object& object, const std::string& componentName) {
+    void from_json(const rapidjson::Value& json, ObjectHandle<false>& object, const std::string& componentName) {
         const auto it = m_componentNameToIndex.find(componentName);
         if (it == m_componentNameToIndex.end()) {
             duk::log::warn("Unregistered Component type: \"{}\"", componentName);
             return;
         }
         const auto index = it->second;
-        visit(visitor, object, index);
+        from_json(json, object, index);
+    }
+
+    void from_json(const rapidjson::Value& json, ObjectHandle<false>& object) {
+        std::string type;
+        duk::serial::from_json_member(json, "type", type);
+        from_json(json, object, type);
+    }
+
+    void to_json(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object, uint32_t componentIndex) {
+        const auto& type = name_of(componentIndex);
+        duk::serial::to_json_member(document, json, "type", type);
+        m_componentEntries.at(componentIndex)->to_json(document, json, object);
     }
 
     template<typename T>
@@ -316,13 +347,16 @@ void register_component() {
 
 class Objects {
 public:
+    template<bool isConst>
     class ObjectView {
     public:
+        using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
+
         class Iterator {
         public:
-            Iterator(uint32_t index, Objects* objects, ComponentMask componentMask);
+            Iterator(uint32_t index, ObjectsType* objects, ComponentMask componentMask);
             // Dereference operator (*)
-            DUK_NO_DISCARD Object operator*() const;
+            DUK_NO_DISCARD ObjectHandle<isConst> operator*() const;
 
             // Pre-increment operator (++it)
             Iterator& operator++();
@@ -330,6 +364,7 @@ public:
             // Post-increment operator (it++)
             DUK_NO_DISCARD Iterator operator++(int);
 
+            // Sum operator (it + value)
             DUK_NO_DISCARD Iterator operator+(int value) const;
 
             // Equality operator (it1 == it2)
@@ -346,12 +381,12 @@ public:
         private:
             uint32_t m_i;
             uint32_t m_freeListCursor;
-            Objects* m_objects;
+            ObjectsType* m_objects;
             ComponentMask m_componentMask;
         };
 
     public:
-        ObjectView(Objects* objects, ComponentMask componentMask);
+        ObjectView(ObjectsType* objects, ComponentMask componentMask);
 
         DUK_NO_DISCARD Iterator begin();
 
@@ -362,56 +397,69 @@ public:
         DUK_NO_DISCARD Iterator end() const;
 
     private:
-        Objects* m_objects;
+        ObjectsType* m_objects;
         ComponentMask m_componentMask;
     };
 
 public:
     ~Objects();
 
-    Object add_object();
+    ObjectHandle<false> add_object();
 
     /// builds a new object which is an exact copy of the original object
-    Object copy_object(const Object& src);
+    ObjectHandle<false> copy_object(const ObjectHandle<true>& src);
 
-    Object copy_objects(Objects& src);
+    ObjectHandle<false> copy_objects(const Objects& src);
 
-    void destroy_object(const Object::Id& id);
+    void destroy_object(const Id& id);
 
-    DUK_NO_DISCARD Object object(const Object::Id& id);
+    DUK_NO_DISCARD ObjectHandle<false> object(const Id& id);
 
-    DUK_NO_DISCARD bool valid_object(const Object::Id& id) const;
+    DUK_NO_DISCARD ObjectHandle<true> object(const Id& id) const;
 
-    DUK_NO_DISCARD ObjectView all();
+    DUK_NO_DISCARD bool valid_object(const Id& id) const;
+
+    DUK_NO_DISCARD ObjectView<false> all();
+
+    DUK_NO_DISCARD ObjectView<true> all() const;
 
     template<typename... Ts>
-    DUK_NO_DISCARD ObjectView all_with();
+    DUK_NO_DISCARD ObjectView<false> all_with();
 
     template<typename... Ts>
-    DUK_NO_DISCARD Object first_with();
+    DUK_NO_DISCARD ObjectView<true> all_with() const;
 
-    DUK_NO_DISCARD const ComponentMask& component_mask(const Object::Id& id) const;
+    template<typename... Ts>
+    DUK_NO_DISCARD ObjectHandle<false> first_with();
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ObjectHandle<true> first_with() const;
+
+    DUK_NO_DISCARD const ComponentMask& component_mask(const Id& id) const;
 
     template<typename T, typename... Args>
-    void add_component(const Object::Id& id, Args&&... args);
+    void add_component(const Id& id, Args&&... args);
 
     template<typename T>
-    void remove_component(const Object::Id& id);
+    void remove_component(const Id& id);
 
     template<typename T>
-    DUK_NO_DISCARD T* component(const Object::Id& id);
+    DUK_NO_DISCARD T* component(const Id& id);
 
     template<typename T>
-    DUK_NO_DISCARD T* component(const Object::Id& id) const;
+    DUK_NO_DISCARD const T* component(const Id& id) const;
 
     template<typename T>
-    DUK_NO_DISCARD bool valid_component(const Object::Id& id) const;
+    DUK_NO_DISCARD bool valid_component(const Id& id) const;
 
     void update();
 
 private:
     template<typename T>
     detail::ComponentPoolT<T>* pool();
+
+    template<typename T>
+    const detail::ComponentPoolT<T>* pool() const;
 
     template<typename T>
     static ComponentMask component_mask();
@@ -426,86 +474,283 @@ private:
     std::vector<ComponentMask> m_componentMasks;
     std::vector<uint32_t> m_versions;
     std::vector<uint32_t> m_freeList;
-    std::vector<Object::Id> m_destroyedIds;
+    std::vector<Id> m_destroyedIds;
 };
 
 using ObjectsResource = duk::resource::ResourceT<Objects>;
 
+// Object Implementation //
+
+template<bool isConst>
+ObjectHandle<isConst>::ObjectHandle()
+    : ObjectHandle(detail::kMaxObjects, 0, nullptr) {
+}
+
+template<bool isConst>
+ObjectHandle<isConst>::ObjectHandle(uint32_t index, uint32_t version, ObjectsType* objects)
+    : m_id(index, version)
+    , m_objects(objects) {
+}
+
+template<bool isConst>
+Id ObjectHandle<isConst>::id() const {
+    return m_id;
+}
+
+template<bool isConst>
+bool ObjectHandle<isConst>::valid() const {
+    return m_objects != nullptr && m_objects->valid_object(m_id);
+}
+
+template<bool isConst>
+ObjectHandle<isConst>::operator bool() const {
+    return valid();
+}
+
+template<bool isConst>
+typename ObjectHandle<isConst>::ObjectsType* ObjectHandle<isConst>::objects() const {
+    return m_objects;
+}
+
+template<bool isConst>
+void ObjectHandle<isConst>::destroy() const {
+    m_objects->destroy_object(m_id);
+}
+
+template<bool isConst>
+const ComponentMask& ObjectHandle<isConst>::component_mask() const {
+    return m_objects->component_mask(m_id);
+}
+
+template<bool isConst>
+template<typename T, typename... Args>
+ComponentHandle<T, isConst> ObjectHandle<isConst>::add(Args&&... args) {
+    m_objects->template add_component<T>(m_id, std::forward<Args>(args)...);
+    return component<T>();
+}
+
+template<bool isConst>
+template<typename T>
+void ObjectHandle<isConst>::remove() {
+    m_objects->template remove_component<T>(m_id);
+}
+
+template<bool isConst>
+template<typename T>
+ComponentHandle<T, isConst> ObjectHandle<isConst>::component() {
+    return ComponentHandle<T, isConst>(m_id, m_objects);
+}
+
+template<bool isConst>
+template<typename T>
+const ComponentHandle<T, isConst> ObjectHandle<isConst>::component() const {
+    return ComponentHandle<T, isConst>(m_id, m_objects);
+}
+
+template<bool isConst>
+template<typename... Ts>
+std::tuple<ComponentHandle<Ts, isConst>...> ObjectHandle<isConst>::components() {
+    return std::make_tuple(component<Ts>()...);
+}
+
+template<bool isConst>
+template<typename... Ts>
+std::tuple<const ComponentHandle<Ts, isConst>...> ObjectHandle<isConst>::components() const {
+    return std::make_tuple(component<Ts>()...);
+}
+
 // Component Implementation //
 
-template<typename T>
-Component<T>::Component(const Object::Id& ownerId, Objects* objects)
+template<typename T, bool isConst>
+ComponentHandle<T, isConst>::ComponentHandle(const Id& ownerId, ObjectsType* objects)
     : m_ownerId(ownerId)
     , m_objects(objects) {
 }
 
-template<typename T>
-Component<T>::Component(const Object& owner)
+template<typename T, bool isConst>
+ComponentHandle<T, isConst>::ComponentHandle(const ObjectHandle<isConst>& owner)
     : m_ownerId(owner.id())
     , m_objects(owner.objects()) {
 }
 
-template<typename T>
-Component<T>::Component()
+template<typename T, bool isConst>
+ComponentHandle<T, isConst>::ComponentHandle()
     : m_ownerId()
     , m_objects(nullptr) {
 }
 
-template<typename T>
-T* Component<T>::operator->() {
+template<typename T, bool isConst>
+typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::operator->() {
     DUK_ASSERT(valid());
     return m_objects->template component<T>(m_ownerId);
 }
 
-template<typename T>
-T* Component<T>::operator->() const {
+template<typename T, bool isConst>
+typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::operator->() const {
     DUK_ASSERT(valid());
     return m_objects->template component<T>(m_ownerId);
 }
 
-template<typename T>
-T& Component<T>::operator*() {
+template<typename T, bool isConst>
+typename ComponentHandle<T, isConst>::Type& ComponentHandle<T, isConst>::operator*() {
     DUK_ASSERT(valid());
     return *m_objects->template component<T>(m_ownerId);
 }
 
-template<typename T>
-T& Component<T>::operator*() const {
+template<typename T, bool isConst>
+typename ComponentHandle<T, isConst>::Type& ComponentHandle<T, isConst>::operator*() const {
     DUK_ASSERT(valid());
     return *m_objects->template component<T>(m_ownerId);
 }
 
-template<typename T>
-T* Component<T>::get() {
+template<typename T, bool isConst>
+typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::get() const {
     DUK_ASSERT(valid());
     return m_objects->template component<T>(m_ownerId);
 }
 
-template<typename T>
-T* Component<T>::get() const {
+template<typename T, bool isConst>
+typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::get() {
     DUK_ASSERT(valid());
     return m_objects->template component<T>(m_ownerId);
 }
 
-template<typename T>
-bool Component<T>::valid() const {
+template<typename T, bool isConst>
+bool ComponentHandle<T, isConst>::valid() const {
     return m_objects->template valid_component<T>(m_ownerId);
 }
 
-template<typename T>
-Object Component<T>::object() const {
-    return m_objects->object(m_ownerId);
+template<typename T, bool isConst>
+ComponentHandle<T, isConst>::operator bool() const {
+    return valid();
 }
 
-template<typename T>
-Component<T>::operator bool() const {
-    return valid();
+template<typename T, bool isConst>
+ObjectHandle<isConst> ComponentHandle<T, isConst>::object() const {
+    return m_objects->object(m_ownerId);
 }
 
 // Objects Implementation //
 
+template<bool IsConst>
+Objects::ObjectView<IsConst>::Iterator::Iterator(uint32_t index, ObjectsType* objects, ComponentMask componentMask)
+    : m_i(index)
+    , m_freeListCursor(0)
+    , m_objects(objects)
+    , m_componentMask(componentMask) {
+    next();
+}
+
+template<bool isConst>
+ObjectHandle<isConst> Objects::ObjectView<isConst>::Iterator::operator*() const {
+    return m_objects->object(Id{m_i, m_objects->m_versions[m_i]});
+}
+
+template<bool IsConst>
+typename Objects::ObjectView<IsConst>::Iterator& Objects::ObjectView<IsConst>::Iterator::operator++() {
+    m_i++;
+    next();
+    return *this;
+}
+
+template<bool IsConst>
+typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::Iterator::operator++(int) {
+    auto old = *this;
+    m_i++;
+    next();
+    return old;
+}
+
+template<bool IsConst>
+typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::Iterator::operator+(int value) const {
+    return Iterator(m_i + value, m_objects, m_componentMask);
+}
+
+template<bool IsConst>
+bool Objects::ObjectView<IsConst>::Iterator::operator==(const Iterator& other) const {
+    return m_i == other.m_i && m_objects == other.m_objects;
+}
+
+template<bool IsConst>
+bool Objects::ObjectView<IsConst>::Iterator::operator!=(const Iterator& other) const {
+    return !(*this == other);
+}
+
+template<bool IsConst>
+void Objects::ObjectView<IsConst>::Iterator::next() {
+    while (m_i < m_objects->m_versions.size() && !valid_object()) {
+        m_i++;
+        m_freeListCursor++;
+    }
+}
+
+template<bool IsConst>
+bool Objects::ObjectView<IsConst>::Iterator::valid_object() {
+    if ((m_componentMask & m_objects->m_componentMasks[m_i]) != m_componentMask) {
+        return false;
+    }
+    auto& freeList = m_objects->m_freeList;
+    if (freeList.empty() || m_freeListCursor >= freeList.size()) {
+        return true;
+    }
+
+    return freeList[m_freeListCursor] != m_i;
+}
+
+template<bool IsConst>
+Objects::ObjectView<IsConst>::ObjectView(ObjectsType* objects, ComponentMask componentMask)
+    : m_objects(objects)
+    , m_componentMask(componentMask) {
+}
+
+template<bool IsConst>
+typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::begin() {
+    return {0, m_objects, m_componentMask};
+}
+
+template<bool IsConst>
+typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::begin() const {
+    return {0, m_objects, m_componentMask};
+}
+
+template<bool IsConst>
+typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::end() {
+    return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
+}
+
+template<bool IsConst>
+typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::end() const {
+    return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
+}
+
+template<typename... Ts>
+Objects::ObjectView<false> Objects::all_with() {
+    return ObjectView<false>(this, component_mask<Ts...>());
+}
+
+template<typename... Ts>
+Objects::ObjectView<true> Objects::all_with() const {
+    return ObjectView<true>(this, component_mask<Ts...>());
+}
+
+template<typename... Ts>
+ObjectHandle<false> Objects::first_with() {
+    for (auto object: all_with<Ts...>()) {
+        return object;
+    }
+    return ObjectHandle<false>();
+}
+
+template<typename... Ts>
+ObjectHandle<true> Objects::first_with() const {
+    for (auto object: all_with<Ts...>()) {
+        return object;
+    }
+    return ObjectHandle<true>();
+}
+
 template<typename T, typename... Args>
-void Objects::add_component(const Object::Id& id, Args&&... args) {
+void Objects::add_component(const Id& id, Args&&... args) {
     DUK_ASSERT(valid_object(id));
     DUK_ASSERT(!valid_component<T>(id));
     auto componentPool = pool<T>();
@@ -514,7 +759,7 @@ void Objects::add_component(const Object::Id& id, Args&&... args) {
 }
 
 template<typename T>
-void Objects::remove_component(const Object::Id& id) {
+void Objects::remove_component(const Id& id) {
     DUK_ASSERT(valid_component<T>(id));
     const auto index = ComponentRegistry::instance()->index_of<T>();
     remove_component(id.index(), index);
@@ -522,21 +767,21 @@ void Objects::remove_component(const Object::Id& id) {
 }
 
 template<typename T>
-T* Objects::component(const Object::Id& id) {
+T* Objects::component(const Id& id) {
     DUK_ASSERT(valid_component<T>(id));
     auto componentPool = pool<T>();
     return componentPool->get(id.index());
 }
 
 template<typename T>
-T* Objects::component(const Object::Id& id) const {
+const T* Objects::component(const Id& id) const {
     DUK_ASSERT(valid_component<T>(id));
     auto componentPool = pool<T>();
     return componentPool->get(id.index());
 }
 
 template<typename T>
-bool Objects::valid_component(const Object::Id& id) const {
+bool Objects::valid_component(const Id& id) const {
     if (!valid_object(id)) {
         return false;
     }
@@ -560,17 +805,14 @@ detail::ComponentPoolT<T>* Objects::pool() {
     return componentPool;
 }
 
-template<typename... Ts>
-Objects::ObjectView Objects::all_with() {
-    return Objects::ObjectView(this, component_mask<Ts...>());
-}
-
-template<typename... Ts>
-Object Objects::first_with() {
-    for (auto object: all_with<Ts...>()) {
-        return object;
+template<typename T>
+const detail::ComponentPoolT<T>* Objects::pool() const {
+    const auto index = ComponentRegistry::instance()->index_of<T>();
+    const auto& pool = m_componentPools[index];
+    if (!pool) {
+        return nullptr;
     }
-    return Object();
+    return dynamic_cast<const detail::ComponentPoolT<T>*>(pool.get());
 }
 
 template<typename T>
@@ -585,127 +827,53 @@ ComponentMask Objects::component_mask() {
     return component_mask<T1>() | component_mask<T2, Ts...>();
 }
 
-template<typename T, typename... Args>
-Component<T> Object::add(Args&&... args) {
-    m_objects->template add_component<T>(m_id, std::forward<Args>(args)...);
-    return Component<T>(m_id, m_objects);
-}
-
-template<typename T>
-void Object::remove() {
-    m_objects->template remove_component<T>(m_id);
-}
-
-template<typename T>
-Component<T> Object::component() {
-    return Component<T>(m_id, m_objects);
-}
-
-template<typename T>
-Component<T> Object::component() const {
-    return Component<T>(m_id, m_objects);
-}
-
-template<typename... Ts>
-std::tuple<Component<Ts>...> Object::components() {
-    return std::make_tuple(component<Ts>()...);
-}
-
-template<typename... Ts>
-std::tuple<Component<Ts>...> Object::components() const {
-    return std::make_tuple(component<Ts>()...);
-}
-
 }// namespace duk::objects
 
 namespace duk::serial {
 
-// Object serialization
-// As usual with arrays, we have to split our serialization into read and write.
-// Our components also have to be wrapped into a SerializedComponent, otherwise
-// we would not be able to serialize different types into a single array.
-// Maybe one day we can have a better solution for arrays like this,
-// but for now this is more than good enough
-struct SerializedComponent {
-    duk::objects::Object& object;
-    std::string type;
-};
-
-class SerializedComponents {
-public:
-    using iterator = std::vector<SerializedComponent>::iterator;
-
-    SerializedComponents(duk::objects::Object& object)
-        : m_object(object) {
-        auto registry = duk::objects::ComponentRegistry::instance();
-        const auto& componentMask = object.component_mask();
-        for (auto componentIndex: componentMask.bits<true>()) {
-            m_components.emplace_back(m_object, registry->name_of(componentIndex));
-        }
-    }
-
-    SerializedComponent& add() {
-        return m_components.emplace_back(m_object);
-    }
-
-    iterator begin() {
-        return m_components.begin();
-    }
-
-    iterator end() {
-        return m_components.end();
-    }
-
-private:
-    duk::objects::Object& m_object;
-    std::vector<SerializedComponent> m_components;
-};
-
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* serializer, SerializedComponent& component) {
-    serializer->visit_member(component.type, MemberDescription("type"));
-    duk::objects::ComponentRegistry::instance()->visit(serializer, component.object, component.type);
-}
-
 template<>
-inline void read_array<SerializedComponents>(JsonReader* reader, SerializedComponents& components, size_t size) {
-    for (size_t i = 0; i < size; i++) {
-        reader->visit_member_object(components.add(), i);
+inline void from_json<duk::objects::ObjectHandle<false>>(const rapidjson::Value& json, duk::objects::ObjectHandle<false>& object) {
+    DUK_ASSERT(json.IsObject());
+    auto jsonComponentsArray = json["components"].GetArray();
+    for (auto& jsonComponent: jsonComponentsArray) {
+        std::string type;
+        from_json_member(jsonComponent, "type", type);
+        objects::ComponentRegistry::instance()->from_json(jsonComponent, object, type);
     }
 }
 
 template<>
-inline void write_array(JsonWriter* writer, SerializedComponents& components) {
-    for (auto& element: components) {
-        writer->visit_member_object(element, MemberDescription(nullptr));
+inline void to_json<duk::objects::ObjectHandle<true>>(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::ObjectHandle<true>& object) {
+    rapidjson::Value jsonComponents;
+    auto jsonComponentsArray = jsonComponents.SetArray().GetArray();
+    auto registry = objects::ComponentRegistry::instance();
+    for (auto componentIndex: object.component_mask().bits<true>()) {
+        rapidjson::Value jsonComponent;
+        registry->to_json(document, jsonComponent, object, componentIndex);
+        jsonComponentsArray.PushBack(jsonComponent, document.GetAllocator());
     }
+    json.SetObject();
+    json.AddMember("components", std::move(jsonComponentsArray), document.GetAllocator());
 }
 
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::objects::Object& object) {
-    SerializedComponents serializedComponents(object);
-    visitor->visit_member_array(serializedComponents, MemberDescription("components"));
-}
-
-// Objects
 template<>
-inline void read_array<duk::objects::Objects>(JsonReader* reader, duk::objects::Objects& objects, size_t size) {
-    for (size_t i = 0; i < size; i++) {
+inline void from_json<duk::objects::Objects>(const rapidjson::Value& json, duk::objects::Objects& objects) {
+    DUK_ASSERT(json.IsArray());
+    auto jsonArray = json.GetArray();
+    for (auto& jsonElement: jsonArray) {
         auto object = objects.add_object();
-        reader->visit_member_object(object, MemberDescription(i));
+        from_json(jsonElement, object);
     }
 }
 
 template<>
-inline void write_array(JsonWriter* writer, duk::objects::Objects& objects) {
+inline void to_json<duk::objects::Objects>(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Objects& objects) {
+    auto jsonArray = json.SetArray().GetArray();
     for (auto object: objects.all()) {
-        writer->visit_member_object(object, MemberDescription(nullptr));
+        rapidjson::Value jsonElement;
+        to_json(document, jsonElement, object);
+        jsonArray.PushBack(std::move(jsonElement), document.GetAllocator());
     }
-}
-
-template<typename JsonVisitor>
-void visit_object(JsonVisitor* visitor, duk::objects::Objects& objects) {
-    visitor->visit_member_array(objects, MemberDescription("objects"));
 }
 
 }// namespace duk::serial
@@ -713,12 +881,12 @@ void visit_object(JsonVisitor* visitor, duk::objects::Objects& objects) {
 namespace duk::resource {
 
 template<typename Solver, typename T>
-void solve_resources(Solver* solver, duk::objects::Component<T>& component) {
+void solve_resources(Solver* solver, duk::objects::ComponentHandle<T, false>& component) {
     solver->solve(*component);
 }
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::objects::Object& object) {
+void solve_resources(Solver* solver, duk::objects::ObjectHandle<false>& object) {
     auto componentRegistry = duk::objects::ComponentRegistry::instance();
 
     const auto& componentMask = object.component_mask();

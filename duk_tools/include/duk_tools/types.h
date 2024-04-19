@@ -19,6 +19,22 @@ const std::string& type_name_of() {
     return typeName;
 }
 
+template<typename T, bool isConst>
+struct maybe_const {};
+
+template<typename T>
+struct maybe_const<T, true> {
+    using type = const T;
+};
+
+template<typename T>
+struct maybe_const<T, false> {
+    using type = T;
+};
+
+template<typename T, bool isConst>
+using maybe_const_t = typename maybe_const<T, isConst>::type;
+
 }// namespace duk::tools
 
 #endif// DUK_TOOLS_TYPES_H

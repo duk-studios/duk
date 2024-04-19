@@ -20,62 +20,29 @@ uint32_t ComponentRegistry::index_of(const std::string& componentTypeName) const
     return m_componentNameToIndex.at(componentTypeName);
 }
 
-Object::Id::Id()
+Id::Id()
     : Id(detail::kMaxObjects, 0) {
 }
 
-Object::Id::Id(uint32_t index, uint32_t version)
+Id::Id(uint32_t index, uint32_t version)
     : m_index(index)
     , m_version(version) {
 }
 
-uint32_t Object::Id::index() const {
+uint32_t Id::index() const {
     return m_index;
 }
 
-uint32_t Object::Id::version() const {
+uint32_t Id::version() const {
     return m_version;
 }
 
-bool Object::Id::operator==(const Object::Id& rhs) const {
+bool Id::operator==(const Id& rhs) const {
     return m_index == rhs.m_index && m_version == rhs.m_version;
 }
 
-bool Object::Id::operator!=(const Object::Id& rhs) const {
+bool Id::operator!=(const Id& rhs) const {
     return !(*this == rhs);
-}
-
-Object::Object()
-    : Object(detail::kMaxObjects, 0, nullptr) {
-}
-
-Object::Object(uint32_t index, uint32_t version, Objects* objects)
-    : m_id(index, version)
-    , m_objects(objects) {
-}
-
-Object::Id Object::id() const {
-    return m_id;
-}
-
-bool Object::valid() const {
-    return m_objects != nullptr && m_objects->valid_object(m_id);
-}
-
-Object::operator bool() const {
-    return valid();
-}
-
-Objects* Object::objects() const {
-    return m_objects;
-}
-
-void Object::destroy() const {
-    m_objects->destroy_object(m_id);
-}
-
-const ComponentMask& Object::component_mask() const {
-    return m_objects->component_mask(m_id);
 }
 
 Objects::~Objects() {
@@ -85,7 +52,7 @@ Objects::~Objects() {
     update();
 }
 
-Object Objects::add_object() {
+ObjectHandle<false> Objects::add_object() {
     if (!m_freeList.empty()) {
         auto freeIndex = m_freeList.back();
         m_freeList.pop_back();
@@ -100,7 +67,7 @@ Object Objects::add_object() {
     return {index, 0, this};
 }
 
-Object Objects::copy_object(const Object& src) {
+ObjectHandle<false> Objects::copy_object(const ObjectHandle<true>& src) {
     auto dst = add_object();
     auto originalComponentMask = src.component_mask();
     for (auto componentIndex: originalComponentMask.bits<true>()) {
@@ -109,10 +76,10 @@ Object Objects::copy_object(const Object& src) {
     return dst;
 }
 
-Object Objects::copy_objects(Objects& src) {
-    Object root;
-    for (auto obj: src.all()) {
-        auto copy = copy_object(obj);
+ObjectHandle<false> Objects::copy_objects(const Objects& src) {
+    ObjectHandle<false> root;
+    for (const auto obj: src.all()) {
+        const auto copy = copy_object(obj);
         if (!root.valid()) {
             root = copy;
         }
@@ -120,24 +87,37 @@ Object Objects::copy_objects(Objects& src) {
     return root;
 }
 
-void Objects::destroy_object(const Object::Id& id) {
-    if (std::find(m_destroyedIds.begin(), m_destroyedIds.end(), id) != m_destroyedIds.end()) {
+void Objects::destroy_object(const class Id& id) {
+    if (std::ranges::find(m_destroyedIds, id) != m_destroyedIds.end()) {
         return;
     }
     m_destroyedIds.emplace_back(id);
 }
 
-Object Objects::object(const Object::Id& id) {
+ObjectHandle<false> Objects::object(const class Id& id) {
     return {id.index(), id.version(), this};
 }
 
-bool Objects::valid_object(const Object::Id& id) const {
+ObjectHandle<true> Objects::object(const class Id& id) const {
+    return {id.index(), id.version(), this};
+}
+
+bool Objects::valid_object(const class Id& id) const {
     const auto index = id.index();
     return m_versions.size() > index && m_versions[index] == id.version();
 }
 
-Objects::ObjectView Objects::all() {
-    return {this, {}};
+Objects::ObjectView<false> Objects::all() {
+    return ObjectView<false>(this, {});
+}
+
+Objects::ObjectView<true> Objects::all() const {
+    return ObjectView<true>(this, {});
+}
+
+const ComponentMask& Objects::component_mask(const class Id& id) const {
+    assert(valid_object(id));
+    return m_componentMasks.at(id.index());
 }
 
 void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
@@ -156,91 +136,9 @@ void Objects::update() {
                 remove_component(index, componentIndex);
             }
         }
-        std::sort(m_freeList.begin(), m_freeList.end());
+        std::ranges::sort(m_freeList);
         m_destroyedIds.clear();
     }
-}
-
-const ComponentMask& Objects::component_mask(const Object::Id& id) const {
-    assert(valid_object(id));
-    return m_componentMasks.at(id.index());
-}
-
-Objects::ObjectView::Iterator::Iterator(uint32_t i, Objects* objects, ComponentMask componentMask)
-    : m_i(i)
-    , m_freeListCursor(0)
-    , m_objects(objects)
-    , m_componentMask(componentMask) {
-    next();
-}
-
-Object Objects::ObjectView::Iterator::operator*() const {
-    return m_objects->object(Object::Id{m_i, m_objects->m_versions[m_i]});
-}
-
-Objects::ObjectView::Iterator& Objects::ObjectView::Iterator::operator++() {
-    m_i++;
-    next();
-    return *this;
-}
-
-Objects::ObjectView::Iterator Objects::ObjectView::Iterator::operator++(int) {
-    auto old = *this;
-    m_i++;
-    next();
-    return old;
-}
-
-Objects::ObjectView::Iterator Objects::ObjectView::Iterator::operator+(int value) const {
-    return Iterator(m_i + value, m_objects, m_componentMask);
-}
-
-bool Objects::ObjectView::Iterator::operator==(const Objects::ObjectView::Iterator& other) const {
-    return m_i == other.m_i && m_objects == other.m_objects;
-}
-
-bool Objects::ObjectView::Iterator::operator!=(const Objects::ObjectView::Iterator& other) const {
-    return !(*this == other);
-}
-
-void Objects::ObjectView::Iterator::next() {
-    while (m_i < m_objects->m_versions.size() && !valid_object()) {
-        m_i++;
-        m_freeListCursor++;
-    }
-}
-
-bool Objects::ObjectView::Iterator::valid_object() {
-    if ((m_componentMask & m_objects->m_componentMasks[m_i]) != m_componentMask) {
-        return false;
-    }
-    auto& freeList = m_objects->m_freeList;
-    if (freeList.empty() || m_freeListCursor >= freeList.size()) {
-        return true;
-    }
-
-    return freeList[m_freeListCursor] != m_i;
-}
-
-Objects::ObjectView::ObjectView(Objects* objects, ComponentMask componentMask)
-    : m_objects(objects)
-    , m_componentMask(componentMask) {
-}
-
-Objects::ObjectView::Iterator Objects::ObjectView::begin() {
-    return {0, m_objects, m_componentMask};
-}
-
-Objects::ObjectView::Iterator Objects::ObjectView::begin() const {
-    return {0, m_objects, m_componentMask};
-}
-
-Objects::ObjectView::Iterator Objects::ObjectView::end() {
-    return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
-}
-
-Objects::ObjectView::Iterator Objects::ObjectView::end() const {
-    return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
 }
 
 }// namespace duk::objects
