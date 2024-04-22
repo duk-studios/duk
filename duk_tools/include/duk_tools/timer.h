@@ -26,13 +26,17 @@ public:
 
     void add_duration(Duration duration);
 
-    DUK_NO_DISCARD Duration duration() const;
+    DUK_NO_DISCARD float delta_time() const;
+
+    DUK_NO_DISCARD float total_time() const;
+
+    DUK_NO_DISCARD Duration delta_duration() const;
 
     DUK_NO_DISCARD Duration total_duration() const;
 
 private:
     Duration m_totalDuration;
-    Duration m_duration;
+    Duration m_deltaDuration;
     Clock::time_point m_start;
 };
 
