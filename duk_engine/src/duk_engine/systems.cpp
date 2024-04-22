@@ -15,11 +15,11 @@ System::System(uint32_t groupMask)
     : m_groupMask(groupMask) {
 }
 
-uint32_t System::group_mask() {
+uint32_t System::group_mask() const {
     return m_groupMask;
 }
 
-bool System::belongs(uint32_t groupMask) {
+bool System::belongs(const uint32_t groupMask) const {
     return (m_groupMask & groupMask) == m_groupMask;
 }
 

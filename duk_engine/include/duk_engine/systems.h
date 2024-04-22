@@ -27,9 +27,9 @@ public:
 
     virtual void exit(duk::objects::Objects& objects, Engine& engine) = 0;
 
-    uint32_t group_mask();
+    uint32_t group_mask() const;
 
-    bool belongs(uint32_t groupMask);
+    bool belongs(const uint32_t groupMask) const;
 
 private:
     uint32_t m_groupMask;
