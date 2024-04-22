@@ -42,7 +42,6 @@ private:
     SceneResource m_scene;
     duk::resource::Id m_requestedSceneId;
     uint32_t m_activeSystemGroup;
-
 };
 
 }// namespace duk::engine
