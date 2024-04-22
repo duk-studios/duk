@@ -11,6 +11,8 @@ namespace duk::engine {
 
 class TransformUpdateSystem : public System {
 public:
+    explicit TransformUpdateSystem();
+
     void enter(duk::objects::Objects& objects, Engine& engine) override;
 
     void update(duk::objects::Objects& objects, Engine& engine) override;

@@ -9,7 +9,8 @@ namespace duk::engine {
 Director::Director(const DirectorCreateInfo& directorCreateInfo)
     : m_renderer(directorCreateInfo.renderer)
     , m_resources(directorCreateInfo.resources)
-    , m_requestedSceneId(directorCreateInfo.firstScene) {
+    , m_requestedSceneId(directorCreateInfo.firstScene)
+    , m_activeSystemGroup(0) {
 }
 
 Director::~Director() {
@@ -26,7 +27,7 @@ void Director::update(Engine& engine) {
         return;
     }
 
-    m_scene->update(engine);
+    m_scene->update(engine, m_activeSystemGroup);
 
     m_renderer->render(m_scene->objects());
 }
@@ -37,6 +38,14 @@ void Director::request_scene(duk::resource::Id id) {
 
 Scene* Director::scene() {
     return m_scene.get();
+}
+
+void Director::enable(uint32_t systemGroup) {
+    m_activeSystemGroup |= systemGroup;
+}
+
+void Director::disable(uint32_t systemGroup) {
+    m_activeSystemGroup &= ~systemGroup;
 }
 
 void Director::load_scene(Engine& engine, duk::resource::Id id) {

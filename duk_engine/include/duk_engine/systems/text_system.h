@@ -11,6 +11,8 @@ namespace duk::engine {
 
 class TextUpdateSystem : public System {
 public:
+    explicit TextUpdateSystem();
+
     void enter(objects::Objects& objects, Engine& engine) override;
 
     void update(objects::Objects& objects, Engine& engine) override;

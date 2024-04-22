@@ -4,13 +4,11 @@
 
 #include <duk_engine/engine.h>
 #include <duk_engine/systems/canvas_system.h>
-
 #include <duk_renderer/components/canvas.h>
 
 namespace duk::engine {
 
 namespace detail {
-
 static void update_canvas(duk::objects::Objects& objects, uint32_t width, uint32_t height) {
     for (auto object: objects.all_with<duk::renderer::Canvas>()) {
         duk::renderer::update_canvas(object.component<duk::renderer::Canvas>(), width, height);
@@ -18,6 +16,10 @@ static void update_canvas(duk::objects::Objects& objects, uint32_t width, uint32
 }
 
 }// namespace detail
+
+CanvasUpdateSystem::CanvasUpdateSystem()
+    : System(kMainThreadGroup) {
+}
 
 void CanvasUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
     m_listener.listen(engine.window()->window_resize_event, [&objects](uint32_t width, uint32_t height) {

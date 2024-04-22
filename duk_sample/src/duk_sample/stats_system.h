@@ -17,6 +17,8 @@ struct Stats {
 
 class StatsSystem : public duk::engine::System {
 public:
+    explicit StatsSystem();
+
     void enter(objects::Objects& objects, engine::Engine& engine) override;
 
     void update(objects::Objects& objects, engine::Engine& engine) override;

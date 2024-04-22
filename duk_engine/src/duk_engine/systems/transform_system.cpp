@@ -5,6 +5,9 @@
 #include <duk_renderer/components/transform.h>
 
 namespace duk::engine {
+TransformUpdateSystem::TransformUpdateSystem()
+    : System(kMainThreadGroup) {
+}
 
 void TransformUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
     duk::renderer::update_transforms(objects);

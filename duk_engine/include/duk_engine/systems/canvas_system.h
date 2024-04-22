@@ -11,6 +11,8 @@ namespace duk::engine {
 
 class CanvasUpdateSystem : public System {
 public:
+    explicit CanvasUpdateSystem();
+
     void enter(objects::Objects& objects, Engine& engine) override;
 
     void update(objects::Objects& objects, Engine& engine) override;

@@ -60,6 +60,10 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 
 }// namespace detail
 
+CameraSystem::CameraSystem()
+    : System(kMainThreadGroup) {
+}
+
 void CameraSystem::enter(duk::objects::Objects& objects, duk::engine::Engine& engine) {
 }
 
