@@ -33,6 +33,10 @@ uint32_t Image::height() const {
     return m_image->height();
 }
 
+glm::u32vec2 Image::size() const {
+    return {m_image->width(), m_image->height()};
+}
+
 duk::rhi::Image* Image::handle() {
     return m_image.get();
 }

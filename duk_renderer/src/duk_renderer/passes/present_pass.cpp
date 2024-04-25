@@ -109,7 +109,7 @@ void PresentPass::render(duk::rhi::CommandBuffer* commandBuffer) {
     m_fullscreenMaterial->bind(commandBuffer);
 
     // a single triangle that will cover the entire screen
-    commandBuffer->draw(3, 0, 1, 0);
+    commandBuffer->draw(3, 1, 0, 0);
 
     commandBuffer->end_render_pass();
 }

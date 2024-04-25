@@ -5,6 +5,7 @@
 #include <duk_renderer/mesh/mesh_data_source.h>
 #include <duk_renderer/mesh/mesh_pool.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/mesh_buffer.h>
 
 #include <glm/ext/scalar_constants.hpp>
 
@@ -287,7 +288,10 @@ MeshPool::~MeshPool() {
 }
 
 MeshResource MeshPool::create(duk::resource::Id resourceId, const duk::renderer::MeshDataSource* meshDataSource) {
-    return insert(resourceId, m_meshBufferPool->create_mesh(meshDataSource));
+    MeshCreateInfo meshCreateInfo = {};
+    meshCreateInfo.meshBufferPool = m_meshBufferPool.get();
+    meshCreateInfo.meshDataSource = meshDataSource;
+    return insert(resourceId, std::make_shared<Mesh>(meshCreateInfo));
 }
 
 MeshResource MeshPool::quad() const {

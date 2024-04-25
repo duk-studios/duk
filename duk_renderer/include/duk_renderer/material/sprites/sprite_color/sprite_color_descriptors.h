@@ -11,11 +11,16 @@ class SpriteColorDescriptors {
 public:
     enum Bindings : uint32_t {
         uCamera = 0,
-        uBaseColor = 1,
-        uMaterial = 2
+        uInstances = 1,
+        uBaseColor = 2,
+        uMaterial = 3
     };
 
-    static constexpr uint32_t kDescriptorCount = 3;
+    static constexpr uint32_t kDescriptorCount = 4;
+
+    struct Instance {
+        glm::mat4x4 model;
+    };
 
     struct Material {
         glm::vec4 color;

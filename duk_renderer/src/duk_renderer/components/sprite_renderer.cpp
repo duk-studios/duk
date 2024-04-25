@@ -3,3 +3,5 @@
 //
 
 #include <duk_renderer/components/sprite_renderer.h>
+
+namespace duk::renderer {}

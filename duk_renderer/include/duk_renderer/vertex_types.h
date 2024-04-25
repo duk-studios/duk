@@ -2,14 +2,16 @@
 // Created by Ricardo on 09/04/2023.
 //
 
-#ifndef DUK_RHI_VERTEX_TYPES_H
-#define DUK_RHI_VERTEX_TYPES_H
+#ifndef DUK_RENDERER_VERTEX_TYPES_H
+#define DUK_RENDERER_VERTEX_TYPES_H
 
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/vertex_layout.h>
 #include <duk_tools/bit_block.h>
+
 #include <memory>
 #include <span>
+#include <set>
 
 namespace duk::renderer {
 
@@ -35,7 +37,7 @@ public:
 
     VertexAttributes();
 
-    explicit VertexAttributes(const std::span<VertexAttributes::Type>& attributes);
+    explicit VertexAttributes(const std::set<Type>& attributes);
 
     DUK_NO_DISCARD bool has_attribute(Type attributeType) const;
 
@@ -66,8 +68,7 @@ struct VertexColorUV {
 
 template<>
 inline VertexAttributes VertexAttributes::create<VertexColorUV>() {
-    VertexAttributes::Type attributes[] = {VertexAttributes::POSITION, VertexAttributes::COLOR, VertexAttributes::UV};
-    return VertexAttributes(attributes);
+    return VertexAttributes({POSITION, COLOR, UV});
 }
 
 // ---------------------------
@@ -80,8 +81,7 @@ struct VertexNormalUV {
 
 template<>
 inline VertexAttributes VertexAttributes::create<VertexNormalUV>() {
-    VertexAttributes::Type attributes[] = {VertexAttributes::POSITION, VertexAttributes::NORMAL, VertexAttributes::UV};
-    return VertexAttributes(attributes);
+    return VertexAttributes({POSITION, NORMAL, UV});
 }
 
 }// namespace duk::renderer
@@ -117,4 +117,4 @@ struct hash<duk::renderer::VertexNormalUV> {
 
 }// namespace std
 
-#endif//DUK_RHI_VERTEX_TYPES_H
+#endif//DUK_RENDERER_VERTEX_TYPES_H

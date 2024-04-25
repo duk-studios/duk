@@ -12,6 +12,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/brush.h
         include/duk_renderer/generic_brush.h
         include/duk_renderer/texture.h
+        include/duk_renderer/mesh_buffer.h
         include/duk_renderer/components/camera.h
         include/duk_renderer/components/canvas.h
         include/duk_renderer/components/lighting.h
@@ -20,8 +21,9 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/components/text_renderer.h
         include/duk_renderer/components/transform.h
         include/duk_renderer/sprite/sprite.h
-        include/duk_renderer/sprite/sprite_brush.h
-        include/duk_renderer/sprite/sprite_data_source.h
+        include/duk_renderer/sprite/sprite_cache.h
+        include/duk_renderer/sprite/sprite_handler.h
+        include/duk_renderer/sprite/sprite_mesh.h
         include/duk_renderer/sprite/sprite_pool.h
         include/duk_renderer/image/image.h
         include/duk_renderer/image/image_pool.h
@@ -74,6 +76,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/brush.cpp
         src/duk_renderer/generic_brush.cpp
         src/duk_renderer/texture.cpp
+        src/duk_renderer/mesh_buffer.cpp
         src/duk_renderer/components/camera.cpp
         src/duk_renderer/components/canvas.cpp
         src/duk_renderer/components/lighting.cpp
@@ -82,9 +85,10 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/components/text_renderer.cpp
         src/duk_renderer/components/transform.cpp
         src/duk_renderer/sprite/sprite.cpp
-        src/duk_renderer/sprite/sprite_data_source.cpp
+        src/duk_renderer/sprite/sprite_cache.cpp
+        src/duk_renderer/sprite/sprite_handler.cpp
+        src/duk_renderer/sprite/sprite_mesh.cpp
         src/duk_renderer/sprite/sprite_pool.cpp
-        src/duk_renderer/sprite/sprite_brush.cpp
         src/duk_renderer/mesh/mesh.cpp
         src/duk_renderer/mesh/mesh_data_source.cpp
         src/duk_renderer/mesh/mesh_pool.cpp

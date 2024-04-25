@@ -6,48 +6,41 @@
 
 namespace duk::renderer {
 
-Sprite::Sprite(const SpriteCreateInfo& spriteCreateInfo)
-    : m_imageMin()
-    , m_imageMax()
-    , m_size() {
-    const auto dataSource = spriteCreateInfo.spriteDataSource;
-    const auto imagePool = spriteCreateInfo.imagePool;
-
-    m_image = imagePool->find_or_default(dataSource->image_id(), imagePool->white_image());
-    m_imageMin = dataSource->image_min();
-    m_imageMax = dataSource->image_max();
-
-    const auto sizePercent = m_imageMax - m_imageMin;
-    const auto width = static_cast<uint32_t>(static_cast<float>(m_image->width()) * sizePercent.x);
-    const auto height = static_cast<uint32_t>(static_cast<float>(m_image->height()) * sizePercent.y);
-
-    m_size = {width, height};
+Sprite::Sprite(const SpriteAtlasCreateInfo& spriteAtlasCreateInfo)
+    : m_image(spriteAtlasCreateInfo.spriteAtlasData->image)
+    , m_pixelsPerUnit(spriteAtlasCreateInfo.spriteAtlasData->pixelsPerUnit)
+    , m_sprites(spriteAtlasCreateInfo.spriteAtlasData->sprites) {
 }
-
-Sprite::~Sprite() = default;
 
 ImageResource& Sprite::image() {
     return m_image;
 }
 
-glm::vec2 Sprite::image_min() const {
-    return m_imageMin;
+const ImageResource& Sprite::image() const {
+    return m_image;
 }
 
-glm::vec2 Sprite::image_max() const {
-    return m_imageMax;
+uint32_t Sprite::count() const {
+    return m_sprites.size();
 }
 
-glm::u32vec2 Sprite::size() const {
-    return m_size;
-}
+SpriteMetrics Sprite::compute_metrics(uint32_t spriteIndex) const {
+    DUK_ASSERT(spriteIndex < m_sprites.size());
+    const auto imageSize = glm::vec2(m_image->size());
+    const auto& sprite = m_sprites[spriteIndex];
 
-uint32_t Sprite::width() const {
-    return m_size.x;
-}
+    const auto spriteMin = glm::vec2(sprite.min.x, sprite.min.y);
+    const auto spriteMax = glm::vec2(sprite.max.x, sprite.max.y);
+    const auto spriteSize = (spriteMax - spriteMin) / m_pixelsPerUnit;
+    const auto minOffset = spriteSize * sprite.pivot;
 
-uint32_t Sprite::height() const {
-    return m_size.y;
+    SpriteMetrics metrics = {};
+    metrics.uv.min = spriteMin / imageSize;
+    metrics.uv.max = spriteMax / imageSize;
+    metrics.position.min = -minOffset;
+    metrics.position.max = spriteSize - minOffset;
+
+    return metrics;
 }
 
 }// namespace duk::renderer

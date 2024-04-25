@@ -10,7 +10,8 @@
 #include <duk_renderer/mesh/mesh.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/sprite/sprite_brush.h>
+#include <duk_renderer/sprite/sprite_cache.h>
+#include <duk_renderer/sprite/sprite_mesh.h>
 
 namespace duk::renderer {
 
@@ -166,19 +167,19 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
     }
 }
 
-static SortKey calculate_sprite_sort_key(Material* material) {
+static SortKey calculate_sprite_sort_key(const Material* material, const SpriteMesh* mesh) {
     SortKey sortKey = {};
     sortKey.flags.higher16Bits = reinterpret_cast<std::intptr_t>(material);
-    sortKey.flags.lower16Bits = sortKey.flags.higher16Bits;
+    sortKey.flags.lower16Bits = reinterpret_cast<std::intptr_t>(mesh);
     return sortKey;
 }
 
 static bool compatible(const SpriteEntry& spriteEntry, const SpriteDrawEntry& drawEntry) {
-    return spriteEntry.material == drawEntry.material;
+    return spriteEntry.material == drawEntry.material && spriteEntry.mesh == drawEntry.mesh;
 }
 
 static bool valid(const SpriteDrawEntry& drawEntry) {
-    return drawEntry.material != nullptr && drawEntry.instanceCount > 0;
+    return drawEntry.material && drawEntry.mesh && drawEntry.instanceCount;
 }
 
 static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, SpriteDrawData* drawData) {
@@ -187,22 +188,30 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
     auto& sortedSprites = drawData->sortedSprites;
     auto& sprites = drawData->sprites;
     auto& drawEntries = drawData->drawEntries;
-    auto& brush = drawData->brush;
+    auto& cache = drawData->cache;
 
-    std::set<Material*> usedMaterials;
+    std::set<Material*> uniqueMaterials;
 
-    for (auto object: objects->all_with<SpriteRenderer, Transform>()) {
+    for (auto object: objects->all_with<SpriteRenderer>()) {
         auto spriteRenderer = object.component<SpriteRenderer>();
-        auto material = spriteRenderer->material.get();
-        auto sprite = spriteRenderer->sprite.get();
+        if (!spriteRenderer->material) {
+            spriteRenderer->material = cache->material_for(spriteRenderer->sprite.get(), spriteRenderer->index);
+        }
 
-        usedMaterials.insert(material);
+        if (!spriteRenderer->mesh) {
+            spriteRenderer->mesh = cache->mesh_for(spriteRenderer->sprite.get(), spriteRenderer->index);
+        }
+
+        const auto material = spriteRenderer->material.get();
+        const auto mesh = spriteRenderer->mesh.get();
+
+        uniqueMaterials.insert(spriteRenderer->material.get());
 
         SpriteEntry spriteEntry = {};
         spriteEntry.objectId = object.id();
-        spriteEntry.sprite = sprite;
+        spriteEntry.mesh = mesh;
         spriteEntry.material = material;
-        spriteEntry.sortKey = calculate_sprite_sort_key(material);
+        spriteEntry.sortKey = calculate_sprite_sort_key(material, mesh);
         sprites.push_back(spriteEntry);
     }
 
@@ -210,19 +219,19 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
         return;
     }
 
+    for (auto material: uniqueMaterials) {
+        material->instance_buffer()->clear();
+    }
+
     SortKey::sort_indices(sprites, sortedSprites);
 
     SpriteDrawEntry drawEntry = {};
-    drawEntry.brush = brush.get();
 
     for (auto sortedIndex: sortedSprites) {
         auto& spriteEntry = sprites[sortedIndex];
 
-        auto object = objects->object(spriteEntry.objectId);
-
-        auto transform = object.component<Transform>();
-
-        brush->push(spriteEntry.sprite, transform->model);
+        // update instance buffer
+        spriteEntry.material->instance_buffer()->insert(objects->object(spriteEntry.objectId));
 
         if (compatible(spriteEntry, drawEntry)) {
             drawEntry.instanceCount++;
@@ -231,9 +240,18 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
         if (valid(drawEntry)) {
             drawEntries.push_back(drawEntry);
         }
+        // if the material is different, it's an entire new draw entry starting at 0
+        if (drawEntry.material != spriteEntry.material) {
+            drawEntry.instanceCount = 1;
+            drawEntry.firstInstance = 0;
+        }
+        // if only the mesh is different, just jump to the correct instance start
+        else if (drawEntry.mesh != spriteEntry.mesh) {
+            drawEntry.firstInstance += drawEntry.instanceCount;
+            drawEntry.instanceCount = 1;
+        }
         drawEntry.material = spriteEntry.material;
-        drawEntry.firstInstance = drawEntry.firstInstance + drawEntry.instanceCount;
-        drawEntry.instanceCount = 1;
+        drawEntry.mesh = spriteEntry.mesh;
     }
     // add last entry
     if (valid(drawEntry)) {
@@ -246,7 +264,8 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
     drawParams.outputHeight = params.outputHeight;
     drawParams.renderPass = renderPass;
 
-    for (auto& material: usedMaterials) {
+    for (auto& material: uniqueMaterials) {
+        material->instance_buffer()->flush();
         material->update(drawParams);
     }
 }
@@ -260,7 +279,6 @@ void MeshDrawData::clear() {
 }
 
 void SpriteDrawData::clear() {
-    brush->clear();
     sprites.clear();
     sortedSprites.clear();
     drawEntries.clear();
@@ -301,11 +319,10 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
     }
 
     {
-        SpriteBrushCreateInfo spriteBrushCreateInfo = {};
-        spriteBrushCreateInfo.initialSpriteCapacity = 10;
-        spriteBrushCreateInfo.renderer = m_renderer;
+        SpriteCacheCreateInfo spriteCacheCreateInfo = {};
+        spriteCacheCreateInfo.renderer = m_renderer;
 
-        m_spriteDrawData.brush = std::make_unique<SpriteBrush>(spriteBrushCreateInfo);
+        m_spriteDrawData.cache = std::make_unique<SpriteCache>(spriteCacheCreateInfo);
     }
 }
 
@@ -373,7 +390,7 @@ void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
                 entry.material->bind(commandBuffer);
                 currentMaterial = entry.material;
             }
-            entry.brush->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
+            entry.mesh->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
         }
     }
 
