@@ -7,6 +7,7 @@
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_sample/camera_system.h>
+#include <duk_renderer/components/sprite_renderer.h>
 
 namespace duk::sample {
 
@@ -97,8 +98,14 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
         auto camera = object.component<duk::renderer::Camera>();
         auto worldPos = duk::renderer::screen_to_world(camera, engine.window()->size(), glm::vec3(input->mouse_position(), -30));
 
-        auto sphereTransform = objects.copy_objects(*controller->sphere).component<duk::renderer::Transform>();
-        sphereTransform->position = worldPos;
+        auto spawnedObject = objects.copy_objects(*controller->sphere);
+        auto spawnedTransform = spawnedObject.component<duk::renderer::Transform>();
+        spawnedTransform->position = worldPos;
+
+        if (auto spriteRenderer = spawnedObject.component<duk::renderer::SpriteRenderer>()) {
+            static int spriteIndex = 0;
+            spriteRenderer->index = spriteIndex++ % spriteRenderer->sprite->count();
+        }
 
         controller->audioPlayer.play(engine.audio(), controller->spawnClip.get());
     }
