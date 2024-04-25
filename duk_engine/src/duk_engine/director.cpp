@@ -10,7 +10,7 @@ Director::Director(const DirectorCreateInfo& directorCreateInfo)
     : m_renderer(directorCreateInfo.renderer)
     , m_resources(directorCreateInfo.resources)
     , m_requestedSceneId(directorCreateInfo.firstScene)
-    , m_activeSystemGroup(0) {
+    , m_activeSystemGroup(~0) {
 }
 
 Director::~Director() {
