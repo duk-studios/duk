@@ -50,13 +50,13 @@ public:
 
     void bind_compute_pipeline(ComputePipeline* pipeline) override;
 
-    void bind_vertex_buffer(Buffer** buffers, uint32_t bufferCount) override;
+    void bind_vertex_buffer(const Buffer** buffers, uint32_t bufferCount, uint32_t firstBinding) override;
 
-    void bind_index_buffer(Buffer* buffer) override;
+    void bind_index_buffer(const Buffer* buffer) override;
 
     void bind_descriptor_set(DescriptorSet* descriptorSet, uint32_t setIndex) override;
 
-    void draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) override;
+    void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) override;
 
     void draw_indexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) override;
 

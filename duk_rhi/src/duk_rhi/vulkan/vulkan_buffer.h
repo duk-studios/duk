@@ -113,6 +113,8 @@ public:
 
     DUK_NO_DISCARD VkBuffer handle(uint32_t imageIndex);
 
+    DUK_NO_DISCARD VkBuffer handle(uint32_t imageIndex) const;
+
     void update(uint32_t imageIndex);
 
     void create(uint32_t imageCount);
@@ -127,7 +129,7 @@ public:
 
     DUK_NO_DISCARD uint8_t* write_ptr(size_t offset) override;
 
-    void write(void* src, size_t size, size_t offset) override;
+    void write(const void* src, size_t size, size_t offset) override;
 
     void copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) override;
 

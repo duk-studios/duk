@@ -34,13 +34,13 @@ public:
 
     virtual void bind_compute_pipeline(ComputePipeline* pipeline) = 0;
 
-    virtual void bind_vertex_buffer(Buffer** buffers, uint32_t bufferCount) = 0;
+    virtual void bind_vertex_buffer(const Buffer** buffers, uint32_t bufferCount, uint32_t firstBinding) = 0;
 
-    virtual void bind_index_buffer(Buffer* buffer) = 0;
+    virtual void bind_index_buffer(const Buffer* buffer) = 0;
 
     virtual void bind_descriptor_set(DescriptorSet* descriptorSet, uint32_t setIndex) = 0;
 
-    virtual void draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) = 0;
+    virtual void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) = 0;
 
     virtual void draw_indexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) = 0;
 

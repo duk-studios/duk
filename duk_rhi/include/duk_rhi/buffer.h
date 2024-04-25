@@ -58,7 +58,7 @@ public:
 
     DUK_NO_DISCARD uint8_t* write_ptr();
 
-    virtual void write(void* src, size_t size, size_t offset) = 0;
+    virtual void write(const void* src, size_t size, size_t offset) = 0;
 
     template<std::ranges::contiguous_range T>
     void write(const T& src, size_t startElement = 0) {
