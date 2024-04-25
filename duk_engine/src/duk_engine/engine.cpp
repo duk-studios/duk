@@ -83,11 +83,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};
         meshPoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::MeshPool>(meshPoolCreateInfo);
-
-        duk::renderer::SpritePoolCreateInfo spritePoolCreateInfo = {};
-        spritePoolCreateInfo.imagePool = m_pools.get<duk::renderer::ImagePool>();
-        m_pools.create_pool<duk::renderer::SpritePool>(spritePoolCreateInfo);
-
+        m_pools.create_pool<duk::renderer::SpritePool>();
         duk::audio::AudioClipPoolCreateInfo audioClipPoolCreateInfo = {};
         audioClipPoolCreateInfo.device = m_audio.get();
         m_pools.create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
