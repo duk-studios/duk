@@ -49,6 +49,13 @@ void read_json(const std::string_view& json, T& value) {
 }
 
 template<typename T>
+T read_json(const std::string_view& json) {
+    T value;
+    read_json(json, value);
+    return value;
+}
+
+template<typename T>
 void write_json(std::ostringstream& buffer, const T& value, bool pretty = false) {
     rapidjson::Document document;
     to_json(document, document, value);
