@@ -11,11 +11,10 @@
 #include <duk_renderer/font/font_handler.h>
 #include <duk_renderer/image/image_handler.h>
 #include <duk_renderer/material/material_handler.h>
+#include <duk_renderer/sprite/sprite_handler.h>
 #include <duk_renderer/register_types.h>
 
 #include <duk_objects/register_types.h>
-
-#include <duk_resource/handler.h>
 
 namespace duk::renderer {
 
@@ -24,6 +23,7 @@ void register_types() {
     duk::resource::register_handler<FontHandler>();
     duk::resource::register_handler<MaterialHandler>();
     duk::resource::register_handler<ImageHandler>();
+    duk::resource::register_handler<SpriteHandler>();
     duk::objects::register_component<DirectionalLight>();
     duk::objects::register_component<PointLight>();
     duk::objects::register_component<Transform>();

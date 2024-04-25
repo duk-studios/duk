@@ -126,15 +126,15 @@ void VulkanCommandBuffer::bind_compute_pipeline(ComputePipeline* pipeline) {
     m_currentPipelineBindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
 }
 
-void VulkanCommandBuffer::bind_vertex_buffer(Buffer** buffers, uint32_t bufferCount) {
+void VulkanCommandBuffer::bind_vertex_buffer(const Buffer** buffers, uint32_t bufferCount, uint32_t firstBinding) {
     static constexpr auto kMaxBufferCount = 32;
-    DUK_ASSERT(bufferCount < kMaxBufferCount);
+    DUK_ASSERT(bufferCount + firstBinding < kMaxBufferCount);
 
     duk::tools::FixedVector<VkBuffer, kMaxBufferCount> bufferHandles;
     duk::tools::FixedVector<VkDeviceSize, kMaxBufferCount> offsets(bufferCount, 0);
 
     for (int i = 0; i < bufferCount; i++) {
-        auto vulkanBuffer = dynamic_cast<VulkanBuffer*>(buffers[i]);
+        auto vulkanBuffer = dynamic_cast<const VulkanBuffer*>(buffers[i]);
         VkBuffer handle = VK_NULL_HANDLE;
         if (vulkanBuffer) {
             handle = vulkanBuffer->handle(*m_currentImagePtr);
@@ -142,16 +142,16 @@ void VulkanCommandBuffer::bind_vertex_buffer(Buffer** buffers, uint32_t bufferCo
         bufferHandles.push_back(handle);
     }
 
-    vkCmdBindVertexBuffers(m_currentCommandBuffer, 0, bufferHandles.size(), bufferHandles.data(), offsets.data());
+    vkCmdBindVertexBuffers(m_currentCommandBuffer, firstBinding, bufferHandles.size(), bufferHandles.data(), offsets.data());
 }
 
-void VulkanCommandBuffer::bind_index_buffer(Buffer* buffer) {
+void VulkanCommandBuffer::bind_index_buffer(const Buffer* buffer) {
     DUK_ASSERT(buffer->type() == Buffer::Type::INDEX_16 || buffer->type() == Buffer::Type::INDEX_32);
 
     auto currentImage = *m_currentImagePtr;
     auto indexType = buffer->type() == Buffer::Type::INDEX_16 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
 
-    auto vulkanBuffer = dynamic_cast<VulkanBuffer*>(buffer);
+    auto vulkanBuffer = dynamic_cast<const VulkanBuffer*>(buffer);
 
     vkCmdBindIndexBuffer(m_currentCommandBuffer, vulkanBuffer->handle(currentImage), 0, indexType);
 }
@@ -167,7 +167,7 @@ void VulkanCommandBuffer::bind_descriptor_set(DescriptorSet* descriptorSet, uint
     vkCmdBindDescriptorSets(m_currentCommandBuffer, m_currentPipelineBindPoint, m_currentPipelineLayout, setIndex, 1, &handle, 0, nullptr);
 }
 
-void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t firstVertex, uint32_t instanceCount, uint32_t firstInstance) {
+void VulkanCommandBuffer::draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) {
     vkCmdDraw(m_currentCommandBuffer, vertexCount, instanceCount, firstVertex, firstInstance);
 }
 

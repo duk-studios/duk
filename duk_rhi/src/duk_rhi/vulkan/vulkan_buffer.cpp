@@ -214,6 +214,10 @@ VkBuffer VulkanBuffer::handle(uint32_t imageIndex) {
     return m_buffers[imageIndex]->handle();
 }
 
+VkBuffer VulkanBuffer::handle(uint32_t imageIndex) const {
+    return m_buffers[imageIndex]->handle();
+}
+
 void VulkanBuffer::update(uint32_t imageIndex) {
     auto& buffer = m_buffers[imageIndex];
     if (buffer->size() < m_data.size()) {
@@ -257,7 +261,7 @@ uint8_t* VulkanBuffer::write_ptr(size_t offset) {
     return m_data.data() + offset;
 }
 
-void VulkanBuffer::write(void* src, size_t size, size_t offset) {
+void VulkanBuffer::write(const void* src, size_t size, size_t offset) {
     DUK_ASSERT(offset + size <= m_data.size());
     memcpy(m_data.data() + offset, src, size);
 }

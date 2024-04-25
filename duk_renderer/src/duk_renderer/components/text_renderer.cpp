@@ -209,9 +209,9 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
 }
 
 void TextMesh::draw(duk::rhi::CommandBuffer* commandBuffer) {
-    duk::rhi::Buffer* buffers[] = {m_positionBuffer.get(), m_texCoordBuffer.get()};
+    const duk::rhi::Buffer* buffers[] = {m_positionBuffer.get(), m_texCoordBuffer.get()};
 
-    commandBuffer->bind_vertex_buffer(buffers, std::size(buffers));
+    commandBuffer->bind_vertex_buffer(buffers, std::size(buffers), 0);
 
     commandBuffer->bind_index_buffer(m_indexBuffer.get());
 

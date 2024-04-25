@@ -10,6 +10,7 @@
 #include <duk_renderer/material/sprites/sprite_color/sprite_color_descriptors.h>
 #include <duk_renderer/material/sprites/sprite_color/sprite_color_shader_data_source.h>
 #include <duk_renderer/material/uniform_buffer.h>
+#include <duk_renderer/material/storage_buffer.h>
 
 namespace duk::renderer {
 
@@ -26,6 +27,26 @@ public:
 
 protected:
     hash::Hash calculate_hash() const override;
+};
+
+struct SpriteColorInstanceBufferCreateInfo {
+    Renderer* renderer;
+};
+
+class SpriteColorInstanceBuffer : public InstanceBuffer {
+public:
+    explicit SpriteColorInstanceBuffer(const SpriteColorInstanceBufferCreateInfo& spriteColorInstanceBufferCreateInfo);
+
+    void insert(const duk::objects::Object& object) override;
+
+    void clear() override;
+
+    void flush() override;
+
+    const StorageBuffer<SpriteColorDescriptors::Instance>* instances() const;
+
+private:
+    std::unique_ptr<StorageBuffer<SpriteColorDescriptors::Instance>> m_instancesSBO;
 };
 
 struct SpriteColorMaterialDescriptorSetCreateInfo {
@@ -45,6 +66,8 @@ public:
 
     bool is_image(uint32_t index) override;
 
+    DUK_NO_DISCARD InstanceBuffer* instance_buffer() override;
+
     void update(const DrawParams& params) override;
 
     void bind(duk::rhi::CommandBuffer* commandBuffer) override;
@@ -52,6 +75,7 @@ public:
 private:
     std::unique_ptr<UniformBuffer<SpriteColorDescriptors::Material>> m_materialUBO;
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
+    std::unique_ptr<SpriteColorInstanceBuffer> m_instanceBuffer;
     ImageResource m_image;
 };
 

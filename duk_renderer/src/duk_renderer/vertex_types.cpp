@@ -29,14 +29,19 @@ VertexAttributes::VertexAttributes()
     : m_attributeOffset({}) {
 }
 
-VertexAttributes::VertexAttributes(const std::span<VertexAttributes::Type>& attributes) {
+VertexAttributes::VertexAttributes(const std::set<Type>& attributes) {
     size_t offset = 0;
-    for (auto attribute: attributes) {
-        const auto attributeIndex = static_cast<uint32_t>(attribute);
+    for (auto attributeIndex = 0; attributeIndex < COUNT; attributeIndex++) {
+        const auto attributeType = static_cast<Type>(attributeIndex);
+        const auto format = format_of(attributeType);
+        if (!attributes.contains(attributeType)) {
+            m_layout.insert(duk::rhi::VertexInput::Format::UNDEFINED);
+            continue;
+        }
+        m_layout.insert(format);
         m_attributes.set(attributeIndex);
-        m_layout.insert(format_of(attribute));
         m_attributeOffset[attributeIndex] = offset;
-        offset += duk::rhi::VertexInput::size_of(format_of(attribute));
+        offset += duk::rhi::VertexInput::size_of(format);
     }
 }
 

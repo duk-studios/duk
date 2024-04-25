@@ -12,8 +12,7 @@ namespace duk::renderer {
 
 class Brush;
 class Mesh;
-class Sprite;
-class SpriteBrush;
+class SpriteMesh;
 class TextMesh;
 class Material;
 class GlobalDescriptors;
@@ -42,12 +41,12 @@ struct MeshDrawEntry {
 struct SpriteEntry {
     duk::objects::Id objectId;
     Material* material{};
-    Sprite* sprite{};
+    SpriteMesh* mesh{};
     SortKey sortKey{};
 };
 
 struct SpriteDrawEntry {
-    SpriteBrush* brush;
+    SpriteMesh* mesh;
     Material* material;
     size_t instanceCount;
     size_t firstInstance;

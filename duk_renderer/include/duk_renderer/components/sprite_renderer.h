@@ -5,6 +5,8 @@
 #ifndef DUK_RENDERER_SPRITE_RENDERER_H
 #define DUK_RENDERER_SPRITE_RENDERER_H
 
+#include <duk_resource/resource.h>
+
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/sprite/sprite.h>
 
@@ -12,7 +14,9 @@ namespace duk::renderer {
 
 struct SpriteRenderer {
     SpriteResource sprite;
-    MaterialResource material;
+    uint32_t index;
+    std::shared_ptr<Material> material;
+    std::shared_ptr<SpriteMesh> mesh;
 };
 
 }// namespace duk::renderer
@@ -22,13 +26,13 @@ namespace duk::serial {
 template<>
 inline void from_json<duk::renderer::SpriteRenderer>(const rapidjson::Value& json, duk::renderer::SpriteRenderer& spriteRenderer) {
     from_json_member(json, "sprite", spriteRenderer.sprite);
-    from_json_member(json, "material", spriteRenderer.material);
+    from_json_member(json, "index", spriteRenderer.index);
 }
 
 template<>
 inline void to_json<duk::renderer::SpriteRenderer>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::SpriteRenderer& spriteRenderer) {
     to_json_member(document, json, "sprite", spriteRenderer.sprite);
-    to_json_member(document, json, "material", spriteRenderer.material);
+    to_json_member(document, json, "index", spriteRenderer.index);
 }
 
 }// namespace duk::serial

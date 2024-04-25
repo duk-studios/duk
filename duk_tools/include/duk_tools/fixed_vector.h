@@ -48,6 +48,7 @@ public:
     FixedVector& operator=(const FixedVector& other) noexcept {
         m_size = other.m_size;
         memcpy(m_array.data(), other.m_array.data(), m_size * sizeof(T));
+        return *this;
     }
 
     FixedVector& operator=(FixedVector&& other) noexcept {
@@ -55,6 +56,7 @@ public:
             push_back(std::move(value));
         }
         other.clear();
+        return *this;
     }
 
     ~FixedVector() {
@@ -124,6 +126,18 @@ public:
 
         if (newSize > m_size) {
             append(newSize - m_size);
+        } else if (newSize < m_size) {
+            erase_at_end(m_size - newSize);
+        }
+    }
+
+    void resize(size_t newSize, const T& value) {
+        if (newSize > N) {
+            throw std::out_of_range("expand with newSize > N on FixedVector");
+        }
+
+        if (newSize > m_size) {
+            append(newSize - m_size, value);
         } else if (newSize < m_size) {
             erase_at_end(m_size - newSize);
         }
@@ -228,6 +242,15 @@ private:
         auto newSize = m_size + n;
         for (int i = m_size; i < newSize; i++) {
             construct(m_array[i]);
+        }
+        m_size = newSize;
+    }
+
+    void append(size_t n, const T& value) {
+        //construct new elements
+        auto newSize = m_size + n;
+        for (int i = m_size; i < newSize; i++) {
+            construct(m_array[i], value);
         }
         m_size = newSize;
     }

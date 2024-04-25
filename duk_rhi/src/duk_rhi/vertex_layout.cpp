@@ -5,6 +5,7 @@
 #include <duk_rhi/vertex_layout.h>
 
 #include <numeric>
+#include <stdexcept>
 
 namespace duk::rhi {
 
@@ -38,6 +39,8 @@ size_t VertexInput::size_of(VertexInput::Format type) {
         case Format::VEC4:
             result = 16;
             break;
+        default:
+            throw std::runtime_error("Invalid VertexInput format");
     }
     return result;
 }

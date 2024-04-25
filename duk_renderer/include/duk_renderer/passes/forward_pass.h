@@ -6,12 +6,10 @@
 
 #include <duk_renderer/material/draw_entry.h>
 #include <duk_renderer/passes/pass.h>
-#include <duk_renderer/sprite/sprite_brush.h>
-
-#include <duk_tools/fixed_vector.h>
 
 namespace duk::renderer {
 
+class SpriteCache;
 class Renderer;
 
 struct TextDrawData {
@@ -32,7 +30,7 @@ struct SpriteDrawData {
     std::vector<SpriteEntry> sprites;
     std::vector<uint16_t> sortedSprites;
     std::vector<SpriteDrawEntry> drawEntries;
-    std::unique_ptr<SpriteBrush> brush;
+    std::unique_ptr<SpriteCache> cache;
 
     void clear();
 };

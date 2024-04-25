@@ -30,6 +30,8 @@ public:
 
     DUK_NO_DISCARD uint32_t height() const;
 
+    DUK_NO_DISCARD glm::u32vec2 size() const;
+
     DUK_NO_DISCARD duk::rhi::Image* handle();
 
     DUK_NO_DISCARD duk::rhi::Image* handle() const;
