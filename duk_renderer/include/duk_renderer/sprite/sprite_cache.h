@@ -23,7 +23,7 @@ public:
 
     ~SpriteCache();
 
-    std::shared_ptr<Material> material_for(Sprite* atlas, uint32_t index);
+    std::shared_ptr<Material> material_for(Sprite* atlas);
 
     std::shared_ptr<SpriteMesh> mesh_for(Sprite* atlas, uint32_t index);
 
