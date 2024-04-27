@@ -27,6 +27,7 @@ target_include_directories(duk_sample
 target_link_libraries(duk_sample
         PRIVATE
         duk_engine
+        duk_animation
         )
 
 set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)

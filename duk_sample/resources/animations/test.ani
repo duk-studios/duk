@@ -1,0 +1,50 @@
+{
+  "sampleRate": 60,
+  "properties": [
+    {
+      "type": "duk::animation::SpriteEvaluator",
+      "values": [
+        {
+          "sample": 0,
+          "sprite": 6401408628342139833,
+          "index": 0
+        },
+        {
+          "sample": 12,
+          "sprite": 6401408628342139833,
+          "index": 1
+        },
+        {
+          "sample": 24,
+          "sprite": 6401408628342139833,
+          "index": 2
+        },
+        {
+          "sample": 36,
+          "sprite": 6401408628342139833,
+          "index": 3
+        },
+        {
+          "sample": 48,
+          "sprite": 6401408628342139833,
+          "index": 4
+        },
+        {
+          "sample": 60,
+          "sprite": 6401408628342139833,
+          "index": 5
+        },
+        {
+          "sample": 72,
+          "sprite": 6401408628342139833,
+          "index": 6
+        },
+        {
+          "sample": 84,
+          "sprite": 6401408628342139833,
+          "index": 0
+        }
+      ]
+    }
+  ]
+}

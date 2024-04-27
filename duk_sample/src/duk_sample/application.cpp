@@ -6,12 +6,15 @@
 #include <duk_sample/camera_system.h>
 #include <duk_sample/stats_system.h>
 
+#include <duk_animation/animation_pool.h>
+#include <duk_animation/register_types.h>
+
 namespace duk::sample {
 
 namespace detail {
 
 static void register_types() {
-    duk::engine::register_types();
+    duk::animation::register_types();
     duk::objects::register_component<CameraController>();
     duk::objects::register_component<Stats>();
     duk::engine::register_system<CameraSystem>();
@@ -27,6 +30,8 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     engineCreateInfo.workingDirectory = applicationCreateInfo.engineWorkingDirectory;
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
+
+    m_engine->pools()->create_pool<duk::animation::AnimationPool>();
 }
 
 Application::~Application() = default;
