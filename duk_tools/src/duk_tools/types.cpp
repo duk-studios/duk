@@ -25,12 +25,12 @@ std::string type_name_of(const std::type_info& info) {
 
 #else
 
-std::string demangle(const char* _value) {
-    return _value;
+std::string demangle(const char* value) {
+    return value;
 }
 
-std::string type_name_of(const type_info& _info) {
-    std::string name = _info.name();
+std::string type_name_of(const type_info& info) {
+    const std::string name = info.name();
     return name.substr(name.find_first_of(' ') + 1);
 }
 
