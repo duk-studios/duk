@@ -7,6 +7,7 @@
   <component name="CidrRootsConfiguration">
     <sourceRoots>
       <file path="$PROJECT_DIR$/cmake" />
+      <file path="$PROJECT_DIR$/duk_animation" />
       <file path="$PROJECT_DIR$/duk_audio" />
       <file path="$PROJECT_DIR$/duk_cli" />
       <file path="$PROJECT_DIR$/duk_engine" />
