@@ -6,11 +6,11 @@
 
 #include <duk_log/log.h>
 
-#include <duk_engine/register_types.h>
+#include <duk_project/register_types.h>
 
 int main(int argc, const char* argv[]) {
     try {
-        duk::engine::register_types();
+        duk::project::register_types();
 
         duk::cli::CommandLine commandLine(argc - 1, argv + 1);
 
