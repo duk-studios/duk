@@ -77,7 +77,7 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
 
     auto input = engine.input();
 
-    const auto deltaTime = engine.timer()->duration().count();
+    const auto deltaTime = engine.timer()->delta_time();
     auto cursor = duk::platform::System::instance()->cursor();
 
     auto controller = object.component<CameraController>();

@@ -8,7 +8,7 @@ using namespace std::chrono_literals;
 namespace duk::tools {
 
 Timer::Timer()
-    : m_duration(0s)
+    : m_deltaDuration(0s)
     , m_totalDuration(0s)
     , m_start(0s) {
 }
@@ -24,16 +24,24 @@ void Timer::stop() {
 
 void Timer::reset() {
     m_totalDuration = 0s;
-    m_duration = 0s;
+    m_deltaDuration = 0s;
 }
 
 void Timer::add_duration(Duration duration) {
-    m_duration = duration;
-    m_totalDuration += m_duration;
+    m_deltaDuration = duration;
+    m_totalDuration += m_deltaDuration;
 }
 
-Timer::Duration Timer::duration() const {
-    return m_duration;
+float Timer::delta_time() const {
+    return m_deltaDuration.count();
+}
+
+float Timer::total_time() const {
+    return m_totalDuration.count();
+}
+
+Timer::Duration Timer::delta_duration() const {
+    return m_deltaDuration;
 }
 
 Timer::Duration Timer::total_duration() const {
