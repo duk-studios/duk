@@ -2,8 +2,8 @@
 // Created by Ricardo on 25/04/2024.
 //
 
-#ifndef DUK_ANIMATION_ANIMATION_H
-#define DUK_ANIMATION_ANIMATION_H
+#ifndef DUK_ANIMATION_ANIMATION_CLIP_H
+#define DUK_ANIMATION_ANIMATION_CLIP_H
 
 #include <duk_animation/property.h>
 
@@ -13,10 +13,10 @@
 
 namespace duk::animation {
 
-class Animation {
+class AnimationClip {
 public:
 
-    Animation();
+    AnimationClip();
 
     void evaluate(duk::objects::Object& object, float time) const;
 
@@ -28,16 +28,16 @@ public:
 
     std::vector<std::unique_ptr<Property>>::iterator end();
 
-    friend void serial::from_json<Animation>(const rapidjson::Value& json, Animation& animation);
+    friend void serial::from_json<AnimationClip>(const rapidjson::Value& json, AnimationClip& animation);
 
-    friend void serial::to_json<Animation>(rapidjson::Document& document, rapidjson::Value& json, const Animation& animation);
+    friend void serial::to_json<AnimationClip>(rapidjson::Document& document, rapidjson::Value& json, const AnimationClip& animation);
 
 private:
     float m_sampleRate;
     std::vector<std::unique_ptr<Property>> m_properties;
 };
 
-using AnimationResource = duk::resource::ResourceT<Animation>;
+using AnimationClipResource = duk::resource::ResourceT<AnimationClip>;
 
 }
 
@@ -62,13 +62,13 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
 
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::Animation& animation) {
+inline void from_json(const rapidjson::Value& json, duk::animation::AnimationClip& animation) {
     from_json_member(json, "sampleRate", animation.m_sampleRate);
     from_json_member(json, "properties", animation.m_properties);
 }
 
 template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::Animation& animation) {
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::AnimationClip& animation) {
     to_json_member(document, json, "sampleRate", animation.m_sampleRate);
     to_json_member(document, json, "properties", animation.m_properties);
 }
@@ -78,7 +78,7 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
 namespace duk::resource {
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::animation::Animation& animation) {
+void solve_resources(Solver* solver, duk::animation::AnimationClip& animation) {
     for (auto& property : animation) {
         solver->solve(*property);
     }
@@ -86,4 +86,4 @@ void solve_resources(Solver* solver, duk::animation::Animation& animation) {
 
 }
 
-#endif //DUK_ANIMATION_ANIMATION_H
+#endif //DUK_ANIMATION_ANIMATION_CLIP_H

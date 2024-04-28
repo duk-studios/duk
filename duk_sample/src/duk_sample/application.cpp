@@ -6,7 +6,7 @@
 #include <duk_sample/camera_system.h>
 #include <duk_sample/stats_system.h>
 
-#include <duk_animation/animation_pool.h>
+#include <duk_animation/clip/animation_clip_pool.h>
 #include <duk_animation/register_types.h>
 
 namespace duk::sample {
@@ -31,7 +31,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
-    m_engine->pools()->create_pool<duk::animation::AnimationPool>();
+    m_engine->pools()->create_pool<duk::animation::AnimationClipPool>();
 }
 
 Application::~Application() = default;

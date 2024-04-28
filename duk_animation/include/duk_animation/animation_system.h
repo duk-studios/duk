@@ -5,14 +5,14 @@
 #ifndef DUK_ANIMATION_ANIMATION_SYSTEM_H
 #define DUK_ANIMATION_ANIMATION_SYSTEM_H
 
-#include <duk_animation/animation.h>
+#include <duk_animation/clip/animation_clip.h>
 
 #include <duk_engine/systems.h>
 
 namespace duk::animation {
 
 struct Animator {
-    AnimationResource animation;
+    AnimationClipResource animation;
     float time = 0.0f;
 };
 

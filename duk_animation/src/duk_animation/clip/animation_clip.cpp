@@ -2,17 +2,17 @@
 // Created by Ricardo on 25/04/2024.
 //
 
-#include <duk_animation/animation.h>
+#include <duk_animation/clip/animation_clip.h>
 
 namespace duk::animation {
 
-Animation::Animation()
+AnimationClip::AnimationClip()
     : m_sampleRate(0) {
 }
 
-void Animation::evaluate(duk::objects::Object& object, const float time) const {
+void AnimationClip::evaluate(duk::objects::Object& object, const float time) const {
     if (m_sampleRate == 0) {
-        duk::log::warn("Animation with sample rate of 0, skipping");
+        duk::log::warn("AnimationClip with sample rate of 0, skipping");
         return;
     }
 
@@ -23,22 +23,22 @@ void Animation::evaluate(duk::objects::Object& object, const float time) const {
     }
 }
 
-uint32_t Animation::samples() const {
+uint32_t AnimationClip::samples() const {
     const auto it = std::ranges::max_element(m_properties, [](const auto& lhs, const auto& rhs) -> bool {
         return lhs->samples() < rhs->samples();
     });
     return (*it)->samples();
 }
 
-float Animation::duration() const {
+float AnimationClip::duration() const {
     return samples() / m_sampleRate;
 }
 
-std::vector<std::unique_ptr<Property>>::iterator Animation::begin() {
+std::vector<std::unique_ptr<Property>>::iterator AnimationClip::begin() {
     return m_properties.begin();
 }
 
-std::vector<std::unique_ptr<Property>>::iterator Animation::end() {
+std::vector<std::unique_ptr<Property>>::iterator AnimationClip::end() {
     return m_properties.end();
 }
 
