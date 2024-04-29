@@ -63,8 +63,8 @@ void MiniaudioDevice::update() {
     m_graph.update();
 }
 
-AudioId MiniaudioDevice::play(const std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) {
-    return m_sourceNode->play(buffer, loop, priority);
+AudioId MiniaudioDevice::play(const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, int32_t priority) {
+    return m_sourceNode->play(buffer, volume, loop, priority);
 }
 
 void MiniaudioDevice::stop(const AudioId& id) {

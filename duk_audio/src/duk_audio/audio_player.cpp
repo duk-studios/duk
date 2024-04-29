@@ -17,9 +17,9 @@ AudioPlayer::~AudioPlayer() {
     stop();
 }
 
-void AudioPlayer::play(AudioDevice* device, const AudioClip* clip, bool loop, int32_t priority) {
+void AudioPlayer::play(AudioDevice* device, const AudioClip* clip, float volume, bool loop, int32_t priority) {
     stop();
-    m_id = device->play(clip->buffer(), loop, priority);
+    m_id = device->play(clip->buffer(), volume, loop, priority);
     m_device = device;
 }
 

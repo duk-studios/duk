@@ -20,6 +20,7 @@ public:
     struct Slot {
         std::weak_ptr<AudioBuffer> buffer;
         uint32_t deviceFrame;
+        float volume;
         bool deviceLoop;
 
         // flag to indicate the device that it should sync its frame with the host
@@ -39,7 +40,7 @@ public:
 
     void update() override;
 
-    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority);
+    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, int32_t priority);
 
     void stop(const AudioId& id);
 

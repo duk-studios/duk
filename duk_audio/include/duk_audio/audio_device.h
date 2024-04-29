@@ -40,9 +40,9 @@ public:
 
     virtual void update() = 0;
 
-    virtual AudioId play(const std::shared_ptr<AudioBuffer>& buffer, bool loop = false, int32_t priority = 0) = 0;
+    virtual AudioId play(const std::shared_ptr<AudioBuffer>& buffer, float volume = 1.0f, bool loop = false, int32_t priority = 0) = 0;
 
-    AudioId play(const AudioClip* clip, bool loop = false, int32_t priority = 0);
+    AudioId play(const AudioClip* clip, float volume = 1.0f, bool loop = false, int32_t priority = 0);
 
     virtual void stop(const AudioId& id) = 0;
 

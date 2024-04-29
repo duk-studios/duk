@@ -20,7 +20,7 @@ public:
 
     ~AudioPlayer();
 
-    void play(AudioDevice* device, const AudioClip* clip, bool loop = false, int32_t priority = 0);
+    void play(AudioDevice* device, const AudioClip* clip, float volume = 0, bool loop = false, int32_t priority = 0);
 
     void stop();
 
