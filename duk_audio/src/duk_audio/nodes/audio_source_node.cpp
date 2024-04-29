@@ -37,6 +37,15 @@ static uint32_t process_buffer_float(const AudioBuffer* buffer, float* output, u
     return framesRead;
 }
 
+static void apply_volume(float* output, float volume, uint32_t frameCount, uint32_t channelCount) {
+    for (uint32_t i = 0; i < frameCount; i++) {
+        uint32_t frameIndex = i * channelCount;
+        for (uint32_t c = 0; c < channelCount; c++) {
+            output[frameIndex + c] *= volume;
+        }
+    }
+}
+
 static void process_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<AudioBuffer>& buffer, void* output, uint32_t frameCount, uint32_t channelCount) {
     const uint32_t kBufferSampleCount = 1024;
     float outputBuffer[kBufferSampleCount];
@@ -51,6 +60,8 @@ static void process_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<Audi
         if (framesRead == 0) {
             break;
         }
+
+        apply_volume(outputBuffer, slot.volume, framesRead, channelCount);
 
         uint32_t dstOffset = (frameCount - remainingFrames) * channelCount;
         mix_float_samples(dstFrames + dstOffset, outputBuffer, framesRead, channelCount);
@@ -68,9 +79,10 @@ static void process_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<Audi
     }
 }
 
-static void update_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<AudioBuffer>& buffer, bool loop, uint32_t priority) {
+static void update_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, uint32_t priority) {
     slot.buffer = buffer;
     slot.priority = priority;
+    slot.volume = volume;
     slot.version++;
     std::lock_guard lock(slot.syncMutex);
     slot.hostFrame = 0;
@@ -103,14 +115,14 @@ void AudioSourceNode::update() {
     }
 }
 
-AudioId AudioSourceNode::play(const std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) {
+AudioId AudioSourceNode::play(const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, int32_t priority) {
     // try to find unused slot, if not found then replace the one with the lowest priority
     int32_t lowestPriority = priority;
     uint32_t lowestPriorityIndex = m_slots.size();
     for (uint32_t i = 0; i < m_slots.size(); i++) {
         auto& slot = m_slots[i];
         if (slot.buffer.expired()) {
-            detail::update_slot(slot, buffer, loop, priority);
+            detail::update_slot(slot, buffer, volume, loop, priority);
             return AudioId(slot.version, i);
         }
         // we may replace this source
@@ -123,7 +135,7 @@ AudioId AudioSourceNode::play(const std::shared_ptr<AudioBuffer>& buffer, bool l
     // if lowestPriorityIndex is valid, it will be the index to the lowest priority slot
     if (lowestPriorityIndex < m_slots.size()) {
         auto& slot = m_slots[lowestPriorityIndex];
-        detail::update_slot(slot, buffer, loop, priority);
+        detail::update_slot(slot, buffer, volume, loop, priority);
         return AudioId(slot.version, lowestPriorityIndex);
     }
 

@@ -34,7 +34,7 @@ public:
 
     void update() override;
 
-    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, bool loop, int32_t priority) override;
+    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, int32_t priority) override;
 
     void stop(const AudioId& id) override;
 

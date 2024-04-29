@@ -54,11 +54,11 @@ int main() {
     auto buffer2 = create_buffer("sample.wav", kChannelCount, kFrameRate);
     audioDevice->start();
 
-    auto id1 = audioDevice->play(buffer, false, 100);
+    auto id1 = audioDevice->play(buffer, 1.0f, false, 100);
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    auto id2 = audioDevice->play(buffer2, false);
+    auto id2 = audioDevice->play(buffer2, 0.5f, false);
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
