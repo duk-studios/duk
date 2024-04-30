@@ -12,4 +12,4 @@ void register_types() {
     duk::animation::register_types();
 }
 
-}
+}// namespace duk::project

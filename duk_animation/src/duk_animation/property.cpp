@@ -28,4 +28,4 @@ PropertyRegistry::PropertyEntry* PropertyRegistry::find_entry(const std::string&
     }
     return it->second.get();
 }
-}
+}// namespace duk::animation

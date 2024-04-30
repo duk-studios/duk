@@ -4,6 +4,4 @@
 
 #include <duk_animation/clip/animation_clip_pool.h>
 
-namespace duk::animation {
-
-}
+namespace duk::animation {}

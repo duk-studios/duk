@@ -11,10 +11,8 @@
 
 namespace duk::animation {
 
-class AnimationClipPool final : public duk::resource::PoolT<AnimationClipResource> {
+class AnimationClipPool final : public duk::resource::PoolT<AnimationClipResource> {};
 
-};
+}// namespace duk::animation
 
-}
-
-#endif //DUK_ANIMATION_ANIMATION_CLIP_POOL_H
+#endif//DUK_ANIMATION_ANIMATION_CLIP_POOL_H

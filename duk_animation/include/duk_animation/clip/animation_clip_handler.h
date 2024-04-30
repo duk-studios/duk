@@ -21,6 +21,6 @@ protected:
     void load(AnimationClipPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };
 
-}
+}// namespace duk::animation
 
-#endif //DUK_ANIMATION_ANIMATION_CLIP_HANDLER_H
+#endif//DUK_ANIMATION_ANIMATION_CLIP_HANDLER_H

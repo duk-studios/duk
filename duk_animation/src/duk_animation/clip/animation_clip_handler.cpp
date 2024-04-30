@@ -8,8 +8,8 @@
 
 namespace duk::animation {
 
-AnimationClipHandler::AnimationClipHandler() :
-    ResourceHandlerT("ani") {
+AnimationClipHandler::AnimationClipHandler()
+    : ResourceHandlerT("ani") {
 }
 
 bool AnimationClipHandler::accepts(const std::string& extension) const {
@@ -24,4 +24,4 @@ void AnimationClipHandler::load(AnimationClipPool* pool, const resource::Id& id,
 
     pool->insert(id, animation);
 }
-}
+}// namespace duk::animation

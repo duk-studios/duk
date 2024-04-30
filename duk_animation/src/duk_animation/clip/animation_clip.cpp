@@ -18,7 +18,7 @@ void AnimationClip::evaluate(const duk::objects::Object& object, const float tim
 
     const uint32_t sample = time * m_sampleRate;
 
-    for (auto& property : m_properties) {
+    for (auto& property: m_properties) {
         property->evaluate(object, sample);
     }
 }
@@ -42,4 +42,4 @@ std::vector<std::unique_ptr<Property>>::iterator AnimationClip::end() {
     return m_properties.end();
 }
 
-}
+}// namespace duk::animation

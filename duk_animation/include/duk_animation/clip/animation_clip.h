@@ -38,13 +38,13 @@ private:
 
 using AnimationClipResource = duk::resource::ResourceT<AnimationClip>;
 
-}
+}// namespace duk::animation
 
 namespace duk::serial {
 
 template<>
 inline void from_json(const rapidjson::Value& json, std::vector<std::unique_ptr<duk::animation::Property>>& properties) {
-    for (const auto& propertyJson : json.GetArray()) {
+    for (const auto& propertyJson: json.GetArray()) {
         from_json(propertyJson, properties.emplace_back());
     }
 }
@@ -52,13 +52,12 @@ inline void from_json(const rapidjson::Value& json, std::vector<std::unique_ptr<
 template<>
 inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const std::vector<std::unique_ptr<duk::animation::Property>>& properties) {
     auto array = json.SetArray().GetArray();
-    for (const auto& property : properties) {
+    for (const auto& property: properties) {
         rapidjson::Value propertyJson;
         to_json(document, propertyJson, property);
         array.PushBack(propertyJson, document.GetAllocator());
     }
 }
-
 
 template<>
 inline void from_json(const rapidjson::Value& json, duk::animation::AnimationClip& animation) {
@@ -72,17 +71,17 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
     to_json_member(document, json, "properties", animation.m_properties);
 }
 
-}
+}// namespace duk::serial
 
 namespace duk::resource {
 
 template<typename Solver>
 void solve_resources(Solver* solver, duk::animation::AnimationClip& animation) {
-    for (auto& property : animation) {
+    for (auto& property: animation) {
         solver->solve(*property);
     }
 }
 
-}
+}// namespace duk::resource
 
-#endif //DUK_ANIMATION_ANIMATION_CLIP_H
+#endif//DUK_ANIMATION_ANIMATION_CLIP_H

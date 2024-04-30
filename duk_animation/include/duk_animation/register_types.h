@@ -11,4 +11,4 @@ extern void register_types();
 
 }
 
-#endif //DUK_ANIMATION_REGISTER_TYPES_H
+#endif//DUK_ANIMATION_REGISTER_TYPES_H
