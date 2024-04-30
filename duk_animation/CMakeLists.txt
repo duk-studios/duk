@@ -12,6 +12,12 @@ set(DUK_ANIMATION_HEADERS
         include/duk_animation/clip/animation_clip.h
         include/duk_animation/clip/animation_clip_handler.h
         include/duk_animation/clip/animation_clip_pool.h
+        include/duk_animation/controller/animation_controller.h
+        include/duk_animation/controller/animation_controller_handler.h
+        include/duk_animation/controller/animation_set.h
+        include/duk_animation/controller/animation_state.h
+        include/duk_animation/controller/animation_transition.h
+        include/duk_animation/controller/animation_variables.h
 )
 
 set(DUK_ANIMATION_SOURCES
@@ -22,6 +28,12 @@ set(DUK_ANIMATION_SOURCES
         src/duk_animation/clip/animation_clip.cpp
         src/duk_animation/clip/animation_clip_handler.cpp
         src/duk_animation/clip/animation_clip_pool.cpp
+        src/duk_animation/controller/animation_controller.cpp
+        src/duk_animation/controller/animation_controller_handler.cpp
+        src/duk_animation/controller/animation_set.cpp
+        src/duk_animation/controller/animation_state.cpp
+        src/duk_animation/controller/animation_transition.cpp
+        src/duk_animation/controller/animation_variables.cpp
 )
 
 add_library(duk_animation STATIC ${DUK_ANIMATION_SOURCES} ${DUK_ANIMATION_HEADERS})

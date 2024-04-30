@@ -10,7 +10,7 @@ AnimationClip::AnimationClip()
     : m_sampleRate(0) {
 }
 
-void AnimationClip::evaluate(duk::objects::Object& object, const float time) const {
+void AnimationClip::evaluate(const duk::objects::Object& object, const float time) const {
     if (m_sampleRate == 0) {
         duk::log::warn("AnimationClip with sample rate of 0, skipping");
         return;

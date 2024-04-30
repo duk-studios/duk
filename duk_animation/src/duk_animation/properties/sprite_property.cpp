@@ -8,7 +8,7 @@
 
 namespace duk::animation {
 
-void SpriteEvaluator::evaluate(duk::objects::Object& object, const SpriteValue& sample) const {
+void SpriteEvaluator::evaluate(const duk::objects::Object& object, const SpriteValue& sample) const {
     auto spriteRenderer = object.component<duk::renderer::SpriteRenderer>();
     if (!spriteRenderer) {
         duk::log::warn("SpriteRenderer not found for object with an animated SpriteProperty");
@@ -18,4 +18,4 @@ void SpriteEvaluator::evaluate(duk::objects::Object& object, const SpriteValue& 
     spriteRenderer->sprite = sample.sprite;
 }
 
-}
+}// namespace duk::animation

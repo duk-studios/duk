@@ -1,0 +1,29 @@
+{
+  "animations": [
+    {
+      "name": "idle",
+      "clip": 14850536888468806129,
+      "transitions": [
+        {
+          "to": "rotate",
+          "condition": {
+            "type": "expression",
+            "variable": "rotating",
+            "operator": "==",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "name": "rotating",
+      "type": "bool",
+      "value": true
+    }
+  ]
+}

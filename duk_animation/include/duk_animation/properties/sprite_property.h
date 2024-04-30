@@ -20,10 +20,10 @@ class SpriteEvaluator {
 public:
     using ValueType = SpriteValue;
 
-    void evaluate(duk::objects::Object& object, const SpriteValue& sample) const;
+    void evaluate(const duk::objects::Object& object, const SpriteValue& sample) const;
 };
 
-}
+}// namespace duk::animation
 
 namespace duk::serial {
 
@@ -33,7 +33,7 @@ inline void from_json(const rapidjson::Value& json, duk::animation::SpriteValue&
     from_json_member(json, "sprite", value.sprite);
 }
 
-}
+}// namespace duk::serial
 
 namespace duk::resource {
 
@@ -42,6 +42,6 @@ void solve_resources(Solver* solver, duk::animation::SpriteValue& value) {
     solver->solve(value.sprite);
 }
 
-}
+}// namespace duk::resource
 
-#endif //DUK_ANIMATION_SPRITE_PROPERTY_H
+#endif//DUK_ANIMATION_SPRITE_PROPERTY_H

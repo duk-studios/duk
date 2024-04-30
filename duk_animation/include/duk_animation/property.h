@@ -22,16 +22,15 @@ template<bool isConst>
 class ObjectHandle;
 
 using Object = ObjectHandle<false>;
-}
+}// namespace duk::objects
 
 namespace duk::animation {
 
 class Property {
 public:
-
     virtual ~Property() = default;
 
-    virtual void evaluate(duk::objects::Object& object, uint32_t sample) const = 0;
+    virtual void evaluate(const duk::objects::Object& object, uint32_t sample) const = 0;
 
     virtual uint32_t samples() const = 0;
 
@@ -45,7 +44,7 @@ public:
 
     void add_value(uint32_t sample, const ValueType& value);
 
-    void evaluate(duk::objects::Object& object, uint32_t sample) const override;
+    void evaluate(const duk::objects::Object& object, uint32_t sample) const override;
 
     const std::string& name() const override;
 
@@ -65,10 +64,8 @@ private:
 
 class PropertyRegistry {
 private:
-
     class PropertyEntry {
     public:
-
         virtual ~PropertyEntry() = default;
 
         virtual void from_json(const rapidjson::Value& json, std::unique_ptr<Property>& property) const = 0;
@@ -89,7 +86,6 @@ private:
     };
 
 public:
-
     static PropertyRegistry* instance();
 
     void from_json(const rapidjson::Value& json, std::unique_ptr<Property>& property) const;
@@ -101,7 +97,6 @@ public:
     void register_property();
 
 private:
-
     PropertyEntry* find_entry(const std::string& type) const;
 
 private:
@@ -120,7 +115,7 @@ void PropertyT<TEvaluator>::add_value(uint32_t sample, const ValueType& value) {
 }
 
 template<typename TEvaluator>
-void PropertyT<TEvaluator>::evaluate(duk::objects::Object& object, uint32_t sample) const {
+void PropertyT<TEvaluator>::evaluate(const duk::objects::Object& object, uint32_t sample) const {
     m_evaluator.evaluate(object, sample_value(sample));
 }
 
@@ -166,7 +161,7 @@ void PropertyRegistry::PropertyEntryT<TEvaluator>::from_json(const rapidjson::Va
 template<typename TEvaluator>
 void PropertyRegistry::PropertyEntryT<TEvaluator>::solve_resources(duk::resource::DependencySolver* solver, Property& property) const {
     auto derivedProperty = dynamic_cast<PropertyT<TEvaluator>*>(&property);
-    for (auto& value : *derivedProperty) {
+    for (auto& value: *derivedProperty) {
         solver->solve(value);
     }
 }
@@ -174,7 +169,7 @@ void PropertyRegistry::PropertyEntryT<TEvaluator>::solve_resources(duk::resource
 template<typename TEvaluator>
 void PropertyRegistry::PropertyEntryT<TEvaluator>::solve_resources(duk::resource::ReferenceSolver* solver, Property& property) const {
     auto derivedProperty = dynamic_cast<PropertyT<TEvaluator>*>(&property);
-    for (auto& value : *derivedProperty) {
+    for (auto& value: *derivedProperty) {
         solver->solve(value);
     }
 }
@@ -195,7 +190,7 @@ void PropertyRegistry::register_property() {
     m_propertyEntries.emplace(type, std::make_unique<PropertyEntryT<TEvaluator>>());
 }
 
-}
+}// namespace duk::animation
 
 namespace duk::serial {
 
@@ -203,7 +198,7 @@ namespace duk::serial {
 template<typename TEvaluator>
 void from_json(const rapidjson::Value& json, duk::animation::PropertyT<TEvaluator>& property) {
     using ValueType = typename TEvaluator::ValueType;
-    for (const auto& jsonValue : json.GetArray()) {
+    for (const auto& jsonValue: json.GetArray()) {
         uint32_t sample;
         from_json_member(jsonValue, "sample", sample);
 
@@ -225,7 +220,7 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
     // not implemented yet
 }
 
-}
+}// namespace duk::serial
 
 namespace duk::resource {
 
@@ -234,6 +229,6 @@ void solve_resources(Solver* solver, duk::animation::Property& property) {
     animation::PropertyRegistry::instance()->solve_resources(solver, property);
 }
 
-}
+}// namespace duk::resource
 
-#endif //DUK_ANIMATION_PROPERTY_H
+#endif//DUK_ANIMATION_PROPERTY_H

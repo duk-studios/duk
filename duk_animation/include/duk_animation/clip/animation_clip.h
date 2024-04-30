@@ -15,10 +15,9 @@ namespace duk::animation {
 
 class AnimationClip {
 public:
-
     AnimationClip();
 
-    void evaluate(duk::objects::Object& object, float time) const;
+    void evaluate(const duk::objects::Object& object, float time) const;
 
     uint32_t samples() const;
 
