@@ -5,15 +5,33 @@
       "clip": 14850536888468806129,
       "transitions": [
         {
-          "to": "rotate",
+          "target": "rotate",
           "condition": {
-            "type": "expression",
+            "type": "comparison",
             "variable": "rotating",
             "operator": "==",
             "value": {
               "type": "bool",
               "value": true
             }
+          }
+        },
+        {
+          "target": "idle2",
+          "condition": {
+            "type": "finished"
+          }
+        }
+      ]
+    },
+    {
+      "name": "idle2",
+      "clip": 6725132555824562159,
+      "transitions": [
+        {
+          "target": "idle",
+          "condition": {
+            "type": "finished"
           }
         }
       ]
@@ -23,7 +41,7 @@
     {
       "name": "rotating",
       "type": "bool",
-      "value": true
+      "value": false
     }
   ]
 }

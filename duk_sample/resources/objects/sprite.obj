@@ -15,7 +15,7 @@
         },
         {
           "type": "duk::animation::Animator",
-          "animation": 14850536888468806129
+          "controller": 11638404355231501488
         }
       ]
     }
