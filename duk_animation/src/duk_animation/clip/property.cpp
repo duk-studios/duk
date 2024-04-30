@@ -2,7 +2,7 @@
 // Created by Ricardo on 25/04/2024.
 //
 
-#include <duk_animation/property.h>
+#include <duk_animation/clip/property.h>
 
 #include <duk_serial/json/serializer.h>
 

@@ -5,7 +5,7 @@
 #ifndef DUK_ANIMATION_ANIMATION_CLIP_H
 #define DUK_ANIMATION_ANIMATION_CLIP_H
 
-#include <duk_animation/property.h>
+#include <duk_animation/clip/property.h>
 
 #include <duk_objects/objects.h>
 

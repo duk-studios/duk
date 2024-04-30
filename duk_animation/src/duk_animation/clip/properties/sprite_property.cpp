@@ -2,7 +2,7 @@
 // Created by Ricardo on 25/04/2024.
 //
 
-#include <duk_animation/properties/sprite_property.h>
+#include <duk_animation/clip/properties/sprite_property.h>
 
 #include <duk_renderer/components/sprite_renderer.h>
 

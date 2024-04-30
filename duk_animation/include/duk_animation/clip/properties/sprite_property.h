@@ -5,7 +5,7 @@
 #ifndef DUK_ANIMATION_SPRITE_PROPERTY_H
 #define DUK_ANIMATION_SPRITE_PROPERTY_H
 
-#include <duk_animation/property.h>
+#include <duk_animation/clip/property.h>
 
 #include <duk_renderer/sprite/sprite.h>
 

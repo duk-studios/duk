@@ -6,12 +6,12 @@ set(DUK_ANIMATION_SRC_DIR ${DUK_ANIMATION_ROOT}/src/duk_animation)
 
 set(DUK_ANIMATION_HEADERS
         include/duk_animation/animation_system.h
-        include/duk_animation/property.h
         include/duk_animation/register_types.h
-        include/duk_animation/properties/sprite_property.h
+        include/duk_animation/clip/property.h
         include/duk_animation/clip/animation_clip.h
         include/duk_animation/clip/animation_clip_handler.h
         include/duk_animation/clip/animation_clip_pool.h
+        include/duk_animation/clip/properties/sprite_property.h
         include/duk_animation/controller/animation_controller.h
         include/duk_animation/controller/animation_controller_handler.h
         include/duk_animation/controller/animation_set.h
@@ -22,12 +22,12 @@ set(DUK_ANIMATION_HEADERS
 
 set(DUK_ANIMATION_SOURCES
         src/duk_animation/animation_system.cpp
-        src/duk_animation/property.cpp
         src/duk_animation/register_types.cpp
-        src/duk_animation/properties/sprite_property.cpp
+        src/duk_animation/clip/property.cpp
         src/duk_animation/clip/animation_clip.cpp
         src/duk_animation/clip/animation_clip_handler.cpp
         src/duk_animation/clip/animation_clip_pool.cpp
+        src/duk_animation/clip/properties/sprite_property.cpp
         src/duk_animation/controller/animation_controller.cpp
         src/duk_animation/controller/animation_controller_handler.cpp
         src/duk_animation/controller/animation_set.cpp

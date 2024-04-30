@@ -6,7 +6,7 @@
 #include <duk_animation/animator.h>
 #include <duk_animation/animation_system.h>
 #include <duk_animation/clip/animation_clip_handler.h>
-#include <duk_animation/properties/sprite_property.h>
+#include <duk_animation/clip/properties/sprite_property.h>
 #include <duk_animation/controller/animation_controller_handler.h>
 
 #include <duk_engine/register_types.h>
