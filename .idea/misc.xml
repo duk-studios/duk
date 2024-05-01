@@ -8,6 +8,7 @@
     <sourceRoots>
       <file path="$PROJECT_DIR$/cmake" />
       <file path="$PROJECT_DIR$/duk_animation" />
+      <file path="$PROJECT_DIR$/duk_api" />
       <file path="$PROJECT_DIR$/duk_audio" />
       <file path="$PROJECT_DIR$/duk_cli" />
       <file path="$PROJECT_DIR$/duk_engine" />
@@ -24,6 +25,7 @@
       <file path="$PROJECT_DIR$/duk_renderer" />
       <file path="$PROJECT_DIR$/duk_resource" />
       <file path="$PROJECT_DIR$/duk_rhi" />
+      <file path="$PROJECT_DIR$/duk_runtime" />
       <file path="$PROJECT_DIR$/duk_sample" />
       <file path="$PROJECT_DIR$/duk_serial" />
       <file path="$PROJECT_DIR$/duk_task" />
