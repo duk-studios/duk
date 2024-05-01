@@ -4,6 +4,7 @@
 
 #include <duk_resource/resource.h>
 #include <duk_objects/objects.h>
+#include <duk_serial/json/serializer.h>
 #include <iostream>
 
 struct TestData {
