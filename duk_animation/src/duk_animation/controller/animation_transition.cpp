@@ -57,20 +57,20 @@ void TriggerCondition::execute(AnimationState& state) const {
 }
 
 bool AnimationTransition::check(const AnimationState& state) const {
-    return m_condition->evaluate(state);
+    return std::ranges::all_of(m_conditions, [&state](const auto& condition) {
+        return condition->evaluate(state);
+    });
 }
 
 void AnimationTransition::execute(const duk::objects::Object& object, AnimationState& state, const AnimationSet& animations) const {
     // when a condition is met, it may need to alter some state (e.g. trigger)
-    m_condition->execute(state);
+    for (auto& condition: m_conditions) {
+        condition->execute(state);
+    }
     // sample at the end of the animation before transitioning
     state.animation->clip->evaluate(object, state.animation->clip->samples());
     state.animation = animations.at(m_target);
     state.time = 0.0f;
-}
-
-std::string_view AnimationTransition::target() const {
-    return m_target;
 }
 
 }// namespace duk::animation

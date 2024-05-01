@@ -6,23 +6,53 @@
       "transitions": [
         {
           "target": "idle",
-          "condition": {
-            "type": "finished"
-          }
+          "conditions": [
+            {
+              "type": "finished"
+            },
+            {
+              "type": "comparison",
+              "variable": "scaling",
+              "operator": "==",
+              "value": {
+                "type": "bool",
+                "value": false
+              }
+            },
+            {
+              "type": "comparison",
+              "variable": "rotating",
+              "operator": "==",
+              "value": {
+                "type": "bool",
+                "value": false
+              }
+            }
+          ]
         },
         {
           "target": "scale",
-          "condition": {
-            "type": "trigger",
-            "variable": "scaling"
-          }
+          "conditions": [
+            {
+              "type": "trigger",
+              "variable": "scaling"
+            },
+            {
+              "type": "finished"
+            }
+          ]
         },
         {
           "target": "rotate",
-          "condition": {
-            "type": "trigger",
-            "variable": "rotating"
-          }
+          "conditions": [
+            {
+              "type": "trigger",
+              "variable": "rotating"
+            },
+            {
+              "type": "finished"
+            }
+          ]
         }
       ]
     },
@@ -32,9 +62,11 @@
       "transitions": [
         {
           "target": "idle",
-          "condition": {
-            "type": "finished"
-          }
+          "conditions": [
+            {
+              "type": "finished"
+            }
+          ]
         }
       ]
     },
@@ -44,9 +76,11 @@
       "transitions": [
         {
           "target": "idle",
-          "condition": {
-            "type": "finished"
-          }
+          "conditions": [
+            {
+              "type": "finished"
+            }
+          ]
         }
       ]
     }
