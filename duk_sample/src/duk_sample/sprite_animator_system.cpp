@@ -19,8 +19,12 @@ void SpriteAnimatorSystem::enter(duk::objects::Objects& objects, engine::Engine&
 void SpriteAnimatorSystem::update(duk::objects::Objects& objects, engine::Engine& engine) {
     auto input = engine.input();
 
-    auto rotating = input->key_down(platform::Keys::R);
-    auto scaling = input->key_down(platform::Keys::T);
+    if (input->key_down(platform::Keys::R)) {
+        engine.director()->request_scene("directions");
+    }
+
+    auto rotating = input->key_down(platform::Keys::G);
+    auto scaling = input->key_down(platform::Keys::H);
 
     for (auto object: objects.all_with<SpriteAnimator, duk::animation::Animator>()) {
         auto [spriteAnimator, animator] = object.components<SpriteAnimator, duk::animation::Animator>();

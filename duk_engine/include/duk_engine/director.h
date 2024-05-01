@@ -27,6 +27,8 @@ public:
 
     void request_scene(duk::resource::Id id);
 
+    void request_scene(const std::string& alias);
+
     Scene* scene();
 
     void enable(uint32_t systemGroup);
