@@ -1,0 +1,22 @@
+{
+  "sampleRate": 60,
+  "properties": [
+    {
+      "type": "duk::animation::ScaleProperty",
+      "values": [
+        {
+          "sample": 0,
+          "scale": "1;1;1"
+        },
+        {
+          "sample": 40,
+          "scale": "8;4;1"
+        },
+        {
+          "sample": 180,
+          "scale": "1;1;1"
+        }
+      ]
+    }
+  ]
+}

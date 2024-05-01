@@ -1,0 +1,66 @@
+{
+  "animations": [
+    {
+      "name": "idle",
+      "clip": 14850536888468806129,
+      "transitions": [
+        {
+          "target": "idle",
+          "condition": {
+            "type": "finished"
+          }
+        },
+        {
+          "target": "scale",
+          "condition": {
+            "type": "trigger",
+            "variable": "scaling"
+          }
+        },
+        {
+          "target": "rotate",
+          "condition": {
+            "type": "trigger",
+            "variable": "rotating"
+          }
+        }
+      ]
+    },
+    {
+      "name": "rotate",
+      "clip": 6725132555824562159,
+      "transitions": [
+        {
+          "target": "idle",
+          "condition": {
+            "type": "finished"
+          }
+        }
+      ]
+    },
+    {
+      "name": "scale",
+      "clip": 11445620582443616340,
+      "transitions": [
+        {
+          "target": "idle",
+          "condition": {
+            "type": "finished"
+          }
+        }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "name": "scaling",
+      "type": "bool",
+      "value": false
+    },
+    {
+      "name": "rotating",
+      "type": "bool",
+      "value": false
+    }
+  ]
+}

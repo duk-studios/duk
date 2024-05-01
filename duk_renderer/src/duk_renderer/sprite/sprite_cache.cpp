@@ -37,7 +37,7 @@ SpriteCache::SpriteCache(const SpriteCacheCreateInfo& spriteCacheCreateInfo)
 
 SpriteCache::~SpriteCache() = default;
 
-std::shared_ptr<Material> SpriteCache::material_for(Sprite* atlas, uint32_t index) {
+std::shared_ptr<Material> SpriteCache::material_for(Sprite* atlas) {
     const auto hash = detail::calculate_material_hash(atlas);
     if (const auto it = m_materials.find(hash); it != m_materials.end()) {
         return it->second;

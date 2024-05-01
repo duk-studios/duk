@@ -168,6 +168,13 @@ void to_json(rapidjson::Document& document, rapidjson::Value& json, const std::v
     }
 }
 
+// these are defined in json/serializer.h
+template<typename T>
+void from_json_member(const rapidjson::Value& json, const char* name, T& value, bool optional = false);
+
+template<typename T>
+void to_json_member(rapidjson::Document& document, rapidjson::Value& json, const char* name, const T& value);
+
 }// namespace duk::serial
 
 #endif//DUK_SERIAL_JSON_TYPES_H

@@ -12,6 +12,13 @@
           "type": "duk::renderer::SpriteRenderer",
           "sprite": 6401408628342139833,
           "index": 2
+        },
+        {
+          "type": "duk::animation::Animator",
+          "controller": 11638404355231501488
+        },
+        {
+          "type": "duk::sample::SpriteAnimator"
         }
       ]
     }

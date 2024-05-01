@@ -14,7 +14,7 @@
 namespace duk::serial {
 
 template<typename T>
-void from_json_member(const rapidjson::Value& json, const char* name, T& value, bool optional = false) {
+void from_json_member(const rapidjson::Value& json, const char* name, T& value, bool optional) {
     auto member = json.FindMember(name);
     if (member == json.MemberEnd()) {
         if (optional) {

@@ -1,0 +1,39 @@
+{
+  "sampleRate": 120,
+  "properties": [
+    {
+      "type": "duk::animation::RotationProperty",
+      "values": [
+        {
+          "sample": 0,
+          "rotation": "0;0;0"
+        },
+        {
+          "sample": 80,
+          "rotation": "0;0;720"
+        },
+        {
+          "sample": 160,
+          "rotation": "0;0;0"
+        }
+      ]
+    },
+    {
+      "type": "duk::animation::ScaleProperty",
+      "values": [
+        {
+          "sample": 0,
+          "scale": "1;1;1"
+        },
+        {
+          "sample": 80,
+          "scale": "2;2;2"
+        },
+        {
+          "sample": 160,
+          "scale": "1;1;1"
+        }
+      ]
+    }
+  ]
+}

@@ -194,13 +194,9 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
 
     for (auto object: objects->all_with<SpriteRenderer>()) {
         auto spriteRenderer = object.component<SpriteRenderer>();
-        if (!spriteRenderer->material) {
-            spriteRenderer->material = cache->material_for(spriteRenderer->sprite.get(), spriteRenderer->index);
-        }
 
-        if (!spriteRenderer->mesh) {
-            spriteRenderer->mesh = cache->mesh_for(spriteRenderer->sprite.get(), spriteRenderer->index);
-        }
+        spriteRenderer->material = cache->material_for(spriteRenderer->sprite.get());
+        spriteRenderer->mesh = cache->mesh_for(spriteRenderer->sprite.get(), spriteRenderer->index);
 
         const auto material = spriteRenderer->material.get();
         const auto mesh = spriteRenderer->mesh.get();
