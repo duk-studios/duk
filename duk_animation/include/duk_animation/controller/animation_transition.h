@@ -89,15 +89,13 @@ public:
 
     void execute(const duk::objects::Object& object, AnimationState& state, const AnimationSet& animations) const;
 
-    std::string_view target() const;
-
     friend void serial::from_json<AnimationTransition>(const rapidjson::Value& json, AnimationTransition& transition);
 
     friend void serial::to_json<AnimationTransition>(rapidjson::Document& document, rapidjson::Value& value, const AnimationTransition& transition);
 
 private:
     std::string m_target;
-    std::unique_ptr<Condition> m_condition;
+    std::vector<std::unique_ptr<Condition>> m_conditions;
 };
 
 }// namespace duk::animation
@@ -278,13 +276,13 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
 template<>
 inline void from_json(const rapidjson::Value& json, duk::animation::AnimationTransition& transition) {
     from_json_member(json, "target", transition.m_target);
-    from_json_member(json, "condition", transition.m_condition);
+    from_json_member(json, "conditions", transition.m_conditions);
 }
 
 template<>
 inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::AnimationTransition& transition) {
     to_json_member(document, json, "target", transition.m_target);
-    to_json_member(document, json, "condition", transition.m_condition);
+    to_json_member(document, json, "conditions", transition.m_conditions);
 }
 
 }// namespace duk::serial
