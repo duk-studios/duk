@@ -64,6 +64,12 @@ class AnimationVariables {
 public:
     const Variable& at(const std::string& name) const;
 
+    void set(const std::string& name, float value);
+
+    void set(const std::string& name, int value);
+
+    void set(const std::string& name, bool value);
+
     friend void serial::from_json<AnimationVariables>(const rapidjson::Value& json, AnimationVariables& state);
 
     friend void serial::to_json<AnimationVariables>(rapidjson::Document& document, rapidjson::Value& json, const AnimationVariables& state);

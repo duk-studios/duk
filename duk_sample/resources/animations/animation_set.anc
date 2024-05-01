@@ -5,10 +5,16 @@
       "clip": 14850536888468806129,
       "transitions": [
         {
-          "target": "a",
+          "target": "idle",
+          "condition": {
+            "type": "finished"
+          }
+        },
+        {
+          "target": "scale",
           "condition": {
             "type": "comparison",
-            "variable": "rotating",
+            "variable": "scaling",
             "operator": "==",
             "value": {
               "type": "bool",
@@ -19,7 +25,13 @@
         {
           "target": "rotate",
           "condition": {
-            "type": "finished"
+            "type": "comparison",
+            "variable": "rotating",
+            "operator": "==",
+            "value": {
+              "type": "bool",
+              "value": true
+            }
           }
         }
       ]
@@ -35,9 +47,26 @@
           }
         }
       ]
+    },
+    {
+      "name": "scale",
+      "clip": 11445620582443616340,
+      "transitions": [
+        {
+          "target": "idle",
+          "condition": {
+            "type": "finished"
+          }
+        }
+      ]
     }
   ],
   "variables": [
+    {
+      "name": "scaling",
+      "type": "bool",
+      "value": false
+    },
     {
       "name": "rotating",
       "type": "bool",

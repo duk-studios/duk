@@ -16,6 +16,9 @@
         {
           "type": "duk::animation::Animator",
           "controller": 11638404355231501488
+        },
+        {
+          "type": "duk::sample::SpriteAnimator"
         }
       ]
     }

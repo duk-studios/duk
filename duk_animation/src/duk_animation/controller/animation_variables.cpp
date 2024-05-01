@@ -95,4 +95,17 @@ bool operator>=(const Variable& lhs, const Variable& rhs) {
 const Variable& AnimationVariables::at(const std::string& name) const {
     return m_variables.at(name);
 }
+
+void AnimationVariables::set(const std::string& name, float value) {
+    m_variables[name] = Variable(value);
+}
+
+void AnimationVariables::set(const std::string& name, int value) {
+    m_variables[name] = Variable(value);
+}
+
+void AnimationVariables::set(const std::string& name, bool value) {
+    m_variables[name] = Variable(value);
+}
+
 }// namespace duk::animation

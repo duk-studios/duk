@@ -5,6 +5,7 @@
 #include <duk_sample/application.h>
 #include <duk_sample/camera_system.h>
 #include <duk_sample/stats_system.h>
+#include <duk_sample/sprite_animator_system.h>
 
 #include <duk_animation/clip/animation_clip_pool.h>
 #include <duk_animation/controller/animation_controller_handler.h>
@@ -18,8 +19,10 @@ static void register_types() {
     duk::animation::register_types();
     duk::objects::register_component<CameraController>();
     duk::objects::register_component<Stats>();
+    duk::objects::register_component<SpriteAnimator>();
     duk::engine::register_system<CameraSystem>();
     duk::engine::register_system<StatsSystem>();
+    duk::engine::register_system<SpriteAnimatorSystem>();
 }
 
 }// namespace detail

@@ -3,6 +3,7 @@
     "duk::sample::CameraSystem",
     "duk::sample::StatsSystem",
     "duk::animation::AnimationSystem",
+    "duk::sample::SpriteAnimatorSystem",
     "duk::engine::TransformUpdateSystem",
     "duk::engine::CameraUpdateSystem",
     "duk::engine::TextUpdateSystem",

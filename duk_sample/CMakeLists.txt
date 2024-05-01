@@ -13,6 +13,8 @@ set(DUK_SAMPLE_SOURCES
         src/duk_sample/application.cpp
         src/duk_sample/camera_system.h
         src/duk_sample/camera_system.cpp
+        src/duk_sample/sprite_animator_system.h
+        src/duk_sample/sprite_animator_system.cpp
         src/duk_sample/stats_system.h
         src/duk_sample/stats_system.cpp
 )
