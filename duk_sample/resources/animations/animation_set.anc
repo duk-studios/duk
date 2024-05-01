@@ -5,7 +5,7 @@
       "clip": 14850536888468806129,
       "transitions": [
         {
-          "target": "rotate",
+          "target": "a",
           "condition": {
             "type": "comparison",
             "variable": "rotating",
@@ -17,7 +17,7 @@
           }
         },
         {
-          "target": "idle2",
+          "target": "rotate",
           "condition": {
             "type": "finished"
           }
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "name": "idle2",
+      "name": "rotate",
       "clip": 6725132555824562159,
       "transitions": [
         {

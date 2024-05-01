@@ -14,8 +14,8 @@
 #include <vector>
 #include <unordered_map>
 
-#include "duk_resource/solver/dependency_solver.h"
-#include "duk_resource/solver/reference_solver.h"
+#include <duk_resource/solver/dependency_solver.h>
+#include <duk_resource/solver/reference_solver.h>
 
 namespace duk::objects {
 template<bool isConst>
@@ -38,8 +38,9 @@ public:
 };
 
 template<typename TEvaluator>
-class PropertyT : public Property {
+class PropertyT final : public Property {
 public:
+
     using ValueType = typename TEvaluator::ValueType;
 
     void add_value(uint32_t sample, const ValueType& value);
@@ -48,7 +49,9 @@ public:
 
     const std::string& name() const override;
 
-    const ValueType& sample_value(uint32_t sample) const;
+    ValueType sample_at(uint32_t sample) const;
+
+    ValueType sample_interpolate(uint32_t sample) const;
 
     uint32_t samples() const override;
 
@@ -59,7 +62,6 @@ public:
 private:
     std::map<uint32_t, uint32_t> m_sampleToValueIndex;
     std::vector<ValueType> m_values;
-    TEvaluator m_evaluator;
 };
 
 class PropertyRegistry {
@@ -116,7 +118,7 @@ void PropertyT<TEvaluator>::add_value(uint32_t sample, const ValueType& value) {
 
 template<typename TEvaluator>
 void PropertyT<TEvaluator>::evaluate(const duk::objects::Object& object, uint32_t sample) const {
-    m_evaluator.evaluate(object, sample_value(sample));
+    TEvaluator::evaluate(object, this, sample);
 }
 
 template<typename TEvaluator>
@@ -125,7 +127,7 @@ const std::string& PropertyT<TEvaluator>::name() const {
 }
 
 template<typename TEvaluator>
-const typename PropertyT<TEvaluator>::ValueType& PropertyT<TEvaluator>::sample_value(uint32_t sample) const {
+typename PropertyT<TEvaluator>::ValueType PropertyT<TEvaluator>::sample_at(uint32_t sample) const {
     auto it = m_sampleToValueIndex.lower_bound(sample);
     if (it == m_sampleToValueIndex.end()) {
         return m_values.back();
@@ -134,6 +136,22 @@ const typename PropertyT<TEvaluator>::ValueType& PropertyT<TEvaluator>::sample_v
         return m_values.front();
     }
     return m_values.at((--it)->second);
+}
+
+template<typename TEvaluator>
+typename PropertyT<TEvaluator>::ValueType PropertyT<TEvaluator>::sample_interpolate(uint32_t sample) const {
+    auto next = m_sampleToValueIndex.lower_bound(sample);
+    if (next == m_sampleToValueIndex.end()) {
+        return m_values.back();
+    }
+    if (next == m_sampleToValueIndex.begin()) {
+        return m_values.front();
+    }
+    auto prev = next;
+    --prev;
+    const auto range = next->first - prev->first;
+    const auto progress = (sample - prev->first) / static_cast<float>(range);
+    return TEvaluator::interpolate(m_values.at(prev->second), m_values.at(next->second), progress);
 }
 
 template<typename TEvaluator>

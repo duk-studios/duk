@@ -1,0 +1,45 @@
+{
+  "sampleRate": 120,
+  "properties": [
+    {
+      "type": "duk::animation::SpriteProperty",
+      "values": [
+        {
+          "sample": 0,
+          "sprite": 6401408628342139833,
+          "index": 0
+        }
+      ]
+    },
+    {
+      "type": "duk::animation::RotationProperty",
+      "values": [
+        {
+          "sample": 0,
+          "rotation": "0;0;0"
+        },
+        {
+          "sample": 160,
+          "rotation": "0;0;360"
+        }
+      ]
+    },
+    {
+      "type": "duk::animation::ScaleProperty",
+      "values": [
+        {
+          "sample": 0,
+          "scale": "1;1;1"
+        },
+        {
+          "sample": 80,
+          "scale": "4;4;4"
+        },
+        {
+          "sample": 160,
+          "scale": "1;1;1"
+        }
+      ]
+    }
+  ]
+}

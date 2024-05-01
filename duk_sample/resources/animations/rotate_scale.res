@@ -1,6 +1,6 @@
 {
     "tag": "ani",
     "id": 6725132555824562159,
-    "file": "test2.ani",
+    "file": "rotate_scale.ani",
     "aliases": []
 }

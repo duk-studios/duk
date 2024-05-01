@@ -16,11 +16,11 @@ struct SpriteValue {
     duk::renderer::SpriteResource sprite;
 };
 
-class SpriteEvaluator {
+class SpriteProperty {
 public:
     using ValueType = SpriteValue;
 
-    void evaluate(const duk::objects::Object& object, const SpriteValue& sample) const;
+    static void evaluate(const duk::objects::Object& object, const PropertyT<SpriteProperty>* property, uint32_t sample);
 };
 
 }// namespace duk::animation
@@ -31,6 +31,12 @@ template<>
 inline void from_json(const rapidjson::Value& json, duk::animation::SpriteValue& value) {
     from_json_member(json, "index", value.index);
     from_json_member(json, "sprite", value.sprite);
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::SpriteValue& value) {
+    to_json_member(document, json, "index", value.index);
+    to_json_member(document, json, "sprite", value.sprite);
 }
 
 }// namespace duk::serial

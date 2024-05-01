@@ -2,7 +2,7 @@
   "sampleRate": 60,
   "properties": [
     {
-      "type": "duk::animation::SpriteEvaluator",
+      "type": "duk::animation::SpriteProperty",
       "values": [
         {
           "sample": 0,
