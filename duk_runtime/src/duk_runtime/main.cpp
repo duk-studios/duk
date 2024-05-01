@@ -1,17 +1,14 @@
 //
-// Created by Ricardo on 09/04/2023.
+// Created by Ricardo on 01/05/2024.
 //
 
-#include <duk_sample/application.h>
+#include <duk_runtime/application.h>
 
 #include <duk_log/log.h>
 
 int main() {
-    duk::sample::ApplicationCreateInfo applicationCreateInfo = {};
-    applicationCreateInfo.engineWorkingDirectory = ".";
-
     try {
-        duk::sample::Application application(applicationCreateInfo);
+        duk::runtime::Application application;
 
         application.run();
     } catch (const std::exception& e) {

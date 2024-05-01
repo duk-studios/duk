@@ -8,9 +8,7 @@ set(DUK_SAMPLE_HEADERS
         )
 
 set(DUK_SAMPLE_SOURCES
-        src/duk_sample/main.cpp
-        src/duk_sample/application.h
-        src/duk_sample/application.cpp
+        src/duk_sample/api.cpp
         src/duk_sample/camera_system.h
         src/duk_sample/camera_system.cpp
         src/duk_sample/sprite_animator_system.h
@@ -19,7 +17,7 @@ set(DUK_SAMPLE_SOURCES
         src/duk_sample/stats_system.cpp
 )
 
-add_executable(duk_sample ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
+add_library(duk_sample STATIC ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
 
 target_include_directories(duk_sample
         PRIVATE
@@ -28,8 +26,9 @@ target_include_directories(duk_sample
 
 target_link_libraries(duk_sample
         PRIVATE
-        duk_engine
-        duk_animation
+        duk_api
         )
 
 set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)
+
+target_link_libraries(duk_runtime PRIVATE duk_sample)
