@@ -36,6 +36,13 @@ void Director::request_scene(duk::resource::Id id) {
     m_requestedSceneId = id;
 }
 
+void Director::request_scene(const std::string& alias) {
+    m_requestedSceneId = m_resources->find_id(alias);
+    if (m_requestedSceneId == duk::resource::kInvalidId) {
+        throw std::runtime_error(fmt::format("failed to find id for scene with alias '{}'", alias));
+    }
+}
+
 Scene* Director::scene() {
     return m_scene.get();
 }

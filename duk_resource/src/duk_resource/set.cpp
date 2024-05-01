@@ -87,8 +87,24 @@ void ResourceSet::load(const Id id) {
     handler->solve_references(m_pools, resourceFile.id, referenceSolver);
 }
 
+void ResourceSet::load(const std::string& alias) {
+    auto id = find_id(alias);
+    if (id == kInvalidId) {
+        throw std::invalid_argument(fmt::format("resource alias '{}' not found", alias));
+    }
+    load(id);
+}
+
 Pools* ResourceSet::pools() const {
     return m_pools;
+}
+
+Id ResourceSet::find_id(const std::string& alias) const {
+    auto it = m_resourceIdAliases.find(alias);
+    if (it != m_resourceIdAliases.end()) {
+        return it->second;
+    }
+    return kInvalidId;
 }
 
 }// namespace duk::resource

@@ -23,7 +23,11 @@ public:
 
     void load(Id id);
 
+    void load(const std::string& alias);
+
     Pools* pools() const;
+
+    Id find_id(const std::string& alias) const;
 
 private:
     Pools* m_pools;
