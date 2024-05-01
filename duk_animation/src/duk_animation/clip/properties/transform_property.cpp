@@ -58,4 +58,4 @@ ScaleProperty::ValueType ScaleProperty::interpolate(const ValueType& from, const
     return result;
 }
 
-}
+}// namespace duk::animation

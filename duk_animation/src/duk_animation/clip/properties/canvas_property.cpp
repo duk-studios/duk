@@ -71,4 +71,4 @@ CanvasSizeProperty::ValueType CanvasSizeProperty::interpolate(const ValueType& f
     return result;
 }
 
-}
+}// namespace duk::animation

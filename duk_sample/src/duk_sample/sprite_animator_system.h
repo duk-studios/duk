@@ -9,13 +9,10 @@
 
 namespace duk::sample {
 
-struct SpriteAnimator {
-
-};
+struct SpriteAnimator {};
 
 class SpriteAnimatorSystem : public duk::engine::System {
 public:
-
     SpriteAnimatorSystem();
 
     void enter(duk::objects::Objects& objects, engine::Engine& engine) override;
@@ -25,20 +22,18 @@ public:
     void exit(duk::objects::Objects& objects, engine::Engine& engine) override;
 };
 
-} // duk::sample
+}// namespace duk::sample
 
 namespace duk::serial {
 
 template<>
 inline void from_json(const rapidjson::Value& json, duk::sample::SpriteAnimator& spriteAnimator) {
-
 }
 
 template<>
 inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::sample::SpriteAnimator& spriteAnimator) {
-
 }
 
-}
+}// namespace duk::serial
 
-#endif //DUK_SAMPLE_SPRITE_ANIMATOR_SYSTEM_H
+#endif//DUK_SAMPLE_SPRITE_ANIMATOR_SYSTEM_H

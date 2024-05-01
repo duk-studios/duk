@@ -15,7 +15,7 @@ struct PositionValue {
     glm::vec3 position;
 };
 
-class PositionProperty  {
+class PositionProperty {
 public:
     using ValueType = PositionValue;
 
@@ -29,7 +29,7 @@ struct RotationValue {
     glm::vec3 rotation;
 };
 
-class RotationProperty  {
+class RotationProperty {
 public:
     using ValueType = RotationValue;
 
@@ -42,7 +42,7 @@ struct ScaleValue {
     glm::vec3 scale;
 };
 
-class ScaleProperty  {
+class ScaleProperty {
 public:
     using ValueType = ScaleValue;
 
@@ -51,7 +51,7 @@ public:
     static ValueType interpolate(const ValueType& from, const ValueType& to, float progress);
 };
 
-}
+}// namespace duk::animation
 
 namespace duk::serial {
 
@@ -86,6 +86,6 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
     to_json_member(document, json, "scale", value.scale);
 }
 
-}
+}// namespace duk::serial
 
-#endif //DUK_ANIMATION_TRANSFORM_PROPERTY_H
+#endif//DUK_ANIMATION_TRANSFORM_PROPERTY_H

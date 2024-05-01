@@ -17,13 +17,12 @@ void SpriteAnimatorSystem::enter(duk::objects::Objects& objects, engine::Engine&
 }
 
 void SpriteAnimatorSystem::update(duk::objects::Objects& objects, engine::Engine& engine) {
-
     auto input = engine.input();
 
     auto rotating = input->key_down(platform::Keys::R);
     auto scaling = input->key_down(platform::Keys::T);
 
-    for (auto object : objects.all_with<SpriteAnimator, duk::animation::Animator>()) {
+    for (auto object: objects.all_with<SpriteAnimator, duk::animation::Animator>()) {
         auto [spriteAnimator, animator] = object.components<SpriteAnimator, duk::animation::Animator>();
         if (rotating) {
             animator->state.variables.set("rotating", true);
@@ -37,4 +36,4 @@ void SpriteAnimatorSystem::update(duk::objects::Objects& objects, engine::Engine
 void SpriteAnimatorSystem::exit(duk::objects::Objects& objects, engine::Engine& engine) {
 }
 
-} // duk::sample
+}// namespace duk::sample

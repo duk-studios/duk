@@ -97,7 +97,7 @@ const Variable& AnimationVariables::at(const std::string& name) const {
 }
 
 void AnimationVariables::assign(const AnimationVariables& other) {
-    for (const auto& [name, variable] : other.m_variables) {
+    for (const auto& [name, variable]: other.m_variables) {
         // will not replace existing variables
         m_variables.emplace(name, variable);
     }

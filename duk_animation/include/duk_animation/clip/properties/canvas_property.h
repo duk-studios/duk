@@ -13,7 +13,7 @@ struct CanvasAnchorValue {
     glm::vec2 anchor;
 };
 
-class CanvasAnchorProperty  {
+class CanvasAnchorProperty {
 public:
     using ValueType = CanvasAnchorValue;
 
@@ -26,7 +26,7 @@ struct CanvasPivotValue {
     glm::vec2 pivot;
 };
 
-class CanvasPivotProperty  {
+class CanvasPivotProperty {
 public:
     using ValueType = CanvasPivotValue;
 
@@ -35,12 +35,11 @@ public:
     static ValueType interpolate(const ValueType& from, const ValueType& to, float progress);
 };
 
-
 struct CanvasPositionValue {
     glm::vec2 position;
 };
 
-class CanvasPositionProperty  {
+class CanvasPositionProperty {
 public:
     using ValueType = CanvasPositionValue;
 
@@ -53,7 +52,7 @@ struct CanvasSizeValue {
     glm::vec2 size;
 };
 
-class CanvasSizeProperty  {
+class CanvasSizeProperty {
 public:
     using ValueType = CanvasSizeValue;
 
@@ -62,7 +61,7 @@ public:
     static ValueType interpolate(const ValueType& from, const ValueType& to, float progress);
 };
 
-}
+}// namespace duk::animation
 
 namespace duk::serial {
 
@@ -106,6 +105,6 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& value, cons
     to_json_member(document, value, "size", canvas.size);
 }
 
-}
+}// namespace duk::serial
 
-#endif //DUK_ANIMATION_CANVAS_PROPERTY_H
+#endif//DUK_ANIMATION_CANVAS_PROPERTY_H

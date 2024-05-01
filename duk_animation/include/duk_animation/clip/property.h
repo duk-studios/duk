@@ -35,7 +35,6 @@ public:
 template<typename TEvaluator>
 class PropertyT final : public Property {
 public:
-
     using ValueType = typename TEvaluator::ValueType;
 
     void add_value(uint32_t sample, const ValueType& value);
