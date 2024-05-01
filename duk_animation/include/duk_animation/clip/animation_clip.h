@@ -19,6 +19,8 @@ public:
 
     void evaluate(const duk::objects::Object& object, float time) const;
 
+    void evaluate(const duk::objects::Object& object, uint32_t sample) const;
+
     uint32_t samples() const;
 
     float duration() const;

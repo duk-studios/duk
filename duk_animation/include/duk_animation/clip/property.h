@@ -128,7 +128,7 @@ const std::string& PropertyT<TEvaluator>::name() const {
 
 template<typename TEvaluator>
 typename PropertyT<TEvaluator>::ValueType PropertyT<TEvaluator>::sample_at(uint32_t sample) const {
-    auto it = m_sampleToValueIndex.lower_bound(sample);
+    auto it = m_sampleToValueIndex.upper_bound(sample);
     if (it == m_sampleToValueIndex.end()) {
         return m_values.back();
     }
@@ -140,7 +140,7 @@ typename PropertyT<TEvaluator>::ValueType PropertyT<TEvaluator>::sample_at(uint3
 
 template<typename TEvaluator>
 typename PropertyT<TEvaluator>::ValueType PropertyT<TEvaluator>::sample_interpolate(uint32_t sample) const {
-    auto next = m_sampleToValueIndex.lower_bound(sample);
+    auto next = m_sampleToValueIndex.upper_bound(sample);
     if (next == m_sampleToValueIndex.end()) {
         return m_values.back();
     }

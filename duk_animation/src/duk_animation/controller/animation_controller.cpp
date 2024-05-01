@@ -24,7 +24,7 @@ void AnimationController::evaluate(const duk::objects::Component<Animator>& anim
     for (auto& transition: animation->transitions) {
         if (transition.check(state)) {
             // sample at the end of the animation before transitioning
-            animation->clip->evaluate(animator.object(), animation->clip->duration());
+            animation->clip->evaluate(animator.object(), animation->clip->samples());
             state.animation = m_animations.at(transition.target());
             state.time = 0.0f;
         }

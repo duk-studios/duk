@@ -18,6 +18,10 @@ void AnimationClip::evaluate(const duk::objects::Object& object, const float tim
 
     const uint32_t sample = time * m_sampleRate;
 
+    evaluate(object, sample);
+}
+
+void AnimationClip::evaluate(const duk::objects::Object& object, uint32_t sample) const {
     for (auto& property: m_properties) {
         property->evaluate(object, sample);
     }
