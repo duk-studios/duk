@@ -5,7 +5,12 @@
 #ifndef DUK_ANIMATION_PROPERTY_H
 #define DUK_ANIMATION_PROPERTY_H
 
+#include <duk_objects/objects.h>
+
 #include <duk_serial/json/types.h>
+
+#include <duk_resource/solver/dependency_solver.h>
+#include <duk_resource/solver/reference_solver.h>
 
 #include <duk_tools/types.h>
 
@@ -13,16 +18,6 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-
-#include <duk_resource/solver/dependency_solver.h>
-#include <duk_resource/solver/reference_solver.h>
-
-namespace duk::objects {
-template<bool isConst>
-class ObjectHandle;
-
-using Object = ObjectHandle<false>;
-}// namespace duk::objects
 
 namespace duk::animation {
 

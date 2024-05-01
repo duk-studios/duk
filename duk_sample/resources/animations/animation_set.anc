@@ -13,25 +13,15 @@
         {
           "target": "scale",
           "condition": {
-            "type": "comparison",
-            "variable": "scaling",
-            "operator": "==",
-            "value": {
-              "type": "bool",
-              "value": true
-            }
+            "type": "trigger",
+            "variable": "scaling"
           }
         },
         {
           "target": "rotate",
           "condition": {
-            "type": "comparison",
-            "variable": "rotating",
-            "operator": "==",
-            "value": {
-              "type": "bool",
-              "value": true
-            }
+            "type": "trigger",
+            "variable": "rotating"
           }
         }
       ]

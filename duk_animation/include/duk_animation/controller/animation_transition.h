@@ -9,12 +9,17 @@
 
 #include <string>
 
+#include <duk_objects/objects.h>
+
 namespace duk::animation {
+
+class AnimationSet;
 
 enum class ConditionType {
     UNDEFINED,
     FINISHED,
-    COMPARISON
+    COMPARISON,
+    TRIGGER
 };
 
 enum class OperatorType {
@@ -31,23 +36,25 @@ class Condition {
 public:
     virtual ~Condition() = default;
 
+    virtual ConditionType type() const = 0;
+
     virtual bool evaluate(const AnimationState& state) const = 0;
 
-    virtual ConditionType type() const = 0;
+    virtual void execute(AnimationState& state) const;
 };
 
 class FinishedCondition : public Condition {
 public:
-    bool evaluate(const AnimationState& state) const override;
-
     ConditionType type() const override;
+
+    bool evaluate(const AnimationState& state) const override;
 };
 
 class ComparisonCondition : public Condition {
 public:
-    bool evaluate(const AnimationState& state) const override;
-
     ConditionType type() const override;
+
+    bool evaluate(const AnimationState& state) const override;
 
     friend void duk::serial::from_json<ComparisonCondition>(const rapidjson::Value& json, ComparisonCondition& condition);
 
@@ -59,10 +66,28 @@ private:
     Variable m_value;
 };
 
+class TriggerCondition : public Condition {
+public:
+    ConditionType type() const override;
+
+    bool evaluate(const AnimationState& state) const override;
+
+    void execute(AnimationState& state) const override;
+
+    friend void duk::serial::from_json<TriggerCondition>(const rapidjson::Value& json, TriggerCondition& condition);
+
+    friend void duk::serial::to_json<TriggerCondition>(rapidjson::Document& document, rapidjson::Value& value, const TriggerCondition& condition);
+
+private:
+    std::string m_variableName;
+};
+
 class AnimationTransition {
 public:
     // returns true if the transition condition is met
     bool check(const AnimationState& state) const;
+
+    void execute(const duk::objects::Object& object, AnimationState& state, const AnimationSet& animations) const;
 
     std::string_view target() const;
 
@@ -88,6 +113,9 @@ static duk::animation::ConditionType parse_condition_type(const std::string_view
     if (str == "comparison") {
         return duk::animation::ConditionType::COMPARISON;
     }
+    if (str == "trigger") {
+        return duk::animation::ConditionType::TRIGGER;
+    }
     return duk::animation::ConditionType::UNDEFINED;
 }
 
@@ -97,6 +125,8 @@ static std::string to_string(const duk::animation::ConditionType& type) {
             return "finished";
         case duk::animation::ConditionType::COMPARISON:
             return "comparison";
+        case duk::animation::ConditionType::TRIGGER:
+            return "trigger";
         case duk::animation::ConditionType::UNDEFINED:
         default:
             return "undefined";
@@ -190,6 +220,16 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
 }
 
 template<>
+inline void from_json(const rapidjson::Value& json, duk::animation::TriggerCondition& condition) {
+    from_json_member(json, "variable", condition.m_variableName);
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::TriggerCondition& condition) {
+    to_json_member(document, json, "variable", condition.m_variableName);
+}
+
+template<>
 inline void from_json(const rapidjson::Value& json, std::unique_ptr<duk::animation::Condition>& condition) {
     duk::animation::ConditionType type;
     from_json_member(json, "type", type);
@@ -206,6 +246,12 @@ inline void from_json(const rapidjson::Value& json, std::unique_ptr<duk::animati
             condition = std::move(comparisonCondition);
             break;
         }
+        case animation::ConditionType::TRIGGER: {
+            auto triggerCondition = std::make_unique<duk::animation::TriggerCondition>();
+            from_json(json, *triggerCondition);
+            condition = std::move(triggerCondition);
+            break;
+        }
         default:
             throw std::runtime_error("Invalid condition type");
     }
@@ -220,6 +266,9 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
             break;
         case animation::ConditionType::COMPARISON:
             to_json(document, json, static_cast<const duk::animation::ComparisonCondition&>(*condition));
+            break;
+        case animation::ConditionType::TRIGGER:
+            to_json(document, json, static_cast<const duk::animation::TriggerCondition&>(*condition));
             break;
         default:
             throw std::runtime_error("Invalid condition type");

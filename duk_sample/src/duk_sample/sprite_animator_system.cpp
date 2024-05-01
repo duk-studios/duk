@@ -20,13 +20,17 @@ void SpriteAnimatorSystem::update(duk::objects::Objects& objects, engine::Engine
 
     auto input = engine.input();
 
-    auto rotating = input->key(platform::Keys::R);
-    auto scaling = input->key(platform::Keys::T);
+    auto rotating = input->key_down(platform::Keys::R);
+    auto scaling = input->key_down(platform::Keys::T);
 
     for (auto object : objects.all_with<SpriteAnimator, duk::animation::Animator>()) {
         auto [spriteAnimator, animator] = object.components<SpriteAnimator, duk::animation::Animator>();
-        animator->state.variables.set("rotating", rotating);
-        animator->state.variables.set("scaling", scaling);
+        if (rotating) {
+            animator->state.variables.set("rotating", true);
+        }
+        if (scaling) {
+            animator->state.variables.set("scaling", true);
+        }
     }
 }
 
