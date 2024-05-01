@@ -64,6 +64,8 @@ class AnimationVariables {
 public:
     const Variable& at(const std::string& name) const;
 
+    void assign(const AnimationVariables& other);
+
     void set(const std::string& name, float value);
 
     void set(const std::string& name, int value);

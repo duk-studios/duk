@@ -96,6 +96,13 @@ const Variable& AnimationVariables::at(const std::string& name) const {
     return m_variables.at(name);
 }
 
+void AnimationVariables::assign(const AnimationVariables& other) {
+    for (const auto& [name, variable] : other.m_variables) {
+        // will not replace existing variables
+        m_variables.emplace(name, variable);
+    }
+}
+
 void AnimationVariables::set(const std::string& name, float value) {
     m_variables[name] = Variable(value);
 }

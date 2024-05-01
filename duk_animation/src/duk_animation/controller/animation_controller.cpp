@@ -44,7 +44,7 @@ AnimationState AnimationController::build_state() const {
     state.controller = this;
     state.time = 0.0f;
     state.animation = m_animations.front();
-    state.variables = m_variables;
+    state.variables.assign(m_variables);
     return state;
 }
 
