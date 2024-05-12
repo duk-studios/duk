@@ -14,6 +14,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <span>
 
 namespace duk::rhi {
 
@@ -47,9 +48,13 @@ public:
 
     VertexLayout(const std::initializer_list<VertexInput::Format>& formats);
 
+    void clear();
+
     void insert(VertexInput::Format format);
 
     void insert(const std::initializer_list<VertexInput::Format>& formats);
+
+    void insert(const std::span<VertexInput::Format>& formats);
 
     DUK_NO_DISCARD size_t size() const;
 

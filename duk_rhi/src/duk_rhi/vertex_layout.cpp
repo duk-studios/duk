@@ -53,12 +53,20 @@ VertexLayout::VertexLayout(const std::initializer_list<VertexInput::Format>& for
     : m_formats(formats) {
 }
 
+void VertexLayout::clear() {
+    m_formats.clear();
+}
+
 void VertexLayout::insert(VertexInput::Format format) {
     m_formats.push_back(format);
 }
 
 void VertexLayout::insert(const std::initializer_list<VertexInput::Format>& formats) {
     m_formats.insert(m_formats.end(), formats);
+}
+
+void VertexLayout::insert(const std::span<VertexInput::Format>& formats) {
+    m_formats.insert(m_formats.end(), formats.begin(), formats.end());
 }
 
 size_t VertexLayout::size() const {

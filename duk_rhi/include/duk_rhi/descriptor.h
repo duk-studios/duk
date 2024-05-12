@@ -4,36 +4,14 @@
 #ifndef DUK_RHI_DESCRIPTOR_H
 #define DUK_RHI_DESCRIPTOR_H
 
+#include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/image.h>
-#include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/sampler.h>
 
-#include <duk_hash/hash_combine.h>
 #include <duk_macros/macros.h>
 
-#include <cstdint>
-#include <vector>
-
 namespace duk::rhi {
-
-enum class DescriptorType {
-    UNDEFINED = 0,
-    UNIFORM_BUFFER,
-    STORAGE_BUFFER,
-    IMAGE,
-    IMAGE_SAMPLER,
-    STORAGE_IMAGE
-};
-
-struct DescriptorDescription {
-    DescriptorType type;
-    Shader::Module::Mask moduleMask;
-};
-
-struct DescriptorSetDescription {
-    std::vector<DescriptorDescription> bindings;
-};
 
 class Descriptor {
 public:
@@ -59,6 +37,8 @@ public:
 
     DUK_NO_DISCARD Buffer* buffer() const;
 
+    friend bool operator==(const Descriptor& lhs, const Descriptor& rhs);
+
 private:
     struct ImageDescriptor {
         Image* image;
@@ -79,28 +59,10 @@ private:
     DescriptorType m_type;
 };
 
+bool operator==(const Descriptor& lhs, const Descriptor& rhs);
+
+bool operator!=(const Descriptor& lhs, const Descriptor& rhs);
+
 }// namespace duk::rhi
 
-namespace std {
-
-template<>
-struct hash<duk::rhi::DescriptorDescription> {
-    size_t operator()(const duk::rhi::DescriptorDescription& descriptorDescription) noexcept {
-        size_t hash = 0;
-        duk::hash::hash_combine(hash, descriptorDescription.type);
-        duk::hash::hash_combine(hash, descriptorDescription.moduleMask);
-        return hash;
-    }
-};
-
-template<>
-struct hash<duk::rhi::DescriptorSetDescription> {
-    size_t operator()(const duk::rhi::DescriptorSetDescription& descriptorSetDescription) noexcept {
-        size_t hash = 0;
-        duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
-        return hash;
-    }
-};
-
-}// namespace std
 #endif// DUK_RHI_DESCRIPTOR_H

@@ -11,9 +11,9 @@
 
 namespace duk::rhi {
 
-VkShaderStageFlagBits convert_module(Shader::Module::Bits module);
+VkShaderStageFlagBits convert_module(ShaderModule::Bits module);
 
-VkShaderStageFlags convert_module_mask(Shader::Module::Mask moduleMask);
+VkShaderStageFlags convert_module_mask(ShaderModule::Mask moduleMask);
 
 struct VulkanShaderCreateInfo {
     VkDevice device;
@@ -31,26 +31,32 @@ public:
 
     DUK_NO_DISCARD const std::vector<VkVertexInputBindingDescription>& input_bindings() const;
 
-    DUK_NO_DISCARD const std::unordered_map<Shader::Module::Bits, VkShaderModule>& shader_modules() const;
+    DUK_NO_DISCARD const std::unordered_map<ShaderModule::Bits, VkShaderModule>& shader_modules() const;
 
     DUK_NO_DISCARD const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts() const;
 
     DUK_NO_DISCARD const VkPipelineLayout& pipeline_layout() const;
 
-    DUK_NO_DISCARD hash::Hash hash() const override;
+    DUK_NO_DISCARD const DescriptorSetDescription& descriptor_set_description(uint32_t set) const override;
+
+    DUK_NO_DISCARD const VertexLayout& vertex_layout() const override;
 
     DUK_NO_DISCARD bool is_graphics_shader() const override;
 
     DUK_NO_DISCARD bool is_compute_shader() const override;
 
+    DUK_NO_DISCARD hash::Hash hash() const override;
+
 private:
-    bool create_shader_module(Shader::Module::Bits type, const ShaderDataSource* shaderDataSource);
+    bool create_shader_module(ShaderModule::Bits type, const ShaderDataSource* shaderDataSource);
 
 private:
     VkDevice m_device;
     duk::hash::Hash m_hash;
-    Shader::Module::Mask m_moduleMask;
-    std::unordered_map<Shader::Module::Bits, VkShaderModule> m_shaderModules;
+    ShaderModule::Mask m_moduleMask;
+    std::vector<DescriptorSetDescription> m_descriptorSetDescriptions;
+    VertexLayout m_vertexLayout;
+    std::unordered_map<ShaderModule::Bits, VkShaderModule> m_shaderModules;
     std::vector<VkDescriptorSetLayout> m_descriptorSetLayouts;
     VkPipelineLayout m_pipelineLayout;
     std::vector<VkVertexInputBindingDescription> m_inputBindings;

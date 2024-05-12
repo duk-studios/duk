@@ -14,40 +14,26 @@ public:
 
     ~StdShaderDataSource() override;
 
-    void insert_spir_v_code(Shader::Module::Bits type, const uint8_t* data, size_t size);
+    void insert_spir_v_code(ShaderModule::Bits type, const uint8_t* data, size_t size);
 
-    void insert_spir_v_code(Shader::Module::Bits type, const std::vector<uint8_t>& data);
+    void insert_spir_v_code(ShaderModule::Bits type, const std::vector<uint8_t>& data);
 
-    void insert_spir_v_code(Shader::Module::Bits type, std::vector<uint8_t>&& data);
-
-    void insert_descriptor_set_description(const DescriptorSetDescription& descriptorSetDescription);
-
-    void insert_descriptor_set_description(DescriptorSetDescription&& descriptorSetDescription);
-
-    void insert_vertex_attribute(VertexInput::Format format);
-
-    void insert_vertex_attributes(const std::initializer_list<VertexInput::Format>& formats);
+    void insert_spir_v_code(ShaderModule::Bits type, std::vector<uint8_t>&& data);
 
     // overrides
-    Shader::Module::Mask module_mask() const override;
+    ShaderModule::Mask module_mask() const override;
 
-    const std::vector<uint8_t>& shader_module_spir_v_code(Shader::Module::Bits type) const override;
-
-    const std::vector<DescriptorSetDescription>& descriptor_set_descriptions() const override;
-
-    const VertexLayout& vertex_layout() const override;
+    const std::vector<uint8_t>& shader_module_spir_v_code(ShaderModule::Bits type) const override;
 
 protected:
     hash::Hash calculate_hash() const override;
 
-    struct ShaderModule {
+    struct ShaderModuleCode {
         std::vector<uint8_t> spirVCode;
     };
 
-    std::unordered_map<Shader::Module::Bits, ShaderModule> m_shaderModules;
-    Shader::Module::Mask m_moduleMask;
-    std::vector<DescriptorSetDescription> m_descriptorSetDescriptions;
-    VertexLayout m_vertexLayout;
+    std::unordered_map<ShaderModule::Bits, ShaderModuleCode> m_shaderModules;
+    ShaderModule::Mask m_moduleMask;
 };
 }// namespace duk::rhi
 

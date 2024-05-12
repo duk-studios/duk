@@ -7,46 +7,46 @@ namespace duk::rhi {
 
 ShaderDataSource::~ShaderDataSource() = default;
 
-bool ShaderDataSource::has_module(Shader::Module::Bits module) const {
+bool ShaderDataSource::has_module(ShaderModule::Bits module) const {
     return module_mask() & module;
 }
 
 bool duk::rhi::ShaderDataSource::has_vertex_module() const {
-    return has_module(Shader::Module::VERTEX);
+    return has_module(ShaderModule::VERTEX);
 }
 
 bool ShaderDataSource::has_geometry_module() const {
-    return has_module(Shader::Module::GEOMETRY);
+    return has_module(ShaderModule::GEOMETRY);
 }
 
 bool ShaderDataSource::has_tesselation_control_module() const {
-    return has_module(Shader::Module::TESSELLATION_CONTROL);
+    return has_module(ShaderModule::TESSELLATION_CONTROL);
 }
 
 bool ShaderDataSource::has_tesselation_evaluate_module() const {
-    return has_module(Shader::Module::TESSELLATION_EVALUATION);
+    return has_module(ShaderModule::TESSELLATION_EVALUATION);
 }
 
 bool ShaderDataSource::has_fragment_module() const {
-    return has_module(Shader::Module::FRAGMENT);
+    return has_module(ShaderModule::FRAGMENT);
 }
 
 bool ShaderDataSource::has_compute_module() const {
-    return has_module(Shader::Module::COMPUTE);
+    return has_module(ShaderModule::COMPUTE);
 }
 
 bool ShaderDataSource::valid_graphics_shader() const {
     const auto moduleMask = module_mask();
-    const auto minimumGraphicsPipelineShader = Shader::Module::VERTEX | Shader::Module::FRAGMENT;
+    const auto minimumGraphicsPipelineShader = ShaderModule::VERTEX | ShaderModule::FRAGMENT;
     const bool hasMinimumGraphics = moduleMask & minimumGraphicsPipelineShader;
-    const bool hasCompute = moduleMask & Shader::Module::COMPUTE;
+    const bool hasCompute = moduleMask & ShaderModule::COMPUTE;
     return hasMinimumGraphics && !hasCompute;
 }
 
 bool ShaderDataSource::valid_compute_shader() const {
     const auto moduleMask = module_mask();
-    const bool hasCompute = moduleMask & Shader::Module::COMPUTE;
-    const bool onlyHasCompute = (moduleMask & ~Shader::Module::COMPUTE) == 0;
+    const bool hasCompute = moduleMask & ShaderModule::COMPUTE;
+    const bool onlyHasCompute = (moduleMask & ~ShaderModule::COMPUTE) == 0;
     return hasCompute && onlyHasCompute;
 }
 

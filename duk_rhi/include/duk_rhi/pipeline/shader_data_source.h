@@ -18,15 +18,11 @@ class ShaderDataSource : public duk::hash::DataSource {
 public:
     ~ShaderDataSource() override;
 
-    DUK_NO_DISCARD virtual Shader::Module::Mask module_mask() const = 0;
+    DUK_NO_DISCARD virtual ShaderModule::Mask module_mask() const = 0;
 
-    DUK_NO_DISCARD virtual const std::vector<uint8_t>& shader_module_spir_v_code(Shader::Module::Bits type) const = 0;
+    DUK_NO_DISCARD virtual const std::vector<uint8_t>& shader_module_spir_v_code(ShaderModule::Bits type) const = 0;
 
-    DUK_NO_DISCARD virtual const std::vector<DescriptorSetDescription>& descriptor_set_descriptions() const = 0;
-
-    DUK_NO_DISCARD virtual const VertexLayout& vertex_layout() const = 0;
-
-    DUK_NO_DISCARD bool has_module(Shader::Module::Bits module) const;
+    DUK_NO_DISCARD bool has_module(ShaderModule::Bits module) const;
 
     DUK_NO_DISCARD bool has_vertex_module() const;
 

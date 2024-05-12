@@ -291,6 +291,10 @@ void VulkanDescriptorSet::set(uint32_t binding, const Descriptor& descriptor) {
     m_descriptors[binding] = descriptor;
 }
 
+uint32_t VulkanDescriptorSet::size() const noexcept {
+    return static_cast<uint32_t>(m_descriptors.size());
+}
+
 Descriptor& VulkanDescriptorSet::at(uint32_t binding) {
     return m_descriptors.at(binding);
 }

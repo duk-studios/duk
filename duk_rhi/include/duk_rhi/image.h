@@ -59,6 +59,8 @@ public:
     DUK_NO_DISCARD virtual uint32_t width() const = 0;
 
     DUK_NO_DISCARD virtual uint32_t height() const = 0;
+
+    glm::uvec2 size() const;
 };
 
 }// namespace duk::rhi
