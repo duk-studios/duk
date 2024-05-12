@@ -1,7 +1,7 @@
 /// 14/10/2023
 /// reflector.cpp
 
-#include <duk_material_generator/reflector.h>
+#include <duk_shader_generator/reflector.h>
 #include <duk_tools/file.h>
 
 #define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
@@ -170,7 +170,7 @@ static void add_types_from_block(SpvReflectBlockVariable* block, Reflector::Type
     types.emplace(typeReflection.name, typeReflection);
 }
 
-static void add_binding(SpvReflectDescriptorBinding* spvBinding, Reflector::Bindings& bindings, duk::rhi::Shader::Module::Bits shaderModuleBit) {
+static void add_binding(SpvReflectDescriptorBinding* spvBinding, Reflector::Bindings& bindings, duk::rhi::ShaderModule::Bits shaderModuleBit) {
     if (bindings.size() <= spvBinding->binding) {
         bindings.resize(spvBinding->binding + 1);
     }
@@ -233,63 +233,59 @@ Reflector::Reflector(const Parser& parser)
 
 Reflector::~Reflector() = default;
 
-void Reflector::reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::Module::Bits shaderModuleBit) {
+void Reflector::reflect_spv(const std::vector<uint8_t>& code, duk::rhi::ShaderModule::Bits shaderModuleBit) {
     m_modules.emplace(shaderModuleBit, code);
 
-    SpvReflectShaderModule module = {};
-    detail::check_result(spvReflectCreateShaderModule(code.size(), code.data(), &module));
+    // SpvReflectShaderModule module = {};
+    // detail::check_result(spvReflectCreateShaderModule(code.size(), code.data(), &module));
+    //
+    // if (shaderModuleBit == rhi::ShaderModule::VERTEX) {
+    //     uint32_t inputVariableCount;
+    //     detail::check_result(spvReflectEnumerateEntryPointInputVariables(&module, "main", &inputVariableCount, nullptr));
+    //
+    //     std::vector<SpvReflectInterfaceVariable*> inputVariables(inputVariableCount);
+    //     detail::check_result(spvReflectEnumerateEntryPointInputVariables(&module, "main", &inputVariableCount, inputVariables.data()));
+    //
+    //     detail::remove_unsupported_attributes(inputVariables);
+    //
+    //     m_attributes.resize(inputVariables.size());
+    //
+    //     for (int i = 0; i < inputVariables.size(); i++) {
+    //         auto inputVariable = inputVariables[i];
+    //         m_attributes.at(inputVariable->location) = (detail::vertex_attribute_format(inputVariable->format));
+    //     }
+    // }
+    //
+    // uint32_t descriptorSetCount;
+    // detail::check_result(spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, nullptr));
+    //
+    // std::vector<SpvReflectDescriptorSet*> descriptorSets(descriptorSetCount);
+    // detail::check_result(spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, descriptorSets.data()));
+    //
+    // if (descriptorSetCount > m_sets.size()) {
+    //     m_sets.resize(descriptorSetCount);
+    // }
 
-    if (shaderModuleBit == rhi::Shader::Module::VERTEX) {
-        uint32_t inputVariableCount;
-        detail::check_result(spvReflectEnumerateEntryPointInputVariables(&module, "main", &inputVariableCount, nullptr));
+    // for (auto descriptorSet: descriptorSets) {
+    //     auto& set = m_sets[descriptorSet->set];
+    //
+    //     std::vector<SpvReflectDescriptorBinding*> spvBindings(descriptorSet->bindings, descriptorSet->bindings + descriptorSet->binding_count);
+    //     for (auto spvBinding: spvBindings) {
+    //         switch (spvBinding->descriptor_type) {
+    //             case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+    //             case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+    //
+    //                 detail::add_types_from_block(&spvBinding->block, m_types);
+    //                 detail::add_binding(spvBinding, set.bindings, shaderModuleBit);
+    //                 break;
+    //             default:
+    //                 detail::add_binding(spvBinding, set.bindings, shaderModuleBit);
+    //                 continue;
+    //         }
+    //     }
+    // }
 
-        std::vector<SpvReflectInterfaceVariable*> inputVariables(inputVariableCount);
-        detail::check_result(spvReflectEnumerateEntryPointInputVariables(&module, "main", &inputVariableCount, inputVariables.data()));
-
-        detail::remove_unsupported_attributes(inputVariables);
-
-        m_attributes.resize(inputVariables.size());
-
-        for (int i = 0; i < inputVariables.size(); i++) {
-            auto inputVariable = inputVariables[i];
-            m_attributes.at(inputVariable->location) = (detail::vertex_attribute_format(inputVariable->format));
-        }
-    }
-
-    uint32_t descriptorSetCount;
-    detail::check_result(spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, nullptr));
-
-    std::vector<SpvReflectDescriptorSet*> descriptorSets(descriptorSetCount);
-    detail::check_result(spvReflectEnumerateDescriptorSets(&module, &descriptorSetCount, descriptorSets.data()));
-
-    if (descriptorSetCount > m_sets.size()) {
-        m_sets.resize(descriptorSetCount);
-    }
-
-    for (auto descriptorSet: descriptorSets) {
-        auto& set = m_sets[descriptorSet->set];
-
-        std::vector<SpvReflectDescriptorBinding*> spvBindings(descriptorSet->bindings, descriptorSet->bindings + descriptorSet->binding_count);
-        for (auto spvBinding: spvBindings) {
-            switch (spvBinding->descriptor_type) {
-                case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER:
-                case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-
-                    if (spvBinding->type_description->member_count > 1) {
-                        throw std::runtime_error("UBOs and SBOs can only have one member");
-                    }
-
-                    detail::add_types_from_block(&spvBinding->block, m_types);
-                    detail::add_binding(spvBinding, set.bindings, shaderModuleBit);
-                    break;
-                default:
-                    detail::add_binding(spvBinding, set.bindings, shaderModuleBit);
-                    continue;
-            }
-        }
-    }
-
-    spvReflectDestroyShaderModule(&module);
+    // spvReflectDestroyShaderModule(&module);
 }
 
 const Reflector::Types& Reflector::types() const {

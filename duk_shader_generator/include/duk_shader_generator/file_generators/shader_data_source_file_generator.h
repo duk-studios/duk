@@ -1,10 +1,10 @@
 /// 04/11/2023
 /// shader_data_source_generator.h
 
-#ifndef DUK_MATERIAL_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
-#define DUK_MATERIAL_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
+#ifndef DUK_SHADER_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
+#define DUK_SHADER_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
 
-#include <duk_material_generator/file_generators/file_generator.h>
+#include <duk_shader_generator/file_generators/file_generator.h>
 
 namespace duk::material_generator {
 
@@ -35,4 +35,4 @@ private:
 
 }// namespace duk::material_generator
 
-#endif// DUK_MATERIAL_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H
+#endif// DUK_SHADER_GENERATOR_SHADER_DATA_SOURCE_GENERATOR_H

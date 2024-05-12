@@ -1,10 +1,10 @@
 /// 14/10/2023
 /// reflector.h
 
-#ifndef DUK_MATERIAL_GENERATOR_REFLECTOR_H
-#define DUK_MATERIAL_GENERATOR_REFLECTOR_H
+#ifndef DUK_SHADER_GENERATOR_REFLECTOR_H
+#define DUK_SHADER_GENERATOR_REFLECTOR_H
 
-#include <duk_material_generator/parser.h>
+#include <duk_shader_generator/parser.h>
 #include <duk_rhi/descriptor.h>
 #include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/vertex_layout.h>
@@ -53,7 +53,7 @@ struct BindingReflection {
     uint32_t binding = 0;
     uint32_t set = 0;
     duk::rhi::DescriptorType descriptorType = rhi::DescriptorType::UNDEFINED;
-    duk::rhi::Shader::Module::Mask moduleMask = 0;
+    duk::rhi::ShaderModule::Mask moduleMask = 0;
 };
 
 struct SetReflection {
@@ -67,7 +67,7 @@ public:
     using Types = std::unordered_map<std::string, TypeReflection>;
     using Bindings = SetReflection::Bindings;
     using Sets = std::vector<SetReflection>;
-    using Modules = std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint8_t>>;
+    using Modules = std::unordered_map<duk::rhi::ShaderModule::Bits, std::vector<uint8_t>>;
     using Attributes = std::vector<duk::rhi::VertexInput::Format>;
 
 public:
@@ -84,7 +84,7 @@ public:
     const Attributes& attributes() const;
 
 private:
-    void reflect_spv(const std::vector<uint8_t>& code, duk::rhi::Shader::Module::Bits shaderModuleBit);
+    void reflect_spv(const std::vector<uint8_t>& code, duk::rhi::ShaderModule::Bits shaderModuleBit);
 
 private:
     const Parser& m_parser;
@@ -96,4 +96,4 @@ private:
 
 }// namespace duk::material_generator
 
-#endif// DUK_MATERIAL_GENERATOR_REFLECTOR_H
+#endif// DUK_SHADER_GENERATOR_REFLECTOR_H

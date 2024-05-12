@@ -1,6 +1,6 @@
-#include <duk_material_generator/generator.h>
-#include <duk_material_generator/parser.h>
-#include <duk_material_generator/reflector.h>
+#include <duk_shader_generator/generator.h>
+#include <duk_shader_generator/parser.h>
+#include <duk_shader_generator/reflector.h>
 
 #include <iostream>
 

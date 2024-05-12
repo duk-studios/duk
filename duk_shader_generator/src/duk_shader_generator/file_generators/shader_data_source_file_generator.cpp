@@ -1,7 +1,7 @@
 /// 04/11/2023
 /// shader_data_source_generator.cpp
 
-#include <duk_material_generator/file_generators/shader_data_source_file_generator.h>
+#include <duk_shader_generator/file_generators/shader_data_source_file_generator.h>
 #include <duk_tools/string.h>
 
 #include <filesystem>
@@ -17,7 +17,7 @@ static std::string shader_data_source_file_name(const Parser& parser) {
 
 static std::string shader_header_include_path(const Parser& parser, const std::string& fileName) {
     auto absoluteIncludeDirectory = parser.output_include_directory();
-    auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/material/");
+    auto startIncludePos = absoluteIncludeDirectory.find("duk_renderer/shader/");
     auto relativeIncludeDirectory = absoluteIncludeDirectory.substr(startIncludePos);
     std::ostringstream oss;
     oss << relativeIncludeDirectory << '/' << fileName << ".h";
@@ -28,20 +28,20 @@ static std::string shader_data_source_class_name(const Parser& parser) {
     return duk::tools::snake_to_pascal(parser.output_material_name()) + "ShaderDataSource";
 }
 
-static std::string module_name(duk::rhi::Shader::Module::Bits moduleBit) {
+static std::string module_name(duk::rhi::ShaderModule::Bits moduleBit) {
     switch (moduleBit) {
-        case duk::rhi::Shader::Module::VERTEX:
-            return "duk::rhi::Shader::Module::VERTEX";
-        case duk::rhi::Shader::Module::TESSELLATION_CONTROL:
-            return "duk::rhi::Shader::Module::TESSELLATION_CONTROL";
-        case duk::rhi::Shader::Module::TESSELLATION_EVALUATION:
-            return "duk::rhi::Shader::Module::TESSELLATION_EVALUATION";
-        case duk::rhi::Shader::Module::GEOMETRY:
-            return "duk::rhi::Shader::Module::GEOMETRY";
-        case duk::rhi::Shader::Module::FRAGMENT:
-            return "duk::rhi::Shader::Module::FRAGMENT";
-        case duk::rhi::Shader::Module::COMPUTE:
-            return "duk::rhi::Shader::Module::COMPUTE";
+        case duk::rhi::ShaderModule::VERTEX:
+            return "duk::rhi::ShaderModule::VERTEX";
+        case duk::rhi::ShaderModule::TESSELLATION_CONTROL:
+            return "duk::rhi::ShaderModule::TESSELLATION_CONTROL";
+        case duk::rhi::ShaderModule::TESSELLATION_EVALUATION:
+            return "duk::rhi::ShaderModule::TESSELLATION_EVALUATION";
+        case duk::rhi::ShaderModule::GEOMETRY:
+            return "duk::rhi::ShaderModule::GEOMETRY";
+        case duk::rhi::ShaderModule::FRAGMENT:
+            return "duk::rhi::ShaderModule::FRAGMENT";
+        case duk::rhi::ShaderModule::COMPUTE:
+            return "duk::rhi::ShaderModule::COMPUTE";
     }
     throw std::runtime_error("Unknown shader module");
 }
@@ -148,12 +148,12 @@ static std::string generate_spir_v_code_map(const Reflector& reflector) {
     return oss.str();
 }
 
-static std::string generate_module_mask(duk::rhi::Shader::Module::Mask mask) {
+static std::string generate_module_mask(duk::rhi::ShaderModule::Mask mask) {
     std::ostringstream oss;
 
     bool needsOrOperator = false;
-    for (int i = 0; i < duk::rhi::Shader::Module::kCount; i++) {
-        const auto bit = static_cast<duk::rhi::Shader::Module::Bits>(mask & (1 << i));
+    for (int i = 0; i < duk::rhi::ShaderModule::kCount; i++) {
+        const auto bit = static_cast<duk::rhi::ShaderModule::Bits>(mask & (1 << i));
         if (bit) {
             if (needsOrOperator) {
                 oss << " | ";
@@ -232,22 +232,16 @@ class TemplateShaderDataSource : public duk::rhi::ShaderDataSource {
 public:
     TemplateShaderDataSource();
 
-    duk::rhi::Shader::Module::Mask module_mask() const override;
+    duk::rhi::ShaderModule::Mask module_mask() const override;
 
-    const std::vector<uint8_t>& shader_module_spir_v_code(duk::rhi::Shader::Module::Bits type) const override;
-
-    const std::vector<duk::rhi::DescriptorSetDescription>& descriptor_set_descriptions() const override;
-
-    const duk::rhi::VertexLayout& vertex_layout() const override;
+    const std::vector<uint8_t>& shader_module_spir_v_code(duk::rhi::ShaderModule::Bits type) const override;
 
 private:
     duk::hash::Hash calculate_hash() const override;
 
 private:
-    duk::rhi::Shader::Module::Mask m_moduleMask;
-    std::unordered_map<duk::rhi::Shader::Module::Bits, std::vector<uint8_t>> m_moduleSpirVCode;
-    std::vector<duk::rhi::DescriptorSetDescription> m_descriptorSetDescriptions;
-    duk::rhi::VertexLayout m_vertexLayout;
+    duk::rhi::ShaderModule::Mask m_moduleMask;
+    std::unordered_map<duk::rhi::ShaderModule::Bits, std::vector<uint8_t>> m_moduleSpirVCode;
 };)";
 /// ---------------------------------------------------
 
@@ -259,27 +253,15 @@ TemplateShaderDataSource::TemplateShaderDataSource() {
 
     m_moduleSpirVCode = TemplateModuleSpirVCode;
 
-    m_descriptorSetDescriptions = TemplateModuleDescriptorSetDescriptions;
-
-    m_vertexLayout = TemplateVertexLayout;
-
     update_hash();
 }
 
-duk::rhi::Shader::Module::Mask TemplateShaderDataSource::module_mask() const {
+duk::rhi::ShaderModule::Mask TemplateShaderDataSource::module_mask() const {
     return m_moduleMask;
 }
 
-const std::vector<uint8_t>& TemplateShaderDataSource::shader_module_spir_v_code(duk::rhi::Shader::Module::Bits type) const {
+const std::vector<uint8_t>& TemplateShaderDataSource::shader_module_spir_v_code(duk::rhi::ShaderModule::Bits type) const {
     return m_moduleSpirVCode.at(type);
-}
-
-const std::vector<duk::rhi::DescriptorSetDescription>& TemplateShaderDataSource::descriptor_set_descriptions() const {
-    return m_descriptorSetDescriptions;
-}
-
-const rhi::VertexLayout& TemplateShaderDataSource::vertex_layout() const {
-    return m_vertexLayout;
 }
 
 duk::hash::Hash TemplateShaderDataSource::calculate_hash() const {
@@ -290,12 +272,6 @@ duk::hash::Hash TemplateShaderDataSource::calculate_hash() const {
         duk::hash::hash_combine(hash, type);
         duk::hash::hash_combine(hash, module.data(), module.size());
     }
-
-    for (const auto& descriptorSetDescription : m_descriptorSetDescriptions) {
-        duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
-    }
-
-    duk::hash::hash_combine(hash, m_vertexLayout);
 
     return hash;
 })";
@@ -365,8 +341,6 @@ void ShaderDataSourceFileGenerator::generate_class_definition(std::ostringstream
     auto classDefinition = std::regex_replace(detail::kClassDefinitionTemplate, std::regex("TemplateShaderDataSource"), m_className);
     classDefinition = std::regex_replace(classDefinition, std::regex("TemplateModuleMask"), detail::generate_module_mask(m_reflector));
     classDefinition = std::regex_replace(classDefinition, std::regex("TemplateModuleSpirVCode"), detail::generate_spir_v_code_map(m_reflector));
-    classDefinition = std::regex_replace(classDefinition, std::regex("TemplateModuleDescriptorSetDescriptions"), detail::generate_descriptor_sets_description(m_reflector));
-    classDefinition = std::regex_replace(classDefinition, std::regex("TemplateVertexLayout"), detail::generate_vertex_layout(m_reflector));
 
     oss << classDefinition << std::endl;
 }

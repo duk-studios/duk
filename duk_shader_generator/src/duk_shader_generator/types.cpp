@@ -1,7 +1,7 @@
 /// 15/10/2023
 /// types.cpp
 
-#include <duk_material_generator/types.h>
+#include <duk_shader_generator/types.h>
 
 #include <unordered_map>
 #include <unordered_set>

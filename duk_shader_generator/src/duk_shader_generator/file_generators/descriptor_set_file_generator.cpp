@@ -1,8 +1,8 @@
 /// 11/11/2023
 /// descriptor_set_generator.cpp
 
-#include <duk_material_generator/file_generators/descriptor_set_file_generator.h>
-#include <duk_material_generator/file_generators/generator_utils.h>
+#include <duk_shader_generator/file_generators/descriptor_set_file_generator.h>
+#include <duk_shader_generator/file_generators/generator_utils.h>
 #include <duk_tools/string.h>
 
 #include <filesystem>

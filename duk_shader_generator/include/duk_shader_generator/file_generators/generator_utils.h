@@ -1,8 +1,8 @@
 /// 11/11/2023
 /// generator_utils.h
 
-#ifndef DUK_MATERIAL_GENERATOR_GENERATOR_UTILS_H
-#define DUK_MATERIAL_GENERATOR_GENERATOR_UTILS_H
+#ifndef DUK_SHADER_GENERATOR_GENERATOR_UTILS_H
+#define DUK_SHADER_GENERATOR_GENERATOR_UTILS_H
 
 #include <duk_macros/macros.h>
 
@@ -32,4 +32,4 @@ DUK_NO_DISCARD std::string generate_for_each(const T& container, P predicate, co
 
 }// namespace duk::material_generator::utils
 
-#endif// DUK_MATERIAL_GENERATOR_GENERATOR_UTILS_H
+#endif// DUK_SHADER_GENERATOR_GENERATOR_UTILS_H

@@ -1,8 +1,8 @@
 /// 04/11/2023
 /// local_types_file_generator.cpp
 
-#include <duk_material_generator/file_generators/local_types_file_generator.h>
-#include <duk_material_generator/types.h>
+#include <duk_shader_generator/file_generators/local_types_file_generator.h>
+#include <duk_shader_generator/types.h>
 
 #include <filesystem>
 
@@ -46,9 +46,6 @@ std::vector<BindingReflection> LocalTypesFileGenerator::extract_local_bindings()
     std::vector<BindingReflection> bindings;
     for (const auto& set: sets) {
         for (auto& binding: set.bindings) {
-            if (m_parser.is_global_binding(binding.typeName)) {
-                continue;
-            }
             bindings.push_back(binding);
         }
     }

@@ -1,8 +1,8 @@
 /// 04/11/2023
 /// file_generator.cpp
 
-#include <duk_material_generator/file_generators/file_generator.h>
-#include <duk_material_generator/types.h>
+#include <duk_shader_generator/file_generators/file_generator.h>
+#include <duk_shader_generator/types.h>
 
 #include <fstream>
 

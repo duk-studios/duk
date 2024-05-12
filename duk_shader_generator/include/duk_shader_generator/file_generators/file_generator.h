@@ -1,10 +1,10 @@
 /// 04/11/2023
 /// file_generator.h
 
-#ifndef DUK_MATERIAL_GENERATOR_FILE_GENERATOR_H
-#define DUK_MATERIAL_GENERATOR_FILE_GENERATOR_H
+#ifndef DUK_SHADER_GENERATOR_FILE_GENERATOR_H
+#define DUK_SHADER_GENERATOR_FILE_GENERATOR_H
 
-#include <duk_material_generator/reflector.h>
+#include <duk_shader_generator/reflector.h>
 
 #include <span>
 #include <sstream>
@@ -32,4 +32,4 @@ protected:
 
 }// namespace duk::material_generator
 
-#endif// DUK_MATERIAL_GENERATOR_FILE_GENERATOR_H
+#endif// DUK_SHADER_GENERATOR_FILE_GENERATOR_H

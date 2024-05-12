@@ -1,10 +1,10 @@
 /// 04/11/2023
 /// local_types_file_generator.h
 
-#ifndef DUK_MATERIAL_GENERATOR_LOCAL_TYPES_FILE_GENERATOR_H
-#define DUK_MATERIAL_GENERATOR_LOCAL_TYPES_FILE_GENERATOR_H
+#ifndef DUK_SHADER_GENERATOR_LOCAL_TYPES_FILE_GENERATOR_H
+#define DUK_SHADER_GENERATOR_LOCAL_TYPES_FILE_GENERATOR_H
 
-#include <duk_material_generator/file_generators/types_file_generator.h>
+#include <duk_shader_generator/file_generators/types_file_generator.h>
 
 namespace duk::material_generator {
 
@@ -22,4 +22,4 @@ private:
 
 }// namespace duk::material_generator
 
-#endif// DUK_MATERIAL_GENERATOR_LOCAL_TYPES_FILE_GENERATOR_H
+#endif// DUK_SHADER_GENERATOR_LOCAL_TYPES_FILE_GENERATOR_H
