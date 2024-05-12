@@ -14,6 +14,7 @@
 #include <set>
 #include <vector>
 #include <sstream>
+#include <filesystem>
 
 namespace duk::serial {
 
@@ -35,6 +36,16 @@ inline void from_json<std::string>(const rapidjson::Value& json, std::string& va
 template<>
 inline void to_json<std::string>(rapidjson::Document& document, rapidjson::Value& json, const std::string& value) {
     json.SetString(value.c_str(), document.GetAllocator());
+}
+
+template<>
+inline void from_json(const rapidjson::Value& json, std::filesystem::path& value) {
+    value = json.GetString();
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const std::filesystem::path& value) {
+    to_json(document, json, value.string());
 }
 
 namespace detail {
