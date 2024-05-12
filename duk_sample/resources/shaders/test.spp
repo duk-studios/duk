@@ -1,0 +1,6 @@
+{
+  "vert": "test.vert",
+  "frag": "test.frag",
+  "blend": false,
+  "depth": true
+}

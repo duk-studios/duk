@@ -19,10 +19,10 @@
     {
       "type": "image-sampler",
       "name": "uBaseColor",
-      "image": 1000004,
+      "image": 1,
       "sampler": {
-        "wrap": "clamp-edge",
-        "filter": "linear"
+        "filter": "nearest",
+        "wrap": "clamp-edge"
       }
     }
   ]

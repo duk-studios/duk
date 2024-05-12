@@ -5,7 +5,8 @@
 #include <duk_renderer/sprite/sprite_mesh.h>
 #include <duk_renderer/mesh_buffer.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/material/sprites/sprite_color/sprite_color_material.h>
+
+#include "duk_renderer/material/material.h"
 
 namespace duk::renderer {
 
@@ -43,14 +44,13 @@ std::shared_ptr<Material> SpriteCache::material_for(Sprite* atlas) {
         return it->second;
     }
 
-    SpriteColorMaterialDataSource materialDataSource;
-    materialDataSource.image = atlas->image();
-    materialDataSource.color = glm::vec4(1.0f);
 
     MaterialCreateInfo materialCreateInfo = {};
     materialCreateInfo.renderer = m_renderer;
-    materialCreateInfo.materialDataSource = &materialDataSource;
     auto material = std::make_shared<Material>(materialCreateInfo);
+
+    material->set("uBaseColor", atlas->image());
+    material->set("uMaterial", glm::vec4(1.0f));
 
     m_materials.emplace(hash, material);
 

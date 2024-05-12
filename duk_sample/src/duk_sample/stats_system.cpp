@@ -8,6 +8,8 @@
 
 #include <duk_renderer/components/text_renderer.h>
 
+#include <numeric>
+
 namespace duk::sample {
 
 StatsSystem::StatsSystem()
