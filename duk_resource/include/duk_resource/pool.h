@@ -52,16 +52,16 @@ public:
         requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
 
     template<typename T>
-    T* get()
-        requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
+    T* get() requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
+
+    template<typename T>
+    const T* get() const requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T>;
 
     void clear();
 
-    void clear_unused();
-
 private:
     template<typename T>
-    size_t pool_index();
+    size_t pool_index() const;
 
 private:
     static size_t s_poolIndexCounter;
@@ -96,7 +96,16 @@ T* Pools::get()
 }
 
 template<typename T>
-size_t Pools::pool_index() {
+const T* Pools::get() const requires std::is_base_of_v<PoolT<ResourceT<typename T::ResourceType>>, T> {
+    const auto index = pool_index<typename T::ResourceType>();
+    if (index >= m_pools.size()) {
+        return nullptr;
+    }
+    return dynamic_cast<const T*>(m_pools.at(index).get());
+}
+
+template<typename T>
+size_t Pools::pool_index() const {
     static const auto index = s_poolIndexCounter++;
     return index;
 }
