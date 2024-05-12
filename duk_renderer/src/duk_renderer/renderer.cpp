@@ -39,6 +39,12 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
         m_globalDescriptors = std::make_unique<GlobalDescriptors>(globalDescriptorsCreateInfo);
     }
+
+    {
+        PipelineCacheCreateInfo pipelineCacheCreateInfo = {};
+        pipelineCacheCreateInfo.renderer = this;
+        m_pipelineCache = std::make_unique<PipelineCache>(pipelineCacheCreateInfo);
+    }
 }
 
 Renderer::~Renderer() = default;
@@ -150,8 +156,8 @@ void Renderer::update_passes(objects::Objects& objects) {
     Pass::UpdateParams updateParams = {};
     updateParams.objects = &objects;
     updateParams.globalDescriptors = m_globalDescriptors.get();
-    updateParams.outputWidth = render_width();
-    updateParams.outputHeight = render_height();
+    updateParams.viewport = {render_width(), render_height()};
+    updateParams.pipelineCache = m_pipelineCache.get();
 
     for (auto& pass: m_passes) {
         pass->update(updateParams);

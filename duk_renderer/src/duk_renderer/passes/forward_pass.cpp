@@ -6,10 +6,10 @@
 #include <duk_renderer/components/text_renderer.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/material/material.h>
-#include <duk_renderer/material/pipeline.h>
 #include <duk_renderer/mesh/mesh.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/sprite/sprite_cache.h>
 #include <duk_renderer/sprite/sprite_mesh.h>
 
@@ -44,15 +44,8 @@ static void update_texts(const Pass::UpdateParams& params, duk::rhi::RenderPass*
         drawEntries.emplace_back(textEntry);
     }
 
-    // update materials
-    DrawParams drawParams = {};
-    drawParams.globalDescriptors = params.globalDescriptors;
-    drawParams.outputWidth = params.outputWidth;
-    drawParams.outputHeight = params.outputHeight;
-    drawParams.renderPass = renderPass;
-
     for (auto material: uniqueMaterials) {
-        material->update(drawParams);
+        material->update(*params.pipelineCache, renderPass, params.viewport);
     }
 }
 
@@ -95,11 +88,6 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
             continue;
         }
 
-        if (!material->instance_buffer()) {
-            duk::log::warn("MeshRenderer with a Material with no InstanceBuffer detected, skipping...");
-            continue;
-        }
-
         auto& objectEntry = meshes.emplace_back();
         objectEntry.objectId = object.id();
         objectEntry.mesh = meshRenderer->mesh.get();
@@ -113,8 +101,13 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
         return;
     }
 
-    for (auto material: uniqueMaterials) {
-        material->instance_buffer()->clear();
+    for (const auto material : uniqueMaterials) {
+        material->set("uCamera", params.globalDescriptors->camera_ubo()->descriptor());
+        MaterialLocationId lights = material->find_binding("uLights");
+        if (lights.valid()) {
+            material->set(lights, params.globalDescriptors->lights_ubo()->descriptor());
+        }
+        material->clear();
     }
 
     SortKey::sort_indices(meshes, sortedMeshes);
@@ -124,8 +117,10 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
     for (auto sortedIndex: sortedMeshes) {
         auto& meshEntry = meshes[sortedIndex];
 
-        // update instance buffer
-        meshEntry.material->instance_buffer()->insert(objects->object(meshEntry.objectId));
+        auto material = meshEntry.material;
+
+        // update instance buffers
+        material->push(meshEntry.objectId);
 
         if (compatible(meshEntry, drawEntry)) {
             drawEntry.instanceCount++;
@@ -137,7 +132,7 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
         }
 
         // if the material is different, it's an entire new draw entry starting at 0
-        if (drawEntry.material != meshEntry.material) {
+        if (drawEntry.material != material) {
             drawEntry.instanceCount = 1;
             drawEntry.firstInstance = 0;
         }
@@ -146,24 +141,15 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
             drawEntry.firstInstance += drawEntry.instanceCount;
             drawEntry.instanceCount = 1;
         }
-        drawEntry.material = meshEntry.material;
+        drawEntry.material = material;
         drawEntry.mesh = meshEntry.mesh;
     }
     if (valid(drawEntry)) {
         drawEntries.push_back(drawEntry);
     }
 
-    // update materials
-    DrawParams drawParams = {};
-    drawParams.globalDescriptors = params.globalDescriptors;
-    drawParams.outputWidth = params.outputWidth;
-    drawParams.outputHeight = params.outputHeight;
-    drawParams.renderPass = renderPass;
-
     for (auto material: uniqueMaterials) {
-        // flush instance buffers
-        material->instance_buffer()->flush();
-        material->update(drawParams);
+        material->update(*params.pipelineCache, renderPass, params.viewport);
     }
 }
 
@@ -215,8 +201,8 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
         return;
     }
 
-    for (auto material: uniqueMaterials) {
-        material->instance_buffer()->clear();
+    for (const auto material: uniqueMaterials) {
+        material->clear();
     }
 
     SortKey::sort_indices(sprites, sortedSprites);
@@ -227,7 +213,7 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
         auto& spriteEntry = sprites[sortedIndex];
 
         // update instance buffer
-        spriteEntry.material->instance_buffer()->insert(objects->object(spriteEntry.objectId));
+        spriteEntry.material->push(spriteEntry.objectId);
 
         if (compatible(spriteEntry, drawEntry)) {
             drawEntry.instanceCount++;
@@ -254,15 +240,8 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
         drawEntries.push_back(drawEntry);
     }
 
-    DrawParams drawParams = {};
-    drawParams.globalDescriptors = params.globalDescriptors;
-    drawParams.outputWidth = params.outputWidth;
-    drawParams.outputHeight = params.outputHeight;
-    drawParams.renderPass = renderPass;
-
     for (auto& material: uniqueMaterials) {
-        material->instance_buffer()->flush();
-        material->update(drawParams);
+        material->update(*params.pipelineCache, renderPass, params.viewport);
     }
 }
 
@@ -329,8 +308,8 @@ PassConnection* ForwardPass::out_color() {
 }
 
 void ForwardPass::update(const Pass::UpdateParams& params) {
-    if (!m_colorImage || m_colorImage->width() != params.outputWidth || m_colorImage->height() != params.outputHeight) {
-        m_colorImage = m_renderer->create_color_image(params.outputWidth, params.outputHeight, detail::kColorFormat);
+    if (!m_colorImage || glm::vec2(m_colorImage->size()) != params.viewport) {
+        m_colorImage = m_renderer->create_color_image(params.viewport.x, params.viewport.y, detail::kColorFormat);
 
         // recreate frame buffer in case image was resized
         m_frameBuffer.reset();
@@ -338,8 +317,8 @@ void ForwardPass::update(const Pass::UpdateParams& params) {
         m_outColor.update(m_colorImage.get());
     }
 
-    if (!m_depthImage || m_depthImage->width() != params.outputWidth || m_depthImage->height() != params.outputHeight) {
-        m_depthImage = m_renderer->create_depth_image(params.outputWidth, params.outputHeight);
+    if (!m_depthImage || glm::vec2(m_depthImage->size()) != params.viewport) {
+        m_depthImage = m_renderer->create_depth_image(params.viewport.x, params.viewport.y);
 
         // recreate frame buffer in case image was resized
         m_frameBuffer.reset();

@@ -13,7 +13,7 @@ namespace duk {
 namespace renderer {
 
 class Pass;
-class Pipeline;
+class PipelineCache;
 class GlobalDescriptors;
 class ImagePool;
 class MaterialPool;
@@ -61,6 +61,7 @@ protected:
     std::shared_ptr<duk::rhi::CommandQueue> m_mainQueue;
     std::vector<std::shared_ptr<Pass>> m_passes;
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
+    std::unique_ptr<PipelineCache> m_pipelineCache;
 };
 
 /// Creates a Renderer with a Forward Pass (and PresentPass if a window is provided)

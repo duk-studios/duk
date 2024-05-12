@@ -9,12 +9,12 @@
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/shader/shader_pipeline_pool.h>
 #include <duk_renderer/image/image_pool.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/material/material_pool.h>
 #include <duk_renderer/mesh/mesh_pool.h>
 #include <duk_renderer/renderer.h>
-#include <duk_rhi/rhi.h>
 #include <duk_tools/timer.h>
 #include <duk_renderer/register_types.h>
 
@@ -53,6 +53,11 @@ public:
         duk::renderer::ImagePoolCreateInfo imagePoolCreateInfo = {};
         imagePoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
+
+        // shader pool
+        duk::renderer::ShaderPipelinePoolCreateInfo shaderPipelinePoolCreateInfo = {};
+        shaderPipelinePoolCreateInfo.renderer = m_renderer.get();
+        m_pools.create_pool<duk::renderer::ShaderPipelinePool>(shaderPipelinePoolCreateInfo);
 
         // material pool
         duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
@@ -110,28 +115,43 @@ int main() {
     globalPointLight->value.color = glm::vec3(1.0f, 1.0f, 1.0f);
     globalPointLight->value.intensity = 5.0f;
 
-    //And finally adding the cube to the objects.
-    //Our cube has the Mesh Drawing component, that specifies what mesh type and material we are going to use.
-    //Also our position and scale and rotation values.
-    duk::objects::Object cubeObject = objects.add_object();
-    auto cubeMeshRenderer = cubeObject.add<duk::renderer::MeshRenderer>();
-    cubeMeshRenderer->mesh = application.pools()->get<duk::renderer::MeshPool>()->cube();
 
-    auto imagePool = application.pools()->get<duk::renderer::ImagePool>();
+    auto add_mesh_object = [](
+        duk::objects::Objects& objects,
+        const duk::renderer::MeshResource& mesh,
+        const duk::renderer::MaterialResource& material,
+        const glm::vec3& position) -> duk::objects::Object {
+
+        duk::objects::Object object = objects.add_object();
+        auto meshRenderer = object.add<duk::renderer::MeshRenderer>();
+        meshRenderer->mesh = mesh;
+        meshRenderer->material = material;
+
+        auto transform = object.add<duk::renderer::Transform>();
+        transform->position = position;
+        transform->scale = glm::vec3(1.0f, 1.0f, 1.0f);
+        transform->rotation = glm::radians(glm::vec3(30, 45, 0));
+
+        return object;
+    };
+
     auto materialPool = application.pools()->get<duk::renderer::MaterialPool>();
 
     // Create a phong material
-    duk::renderer::PhongMaterialDataSource phongMaterialDataSource = {};
-    phongMaterialDataSource.albedo = glm::vec4(0.4f, 1.0f, 0.8f, 1.0f);
-    phongMaterialDataSource.albedoTexture = imagePool->white_image();
-    phongMaterialDataSource.specular = 32;
-    phongMaterialDataSource.specularTexture = imagePool->white_image();
-    phongMaterialDataSource.update_hash();
-    cubeMeshRenderer->material = materialPool->create(duk::resource::Id(666), &phongMaterialDataSource);
-    auto cubeTransform = cubeObject.add<duk::renderer::Transform>();
-    cubeTransform->position = glm::vec3(0, 0, -10);
-    cubeTransform->scale = glm::vec3(1.0f, 1.0f, 1.0f);
-    cubeTransform->rotation = glm::radians(glm::vec3(30, 45, 0));
+    auto material = materialPool->create_phong(*application.pools(), duk::resource::Id(666));
+    material->set("uProperties", "color", glm::vec4(1.0f, 0.5f, 0.8f, 1.0f));
+    // material->set("uBaseColor", imagePool->white_image(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
+
+    auto mesh = application.pools()->get<duk::renderer::MeshPool>()->cube();
+
+    auto cube1 = add_mesh_object(objects, mesh, material, glm::vec3(0, 2, -10));
+    auto cube2 = add_mesh_object(objects, mesh, material, glm::vec3(0, -2, -10));
+
+    auto cube1Transform = cube1.component<duk::renderer::Transform>();
+    auto cube2Transform = cube2.component<duk::renderer::Transform>();
+
+    material->set(cube1.id(), "uProperties", "color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    material->set(cube2.id(), "uProperties", "color", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
     //Show the window we created.
     application.window()->show();
@@ -149,11 +169,15 @@ int main() {
             application.window()->wait_events();
         }
 
-        duk::renderer::update_transforms(objects);
-        duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());
+        auto time = timer.total_time();
 
         //Rotating the cube in the X value by the timer total duration.
-        cubeTransform->rotation = glm::vec3(timer.total_duration().count(), 45.0f, 0.0f);
+        cube1Transform->rotation = glm::radians(glm::vec3(time * 30, 45.0f, 0.0f));
+
+        cube2Transform->rotation = glm::radians(glm::vec3(time * -52, sinf(time  * 4) * 85, 15.0f));
+
+        duk::renderer::update_transforms(objects);
+        duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());
 
         //Telling to our renderer to render the objects we want.
         application.renderer()->render(objects);
