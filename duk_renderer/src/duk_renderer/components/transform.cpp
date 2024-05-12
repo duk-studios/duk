@@ -1,8 +1,9 @@
 /// 20/08/2023
 /// transform.cpp
 
-#include <duk_objects/objects.h>
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/material/material.h>
+
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace duk::renderer {
@@ -30,7 +31,14 @@ void update_transform(const duk::objects::Component<Transform>& transform) {
 
 void update_transforms(duk::objects::Objects& objects) {
     for (auto object: objects.all_with<Transform>()) {
-        update_transform(object.component<Transform>());
+        auto transform = object.component<Transform>();
+
+        update_transform(transform);
+
+        if (auto material = find_material(object)) {
+            material->set(object.id(), "uTransform", "model", transform->model);
+            material->set(object.id(), "uTransform", "invModel", transform->invModel);
+        }
     }
 }
 
