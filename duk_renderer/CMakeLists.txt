@@ -89,6 +89,10 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/sprite/sprite_handler.cpp
         src/duk_renderer/sprite/sprite_mesh.cpp
         src/duk_renderer/sprite/sprite_pool.cpp
+        src/duk_renderer/shader/pipeline_cache.cpp
+        src/duk_renderer/shader/shader_pipeline.cpp
+        src/duk_renderer/shader/shader_pipeline_pool.cpp
+        src/duk_renderer/shader/shader_pipeline_handler.cpp
         src/duk_renderer/mesh/mesh.cpp
         src/duk_renderer/mesh/mesh_data_source.cpp
         src/duk_renderer/mesh/mesh_pool.cpp
@@ -157,7 +161,7 @@ target_link_libraries(duk_renderer
 set_target_properties(duk_renderer PROPERTIES CXX_STANDARD 20)
 
 # used for generating spv files
-add_subdirectory(src/duk_renderer/material)
+add_subdirectory(src/duk_renderer/shader)
 
 add_subdirectory(test)
 
