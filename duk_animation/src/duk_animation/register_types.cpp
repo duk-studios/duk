@@ -26,6 +26,7 @@ void register_types() {
     register_property<CanvasPivotProperty>();
     register_property<CanvasPositionProperty>();
     register_property<CanvasSizeProperty>();
+    register_property<CanvasScaleProperty>();
     duk::resource::register_handler<AnimationClipHandler>();
     duk::resource::register_handler<AnimationControllerHandler>();
     duk::engine::register_system<AnimationSystem>();

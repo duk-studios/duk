@@ -71,4 +71,19 @@ CanvasSizeProperty::ValueType CanvasSizeProperty::interpolate(const ValueType& f
     return result;
 }
 
+void CanvasScaleProperty::evaluate(const duk::objects::Object &object, const PropertyT<CanvasScaleProperty> *property, uint32_t sample) {
+    auto canvasTransform = object.component<duk::renderer::CanvasTransform>();
+    if (!canvasTransform) {
+        duk::log::warn("CanvasTransform not found for object with an animated scale");
+        return;
+    }
+    auto value = property->sample_interpolate(sample);
+    canvasTransform->scale = value.scale;
+}
+
+CanvasScaleProperty::ValueType CanvasScaleProperty::interpolate(const ValueType &from, const ValueType &to, float progress) {
+    ValueType result;
+    result.scale = glm::mix(from.scale, to.scale, progress);
+    return result;
+}
 }// namespace duk::animation

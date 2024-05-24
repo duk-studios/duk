@@ -17,6 +17,7 @@ void update_canvas_transform(const duk::objects::Component<Canvas>& canvas, duk:
     const auto halfSize = canvasTransform->size / 2.0f;
     const auto pivotOffset = halfSize * ((canvasTransform->pivot * 2.0f) - 1.0f);
     canvasTransform->model = glm::translate(glm::mat4(1), glm::vec3(position - pivotOffset, 0.0));
+    canvasTransform->model = glm::scale(canvasTransform->model, glm::vec3(canvasTransform->scale,1));
 }
 
 }// namespace duk::renderer

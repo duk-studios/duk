@@ -61,6 +61,19 @@ public:
     static ValueType interpolate(const ValueType& from, const ValueType& to, float progress);
 };
 
+struct CanvasScaleValue {
+    glm::vec2 scale;
+};
+
+class CanvasScaleProperty {
+public:
+    using ValueType = CanvasScaleValue;
+
+    static void evaluate(const duk::objects::Object& object, const PropertyT<CanvasScaleProperty>* property, uint32_t sample);
+
+    static ValueType interpolate(const ValueType& from, const ValueType& to, float progress);
+};
+
 }// namespace duk::animation
 
 namespace duk::serial {
@@ -103,6 +116,16 @@ inline void from_json(const rapidjson::Value& value, duk::animation::CanvasSizeV
 template<>
 inline void to_json(rapidjson::Document& document, rapidjson::Value& value, const duk::animation::CanvasSizeValue& canvas) {
     to_json_member(document, value, "size", canvas.size);
+}
+
+template<>
+inline void from_json(const rapidjson::Value& value, duk::animation::CanvasScaleValue& canvas) {
+    from_json_member(value, "scale", canvas.scale);
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& value, const duk::animation::CanvasScaleValue& canvas) {
+    to_json_member(document, value, "scale", canvas.scale);
 }
 
 }// namespace duk::serial
