@@ -29,6 +29,9 @@ struct CanvasTransform {
     // in pixels
     glm::vec2 size;
 
+    // normalized
+    glm::vec2 scale;
+
     // internal usage
     glm::mat4 model;
 };
@@ -55,6 +58,7 @@ inline void from_json<duk::renderer::CanvasTransform>(const rapidjson::Value& js
     from_json_member(json, "pivot", canvasTransform.pivot);
     from_json_member(json, "position", canvasTransform.position);
     from_json_member(json, "size", canvasTransform.size);
+    from_json_member(json, "scale", canvasTransform.scale);
 }
 
 template<>
@@ -63,6 +67,7 @@ inline void to_json<duk::renderer::CanvasTransform>(rapidjson::Document& documen
     to_json_member(document, json, "pivot", canvasTransform.pivot);
     to_json_member(document, json, "position", canvasTransform.position);
     to_json_member(document, json, "size", canvasTransform.size);
+    to_json_member(document, json, "scale", canvasTransform.scale);
 }
 
 }// namespace duk::serial
