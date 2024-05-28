@@ -39,6 +39,7 @@ public:
         // Create renderer
         duk::renderer::RendererCreateInfo rendererCreateInfo = {};
         rendererCreateInfo.window = m_window.get();
+        rendererCreateInfo.pools = &m_pools;
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.logger = duk::log::Logging::instance(true)->default_logger();
 
@@ -138,7 +139,7 @@ int main() {
     auto materialPool = application.pools()->get<duk::renderer::MaterialPool>();
 
     // Create a phong material
-    auto material = materialPool->create_phong(*application.pools(), duk::resource::Id(666));
+    auto material = duk::renderer::create_phong_material(application.renderer());
     material->set("uProperties", "color", glm::vec4(1.0f, 0.5f, 0.8f, 1.0f));
     // material->set("uBaseColor", imagePool->white_image(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
 
