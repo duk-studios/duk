@@ -6,9 +6,3 @@ generate_shader_files(
         INC_DIR ${DUK_SHADER_SRC_DIR}/fullscreen
         SRC_DIR ${DUK_SHADER_SRC_DIR}/fullscreen
 )
-
-target_sources(duk_renderer
-        PRIVATE
-        fullscreen_shader_data_source.h
-        fullscreen_shader_data_source.cpp
-)

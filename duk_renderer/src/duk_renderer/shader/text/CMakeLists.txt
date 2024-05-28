@@ -6,9 +6,3 @@ generate_shader_files(
         INC_DIR ${DUK_SHADER_SRC_DIR}/text
         SRC_DIR ${DUK_SHADER_SRC_DIR}/text
 )
-
-target_sources(duk_renderer
-        PRIVATE
-        text_shader_data_source.h
-        text_shader_data_source.cpp
-)

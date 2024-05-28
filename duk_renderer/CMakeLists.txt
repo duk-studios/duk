@@ -84,6 +84,14 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/shader/shader_pipeline.cpp
         src/duk_renderer/shader/shader_pipeline_pool.cpp
         src/duk_renderer/shader/shader_pipeline_handler.cpp
+        src/duk_renderer/shader/color/color_shader_data_source.h
+        src/duk_renderer/shader/color/color_shader_data_source.cpp
+        src/duk_renderer/shader/fullscreen/fullscreen_shader_data_source.h
+        src/duk_renderer/shader/fullscreen/fullscreen_shader_data_source.cpp
+        src/duk_renderer/shader/phong/phong_shader_data_source.h
+        src/duk_renderer/shader/phong/phong_shader_data_source.cpp
+        src/duk_renderer/shader/text/text_shader_data_source.h
+        src/duk_renderer/shader/text/text_shader_data_source.cpp
         src/duk_renderer/mesh/mesh.cpp
         src/duk_renderer/mesh/mesh_data_source.cpp
         src/duk_renderer/mesh/mesh_pool.cpp
