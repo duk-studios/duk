@@ -19,7 +19,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    void load(ShaderPipelinePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<ShaderPipeline> load(ShaderPipelinePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 
 private:
 };

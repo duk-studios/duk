@@ -22,28 +22,31 @@ public:
 
     virtual bool accepts(const std::string& extension) const = 0;
 
-    virtual void load(Pools* pools, const Id& id, const std::filesystem::path& path) = 0;
+    virtual Handle<void> load(Pools* pools, const Id& id, const std::filesystem::path& path) = 0;
 
-    virtual void solve_dependencies(Pools* pools, const Id& id, DependencySolver& dependencySolver) = 0;
+    virtual void solve_dependencies(const Handle<void>& handle, std::set<Id>& dependencies) = 0;
 
-    virtual void solve_references(Pools* pools, const Id& id, ReferenceSolver& referenceSolver) = 0;
+    virtual void solve_references(const Handle<void>& handle, Pools* pools) = 0;
 };
 
 template<typename TPool>
 class ResourceHandlerT : public ResourceHandler {
 public:
+
+    using Type = typename TPool::Type;
+
     explicit ResourceHandlerT(const char* tag);
 
     const std::string& tag() const final;
 
-    void load(Pools* pools, const Id& id, const std::filesystem::path& path) override;
+    Handle<void> load(Pools* pools, const Id& id, const std::filesystem::path& path) override;
 
-    void solve_dependencies(Pools* pools, const Id& id, DependencySolver& dependencySolver) override;
+    void solve_dependencies(const Handle<void>& handle, std::set<Id>& dependencies) override;
 
-    void solve_references(Pools* pools, const Id& id, ReferenceSolver& referenceSolver) override;
+    void solve_references(const Handle<void>& handle, Pools* pools) override;
 
 protected:
-    virtual void load(TPool* pool, const Id& id, const std::filesystem::path& path) = 0;
+    virtual Handle<Type> load(TPool* pool, const Id& id, const std::filesystem::path& path) = 0;
 
 private:
     static TPool* find_pool(Pools* pools);
@@ -82,29 +85,22 @@ const std::string& ResourceHandlerT<TPool>::tag() const {
 }
 
 template<typename TPool>
-void ResourceHandlerT<TPool>::load(Pools* pools, const Id& id, const std::filesystem::path& path) {
+Handle<void> ResourceHandlerT<TPool>::load(Pools* pools, const Id& id, const std::filesystem::path& path) {
     auto pool = find_pool(pools);
-    load(pool, id, path);
+    return load(pool, id, path);
 }
 
 template<typename TPool>
-void ResourceHandlerT<TPool>::solve_dependencies(Pools* pools, const Id& id, DependencySolver& dependencySolver) {
-    auto pool = find_pool(pools);
-    auto resource = pool->find(id);
-    if (!resource) {
-        throw std::out_of_range(fmt::format("Resource ({}) not found in a pool", id.value()));
-    }
-    dependencySolver.solve(*resource);
+void ResourceHandlerT<TPool>::solve_dependencies(const Handle<void>& handle, std::set<Id>& dependencies) {
+    DependencySolver dependencySolver;
+    dependencySolver.solve(*handle.as<Type>());
+    dependencies = dependencySolver.dependencies();
 }
 
 template<typename TPool>
-void ResourceHandlerT<TPool>::solve_references(Pools* pools, const Id& id, ReferenceSolver& referenceSolver) {
-    auto pool = find_pool(pools);
-    auto resource = pool->find(id);
-    if (!resource) {
-        throw std::out_of_range(fmt::format("Resource ({}) not found in a pool", id.value()));
-    }
-    referenceSolver.solve(*resource);
+void ResourceHandlerT<TPool>::solve_references(const Handle<void>& handle, Pools* pools) {
+    ReferenceSolver referenceSolver(pools);
+    referenceSolver.solve(*handle.as<Type>());
 }
 
 template<typename TPool>

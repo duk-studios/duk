@@ -33,7 +33,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    void load(ImagePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Image> load(ImagePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 
 private:
     std::vector<std::unique_ptr<ImageLoader>> m_loaders;

@@ -57,7 +57,7 @@ private:
     bool m_dirty;
 };
 
-using ShaderPipelineResource = duk::resource::ResourceT<ShaderPipeline>;
+using ShaderPipelineResource = duk::resource::Handle<ShaderPipeline>;
 
 }
 

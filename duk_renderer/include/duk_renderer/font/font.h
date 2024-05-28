@@ -24,7 +24,7 @@ public:
     virtual FontAtlas* atlas(const BuildAtlasParams& buildAtlasParams) = 0;
 };
 
-using FontResource = duk::resource::ResourceT<Font>;
+using FontResource = duk::resource::Handle<Font>;
 
 }// namespace duk::renderer
 

@@ -42,7 +42,7 @@ private:
     std::shared_ptr<duk::rhi::Image> m_image;
 };
 
-using ImageResource = duk::resource::ResourceT<Image>;
+using ImageResource = duk::resource::Handle<Image>;
 
 }// namespace duk::renderer
 

@@ -17,7 +17,7 @@ bool MaterialHandler::accepts(const std::string& extension) const {
     return extension == ".mat";
 }
 
-void MaterialHandler::load(MaterialPool* pool, const resource::Id& id, const std::filesystem::path& path) {
+duk::resource::Handle<Material> MaterialHandler::load(MaterialPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error(fmt::format("material at ({}) does not exist", path.string()));
     }
@@ -30,6 +30,6 @@ void MaterialHandler::load(MaterialPool* pool, const resource::Id& id, const std
 
     auto materialData = duk::serial::read_json<MaterialData>(content);
 
-    pool->create(id, &materialData);
+    return pool->create(id, std::move(materialData));
 }
 }// namespace duk::renderer

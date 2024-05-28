@@ -32,7 +32,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    void load(FontPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Font> load(FontPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 
 private:
     std::vector<std::unique_ptr<FontLoader>> m_loaders;

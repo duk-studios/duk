@@ -30,7 +30,7 @@ private:
     Systems m_systems;
 };
 
-using SceneResource = duk::resource::ResourceT<Scene>;
+using SceneResource = duk::resource::Handle<Scene>;
 
 }// namespace duk::engine
 

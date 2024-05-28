@@ -38,7 +38,7 @@ private:
     std::vector<std::unique_ptr<Property>> m_properties;
 };
 
-using AnimationClipResource = duk::resource::ResourceT<AnimationClip>;
+using AnimationClipResource = duk::resource::Handle<AnimationClip>;
 
 }// namespace duk::animation
 

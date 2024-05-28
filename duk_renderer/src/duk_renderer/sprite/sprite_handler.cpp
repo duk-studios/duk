@@ -16,7 +16,7 @@ bool SpriteHandler::accepts(const std::string& extension) const {
     return extension == ".spt";
 }
 
-void SpriteHandler::load(SpritePool* pool, const resource::Id& id, const std::filesystem::path& path) {
+duk::resource::Handle<Sprite> SpriteHandler::load(SpritePool* pool, const resource::Id& id, const std::filesystem::path& path) {
     auto content = duk::tools::load_text(path);
     auto spriteAtlasData = duk::serial::read_json<SpriteAtlasData>(content);
 
@@ -25,7 +25,7 @@ void SpriteHandler::load(SpritePool* pool, const resource::Id& id, const std::fi
 
     auto spriteAtlas = std::make_shared<Sprite>(spriteAtlasCreateInfo);
 
-    pool->insert(id, spriteAtlas);
+    return pool->insert(id, spriteAtlas);
 }
 
 }// namespace duk::renderer

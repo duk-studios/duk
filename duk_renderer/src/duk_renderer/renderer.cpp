@@ -12,7 +12,8 @@
 namespace duk::renderer {
 
 Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
-    : m_window(rendererCreateInfo.window) {
+    : m_window(rendererCreateInfo.window)
+    , m_pools(rendererCreateInfo.pools) {
     {
         duk::rhi::RHICreateInfo rhiCreateInfo = {};
         rhiCreateInfo.window = rendererCreateInfo.window;
@@ -142,6 +143,10 @@ duk::rhi::RHI* Renderer::rhi() const {
 
 duk::rhi::CommandQueue* Renderer::main_command_queue() const {
     return m_mainQueue.get();
+}
+
+duk::resource::Pools* Renderer::pools() const {
+    return m_pools;
 }
 
 void Renderer::update_global_descriptors(duk::objects::Objects& objects) {

@@ -42,151 +42,141 @@ static constexpr duk::resource::Id kInvalidId;
 // 1,000,000 reserved for built-in resources
 static constexpr Id kMaxBuiltInResourceId(1000000);
 
-class Resource {
+template<typename T>
+class HandleAccess {
 public:
-    virtual ~Resource();
+    DUK_NO_DISCARD T* operator->() const;
 
-    DUK_NO_DISCARD Id id() const;
+    DUK_NO_DISCARD T& operator*() const;
+};
 
-    virtual void reset(Id id = kInvalidId);
-
-    DUK_NO_DISCARD virtual size_t use_count() const = 0;
-
-    DUK_NO_DISCARD virtual bool valid() const = 0;
-
-    DUK_NO_DISCARD virtual operator bool() const = 0;
-
-protected:
-    Resource(Id id);
-
-protected:
-    Id m_id;
+template<>
+class HandleAccess<void> {
+    // void handles have no access operators
 };
 
 template<typename T>
-class ResourceT : public Resource {
+class Handle : public HandleAccess<T> {
 public:
     using Type = T;
 
-    ResourceT();
+    Handle();
 
-    ResourceT(Id id);
+    Handle(Id id);
 
-    ResourceT(Id id, const std::shared_ptr<T>& resource);
+    Handle(Id id, const std::shared_ptr<T>& resource);
 
-    ResourceT(const std::shared_ptr<T>& resource);
+    Handle(const std::shared_ptr<T>& resource);
 
     template<typename U>
-    ResourceT(const ResourceT<U>& other)
-        requires std::is_base_of_v<T, U>;
+    Handle(const Handle<U>& other) requires std::is_convertible_v<U*, T*>;
 
-    void reset(Id id = kInvalidId) override;
+    template<typename U>
+    Handle(Id id, const std::shared_ptr<U>& resource) requires std::is_convertible_v<U*, T*>;
 
-    size_t use_count() const override;
+    template<typename U>
+    Handle<U> as() const;
 
-    bool valid() const override;
+    Id id() const;
 
-    operator bool() const override;
+    T* get() const;
 
-    DUK_NO_DISCARD T* get();
+    bool valid() const;
 
-    DUK_NO_DISCARD T* get() const;
+    operator bool() const;
 
-    DUK_NO_DISCARD T* operator->();
+    size_t use_count() const;
 
-    DUK_NO_DISCARD T* operator->() const;
-
-    DUK_NO_DISCARD T& operator*();
-
-    DUK_NO_DISCARD T& operator*() const;
+    void reset(Id id = kInvalidId);
 
 private:
-    template<typename U>
-    ResourceT(Id id, const std::shared_ptr<U>& resource);
 
     template<typename U>
-    friend class ResourceT;
+    friend class Handle;
+
+    Id m_id;
     std::shared_ptr<T> m_resource;
 };
 
 template<typename T>
-ResourceT<T>::ResourceT()
-    : ResourceT(kInvalidId, nullptr) {
+T* HandleAccess<T>::operator->() const {
+    return static_cast<const Handle<T>*>(this)->get();
 }
 
 template<typename T>
-ResourceT<T>::ResourceT(Id id)
-    : ResourceT(id, std::shared_ptr<T>()) {
+T& HandleAccess<T>::operator*() const {
+    return *static_cast<const Handle<T>*>(this)->get();
 }
 
 template<typename T>
-ResourceT<T>::ResourceT(Id id, const std::shared_ptr<T>& resource)
-    : Resource(id)
+Handle<T>::Handle()
+    : Handle(kInvalidId, nullptr) {
+}
+
+template<typename T>
+Handle<T>::Handle(Id id)
+    : Handle(id, nullptr) {
+}
+
+template<typename T>
+Handle<T>::Handle(const Id id, const std::shared_ptr<T>& resource)
+    : m_id(id)
     , m_resource(resource) {
 }
 
 template<typename T>
-ResourceT<T>::ResourceT(const std::shared_ptr<T>& resource)
-    : Resource(kInvalidId)
+Handle<T>::Handle(const std::shared_ptr<T>& resource)
+    : Handle(kInvalidId, resource) {
+}
+
+template<typename T>
+template<typename U>
+Handle<T>::Handle(const Handle<U>& other) requires std::is_convertible_v<U*, T*>
+    : Handle(other.id(), other.m_resource) {
+}
+
+template<typename T>
+template<typename U>
+Handle<T>::Handle(Id id, const std::shared_ptr<U>& resource) requires std::is_convertible_v<U*, T*>
+    : m_id(id)
     , m_resource(resource) {
 }
 
 template<typename T>
 template<typename U>
-ResourceT<T>::ResourceT(const ResourceT<U>& other)
-    requires std::is_base_of_v<T, U>
-    : Resource(other.id(), other.m_resource) {
+Handle<U> Handle<T>::as() const {
+    return Handle<U>(m_id, std::static_pointer_cast<U>(m_resource));
 }
 
 template<typename T>
-void ResourceT<T>::reset(Id id) {
-    Resource::reset(id);
+Id Handle<T>::id() const {
+    return m_id;
+}
+
+template<typename T>
+void Handle<T>::reset(const Id id) {
+    m_id = id;
     m_resource.reset();
 }
 
 template<typename T>
-size_t ResourceT<T>::use_count() const {
+size_t Handle<T>::use_count() const {
     return m_resource.use_count();
 }
 
 template<typename T>
-bool ResourceT<T>::valid() const {
-    return m_resource && m_id.value() != 0;
+bool Handle<T>::valid() const {
+    return m_resource != nullptr;
 }
 
 template<typename T>
-ResourceT<T>::operator bool() const {
+Handle<T>::operator bool() const {
     return valid();
 }
 
 template<typename T>
-T* ResourceT<T>::get() {
+T* Handle<T>::get() const {
     return reinterpret_cast<T*>(m_resource.get());
-}
-
-template<typename T>
-T* ResourceT<T>::get() const {
-    return reinterpret_cast<T*>(m_resource.get());
-}
-
-template<typename T>
-T* ResourceT<T>::operator->() {
-    return get();
-}
-
-template<typename T>
-T* ResourceT<T>::operator->() const {
-    return get();
-}
-
-template<typename T>
-T& ResourceT<T>::operator*() {
-    return *get();
-}
-
-template<typename T>
-T& ResourceT<T>::operator*() const {
-    return *get();
 }
 
 }// namespace duk::resource
@@ -204,26 +194,22 @@ inline void to_json<duk::resource::Id>(rapidjson::Document& document, rapidjson:
 }
 
 template<typename T>
-void from_json(const rapidjson::Value& jsonObject, duk::resource::ResourceT<T>& resource) {
+void from_json(const rapidjson::Value& jsonObject, duk::resource::Handle<T>& resource) {
     resource.reset(duk::resource::Id(jsonObject.Get<uint64_t>()));
 }
 
 template<typename T>
-void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::ResourceT<T>& resource) {
+void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Handle<T>& resource) {
     json.Set<uint64_t>(resource.id().value());
 }
 
 }// namespace duk::serial
 
-namespace std {
-
 template<>
-struct hash<duk::resource::Id> {
-    size_t operator()(const duk::resource::Id& resourceId) const {
+struct std::hash<duk::resource::Id> {
+    size_t operator()(const duk::resource::Id& resourceId) const noexcept {
         return resourceId.value();
     }
 };
-
-}// namespace std
 
 #endif//DUK_RESOURCE_RESOURCE_H

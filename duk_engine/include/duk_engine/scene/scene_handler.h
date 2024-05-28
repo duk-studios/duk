@@ -20,7 +20,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    void load(ScenePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Scene> load(ScenePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };
 
 }// namespace duk::engine
