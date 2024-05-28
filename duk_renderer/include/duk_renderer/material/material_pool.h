@@ -20,11 +20,7 @@ class MaterialPool : public duk::resource::PoolT<MaterialResource> {
 public:
     explicit MaterialPool(const MaterialPoolCreateInfo& materialPoolCreateInfo);
 
-    MaterialResource create(duk::resource::Id resourceId, const MaterialData* materialData);
-
-    MaterialResource create_color(const duk::resource::Pools& pools, duk::resource::Id resourceId);
-
-    MaterialResource create_phong(const duk::resource::Pools& pools, duk::resource::Id resourceId);
+    MaterialResource create(duk::resource::Id resourceId, MaterialData materialData);
 
 private:
     duk::renderer::Renderer* m_renderer;

@@ -42,4 +42,8 @@ void MaterialUniformBuffer::write(uint32_t member, const void* data, uint32_t si
     m_buffer->write(data, size, memberDescription.offset);
 }
 
+void MaterialUniformBuffer::flush() {
+    m_buffer->flush();
+}
+
 }

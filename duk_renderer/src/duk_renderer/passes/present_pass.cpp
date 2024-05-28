@@ -50,12 +50,9 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
         shaderPipelineCreateInfo.settings.invertY = true;
         shaderPipelineCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
 
-        MaterialData materialData = {};
-        materialData.shader = std::make_shared<ShaderPipeline>(shaderPipelineCreateInfo);
-
         MaterialCreateInfo materialCreateInfo = {};
         materialCreateInfo.renderer = m_renderer;
-        materialCreateInfo.materialData = &materialData;
+        materialCreateInfo.materialData.shader = std::make_shared<ShaderPipeline>(shaderPipelineCreateInfo);;
 
         m_fullscreenMaterial = std::make_unique<Material>(materialCreateInfo);
     }

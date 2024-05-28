@@ -8,6 +8,8 @@
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/canvas.h>
 
+#include <duk_renderer/material/material_pool.h>
+
 namespace duk::renderer {
 
 namespace detail {
@@ -257,15 +259,8 @@ void update_text_renderer(Renderer* renderer, const objects::Component<TextRende
     auto& mesh = textRenderer->mesh;
 
     if (!material) {
-
-        MaterialCreateInfo materialCreateInfo = {};
-        materialCreateInfo.renderer = renderer;
-
-        material = std::make_shared<Material>(materialCreateInfo);
-        // auto pipeline = material->pipeline();
-        // pipeline->blend(true);
-        // pipeline->cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::BACK);
-        // pipeline->depth_test(false);
+        material = create_text_material(renderer);
+        material->set("uBaseColor", atlas->image(), kDefaultTextureSampler);
     }
 
     if (!mesh) {
@@ -275,18 +270,7 @@ void update_text_renderer(Renderer* renderer, const objects::Component<TextRende
     }
 
     const auto transform = textRenderer.object().component<Transform>();
-    const auto canvasTransform = textRenderer.object().component<CanvasTransform>();
-
-    if (transform) {
-        material->set("uInstance", transform->model);
-        mesh->update_text(atlas, *textRenderer, 100);
-    } else if (canvasTransform) {
-        material->set("uInstance", canvasTransform->model);
-        mesh->update_text(atlas, *textRenderer, 1);
-    } else {
-        material->set("uInstance", glm::mat4(1));
-        mesh->update_text(atlas, *textRenderer, 1);
-    }
+    mesh->update_text(atlas, *textRenderer, transform ? 100 : 1);
 }
 
 }// namespace duk::renderer

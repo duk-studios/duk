@@ -35,6 +35,8 @@ public:
     // writes a specific member of the buffer
     void write(uint32_t member, const void* data, uint32_t size);
 
+    void flush();
+
 private:
     duk::rhi::DescriptorDescription m_description;
     std::shared_ptr<duk::rhi::Buffer> m_buffer;

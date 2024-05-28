@@ -29,7 +29,7 @@ struct BindingData {
 struct Binding {
     std::string name;
     BindingType type;
-    std::unique_ptr<BindingData> data;
+    std::shared_ptr<BindingData> data;
 };
 
 struct BufferBinding : BindingData {
@@ -194,19 +194,19 @@ inline void from_json(const rapidjson::Value& json, duk::renderer::Binding& bind
     switch (binding.type) {
         case renderer::BindingType::UNIFORM:
         case renderer::BindingType::INSTANCE: {
-            auto bufferData = std::make_unique<duk::renderer::BufferBinding>();
+            auto bufferData = std::make_shared<duk::renderer::BufferBinding>();
             from_json(json, *bufferData);
             binding.data = std::move(bufferData);
             break;
         }
         case renderer::BindingType::IMAGE_SAMPLER: {
-            auto textureData = std::make_unique<duk::renderer::ImageSamplerBinding>();
+            auto textureData = std::make_shared<duk::renderer::ImageSamplerBinding>();
             from_json(json, *textureData);
             binding.data = std::move(textureData);
             break;
         }
         case renderer::BindingType::IMAGE: {
-            auto imageData = std::make_unique<duk::renderer::ImageBinding>();
+            auto imageData = std::make_shared<duk::renderer::ImageBinding>();
             from_json(json, *imageData);
             binding.data = std::move(imageData);
             break;

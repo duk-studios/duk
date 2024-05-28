@@ -3,6 +3,7 @@
 //
 
 #include <duk_renderer/components/canvas.h>
+#include <duk_renderer/material/material.h>
 
 namespace duk::renderer {
 
@@ -17,6 +18,11 @@ void update_canvas_transform(const duk::objects::Component<Canvas>& canvas, duk:
     const auto halfSize = canvasTransform->size / 2.0f;
     const auto pivotOffset = halfSize * ((canvasTransform->pivot * 2.0f) - 1.0f);
     canvasTransform->model = glm::translate(glm::mat4(1), glm::vec3(position - pivotOffset, 0.0));
+
+    auto object = canvasTransform.object();
+    if (auto material = find_material(object)) {
+        material->set(object.id(), "uTransform", "model", canvasTransform->model);
+    }
 }
 
 }// namespace duk::renderer

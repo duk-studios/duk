@@ -38,7 +38,7 @@ private:
 
 struct MaterialCreateInfo {
     Renderer* renderer;
-    const MaterialData* materialData;
+    MaterialData materialData;
 };
 
 class Material {
@@ -48,11 +48,9 @@ public:
 
     ~Material();
 
+    DUK_NO_DISCARD ShaderPipelineResource& shader();
+
     DUK_NO_DISCARD uint32_t binding_count() const;
-
-    DUK_NO_DISCARD std::unordered_map<uint32_t, ImageResource> images();
-
-    DUK_NO_DISCARD std::unordered_map<uint32_t, ImageSamplerBinding> image_samplers();
 
     uint32_t find_binding(const std::string_view& name) const;
 
@@ -100,20 +98,34 @@ public:
 
     void bind(duk::rhi::CommandBuffer* commandBuffer);
 
+    template<typename Solver>
+    void solve_resources(Solver* solver);
+
+private:
+
+    // unfortunately this has to be here until we refactor the way we load resources
+    // see DUK-79 for more details
+    void init();
+
 private:
     Renderer* m_renderer;
     ShaderPipelineResource m_shader;
+    std::vector<Binding> m_bindings;
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
-    std::unordered_map<uint32_t, ImageResource> m_images;
-    std::unordered_map<uint32_t, ImageSamplerBinding> m_imageSamplers;
-    std::unordered_map<uint32_t, MaterialUniformBuffer> m_uniformBuffers;
-    std::unordered_map<uint32_t, MaterialInstanceBuffer> m_instanceBuffers;
+    std::unordered_map<uint32_t, std::unique_ptr<MaterialUniformBuffer>> m_uniformBuffers;
+    std::unordered_map<uint32_t, std::unique_ptr<MaterialInstanceBuffer>> m_instanceBuffers;
     bool m_dirty;
 };
 
 Material* find_material(const duk::objects::Object& object);
 
-using MaterialResource = duk::resource::ResourceT<Material>;
+std::shared_ptr<Material> create_color_material(Renderer* renderer);
+
+std::shared_ptr<Material> create_phong_material(Renderer* renderer);
+
+std::shared_ptr<Material> create_text_material(Renderer* renderer);
+
+using MaterialResource = duk::resource::Handle<Material>;
 
 template<typename T>
 void Material::set(const MaterialLocationId& binding, const T& data) {
@@ -135,20 +147,34 @@ void Material::set(const duk::objects::Id& id, const MaterialLocationId& binding
     set(id, binding, member, &data, sizeof(T));
 }
 
+template<typename Solver>
+void Material::solve_resources(Solver* solver) {
+    solver->solve(m_shader);
+    for (auto& binding: m_bindings) {
+        switch (binding.type) {
+            case BindingType::IMAGE_SAMPLER: {
+                auto imageSampler = static_cast<ImageSamplerBinding*>(binding.data.get());
+                solver->solve(imageSampler->image);
+                break;
+            }
+            case BindingType::IMAGE: {
+                auto image = static_cast<ImageBinding*>(binding.data.get());
+                solver->solve(image->image);
+                break;
+            }
+            default:
+                break;
+        }
+    }
+}
+
 }// namespace duk::renderer
-
-
 
 namespace duk::resource {
 
 template<typename Solver>
 void solve_resources(Solver* solver, duk::renderer::Material& material) {
-    for (auto& [binding, image]: material.images()) {
-        solver->solve(image);
-    }
-    for (auto& [binding, texture]: material.image_samplers()) {
-        solver->solve(texture);
-    }
+    material.solve_resources(solver);
 }
 
 }// namespace duk::resource

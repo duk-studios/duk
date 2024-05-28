@@ -35,6 +35,12 @@ static void update_texts(const Pass::UpdateParams& params, duk::rhi::RenderPass*
         }
 
         auto material = textRenderer->material.get();
+        if (object.component<Transform>())
+            material->set("uCamera", params.globalDescriptors->camera_ubo()->descriptor());
+        else
+            material->set("uCamera", params.globalDescriptors->canvas_ubo()->descriptor());
+        material->clear();
+        material->push(object.id());
         uniqueMaterials.insert(material);
 
         TextDrawEntry textEntry = {};
@@ -202,6 +208,7 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
     }
 
     for (const auto material: uniqueMaterials) {
+        material->set("uCamera", params.globalDescriptors->camera_ubo()->descriptor());
         material->clear();
     }
 

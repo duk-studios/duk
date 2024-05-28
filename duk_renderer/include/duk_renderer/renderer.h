@@ -22,6 +22,7 @@ class SpritePool;
 
 struct RendererCreateInfo {
     duk::platform::Window* window;
+    duk::resource::Pools* pools;
     duk::log::Logger* logger;
     duk::rhi::API api;
     const char* applicationName;
@@ -47,6 +48,8 @@ public:
 
     DUK_NO_DISCARD duk::rhi::CommandQueue* main_command_queue() const;
 
+    DUK_NO_DISCARD duk::resource::Pools* pools() const;
+
     template<typename T, typename... Args>
     T* add_pass(Args&&... args);
 
@@ -57,6 +60,7 @@ private:
 
 protected:
     duk::platform::Window* m_window;
+    duk::resource::Pools* m_pools;
     std::shared_ptr<duk::rhi::RHI> m_rhi;
     std::shared_ptr<duk::rhi::CommandQueue> m_mainQueue;
     std::vector<std::shared_ptr<Pass>> m_passes;
