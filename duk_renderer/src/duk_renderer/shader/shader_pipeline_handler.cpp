@@ -29,7 +29,7 @@ bool ShaderPipelineHandler::accepts(const std::string& extension) const {
     return extension == ".spp";
 }
 
-void ShaderPipelineHandler::load(ShaderPipelinePool* pool, const resource::Id& id, const std::filesystem::path& path) {
+duk::resource::Handle<ShaderPipeline> ShaderPipelineHandler::load(ShaderPipelinePool* pool, const resource::Id& id, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error(fmt::format("File '{}' does not exist", path.string()));
     }
@@ -42,7 +42,7 @@ void ShaderPipelineHandler::load(ShaderPipelinePool* pool, const resource::Id& i
     detail::load_shader_stage(shaderDataSource, duk::rhi::ShaderModule::VERTEX, path, shaderPipelineData.shader.vertexPath);
     detail::load_shader_stage(shaderDataSource, duk::rhi::ShaderModule::FRAGMENT, path, shaderPipelineData.shader.fragmentPath);
 
-    pool->create(id, &shaderDataSource, shaderPipelineData.settings);
+    return pool->create(id, &shaderDataSource, shaderPipelineData.settings);
 }
 
 }
