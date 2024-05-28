@@ -35,7 +35,7 @@ private:
     std::vector<AnimationEntry> m_animations;
 };
 
-using AnimationSetResource = duk::resource::ResourceT<AnimationSet>;
+using AnimationSetResource = duk::resource::Handle<AnimationSet>;
 
 }// namespace duk::animation
 

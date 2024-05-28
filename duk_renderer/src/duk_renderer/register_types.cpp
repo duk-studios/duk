@@ -9,6 +9,7 @@
 #include <duk_renderer/components/text_renderer.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/font/font_handler.h>
+#include <duk_renderer/shader/shader_pipeline_handler.h>
 #include <duk_renderer/image/image_handler.h>
 #include <duk_renderer/material/material_handler.h>
 #include <duk_renderer/sprite/sprite_handler.h>
@@ -21,6 +22,7 @@ namespace duk::renderer {
 void register_types() {
     duk::objects::register_types();
     duk::resource::register_handler<FontHandler>();
+    duk::resource::register_handler<ShaderPipelineHandler>();
     duk::resource::register_handler<MaterialHandler>();
     duk::resource::register_handler<ImageHandler>();
     duk::resource::register_handler<SpriteHandler>();

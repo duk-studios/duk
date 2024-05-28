@@ -18,7 +18,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    void load(SpritePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Sprite> load(SpritePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };
 
 }// namespace duk::renderer

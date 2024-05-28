@@ -19,6 +19,8 @@
 
 #include <duk_platform/systems.h>
 
+#include "duk_renderer/shader/shader_pipeline_pool.h"
+
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
@@ -47,6 +49,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     {
         duk::renderer::RendererCreateInfo rendererCreateInfo = {};
         rendererCreateInfo.window = m_window.get();
+        rendererCreateInfo.pools = &m_pools;
         rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.applicationName = m_settings.name.c_str();
@@ -75,6 +78,10 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         duk::renderer::ImagePoolCreateInfo imagePoolCreateInfo = {};
         imagePoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
+
+        duk::renderer::ShaderPipelinePoolCreateInfo shaderPipelinePoolCreateInfo = {};
+        shaderPipelinePoolCreateInfo.renderer = m_renderer.get();
+        m_pools.create_pool<duk::renderer::ShaderPipelinePool>(shaderPipelinePoolCreateInfo);
 
         duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
         materialPoolCreateInfo.renderer = m_renderer.get();

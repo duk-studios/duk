@@ -18,7 +18,7 @@ static constexpr duk::resource::Id kConeMeshId(10004);
 
 class Renderer;
 
-using MeshResource = duk::resource::ResourceT<Mesh>;
+using MeshResource = duk::resource::Handle<Mesh>;
 
 struct MeshPoolCreateInfo {
     Renderer* renderer;

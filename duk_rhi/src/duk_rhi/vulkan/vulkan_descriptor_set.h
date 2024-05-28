@@ -74,6 +74,8 @@ public:
 
     void set(uint32_t binding, const Descriptor& descriptor) override;
 
+    DUK_NO_DISCARD uint32_t size() const noexcept override;
+
     DUK_NO_DISCARD Descriptor& at(uint32_t binding) override;
 
     DUK_NO_DISCARD const Descriptor& at(uint32_t binding) const override;

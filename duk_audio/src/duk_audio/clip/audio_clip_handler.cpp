@@ -16,10 +16,10 @@ bool AudioClipHandler::accepts(const std::string& extension) const {
     return extension == ".mp3" || extension == ".flac" || extension == ".ogg" || extension == ".wav";
 }
 
-void AudioClipHandler::load(AudioClipPool* pool, const resource::Id& id, const std::filesystem::path& path) {
+duk::resource::Handle<AudioClip> AudioClipHandler::load(AudioClipPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {
         throw std::invalid_argument(fmt::format("failed to load AudioClip, path ({}) does not exist", path.string()));
     }
-    pool->create(id, duk::tools::load_bytes(path));
+    return pool->create(id, duk::tools::load_bytes(path));
 }
 }// namespace duk::audio

@@ -40,6 +40,8 @@ target_include_directories(duk_resource
 
 set_target_properties(duk_resource PROPERTIES CXX_STANDARD 20)
 
+add_subdirectory(test)
+
 install(
         DIRECTORY include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}

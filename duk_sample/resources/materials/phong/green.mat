@@ -1,19 +1,43 @@
 {
-  "type": "Phong",
-  "albedo": "0.1;1.0f;0.1",
-  "albedo-texture": {
-    "image": 1,
-    "sampler": {
-      "filter": "nearest",
-      "wrap": "clamp-edge"
+  "shader": 100002,
+  "bindings": [
+    {
+      "type": "instance",
+      "name": "uTransform"
+    },
+    {
+      "type": "instance",
+      "name": "uProperties",
+      "members": [
+        {
+          "type": "vec4",
+          "name": "color",
+          "value": "0.1;1;0.1;1"
+        },
+        {
+          "type": "float",
+          "name": "shininess",
+          "value": 32
+        }
+      ]
+    },
+    {
+      "type": "image-sampler",
+      "name": "uBaseColor",
+      "image": 1,
+      "sampler": {
+        "wrap": "clamp-edge",
+        "filter": "nearest"
+      }
+    },
+    {
+      "type": "image-sampler",
+      "name": "uSpecular",
+      "image": 1,
+      "sampler": {
+        "wrap": "clamp-edge",
+        "filter": "nearest"
+      }
     }
-  },
-  "specular": 32,
-  "specular-texture": {
-    "image": 1,
-    "sampler": {
-      "filter": "nearest",
-      "wrap": "clamp-edge"
-    }
-  }
+  ]
 }

@@ -13,7 +13,7 @@ namespace duk::resource {
 class DependencySolver {
 public:
     template<typename T>
-    void solve(ResourceT<T>& resource);
+    void solve(Handle<T>& resource);
 
     template<typename T>
     void solve(T& object);
@@ -29,7 +29,7 @@ private:
 };
 
 template<typename T>
-void DependencySolver::solve(ResourceT<T>& resource) {
+void DependencySolver::solve(Handle<T>& resource) {
     m_dependencies.insert(resource.id());
 }
 

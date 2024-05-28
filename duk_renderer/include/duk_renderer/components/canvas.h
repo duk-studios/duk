@@ -5,8 +5,6 @@
 #ifndef DUK_RENDERER_CANVAS_H
 #define DUK_RENDERER_CANVAS_H
 
-#include <duk_serial/json/serializer.h>
-
 #include <duk_objects/objects.h>
 
 #include <glm/glm.hpp>

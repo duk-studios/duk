@@ -18,7 +18,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    void load(ObjectsPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Objects> load(ObjectsPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
 };
 
 }// namespace duk::objects

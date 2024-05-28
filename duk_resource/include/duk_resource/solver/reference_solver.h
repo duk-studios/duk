@@ -15,7 +15,7 @@ public:
 
     // Solve a given resource that already has a set Id
     template<typename T>
-    void solve(ResourceT<T>& resource);
+    void solve(Handle<T>& resource);
 
     // Solve an object resources with template specialization (see solve_resources bellow)
     template<typename T>
@@ -23,14 +23,14 @@ public:
 
 private:
     template<typename T>
-    PoolT<ResourceT<T>>* find_pool();
+    PoolT<Handle<T>>* find_pool();
 
 private:
     Pools* m_pools;
 };
 
 template<typename T>
-void ReferenceSolver::solve(ResourceT<T>& resource) {
+void ReferenceSolver::solve(Handle<T>& resource) {
     auto pool = find_pool<T>();
     if (!pool) {
         throw std::logic_error("could not solve resource: pool not found");
@@ -44,8 +44,8 @@ void ReferenceSolver::solve(T& object) {
 }
 
 template<typename T>
-PoolT<ResourceT<T>>* ReferenceSolver::find_pool() {
-    return m_pools->get<PoolT<ResourceT<T>>>();
+PoolT<Handle<T>>* ReferenceSolver::find_pool() {
+    return m_pools->get<PoolT<Handle<T>>>();
 }
 
 }// namespace duk::resource

@@ -4,8 +4,12 @@
 #ifndef DUK_RHI_DESCRIPTOR_SET_H
 #define DUK_RHI_DESCRIPTOR_SET_H
 
-#include <duk_macros/macros.h>
 #include <duk_rhi/descriptor.h>
+
+#include <duk_hash/hash_combine.h>
+
+#include <cstdint>
+#include <vector>
 
 namespace duk::rhi {
 
@@ -17,6 +21,8 @@ public:
     virtual ~DescriptorSet();
 
     virtual void set(uint32_t binding, const Descriptor& descriptor) = 0;
+
+    DUK_NO_DISCARD virtual uint32_t size() const noexcept = 0;
 
     DUK_NO_DISCARD virtual Descriptor& at(uint32_t binding) = 0;
 
@@ -34,5 +40,28 @@ public:
 };
 
 }// namespace duk::rhi
+
+namespace std {
+
+template<>
+struct hash<duk::rhi::DescriptorDescription> {
+    size_t operator()(const duk::rhi::DescriptorDescription& descriptorDescription) const noexcept {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, descriptorDescription.type);
+        duk::hash::hash_combine(hash, descriptorDescription.moduleMask);
+        return hash;
+    }
+};
+
+template<>
+struct hash<duk::rhi::DescriptorSetDescription> {
+    size_t operator()(const duk::rhi::DescriptorSetDescription& descriptorSetDescription) const noexcept {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
+        return hash;
+    }
+};
+
+}// namespace std
 
 #endif// DUK_RHI_DESCRIPTOR_SET_H

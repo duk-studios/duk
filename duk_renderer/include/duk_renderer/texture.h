@@ -70,4 +70,13 @@ inline void to_json<duk::renderer::Texture>(rapidjson::Document& document, rapid
 
 }// namespace duk::serial
 
+namespace duk::resource {
+
+template<typename Solver>
+void solve_resources(Solver* solver, duk::renderer::Texture& texture) {
+    solver->solve(texture.image());
+}
+
+}// namespace duk::resource
+
 #endif// DUK_RENDERER_TEXTURE_H

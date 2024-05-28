@@ -18,19 +18,19 @@ namespace duk::rhi {
 
 class VulkanSwapchain;
 class VulkanMemoryImage;
-class VulkanMemoryImageCreateInfo;
+struct VulkanMemoryImageCreateInfo;
 class VulkanBuffer;
-class VulkanBufferCreateInfo;
+struct VulkanBufferCreateInfo;
 class VulkanDescriptorSet;
-class VulkanDescriptorSetCreateInfo;
+struct VulkanDescriptorSetCreateInfo;
 class VulkanGraphicsPipeline;
-class VulkanGraphicsPipelineCreateInfo;
+struct VulkanGraphicsPipelineCreateInfo;
 class VulkanComputePipeline;
-class VulkanComputePipelineCreateInfo;
+struct VulkanComputePipelineCreateInfo;
 class VulkanFrameBuffer;
-class VulkanFrameBufferCreateInfo;
+struct VulkanFrameBufferCreateInfo;
 class VulkanRenderPass;
-class VulkanRenderPassCreateInfo;
+struct VulkanRenderPassCreateInfo;
 
 struct VulkanResourceManagerCreateInfo {
     VulkanSwapchain* swapchain;

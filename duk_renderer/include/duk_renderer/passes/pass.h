@@ -19,6 +19,7 @@ class Objects;
 
 namespace renderer {
 
+class PipelineCache;
 class GlobalDescriptors;
 
 class PassConnection {
@@ -65,8 +66,8 @@ public:
     struct UpdateParams {
         duk::objects::Objects* objects;
         GlobalDescriptors* globalDescriptors;
-        uint32_t outputWidth;
-        uint32_t outputHeight;
+        glm::vec2 viewport;
+        PipelineCache* pipelineCache;
     };
 
     virtual void update(const UpdateParams& params) = 0;

@@ -1,11 +1,29 @@
 {
-  "type": "Color",
-  "color": "1;1;1;1",
-  "texture": {
-    "image": 1,
-    "sampler": {
-      "wrap": "clamp-edge",
-      "filter": "linear"
+  "shader": 100000,
+  "bindings": [
+    {
+      "type": "instance",
+      "name": "uTransform"
+    },
+    {
+      "type": "instance",
+      "name": "uProperties",
+      "members": [
+        {
+          "type": "vec4",
+          "name": "color",
+          "value": "1;1;1;1"
+        }
+      ]
+    },
+    {
+      "type": "image-sampler",
+      "name": "uBaseColor",
+      "image": 1,
+      "sampler": {
+        "wrap": "clamp-edge",
+        "filter": "nearest"
+      }
     }
-  }
+  ]
 }

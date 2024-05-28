@@ -11,7 +11,7 @@ struct TestData {
     int b;
 };
 
-using TestDataResource = duk::resource::ResourceT<TestData>;
+using TestDataResource = duk::resource::Handle<TestData>;
 
 struct ComponentTest {
     uint32_t a;

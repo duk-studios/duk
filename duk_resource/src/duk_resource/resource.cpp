@@ -26,18 +26,4 @@ bool Id::valid() const {
     return m_id != 0;
 }
 
-Resource::~Resource() = default;
-
-Id Resource::id() const {
-    return m_id;
-}
-
-void Resource::reset(Id id) {
-    m_id = id;
-}
-
-Resource::Resource(Id id)
-    : m_id(id) {
-}
-
 }// namespace duk::resource

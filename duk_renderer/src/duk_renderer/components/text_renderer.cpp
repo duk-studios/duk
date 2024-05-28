@@ -3,10 +3,12 @@
 //
 
 #include <duk_renderer/components/text_renderer.h>
-#include <duk_renderer/material/text/text_material.h>
 #include <duk_renderer/renderer.h>
 
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/components/canvas.h>
+
+#include <duk_renderer/material/material_pool.h>
 
 namespace duk::renderer {
 
@@ -257,19 +259,8 @@ void update_text_renderer(Renderer* renderer, const objects::Component<TextRende
     auto& mesh = textRenderer->mesh;
 
     if (!material) {
-        TextMaterialDataSource textMaterialDataSource = {};
-        textMaterialDataSource.color = glm::vec4(1);
-        textMaterialDataSource.atlasTexture = Texture{atlas->image(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE}};
-
-        MaterialCreateInfo materialCreateInfo = {};
-        materialCreateInfo.renderer = renderer;
-        materialCreateInfo.materialDataSource = &textMaterialDataSource;
-
-        material = std::make_shared<Material>(materialCreateInfo);
-        auto pipeline = material->pipeline();
-        pipeline->blend(true);
-        pipeline->cull_mode_mask(duk::rhi::GraphicsPipeline::CullMode::BACK);
-        pipeline->depth_test(false);
+        material = create_text_material(renderer);
+        material->set("uBaseColor", atlas->image(), kDefaultTextureSampler);
     }
 
     if (!mesh) {
@@ -278,12 +269,8 @@ void update_text_renderer(Renderer* renderer, const objects::Component<TextRende
         mesh = std::make_shared<TextMesh>(textMeshCreateInfo);
     }
 
-    const bool isWorldSpace = textRenderer.object().component<Transform>().valid();
-
-    mesh->update_text(atlas, *textRenderer, isWorldSpace ? 100 : 1);
-
-    auto descriptorSet = dynamic_cast<TextMaterialDescriptorSet*>(material->descriptor_set());
-    descriptorSet->set_instance(textRenderer.object());
+    const auto transform = textRenderer.object().component<Transform>();
+    mesh->update_text(atlas, *textRenderer, transform ? 100 : 1);
 }
 
 }// namespace duk::renderer

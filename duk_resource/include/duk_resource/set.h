@@ -21,9 +21,9 @@ class ResourceSet {
 public:
     explicit ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo);
 
-    void load(Id id);
+    Handle<void> load(Id id);
 
-    void load(const std::string& alias);
+    Handle<void> load(const std::string& alias);
 
     Pools* pools() const;
 

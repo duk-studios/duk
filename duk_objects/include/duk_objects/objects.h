@@ -476,7 +476,7 @@ private:
     std::vector<Id> m_destroyedIds;
 };
 
-using ObjectsResource = duk::resource::ResourceT<Objects>;
+using ObjectsResource = duk::resource::Handle<Objects>;
 
 // Object Implementation //
 

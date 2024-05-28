@@ -32,7 +32,7 @@ private:
     std::shared_ptr<AudioBuffer> m_buffer;
 };
 
-using AudioClipResource = duk::resource::ResourceT<AudioClip>;
+using AudioClipResource = duk::resource::Handle<AudioClip>;
 
 }// namespace duk::audio
 

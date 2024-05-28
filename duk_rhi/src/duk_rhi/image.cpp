@@ -7,4 +7,8 @@ namespace duk::rhi {
 
 Image::~Image() = default;
 
+glm::uvec2 Image::size() const {
+    return {width(), height()};
 }
+
+}// namespace duk::rhi

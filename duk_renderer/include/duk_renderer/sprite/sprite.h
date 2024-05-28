@@ -55,7 +55,7 @@ private:
     std::vector<SpriteData> m_sprites;
 };
 
-using SpriteResource = duk::resource::ResourceT<Sprite>;
+using SpriteResource = duk::resource::Handle<Sprite>;
 
 }// namespace duk::renderer
 

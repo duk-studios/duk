@@ -52,10 +52,11 @@ ResourceSet::ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo)
     }
 }
 
-void ResourceSet::load(const Id id) {
+Handle<void> ResourceSet::load(const Id id) {
+    Handle<void> handle;
     if (id < kMaxBuiltInResourceId) {
         // this is a builtin resource, skip
-        return;
+        return handle;
     }
 
     auto resourceIt = m_resourceFiles.find(id);
@@ -71,28 +72,29 @@ void ResourceSet::load(const Id id) {
     }
 
     try {
-        handler->load(m_pools, resourceFile.id, resourceFile.file);
+        handle = handler->load(m_pools, resourceFile.id, resourceFile.file);
     } catch (const std::exception& e) {
         throw std::runtime_error(fmt::format("Failed to load resource '{}' at '{}', reason: {}\n", resourceFile.id.value(), resourceFile.file, e.what()));
     }
 
-    DependencySolver dependencySolver;
-    handler->solve_dependencies(m_pools, id, dependencySolver);
+    std::set<Id> dependencies;
+    handler->solve_dependencies(handle, dependencies);
 
-    for (const auto dependency: dependencySolver.dependencies()) {
+    for (const auto dependency: dependencies) {
         load(dependency);
     }
 
-    ReferenceSolver referenceSolver(m_pools);
-    handler->solve_references(m_pools, resourceFile.id, referenceSolver);
+    handler->solve_references(handle, m_pools);
+
+    return handle;
 }
 
-void ResourceSet::load(const std::string& alias) {
+Handle<void> ResourceSet::load(const std::string& alias) {
     auto id = find_id(alias);
     if (id == kInvalidId) {
         throw std::invalid_argument(fmt::format("resource alias '{}' not found", alias));
     }
-    load(id);
+    return load(id);
 }
 
 Pools* ResourceSet::pools() const {

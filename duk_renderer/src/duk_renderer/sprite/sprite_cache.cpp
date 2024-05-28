@@ -5,7 +5,7 @@
 #include <duk_renderer/sprite/sprite_mesh.h>
 #include <duk_renderer/mesh_buffer.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/material/sprites/sprite_color/sprite_color_material.h>
+#include <duk_renderer/material/material.h>
 
 namespace duk::renderer {
 
@@ -42,15 +42,9 @@ std::shared_ptr<Material> SpriteCache::material_for(Sprite* atlas) {
     if (const auto it = m_materials.find(hash); it != m_materials.end()) {
         return it->second;
     }
+    auto material = create_color_material(m_renderer);
 
-    SpriteColorMaterialDataSource materialDataSource;
-    materialDataSource.image = atlas->image();
-    materialDataSource.color = glm::vec4(1.0f);
-
-    MaterialCreateInfo materialCreateInfo = {};
-    materialCreateInfo.renderer = m_renderer;
-    materialCreateInfo.materialDataSource = &materialDataSource;
-    auto material = std::make_shared<Material>(materialCreateInfo);
+    material->set("uBaseColor", atlas->image(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
 
     m_materials.emplace(hash, material);
 

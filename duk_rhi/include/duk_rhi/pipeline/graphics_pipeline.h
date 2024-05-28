@@ -151,4 +151,41 @@ public:
 
 }// namespace duk::rhi
 
+template<>
+struct std::hash<duk::rhi::GraphicsPipeline::Viewport> {
+    size_t operator()(const duk::rhi::GraphicsPipeline::Viewport& viewport) const noexcept {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, viewport.extent);
+        duk::hash::hash_combine(hash, viewport.offset);
+        duk::hash::hash_combine(hash, viewport.maxDepth);
+        duk::hash::hash_combine(hash, viewport.minDepth);
+        return hash;
+    }
+};
+
+template<>
+struct std::hash<duk::rhi::GraphicsPipeline::Scissor> {
+    size_t operator()(const duk::rhi::GraphicsPipeline::Scissor& scissor) const noexcept {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, scissor.extent);
+        duk::hash::hash_combine(hash, scissor.offset);
+        return hash;
+    }
+};
+
+template<>
+struct std::hash<duk::rhi::GraphicsPipeline::Blend> {
+    size_t operator()(const duk::rhi::GraphicsPipeline::Blend& blend) const noexcept {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, blend.srcColorBlendFactor);
+        duk::hash::hash_combine(hash, blend.dstColorBlendFactor);
+        duk::hash::hash_combine(hash, blend.colorBlendOp);
+        duk::hash::hash_combine(hash, blend.srcAlphaBlendFactor);
+        duk::hash::hash_combine(hash, blend.dstAlphaBlendFactor);
+        duk::hash::hash_combine(hash, blend.alphaBlendOp);
+        duk::hash::hash_combine(hash, blend.enabled);
+        return hash;
+    }
+};
+
 #endif// DUK_RHI_PIPELINE_H

@@ -4,8 +4,6 @@
 #ifndef DUK_RENDERER_PRESENT_PASS_H
 #define DUK_RENDERER_PRESENT_PASS_H
 
-#include <duk_renderer/generic_brush.h>
-#include <duk_renderer/material/fullscreen/fullscreen_material.h>
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/renderer.h>
@@ -36,7 +34,6 @@ private:
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
     std::unique_ptr<Material> m_fullscreenMaterial;
-    FullscreenMaterialDescriptorSet* m_fullscreenMaterialDescriptorSet;
 };
 
 }// namespace duk::renderer

@@ -38,7 +38,7 @@ void VulkanComputePipeline::update(uint32_t) {
     VkPipelineShaderStageCreateInfo computeShaderStage = {};
     computeShaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     computeShaderStage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-    computeShaderStage.module = m_shader->shader_modules().at(Shader::Module::COMPUTE);
+    computeShaderStage.module = m_shader->shader_modules().at(ShaderModule::COMPUTE);
     computeShaderStage.pName = "main";
 
     VkComputePipelineCreateInfo computePipeline = {};

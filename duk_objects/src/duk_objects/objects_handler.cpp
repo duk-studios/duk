@@ -42,7 +42,7 @@ bool ObjectsHandler::accepts(const std::string& extension) const {
     return extension == ".obj";
 }
 
-void ObjectsHandler::load(ObjectsPool* pool, const resource::Id& id, const std::filesystem::path& path) {
+duk::resource::Handle<Objects> ObjectsHandler::load(ObjectsPool* pool, const resource::Id& id, const std::filesystem::path& path) {
     auto content = duk::tools::load_text(path);
 
     ObjectsWrapper objectsWrapper = {};
@@ -50,7 +50,7 @@ void ObjectsHandler::load(ObjectsPool* pool, const resource::Id& id, const std::
 
     duk::serial::read_json(content, objectsWrapper);
 
-    pool->insert(id, objectsWrapper.objects);
+    return pool->insert(id, objectsWrapper.objects);
 }
 
 }// namespace duk::objects

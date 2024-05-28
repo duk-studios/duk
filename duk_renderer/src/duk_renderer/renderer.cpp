@@ -12,7 +12,8 @@
 namespace duk::renderer {
 
 Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
-    : m_window(rendererCreateInfo.window) {
+    : m_window(rendererCreateInfo.window)
+    , m_pools(rendererCreateInfo.pools) {
     {
         duk::rhi::RHICreateInfo rhiCreateInfo = {};
         rhiCreateInfo.window = rendererCreateInfo.window;
@@ -38,6 +39,12 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
         globalDescriptorsCreateInfo.commandQueue = m_mainQueue.get();
 
         m_globalDescriptors = std::make_unique<GlobalDescriptors>(globalDescriptorsCreateInfo);
+    }
+
+    {
+        PipelineCacheCreateInfo pipelineCacheCreateInfo = {};
+        pipelineCacheCreateInfo.renderer = this;
+        m_pipelineCache = std::make_unique<PipelineCache>(pipelineCacheCreateInfo);
     }
 }
 
@@ -138,6 +145,10 @@ duk::rhi::CommandQueue* Renderer::main_command_queue() const {
     return m_mainQueue.get();
 }
 
+duk::resource::Pools* Renderer::pools() const {
+    return m_pools;
+}
+
 void Renderer::update_global_descriptors(duk::objects::Objects& objects) {
     m_globalDescriptors->update_cameras(objects);
 
@@ -150,8 +161,8 @@ void Renderer::update_passes(objects::Objects& objects) {
     Pass::UpdateParams updateParams = {};
     updateParams.objects = &objects;
     updateParams.globalDescriptors = m_globalDescriptors.get();
-    updateParams.outputWidth = render_width();
-    updateParams.outputHeight = render_height();
+    updateParams.viewport = {render_width(), render_height()};
+    updateParams.pipelineCache = m_pipelineCache.get();
 
     for (auto& pass: m_passes) {
         pass->update(updateParams);

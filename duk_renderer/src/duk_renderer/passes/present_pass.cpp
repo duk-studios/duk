@@ -2,9 +2,9 @@
 /// present_pass.cpp
 
 #include <duk_platform/window.h>
-#include <duk_renderer/material/fullscreen/fullscreen_material.h>
-#include <duk_renderer/material/pipeline.h>
 #include <duk_renderer/passes/present_pass.h>
+
+#include "duk_renderer/shader/fullscreen/fullscreen_shader_data_source.h"
 
 namespace duk::renderer {
 
@@ -38,20 +38,24 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
     }
 
     {
-        FullscreenMaterialDataSource fullscreenMaterialDataSource = {};
-        fullscreenMaterialDataSource.sampler = duk::rhi::Sampler(duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER);
-        fullscreenMaterialDataSource.update_hash();
+        // FullscreenMaterialDataSource fullscreenMaterialDataSource = {};
+        // fullscreenMaterialDataSource.sampler = duk::rhi::Sampler(duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER);
+        // fullscreenMaterialDataSource.update_hash();
+
+        FullscreenShaderDataSource fullscreenShaderDataSource;
+
+        ShaderPipelineCreateInfo shaderPipelineCreateInfo = {};
+        shaderPipelineCreateInfo.renderer = m_renderer;
+        // necessary when using vulkan, need to take that into account when supporting other APIs
+        shaderPipelineCreateInfo.settings.invertY = true;
+        shaderPipelineCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
 
         MaterialCreateInfo materialCreateInfo = {};
         materialCreateInfo.renderer = m_renderer;
-        materialCreateInfo.materialDataSource = &fullscreenMaterialDataSource;
+        materialCreateInfo.materialData.shader = std::make_shared<ShaderPipeline>(shaderPipelineCreateInfo);
+        ;
 
         m_fullscreenMaterial = std::make_unique<Material>(materialCreateInfo);
-
-        m_fullscreenMaterialDescriptorSet = dynamic_cast<FullscreenMaterialDescriptorSet*>(m_fullscreenMaterial->descriptor_set());
-
-        // necessary when using vulkan, need to take that into account when supporting other APIs
-        m_fullscreenMaterial->pipeline()->invert_y(true);
     }
 }
 
@@ -66,10 +70,6 @@ void PresentPass::update(const Pass::UpdateParams& params) {
         return;
     }
 
-    if (!m_fullscreenMaterialDescriptorSet) {
-        return;
-    }
-
     if (!m_frameBuffer) {
         duk::rhi::Image* frameBufferAttachments[] = {m_renderer->rhi()->present_image()};
 
@@ -81,15 +81,9 @@ void PresentPass::update(const Pass::UpdateParams& params) {
         m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
     }
 
-    m_fullscreenMaterialDescriptorSet->set_image(m_inColor.image());
+    m_fullscreenMaterial->set("uTexture", duk::rhi::Descriptor::image_sampler(m_inColor.image(), m_inColor.image_layout(), kDefaultTextureSampler));
 
-    DrawParams drawParams = {};
-    drawParams.globalDescriptors = params.globalDescriptors;
-    drawParams.outputWidth = params.outputWidth;
-    drawParams.outputHeight = params.outputHeight;
-    drawParams.renderPass = m_renderPass.get();
-
-    m_fullscreenMaterial->update(drawParams);
+    m_fullscreenMaterial->update(*params.pipelineCache, m_renderPass.get(), params.viewport);
 }
 
 void PresentPass::render(duk::rhi::CommandBuffer* commandBuffer) {

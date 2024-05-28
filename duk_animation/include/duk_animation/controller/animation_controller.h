@@ -33,7 +33,7 @@ private:
     AnimationVariables m_variables;
 };
 
-using AnimationControllerResource = duk::resource::ResourceT<AnimationController>;
+using AnimationControllerResource = duk::resource::Handle<AnimationController>;
 
 }// namespace duk::animation
 
