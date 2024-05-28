@@ -1,5 +1,5 @@
 {
-  "shader": 100000,
+  "shader": 100002,
   "bindings": [
     {
       "type": "instance",
