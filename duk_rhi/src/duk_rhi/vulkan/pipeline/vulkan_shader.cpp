@@ -63,8 +63,6 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo)
         throw std::runtime_error("invalid ShaderDataSource provided to VulkanShader");
     }
 
-
-
     m_descriptorSetLayouts.reserve(m_descriptorSetDescriptions.size());
     for (auto& descriptorSetDescription: m_descriptorSetDescriptions) {
         m_descriptorSetLayouts.push_back(shaderCreateInfo.descriptorSetLayoutCache->get_layout(descriptorSetDescription));

@@ -13,7 +13,6 @@ namespace duk::renderer {
 
 class ShaderPipelineHandler : public duk::resource::ResourceHandlerT<ShaderPipelinePool> {
 public:
-
     ShaderPipelineHandler();
 
     bool accepts(const std::string& extension) const override;
@@ -24,6 +23,6 @@ protected:
 private:
 };
 
-}
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_SHADER_PIPELINE_HANDLER_H
+#endif//DUK_RENDERER_SHADER_PIPELINE_HANDLER_H

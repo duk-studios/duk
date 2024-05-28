@@ -188,6 +188,4 @@ struct std::hash<duk::rhi::GraphicsPipeline::Blend> {
     }
 };
 
-
-
 #endif// DUK_RHI_PIPELINE_H

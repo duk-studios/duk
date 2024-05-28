@@ -75,7 +75,7 @@ duk::rhi::GraphicsPipeline* PipelineCache::find(const PipelineState& state) {
 void PipelineCache::clear() {
     const auto kDeleteUnusedPipelineAfterFrames = 100;
 
-    for (auto it = m_pipelines.begin(); it!= m_pipelines.end(); ++it) {
+    for (auto it = m_pipelines.begin(); it != m_pipelines.end(); ++it) {
         auto& entry = it->second;
         entry.framesUnused++;
 
@@ -84,4 +84,4 @@ void PipelineCache::clear() {
         }
     }
 }
-}
+}// namespace duk::renderer

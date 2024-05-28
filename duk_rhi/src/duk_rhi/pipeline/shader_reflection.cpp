@@ -126,7 +126,7 @@ static void remove_unsupported_attributes(std::vector<SpvReflectInterfaceVariabl
     });
 }
 
-}
+}// namespace detail
 
 void reflect_descriptor_sets(const uint8_t* data, size_t size, ShaderModule::Bits shaderModuleBit, std::vector<DescriptorSetDescription>& sets) {
     SpvReflectShaderModule module = {};
@@ -179,7 +179,6 @@ void reflect_vertex_layout(const uint8_t* data, size_t size, VertexLayout& verte
     }
     vertexLayout.clear();
     vertexLayout.insert(attributes);
-
 }
 
-} // duk::rhi
+}// namespace duk::rhi

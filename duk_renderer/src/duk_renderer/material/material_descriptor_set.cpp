@@ -3,7 +3,4 @@
 
 #include <duk_renderer/material/material_descriptor_set.h>
 
-namespace duk::renderer {
-
-
-}// namespace duk::renderer
+namespace duk::renderer {}// namespace duk::renderer

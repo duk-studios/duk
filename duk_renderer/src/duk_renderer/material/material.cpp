@@ -56,25 +56,25 @@ static void set_member(Material* material, uint32_t bindingIndex, uint32_t membe
     switch (member.type) {
         case BufferBinding::Member::Type::INT:
             material->set(bindingIndex, memberIndex, member.data.intValue);
-        break;
+            break;
         case BufferBinding::Member::Type::UINT:
             material->set(bindingIndex, memberIndex, member.data.uintValue);
-        break;
+            break;
         case BufferBinding::Member::Type::FLOAT:
             material->set(bindingIndex, memberIndex, member.data.floatValue);
-        break;
+            break;
         case BufferBinding::Member::Type::BOOL:
             material->set(bindingIndex, memberIndex, member.data.boolValue);
-        break;
+            break;
         case BufferBinding::Member::Type::VEC2:
             material->set(bindingIndex, memberIndex, member.data.vec2Value);
-        break;
+            break;
         case BufferBinding::Member::Type::VEC3:
             material->set(bindingIndex, memberIndex, member.data.vec3Value);
-        break;
+            break;
         case BufferBinding::Member::Type::VEC4:
             material->set(bindingIndex, memberIndex, member.data.vec4Value);
-        break;
+            break;
         default:
             throw std::runtime_error("Unsupported material buffer member type");
     }
@@ -104,7 +104,7 @@ static void set_buffer_members(Material* material, const Binding& binding, uint3
         duk::log::fatal("Binding '{}' is not a BufferBinding", binding.name);
         return;
     }
-    for (auto& member : buffer->members) {
+    for (auto& member: buffer->members) {
         auto memberIndex = detail::find_member(descriptorDescription, member.name);
         if (memberIndex == kInvalidMaterialLocation) {
             duk::log::fatal("Binding '{}' member '{}' not found in Material descriptor set", binding.name, member.name);
@@ -120,7 +120,7 @@ static void add_transform_binding(MaterialData& materialData) {
     transforms.type = BindingType::INSTANCE;
 }
 
-}
+}// namespace detail
 
 MaterialLocationId::MaterialLocationId()
     : m_index(kInvalidMaterialLocation) {
@@ -157,7 +157,6 @@ Material::Material(const MaterialCreateInfo& materialCreateInfo)
     , m_shader(materialCreateInfo.materialData.shader)
     , m_bindings(std::move(materialCreateInfo.materialData.bindings))
     , m_dirty(true) {
-
 }
 
 Material::~Material() = default;
@@ -201,9 +200,7 @@ void Material::set(const MaterialLocationId& binding, const ImageResource& image
 }
 
 void Material::set(const MaterialLocationId& binding, const ImageResource& image, const duk::rhi::Sampler& sampler) {
-    Texture texture = {
-        image, sampler
-    };
+    Texture texture = {image, sampler};
     set(binding, texture.descriptor());
 }
 
@@ -219,8 +216,7 @@ void Material::set(const MaterialLocationId& binding, const void* data, uint32_t
 
     if (m_uniformBuffers.contains(bindingIndex)) {
         m_uniformBuffers.at(bindingIndex)->write(data, size);
-    }
-    else if (m_instanceBuffers.contains(bindingIndex)) {
+    } else if (m_instanceBuffers.contains(bindingIndex)) {
         m_instanceBuffers.at(bindingIndex)->write(data, size);
     }
 }
@@ -260,8 +256,7 @@ void Material::set(const MaterialLocationId& binding, const MaterialLocationId& 
 
     if (m_uniformBuffers.contains(bindingIndex)) {
         m_uniformBuffers.at(bindingIndex)->write(memberIndex, data, size);
-    }
-    else if (m_instanceBuffers.contains(bindingIndex)) {
+    } else if (m_instanceBuffers.contains(bindingIndex)) {
         m_instanceBuffers.at(bindingIndex)->write(memberIndex, data, size);
     }
 }
@@ -343,7 +338,7 @@ void Material::init() {
     }
 
     // initialize descriptors
-    for (auto& binding : m_bindings) {
+    for (auto& binding: m_bindings) {
         auto descriptorType = detail::get_descriptor_type(binding.type);
         if (descriptorType == duk::rhi::DescriptorType::UNDEFINED) {
             duk::log::fatal("Binding '{}' with an undefined descriptor type '{}'", binding.name);

@@ -32,7 +32,6 @@ public:
 template<typename TPool>
 class ResourceHandlerT : public ResourceHandler {
 public:
-
     using Type = typename TPool::Type;
 
     explicit ResourceHandlerT(const char* tag);

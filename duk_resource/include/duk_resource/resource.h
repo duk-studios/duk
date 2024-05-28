@@ -69,10 +69,12 @@ public:
     Handle(const std::shared_ptr<T>& resource);
 
     template<typename U>
-    Handle(const Handle<U>& other) requires std::is_convertible_v<U*, T*>;
+    Handle(const Handle<U>& other)
+        requires std::is_convertible_v<U*, T*>;
 
     template<typename U>
-    Handle(Id id, const std::shared_ptr<U>& resource) requires std::is_convertible_v<U*, T*>;
+    Handle(Id id, const std::shared_ptr<U>& resource)
+        requires std::is_convertible_v<U*, T*>;
 
     template<typename U>
     Handle<U> as() const;
@@ -90,7 +92,6 @@ public:
     void reset(Id id = kInvalidId);
 
 private:
-
     template<typename U>
     friend class Handle;
 
@@ -131,13 +132,15 @@ Handle<T>::Handle(const std::shared_ptr<T>& resource)
 
 template<typename T>
 template<typename U>
-Handle<T>::Handle(const Handle<U>& other) requires std::is_convertible_v<U*, T*>
+Handle<T>::Handle(const Handle<U>& other)
+    requires std::is_convertible_v<U*, T*>
     : Handle(other.id(), other.m_resource) {
 }
 
 template<typename T>
 template<typename U>
-Handle<T>::Handle(Id id, const std::shared_ptr<U>& resource) requires std::is_convertible_v<U*, T*>
+Handle<T>::Handle(Id id, const std::shared_ptr<U>& resource)
+    requires std::is_convertible_v<U*, T*>
     : m_id(id)
     , m_resource(resource) {
 }

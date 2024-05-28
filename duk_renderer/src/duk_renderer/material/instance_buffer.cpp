@@ -19,7 +19,7 @@ static std::shared_ptr<duk::rhi::Buffer> create_storage_buffer(duk::rhi::RHI* rh
     return rhi->create_buffer(bufferCreateInfo);
 }
 
-}
+}// namespace detail
 
 MaterialInstanceBuffer::MaterialInstanceBuffer()
     : m_description()
@@ -132,4 +132,4 @@ void MaterialInstanceBuffer::update(const duk::objects::Id& id) {
     m_instanceVersions[id.index()] = id.version();
 }
 
-}
+}// namespace duk::renderer

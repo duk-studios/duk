@@ -8,7 +8,6 @@
 
 namespace duk::renderer {
 
-
 MaterialHandler::MaterialHandler()
     : ResourceHandlerT("mat") {
 }

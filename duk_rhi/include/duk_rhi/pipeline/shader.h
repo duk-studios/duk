@@ -80,7 +80,6 @@ public:
     DUK_NO_DISCARD virtual duk::hash::Hash hash() const = 0;
 };
 
-
 }// namespace duk::rhi
 
 #endif// DUK_RHI_SHADER_H

@@ -52,7 +52,8 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
 
         MaterialCreateInfo materialCreateInfo = {};
         materialCreateInfo.renderer = m_renderer;
-        materialCreateInfo.materialData.shader = std::make_shared<ShaderPipeline>(shaderPipelineCreateInfo);;
+        materialCreateInfo.materialData.shader = std::make_shared<ShaderPipeline>(shaderPipelineCreateInfo);
+        ;
 
         m_fullscreenMaterial = std::make_unique<Material>(materialCreateInfo);
     }

@@ -43,7 +43,6 @@ struct MaterialCreateInfo {
 
 class Material {
 public:
-
     explicit Material(const MaterialCreateInfo& materialCreateInfo);
 
     ~Material();
@@ -102,7 +101,6 @@ public:
     void solve_resources(Solver* solver);
 
 private:
-
     // unfortunately this has to be here until we refactor the way we load resources
     // see DUK-79 for more details
     void init();

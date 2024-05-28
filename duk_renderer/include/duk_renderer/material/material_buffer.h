@@ -20,7 +20,6 @@ struct MaterialBufferCreateInfo {
 
 class MaterialUniformBuffer {
 public:
-
     MaterialUniformBuffer();
 
     MaterialUniformBuffer(const MaterialBufferCreateInfo& materialBufferCreateInfo);
@@ -42,6 +41,6 @@ private:
     std::shared_ptr<duk::rhi::Buffer> m_buffer;
 };
 
-}
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_MATERIAL_BUFFER_H
+#endif//DUK_RENDERER_MATERIAL_BUFFER_H

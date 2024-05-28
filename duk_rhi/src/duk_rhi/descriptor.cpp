@@ -79,7 +79,7 @@ Buffer* Descriptor::buffer() const {
 }
 
 bool operator==(const Descriptor& lhs, const Descriptor& rhs) {
-    if (lhs.m_type!= rhs.m_type) {
+    if (lhs.m_type != rhs.m_type) {
         return false;
     }
     switch (lhs.m_type) {
@@ -87,9 +87,7 @@ bool operator==(const Descriptor& lhs, const Descriptor& rhs) {
         case DescriptorType::STORAGE_BUFFER:
             return lhs.m_data.bufferDescriptor.buffer == rhs.m_data.bufferDescriptor.buffer;
         case DescriptorType::IMAGE_SAMPLER:
-            return lhs.m_data.imageDescriptor.image == rhs.m_data.imageDescriptor.image
-                && lhs.m_data.imageDescriptor.sampler == rhs.m_data.imageDescriptor.sampler
-                && lhs.m_data.imageDescriptor.layout == rhs.m_data.imageDescriptor.layout;
+            return lhs.m_data.imageDescriptor.image == rhs.m_data.imageDescriptor.image && lhs.m_data.imageDescriptor.sampler == rhs.m_data.imageDescriptor.sampler && lhs.m_data.imageDescriptor.layout == rhs.m_data.imageDescriptor.layout;
         case DescriptorType::IMAGE:
             return lhs.m_data.imageDescriptor.image == rhs.m_data.imageDescriptor.image;
         case DescriptorType::STORAGE_IMAGE:

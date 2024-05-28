@@ -13,13 +13,11 @@ struct Boo {
 };
 
 int main() {
-
     duk::resource::Handle<Foo> foo = std::make_shared<Foo>();
 
     duk::resource::Handle<void> voidFoo = foo;
 
     duk::resource::Handle<Foo> foo2 = voidFoo.as<Foo>();
-
 
     return 0;
 }

@@ -81,7 +81,7 @@ struct MaterialData {
     std::vector<Binding> bindings;
 };
 
-}
+}// namespace duk::renderer
 
 namespace duk::serial {
 
@@ -128,7 +128,7 @@ static duk::renderer::BufferBinding::Member::Type parse_material_data_binding_bu
     return duk::renderer::BufferBinding::Member::Type::UNDEFINED;
 }
 
-}
+}// namespace detail
 
 template<>
 inline void from_json(const rapidjson::Value& json, duk::renderer::BufferBinding::Member::Type& type) {
@@ -222,6 +222,6 @@ inline void from_json(const rapidjson::Value& json, duk::renderer::MaterialData&
     from_json_member(json, "bindings", materialData.bindings);
 }
 
-}
+}// namespace duk::serial
 
-#endif //DUK_RENDERER_MATERIAL_DATA_H
+#endif//DUK_RENDERER_MATERIAL_DATA_H

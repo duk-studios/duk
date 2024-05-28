@@ -27,7 +27,6 @@ struct ShaderPipelineCreateInfo {
 
 class ShaderPipeline {
 public:
-
     explicit ShaderPipeline(const ShaderPipelineCreateInfo& shaderPipelineCreateInfo);
 
     const duk::rhi::DescriptorSetDescription& descriptor_set_description() const;
@@ -59,6 +58,6 @@ private:
 
 using ShaderPipelineResource = duk::resource::Handle<ShaderPipeline>;
 
-}
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_SHADER_PIPELINE_H
+#endif//DUK_RENDERER_SHADER_PIPELINE_H

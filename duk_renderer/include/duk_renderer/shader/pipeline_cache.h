@@ -25,7 +25,7 @@ struct PipelineState {
 
 bool operator==(const PipelineState& lhs, const PipelineState& rhs);
 
-}
+}// namespace duk::renderer
 
 template<>
 struct std::hash<duk::renderer::PipelineState> {
@@ -69,6 +69,6 @@ private:
     std::unordered_map<PipelineState, PipelineEntry> m_pipelines;
 };
 
-}
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_PIPELINE_CACHE_H
+#endif//DUK_RENDERER_PIPELINE_CACHE_H

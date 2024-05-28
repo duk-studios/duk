@@ -19,7 +19,7 @@ static void load_shader_stage(rhi::StdShaderDataSource& shaderDataSource, duk::r
     shaderDataSource.insert_spir_v_code(shaderModule, code);
 }
 
-}
+}// namespace detail
 
 ShaderPipelineHandler::ShaderPipelineHandler()
     : ResourceHandlerT("spp") {
@@ -45,4 +45,4 @@ duk::resource::Handle<ShaderPipeline> ShaderPipelineHandler::load(ShaderPipeline
     return pool->create(id, &shaderDataSource, shaderPipelineData.settings);
 }
 
-}
+}// namespace duk::renderer

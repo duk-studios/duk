@@ -35,10 +35,11 @@ static void update_texts(const Pass::UpdateParams& params, duk::rhi::RenderPass*
         }
 
         auto material = textRenderer->material.get();
-        if (object.component<Transform>())
+        if (object.component<Transform>()) {
             material->set("uCamera", params.globalDescriptors->camera_ubo()->descriptor());
-        else
+        } else {
             material->set("uCamera", params.globalDescriptors->canvas_ubo()->descriptor());
+        }
         material->clear();
         material->push(object.id());
         uniqueMaterials.insert(material);
@@ -107,7 +108,7 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
         return;
     }
 
-    for (const auto material : uniqueMaterials) {
+    for (const auto material: uniqueMaterials) {
         material->set("uCamera", params.globalDescriptors->camera_ubo()->descriptor());
         MaterialLocationId lights = material->find_binding("uLights");
         if (lights.valid()) {

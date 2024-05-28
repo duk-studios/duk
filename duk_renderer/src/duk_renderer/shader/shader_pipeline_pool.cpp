@@ -12,7 +12,6 @@ namespace duk::renderer {
 
 ShaderPipelinePool::ShaderPipelinePool(const ShaderPipelinePoolCreateInfo& shaderPipelinePoolCreateInfo)
     : m_renderer(shaderPipelinePoolCreateInfo.renderer) {
-
     {
         ColorShaderDataSource colorShaderDataSource = {};
         PipelineSettings settings = {};
@@ -87,4 +86,4 @@ ShaderPipelineResource ShaderPipelinePool::text() const {
     return m_text;
 }
 
-}
+}// namespace duk::renderer

@@ -14,9 +14,7 @@ SpriteMesh::SpriteMesh(const SpriteMeshCreateInfo& spriteMeshCreateInfo) {
     const auto spriteIndex = spriteMeshCreateInfo.spriteIndex;
     const auto [position, uv] = spriteAtlas->compute_metrics(spriteIndex);
 
-    {
-        m_meshBuffer = meshBufferPool->find_buffer(s_vertexAttributes.vertex_layout(), rhi::IndexType::UINT32, rhi::Buffer::UpdateFrequency::DYNAMIC);
-    }
+    { m_meshBuffer = meshBufferPool->find_buffer(s_vertexAttributes.vertex_layout(), rhi::IndexType::UINT32, rhi::Buffer::UpdateFrequency::DYNAMIC); }
 
     m_meshHandle = m_meshBuffer->allocate(4, 6);
 

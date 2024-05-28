@@ -27,7 +27,7 @@ struct ShaderPipelineData {
     PipelineSettings settings;
 };
 
-}
+}// namespace duk::renderer
 
 namespace duk::serial {
 
@@ -61,13 +61,12 @@ inline void from_json(const rapidjson::Value& json, duk::renderer::ShaderPipelin
     from_json_member(json, "settings", data.settings);
 }
 
-
 template<>
 inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::ShaderPipelineData& data) {
     to_json_member(document, json, "shader", data.shader);
     to_json_member(document, json, "settings", data.settings);
 }
 
-}
+}// namespace duk::serial
 
-#endif //DUK_RENDERER_SHADER_PIPELINE_DATA_H
+#endif//DUK_RENDERER_SHADER_PIPELINE_DATA_H

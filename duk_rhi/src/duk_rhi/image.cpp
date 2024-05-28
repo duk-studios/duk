@@ -11,4 +11,4 @@ glm::uvec2 Image::size() const {
     return {width(), height()};
 }
 
-}
+}// namespace duk::rhi

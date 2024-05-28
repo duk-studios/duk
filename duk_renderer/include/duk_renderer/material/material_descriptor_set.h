@@ -10,9 +10,6 @@
 #include <duk_renderer/texture.h>
 #include <duk_rhi/command/command_buffer.h>
 
-namespace duk::renderer {
-
-
-}// namespace duk::renderer
+namespace duk::renderer {}// namespace duk::renderer
 
 #endif// DUK_RENDERER_MATERIAL_DESCRIPTOR_SET_H

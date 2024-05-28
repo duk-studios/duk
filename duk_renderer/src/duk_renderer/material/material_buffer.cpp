@@ -46,4 +46,4 @@ void MaterialUniformBuffer::flush() {
     m_buffer->flush();
 }
 
-}
+}// namespace duk::renderer

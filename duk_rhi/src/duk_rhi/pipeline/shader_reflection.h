@@ -14,6 +14,6 @@ void reflect_descriptor_sets(const uint8_t* data, size_t size, ShaderModule::Bit
 
 void reflect_vertex_layout(const uint8_t* data, size_t size, VertexLayout& vertexLayout);
 
-} // duk::rhi
+}// namespace duk::rhi
 
-#endif //DUK_RHI_SHADER_REFLECTION_H
+#endif//DUK_RHI_SHADER_REFLECTION_H

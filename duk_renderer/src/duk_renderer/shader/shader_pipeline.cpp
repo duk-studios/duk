@@ -38,8 +38,7 @@ void ShaderPipeline::set_blend(bool enable) {
         m_state.blend.alphaBlendOp = rhi::GraphicsPipeline::Blend::Operator::ADD;
         m_state.blend.srcAlphaBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ONE;
         m_state.blend.dstAlphaBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ZERO;
-    }
-    else {
+    } else {
         m_state.blend.enabled = false;
     }
     m_dirty = true;
@@ -73,7 +72,7 @@ void ShaderPipeline::update(PipelineCache& pipelineCache, duk::rhi::RenderPass* 
         m_state.renderPass = renderPass;
         dirty = true;
     }
-    if (m_state.viewport.extent != viewport || dirty) { //check for dirty, invert y might have changed
+    if (m_state.viewport.extent != viewport || dirty) {//check for dirty, invert y might have changed
         m_state.viewport.extent = viewport;
         m_state.viewport.offset = {};
         m_state.viewport.maxDepth = 1.0f;
@@ -103,4 +102,4 @@ void ShaderPipeline::bind(duk::rhi::CommandBuffer* commandBuffer) const {
     commandBuffer->bind_graphics_pipeline(m_pipeline);
 }
 
-}
+}// namespace duk::renderer

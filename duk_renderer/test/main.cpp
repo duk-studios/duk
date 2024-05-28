@@ -116,13 +116,7 @@ int main() {
     globalPointLight->value.color = glm::vec3(1.0f, 1.0f, 1.0f);
     globalPointLight->value.intensity = 5.0f;
 
-
-    auto add_mesh_object = [](
-        duk::objects::Objects& objects,
-        const duk::renderer::MeshResource& mesh,
-        const duk::renderer::MaterialResource& material,
-        const glm::vec3& position) -> duk::objects::Object {
-
+    auto add_mesh_object = [](duk::objects::Objects& objects, const duk::renderer::MeshResource& mesh, const duk::renderer::MaterialResource& material, const glm::vec3& position) -> duk::objects::Object {
         duk::objects::Object object = objects.add_object();
         auto meshRenderer = object.add<duk::renderer::MeshRenderer>();
         meshRenderer->mesh = mesh;
@@ -175,7 +169,7 @@ int main() {
         //Rotating the cube in the X value by the timer total duration.
         cube1Transform->rotation = glm::radians(glm::vec3(time * 30, 45.0f, 0.0f));
 
-        cube2Transform->rotation = glm::radians(glm::vec3(time * -52, sinf(time  * 4) * 85, 15.0f));
+        cube2Transform->rotation = glm::radians(glm::vec3(time * -52, sinf(time * 4) * 85, 15.0f));
 
         duk::renderer::update_transforms(objects);
         duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());

@@ -21,7 +21,6 @@ struct MaterialInstanceBufferCreateInfo {
 
 class MaterialInstanceBuffer final {
 public:
-
     MaterialInstanceBuffer();
 
     explicit MaterialInstanceBuffer(const MaterialInstanceBufferCreateInfo& instanceBufferCreateInfo);
@@ -55,7 +54,6 @@ public:
     void flush();
 
 private:
-
     uint32_t instance_offset(const duk::objects::Id& id) const;
 
     bool is_valid(const duk::objects::Id& id) const;

@@ -4,7 +4,4 @@
 
 #include <duk_renderer/material/material_data.h>
 
-namespace duk::renderer {
-
-
-} // namespace duk::renderer
+namespace duk::renderer {}// namespace duk::renderer

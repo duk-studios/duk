@@ -53,7 +53,6 @@ ResourceSet::ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo)
 }
 
 Handle<void> ResourceSet::load(const Id id) {
-
     Handle<void> handle;
     if (id < kMaxBuiltInResourceId) {
         // this is a builtin resource, skip

@@ -26,7 +26,6 @@ struct ShaderPipelinePoolCreateInfo {
 
 class ShaderPipelinePool : public duk::resource::PoolT<ShaderPipelineResource> {
 public:
-
     explicit ShaderPipelinePool(const ShaderPipelinePoolCreateInfo& shaderPipelinePoolCreateInfo);
 
     ShaderPipelineResource create(const duk::resource::Id& id, const duk::rhi::ShaderDataSource* shaderDataSource, const PipelineSettings& settings);
@@ -53,6 +52,6 @@ private:
     ShaderPipelineResource m_text;
 };
 
-}
+}// namespace duk::renderer
 
-#endif //DUK_RENDERER_SHADER_PIPELINE_POOL_H
+#endif//DUK_RENDERER_SHADER_PIPELINE_POOL_H

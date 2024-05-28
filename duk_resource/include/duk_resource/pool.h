@@ -52,10 +52,12 @@ public:
         requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>;
 
     template<typename T>
-    T* get() requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>;
+    T* get()
+        requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>;
 
     template<typename T>
-    const T* get() const requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>;
+    const T* get() const
+        requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>;
 
     void clear();
 
@@ -96,7 +98,9 @@ T* Pools::get()
 }
 
 template<typename T>
-const T* Pools::get() const requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T> {
+const T* Pools::get() const
+    requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>
+{
     const auto index = pool_index<typename T::Type>();
     if (index >= m_pools.size()) {
         return nullptr;

@@ -77,6 +77,6 @@ void solve_resources(Solver* solver, duk::renderer::Texture& texture) {
     solver->solve(texture.image());
 }
 
-}
+}// namespace duk::resource
 
 #endif// DUK_RENDERER_TEXTURE_H

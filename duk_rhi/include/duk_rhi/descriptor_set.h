@@ -56,7 +56,7 @@ struct hash<duk::rhi::DescriptorDescription> {
 template<>
 struct hash<duk::rhi::DescriptorSetDescription> {
     size_t operator()(const duk::rhi::DescriptorSetDescription& descriptorSetDescription) const noexcept {
-       size_t hash = 0;
+        size_t hash = 0;
         duk::hash::hash_combine(hash, descriptorSetDescription.bindings.begin(), descriptorSetDescription.bindings.end());
         return hash;
     }
