@@ -17,7 +17,7 @@ namespace duk::renderer {
 
 class VertexAttributes {
 public:
-    enum Type {
+    enum Type : uint32_t {
         POSITION = 0,
         NORMAL,
         UV,

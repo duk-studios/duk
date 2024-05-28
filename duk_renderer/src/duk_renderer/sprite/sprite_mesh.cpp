@@ -6,6 +6,8 @@
 
 namespace duk::renderer {
 
+static const VertexAttributes s_vertexAttributes({VertexAttributes::POSITION, VertexAttributes::UV});
+
 SpriteMesh::SpriteMesh(const SpriteMeshCreateInfo& spriteMeshCreateInfo) {
     const auto meshBufferPool = spriteMeshCreateInfo.meshBufferPool;
     const auto spriteAtlas = spriteMeshCreateInfo.sprite;
@@ -13,12 +15,7 @@ SpriteMesh::SpriteMesh(const SpriteMeshCreateInfo& spriteMeshCreateInfo) {
     const auto [position, uv] = spriteAtlas->compute_metrics(spriteIndex);
 
     {
-        rhi::VertexLayout vertexLayout = {
-                {rhi::VertexInput::Format::VEC3},// position
-                {rhi::VertexInput::Format::VEC2},// uv
-        };
-
-        m_meshBuffer = meshBufferPool->find_buffer(vertexLayout, rhi::IndexType::UINT32, rhi::Buffer::UpdateFrequency::DYNAMIC);
+        m_meshBuffer = meshBufferPool->find_buffer(s_vertexAttributes.vertex_layout(), rhi::IndexType::UINT32, rhi::Buffer::UpdateFrequency::DYNAMIC);
     }
 
     m_meshHandle = m_meshBuffer->allocate(4, 6);
@@ -32,7 +29,7 @@ SpriteMesh::SpriteMesh(const SpriteMeshCreateInfo& spriteMeshCreateInfo) {
 
         std::array positions = {glm::vec3(posMin.x, posMin.y, 0.0f), glm::vec3(posMax.x, posMin.y, 0.0f), glm::vec3(posMin.x, posMax.y, 0.0f), glm::vec3(posMax.x, posMax.y, 0.0f)};
 
-        m_meshBuffer->write_vertex(m_meshHandle, 0, positions.data(), positions.size() * sizeof(glm::vec3), 0);
+        m_meshBuffer->write_vertex(m_meshHandle, VertexAttributes::POSITION, positions.data(), positions.size() * sizeof(glm::vec3), 0);
     }
 
     {
@@ -41,7 +38,7 @@ SpriteMesh::SpriteMesh(const SpriteMeshCreateInfo& spriteMeshCreateInfo) {
 
         std::array uvs = {glm::vec2(uvMin.x, uvMax.y), glm::vec2(uvMax.x, uvMax.y), glm::vec2(uvMin.x, uvMin.y), glm::vec2(uvMax.x, uvMin.y)};
 
-        m_meshBuffer->write_vertex(m_meshHandle, 1, uvs.data(), uvs.size() * sizeof(glm::vec2), 0);
+        m_meshBuffer->write_vertex(m_meshHandle, VertexAttributes::UV, uvs.data(), uvs.size() * sizeof(glm::vec2), 0);
     }
 
     {
