@@ -117,7 +117,7 @@ private:
 
 Material* find_material(const duk::objects::Object& object);
 
-std::shared_ptr<Material> create_color_material(Renderer* renderer);
+std::shared_ptr<Material> create_color_material(Renderer* renderer, bool transparent);
 
 std::shared_ptr<Material> create_phong_material(Renderer* renderer);
 

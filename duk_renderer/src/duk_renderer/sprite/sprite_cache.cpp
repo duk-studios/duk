@@ -42,7 +42,7 @@ std::shared_ptr<Material> SpriteCache::material_for(Sprite* atlas) {
     if (const auto it = m_materials.find(hash); it != m_materials.end()) {
         return it->second;
     }
-    auto material = create_color_material(m_renderer);
+    auto material = create_color_material(m_renderer, true);
 
     material->set("uBaseColor", atlas->image(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
 

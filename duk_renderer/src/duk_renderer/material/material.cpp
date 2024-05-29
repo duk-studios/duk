@@ -402,10 +402,11 @@ Material* find_material(const duk::objects::Object& object) {
     return nullptr;
 }
 
-std::shared_ptr<Material> create_color_material(Renderer* renderer) {
+std::shared_ptr<Material> create_color_material(Renderer* renderer, bool transparent) {
     auto pools = renderer->pools();
+    auto shaderPool = pools->get<ShaderPipelinePool>();
     MaterialData materialData = {};
-    materialData.shader = pools->get<ShaderPipelinePool>()->opaque_color();
+    materialData.shader = transparent ? shaderPool->transparent_color() : shaderPool->opaque_color();
     detail::add_transform_binding(materialData);
     {
         auto& properties = materialData.bindings.emplace_back();
