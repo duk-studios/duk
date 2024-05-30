@@ -20,12 +20,13 @@ static bool calculate_normals(std::span<const glm::vec3> vertices, std::span<con
         }
         auto& v0 = vertices[idx0];
         auto& v1 = vertices[idx1];
+        auto& v2 = vertices[idx2];
 
         auto& n0 = normals[idx0];
         auto& n1 = normals[idx1];
         auto& n2 = normals[idx2];
 
-        n0 = n1 = n2 = glm::normalize(glm::cross(v1 - v0, glm::vec3(0, 1, 0)));
+        n0 = n1 = n2 = glm::normalize(glm::cross(v0 - v1, v0 - v2));
     }
     return true;
 }
@@ -40,12 +41,13 @@ static bool calculate_normals(std::span<const glm::vec3> vertices, std::span<glm
         }
         auto& v0 = vertices[idx0];
         auto& v1 = vertices[idx1];
+        auto& v2 = vertices[idx2];
 
         auto& n0 = normals[idx0];
         auto& n1 = normals[idx1];
         auto& n2 = normals[idx2];
 
-        n0 = n1 = n2 = glm::normalize(glm::cross(v1 - v0, glm::vec3(0, 1, 0)));
+        n0 = n1 = n2 = glm::normalize(glm::cross(v0 - v1, v0 - v2));
     }
     return true;
 }
@@ -266,7 +268,7 @@ MeshDataSourceSOA build_sphere_mesh_data(uint32_t resolution, const std::set<Ver
                 positions.emplace_back(glm::vec3{x, y, z} * scale);
             }
             if (attributes.contains(VertexAttributes::NORMAL)) {
-                normals.emplace_back(x, y, z);
+                normals.emplace_back(-glm::vec3(x, y, z));
             }
             if (attributes.contains(VertexAttributes::UV)) {
                 uvs.emplace_back(u, v);
