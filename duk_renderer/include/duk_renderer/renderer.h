@@ -18,6 +18,7 @@ class GlobalDescriptors;
 class ImagePool;
 class MaterialPool;
 class MeshPool;
+class MeshBufferPool;
 class SpritePool;
 
 struct RendererCreateInfo {
@@ -50,6 +51,8 @@ public:
 
     DUK_NO_DISCARD duk::resource::Pools* pools() const;
 
+    DUK_NO_DISCARD MeshBufferPool* mesh_buffer_pool() const;
+
     template<typename T, typename... Args>
     T* add_pass(Args&&... args);
 
@@ -65,6 +68,7 @@ protected:
     std::shared_ptr<duk::rhi::CommandQueue> m_mainQueue;
     std::vector<std::shared_ptr<Pass>> m_passes;
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
+    std::unique_ptr<MeshBufferPool> m_meshBufferPool;
     std::unique_ptr<PipelineCache> m_pipelineCache;
 };
 

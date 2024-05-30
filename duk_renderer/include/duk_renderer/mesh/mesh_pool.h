@@ -21,7 +21,7 @@ class Renderer;
 using MeshResource = duk::resource::Handle<Mesh>;
 
 struct MeshPoolCreateInfo {
-    Renderer* renderer;
+    MeshBufferPool* meshBufferPool;
 };
 
 class MeshPool : public duk::resource::PoolT<MeshResource> {
@@ -41,11 +41,11 @@ public:
     DUK_NO_DISCARD MeshResource cone() const;
 
 private:
+    MeshBufferPool* m_meshBufferPool;
     MeshResource m_quad;
     MeshResource m_cube;
     MeshResource m_sphere;
     MeshResource m_cone;
-    std::shared_ptr<MeshBufferPool> m_meshBufferPool;
 };
 
 }// namespace duk::renderer

@@ -2,6 +2,7 @@
 /// renderer.cpp
 
 #include <duk_platform/window.h>
+#include <duk_renderer/mesh_buffer.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/passes/pass.h>
@@ -40,7 +41,13 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
         m_globalDescriptors = std::make_unique<GlobalDescriptors>(globalDescriptorsCreateInfo);
     }
+    {
+        duk::renderer::MeshBufferPoolCreateInfo meshBufferPoolCreateInfo = {};
+        meshBufferPoolCreateInfo.rhi = m_rhi.get();
+        meshBufferPoolCreateInfo.commandQueue = m_mainQueue.get();
 
+        m_meshBufferPool = std::make_unique<renderer::MeshBufferPool>(meshBufferPoolCreateInfo);
+    }
     {
         PipelineCacheCreateInfo pipelineCacheCreateInfo = {};
         pipelineCacheCreateInfo.renderer = this;
@@ -147,6 +154,10 @@ duk::rhi::CommandQueue* Renderer::main_command_queue() const {
 
 duk::resource::Pools* Renderer::pools() const {
     return m_pools;
+}
+
+MeshBufferPool* Renderer::mesh_buffer_pool() const {
+    return m_meshBufferPool.get();
 }
 
 void Renderer::update_global_descriptors(duk::objects::Objects& objects) {
