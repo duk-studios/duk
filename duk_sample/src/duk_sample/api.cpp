@@ -7,6 +7,7 @@
 #include <duk_sample/sprite_animator_system.h>
 #include <duk_sample/stats_system.h>
 #include <duk_sample/camera_system.h>
+#include <duk_serial/json/serializer.h>
 
 void duk_api_register_types() {
     duk::objects::register_component<duk::sample::CameraController>();

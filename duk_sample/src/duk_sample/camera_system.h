@@ -5,11 +5,10 @@
 #ifndef DUK_SAMPLE_CAMERA_SYSTEM_H
 #define DUK_SAMPLE_CAMERA_SYSTEM_H
 
+#include <duk_objects/objects.h>
 #include <duk_audio/audio_player.h>
 #include <duk_audio/clip/audio_clip.h>
 #include <duk_engine/systems.h>
-#include <duk_objects/objects.h>
-#include <duk_renderer/font/font.h>
 
 namespace duk::sample {
 

@@ -47,7 +47,7 @@ public:
 
         // mesh pool
         duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};
-        meshPoolCreateInfo.renderer = m_renderer.get();
+        meshPoolCreateInfo.meshBufferPool = m_renderer->mesh_buffer_pool();
         m_pools.create_pool<duk::renderer::MeshPool>(meshPoolCreateInfo);
 
         // image pool

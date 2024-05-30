@@ -6,7 +6,7 @@
 
 #include <duk_hash/hash.h>
 #include <duk_macros/macros.h>
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json/types.h>
 
 namespace duk::rhi {
 

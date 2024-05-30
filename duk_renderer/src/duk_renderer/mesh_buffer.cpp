@@ -3,6 +3,7 @@
 //
 
 #include <duk_renderer/mesh_buffer.h>
+#include <duk_log/log.h>
 
 namespace duk::renderer {
 

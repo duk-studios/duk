@@ -11,8 +11,6 @@
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 
-#include <duk_serial/json/types.h>
-
 #include <duk_tools/bit_block.h>
 #include <duk_tools/fixed_vector.h>
 #include <duk_tools/types.h>
