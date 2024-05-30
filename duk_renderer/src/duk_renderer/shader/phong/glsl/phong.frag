@@ -15,6 +15,7 @@ layout(location = 0) out vec4 oColor;
 struct Properties {
     vec4 color;
     float shininess;
+    vec2 uvScale;
 };
 
 layout(binding = 3) buffer PropertiesUBO {
@@ -30,11 +31,11 @@ void main() {
 
     Properties properties = DUK_INSTANCE_GET(uProperties, vInstanceIndex);
 
-    float shininess = max(1, (properties.shininess * texture(uSpecular, vTexCoord).r));
+    float shininess = max(1, (properties.shininess * texture(uSpecular, vTexCoord * properties.uvScale).r));
 
     vec3 lighting = duk_calculate_phong_lights(shininess, vPosition, normal, view);
 
-    vec4 color = texture(uBaseColor, vTexCoord) * properties.color;
+    vec4 color = texture(uBaseColor, vTexCoord * properties.uvScale) * properties.color;
 
     oColor = color * vec4(lighting, 1.0);
 }

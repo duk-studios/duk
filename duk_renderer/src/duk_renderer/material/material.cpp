@@ -465,6 +465,12 @@ std::shared_ptr<Material> create_phong_material(Renderer* renderer) {
                 shininess.type = BufferBinding::Member::Type::FLOAT;
                 shininess.data.floatValue = 32.0f;
             }
+            {
+                auto& uvScale = bindingData->members.emplace_back();
+                uvScale.name = "uvScale";
+                uvScale.type = BufferBinding::Member::Type::VEC2;
+                uvScale.data.vec2Value = glm::vec2(1);
+            }
             return bindingData;
         }();
     }
