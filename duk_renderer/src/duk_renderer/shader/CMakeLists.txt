@@ -134,9 +134,8 @@ function(add_shader_generate_command PACKED_ENTRY)
 
     list(APPEND COMMAND_LINE "-n")
     list(APPEND COMMAND_LINE "${NAME}")
-
-
-    message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
+    
+#    message(STATUS "COMMAND_LINE: ${COMMAND_LINE}")
 
     set(OUTPUT_FILES)
     list(APPEND OUTPUT_FILES "${SHADER_INC_DIR}/${NAME}_shader_data_source.h")
@@ -163,7 +162,6 @@ endfunction()
 add_subdirectory(color)
 add_subdirectory(fullscreen)
 add_subdirectory(phong)
-#add_subdirectory(sprites/sprite_color)
 add_subdirectory(text)
 
 foreach (PACKED_ENTRY ${GENERATE_SHADER_ENTRIES})
