@@ -35,12 +35,14 @@ template<>
 inline void from_json(const rapidjson::Value& json, duk::renderer::PipelineSettings& data) {
     from_json_member(json, "blend", data.blend);
     from_json_member(json, "depth", data.depth);
+    from_json_member(json, "invertY", data.invertY);
 }
 
 template<>
 inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::PipelineSettings& data) {
     to_json_member(document, json, "blend", data.blend);
     to_json_member(document, json, "depth", data.depth);
+    to_json_member(document, json, "invertY", data.invertY);
 }
 
 template<>
