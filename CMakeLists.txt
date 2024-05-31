@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.24)
 
+if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
+    set(DUK_AS_SOURCE TRUE)
+endif ()
+
 option(DUK_BUILD_SAMPLE "Enables building of duk_sample" ON)
 option(DUK_FORMAT_FILES "Enables format target" ON)
 option(DUK_VCPKG_INSTALL "Enables using vcpkg to install dependencies" ON)
@@ -75,7 +79,15 @@ install(
         DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
 )
 
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake" DESTINATION "${CMAKE_INSTALL_DATADIR}/duk")
+install(
+        FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/compile_shaders.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vcpkg.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.json"
+        "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-configuration.json"
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
+)
 
 install(
         EXPORT duk-targets

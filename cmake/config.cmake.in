@@ -1,6 +1,8 @@
 @PACKAGE_INIT@
 
-include("${CMAKE_CURRENT_LIST_DIR}/duk-targets.cmake")
+include(${CMAKE_CURRENT_LIST_DIR}/vcpkg.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/compile_shaders.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/duk-targets.cmake)
 
 find_package(cxxopts CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
