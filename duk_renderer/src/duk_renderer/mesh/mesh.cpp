@@ -39,6 +39,8 @@ Mesh::Mesh(const MeshCreateInfo& meshCreateInfo)
         m_meshBuffer->write_index(m_meshBufferHandle, buffer.data(), buffer.size(), 0);
     }
 
+    m_meshBuffer->flush();
+
     m_firstVertex = m_meshBuffer->first_vertex(m_meshBufferHandle);
     m_firstIndex = m_meshBuffer->first_index(m_meshBufferHandle);
 }
