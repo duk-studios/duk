@@ -158,6 +158,12 @@ install(
 )
 
 install(
+        DIRECTORY src/duk_renderer/shader/glsl
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
+)
+
+install(
         TARGETS duk_renderer
         EXPORT duk-targets
 )
+
