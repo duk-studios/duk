@@ -1,6 +1,18 @@
 set(COMPILE_SHADERS_FUNC_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+find_program(GLSLC_EXECUTABLE glslc)
+
+if (GLSLC_EXECUTABLE)
+    message(STATUS "glslc found at (${GLSLC_EXECUTABLE})")
+else ()
+    message(WARNING "glslc not found. Skipping shader generation...")
+endif()
+
 function(duk_compile_shaders TARGET_NAME)
+
+    if (NOT GLSLC_EXECUTABLE)
+        return()
+    endif()
 
     set(options)
     set(oneValueArgs OUT_SPV_FILES WORKING_DIRECTORY)
@@ -32,14 +44,14 @@ function(duk_compile_shaders TARGET_NAME)
         set(SPV_FILE "${ARGS_WORKING_DIRECTORY}/${GLSL_DIRECTORY}/${GLSL_FILENAME}.spv")
 
         set(COMMAND_LINE "${ABSOLUTE_GLSL_SOURCE_PATH}" -o "${SPV_FILE}" "${GLSLC_FLAGS}")
-        message(STATUS "Shader compilation arguments: ${COMMAND_LINE}")
+#        message(STATUS "Shader compilation arguments: ${COMMAND_LINE}")
 
         add_custom_command(
                 OUTPUT ${SPV_FILE}
                 DEPENDS "${ABSOLUTE_GLSL_SOURCE_PATH}"
                 COMMAND "${GLSLC_EXECUTABLE}" ${COMMAND_LINE}
                 WORKING_DIRECTORY ${ARGS_WORKING_DIRECTORY}
-                COMMENT "Compiling GLSL ${GLSL_FILENAME} to SPIR-V: ${SPV_FILE}"
+                COMMENT "Compiling GLSL ${GLSL_FILENAME} to SPIR-V: ${SPV_FILE} with arguments: ${COMMAND_LINE}"
         )
 
         list(APPEND SPV_FILES "${SPV_FILE}")
@@ -49,7 +61,6 @@ function(duk_compile_shaders TARGET_NAME)
 
     add_custom_target(${TARGET_NAME}
             DEPENDS "${SPV_FILES}"
-            COMMENT "${TARGET_NAME}: running"
     )
 
 endfunction()
