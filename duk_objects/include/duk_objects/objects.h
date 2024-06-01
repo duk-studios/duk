@@ -351,7 +351,7 @@ public:
 
         class Iterator {
         public:
-            Iterator(uint32_t index, ObjectsType* objects, ComponentMask componentMask);
+            Iterator(uint32_t index, uint32_t end, ObjectsType* objects, ComponentMask componentMask);
             // Dereference operator (*)
             DUK_NO_DISCARD ObjectHandle<isConst> operator*() const;
 
@@ -377,6 +377,7 @@ public:
 
         private:
             uint32_t m_i;
+            uint32_t m_end;
             uint32_t m_freeListCursor;
             ObjectsType* m_objects;
             ComponentMask m_componentMask;
@@ -395,6 +396,7 @@ public:
 
     private:
         ObjectsType* m_objects;
+        uint32_t m_endIndex;
         ComponentMask m_componentMask;
     };
 
@@ -630,8 +632,9 @@ ObjectHandle<isConst> ComponentHandle<T, isConst>::object() const {
 // Objects Implementation //
 
 template<bool IsConst>
-Objects::ObjectView<IsConst>::Iterator::Iterator(uint32_t index, ObjectsType* objects, ComponentMask componentMask)
+Objects::ObjectView<IsConst>::Iterator::Iterator(uint32_t index, uint32_t end, ObjectsType* objects, ComponentMask componentMask)
     : m_i(index)
+    , m_end(end)
     , m_freeListCursor(0)
     , m_objects(objects)
     , m_componentMask(componentMask) {
@@ -660,7 +663,7 @@ typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::It
 
 template<bool IsConst>
 typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::Iterator::operator+(int value) const {
-    return Iterator(m_i + value, m_objects, m_componentMask);
+    return Iterator(m_i + value, m_end, m_objects, m_componentMask);
 }
 
 template<bool IsConst>
@@ -675,7 +678,7 @@ bool Objects::ObjectView<IsConst>::Iterator::operator!=(const Iterator& other) c
 
 template<bool IsConst>
 void Objects::ObjectView<IsConst>::Iterator::next() {
-    while (m_i < m_objects->m_versions.size() && !valid_object()) {
+    while (m_i < m_end && !valid_object()) {
         m_i++;
         m_freeListCursor++;
     }
@@ -683,6 +686,9 @@ void Objects::ObjectView<IsConst>::Iterator::next() {
 
 template<bool IsConst>
 bool Objects::ObjectView<IsConst>::Iterator::valid_object() {
+    if (m_i >= m_end) {
+        return false;
+    }
     if ((m_componentMask & m_objects->m_componentMasks[m_i]) != m_componentMask) {
         return false;
     }
@@ -697,27 +703,28 @@ bool Objects::ObjectView<IsConst>::Iterator::valid_object() {
 template<bool IsConst>
 Objects::ObjectView<IsConst>::ObjectView(ObjectsType* objects, ComponentMask componentMask)
     : m_objects(objects)
+    , m_endIndex(objects->m_versions.size())
     , m_componentMask(componentMask) {
 }
 
 template<bool IsConst>
 typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::begin() {
-    return {0, m_objects, m_componentMask};
+    return {0, m_endIndex, m_objects, m_componentMask};
 }
 
 template<bool IsConst>
 typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::begin() const {
-    return {0, m_objects, m_componentMask};
+    return {0, m_endIndex, m_objects, m_componentMask};
 }
 
 template<bool IsConst>
 typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::end() {
-    return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
+    return {m_endIndex, m_endIndex, m_objects, m_componentMask};
 }
 
 template<bool IsConst>
 typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::end() const {
-    return {static_cast<uint32_t>(m_objects->m_versions.size()), m_objects, m_componentMask};
+    return {m_endIndex, m_endIndex, m_objects, m_componentMask};
 }
 
 template<typename... Ts>
