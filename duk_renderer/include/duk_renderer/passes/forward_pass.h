@@ -30,7 +30,6 @@ struct SpriteDrawData {
     std::vector<SpriteEntry> sprites;
     std::vector<uint16_t> sortedSprites;
     std::vector<SpriteDrawEntry> drawEntries;
-    std::unique_ptr<SpriteCache> cache;
 
     void clear();
 };

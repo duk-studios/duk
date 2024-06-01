@@ -71,6 +71,7 @@ void Director::load_scene(Engine& engine, duk::resource::Id id) {
     }
 
     m_resources->pools()->clear();
+    m_renderer->clear_cache();
 }
 
 }// namespace duk::engine

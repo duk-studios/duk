@@ -14,6 +14,7 @@ namespace renderer {
 
 class Pass;
 class PipelineCache;
+class SpriteCache;
 class GlobalDescriptors;
 class ImagePool;
 class MaterialPool;
@@ -36,6 +37,8 @@ public:
     virtual ~Renderer();
 
     void render(duk::objects::Objects& objects);
+
+    void clear_cache();
 
     DUK_NO_DISCARD uint32_t render_width() const;
 
@@ -70,6 +73,7 @@ protected:
     std::unique_ptr<GlobalDescriptors> m_globalDescriptors;
     std::unique_ptr<MeshBufferPool> m_meshBufferPool;
     std::unique_ptr<PipelineCache> m_pipelineCache;
+    std::unique_ptr<SpriteCache> m_spriteCache;
 };
 
 /// Creates a Renderer with a Forward Pass (and PresentPass if a window is provided)

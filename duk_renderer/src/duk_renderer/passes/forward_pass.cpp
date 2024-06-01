@@ -181,7 +181,7 @@ static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPas
     auto& sortedSprites = drawData->sortedSprites;
     auto& sprites = drawData->sprites;
     auto& drawEntries = drawData->drawEntries;
-    auto& cache = drawData->cache;
+    auto cache = params.spriteCache;
 
     std::set<Material*> uniqueMaterials;
 
@@ -299,13 +299,6 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
         renderPassCreateInfo.depthAttachment = &depthAttachmentDescription;
 
         m_renderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
-    }
-
-    {
-        SpriteCacheCreateInfo spriteCacheCreateInfo = {};
-        spriteCacheCreateInfo.renderer = m_renderer;
-
-        m_spriteDrawData.cache = std::make_unique<SpriteCache>(spriteCacheCreateInfo);
     }
 }
 

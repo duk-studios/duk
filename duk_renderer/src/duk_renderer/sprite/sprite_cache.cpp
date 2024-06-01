@@ -69,4 +69,9 @@ std::shared_ptr<SpriteMesh> SpriteCache::mesh_for(Sprite* atlas, uint32_t index)
     return mesh;
 }
 
+void SpriteCache::clear() {
+    m_meshes.clear();
+    m_materials.clear();
+}
+
 }// namespace duk::renderer

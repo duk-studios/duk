@@ -54,7 +54,7 @@ class PipelineCache {
 public:
     PipelineCache(const PipelineCacheCreateInfo& pipelineCacheCreateInfo);
 
-    duk::rhi::GraphicsPipeline* find(const PipelineState& state);
+    std::shared_ptr<duk::rhi::GraphicsPipeline> find(const PipelineState& state);
 
     void clear();
 

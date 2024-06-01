@@ -27,6 +27,8 @@ public:
 
     std::shared_ptr<SpriteMesh> mesh_for(Sprite* atlas, uint32_t index);
 
+    void clear();
+
 private:
     Renderer* m_renderer;
     std::unique_ptr<MeshBufferPool> m_meshBufferPool;
