@@ -20,6 +20,7 @@ class Objects;
 namespace renderer {
 
 class PipelineCache;
+class SpriteCache;
 class GlobalDescriptors;
 
 class PassConnection {
@@ -68,6 +69,7 @@ public:
         GlobalDescriptors* globalDescriptors;
         glm::vec2 viewport;
         PipelineCache* pipelineCache;
+        SpriteCache* spriteCache;
     };
 
     virtual void update(const UpdateParams& params) = 0;

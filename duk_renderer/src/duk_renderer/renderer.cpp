@@ -8,6 +8,7 @@
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/passes/present_pass.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/sprite/sprite_cache.h>
 #include <duk_rhi/image_data_source.h>
 
 namespace duk::renderer {
@@ -52,6 +53,12 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
         PipelineCacheCreateInfo pipelineCacheCreateInfo = {};
         pipelineCacheCreateInfo.renderer = this;
         m_pipelineCache = std::make_unique<PipelineCache>(pipelineCacheCreateInfo);
+    }
+    {
+        SpriteCacheCreateInfo spriteCacheCreateInfo = {};
+        spriteCacheCreateInfo.renderer = this;
+
+        m_spriteCache = std::make_unique<SpriteCache>(spriteCacheCreateInfo);
     }
 }
 
@@ -174,6 +181,7 @@ void Renderer::update_passes(objects::Objects& objects) {
     updateParams.globalDescriptors = m_globalDescriptors.get();
     updateParams.viewport = {render_width(), render_height()};
     updateParams.pipelineCache = m_pipelineCache.get();
+    updateParams.spriteCache = m_spriteCache.get();
 
     for (auto& pass: m_passes) {
         pass->update(updateParams);
