@@ -99,7 +99,7 @@ void ShaderPipeline::update(PipelineCache& pipelineCache, duk::rhi::RenderPass* 
 }
 
 void ShaderPipeline::bind(duk::rhi::CommandBuffer* commandBuffer) const {
-    commandBuffer->bind_graphics_pipeline(m_pipeline);
+    commandBuffer->bind_graphics_pipeline(m_pipeline.get());
 }
 
 }// namespace duk::renderer

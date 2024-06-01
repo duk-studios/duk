@@ -50,7 +50,7 @@ public:
 private:
     Renderer* m_renderer;
     std::shared_ptr<duk::rhi::Shader> m_shader;
-    duk::rhi::GraphicsPipeline* m_pipeline;
+    std::shared_ptr<duk::rhi::GraphicsPipeline> m_pipeline;
     PipelineState m_state;
     bool m_invertY;
     bool m_dirty;

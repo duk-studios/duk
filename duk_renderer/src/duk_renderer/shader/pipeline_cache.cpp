@@ -8,32 +8,6 @@
 
 namespace duk::renderer {
 
-// duk::rhi::GraphicsPipeline::Viewport PipelineCache::viewport_for_params(const DrawParams& params) {
-//     duk::rhi::GraphicsPipeline::Viewport viewport = {};
-//     viewport.extent = {params.outputWidth, params.outputHeight};
-//     viewport.maxDepth = 1.0f;
-//     viewport.minDepth = 0.0f;
-//     if (m_invertY) {
-//         viewport.offset.y = viewport.extent.y;
-//         viewport.extent.y = -viewport.extent.y;
-//     }
-//     return viewport;
-// }
-//
-// void PipelineCache::blend(bool enabled) {
-//     if (enabled) {
-//         m_blend.enabled = true;
-//         m_blend.colorBlendOp = rhi::GraphicsPipeline::Blend::Operator::ADD;
-//         m_blend.srcColorBlendFactor = rhi::GraphicsPipeline::Blend::Factor::SRC_ALPHA;
-//         m_blend.dstColorBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ONE_MINUS_SRC_ALPHA;
-//         m_blend.alphaBlendOp = rhi::GraphicsPipeline::Blend::Operator::ADD;
-//         m_blend.srcAlphaBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ONE;
-//         m_blend.dstAlphaBlendFactor = rhi::GraphicsPipeline::Blend::Factor::ZERO;
-//     } else {
-//         m_blend.enabled = false;
-//     }
-// }
-
 bool operator==(const PipelineState& lhs, const PipelineState& rhs) {
     return memcmp(&lhs, &rhs, sizeof(PipelineState)) == 0;
 }
@@ -42,10 +16,10 @@ PipelineCache::PipelineCache(const PipelineCacheCreateInfo& pipelineCacheCreateI
     : m_renderer(pipelineCacheCreateInfo.renderer) {
 }
 
-duk::rhi::GraphicsPipeline* PipelineCache::find(const PipelineState& state) {
+std::shared_ptr<duk::rhi::GraphicsPipeline> PipelineCache::find(const PipelineState& state) {
     if (const auto it = m_pipelines.find(state); it != m_pipelines.end()) {
         it->second.framesUnused = 0;
-        return it->second.pipeline.get();
+        return it->second.pipeline;
     }
     duk::rhi::RHI::GraphicsPipelineCreateInfo pipelineCreateInfo = {};
     pipelineCreateInfo.viewport = state.viewport;
@@ -69,19 +43,11 @@ duk::rhi::GraphicsPipeline* PipelineCache::find(const PipelineState& state) {
     if (!result.second) {
         throw std::runtime_error("failed to insert Pipeline into cache");
     }
-    return entry.pipeline.get();
+    return entry.pipeline;
 }
 
 void PipelineCache::clear() {
-    const auto kDeleteUnusedPipelineAfterFrames = 100;
-
-    for (auto it = m_pipelines.begin(); it != m_pipelines.end(); ++it) {
-        auto& entry = it->second;
-        entry.framesUnused++;
-
-        if (entry.framesUnused > kDeleteUnusedPipelineAfterFrames) {
-            it = m_pipelines.erase(it);
-        }
-    }
+    m_pipelines.clear();
 }
+
 }// namespace duk::renderer
