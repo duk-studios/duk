@@ -38,6 +38,8 @@ public:
 
     void render(duk::objects::Objects& objects);
 
+    void clear_cache();
+
     DUK_NO_DISCARD uint32_t render_width() const;
 
     DUK_NO_DISCARD uint32_t render_height() const;

@@ -101,6 +101,11 @@ void Renderer::render(duk::objects::Objects& objects) {
     scheduler->flush();
 }
 
+void Renderer::clear_cache() {
+    m_pipelineCache->clear();
+    m_spriteCache->clear();
+}
+
 uint32_t Renderer::render_width() const {
     return m_window ? m_window->width() : 0;
 }
