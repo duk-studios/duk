@@ -3,10 +3,8 @@
 
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/components/mesh_renderer.h>
-#include <duk_renderer/components/sprite_renderer.h>
-#include <duk_renderer/components/text_renderer.h>
 #include <duk_renderer/shader/shader_pipeline_pool.h>
+#include <duk_renderer/image/image_pool.h>
 
 namespace duk::renderer {
 
@@ -193,6 +191,18 @@ void Material::clear() {
     for (auto& instanceBuffer: m_instanceBuffers | std::views::values) {
         instanceBuffer->clear();
     }
+}
+
+duk::rhi::Descriptor Material::get(const MaterialLocationId& binding) const {
+    if (!m_descriptorSet) {
+        return {};
+    }
+    uint32_t bindingIndex;
+    if (!detail::extract_binding_index(this, binding, bindingIndex)) {
+        duk::log::fatal("Binding '{}' not found in Material descriptor get", binding.name());
+        return {};
+    }
+    return m_descriptorSet->at(bindingIndex);
 }
 
 void Material::set(const MaterialLocationId& binding, const ImageResource& image) {
@@ -387,19 +397,6 @@ void Material::init() {
         }
     }
     m_dirty = true;
-}
-
-Material* find_material(const duk::objects::Object& object) {
-    if (auto meshRenderer = object.component<MeshRenderer>()) {
-        return meshRenderer->material.get();
-    }
-    if (auto spriteRenderer = object.component<SpriteRenderer>()) {
-        return spriteRenderer->material.get();
-    }
-    if (auto textRenderer = object.component<TextRenderer>()) {
-        return textRenderer->material.get();
-    }
-    return nullptr;
 }
 
 std::shared_ptr<Material> create_color_material(Renderer* renderer, bool transparent) {

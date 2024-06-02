@@ -7,6 +7,7 @@
 
 #include <duk_renderer/font/font.h>
 #include <duk_renderer/material/material.h>
+#include <duk_renderer/mesh/mesh.h>
 
 namespace duk::renderer {
 
@@ -16,13 +17,13 @@ struct TextMeshCreateInfo {
     Renderer* renderer;
 };
 
-class TextMesh {
+class TextMesh : public Mesh {
 public:
     TextMesh(const TextMeshCreateInfo& textBrushCreateInfo);
 
     void update_text(const FontAtlas* atlas, const TextRenderer& textRenderer, float pixelsPerUnit);
 
-    void draw(duk::rhi::CommandBuffer* commandBuffer);
+    void draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) override;
 
 private:
     void reserve(uint32_t textCount);
@@ -56,8 +57,6 @@ struct TextRenderer {
     glm::vec2 size;
     TextHoriAlignment horiAlignment;
     TextVertAlignment vertAlignment;
-    std::shared_ptr<TextMesh> mesh;
-    std::shared_ptr<Material> material;
 };
 
 void update_text_renderer(Renderer* renderer, const duk::objects::Component<TextRenderer>& textRenderer);

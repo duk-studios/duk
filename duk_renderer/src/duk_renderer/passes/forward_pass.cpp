@@ -1,17 +1,13 @@
 /// 05/10/2023
 /// forward_pass.cpp
 
-#include <duk_renderer/components/mesh_renderer.h>
-#include <duk_renderer/components/sprite_renderer.h>
-#include <duk_renderer/components/text_renderer.h>
-#include <duk_renderer/components/transform.h>
+#include <duk_renderer/components/material_slot.h>
+#include <duk_renderer/components/mesh_slot.h>
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/mesh/mesh.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
-#include <duk_renderer/sprite/sprite_cache.h>
-#include <duk_renderer/sprite/sprite_mesh.h>
 
 namespace duk::renderer {
 
@@ -19,47 +15,10 @@ namespace detail {
 
 static constexpr auto kColorFormat = duk::rhi::PixelFormat::RGBA8U;
 
-static void update_texts(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, TextDrawData* drawData) {
-    drawData->clear();
-    auto objects = params.objects;
-    auto& drawEntries = drawData->drawEntries;
-
-    std::set<Material*> uniqueMaterials;
-
-    for (auto object: objects->all_with<TextRenderer>()) {
-        auto textRenderer = object.component<TextRenderer>();
-
-        if (!textRenderer->material || !textRenderer->mesh) {
-            duk::log::warn("TextRenderer with no material and/or mesh, missing call to update_text_renderer");
-            continue;
-        }
-
-        auto material = textRenderer->material.get();
-        if (object.component<Transform>()) {
-            material->set("uCamera", params.globalDescriptors->camera_ubo()->descriptor());
-        } else {
-            material->set("uCamera", params.globalDescriptors->canvas_ubo()->descriptor());
-        }
-        material->clear();
-        material->push(object.id());
-        uniqueMaterials.insert(material);
-
-        TextDrawEntry textEntry = {};
-        textEntry.material = material;
-        textEntry.mesh = textRenderer->mesh.get();
-
-        drawEntries.emplace_back(textEntry);
-    }
-
-    for (auto material: uniqueMaterials) {
-        material->update(*params.pipelineCache, renderPass, params.viewport);
-    }
-}
-
-static SortKey calculate_mesh_sort_key(const MeshRenderer* param) {
+static SortKey calculate_sort_key(const MeshSlot* meshSlot, const MaterialSlot* materialSlot) {
     SortKey::Flags flags = {};
-    flags.higher16Bits = reinterpret_cast<std::intptr_t>(param->material.get());
-    flags.lower16Bits = reinterpret_cast<std::intptr_t>(param->mesh.get());
+    flags.higher16Bits = reinterpret_cast<std::intptr_t>(materialSlot->material.get());
+    flags.lower16Bits = reinterpret_cast<std::intptr_t>(meshSlot->mesh.get());
     return SortKey{flags};
 }
 
@@ -74,34 +33,33 @@ static bool valid(const MeshDrawEntry& drawEntry) {
 static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, MeshDrawData* drawData) {
     drawData->clear();
     auto objects = params.objects;
-    auto& meshes = drawData->meshes;
-    auto& sortedMeshes = drawData->sortedMeshes;
+    auto& meshes = drawData->meshEntries;
+    auto& sortedMeshes = drawData->sortedMeshEntries;
     auto& drawEntries = drawData->drawEntries;
 
     std::set<Material*> uniqueMaterials;
 
-    for (auto object: objects->all_with<MeshRenderer, Transform>()) {
-        auto meshRenderer = object.component<MeshRenderer>();
+    for (auto object: objects->all_with<MeshSlot, MaterialSlot>()) {
+        auto meshSlot = object.component<MeshSlot>();
+        auto materialSlot = object.component<MaterialSlot>();
 
-        auto material = meshRenderer->material.get();
-
-        if (!meshRenderer->material) {
-            duk::log::warn("MeshRenderer with no Material, skipping...");
+        if (!meshSlot->mesh) {
+            duk::log::info("MeshSlot with no Mesh, skipping...");
             continue;
         }
 
-        if (!meshRenderer->mesh) {
-            duk::log::warn("MeshRenderer with no Mesh, skipping...");
+        if (!materialSlot->material) {
+            duk::log::info("MaterialSlot with no Material, skipping...");
             continue;
         }
 
         auto& objectEntry = meshes.emplace_back();
         objectEntry.objectId = object.id();
-        objectEntry.mesh = meshRenderer->mesh.get();
-        objectEntry.material = material;
-        objectEntry.sortKey = calculate_mesh_sort_key(meshRenderer.get());
+        objectEntry.mesh = meshSlot->mesh.get();
+        objectEntry.material = materialSlot->material.get();
+        objectEntry.sortKey = calculate_sort_key(meshSlot.get(), materialSlot.get());
 
-        uniqueMaterials.insert(material);
+        uniqueMaterials.insert(materialSlot->material.get());
     }
 
     if (meshes.empty()) {
@@ -109,7 +67,13 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
     }
 
     for (const auto material: uniqueMaterials) {
-        material->set("uCamera", params.globalDescriptors->camera_ubo()->descriptor());
+        MaterialLocationId cameraLocationId = material->find_binding("uCamera");
+        if (cameraLocationId.valid()) {
+            auto cameraDescriptor = material->get(cameraLocationId);
+            if (cameraDescriptor.type() == duk::rhi::DescriptorType::UNDEFINED) {
+                material->set(cameraLocationId, params.globalDescriptors->camera_ubo()->descriptor());
+            }
+        }
         MaterialLocationId lights = material->find_binding("uLights");
         if (lights.valid()) {
             material->set(lights, params.globalDescriptors->lights_ubo()->descriptor());
@@ -160,114 +124,11 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
     }
 }
 
-static SortKey calculate_sprite_sort_key(const Material* material, const SpriteMesh* mesh) {
-    SortKey sortKey = {};
-    sortKey.flags.higher16Bits = reinterpret_cast<std::intptr_t>(material);
-    sortKey.flags.lower16Bits = reinterpret_cast<std::intptr_t>(mesh);
-    return sortKey;
-}
-
-static bool compatible(const SpriteEntry& spriteEntry, const SpriteDrawEntry& drawEntry) {
-    return spriteEntry.material == drawEntry.material && spriteEntry.mesh == drawEntry.mesh;
-}
-
-static bool valid(const SpriteDrawEntry& drawEntry) {
-    return drawEntry.material && drawEntry.mesh && drawEntry.instanceCount;
-}
-
-static void update_sprites(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, SpriteDrawData* drawData) {
-    drawData->clear();
-    auto objects = params.objects;
-    auto& sortedSprites = drawData->sortedSprites;
-    auto& sprites = drawData->sprites;
-    auto& drawEntries = drawData->drawEntries;
-    auto cache = params.spriteCache;
-
-    std::set<Material*> uniqueMaterials;
-
-    for (auto object: objects->all_with<SpriteRenderer>()) {
-        auto spriteRenderer = object.component<SpriteRenderer>();
-
-        spriteRenderer->material = cache->material_for(spriteRenderer->sprite.get());
-        spriteRenderer->mesh = cache->mesh_for(spriteRenderer->sprite.get(), spriteRenderer->index);
-
-        const auto material = spriteRenderer->material.get();
-        const auto mesh = spriteRenderer->mesh.get();
-
-        uniqueMaterials.insert(spriteRenderer->material.get());
-
-        SpriteEntry spriteEntry = {};
-        spriteEntry.objectId = object.id();
-        spriteEntry.mesh = mesh;
-        spriteEntry.material = material;
-        spriteEntry.sortKey = calculate_sprite_sort_key(material, mesh);
-        sprites.push_back(spriteEntry);
-    }
-
-    if (sprites.empty()) {
-        return;
-    }
-
-    for (const auto material: uniqueMaterials) {
-        material->set("uCamera", params.globalDescriptors->camera_ubo()->descriptor());
-        material->clear();
-    }
-
-    SortKey::sort_indices(sprites, sortedSprites);
-
-    SpriteDrawEntry drawEntry = {};
-
-    for (auto sortedIndex: sortedSprites) {
-        auto& spriteEntry = sprites[sortedIndex];
-
-        // update instance buffer
-        spriteEntry.material->push(spriteEntry.objectId);
-
-        if (compatible(spriteEntry, drawEntry)) {
-            drawEntry.instanceCount++;
-            continue;
-        }
-        if (valid(drawEntry)) {
-            drawEntries.push_back(drawEntry);
-        }
-        // if the material is different, it's an entire new draw entry starting at 0
-        if (drawEntry.material != spriteEntry.material) {
-            drawEntry.instanceCount = 1;
-            drawEntry.firstInstance = 0;
-        }
-        // if only the mesh is different, just jump to the correct instance start
-        else if (drawEntry.mesh != spriteEntry.mesh) {
-            drawEntry.firstInstance += drawEntry.instanceCount;
-            drawEntry.instanceCount = 1;
-        }
-        drawEntry.material = spriteEntry.material;
-        drawEntry.mesh = spriteEntry.mesh;
-    }
-    // add last entry
-    if (valid(drawEntry)) {
-        drawEntries.push_back(drawEntry);
-    }
-
-    for (auto& material: uniqueMaterials) {
-        material->update(*params.pipelineCache, renderPass, params.viewport);
-    }
-}
-
 }// namespace detail
 
 void MeshDrawData::clear() {
-    meshes.clear();
-    sortedMeshes.clear();
-    drawEntries.clear();
-}
-
-void SpriteDrawData::clear() {
-    sprites.clear();
-    sortedSprites.clear();
-    drawEntries.clear();
-}
-
-void TextDrawData::clear() {
+    meshEntries.clear();
+    sortedMeshEntries.clear();
     drawEntries.clear();
 }
 
@@ -336,11 +197,7 @@ void ForwardPass::update(const Pass::UpdateParams& params) {
         m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
     }
 
-    detail::update_texts(params, m_renderPass.get(), &m_textDrawData);
-
     detail::update_meshes(params, m_renderPass.get(), &m_meshDrawData);
-
-    detail::update_sprites(params, m_renderPass.get(), &m_spriteDrawData);
 }
 
 void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
@@ -355,26 +212,6 @@ void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
                 entry.material->bind(commandBuffer);
             }
             entry.mesh->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
-        }
-    }
-
-    // render sprites
-    {
-        Material* currentMaterial = nullptr;
-        for (auto& entry: m_spriteDrawData.drawEntries) {
-            if (entry.material != currentMaterial) {
-                entry.material->bind(commandBuffer);
-                currentMaterial = entry.material;
-            }
-            entry.mesh->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
-        }
-    }
-
-    // render texts
-    {
-        for (auto& entry: m_textDrawData.drawEntries) {
-            entry.material->bind(commandBuffer);
-            entry.mesh->draw(commandBuffer);
         }
     }
 

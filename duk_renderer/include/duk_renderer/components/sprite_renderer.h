@@ -16,9 +16,9 @@ namespace duk::renderer {
 struct SpriteRenderer {
     SpriteResource sprite;
     uint32_t index;
-    std::shared_ptr<Material> material;
-    std::shared_ptr<SpriteMesh> mesh;
 };
+
+void update_sprite_renderer(const Renderer* renderer, const duk::objects::Component<SpriteRenderer>& spriteRenderer);
 
 }// namespace duk::renderer
 
@@ -43,7 +43,6 @@ namespace duk::resource {
 template<typename Solver>
 void solve_resources(Solver* solver, duk::renderer::SpriteRenderer& spriteRenderer) {
     solver->solve(spriteRenderer.sprite);
-    solver->solve(spriteRenderer.material);
 }
 
 }// namespace duk::resource

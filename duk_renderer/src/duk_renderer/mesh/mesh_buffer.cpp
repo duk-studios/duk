@@ -2,7 +2,7 @@
 // Created by Ricardo on 21/04/2024.
 //
 
-#include <duk_renderer/mesh_buffer.h>
+#include <duk_renderer/mesh/mesh_buffer.h>
 #include <duk_log/log.h>
 
 namespace duk::renderer {

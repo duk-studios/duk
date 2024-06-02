@@ -5,6 +5,8 @@
 #include <duk_renderer/components/canvas.h>
 #include <duk_renderer/material/material.h>
 
+#include "duk_renderer/components/material_slot.h"
+
 namespace duk::renderer {
 
 void update_canvas(const objects::Component<Canvas>& canvas, uint32_t width, uint32_t height) {
@@ -21,7 +23,13 @@ void update_canvas_transform(const duk::objects::Component<Canvas>& canvas, duk:
     canvasTransform->model = glm::scale(canvasTransform->model, glm::vec3(canvasTransform->scale, 1));
 
     auto object = canvasTransform.object();
-    if (auto material = find_material(object)) {
+
+    auto materialSlot = object.component<MaterialSlot>();
+    if (!materialSlot) {
+        return;
+    }
+
+    if (auto material = materialSlot->material) {
         material->set(object.id(), "uTransform", "model", canvasTransform->model);
     }
 }

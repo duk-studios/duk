@@ -47,7 +47,7 @@ ShaderPipelinePool::ShaderPipelinePool(const ShaderPipelinePoolCreateInfo& shade
         TextShaderDataSource textShaderDataSource = {};
         PipelineSettings settings = {};
         settings.blend = true;
-        settings.depth = false;
+        settings.depth = true;
         settings.invertY = false;
         m_text = create(kTextShaderPipelineId, &textShaderDataSource, settings);
     }

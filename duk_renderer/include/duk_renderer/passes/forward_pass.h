@@ -12,24 +12,10 @@ namespace duk::renderer {
 class SpriteCache;
 class Renderer;
 
-struct TextDrawData {
-    std::vector<TextDrawEntry> drawEntries;
-
-    void clear();
-};
-
 struct MeshDrawData {
-    std::vector<MeshEntry> meshes;
-    std::vector<uint16_t> sortedMeshes;
+    std::vector<MeshEntry> meshEntries;
+    std::vector<uint16_t> sortedMeshEntries;
     std::vector<MeshDrawEntry> drawEntries;
-
-    void clear();
-};
-
-struct SpriteDrawData {
-    std::vector<SpriteEntry> sprites;
-    std::vector<uint16_t> sortedSprites;
-    std::vector<SpriteDrawEntry> drawEntries;
 
     void clear();
 };
@@ -58,8 +44,6 @@ private:
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
     PassConnection m_outColor;
     MeshDrawData m_meshDrawData;
-    SpriteDrawData m_spriteDrawData;
-    TextDrawData m_textDrawData;
 };
 
 }// namespace duk::renderer

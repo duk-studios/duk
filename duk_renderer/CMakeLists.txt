@@ -9,14 +9,12 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/vertex_types.h
         include/duk_renderer/sort.h
         include/duk_renderer/register_types.h
-        include/duk_renderer/brush.h
-        include/duk_renderer/generic_brush.h
         include/duk_renderer/texture.h
-        include/duk_renderer/mesh_buffer.h
         include/duk_renderer/components/camera.h
         include/duk_renderer/components/canvas.h
         include/duk_renderer/components/lighting.h
-        include/duk_renderer/components/mesh_renderer.h
+        include/duk_renderer/components/material_slot.h
+        include/duk_renderer/components/mesh_slot.h
         include/duk_renderer/components/sprite_renderer.h
         include/duk_renderer/components/text_renderer.h
         include/duk_renderer/components/transform.h
@@ -33,10 +31,13 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/font/font_atlas.h
         include/duk_renderer/font/font_pool.h
         include/duk_renderer/font/font_handler.h
+        include/duk_renderer/mesh/empty_mesh.h
         include/duk_renderer/mesh/mesh.h
-        include/duk_renderer/mesh/mesh_builder.h
-        include/duk_renderer/mesh/mesh_data_source.h
+        include/duk_renderer/mesh/mesh_buffer.h
         include/duk_renderer/mesh/mesh_pool.h
+        include/duk_renderer/mesh/static_mesh.h
+        include/duk_renderer/mesh/static_mesh_builder.h
+        include/duk_renderer/mesh/static_mesh_data_source.h
         include/duk_renderer/material/globals/global_descriptors.h
         include/duk_renderer/material/material.h
         include/duk_renderer/material/material_handler.h
@@ -65,14 +66,12 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/sort.cpp
         src/duk_renderer/vertex_types.cpp
         src/duk_renderer/register_types.cpp
-        src/duk_renderer/brush.cpp
-        src/duk_renderer/generic_brush.cpp
         src/duk_renderer/texture.cpp
-        src/duk_renderer/mesh_buffer.cpp
         src/duk_renderer/components/camera.cpp
         src/duk_renderer/components/canvas.cpp
         src/duk_renderer/components/lighting.cpp
-        src/duk_renderer/components/mesh_renderer.cpp
+        src/duk_renderer/components/material_slot.cpp
+        src/duk_renderer/components/mesh_slot.cpp
         src/duk_renderer/components/sprite_renderer.cpp
         src/duk_renderer/components/text_renderer.cpp
         src/duk_renderer/components/transform.cpp
@@ -93,10 +92,13 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/shader/phong/phong_shader_data_source.cpp
         src/duk_renderer/shader/text/text_shader_data_source.h
         src/duk_renderer/shader/text/text_shader_data_source.cpp
+        src/duk_renderer/mesh/empty_mesh.cpp
         src/duk_renderer/mesh/mesh.cpp
-        src/duk_renderer/mesh/mesh_builder.cpp
-        src/duk_renderer/mesh/mesh_data_source.cpp
+        src/duk_renderer/mesh/mesh_buffer.cpp
         src/duk_renderer/mesh/mesh_pool.cpp
+        src/duk_renderer/mesh/static_mesh.cpp
+        src/duk_renderer/mesh/static_mesh_builder.cpp
+        src/duk_renderer/mesh/static_mesh_data_source.cpp
         src/duk_renderer/image/image.cpp
         src/duk_renderer/image/image_pool.cpp
         src/duk_renderer/image/image_handler.cpp

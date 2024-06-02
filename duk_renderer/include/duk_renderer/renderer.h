@@ -54,7 +54,11 @@ public:
 
     DUK_NO_DISCARD duk::resource::Pools* pools() const;
 
+    DUK_NO_DISCARD GlobalDescriptors* global_descriptors() const;
+
     DUK_NO_DISCARD MeshBufferPool* mesh_buffer_pool() const;
+
+    DUK_NO_DISCARD SpriteCache* sprite_cache() const;
 
     template<typename T, typename... Args>
     T* add_pass(Args&&... args);

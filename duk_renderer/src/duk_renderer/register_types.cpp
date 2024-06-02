@@ -4,17 +4,17 @@
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/canvas.h>
 #include <duk_renderer/components/lighting.h>
-#include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/sprite_renderer.h>
 #include <duk_renderer/components/text_renderer.h>
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/components/material_slot.h>
+#include <duk_renderer/components/mesh_slot.h>
 #include <duk_renderer/font/font_handler.h>
 #include <duk_renderer/shader/shader_pipeline_handler.h>
 #include <duk_renderer/image/image_handler.h>
 #include <duk_renderer/material/material_handler.h>
 #include <duk_renderer/sprite/sprite_handler.h>
 #include <duk_renderer/register_types.h>
-
 #include <duk_objects/register_types.h>
 
 #include <duk_serial/json/serializer.h>
@@ -32,7 +32,8 @@ void register_types() {
     duk::objects::register_component<PointLight>();
     duk::objects::register_component<Transform>();
     duk::objects::register_component<SpriteRenderer>();
-    duk::objects::register_component<MeshRenderer>();
+    duk::objects::register_component<MeshSlot>();
+    duk::objects::register_component<MaterialSlot>();
     duk::objects::register_component<TextRenderer>();
     duk::objects::register_component<Camera>();
     duk::objects::register_component<Canvas>();
