@@ -9,6 +9,7 @@
 #include <duk_engine/systems.h>
 #include <duk_engine/systems/camera_system.h>
 #include <duk_engine/systems/canvas_system.h>
+#include <duk_engine/systems/sprite_system.h>
 #include <duk_engine/systems/text_system.h>
 #include <duk_engine/systems/transform_system.h>
 
@@ -23,6 +24,7 @@ void register_types() {
     register_system<CameraUpdateSystem>();
     register_system<TransformUpdateSystem>();
     register_system<CanvasUpdateSystem>();
+    register_system<SpriteUpdateSystem>();
     register_system<TextUpdateSystem>();
 }
 
