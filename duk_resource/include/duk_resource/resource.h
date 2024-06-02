@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <typeindex>
+#include <vector>
 
 namespace duk::resource {
 
@@ -204,6 +205,25 @@ void from_json(const rapidjson::Value& jsonObject, duk::resource::Handle<T>& res
 template<typename T>
 void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Handle<T>& resource) {
     json.Set<uint64_t>(resource.id().value());
+}
+
+template<typename T>
+void from_json(const rapidjson::Value& jsonObject, std::vector<duk::resource::Handle<T>>& resources) {
+    DUK_ASSERT(jsonObject.IsArray());
+    auto jsonArray = jsonObject.GetArray();
+    for (auto& jsonElement: jsonArray) {
+        from_json(jsonElement, resources.emplace_back());
+    }
+}
+
+template<typename T>
+void to_json(rapidjson::Document& document, rapidjson::Value& json, const std::vector<duk::resource::Handle<T>>& resources) {
+    auto jsonArray = json.SetArray().GetArray();
+    for (const auto& element: resources) {
+        rapidjson::Value jsonElement;
+        to_json(document, jsonElement, element);
+        jsonArray.PushBack(jsonElement, document.GetAllocator());
+    }
 }
 
 }// namespace duk::serial
