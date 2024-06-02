@@ -6,6 +6,7 @@
     "duk::sample::SpriteAnimatorSystem",
     "duk::engine::TransformUpdateSystem",
     "duk::engine::CameraUpdateSystem",
+    "duk::engine::SpriteUpdateSystem",
     "duk::engine::TextUpdateSystem",
     "duk::engine::CanvasUpdateSystem"
   ],
@@ -49,9 +50,12 @@
           "scale": "3;3;3"
         },
         {
-          "type":"duk::renderer::MeshRenderer",
-          "mesh":10004,
-          "material":1000009
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10004
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000009
         }
       ]
     },
@@ -64,9 +68,12 @@
           "scale": "3;3;3"
         },
         {
-          "type":"duk::renderer::MeshRenderer",
-          "mesh":10004,
-          "material":1000007
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10004
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000007
         }
       ]
     },
@@ -79,9 +86,12 @@
           "scale": "3;3;3"
         },
         {
-          "type":"duk::renderer::MeshRenderer",
-          "mesh":10004,
-          "material":1000005
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10004
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000005
         }
       ]
     },
@@ -94,9 +104,12 @@
           "scale": "3;3;3"
         },
         {
-          "type":"duk::renderer::MeshRenderer",
-          "mesh":10004,
-          "material":1000010
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10004
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000010
         }
       ]
     },
@@ -109,9 +122,12 @@
           "scale": "3;3;3"
         },
         {
-          "type":"duk::renderer::MeshRenderer",
-          "mesh":10004,
-          "material":1000006
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10004
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000006
         }
       ]
     },
@@ -124,9 +140,12 @@
           "scale": "3;3;3"
         },
         {
-          "type":"duk::renderer::MeshRenderer",
-          "mesh":10004,
-          "material":1000008
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10004
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000008
         }
       ]
     },
@@ -139,9 +158,12 @@
           "scale": "20;20;20"
         },
         {
-          "type":"duk::renderer::MeshRenderer",
-          "mesh":10001,
-          "material":1000013
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10001
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000013
         }
       ]
     },
@@ -353,9 +375,12 @@
           "radius":4000
         },
         {
-          "type":"duk::renderer::MeshRenderer",
-          "mesh":10003,
-          "material":1000012
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10003
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000012
         }
       ]
     }
