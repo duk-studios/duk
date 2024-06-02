@@ -2,6 +2,7 @@
 /// transform.cpp
 
 #include <duk_renderer/components/transform.h>
+#include <duk_renderer/components/material_slot.h>
 #include <duk_renderer/material/material.h>
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -35,7 +36,12 @@ void update_transforms(duk::objects::Objects& objects) {
 
         update_transform(transform);
 
-        if (auto material = find_material(object)) {
+        auto materialSlot = object.component<MaterialSlot>();
+        if (!materialSlot) {
+            continue;
+        }
+
+        if (auto material = materialSlot->material) {
             material->set(object.id(), "uTransform", "model", transform->model);
             material->set(object.id(), "uTransform", "invModel", transform->invModel);
         }

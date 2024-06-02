@@ -3,7 +3,7 @@
 //
 #include <duk_renderer/sprite/sprite_cache.h>
 #include <duk_renderer/sprite/sprite_mesh.h>
-#include <duk_renderer/mesh_buffer.h>
+#include <duk_renderer/mesh/mesh_buffer.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/material/material.h>
 

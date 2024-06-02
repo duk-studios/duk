@@ -7,8 +7,10 @@
 
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/components/canvas.h>
+#include <duk_renderer/components/material_slot.h>
+#include <duk_renderer/components/mesh_slot.h>
 
-#include <duk_renderer/material/material_pool.h>
+#include <duk_renderer/material/globals/global_descriptors.h>
 
 namespace duk::renderer {
 
@@ -210,14 +212,14 @@ void TextMesh::update_text(const FontAtlas* atlas, const TextRenderer& textRende
     m_indexBuffer->flush();
 }
 
-void TextMesh::draw(duk::rhi::CommandBuffer* commandBuffer) {
+void TextMesh::draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) {
     const duk::rhi::Buffer* buffers[] = {m_positionBuffer.get(), m_texCoordBuffer.get()};
 
     commandBuffer->bind_vertex_buffer(buffers, std::size(buffers), 0);
 
     commandBuffer->bind_index_buffer(m_indexBuffer.get());
 
-    commandBuffer->draw_indexed(m_textCount * 6, 1, 0, 0, 0);
+    commandBuffer->draw_indexed(m_textCount * 6, instanceCount, 0, 0, firstInstance);
 }
 
 void TextMesh::reserve(uint32_t textCount) {
@@ -255,22 +257,33 @@ void update_text_renderer(Renderer* renderer, const objects::Component<TextRende
 
     auto atlas = textRenderer->font->atlas(buildAtlasParams);
 
-    auto& material = textRenderer->material;
-    auto& mesh = textRenderer->mesh;
+    auto textObject = textRenderer.object();
 
-    if (!material) {
-        material = create_text_material(renderer);
-        material->set("uBaseColor", atlas->image(), kDefaultTextureSampler);
+    auto [meshSlot, materialSlot] = textObject.components<MeshSlot, MaterialSlot>();
+    if (!meshSlot) {
+        meshSlot = textObject.add<MeshSlot>();
     }
-
-    if (!mesh) {
-        TextMeshCreateInfo textMeshCreateInfo = {};
-        textMeshCreateInfo.renderer = renderer;
-        mesh = std::make_shared<TextMesh>(textMeshCreateInfo);
+    if (!materialSlot) {
+        materialSlot = textObject.add<MaterialSlot>();
     }
 
     const auto transform = textRenderer.object().component<Transform>();
-    mesh->update_text(atlas, *textRenderer, transform ? 100 : 1);
+    if (!materialSlot->material) {
+        materialSlot->material = create_text_material(renderer);
+        materialSlot->material->set("uBaseColor", atlas->image(), kDefaultTextureSampler);
+
+        auto globalDescriptors = renderer->global_descriptors();
+        auto ubo = transform ? globalDescriptors->camera_ubo() : globalDescriptors->canvas_ubo();
+        materialSlot->material->set("uCamera", ubo->descriptor());
+    }
+
+    if (!meshSlot->mesh) {
+        TextMeshCreateInfo textMeshCreateInfo = {};
+        textMeshCreateInfo.renderer = renderer;
+        meshSlot->mesh = std::make_shared<TextMesh>(textMeshCreateInfo);
+    }
+
+    static_cast<TextMesh*>(meshSlot->mesh.get())->update_text(atlas, *textRenderer, transform ? 100 : 1);
 }
 
 }// namespace duk::renderer

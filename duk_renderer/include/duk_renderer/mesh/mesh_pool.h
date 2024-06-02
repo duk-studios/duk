@@ -6,6 +6,7 @@
 #define DUK_RENDERER_MESH_POOL_H
 
 #include <duk_renderer/mesh/mesh.h>
+#include <duk_renderer/mesh/mesh_buffer.h>
 #include <duk_resource/pool.h>
 
 namespace duk::renderer {
@@ -17,8 +18,7 @@ static constexpr duk::resource::Id kSphereMeshId(10003);
 static constexpr duk::resource::Id kConeMeshId(10004);
 
 class Renderer;
-
-using MeshResource = duk::resource::Handle<Mesh>;
+class StaticMeshDataSource;
 
 struct MeshPoolCreateInfo {
     MeshBufferPool* meshBufferPool;
@@ -30,7 +30,7 @@ public:
 
     ~MeshPool() override;
 
-    DUK_NO_DISCARD MeshResource create(duk::resource::Id resourceId, const MeshDataSource* meshDataSource);
+    DUK_NO_DISCARD MeshResource create(duk::resource::Id resourceId, const StaticMeshDataSource* meshDataSource);
 
     DUK_NO_DISCARD MeshResource quad() const;
 

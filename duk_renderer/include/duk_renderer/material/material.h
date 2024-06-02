@@ -59,6 +59,9 @@ public:
 
     void clear();
 
+    // returns the current bound descriptor for the given binding
+    duk::rhi::Descriptor get(const MaterialLocationId& binding) const;
+
     void set(const MaterialLocationId& binding, const ImageResource& image);
 
     void set(const MaterialLocationId& binding, const ImageResource& image, const duk::rhi::Sampler& sampler);
@@ -114,8 +117,6 @@ private:
     std::unordered_map<uint32_t, std::unique_ptr<MaterialInstanceBuffer>> m_instanceBuffers;
     bool m_dirty;
 };
-
-Material* find_material(const duk::objects::Object& object);
 
 std::shared_ptr<Material> create_color_material(Renderer* renderer, bool transparent);
 

@@ -2,7 +2,7 @@
 // Created by Ricardo on 28/05/2024.
 //
 
-#include <duk_renderer/mesh/mesh_builder.h>
+#include <duk_renderer/mesh/static_mesh_builder.h>
 #include <glm/ext/scalar_constants.hpp>
 
 namespace duk::renderer {
@@ -66,8 +66,8 @@ bool calculate_normals(std::span<const glm::vec3> vertices, std::span<glm::vec3>
     return detail::calculate_normals(vertices, normals);
 }
 
-MeshDataSourceSOA build_quad_mesh_data(const std::set<VertexAttributes::Type>& attributes, const glm::vec3& scale) {
-    MeshDataSourceSOA meshDataSource;
+StaticMeshDataSourceSOA build_quad_mesh_data(const std::set<VertexAttributes::Type>& attributes, const glm::vec3& scale) {
+    StaticMeshDataSourceSOA meshDataSource;
     if (attributes.contains(VertexAttributes::POSITION)) {
         std::array<glm::vec3, 4> positions = {};
         positions[0] = glm::vec3(-0.5f, -0.5f, 0.0f) * scale;
@@ -112,8 +112,8 @@ MeshDataSourceSOA build_quad_mesh_data(const std::set<VertexAttributes::Type>& a
     return meshDataSource;
 }
 
-MeshDataSourceSOA build_cube_mesh_data(const std::set<VertexAttributes::Type>& attributes, const glm::vec3& scale) {
-    MeshDataSourceSOA meshDataSource;
+StaticMeshDataSourceSOA build_cube_mesh_data(const std::set<VertexAttributes::Type>& attributes, const glm::vec3& scale) {
+    StaticMeshDataSourceSOA meshDataSource;
 
     if (attributes.contains(VertexAttributes::POSITION)) {
         std::array<glm::vec3, 24> positions = {};
@@ -233,8 +233,8 @@ MeshDataSourceSOA build_cube_mesh_data(const std::set<VertexAttributes::Type>& a
     return meshDataSource;
 }
 
-MeshDataSourceSOA build_sphere_mesh_data(uint32_t resolution, const std::set<VertexAttributes::Type>& attributes, const glm::vec3& scale) {
-    MeshDataSourceSOA meshDataSource;
+StaticMeshDataSourceSOA build_sphere_mesh_data(uint32_t resolution, const std::set<VertexAttributes::Type>& attributes, const glm::vec3& scale) {
+    StaticMeshDataSourceSOA meshDataSource;
 
     const auto rows = resolution;
     const auto columns = resolution;
@@ -310,8 +310,8 @@ MeshDataSourceSOA build_sphere_mesh_data(uint32_t resolution, const std::set<Ver
     return meshDataSource;
 }
 
-MeshDataSourceSOA build_cone_mesh_data(uint32_t resolution, const std::set<VertexAttributes::Type>& attributes, const glm::vec3& scale) {
-    MeshDataSourceSOA meshDataSource;
+StaticMeshDataSourceSOA build_cone_mesh_data(uint32_t resolution, const std::set<VertexAttributes::Type>& attributes, const glm::vec3& scale) {
+    StaticMeshDataSourceSOA meshDataSource;
 
     uint32_t vertexCount = (resolution * 2) + 1;
 

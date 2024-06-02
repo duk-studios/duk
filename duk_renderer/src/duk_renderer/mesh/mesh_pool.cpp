@@ -2,11 +2,12 @@
 // Created by rov on 11/21/2023.
 //
 
-#include <duk_renderer/mesh/mesh_data_source.h>
+#include <duk_renderer/mesh/static_mesh_data_source.h>
 #include <duk_renderer/mesh/mesh_pool.h>
+#include <duk_renderer/mesh/mesh_buffer.h>
+#include <duk_renderer/mesh/static_mesh.h>
+#include <duk_renderer/mesh/static_mesh_builder.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/mesh_buffer.h>
-#include <duk_renderer/mesh/mesh_builder.h>
 
 namespace duk::renderer {
 
@@ -35,11 +36,11 @@ MeshPool::MeshPool(const MeshPoolCreateInfo& meshPoolCreateInfo)
 
 MeshPool::~MeshPool() = default;
 
-MeshResource MeshPool::create(duk::resource::Id resourceId, const duk::renderer::MeshDataSource* meshDataSource) {
-    MeshCreateInfo meshCreateInfo = {};
+MeshResource MeshPool::create(duk::resource::Id resourceId, const duk::renderer::StaticMeshDataSource* meshDataSource) {
+    StaticMeshCreateInfo meshCreateInfo = {};
     meshCreateInfo.meshBufferPool = m_meshBufferPool;
     meshCreateInfo.meshDataSource = meshDataSource;
-    return insert(resourceId, std::make_shared<Mesh>(meshCreateInfo));
+    return insert(resourceId, std::make_shared<StaticMesh>(meshCreateInfo));
 }
 
 MeshResource MeshPool::quad() const {

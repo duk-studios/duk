@@ -9,8 +9,11 @@
           "scale": "1;1;1"
         },
         {
-          "type": "duk::renderer::MeshRenderer",
-          "mesh": 10003,
+          "type": "duk::renderer::MeshSlot",
+          "mesh": 10003
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
           "material": 1000013
         }
       ]

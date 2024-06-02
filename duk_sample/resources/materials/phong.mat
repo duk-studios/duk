@@ -18,6 +18,11 @@
           "type": "float",
           "name": "shininess",
           "value": 32
+        },
+        {
+          "type": "vec2",
+          "name": "uvScale",
+          "value": "1;1"
         }
       ]
     },

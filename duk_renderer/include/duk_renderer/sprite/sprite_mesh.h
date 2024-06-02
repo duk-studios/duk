@@ -7,6 +7,8 @@
 
 #include <duk_renderer/sprite/sprite.h>
 
+#include <duk_renderer/mesh/mesh.h>
+
 namespace duk::renderer {
 
 class MeshBufferPool;
@@ -18,13 +20,13 @@ struct SpriteMeshCreateInfo {
     uint32_t spriteIndex;
 };
 
-class SpriteMesh {
+class SpriteMesh : public Mesh {
 public:
     explicit SpriteMesh(const SpriteMeshCreateInfo& spriteMeshCreateInfo);
 
-    ~SpriteMesh();
+    ~SpriteMesh() override;
 
-    void draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) const;
+    void draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) override;
 
 private:
     MeshBuffer* m_meshBuffer;

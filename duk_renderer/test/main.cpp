@@ -7,7 +7,6 @@
 #include <duk_platform/window.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>
-#include <duk_renderer/components/mesh_renderer.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/shader/shader_pipeline_pool.h>
 #include <duk_renderer/image/image_pool.h>
@@ -17,6 +16,9 @@
 #include <duk_renderer/renderer.h>
 #include <duk_tools/timer.h>
 #include <duk_renderer/register_types.h>
+
+#include "duk_renderer/components/material_slot.h"
+#include "duk_renderer/components/mesh_slot.h"
 
 class Application {
 public:
@@ -118,9 +120,11 @@ int main() {
 
     auto add_mesh_object = [](duk::objects::Objects& objects, const duk::renderer::MeshResource& mesh, const duk::renderer::MaterialResource& material, const glm::vec3& position) -> duk::objects::Object {
         duk::objects::Object object = objects.add_object();
-        auto meshRenderer = object.add<duk::renderer::MeshRenderer>();
-        meshRenderer->mesh = mesh;
-        meshRenderer->material = material;
+        auto meshSlot = object.add<duk::renderer::MeshSlot>();
+        meshSlot->mesh = mesh;
+
+        auto materialSlot = object.add<duk::renderer::MaterialSlot>();
+        materialSlot->material = material;
 
         auto transform = object.add<duk::renderer::Transform>();
         transform->position = position;
@@ -134,7 +138,7 @@ int main() {
 
     // Create a phong material
     auto material = duk::renderer::create_phong_material(application.renderer());
-    material->set("uProperties", "color", glm::vec4(1.0f, 0.5f, 0.8f, 1.0f));
+    // material->set("uProperties", "color", glm::vec4(1.0f, 0.5f, 0.8f, 1.0f));
     // material->set("uBaseColor", imagePool->white_image(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
 
     auto mesh = application.pools()->get<duk::renderer::MeshPool>()->cube();

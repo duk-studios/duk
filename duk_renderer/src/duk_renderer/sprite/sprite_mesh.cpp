@@ -2,7 +2,7 @@
 // Created by Ricardo on 24/04/2024.
 //
 #include <duk_renderer/sprite/sprite_mesh.h>
-#include <duk_renderer/mesh_buffer.h>
+#include <duk_renderer/mesh/mesh_buffer.h>
 
 namespace duk::renderer {
 
@@ -52,7 +52,7 @@ SpriteMesh::~SpriteMesh() {
     m_meshBuffer->free(m_meshHandle);
 }
 
-void SpriteMesh::draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) const {
+void SpriteMesh::draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) {
     m_meshBuffer->bind(commandBuffer);
     commandBuffer->draw_indexed(6, instanceCount, m_firstIndex, static_cast<int32_t>(m_firstVertex), firstInstance);
 }

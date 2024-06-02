@@ -78,6 +78,10 @@ public:
         requires std::is_convertible_v<U*, T*>;
 
     template<typename U>
+    Handle(const std::shared_ptr<U>& resource)
+        requires std::is_convertible_v<U*, T*>;
+
+    template<typename U>
     Handle<U> as() const;
 
     Id id() const;
@@ -143,6 +147,14 @@ template<typename U>
 Handle<T>::Handle(Id id, const std::shared_ptr<U>& resource)
     requires std::is_convertible_v<U*, T*>
     : m_id(id)
+    , m_resource(resource) {
+}
+
+template<typename T>
+template<typename U>
+Handle<T>::Handle(const std::shared_ptr<U>& resource)
+    requires std::is_convertible_v<U*, T*>
+    : m_id(kInvalidId)
     , m_resource(resource) {
 }
 

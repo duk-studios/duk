@@ -2,7 +2,7 @@
 /// renderer.cpp
 
 #include <duk_platform/window.h>
-#include <duk_renderer/mesh_buffer.h>
+#include <duk_renderer/mesh/mesh_buffer.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/passes/pass.h>
@@ -168,8 +168,16 @@ duk::resource::Pools* Renderer::pools() const {
     return m_pools;
 }
 
+GlobalDescriptors* Renderer::global_descriptors() const {
+    return m_globalDescriptors.get();
+}
+
 MeshBufferPool* Renderer::mesh_buffer_pool() const {
     return m_meshBufferPool.get();
+}
+
+SpriteCache* Renderer::sprite_cache() const {
+    return m_spriteCache.get();
 }
 
 void Renderer::update_global_descriptors(duk::objects::Objects& objects) {
