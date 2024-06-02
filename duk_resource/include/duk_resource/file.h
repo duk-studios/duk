@@ -7,7 +7,7 @@
 
 #include <duk_resource/resource.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json/types.h>
 
 #include <set>
 #include <string>

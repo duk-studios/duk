@@ -4,6 +4,8 @@
 #include <duk_engine/settings.h>
 #include <duk_tools/file.h>
 
+#include <duk_serial/json/serializer.h>
+
 namespace duk::engine {
 
 Settings load_settings(const std::string& path) {

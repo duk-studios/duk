@@ -7,6 +7,8 @@
 
 #include <duk_rhi/pipeline/std_shader_data_source.h>
 
+#include <duk_serial/json/serializer.h>
+
 #include <duk_tools/file.h>
 
 namespace duk::renderer {

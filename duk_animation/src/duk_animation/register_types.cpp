@@ -13,6 +13,7 @@
 
 #include <duk_engine/register_types.h>
 #include <duk_engine/systems.h>
+#include <duk_serial/json/serializer.h>
 
 namespace duk::animation {
 

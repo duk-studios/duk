@@ -5,7 +5,6 @@
 #define DUK_ENGINE_SETTINGS_H
 
 #include <duk_resource/resource.h>
-#include <duk_serial/json/serializer.h>
 #include <glm/vec2.hpp>
 #include <string>
 

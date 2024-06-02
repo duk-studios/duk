@@ -4,6 +4,8 @@
 
 #include <duk_renderer/sprite/sprite_handler.h>
 
+#include <duk_serial/json/serializer.h>
+
 #include <duk_tools/file.h>
 
 namespace duk::renderer {

@@ -7,7 +7,7 @@
 #include <duk_resource/handler.h>
 #include <duk_tools/file.h>
 
-#include <fmt/format.h>
+#include <duk_serial/json/serializer.h>
 
 #include <fstream>
 #include <random>
