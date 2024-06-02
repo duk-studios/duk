@@ -6,6 +6,8 @@
 #include <duk_log/log.h>
 #include <duk_tools/file.h>
 
+#include <duk_serial/json/serializer.h>
+
 #include <fstream>
 
 namespace duk::project {

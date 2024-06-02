@@ -17,6 +17,8 @@
 
 #include <duk_objects/register_types.h>
 
+#include <duk_serial/json/serializer.h>
+
 namespace duk::renderer {
 
 void register_types() {
