@@ -16,7 +16,8 @@ static float z_depth(const glm::mat4& projection, float z) {
 }
 
 static glm::mat4 calculate_projection(const PerspectiveCamera& perspective, uint32_t width, uint32_t height) {
-    return glm::perspective(glm::radians(perspective.fovDegrees), static_cast<float>(width) / static_cast<float>(height), perspective.zNear, perspective.zFar);
+    const auto aspect = static_cast<float>(width) / static_cast<float>(height);
+    return glm::perspective(glm::radians(perspective.fovDegrees), aspect, perspective.zNear, perspective.zFar);
 }
 
 }// namespace detail
