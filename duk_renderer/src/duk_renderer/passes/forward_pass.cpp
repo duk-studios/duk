@@ -27,10 +27,10 @@ static SortKey calculate_opaque_sort_key(const duk::objects::Object& object) {
 
 static uint32_t float_to_uint32(float value) {
     // Calculate the range of the float values
-    constexpr float rangeFloat = std::numeric_limits<float>::max() - std::numeric_limits<float>::lowest();
+    const float rangeFloat = std::numeric_limits<float>::max() - std::numeric_limits<float>::lowest();
 
     // Calculate the maximum value of an unsigned int
-    constexpr uint32_t maxUInt = std::numeric_limits<uint32_t>::max();
+    const uint32_t maxUInt = std::numeric_limits<uint32_t>::max();
 
     // Apply the linear transformation
     uint32_t result = static_cast<uint32_t>(((value - std::numeric_limits<float>::lowest()) / rangeFloat) * maxUInt);
