@@ -20,6 +20,8 @@ struct PipelineSettings {
     bool blend;
     bool depth;
     bool invertY;
+    duk::rhi::GraphicsPipeline::CullMode::Mask cullModeMask;
+    uint32_t priority;
 };
 
 struct ShaderPipelineData {
@@ -36,6 +38,8 @@ inline void from_json(const rapidjson::Value& json, duk::renderer::PipelineSetti
     from_json_member(json, "blend", data.blend);
     from_json_member(json, "depth", data.depth);
     from_json_member(json, "invertY", data.invertY);
+    from_json_member(json, "cullModeMask", data.cullModeMask);
+    from_json_member(json, "priority", data.priority);
 }
 
 template<>
@@ -43,6 +47,8 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
     to_json_member(document, json, "blend", data.blend);
     to_json_member(document, json, "depth", data.depth);
     to_json_member(document, json, "invertY", data.invertY);
+    to_json_member(document, json, "cullModeMask", data.cullModeMask);
+    to_json_member(document, json, "priority", data.priority);
 }
 
 template<>

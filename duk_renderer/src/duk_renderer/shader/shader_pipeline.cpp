@@ -19,8 +19,9 @@ ShaderPipeline::ShaderPipeline(const ShaderPipelineCreateInfo& shaderPipelineCre
     set_blend(settings.blend);
     set_depth(settings.depth);
     set_invert_y(settings.invertY);
+    m_priority = settings.priority;
 
-    m_state.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
+    m_state.cullModeMask = settings.cullModeMask;
     m_state.fillMode = duk::rhi::GraphicsPipeline::FillMode::FILL;
     m_state.topology = duk::rhi::GraphicsPipeline::Topology::TRIANGLE_LIST;
 }
@@ -64,6 +65,10 @@ void ShaderPipeline::set_invert_y(bool invert) {
 
 bool ShaderPipeline::invert_y() const {
     return m_invertY;
+}
+
+uint32_t ShaderPipeline::priority() const {
+    return m_priority;
 }
 
 void ShaderPipeline::update(PipelineCache& pipelineCache, duk::rhi::RenderPass* renderPass, const glm::vec2& viewport) {
