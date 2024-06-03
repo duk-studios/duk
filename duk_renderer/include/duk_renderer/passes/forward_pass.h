@@ -12,7 +12,7 @@ namespace duk::renderer {
 class SpriteCache;
 class Renderer;
 
-struct DrawDataGroup {
+struct DrawGroupData {
     typedef SortKey (*CalculateSortKeyFunc)(const duk::objects::Object& object);
 
     std::vector<ObjectEntry> objectEntries;
@@ -24,8 +24,8 @@ struct DrawDataGroup {
 };
 
 struct DrawData {
-    DrawDataGroup opaqueGroup;
-    DrawDataGroup transparentGroup;
+    DrawGroupData opaqueGroup;
+    DrawGroupData transparentGroup;
 
     void clear();
 };

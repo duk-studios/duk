@@ -70,7 +70,7 @@ static bool valid(const DrawEntry& drawEntry) {
     return drawEntry.material != nullptr && drawEntry.mesh != nullptr && drawEntry.instanceCount > 0;
 }
 
-static void update_draw_entries(DrawDataGroup& drawGroup) {
+static void update_draw_group(DrawGroupData& drawGroup) {
     SortKey::sort_indices(drawGroup.objectEntries, drawGroup.sortedIndices);
 
     DrawEntry drawEntry = {};
@@ -134,7 +134,7 @@ static void update_draw_data(const Pass::UpdateParams& params, duk::rhi::RenderP
 
         auto material = materialSlot->material.get();
         ObjectEntry* objectEntry;
-        DrawDataGroup::CalculateSortKeyFunc calculateSortKey;
+        DrawGroupData::CalculateSortKeyFunc calculateSortKey;
         if (is_transparent(material)) {
             objectEntry = &transparentGroup.objectEntries.emplace_back();
             calculateSortKey = transparentGroup.calculateSortKey;
@@ -170,15 +170,15 @@ static void update_draw_data(const Pass::UpdateParams& params, duk::rhi::RenderP
         material->clear();
     }
 
-    update_draw_entries(drawData.opaqueGroup);
-    update_draw_entries(drawData.transparentGroup);
+    update_draw_group(drawData.opaqueGroup);
+    update_draw_group(drawData.transparentGroup);
 
     for (const auto material: uniqueMaterials) {
         material->update(*params.pipelineCache, renderPass, params.viewport);
     }
 }
 
-static void render_draw_entries(duk::rhi::CommandBuffer* commandBuffer, const DrawDataGroup& drawGroup) {
+static void render_draw_group(duk::rhi::CommandBuffer* commandBuffer, const DrawGroupData& drawGroup) {
     Material* currentMaterial = nullptr;
     for (auto& entry: drawGroup.drawEntries) {
         if (currentMaterial != entry.material) {
@@ -191,7 +191,7 @@ static void render_draw_entries(duk::rhi::CommandBuffer* commandBuffer, const Dr
 
 }// namespace detail
 
-void DrawDataGroup::clear() {
+void DrawGroupData::clear() {
     objectEntries.clear();
     sortedIndices.clear();
     drawEntries.clear();
@@ -276,10 +276,10 @@ void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
     commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
     // render opaque
-    detail::render_draw_entries(commandBuffer, m_drawData.opaqueGroup);
+    detail::render_draw_group(commandBuffer, m_drawData.opaqueGroup);
 
     // render transparent
-    detail::render_draw_entries(commandBuffer, m_drawData.transparentGroup);
+    detail::render_draw_group(commandBuffer, m_drawData.transparentGroup);
 
     commandBuffer->end_render_pass();
 }
