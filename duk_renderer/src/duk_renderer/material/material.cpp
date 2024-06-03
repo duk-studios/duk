@@ -463,6 +463,12 @@ std::shared_ptr<Material> create_phong_material(Renderer* renderer) {
                 shininess.data.floatValue = 32.0f;
             }
             {
+                auto& emissiveColor = bindingData->members.emplace_back();
+                emissiveColor.name = "emissiveColor";
+                emissiveColor.type = BufferBinding::Member::Type::VEC3;
+                emissiveColor.data.vec3Value = glm::vec3(0.0f);
+            }
+            {
                 auto& uvScale = bindingData->members.emplace_back();
                 uvScale.name = "uvScale";
                 uvScale.type = BufferBinding::Member::Type::VEC2;
@@ -489,6 +495,17 @@ std::shared_ptr<Material> create_phong_material(Renderer* renderer) {
         specular.data = [&pools]() -> std::unique_ptr<BindingData> {
             auto imageSamplerBinding = std::make_unique<ImageSamplerBinding>();
             imageSamplerBinding->image = pools->get<ImagePool>()->white_image();
+            imageSamplerBinding->sampler = kDefaultTextureSampler;
+            return imageSamplerBinding;
+        }();
+    }
+    {
+        auto& emissive = materialData.bindings.emplace_back();
+        emissive.type = BindingType::IMAGE_SAMPLER;
+        emissive.name = "uEmissive";
+        emissive.data = [&pools]() -> std::unique_ptr<BindingData> {
+            auto imageSamplerBinding = std::make_unique<ImageSamplerBinding>();
+            imageSamplerBinding->image = pools->get<ImagePool>()->black_image();
             imageSamplerBinding->sampler = kDefaultTextureSampler;
             return imageSamplerBinding;
         }();

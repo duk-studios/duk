@@ -15,6 +15,11 @@
           "value": "0.1;1;1;1"
         },
         {
+          "type": "vec3",
+          "name": "emissiveColor",
+          "value": "0;0;0"
+        },
+        {
           "type": "float",
           "name": "shininess",
           "value": 32
@@ -34,6 +39,15 @@
       "type": "image-sampler",
       "name": "uSpecular",
       "image": 1,
+      "sampler": {
+        "wrap": "clamp-edge",
+        "filter": "nearest"
+      }
+    },
+    {
+      "type": "image-sampler",
+      "name": "uEmissive",
+      "image": 2,
       "sampler": {
         "wrap": "clamp-edge",
         "filter": "nearest"
