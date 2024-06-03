@@ -14,6 +14,7 @@ layout(location = 0) out vec4 oColor;
 
 struct Properties {
     vec4 color;
+    vec3 emissiveColor;
     float shininess;
     vec2 uvScale;
 };
@@ -24,18 +25,24 @@ layout(binding = 3) buffer PropertiesUBO {
 
 layout(binding = 4) uniform sampler2D uBaseColor;
 layout(binding = 5) uniform sampler2D uSpecular;
+layout(binding = 6) uniform sampler2D uEmissive;
 
 void main() {
     vec3 view = normalize(duk_camera_position() - vPosition);
     vec3 normal = normalize(vNormal);
-
     Properties properties = DUK_INSTANCE_GET(uProperties, vInstanceIndex);
+    vec2 texCoord = vTexCoord * properties.uvScale;
 
-    float shininess = max(1, (properties.shininess * texture(uSpecular, vTexCoord * properties.uvScale).r));
+    float shininess = max(1, (properties.shininess * texture(uSpecular, texCoord).r));
 
     vec3 lighting = duk_calculate_phong_lights(shininess, vPosition, normal, view);
 
-    vec4 color = texture(uBaseColor, vTexCoord * properties.uvScale) * properties.color;
+    vec4 color = texture(uBaseColor, texCoord) * properties.color;
 
-    oColor = color * vec4(lighting, 1.0);
+    vec3 emissive = texture(uEmissive, texCoord).rgb;
+
+    // prevent lighting from affecting the emissive color
+    lighting *= vec3(1.0) - emissive;
+
+    oColor = color * vec4(lighting, 1.0) + vec4(emissive * properties.emissiveColor, 0.0);
 }
