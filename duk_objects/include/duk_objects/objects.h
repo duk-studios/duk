@@ -137,22 +137,22 @@ public:
     const ComponentMask& component_mask() const;
 
     template<typename T, typename... Args>
-    ComponentHandle<T, isConst> add(Args&&... args);
+    ComponentHandle<T, isConst> add(Args&&... args) const;
 
     template<typename T>
-    void remove();
+    void remove() const;
 
     template<typename T>
-    ComponentHandle<T, isConst> component();
-
-    template<typename T>
-    const ComponentHandle<T, isConst> component() const;
+    ComponentHandle<T, isConst> component() const;
 
     template<typename... Ts>
-    std::tuple<ComponentHandle<Ts, isConst>...> components();
+    std::tuple<ComponentHandle<Ts, isConst>...> components() const;
+
+    template<typename T>
+    ComponentHandle<T, isConst> component_or_add() const;
 
     template<typename... Ts>
-    std::tuple<const ComponentHandle<Ts, isConst>...> components() const;
+    ComponentHandle<Ts..., isConst> components_or_add() const;
 
 private:
     Id m_id;
@@ -191,7 +191,29 @@ public:
 
     DUK_NO_DISCARD explicit operator bool() const;
 
+    DUK_NO_DISCARD Id id() const;
+
     DUK_NO_DISCARD ObjectHandle<isConst> object() const;
+
+    DUK_NO_DISCARD ObjectsType* objects() const;
+
+    template<typename U, typename... Args>
+    ComponentHandle<U, isConst> add(Args&&... args) const;
+
+    template<typename U>
+    void remove() const;
+
+    template<typename U>
+    DUK_NO_DISCARD ComponentHandle<U, isConst> component();
+
+    template<typename... Ts>
+    DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, isConst>...> components();
+
+    template<typename U>
+    DUK_NO_DISCARD ComponentHandle<U, isConst> component_or_add() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ComponentHandle<Ts..., isConst> components_or_add() const;
 
 private:
     Id m_ownerId;
@@ -523,39 +545,42 @@ const ComponentMask& ObjectHandle<isConst>::component_mask() const {
 
 template<bool isConst>
 template<typename T, typename... Args>
-ComponentHandle<T, isConst> ObjectHandle<isConst>::add(Args&&... args) {
+ComponentHandle<T, isConst> ObjectHandle<isConst>::add(Args&&... args) const {
     m_objects->template add_component<T>(m_id, std::forward<Args>(args)...);
     return component<T>();
 }
 
 template<bool isConst>
 template<typename T>
-void ObjectHandle<isConst>::remove() {
+void ObjectHandle<isConst>::remove() const {
     m_objects->template remove_component<T>(m_id);
 }
 
 template<bool isConst>
 template<typename T>
-ComponentHandle<T, isConst> ObjectHandle<isConst>::component() {
+ComponentHandle<T, isConst> ObjectHandle<isConst>::component() const {
     return ComponentHandle<T, isConst>(m_id, m_objects);
+}
+
+template<bool isConst>
+template<typename... Ts>
+std::tuple<ComponentHandle<Ts, isConst>...> ObjectHandle<isConst>::components() const {
+    return std::make_tuple(component<Ts>()...);
 }
 
 template<bool isConst>
 template<typename T>
-const ComponentHandle<T, isConst> ObjectHandle<isConst>::component() const {
-    return ComponentHandle<T, isConst>(m_id, m_objects);
+ComponentHandle<T, isConst> ObjectHandle<isConst>::component_or_add() const {
+    if (const auto comp = component<T>()) {
+        return comp;
+    }
+    return add<T>();
 }
 
 template<bool isConst>
 template<typename... Ts>
-std::tuple<ComponentHandle<Ts, isConst>...> ObjectHandle<isConst>::components() {
-    return std::make_tuple(component<Ts>()...);
-}
-
-template<bool isConst>
-template<typename... Ts>
-std::tuple<const ComponentHandle<Ts, isConst>...> ObjectHandle<isConst>::components() const {
-    return std::make_tuple(component<Ts>()...);
+ComponentHandle<Ts..., isConst> ObjectHandle<isConst>::components_or_add() const {
+    return std::make_tuple(component_or_add<Ts>()...);
 }
 
 // Component Implementation //
@@ -625,8 +650,54 @@ ComponentHandle<T, isConst>::operator bool() const {
 }
 
 template<typename T, bool isConst>
+Id ComponentHandle<T, isConst>::id() const {
+    return m_ownerId;
+}
+
+template<typename T, bool isConst>
 ObjectHandle<isConst> ComponentHandle<T, isConst>::object() const {
     return m_objects->object(m_ownerId);
+}
+
+template<typename T, bool isConst>
+typename ComponentHandle<T, isConst>::ObjectsType* ComponentHandle<T, isConst>::objects() const {
+    return m_objects;
+}
+
+template<typename T, bool isConst>
+template<typename U, typename... Args>
+ComponentHandle<U, isConst> ComponentHandle<T, isConst>::add(Args&&... args) const {
+    return object().template add<U>(std::forward<Args>(args)...);
+}
+
+template<typename T, bool isConst>
+template<typename U>
+void ComponentHandle<T, isConst>::remove() const {
+    object().template remove<U>();
+}
+
+template<typename T, bool isConst>
+template<typename U>
+ComponentHandle<U, isConst> ComponentHandle<T, isConst>::component() {
+    return object().template component<U>();
+}
+
+template<typename T, bool isConst>
+template<typename... Ts>
+std::tuple<ComponentHandle<Ts, isConst>...> ComponentHandle<T, isConst>::components() {
+    return object().template components<Ts...>();
+}
+
+template<typename T, bool isConst>
+template<typename U>
+ComponentHandle<U, isConst> ComponentHandle<T, isConst>::component_or_add() const {
+    return object().template component_or_add<U>();
+}
+
+template<typename T, bool isConst>
+template<typename... Ts>
+ComponentHandle<Ts..., isConst> ComponentHandle<T, isConst>::components_or_add() const {
+    return object().template components_or_add<Ts...>();
 }
 
 // Objects Implementation //
