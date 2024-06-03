@@ -36,4 +36,8 @@ vec3 duk_camera_position() {
     return uCamera.invView[3].xyz;
 }
 
+float duk_camera_aspect_ratio() {
+    return uCamera.proj[0][0] / uCamera.proj[1][1];
+}
+
 #endif // DUK_CAMERA_GLSL
