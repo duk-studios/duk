@@ -47,7 +47,7 @@ public:
 
     ~Material();
 
-    DUK_NO_DISCARD ShaderPipelineResource& shader();
+    DUK_NO_DISCARD ShaderPipelineResource shader() const;
 
     DUK_NO_DISCARD uint32_t binding_count() const;
 

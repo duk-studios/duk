@@ -7,6 +7,7 @@
 #include <duk_renderer/mesh/mesh.h>
 #include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/renderer.h>
+#include <duk_renderer/components/transform.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
 
 namespace duk::renderer {
@@ -15,27 +16,105 @@ namespace detail {
 
 static constexpr auto kColorFormat = duk::rhi::PixelFormat::RGBA8U;
 
-static SortKey calculate_sort_key(const MeshSlot* meshSlot, const MaterialSlot* materialSlot) {
-    SortKey::Flags flags = {};
-    flags.higher16Bits = reinterpret_cast<std::intptr_t>(materialSlot->material.get());
-    flags.lower16Bits = reinterpret_cast<std::intptr_t>(meshSlot->mesh.get());
-    return SortKey{flags};
+static SortKey calculate_opaque_sort_key(const duk::objects::Object& object) {
+    auto [meshSlot, materialSlot] = object.components<MeshSlot, MaterialSlot>();
+    SortKey sortKey = {};
+    sortKey.bytes16x4.chunks[0] = reinterpret_cast<std::intptr_t>(meshSlot->mesh.get());
+    sortKey.bytes16x4.chunks[1] = reinterpret_cast<std::intptr_t>(materialSlot->material.get());
+    sortKey.bytes32x2.chunks[1] = materialSlot->material->shader()->priority();
+    return sortKey;
 }
 
-static bool compatible(const MeshEntry& meshEntry, const MeshDrawEntry& drawEntry) {
+static uint32_t float_to_uint32(float value) {
+    // Calculate the range of the float values
+    constexpr float rangeFloat = std::numeric_limits<float>::max() - std::numeric_limits<float>::lowest();
+
+    // Calculate the maximum value of an unsigned int
+    constexpr uint32_t maxUInt = std::numeric_limits<uint32_t>::max();
+
+    // Apply the linear transformation
+    uint32_t result = static_cast<uint32_t>(((value - std::numeric_limits<float>::lowest()) / rangeFloat) * maxUInt);
+
+    return result;
+}
+
+static uint32_t calculate_z_order(const duk::objects::Object& object) {
+    const auto transform = object.component<Transform>();
+    if (!transform) {
+        return 0;
+    }
+    // TODO: this should be relative to the camera
+    return float_to_uint32(transform->position.z);
+}
+
+static SortKey calculate_transparent_sort_key(const duk::objects::Object& object) {
+    auto [meshSlot, materialSlot] = object.components<MeshSlot, MaterialSlot>();
+    SortKey sortKey = {};
+    sortKey.bytes16x4.chunks[0] = reinterpret_cast<std::intptr_t>(meshSlot->mesh.get());
+    sortKey.bytes16x4.chunks[1] = reinterpret_cast<std::intptr_t>(materialSlot->material.get());
+    sortKey.bytes16x4.chunks[2] = static_cast<uint16_t>(calculate_z_order(object));
+    sortKey.bytes16x4.chunks[3] = materialSlot->material->shader()->priority();
+
+    return sortKey;
+}
+
+static bool is_transparent(const Material* material) {
+    return material->shader()->blend();
+}
+
+static bool compatible(const ObjectEntry& meshEntry, const DrawEntry& drawEntry) {
     return meshEntry.mesh == drawEntry.mesh && meshEntry.material == drawEntry.material;
 }
 
-static bool valid(const MeshDrawEntry& drawEntry) {
+static bool valid(const DrawEntry& drawEntry) {
     return drawEntry.material != nullptr && drawEntry.mesh != nullptr && drawEntry.instanceCount > 0;
 }
 
-static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, MeshDrawData* drawData) {
-    drawData->clear();
-    auto objects = params.objects;
-    auto& meshes = drawData->meshEntries;
-    auto& sortedMeshes = drawData->sortedMeshEntries;
-    auto& drawEntries = drawData->drawEntries;
+static void update_draw_entries(DrawDataGroup& drawGroup) {
+    SortKey::sort_indices(drawGroup.objectEntries, drawGroup.sortedIndices);
+
+    DrawEntry drawEntry = {};
+
+    for (const auto sortedIndex: drawGroup.sortedIndices) {
+        auto& objectEntry = drawGroup.objectEntries[sortedIndex];
+
+        const auto material = objectEntry.material;
+
+        // update instance buffers
+        material->push(objectEntry.objectId);
+
+        if (compatible(objectEntry, drawEntry)) {
+            drawEntry.instanceCount++;
+            continue;
+        }
+
+        if (valid(drawEntry)) {
+            drawGroup.drawEntries.push_back(drawEntry);
+        }
+
+        // if the material is different, it's an entire new draw entry starting at 0
+        if (drawEntry.material != material) {
+            drawEntry.instanceCount = 1;
+            drawEntry.firstInstance = 0;
+        }
+        // if only the mesh is different, just jump to the correct instance start
+        else if (drawEntry.mesh != objectEntry.mesh) {
+            drawEntry.firstInstance += drawEntry.instanceCount;
+            drawEntry.instanceCount = 1;
+        }
+        drawEntry.material = material;
+        drawEntry.mesh = objectEntry.mesh;
+    }
+    if (valid(drawEntry)) {
+        drawGroup.drawEntries.push_back(drawEntry);
+    }
+}
+
+static void update_draw_data(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, DrawData& drawData) {
+    drawData.clear();
+    const auto objects = params.objects;
+    auto& opaqueGroup = drawData.opaqueGroup;
+    auto& transparentGroup = drawData.transparentGroup;
 
     std::set<Material*> uniqueMaterials;
 
@@ -53,16 +132,26 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
             continue;
         }
 
-        auto& objectEntry = meshes.emplace_back();
-        objectEntry.objectId = object.id();
-        objectEntry.mesh = meshSlot->mesh.get();
-        objectEntry.material = materialSlot->material.get();
-        objectEntry.sortKey = calculate_sort_key(meshSlot.get(), materialSlot.get());
+        auto material = materialSlot->material.get();
+        ObjectEntry* objectEntry;
+        DrawDataGroup::CalculateSortKeyFunc calculateSortKey;
+        if (is_transparent(material)) {
+            objectEntry = &transparentGroup.objectEntries.emplace_back();
+            calculateSortKey = transparentGroup.calculateSortKey;
+        } else {
+            objectEntry = &opaqueGroup.objectEntries.emplace_back();
+            calculateSortKey = opaqueGroup.calculateSortKey;
+        }
 
-        uniqueMaterials.insert(materialSlot->material.get());
+        objectEntry->objectId = object.id();
+        objectEntry->mesh = meshSlot->mesh.get();
+        objectEntry->material = material;
+        objectEntry->sortKey = calculateSortKey(object);
+
+        uniqueMaterials.insert(material);
     }
 
-    if (meshes.empty()) {
+    if (opaqueGroup.objectEntries.empty() && transparentGroup.objectEntries.empty()) {
         return;
     }
 
@@ -81,55 +170,36 @@ static void update_meshes(const Pass::UpdateParams& params, duk::rhi::RenderPass
         material->clear();
     }
 
-    SortKey::sort_indices(meshes, sortedMeshes);
+    update_draw_entries(drawData.opaqueGroup);
+    update_draw_entries(drawData.transparentGroup);
 
-    MeshDrawEntry drawEntry = {};
-
-    for (auto sortedIndex: sortedMeshes) {
-        auto& meshEntry = meshes[sortedIndex];
-
-        auto material = meshEntry.material;
-
-        // update instance buffers
-        material->push(meshEntry.objectId);
-
-        if (compatible(meshEntry, drawEntry)) {
-            drawEntry.instanceCount++;
-            continue;
-        }
-
-        if (valid(drawEntry)) {
-            drawEntries.push_back(drawEntry);
-        }
-
-        // if the material is different, it's an entire new draw entry starting at 0
-        if (drawEntry.material != material) {
-            drawEntry.instanceCount = 1;
-            drawEntry.firstInstance = 0;
-        }
-        // if only the mesh is different, just jump to the correct instance start
-        else if (drawEntry.mesh != meshEntry.mesh) {
-            drawEntry.firstInstance += drawEntry.instanceCount;
-            drawEntry.instanceCount = 1;
-        }
-        drawEntry.material = material;
-        drawEntry.mesh = meshEntry.mesh;
-    }
-    if (valid(drawEntry)) {
-        drawEntries.push_back(drawEntry);
-    }
-
-    for (auto material: uniqueMaterials) {
+    for (const auto material: uniqueMaterials) {
         material->update(*params.pipelineCache, renderPass, params.viewport);
+    }
+}
+
+static void render_draw_entries(duk::rhi::CommandBuffer* commandBuffer, const DrawDataGroup& drawGroup) {
+    Material* currentMaterial = nullptr;
+    for (auto& entry: drawGroup.drawEntries) {
+        if (currentMaterial != entry.material) {
+            currentMaterial = entry.material;
+            entry.material->bind(commandBuffer);
+        }
+        entry.mesh->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
     }
 }
 
 }// namespace detail
 
-void MeshDrawData::clear() {
-    meshEntries.clear();
-    sortedMeshEntries.clear();
+void DrawDataGroup::clear() {
+    objectEntries.clear();
+    sortedIndices.clear();
     drawEntries.clear();
+}
+
+void DrawData::clear() {
+    opaqueGroup.clear();
+    transparentGroup.clear();
 }
 
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
@@ -161,6 +231,8 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
 
         m_renderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
     }
+    m_drawData.opaqueGroup.calculateSortKey = detail::calculate_opaque_sort_key;
+    m_drawData.transparentGroup.calculateSortKey = detail::calculate_transparent_sort_key;
 }
 
 ForwardPass::~ForwardPass() = default;
@@ -197,23 +269,17 @@ void ForwardPass::update(const Pass::UpdateParams& params) {
         m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
     }
 
-    detail::update_meshes(params, m_renderPass.get(), &m_meshDrawData);
+    detail::update_draw_data(params, m_renderPass.get(), m_drawData);
 }
 
 void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
     commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
-    // render meshes
-    {
-        Material* currentMaterial = nullptr;
-        for (auto& entry: m_meshDrawData.drawEntries) {
-            if (currentMaterial != entry.material) {
-                currentMaterial = entry.material;
-                entry.material->bind(commandBuffer);
-            }
-            entry.mesh->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
-        }
-    }
+    // render opaque
+    detail::render_draw_entries(commandBuffer, m_drawData.opaqueGroup);
+
+    // render transparent
+    detail::render_draw_entries(commandBuffer, m_drawData.transparentGroup);
 
     commandBuffer->end_render_pass();
 }

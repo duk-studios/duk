@@ -12,10 +12,20 @@ namespace duk::renderer {
 class SpriteCache;
 class Renderer;
 
-struct MeshDrawData {
-    std::vector<MeshEntry> meshEntries;
-    std::vector<uint16_t> sortedMeshEntries;
-    std::vector<MeshDrawEntry> drawEntries;
+struct DrawDataGroup {
+    typedef SortKey (*CalculateSortKeyFunc)(const duk::objects::Object& object);
+
+    std::vector<ObjectEntry> objectEntries;
+    std::vector<uint16_t> sortedIndices;
+    std::vector<DrawEntry> drawEntries;
+    CalculateSortKeyFunc calculateSortKey;
+
+    void clear();
+};
+
+struct DrawData {
+    DrawDataGroup opaqueGroup;
+    DrawDataGroup transparentGroup;
 
     void clear();
 };
@@ -43,7 +53,7 @@ private:
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;
     PassConnection m_outColor;
-    MeshDrawData m_meshDrawData;
+    DrawData m_drawData;
 };
 
 }// namespace duk::renderer

@@ -159,7 +159,7 @@ Material::Material(const MaterialCreateInfo& materialCreateInfo)
 
 Material::~Material() = default;
 
-ShaderPipelineResource& Material::shader() {
+ShaderPipelineResource Material::shader() const {
     return m_shader;
 }
 

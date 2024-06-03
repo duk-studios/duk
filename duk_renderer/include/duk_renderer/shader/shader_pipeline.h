@@ -43,6 +43,8 @@ public:
 
     bool invert_y() const;
 
+    uint32_t priority() const;
+
     void update(PipelineCache& pipelineCache, duk::rhi::RenderPass* renderPass, const glm::vec2& viewport);
 
     void bind(duk::rhi::CommandBuffer* commandBuffer) const;
@@ -52,6 +54,7 @@ private:
     std::shared_ptr<duk::rhi::Shader> m_shader;
     std::shared_ptr<duk::rhi::GraphicsPipeline> m_pipeline;
     PipelineState m_state;
+    uint32_t m_priority;
     bool m_invertY;
     bool m_dirty;
 };

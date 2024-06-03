@@ -12,14 +12,28 @@
 namespace duk::renderer {
 
 struct SortKey {
-    struct Flags {
-        uint16_t lower16Bits;
-        uint16_t higher16Bits;
+    struct Bytes8x8 {
+        std::array<uint8_t, 8> chunks;
+    };
+
+    struct Bytes16x4 {
+        std::array<uint16_t, 4> chunks;
+    };
+
+    struct Bytes32x2 {
+        std::array<uint32_t, 2> chunks;
+    };
+
+    struct Bytes64x1 {
+        std::array<uint64_t, 1> chunks;
     };
 
     union {
-        Flags flags;
-        uint32_t key;
+        Bytes8x8 bytes8x8;
+        Bytes16x4 bytes16x4;
+        Bytes32x2 bytes32x2;
+        Bytes64x1 bytes64x1;
+        uint64_t key;
     };
 
     // specialize this method for any given type to access its SortKey object
