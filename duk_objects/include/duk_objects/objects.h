@@ -422,6 +422,54 @@ public:
         ComponentMask m_componentMask;
     };
 
+    template<bool isConst, typename... Ts>
+    class ComponentView {
+    public:
+        using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
+        using ObjectViewType = ObjectView<isConst>;
+        using ObjectIteratorType = typename ObjectViewType::Iterator;
+
+        class Iterator {
+        public:
+            Iterator(const ObjectIteratorType& it);
+
+            // Dereference operator (*)
+            DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, isConst>...> operator*() const;
+
+            // Pre-increment operator (++it)
+            Iterator& operator++();
+
+            // Post-increment operator (it++)
+            DUK_NO_DISCARD Iterator operator++(int);
+
+            // Sum operator (it + value)
+            DUK_NO_DISCARD Iterator operator+(int value) const;
+
+            // Equality operator (it1 == it2)
+            DUK_NO_DISCARD bool operator==(const Iterator& other) const;
+
+            // Inequality operator (it1 != it2)
+            DUK_NO_DISCARD bool operator!=(const Iterator& other) const;
+
+        private:
+            ObjectIteratorType m_it;
+        };
+
+    public:
+        ComponentView(ObjectsType* objects);
+
+        DUK_NO_DISCARD Iterator begin();
+
+        DUK_NO_DISCARD Iterator begin() const;
+
+        DUK_NO_DISCARD Iterator end();
+
+        DUK_NO_DISCARD Iterator end() const;
+
+    private:
+        ObjectViewType m_objectView;
+    };
+
 public:
     ~Objects();
 
@@ -451,10 +499,22 @@ public:
     DUK_NO_DISCARD ObjectView<true> all_with() const;
 
     template<typename... Ts>
+    DUK_NO_DISCARD ComponentView<false, Ts...> all_of();
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ComponentView<true, Ts...> all_of() const;
+
+    template<typename... Ts>
     DUK_NO_DISCARD ObjectHandle<false> first_with();
 
     template<typename... Ts>
     DUK_NO_DISCARD ObjectHandle<true> first_with() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, false>...> first_of();
+
+    template<typename... Ts>
+    DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, true>...> first_of() const;
 
     DUK_NO_DISCARD const ComponentMask& component_mask(const Id& id) const;
 
@@ -798,6 +858,69 @@ typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::en
     return {m_endIndex, m_endIndex, m_objects, m_componentMask};
 }
 
+template<bool isConst, typename... Ts>
+Objects::ComponentView<isConst, Ts...>::Iterator::Iterator(const ObjectIteratorType& it)
+    : m_it(it) {
+}
+
+template<bool isConst, typename... Ts>
+std::tuple<ComponentHandle<Ts, isConst>...> Objects::ComponentView<isConst, Ts...>::Iterator::operator*() const {
+    return (*m_it).template components<Ts...>();
+}
+
+template<bool isConst, typename... Ts>
+typename Objects::ComponentView<isConst, Ts...>::Iterator& Objects::ComponentView<isConst, Ts...>::Iterator::operator++() {
+    ++m_it;
+    return *this;
+}
+
+template<bool isConst, typename... Ts>
+typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::Iterator::operator++(int) {
+    auto old = *this;
+    ++m_it;
+    return old;
+}
+
+template<bool isConst, typename... Ts>
+typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::Iterator::operator+(int value) const {
+    return Iterator(m_it + value);
+}
+
+template<bool isConst, typename... Ts>
+bool Objects::ComponentView<isConst, Ts...>::Iterator::operator==(const Iterator& other) const {
+    return m_it == other.m_it;
+}
+
+template<bool isConst, typename... Ts>
+bool Objects::ComponentView<isConst, Ts...>::Iterator::operator!=(const Iterator& other) const {
+    return !(*this == other);
+}
+
+template<bool isConst, typename... Ts>
+Objects::ComponentView<isConst, Ts...>::ComponentView(ObjectsType* objects)
+    : m_objectView(objects, objects->template component_mask<Ts...>()) {
+}
+
+template<bool isConst, typename... Ts>
+typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::begin() {
+    return Iterator(m_objectView.begin());
+}
+
+template<bool isConst, typename... Ts>
+typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::begin() const {
+    return Iterator(m_objectView.begin());
+}
+
+template<bool isConst, typename... Ts>
+typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::end() {
+    return Iterator(m_objectView.end());
+}
+
+template<bool isConst, typename... Ts>
+typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::end() const {
+    return Iterator(m_objectView.end());
+}
+
 template<typename... Ts>
 Objects::ObjectView<false> Objects::all_with() {
     return ObjectView<false>(this, component_mask<Ts...>());
@@ -809,11 +932,21 @@ Objects::ObjectView<true> Objects::all_with() const {
 }
 
 template<typename... Ts>
+Objects::ComponentView<false, Ts...> Objects::all_of() {
+    return ComponentView<false, Ts...>(this);
+}
+
+template<typename... Ts>
+Objects::ComponentView<true, Ts...> Objects::all_of() const {
+    return ComponentView<true, Ts...>(this);
+}
+
+template<typename... Ts>
 ObjectHandle<false> Objects::first_with() {
     for (auto object: all_with<Ts...>()) {
         return object;
     }
-    return ObjectHandle<false>();
+    return {};
 }
 
 template<typename... Ts>
@@ -821,7 +954,23 @@ ObjectHandle<true> Objects::first_with() const {
     for (auto object: all_with<Ts...>()) {
         return object;
     }
-    return ObjectHandle<true>();
+    return {};
+}
+
+template<typename... Ts>
+std::tuple<ComponentHandle<Ts, false>...> Objects::first_of() {
+    for (auto components: all_of<Ts...>()) {
+        return components;
+    }
+    return std::tuple<ComponentHandle<Ts, false>...>();
+}
+
+template<typename... Ts>
+std::tuple<ComponentHandle<Ts, true>...> Objects::first_of() const {
+    for (auto components: all_of<Ts...>()) {
+        return components;
+    }
+    return std::tuple<ComponentHandle<Ts, true>...>();
 }
 
 template<typename T, typename... Args>
