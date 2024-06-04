@@ -204,10 +204,10 @@ public:
     void remove() const;
 
     template<typename U>
-    DUK_NO_DISCARD ComponentHandle<U, isConst> component();
+    DUK_NO_DISCARD ComponentHandle<U, isConst> component() const;
 
     template<typename... Ts>
-    DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, isConst>...> components();
+    DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, isConst>...> components() const;
 
     template<typename U>
     DUK_NO_DISCARD ComponentHandle<U, isConst> component_or_add() const;
@@ -738,13 +738,13 @@ void ComponentHandle<T, isConst>::remove() const {
 
 template<typename T, bool isConst>
 template<typename U>
-ComponentHandle<U, isConst> ComponentHandle<T, isConst>::component() {
+ComponentHandle<U, isConst> ComponentHandle<T, isConst>::component() const {
     return object().template component<U>();
 }
 
 template<typename T, bool isConst>
 template<typename... Ts>
-std::tuple<ComponentHandle<Ts, isConst>...> ComponentHandle<T, isConst>::components() {
+std::tuple<ComponentHandle<Ts, isConst>...> ComponentHandle<T, isConst>::components() const {
     return object().template components<Ts...>();
 }
 
