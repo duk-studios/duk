@@ -689,19 +689,23 @@ typename ComponentHandle<T, isConst>::Type& ComponentHandle<T, isConst>::operato
 
 template<typename T, bool isConst>
 typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::get() const {
-    DUK_ASSERT(valid());
+    if (!valid()) {
+        return nullptr;
+    }
     return m_objects->template component<T>(m_ownerId);
 }
 
 template<typename T, bool isConst>
 typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::get() {
-    DUK_ASSERT(valid());
+    if (!valid()) {
+        return nullptr;
+    }
     return m_objects->template component<T>(m_ownerId);
 }
 
 template<typename T, bool isConst>
 bool ComponentHandle<T, isConst>::valid() const {
-    return m_objects->template valid_component<T>(m_ownerId);
+    return m_objects && m_objects->template valid_component<T>(m_ownerId);
 }
 
 template<typename T, bool isConst>
