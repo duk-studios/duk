@@ -17,8 +17,8 @@ out gl_PerVertex {
 
 void main() {
     vInstanceIndex = gl_InstanceIndex;
-    vPosition = duk_model_to_local(vInstanceIndex, vec4(aPosition, 1.0)).xyz;
-    gl_Position = duk_local_to_clip(vec4(vPosition, 1.0));
+    vPosition = duk_model_to_world(vInstanceIndex, vec4(aPosition, 1.0)).xyz;
+    gl_Position = duk_world_to_clip(vec4(vPosition, 1.0));
     vTexCoord = aTexCoord;
     vNormal = aNormal;
 }

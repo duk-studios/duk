@@ -8,27 +8,27 @@ layout(set = 0, binding = 0) uniform CameraUBO {
     mat4 vp;
 } uCamera;
 
-vec4 duk_local_to_world(vec4 localPosition) {
-    return uCamera.view * localPosition;
+vec4 duk_world_to_view(vec4 worldPosition) {
+    return uCamera.view * worldPosition;
+}
+
+vec4 duk_view_to_clip(vec4 viewPosition) {
+    return uCamera.proj * viewPosition;
 }
 
 vec4 duk_world_to_clip(vec4 worldPosition) {
-    return uCamera.proj * worldPosition;
+    return uCamera.vp * worldPosition;
 }
 
-vec4 duk_local_to_clip(vec4 localPosition) {
-    return uCamera.vp * localPosition;
-}
-
-vec4 duk_world_to_local(vec4 worldPosition) {
-    return uCamera.invView * worldPosition;
-}
-
-vec4 duk_clip_to_local(vec4 clipPosition) {
-    return inverse(uCamera.vp) * clipPosition;
+vec4 duk_view_to_world(vec4 viewPosition) {
+    return uCamera.invView * viewPosition;
 }
 
 vec4 duk_clip_to_world(vec4 clipPosition) {
+    return inverse(uCamera.vp) * clipPosition;
+}
+
+vec4 duk_clip_to_view(vec4 clipPosition) {
     return inverse(uCamera.proj) * clipPosition;
 }
 

@@ -17,11 +17,11 @@ out gl_PerVertex {
 void main() {
     vInstanceIndex = gl_InstanceIndex;
 
-    vPosition = duk_model_to_local(vInstanceIndex, vec4(aPosition, 1.0)).xyz;
+    vPosition = duk_model_to_world(vInstanceIndex, vec4(aPosition, 1.0)).xyz;
 
-    vNormal = duk_model_to_local_rotation(vInstanceIndex, aNormal);
+    vNormal = duk_model_to_world_rotation(vInstanceIndex, aNormal);
 
     vTexCoord = aTexCoord;
 
-    gl_Position = duk_local_to_clip(vec4(vPosition, 1.0));
+    gl_Position = duk_world_to_clip(vec4(vPosition, 1.0));
 }
