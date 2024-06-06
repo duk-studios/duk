@@ -13,16 +13,22 @@ Timer::Timer()
     , m_unscaledDuration(0s)
     , m_unscaledDeltaDuration(0s)
     , m_start(0s)
-    , m_scale(1.0f) {
+    , m_scale(1.0f)
+    , m_started(false) {
 }
 
 void Timer::start() {
     m_start = Clock::now();
+    m_started = true;
 }
 
 void Timer::stop() {
+    if (!m_started) {
+        return;
+    }
     const auto stop = Clock::now();
     add_duration(stop - m_start);
+    m_started = false;
 }
 
 void Timer::tick() {

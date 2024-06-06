@@ -47,6 +47,7 @@ private:
     Duration m_unscaledDeltaDuration;
     Clock::time_point m_start;
     float m_scale;
+    bool m_started;
 };
 
 }// namespace duk::tools
