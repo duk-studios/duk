@@ -45,7 +45,7 @@ public:
 
     DUK_NO_DISCARD const duk::engine::Input* input() const;
 
-    DUK_NO_DISCARD const duk::tools::Timer* timer() const;
+    DUK_NO_DISCARD duk::tools::Timer* timer();
 
     DUK_NO_DISCARD duk::event::Dispatcher* dispatcher();
 

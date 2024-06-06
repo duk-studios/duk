@@ -36,7 +36,7 @@ void StatsSystem::update(objects::Objects& objects, engine::Engine& engine) {
         fpsSamples.resize(stats->sampleCount, 0.f);
     }
 
-    fpsSamples[currentSample++] = 1.f / timer->delta_time();
+    fpsSamples[currentSample++] = 1.f / timer->unscaled_delta_time();
 
     if (currentSample >= stats->sampleCount) {
         float average = std::reduce(fpsSamples.begin(), fpsSamples.end()) / currentSample;

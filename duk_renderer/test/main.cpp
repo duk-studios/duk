@@ -168,7 +168,7 @@ int main() {
             application.window()->wait_events();
         }
 
-        auto time = timer.total_time();
+        auto time = timer.time();
 
         //Rotating the cube in the X value by the timer total duration.
         cube1Transform->rotation = glm::radians(glm::vec3(time * 30, 45.0f, 0.0f));
