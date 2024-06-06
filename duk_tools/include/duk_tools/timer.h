@@ -22,22 +22,31 @@ public:
 
     void stop();
 
+    void tick();
+
     void reset();
 
     void add_duration(Duration duration);
 
+    void set_scale(float scale);
+
+    DUK_NO_DISCARD float scale() const;
+
     DUK_NO_DISCARD float delta_time() const;
 
-    DUK_NO_DISCARD float total_time() const;
+    DUK_NO_DISCARD float time() const;
 
-    DUK_NO_DISCARD Duration delta_duration() const;
+    DUK_NO_DISCARD float unscaled_time() const;
 
-    DUK_NO_DISCARD Duration total_duration() const;
+    DUK_NO_DISCARD float unscaled_delta_time() const;
 
 private:
-    Duration m_totalDuration;
+    Duration m_duration;
     Duration m_deltaDuration;
+    Duration m_unscaledDuration;
+    Duration m_unscaledDeltaDuration;
     Clock::time_point m_start;
+    float m_scale;
 };
 
 }// namespace duk::tools
