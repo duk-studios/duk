@@ -20,12 +20,16 @@ mat4 duk_inverse_model(int instanceIndex) {
     return DUK_INSTANCE_GET(uTransform, instanceIndex).invModel;
 }
 
-vec4 duk_model_to_local(int instanceIndex, vec4 modelPosition) {
+vec4 duk_model_to_world(int instanceIndex, vec4 modelPosition) {
     return duk_model(instanceIndex) * modelPosition;
 }
 
-vec4 duk_local_to_model(int instanceIndex, vec4 localPosition) {
-    return duk_inverse_model(instanceIndex) * localPosition;
+vec4 duk_world_to_model(int instanceIndex, vec4 worldPosition) {
+    return duk_inverse_model(instanceIndex) * worldPosition;
+}
+
+vec3 duk_model_to_world_rotation(int instanceIndex, vec3 modelDirection) {
+    return mat3(transpose(duk_inverse_model(instanceIndex))) * modelDirection;
 }
 
 #endif
