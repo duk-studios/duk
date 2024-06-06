@@ -14,12 +14,11 @@
 #include <duk_renderer/material/material_handler.h>
 #include <duk_renderer/mesh/mesh_pool.h>
 #include <duk_renderer/sprite/sprite_pool.h>
+#include <duk_renderer/shader/shader_pipeline_pool.h>
 
 #include <duk_log/log.h>
 
 #include <duk_platform/systems.h>
-
-#include "duk_renderer/shader/shader_pipeline_pool.h"
 
 namespace duk::engine {
 
@@ -126,13 +125,13 @@ void Engine::run() {
 
     m_window->show();
 
+    m_audio->start();
+
     // assume 60fps for the first frame
     m_timer.add_duration(std::chrono::milliseconds(16));
 
-    m_audio->start();
-
     while (m_run) {
-        m_timer.start();
+        m_timer.tick();
 
         m_input->refresh();
 
@@ -145,8 +144,6 @@ void Engine::run() {
         m_audio->update();
 
         m_director->update(*this);
-
-        m_timer.stop();
     }
 }
 
@@ -178,7 +175,7 @@ const duk::engine::Input* Engine::input() const {
     return m_input.get();
 }
 
-const duk::tools::Timer* Engine::timer() const {
+duk::tools::Timer* Engine::timer() {
     return &m_timer;
 }
 
