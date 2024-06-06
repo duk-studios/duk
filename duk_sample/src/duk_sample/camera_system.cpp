@@ -8,6 +8,7 @@
 #include <duk_renderer/components/transform.h>
 #include <duk_sample/camera_system.h>
 #include <duk_renderer/components/sprite_renderer.h>
+#include <glm/gtc/random.hpp>
 
 namespace duk::sample {
 
@@ -107,7 +108,7 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
             spriteRenderer->index = spriteIndex++ % spriteRenderer->sprite->count();
         }
 
-        controller->audioPlayer.play(engine.audio(), controller->spawnClip.get());
+        controller->audioPlayer.play(engine.audio(), controller->spawnClip.get(), 1.0f, glm::linearRand(1.0f, 1.05f));
     }
 }
 
