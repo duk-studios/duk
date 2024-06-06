@@ -34,11 +34,19 @@ public:
 
     void update() override;
 
-    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, int32_t priority) override;
+    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, float volume, float frameRate, bool loop, int32_t priority) override;
 
     void stop(const AudioId& id) override;
 
     bool is_playing(const AudioId& id) const override;
+
+    void set_volume(const AudioId& id, float volume) override;
+
+    float volume(const AudioId& id) const override;
+
+    void set_frame_rate(const AudioId& id, float frameRate) override;
+
+    float frame_rate(const AudioId& id) const override;
 
     void data_callback(void* output, const void* input, uint32_t frameCount);
 

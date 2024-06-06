@@ -20,13 +20,16 @@ public:
     struct Slot {
         std::weak_ptr<AudioBuffer> buffer;
         uint32_t deviceFrame;
-        float volume;
+        float deviceFrameRate;
+        float deviceVolume;
         bool deviceLoop;
 
         // flag to indicate the device that it should sync its frame with the host
         std::atomic<bool> syncDeviceFrame;
         std::atomic<uint32_t> hostFrame;
         std::atomic<bool> hostLoop;
+        std::atomic<float> hostVolume;
+        std::atomic<float> hostFrameRate;
         std::mutex syncMutex;
 
         int32_t priority;
@@ -40,11 +43,19 @@ public:
 
     void update() override;
 
-    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, int32_t priority);
+    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, float volume, float frameRate, bool loop, int32_t priority);
 
     void stop(const AudioId& id);
 
     bool is_playing(const AudioId& id) const;
+
+    void set_volume(const AudioId& id, float volume);
+
+    float volume(const AudioId& id) const;
+
+    void set_frame_rate(const AudioId& id, float frameRate);
+
+    float frame_rate(const AudioId& id) const;
 
 private:
     std::vector<Slot> m_slots;

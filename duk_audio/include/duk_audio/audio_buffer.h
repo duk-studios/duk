@@ -15,7 +15,7 @@ class AudioBuffer {
 public:
     virtual ~AudioBuffer() = default;
 
-    virtual void read_float(float* dst, uint32_t frameCount, uint32_t frameOffset, uint32_t dstChannelCount) const = 0;
+    virtual uint32_t read_float(float* dst, uint32_t frameCount, uint32_t frameOffset, uint32_t dstChannelCount, float frameRate) const = 0;
 
     virtual bool empty() const = 0;
 
@@ -37,7 +37,7 @@ public:
 
     ~AudioBufferT() override;
 
-    void read_float(float* dst, uint32_t frameCount, uint32_t frameOffset, uint32_t dstChannelCount) const override;
+    uint32_t read_float(float* dst, uint32_t frameCount, uint32_t frameOffset, uint32_t dstChannelCount, float frameRate) const override;
 
     void resize(uint32_t frameCount, uint32_t channelCount);
 
@@ -90,15 +90,19 @@ AudioBufferT<TSample>::~AudioBufferT() {
 }
 
 template<typename TSample>
-void AudioBufferT<TSample>::read_float(float* dst, uint32_t frameCount, uint32_t frameOffset, uint32_t dstChannelCount) const {
-    const float* src = m_data + (frameOffset * m_channelCount);
-    for (uint32_t i = 0; i < frameCount; i++) {
-        float* dstFrame = dst + (i * dstChannelCount);
-        const float* srcFrame = src + (i * m_channelCount);
+uint32_t AudioBufferT<TSample>::read_float(float* dst, uint32_t frameCount, uint32_t frameOffset, uint32_t dstChannelCount, float frameRate) const {
+    uint32_t srcFrameIndex = frameOffset;
+    uint32_t dstFrameIndex = 0;
+    while (dstFrameIndex < frameCount && srcFrameIndex < m_frameCount) {
+        float* dstFrame = dst + (dstFrameIndex * dstChannelCount);
+        const float* srcFrame = m_data + (srcFrameIndex * m_channelCount);
         for (uint32_t dstChannel = 0; dstChannel < dstChannelCount; dstChannel++) {
             dstFrame[dstChannel] = srcFrame[dstChannel % m_channelCount];
         }
+        dstFrameIndex++;
+        srcFrameIndex = (frameOffset + dstFrameIndex) * frameRate;
     }
+    return dstFrameIndex;
 }
 
 template<typename TSample>

@@ -595,6 +595,9 @@ typename ObjectHandle<isConst>::ObjectsType* ObjectHandle<isConst>::objects() co
 
 template<bool isConst>
 void ObjectHandle<isConst>::destroy() const {
+    if (!valid()) {
+        return;
+    }
     m_objects->destroy_object(m_id);
 }
 
@@ -720,6 +723,9 @@ Id ComponentHandle<T, isConst>::id() const {
 
 template<typename T, bool isConst>
 ObjectHandle<isConst> ComponentHandle<T, isConst>::object() const {
+    if (!valid()) {
+        return {};
+    }
     return m_objects->object(m_ownerId);
 }
 
