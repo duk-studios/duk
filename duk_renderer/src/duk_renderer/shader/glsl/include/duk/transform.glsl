@@ -28,4 +28,8 @@ vec4 duk_local_to_model(int instanceIndex, vec4 localPosition) {
     return duk_inverse_model(instanceIndex) * localPosition;
 }
 
+vec3 duk_model_to_local_rotation(int instanceIndex, vec3 modelDirection) {
+    return mat3(transpose(duk_inverse_model(instanceIndex))) * modelDirection;
+}
+
 #endif

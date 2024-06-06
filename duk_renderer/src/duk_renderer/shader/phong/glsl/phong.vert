@@ -19,7 +19,7 @@ void main() {
 
     vPosition = duk_model_to_local(vInstanceIndex, vec4(aPosition, 1.0)).xyz;
 
-    vNormal = normalize(duk_model_to_local(vInstanceIndex, vec4(aNormal, 0.0))).xyz;
+    vNormal = duk_model_to_local_rotation(vInstanceIndex, aNormal);
 
     vTexCoord = aTexCoord;
 
