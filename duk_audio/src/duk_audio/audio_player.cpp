@@ -17,9 +17,9 @@ AudioPlayer::~AudioPlayer() {
     stop();
 }
 
-void AudioPlayer::play(AudioDevice* device, const AudioClip* clip, float volume, bool loop, int32_t priority) {
+void AudioPlayer::play(AudioDevice* device, const AudioClip* clip, float volume, float frameRate, bool loop, int32_t priority) {
     stop();
-    m_id = device->play(clip->buffer(), volume, loop, priority);
+    m_id = device->play(clip->buffer(), volume, frameRate, loop, priority);
     m_device = device;
 }
 
@@ -29,6 +29,41 @@ void AudioPlayer::stop() {
     }
     m_device->stop(m_id);
     m_id = kInvalidAudioId;
+}
+
+bool AudioPlayer::is_playing() const {
+    if (!m_device) {
+        return false;
+    }
+    return m_device->is_playing(m_id);
+}
+
+void AudioPlayer::set_volume(float volume) {
+    if (!m_device) {
+        return;
+    }
+    m_device->set_volume(m_id, volume);
+}
+
+float AudioPlayer::volume() const {
+    if (!m_device) {
+        return 0.0f;
+    }
+    return m_device->volume(m_id);
+}
+
+void AudioPlayer::set_frame_rate(float frameRate) {
+    if (!m_device) {
+        return;
+    }
+    m_device->set_frame_rate(m_id, frameRate);
+}
+
+float AudioPlayer::frame_rate() const {
+    if (!m_device) {
+        return 0.0f;
+    }
+    return m_device->frame_rate(m_id);
 }
 
 }// namespace duk::audio

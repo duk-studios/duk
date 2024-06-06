@@ -29,8 +29,8 @@ std::unique_ptr<AudioDevice> AudioDevice::create(const AudioDeviceCreateInfo& au
 
 AudioDevice::~AudioDevice() = default;
 
-AudioId AudioDevice::play(const AudioClip* clip, float volume, bool loop, int32_t priority) {
-    return play(clip->buffer(), volume, loop, priority);
+AudioId AudioDevice::play(const AudioClip* clip, float volume, float frameRate, bool loop, int32_t priority) {
+    return play(clip->buffer(), volume, frameRate, loop, priority);
 }
 
 }// namespace duk::audio

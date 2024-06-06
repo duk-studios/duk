@@ -20,21 +20,22 @@ static void mix_float_samples(float* dst, const float* src, uint32_t frameCount,
     }
 }
 
-static uint32_t process_buffer_float(const AudioBuffer* buffer, float* output, uint32_t frameCount, uint32_t channelCount, uint32_t& currentFrame, bool loop) {
+static void process_buffer_float(const AudioBuffer* buffer, float* output, uint32_t frameCount, uint32_t channelCount, uint32_t& currentFrame, float frameRate, bool loop) {
     uint32_t framesRead = 0;
-    while (framesRead < frameCount && currentFrame < buffer->frame_count()) {
-        uint32_t framesToRead = std::min(frameCount, buffer->frame_count() - currentFrame) - framesRead;
-        if (framesToRead) {
-            buffer->read_float(output, framesToRead, currentFrame, channelCount);
-            framesRead += framesToRead;
-            currentFrame += framesToRead;
-        }
+    float* dst = output;
+    while (framesRead < frameCount && (currentFrame < buffer->frame_count() || loop)) {
+        auto readAmount = buffer->read_float(dst, frameCount, currentFrame, channelCount, frameRate);
+        dst += readAmount * channelCount;
+        framesRead += readAmount;
+        currentFrame += readAmount;
 
-        if (loop && currentFrame == buffer->frame_count()) {
+        if (loop && currentFrame >= buffer->frame_count()) {
             currentFrame = 0;
         }
     }
-    return framesRead;
+    if (framesRead < frameCount) {
+        memset(output + framesRead * channelCount, 0, (frameCount - framesRead) * channelCount * sizeof(float));
+    }
 }
 
 static void apply_volume(float* output, float volume, uint32_t frameCount, uint32_t channelCount) {
@@ -56,37 +57,38 @@ static void process_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<Audi
 
     while (remainingFrames) {
         auto framesToRead = std::min(remainingFrames, kBufferFrameCount);
-        auto framesRead = process_buffer_float(buffer.get(), outputBuffer, framesToRead, channelCount, slot.deviceFrame, slot.deviceLoop);
-        if (framesRead == 0) {
-            break;
-        }
 
-        apply_volume(outputBuffer, slot.volume, framesRead, channelCount);
+        process_buffer_float(buffer.get(), outputBuffer, framesToRead, channelCount, slot.deviceFrame, slot.deviceFrameRate, slot.deviceLoop);
+
+        apply_volume(outputBuffer, slot.deviceVolume, framesToRead, channelCount);
 
         uint32_t dstOffset = (frameCount - remainingFrames) * channelCount;
-        mix_float_samples(dstFrames + dstOffset, outputBuffer, framesRead, channelCount);
+        mix_float_samples(dstFrames + dstOffset, outputBuffer, framesToRead, channelCount);
 
-        remainingFrames -= framesRead;
+        remainingFrames -= framesToRead;
     }
 
+    slot.deviceVolume = slot.hostVolume;
+    slot.deviceFrameRate = slot.hostFrameRate;
+    slot.deviceLoop = slot.hostLoop;
     std::lock_guard lock(slot.syncMutex);
     if (slot.syncDeviceFrame) {
         slot.deviceFrame = slot.hostFrame;
-        slot.deviceLoop = slot.hostLoop;
         slot.syncDeviceFrame = false;
     } else {
         slot.hostFrame = slot.deviceFrame;
     }
 }
 
-static void update_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, uint32_t priority) {
+static void update_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<AudioBuffer>& buffer, float volume, float frameRate, bool loop, uint32_t priority) {
     slot.buffer = buffer;
     slot.priority = priority;
-    slot.volume = volume;
+    slot.hostVolume = volume;
+    slot.hostLoop = loop;
+    slot.hostFrameRate = frameRate;
     slot.version++;
     std::lock_guard lock(slot.syncMutex);
     slot.hostFrame = 0;
-    slot.hostLoop = loop;
     slot.syncDeviceFrame = true;
 }
 
@@ -115,14 +117,14 @@ void AudioSourceNode::update() {
     }
 }
 
-AudioId AudioSourceNode::play(const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, int32_t priority) {
+AudioId AudioSourceNode::play(const std::shared_ptr<AudioBuffer>& buffer, float volume, float frameRate, bool loop, int32_t priority) {
     // try to find unused slot, if not found then replace the one with the lowest priority
     int32_t lowestPriority = priority;
     uint32_t lowestPriorityIndex = m_slots.size();
     for (uint32_t i = 0; i < m_slots.size(); i++) {
         auto& slot = m_slots[i];
         if (slot.buffer.expired()) {
-            detail::update_slot(slot, buffer, volume, loop, priority);
+            detail::update_slot(slot, buffer, volume, frameRate, loop, priority);
             return AudioId(slot.version, i);
         }
         // we may replace this source
@@ -135,7 +137,7 @@ AudioId AudioSourceNode::play(const std::shared_ptr<AudioBuffer>& buffer, float 
     // if lowestPriorityIndex is valid, it will be the index to the lowest priority slot
     if (lowestPriorityIndex < m_slots.size()) {
         auto& slot = m_slots[lowestPriorityIndex];
-        detail::update_slot(slot, buffer, volume, loop, priority);
+        detail::update_slot(slot, buffer, volume, frameRate, loop, priority);
         return AudioId(slot.version, lowestPriorityIndex);
     }
 
@@ -152,6 +154,38 @@ bool AudioSourceNode::is_playing(const AudioId& id) const {
         return false;
     }
     return slot.version == id.version;
+}
+
+void AudioSourceNode::set_volume(const AudioId& id, float volume) {
+    if (!is_playing(id)) {
+        return;
+    }
+    auto& slot = m_slots[id.index];
+    slot.hostVolume = volume;
+}
+
+float AudioSourceNode::volume(const AudioId& id) const {
+    if (!is_playing(id)) {
+        return 0.0f;
+    }
+    const auto& slot = m_slots[id.index];
+    return slot.hostVolume;
+}
+
+void AudioSourceNode::set_frame_rate(const AudioId& id, float frameRate) {
+    if (!is_playing(id)) {
+        return;
+    }
+    auto& slot = m_slots[id.index];
+    slot.hostFrameRate = frameRate;
+}
+
+float AudioSourceNode::frame_rate(const AudioId& id) const {
+    if (!is_playing(id)) {
+        return 0.0f;
+    }
+    const auto& slot = m_slots[id.index];
+    return slot.hostFrameRate;
 }
 
 void AudioSourceNode::stop(const AudioId& id) {

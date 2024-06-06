@@ -20,9 +20,19 @@ public:
 
     ~AudioPlayer();
 
-    void play(AudioDevice* device, const AudioClip* clip, float volume = 1.0f, bool loop = false, int32_t priority = 0);
+    void play(AudioDevice* device, const AudioClip* clip, float volume = 1.0f, float frameRate = 1.0f, bool loop = false, int32_t priority = 0);
 
     void stop();
+
+    bool is_playing() const;
+
+    void set_volume(float volume);
+
+    float volume() const;
+
+    void set_frame_rate(float frameRate);
+
+    float frame_rate() const;
 
 private:
     AudioDevice* m_device;

@@ -63,8 +63,8 @@ void MiniaudioDevice::update() {
     m_graph.update();
 }
 
-AudioId MiniaudioDevice::play(const std::shared_ptr<AudioBuffer>& buffer, float volume, bool loop, int32_t priority) {
-    return m_sourceNode->play(buffer, volume, loop, priority);
+AudioId MiniaudioDevice::play(const std::shared_ptr<AudioBuffer>& buffer, float volume, float frameRate, bool loop, int32_t priority) {
+    return m_sourceNode->play(buffer, volume, frameRate, loop, priority);
 }
 
 void MiniaudioDevice::stop(const AudioId& id) {
@@ -73,6 +73,22 @@ void MiniaudioDevice::stop(const AudioId& id) {
 
 bool MiniaudioDevice::is_playing(const AudioId& id) const {
     return m_sourceNode->is_playing(id);
+}
+
+void MiniaudioDevice::set_volume(const AudioId& id, float volume) {
+    m_sourceNode->set_volume(id, volume);
+}
+
+float MiniaudioDevice::volume(const AudioId& id) const {
+    return m_sourceNode->volume(id);
+}
+
+void MiniaudioDevice::set_frame_rate(const AudioId& id, float frameRate) {
+    m_sourceNode->set_frame_rate(id, frameRate);
+}
+
+float MiniaudioDevice::frame_rate(const AudioId& id) const {
+    return m_sourceNode->frame_rate(id);
 }
 
 void MiniaudioDevice::data_callback(void* output, const void* input, ma_uint32 frameCount) {
