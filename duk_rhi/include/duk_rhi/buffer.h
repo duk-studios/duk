@@ -87,6 +87,8 @@ public:
 
     DUK_NO_DISCARD virtual Type type() const = 0;
 
+    DUK_NO_DISCARD virtual UpdateFrequency update_frequency() const = 0;
+
     DUK_NO_DISCARD virtual CommandQueue* command_queue() const = 0;
 };
 

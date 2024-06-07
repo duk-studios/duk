@@ -190,11 +190,15 @@ bool MeshBuffer::ManagedBuffer::allocate_from_free_blocks(uint32_t* allocationHa
 }
 
 void MeshBuffer::ManagedBuffer::expand_by(size_t size) {
-    auto newBuffer = m_rhi->create_buffer({.type = m_buffer->type(),
-                                           .updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC,
-                                           .elementCount = (m_buffer->byte_size() + size) / m_buffer->element_size(),
-                                           .elementSize = m_buffer->element_size(),
-                                           .commandQueue = m_buffer->command_queue()});
+    // clang-format off
+    auto newBuffer = m_rhi->create_buffer({
+        .type = m_buffer->type(),
+        .updateFrequency = m_buffer->update_frequency(),
+        .elementCount = (m_buffer->byte_size() + size) / m_buffer->element_size(),
+        .elementSize = m_buffer->element_size(),
+        .commandQueue = m_buffer->command_queue()
+    });
+    // clang-format on
 
     newBuffer->copy_from(m_buffer.get(), m_buffer->byte_size(), 0, 0);
 

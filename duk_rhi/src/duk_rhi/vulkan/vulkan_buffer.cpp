@@ -297,6 +297,10 @@ Buffer::Type VulkanBuffer::type() const {
     return m_type;
 }
 
+Buffer::UpdateFrequency VulkanBuffer::update_frequency() const {
+    return m_updateFrequency;
+}
+
 CommandQueue* VulkanBuffer::command_queue() const {
     return m_commandQueue;
 }
