@@ -143,6 +143,8 @@ public:
 
     DUK_NO_DISCARD Type type() const override;
 
+    DUK_NO_DISCARD UpdateFrequency update_frequency() const override;
+
     DUK_NO_DISCARD CommandQueue* command_queue() const override;
 
 private:
