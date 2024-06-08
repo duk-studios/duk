@@ -57,6 +57,8 @@ public:
 
     void push(const duk::objects::Id& id);
 
+    uint32_t instance_count() const;
+
     void clear();
 
     // returns the current bound descriptor for the given binding
@@ -115,6 +117,7 @@ private:
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
     std::unordered_map<uint32_t, std::unique_ptr<MaterialUniformBuffer>> m_uniformBuffers;
     std::unordered_map<uint32_t, std::unique_ptr<MaterialInstanceBuffer>> m_instanceBuffers;
+    uint32_t m_instanceCount;
     bool m_dirty;
 };
 

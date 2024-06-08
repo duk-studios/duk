@@ -97,7 +97,8 @@ static void update_draw_group(DrawGroupData& drawGroup) {
         // if the material is different, it's an entire new draw entry starting at 0
         if (drawEntry.material != material) {
             drawEntry.instanceCount = 1;
-            drawEntry.firstInstance = 0;
+            // minus one to count for this exact instance
+            drawEntry.firstInstance = material->instance_count() - 1;
         }
         // if only the mesh is different, just jump to the correct instance start
         else if (drawEntry.mesh != objectEntry.mesh) {
