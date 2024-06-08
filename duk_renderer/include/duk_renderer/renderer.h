@@ -15,6 +15,7 @@ namespace renderer {
 class Pass;
 class PipelineCache;
 class SpriteCache;
+class TextCache;
 class GlobalDescriptors;
 class ImagePool;
 class MaterialPool;
@@ -60,6 +61,8 @@ public:
 
     DUK_NO_DISCARD SpriteCache* sprite_cache() const;
 
+    DUK_NO_DISCARD TextCache* text_cache() const;
+
     template<typename T, typename... Args>
     T* add_pass(Args&&... args);
 
@@ -78,6 +81,7 @@ protected:
     std::unique_ptr<MeshBufferPool> m_meshBufferPool;
     std::unique_ptr<PipelineCache> m_pipelineCache;
     std::unique_ptr<SpriteCache> m_spriteCache;
+    std::unique_ptr<TextCache> m_textMeshCache;
 };
 
 /// Creates a Renderer with a Forward Pass (and PresentPass if a window is provided)

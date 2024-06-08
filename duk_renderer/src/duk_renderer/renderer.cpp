@@ -9,6 +9,7 @@
 #include <duk_renderer/passes/present_pass.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/sprite/sprite_cache.h>
+#include <duk_renderer/text/text_mesh_cache.h>
 #include <duk_rhi/image_data_source.h>
 
 namespace duk::renderer {
@@ -60,6 +61,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
         m_spriteCache = std::make_unique<SpriteCache>(spriteCacheCreateInfo);
     }
+    { m_textMeshCache = std::make_unique<TextCache>(); }
 }
 
 Renderer::~Renderer() = default;
@@ -104,6 +106,7 @@ void Renderer::render(duk::objects::Objects& objects) {
 void Renderer::clear_cache() {
     m_pipelineCache->clear();
     m_spriteCache->clear();
+    m_textMeshCache->clear();
 }
 
 uint32_t Renderer::render_width() const {
@@ -178,6 +181,10 @@ MeshBufferPool* Renderer::mesh_buffer_pool() const {
 
 SpriteCache* Renderer::sprite_cache() const {
     return m_spriteCache.get();
+}
+
+TextCache* Renderer::text_cache() const {
+    return m_textMeshCache.get();
 }
 
 void Renderer::update_global_descriptors(duk::objects::Objects& objects) {

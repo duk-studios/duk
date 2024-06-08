@@ -9,7 +9,6 @@
 
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/sprite/sprite.h>
-#include <duk_renderer/sprite/sprite_mesh.h>
 
 namespace duk::renderer {
 

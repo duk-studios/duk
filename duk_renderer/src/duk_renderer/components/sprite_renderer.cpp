@@ -8,6 +8,7 @@
 
 #include <duk_renderer/components/material_slot.h>
 #include <duk_renderer/components/mesh_slot.h>
+#include <duk_renderer/sprite/sprite_mesh.h>
 
 namespace duk::renderer {
 
