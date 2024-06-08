@@ -185,12 +185,18 @@ void Material::push(const duk::objects::Id& id) {
         }
         instanceBuffer->push(id);
     }
+    m_instanceCount++;
+}
+
+uint32_t Material::instance_count() const {
+    return m_instanceCount;
 }
 
 void Material::clear() {
     for (auto& instanceBuffer: m_instanceBuffers | std::views::values) {
         instanceBuffer->clear();
     }
+    m_instanceCount = 0;
 }
 
 duk::rhi::Descriptor Material::get(const MaterialLocationId& binding) const {

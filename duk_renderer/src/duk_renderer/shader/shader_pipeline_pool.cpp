@@ -20,7 +20,6 @@ ShaderPipelinePool::ShaderPipelinePool(const ShaderPipelinePoolCreateInfo& shade
         settings.invertY = false;
         settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
         m_opaqueColor = create(kOpaqueColorShaderPipelineId, &colorShaderDataSource, settings);
-        settings.depth = false;
         settings.blend = true;
         settings.priority = 1000;
         m_transparentColor = create(kTransparentColorShaderPipelineId, &colorShaderDataSource, settings);
@@ -34,7 +33,6 @@ ShaderPipelinePool::ShaderPipelinePool(const ShaderPipelinePoolCreateInfo& shade
         settings.invertY = false;
         settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
         m_opaquePhong = create(kOpaquePhongShaderPipelineId, &phongShaderDataSource, settings);
-        settings.depth = false;
         settings.blend = true;
         settings.priority = 1000;
         m_transparentPhong = create(kTransparentPhongShaderPipelineId, &phongShaderDataSource, settings);
@@ -55,9 +53,8 @@ ShaderPipelinePool::ShaderPipelinePool(const ShaderPipelinePoolCreateInfo& shade
         PipelineSettings settings = {};
         settings.depth = false;
         settings.blend = true;
-        settings.priority = 1000;
+        settings.priority = 2000;
         settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
-        settings.priority = 1000;
         m_text = create(kTextShaderPipelineId, &textShaderDataSource, settings);
     }
 }

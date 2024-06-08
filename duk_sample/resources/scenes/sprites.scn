@@ -1,0 +1,135 @@
+{
+  "systems":[
+    "duk::sample::CameraSystem",
+    "duk::sample::StatsSystem",
+    "duk::animation::AnimationSystem",
+    "duk::sample::SpriteAnimatorSystem",
+    "duk::engine::TransformUpdateSystem",
+    "duk::engine::CameraUpdateSystem",
+    "duk::engine::SpriteUpdateSystem",
+    "duk::engine::TextUpdateSystem",
+    "duk::engine::CanvasUpdateSystem"
+  ],
+  "objects":[
+    {
+      "components":[
+        {
+          "type": "duk::renderer::Transform",
+          "position":"0;0;30",
+          "rotation": "0;0;0",
+          "scale": "1;1;1"
+        },
+        {
+          "type":"duk::renderer::Camera"
+        },
+        {
+          "type": "duk::renderer::Canvas"
+        },
+        {
+          "type":"duk::renderer::PerspectiveCamera",
+          "fov": 45.0,
+          "near": 0.1,
+          "far": 110.0
+        },
+        {
+          "type":"duk::sample::CameraController",
+          "speed": 10,
+          "rotationSpeed": 50,
+          "spawnClip": 13314676106729818186,
+          "sphere": 15239267644433745541,
+          "font": 11859234415737620434
+        }
+      ]
+    },
+    {
+      "components":[
+        {
+          "type": "duk::renderer::Transform",
+          "position": "0;0;-20",
+          "rotation": "0;0;0",
+          "scale": "20;20;20"
+        },
+        {
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10001
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000013
+        }
+      ]
+    },
+    {
+      "components":[
+        {
+          "type": "duk::renderer::CanvasTransform",
+          "anchor": "0.0;0.0",
+          "position": "6;6",
+          "size": "200;50",
+          "pivot": "0.0;0.0",
+          "scale": "1;1"
+        },
+        {
+          "type":"duk::renderer::TextRenderer",
+          "font":11859234415737620434,
+          "fontSize":16,
+          "size": "200;50",
+          "horiAlignment": "left",
+          "vertAlignment": "bottom",
+          "text": "FPS",
+          "dynamic": true
+        },
+        {
+          "type": "duk::sample::Stats",
+          "sampleCount": 140
+        }
+      ]
+    },
+    {
+      "components":[
+        {
+          "type": "duk::renderer::Transform",
+          "position": "0;10;5",
+          "rotation": "0.0;0.0",
+          "scale": "1;1"
+        },
+        {
+          "type":"duk::renderer::TextRenderer",
+          "font":11859234415737620434,
+          "fontSize":24,
+          "size": "200;50",
+          "horiAlignment": "left",
+          "vertAlignment": "bottom",
+          "text": "Test test",
+          "dynamic": false
+        }
+      ]
+    },
+    {
+      "components":[
+        {
+          "type": "duk::renderer::Transform",
+          "position": "0;0;0",
+          "rotation": "0;0;0",
+          "scale": "0.3;0.3;0.3"
+        },
+        {
+          "type":"duk::renderer::PointLight",
+          "value":{
+            "color":"1;1;1",
+            "intensity":2
+          },
+          "radius":4000
+        },
+        {
+          "type":"duk::renderer::MeshSlot",
+          "mesh":10003
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "material": 1000012
+        }
+      ]
+    }
+  ]
+}
