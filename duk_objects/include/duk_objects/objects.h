@@ -152,7 +152,7 @@ public:
     ComponentHandle<T, isConst> component_or_add() const;
 
     template<typename... Ts>
-    ComponentHandle<Ts..., isConst> components_or_add() const;
+    std::tuple<ComponentHandle<Ts, isConst>...> components_or_add() const;
 
 private:
     Id m_id;
@@ -213,7 +213,7 @@ public:
     DUK_NO_DISCARD ComponentHandle<U, isConst> component_or_add() const;
 
     template<typename... Ts>
-    DUK_NO_DISCARD ComponentHandle<Ts..., isConst> components_or_add() const;
+    DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, isConst>...> components_or_add() const;
 
 private:
     Id m_ownerId;
@@ -642,7 +642,7 @@ ComponentHandle<T, isConst> ObjectHandle<isConst>::component_or_add() const {
 
 template<bool isConst>
 template<typename... Ts>
-ComponentHandle<Ts..., isConst> ObjectHandle<isConst>::components_or_add() const {
+std::tuple<ComponentHandle<Ts, isConst>...> ObjectHandle<isConst>::components_or_add() const {
     return std::make_tuple(component_or_add<Ts>()...);
 }
 
@@ -766,7 +766,7 @@ ComponentHandle<U, isConst> ComponentHandle<T, isConst>::component_or_add() cons
 
 template<typename T, bool isConst>
 template<typename... Ts>
-ComponentHandle<Ts..., isConst> ComponentHandle<T, isConst>::components_or_add() const {
+std::tuple<ComponentHandle<Ts, isConst>...> ComponentHandle<T, isConst>::components_or_add() const {
     return object().template components_or_add<Ts...>();
 }
 
