@@ -15,6 +15,8 @@ public:
     DUK_NO_DISCARD virtual PixelFormat depth_format() const = 0;
 
     DUK_NO_DISCARD virtual bool is_format_supported(PixelFormat format, Image::Usage usage) const = 0;
+
+    DUK_NO_DISCARD virtual bool is_multi_draw_indirect_supported() const = 0;
 };
 
 }// namespace duk::rhi

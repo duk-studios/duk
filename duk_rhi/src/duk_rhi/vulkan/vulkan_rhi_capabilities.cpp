@@ -23,4 +23,8 @@ bool VulkanRendererCapabilities::is_format_supported(PixelFormat format, Image::
     return m_physicalDevice->is_format_supported(vkFormat, VK_IMAGE_TILING_OPTIMAL, usage_format_features(usage));
 }
 
+bool VulkanRendererCapabilities::is_multi_draw_indirect_supported() const {
+    return m_physicalDevice->features().multiDrawIndirect;
+}
+
 }// namespace duk::rhi

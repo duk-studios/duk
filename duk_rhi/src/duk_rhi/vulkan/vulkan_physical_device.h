@@ -51,10 +51,13 @@ public:
 
     DUK_NO_DISCARD VkFormat select_depth_format(std::span<VkFormat> formats) const;
 
+    DUK_NO_DISCARD const VkPhysicalDeviceFeatures& features() const;
+
 private:
     VkPhysicalDevice m_physicalDevice;
     std::vector<VkQueueFamilyProperties> m_queueFamilyProperties;
     VkPhysicalDeviceMemoryProperties m_memoryProperties;
+    VkPhysicalDeviceFeatures m_features;
 };
 
 }// namespace duk::rhi

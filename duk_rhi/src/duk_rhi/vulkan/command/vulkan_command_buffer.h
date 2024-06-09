@@ -60,6 +60,10 @@ public:
 
     void draw_indexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) override;
 
+    void draw_indirect(const Buffer* buffer, size_t offset, uint32_t drawCount) override;
+
+    void draw_indirect_indexed(const Buffer* buffer, size_t offset, uint32_t drawCount) override;
+
     void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
 
     void pipeline_barrier(const PipelineBarrier& barrier) override;

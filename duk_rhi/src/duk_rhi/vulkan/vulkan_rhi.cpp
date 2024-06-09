@@ -466,9 +466,14 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
     synchronization2.synchronization2 = VK_TRUE;
     synchronization2.pNext = &physicalDeviceRobustness2;
 
+    const auto& deviceFeatures = m_physicalDevice->features();
+
     VkPhysicalDeviceFeatures2 enabledFeatures = {};
     enabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     enabledFeatures.features.fillModeNonSolid = VK_TRUE;
+    if (deviceFeatures.multiDrawIndirect) {
+        enabledFeatures.features.multiDrawIndirect = VK_TRUE;
+    }
     enabledFeatures.pNext = &synchronization2;
 
     VkDeviceCreateInfo deviceCreateInfo = {};
