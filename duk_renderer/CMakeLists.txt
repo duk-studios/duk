@@ -31,6 +31,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/font/font_atlas.h
         include/duk_renderer/font/font_pool.h
         include/duk_renderer/font/font_handler.h
+        include/duk_renderer/mesh/draw_buffer.h
         include/duk_renderer/mesh/dynamic_mesh.h
         include/duk_renderer/mesh/empty_mesh.h
         include/duk_renderer/mesh/mesh.h
@@ -97,6 +98,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/shader/phong/phong_shader_data_source.cpp
         src/duk_renderer/shader/text/text_shader_data_source.h
         src/duk_renderer/shader/text/text_shader_data_source.cpp
+        src/duk_renderer/mesh/draw_buffer.cpp
         src/duk_renderer/mesh/dynamic_mesh.cpp
         src/duk_renderer/mesh/empty_mesh.cpp
         src/duk_renderer/mesh/mesh.cpp

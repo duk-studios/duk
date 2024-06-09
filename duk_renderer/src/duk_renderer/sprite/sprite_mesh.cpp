@@ -52,9 +52,24 @@ SpriteMesh::~SpriteMesh() {
     m_meshBuffer->free(m_meshHandle);
 }
 
-void SpriteMesh::draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) {
-    m_meshBuffer->bind(commandBuffer);
-    commandBuffer->draw_indexed(6, instanceCount, m_firstIndex, static_cast<int32_t>(m_firstVertex), firstInstance);
+const MeshBuffer* SpriteMesh::buffer() const {
+    return m_meshBuffer;
+}
+
+uint32_t SpriteMesh::vertex_count() const {
+    return 4;
+}
+
+uint32_t SpriteMesh::vertex_offset() const {
+    return m_firstVertex;
+}
+
+uint32_t SpriteMesh::index_count() const {
+    return 6;
+}
+
+uint32_t SpriteMesh::index_offset() const {
+    return m_firstIndex;
 }
 
 }// namespace duk::renderer

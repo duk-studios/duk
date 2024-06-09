@@ -16,9 +16,15 @@ class EmptyMesh : public Mesh {
 public:
     explicit EmptyMesh(const EmptyMeshCreateInfo& emptyMeshCreateInfo);
 
-    uint32_t vertex_count() const;
+    const MeshBuffer* buffer() const override;
 
-    void draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) override;
+    uint32_t vertex_count() const override;
+
+    uint32_t vertex_offset() const override;
+
+    uint32_t index_count() const override;
+
+    uint32_t index_offset() const override;
 
 private:
     uint32_t m_vertexCount;

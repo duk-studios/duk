@@ -10,11 +10,21 @@
 
 namespace duk::renderer {
 
+class MeshBuffer;
+
 class Mesh {
 public:
     virtual ~Mesh();
 
-    virtual void draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) = 0;
+    virtual const MeshBuffer* buffer() const = 0;
+
+    virtual uint32_t vertex_count() const = 0;
+
+    virtual uint32_t vertex_offset() const = 0;
+
+    virtual uint32_t index_count() const = 0;
+
+    virtual uint32_t index_offset() const = 0;
 };
 
 using MeshResource = duk::resource::Handle<Mesh>;

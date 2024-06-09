@@ -26,10 +26,10 @@ DynamicMesh::~DynamicMesh() {
     m_meshBuffer->free(m_meshBufferHandle);
 }
 
-void DynamicMesh::write_vertices(duk::renderer::VertexAttributes::Type attribute, const void* data, uint32_t size) {
+void DynamicMesh::write_vertices(VertexAttributes::Type attribute, const void* data, uint32_t size) {
     DUK_ASSERT(m_attributes.has_attribute(attribute));
     auto& vertexCount = m_vertexCounts[attribute];
-    const auto vertexSize = duk::renderer::VertexAttributes::size_of(attribute);
+    const auto vertexSize = VertexAttributes::size_of(attribute);
     const auto offset = vertexSize * vertexCount;
     m_meshBuffer->write_vertex(m_meshBufferHandle, attribute, data, size, offset);
     vertexCount += size / vertexSize;
@@ -52,13 +52,24 @@ void DynamicMesh::clear() {
     m_indexCount = 0;
 }
 
-void DynamicMesh::draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) {
-    m_meshBuffer->bind(commandBuffer);
-    if (m_indexType != duk::rhi::IndexType::NONE && m_indexCount > 0) {
-        commandBuffer->draw_indexed(m_indexCount, instanceCount, m_firstIndex, static_cast<int32_t>(m_firstVertex), firstInstance);
-    } else if (m_indexType == duk::rhi::IndexType::NONE && m_vertexCounts[duk::renderer::VertexAttributes::POSITION] > 0) {
-        commandBuffer->draw(m_vertexCounts[duk::renderer::VertexAttributes::POSITION], instanceCount, m_firstVertex, firstInstance);
-    }
+const MeshBuffer* DynamicMesh::buffer() const {
+    return m_meshBuffer;
+}
+
+uint32_t DynamicMesh::vertex_count() const {
+    return m_vertexCounts[VertexAttributes::POSITION];
+}
+
+uint32_t DynamicMesh::vertex_offset() const {
+    return m_firstVertex;
+}
+
+uint32_t DynamicMesh::index_count() const {
+    return m_indexCount;
+}
+
+uint32_t DynamicMesh::index_offset() const {
+    return m_firstIndex;
 }
 
 }// namespace duk::renderer

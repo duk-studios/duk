@@ -5,6 +5,7 @@
 #define DUK_RENDERER_FORWARD_PASS_H
 
 #include <duk_renderer/material/draw_entry.h>
+#include <duk_renderer/mesh/draw_buffer.h>
 #include <duk_renderer/passes/pass.h>
 
 namespace duk::renderer {
@@ -17,7 +18,8 @@ struct DrawGroupData {
 
     std::vector<ObjectEntry> objectEntries;
     std::vector<uint16_t> sortedIndices;
-    std::vector<DrawEntry> drawEntries;
+    std::vector<DrawEntry> instanceDrawEntries;
+    std::vector<IndirectDrawEntry> drawEntries;
     CalculateSortKeyFunc calculateSortKey;
 
     void clear();
@@ -26,6 +28,7 @@ struct DrawGroupData {
 struct DrawData {
     DrawGroupData opaqueGroup;
     DrawGroupData transparentGroup;
+    std::unique_ptr<DrawBuffer> drawBuffer;
 
     void clear();
 };

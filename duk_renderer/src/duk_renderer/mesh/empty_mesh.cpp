@@ -9,12 +9,24 @@ EmptyMesh::EmptyMesh(const EmptyMeshCreateInfo& emptyMeshCreateInfo)
     : m_vertexCount(emptyMeshCreateInfo.vertexCount) {
 }
 
+const MeshBuffer* EmptyMesh::buffer() const {
+    return nullptr;
+}
+
 uint32_t EmptyMesh::vertex_count() const {
     return m_vertexCount;
 }
 
-void EmptyMesh::draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) {
-    commandBuffer->draw(m_vertexCount, instanceCount, 0, firstInstance);
+uint32_t EmptyMesh::vertex_offset() const {
+    return 0;
+}
+
+uint32_t EmptyMesh::index_count() const {
+    return 0;
+}
+
+uint32_t EmptyMesh::index_offset() const {
+    return 0;
 }
 
 }// namespace duk::renderer

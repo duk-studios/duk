@@ -57,14 +57,24 @@ rhi::IndexType StaticMesh::index_type() const {
     return m_indexType;
 }
 
-void StaticMesh::draw(rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) {
-    m_meshBuffer->bind(commandBuffer);
+const MeshBuffer* StaticMesh::buffer() const {
+    return m_meshBuffer;
+}
 
-    if (m_indexType != rhi::IndexType::NONE) {
-        commandBuffer->draw_indexed(m_indexCount, instanceCount, m_firstIndex, static_cast<int32_t>(m_firstVertex), firstInstance);
-    } else {
-        commandBuffer->draw(m_vertexCount, instanceCount, m_firstVertex, firstInstance);
-    }
+uint32_t StaticMesh::vertex_count() const {
+    return m_vertexCount;
+}
+
+uint32_t StaticMesh::vertex_offset() const {
+    return m_firstVertex;
+}
+
+uint32_t StaticMesh::index_count() const {
+    return m_indexCount;
+}
+
+uint32_t StaticMesh::index_offset() const {
+    return m_firstIndex;
 }
 
 }// namespace duk::renderer

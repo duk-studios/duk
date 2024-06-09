@@ -100,7 +100,7 @@ public:
 
     void update(PipelineCache& pipelineCache, duk::rhi::RenderPass* renderPass, const glm::vec2& viewport);
 
-    void bind(duk::rhi::CommandBuffer* commandBuffer);
+    void bind(duk::rhi::CommandBuffer* commandBuffer) const;
 
     template<typename Solver>
     void solve_resources(Solver* solver);
