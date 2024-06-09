@@ -24,6 +24,8 @@ public:
 
     DUK_NO_DISCARD bool is_format_supported(PixelFormat format, Image::Usage usage) const override;
 
+    DUK_NO_DISCARD bool is_multi_draw_indirect_supported() const override;
+
 private:
     VulkanPhysicalDevice* m_physicalDevice;
 };

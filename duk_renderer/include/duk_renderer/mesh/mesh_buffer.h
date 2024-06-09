@@ -93,6 +93,10 @@ public:
 
     uint32_t first_index(uint32_t handle) const;
 
+    duk::rhi::VertexLayout vertex_layout() const;
+
+    duk::rhi::IndexType index_type() const;
+
     void flush();
 
     void bind(duk::rhi::CommandBuffer* commandBuffer) const;

@@ -314,6 +314,14 @@ uint32_t MeshBuffer::first_index(uint32_t handle) const {
     return allocation.firstIndex;
 }
 
+duk::rhi::VertexLayout MeshBuffer::vertex_layout() const {
+    return m_vertexLayout;
+}
+
+duk::rhi::IndexType MeshBuffer::index_type() const {
+    return m_indexType;
+}
+
 void MeshBuffer::flush() {
     for (auto& vertexBuffer: m_vertexBuffers) {
         if (vertexBuffer) {

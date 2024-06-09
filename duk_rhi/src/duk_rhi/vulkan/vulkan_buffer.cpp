@@ -28,6 +28,9 @@ static VkBufferUsageFlags buffer_usage_from_type(Buffer::Type type) {
         case Buffer::Type::STORAGE:
             usageFlags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
             break;
+        case Buffer::Type::INDIRECT:
+            usageFlags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+            break;
         default:
             throw std::invalid_argument("unhandled Buffer::Type");
     }

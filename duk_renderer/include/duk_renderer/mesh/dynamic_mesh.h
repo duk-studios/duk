@@ -39,7 +39,15 @@ public:
 
     void clear();
 
-    void draw(duk::rhi::CommandBuffer* commandBuffer, uint32_t instanceCount, uint32_t firstInstance) override;
+    const MeshBuffer* buffer() const override;
+
+    uint32_t vertex_count() const override;
+
+    uint32_t vertex_offset() const override;
+
+    uint32_t index_count() const override;
+
+    uint32_t index_offset() const override;
 
 private:
     VertexAttributes m_attributes;

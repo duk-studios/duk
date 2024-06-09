@@ -9,6 +9,8 @@
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
+#include <duk_renderer/mesh/draw_buffer.h>
+#include <duk_renderer/mesh/mesh_buffer.h>
 
 namespace duk::renderer {
 
@@ -72,9 +74,7 @@ static bool valid(const DrawEntry& drawEntry) {
     return drawEntry.material != nullptr && drawEntry.mesh != nullptr && drawEntry.instanceCount > 0;
 }
 
-static void update_draw_group(DrawGroupData& drawGroup) {
-    SortKey::sort_indices(drawGroup.objectEntries, drawGroup.sortedIndices);
-
+static void update_instance_draw_entires(DrawGroupData& drawGroup) {
     DrawEntry drawEntry = {};
 
     for (const auto sortedIndex: drawGroup.sortedIndices) {
@@ -91,7 +91,7 @@ static void update_draw_group(DrawGroupData& drawGroup) {
         }
 
         if (valid(drawEntry)) {
-            drawGroup.drawEntries.push_back(drawEntry);
+            drawGroup.instanceDrawEntries.push_back(drawEntry);
         }
 
         // if the material is different, it's an entire new draw entry starting at 0
@@ -109,8 +109,57 @@ static void update_draw_group(DrawGroupData& drawGroup) {
         drawEntry.mesh = objectEntry.mesh;
     }
     if (valid(drawEntry)) {
-        drawGroup.drawEntries.push_back(drawEntry);
+        drawGroup.instanceDrawEntries.push_back(drawEntry);
     }
+}
+
+static bool compatible(const IndirectDrawEntry& indirectDrawEntry, const DrawEntry& drawEntry) {
+    return indirectDrawEntry.meshBuffer == drawEntry.mesh->buffer() && indirectDrawEntry.material == drawEntry.material;
+}
+
+static bool valid(const IndirectDrawEntry& indirectDrawEntry) {
+    return indirectDrawEntry.material != nullptr && indirectDrawEntry.drawCount > 0;
+}
+
+static void update_indirect_draw_entires(DrawGroupData& drawGroup, DrawBuffer* drawBuffer) {
+    IndirectDrawEntry indirectDrawEntry = {};
+    for (auto& instanceDrawEntry: drawGroup.instanceDrawEntries) {
+        const auto material = instanceDrawEntry.material;
+        const auto mesh = instanceDrawEntry.mesh;
+        const auto meshBuffer = mesh->buffer();
+        const auto offset = drawBuffer->size();
+
+        if (meshBuffer == nullptr || meshBuffer->index_type() == duk::rhi::IndexType::NONE) {
+            drawBuffer->push_draw(mesh->vertex_count(), instanceDrawEntry.instanceCount, mesh->vertex_offset(), instanceDrawEntry.firstInstance);
+        } else {
+            drawBuffer->push_indexed_draw(mesh->index_count(), instanceDrawEntry.instanceCount, mesh->index_offset(), mesh->vertex_offset(), instanceDrawEntry.firstInstance);
+        }
+
+        if (compatible(indirectDrawEntry, instanceDrawEntry)) {
+            indirectDrawEntry.drawCount++;
+            continue;
+        }
+
+        if (valid(indirectDrawEntry)) {
+            drawGroup.drawEntries.push_back(indirectDrawEntry);
+        }
+
+        indirectDrawEntry.drawCount = 1;
+        indirectDrawEntry.material = material;
+        indirectDrawEntry.meshBuffer = meshBuffer;
+        indirectDrawEntry.offset = offset;
+    }
+    if (valid(indirectDrawEntry)) {
+        drawGroup.drawEntries.push_back(indirectDrawEntry);
+    }
+}
+
+static void update_draw_group(DrawGroupData& drawGroup, DrawBuffer* drawBuffer) {
+    SortKey::sort_indices(drawGroup.objectEntries, drawGroup.sortedIndices);
+
+    update_instance_draw_entires(drawGroup);
+
+    update_indirect_draw_entires(drawGroup, drawBuffer);
 }
 
 static void update_draw_data(const Pass::UpdateParams& params, duk::rhi::RenderPass* renderPass, DrawData& drawData) {
@@ -173,23 +222,66 @@ static void update_draw_data(const Pass::UpdateParams& params, duk::rhi::RenderP
         material->clear();
     }
 
-    update_draw_group(drawData.opaqueGroup);
-    update_draw_group(drawData.transparentGroup);
+    update_draw_group(drawData.opaqueGroup, drawData.drawBuffer.get());
+    update_draw_group(drawData.transparentGroup, drawData.drawBuffer.get());
+
+    drawData.drawBuffer->flush();
 
     for (const auto material: uniqueMaterials) {
         material->update(*params.pipelineCache, renderPass, params.viewport);
     }
 }
 
-static void render_draw_group(duk::rhi::CommandBuffer* commandBuffer, const DrawGroupData& drawGroup) {
-    Material* currentMaterial = nullptr;
+static void render_draw_indirect(duk::rhi::CommandBuffer* commandBuffer, const DrawBuffer* drawBuffer, const IndirectDrawEntry& entry, bool multiDrawSupported) {
+    if (multiDrawSupported) {
+        commandBuffer->draw_indirect(drawBuffer->buffer(), entry.offset, entry.drawCount);
+    } else {
+        for (auto i = 0; i < entry.drawCount; i++) {
+            const auto offset = entry.offset + i * sizeof(IndirectDrawCommand);
+            commandBuffer->draw_indirect(drawBuffer->buffer(), offset, 1);
+        }
+    }
+}
+
+static void render_draw_indexed_indirect(duk::rhi::CommandBuffer* commandBuffer, const DrawBuffer* drawBuffer, const IndirectDrawEntry& entry, bool multiDrawSupported) {
+    if (multiDrawSupported) {
+        commandBuffer->draw_indirect_indexed(drawBuffer->buffer(), entry.offset, entry.drawCount);
+    } else {
+        for (auto i = 0; i < entry.drawCount; i++) {
+            const auto offset = entry.offset + i * sizeof(IndirectDrawIndexedCommand);
+            commandBuffer->draw_indirect_indexed(drawBuffer->buffer(), offset, 1);
+        }
+    }
+}
+
+static void render_draw_group(duk::rhi::CommandBuffer* commandBuffer, const DrawBuffer* drawBuffer, const DrawGroupData& drawGroup, bool multiDrawSupported) {
+    const Material* currentMaterial = nullptr;
+    const MeshBuffer* currentMeshBuffer = nullptr;
     for (auto& entry: drawGroup.drawEntries) {
         if (currentMaterial != entry.material) {
             currentMaterial = entry.material;
-            entry.material->bind(commandBuffer);
+            currentMaterial->bind(commandBuffer);
         }
-        entry.mesh->draw(commandBuffer, entry.instanceCount, entry.firstInstance);
+        if (currentMeshBuffer != entry.meshBuffer) {
+            currentMeshBuffer = entry.meshBuffer;
+            if (currentMeshBuffer) {
+                currentMeshBuffer->bind(commandBuffer);
+            }
+        }
+        if (currentMeshBuffer == nullptr || entry.meshBuffer->index_type() == duk::rhi::IndexType::NONE) {
+            render_draw_indirect(commandBuffer, drawBuffer, entry, multiDrawSupported);
+        } else {
+            render_draw_indexed_indirect(commandBuffer, drawBuffer, entry, multiDrawSupported);
+        }
     }
+}
+
+static void render_draw_data(duk::rhi::CommandBuffer* commandBuffer, const DrawData& drawData, bool multiDrawSupported) {
+    // opaque
+    render_draw_group(commandBuffer, drawData.drawBuffer.get(), drawData.opaqueGroup, multiDrawSupported);
+
+    // transparent
+    render_draw_group(commandBuffer, drawData.drawBuffer.get(), drawData.transparentGroup, multiDrawSupported);
 }
 
 }// namespace detail
@@ -197,12 +289,14 @@ static void render_draw_group(duk::rhi::CommandBuffer* commandBuffer, const Draw
 void DrawGroupData::clear() {
     objectEntries.clear();
     sortedIndices.clear();
+    instanceDrawEntries.clear();
     drawEntries.clear();
 }
 
 void DrawData::clear() {
     opaqueGroup.clear();
     transparentGroup.clear();
+    drawBuffer->clear();
 }
 
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
@@ -236,6 +330,13 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
     }
     m_drawData.opaqueGroup.calculateSortKey = detail::calculate_opaque_sort_key;
     m_drawData.transparentGroup.calculateSortKey = detail::calculate_transparent_sort_key;
+
+    {
+        DrawBufferCreateInfo drawBufferCreateInfo = {};
+        drawBufferCreateInfo.rhi = m_renderer->rhi();
+        drawBufferCreateInfo.commandQueue = m_renderer->main_command_queue();
+        m_drawData.drawBuffer = std::make_unique<DrawBuffer>(drawBufferCreateInfo);
+    }
 }
 
 ForwardPass::~ForwardPass() = default;
@@ -278,11 +379,9 @@ void ForwardPass::update(const Pass::UpdateParams& params) {
 void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
     commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
-    // render opaque
-    detail::render_draw_group(commandBuffer, m_drawData.opaqueGroup);
+    const auto isMultiDrawIndirectSupported = m_renderer->rhi()->capabilities()->is_multi_draw_indirect_supported();
 
-    // render transparent
-    detail::render_draw_group(commandBuffer, m_drawData.transparentGroup);
+    detail::render_draw_data(commandBuffer, m_drawData, isMultiDrawIndirectSupported);
 
     commandBuffer->end_render_pass();
 }

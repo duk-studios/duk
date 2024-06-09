@@ -175,11 +175,23 @@ void VulkanCommandBuffer::draw_indexed(uint32_t indexCount, uint32_t instanceCou
     vkCmdDrawIndexed(m_currentCommandBuffer, indexCount, instanceCount, firstIndex, vertexOffset, firstInstance);
 }
 
+void VulkanCommandBuffer::draw_indirect(const Buffer* buffer, size_t offset, uint32_t drawCount) {
+    const auto currentImage = *m_currentImagePtr;
+    const auto bufferHandle = static_cast<const VulkanBuffer*>(buffer)->handle(currentImage);
+    vkCmdDrawIndirect(m_currentCommandBuffer, bufferHandle, offset, drawCount, sizeof(VkDrawIndirectCommand));
+}
+
+void VulkanCommandBuffer::draw_indirect_indexed(const Buffer* buffer, size_t offset, uint32_t drawCount) {
+    const auto currentImage = *m_currentImagePtr;
+    const auto bufferHandle = static_cast<const VulkanBuffer*>(buffer)->handle(currentImage);
+    vkCmdDrawIndexedIndirect(m_currentCommandBuffer, bufferHandle, offset, drawCount, sizeof(VkDrawIndexedIndirectCommand));
+}
+
 void VulkanCommandBuffer::dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) {
     vkCmdDispatch(m_currentCommandBuffer, groupCountX, groupCountY, groupCountZ);
 }
 
-void VulkanCommandBuffer::pipeline_barrier(const CommandBuffer::PipelineBarrier& barrier) {
+void VulkanCommandBuffer::pipeline_barrier(const PipelineBarrier& barrier) {
     auto imageIndex = *m_currentImagePtr;
 
     for (int i = 0; i < barrier.bufferMemoryBarrierCount; i++) {

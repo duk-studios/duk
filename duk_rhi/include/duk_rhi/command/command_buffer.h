@@ -44,6 +44,10 @@ public:
 
     virtual void draw_indexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) = 0;
 
+    virtual void draw_indirect(const Buffer* buffer, size_t offset, uint32_t drawCount) = 0;
+
+    virtual void draw_indirect_indexed(const Buffer* buffer, size_t offset, uint32_t drawCount) = 0;
+
     virtual void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) = 0;
 
     struct BufferMemoryBarrier {

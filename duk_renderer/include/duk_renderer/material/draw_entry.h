@@ -9,6 +9,7 @@
 namespace duk::renderer {
 
 class Mesh;
+class MeshBuffer;
 class Material;
 class GlobalDescriptors;
 
@@ -31,6 +32,13 @@ struct DrawEntry {
     Mesh* mesh;
     uint32_t instanceCount;
     uint32_t firstInstance;
+};
+
+struct IndirectDrawEntry {
+    const Material* material;
+    const MeshBuffer* meshBuffer;
+    size_t offset;
+    uint32_t drawCount;
 };
 
 // specialization for duk_renderer/sort.h sort_key

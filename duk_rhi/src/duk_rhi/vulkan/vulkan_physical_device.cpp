@@ -61,6 +61,8 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
     vkGetPhysicalDeviceQueueFamilyProperties(m_physicalDevice, &queueFamilyCount, m_queueFamilyProperties.data());
 
     vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &m_memoryProperties);
+
+    vkGetPhysicalDeviceFeatures(m_physicalDevice, &m_features);
 }
 
 VulkanPhysicalDevice::~VulkanPhysicalDevice() = default;
@@ -142,6 +144,10 @@ bool VulkanPhysicalDevice::is_format_supported(VkFormat format, VkImageTiling ti
 
 VkFormat VulkanPhysicalDevice::select_depth_format(std::span<VkFormat> formats) const {
     return detail::find_supported_format(m_physicalDevice, formats, VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+}
+
+const VkPhysicalDeviceFeatures& VulkanPhysicalDevice::features() const {
+    return m_features;
 }
 
 }// namespace duk::rhi

@@ -154,6 +154,7 @@ Material::Material(const MaterialCreateInfo& materialCreateInfo)
     : m_renderer(materialCreateInfo.renderer)
     , m_shader(materialCreateInfo.materialData.shader)
     , m_bindings(std::move(materialCreateInfo.materialData.bindings))
+    , m_instanceCount(0)
     , m_dirty(true) {
 }
 
@@ -336,7 +337,7 @@ void Material::update(PipelineCache& pipelineCache, duk::rhi::RenderPass* render
     }
 }
 
-void Material::bind(duk::rhi::CommandBuffer* commandBuffer) {
+void Material::bind(duk::rhi::CommandBuffer* commandBuffer) const {
     m_shader->bind(commandBuffer);
     commandBuffer->bind_descriptor_set(m_descriptorSet.get(), 0);
 }
