@@ -11,7 +11,6 @@
 
 namespace duk::tools {
 
-
 std::vector<uint8_t> load_compressed_bytes(const char* filepath) {
     std::ifstream file(filepath, std::ios::binary | std::ios::ate);
 

@@ -20,4 +20,4 @@ void PackCommand::execute() {
     duk::project::pack(&project);
 }
 
-}
+}// namespace duk::cli
