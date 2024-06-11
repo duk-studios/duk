@@ -50,8 +50,9 @@ Descriptor Descriptor::storage_image(Image* image, Image::Layout layout) {
     return descriptor;
 }
 
-Descriptor::Descriptor() {
-    m_type = DescriptorType::UNDEFINED;
+Descriptor::Descriptor()
+    : m_data({})
+    , m_type(DescriptorType::UNDEFINED) {
 }
 
 DescriptorType Descriptor::type() const {
