@@ -31,7 +31,8 @@ add_executable(duk_cli ${DUK_CLI_HEADERS} ${DUK_CLI_SOURCES})
 
 target_include_directories(duk_cli
         PUBLIC
-        include
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
