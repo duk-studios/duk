@@ -117,4 +117,38 @@ void update(Project* project) {
     }
 }
 
+void pack(Project* project) {
+    if (project->root.empty()) {
+        throw std::invalid_argument("project root is not initialized");
+    }
+
+    resource_scan(project);
+
+    auto resourcesPath = project->root / ".duk/pack/resources";
+    if (!std::filesystem::exists(resourcesPath)) {
+        std::filesystem::create_directories(resourcesPath);
+    }
+
+    std::vector<duk::resource::ResourceFile> resourceFiles;
+    resourceFiles.reserve(project->resources.size());
+    for (const auto& [id, entry]: project->resources) {
+        auto resourceFile = load_resource_file(entry.resourceFile);
+        resourceFiles.emplace_back(resourceFile);
+        auto resourceData = duk::tools::load_bytes(entry.dataFile);
+
+        auto compressedResourceDataPath = resourcesPath / fmt::format("{}.bin", id.value());
+
+        duk::tools::save_compressed_bytes(compressedResourceDataPath, resourceData.data(), resourceData.size());
+    }
+
+    std::ostringstream oss;
+    duk::serial::write_json(oss, resourceFiles);
+
+    auto json = oss.str();
+
+    auto resourcesBinPath = resourcesPath / "resources.bin";
+
+    duk::tools::save_compressed_text(resourcesBinPath, json);
+}
+
 }// namespace duk::project

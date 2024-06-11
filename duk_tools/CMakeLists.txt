@@ -34,6 +34,9 @@ target_include_directories(duk_tools
 target_link_libraries(duk_tools
         PUBLIC
         duk_macros
+
+        ZLIB::ZLIB
+        fmt::fmt-header-only
         )
 
 set_target_properties(duk_tools PROPERTIES CXX_STANDARD 20)

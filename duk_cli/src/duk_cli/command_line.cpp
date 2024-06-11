@@ -11,6 +11,8 @@
 // std
 #include <filesystem>
 
+#include "duk_cli/commands/pack_command.h"
+
 namespace duk::cli {
 
 namespace detail {
@@ -27,6 +29,13 @@ std::unique_ptr<Command> make_update_command() {
     updateCommandCreateInfo.path = std::filesystem::current_path();
 
     return std::make_unique<UpdateCommand>(updateCommandCreateInfo);
+}
+
+std::unique_ptr<Command> make_pack_command() {
+    PackCommandCreateInfo packCommandCreateInfo = {};
+    packCommandCreateInfo.path = std::filesystem::current_path();
+
+    return std::make_unique<PackCommand>(packCommandCreateInfo);
 }
 
 std::unique_ptr<Command> make_status_command() {
@@ -57,6 +66,10 @@ CommandLine::CommandLine(int argc, const char* argv[]) {
     }
     if (commandName == "status") {
         m_command = detail::make_status_command();
+        return;
+    }
+    if (commandName == "pack") {
+        m_command = detail::make_pack_command();
         return;
     }
 

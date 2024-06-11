@@ -19,7 +19,7 @@ void StatusCommand::execute() {
     duk::project::resource_scan(&project);
     duk::log::info("Resources:");
     for (auto& [id, resource]: project.resources) {
-        duk::log::info("  id: {} - file: {}", id.value(), resource.resourceFile.string());
+        duk::log::info("  id: {} - file: {}", id.value(), resource.dataFile.string());
     }
 
     duk::log::info("Settings:");

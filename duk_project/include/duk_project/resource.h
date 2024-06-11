@@ -9,9 +9,13 @@
 #include <filesystem>
 #include <string>
 
+#include <duk_resource/file.h>
+
 namespace duk::project {
 
 struct Project;
+
+duk::resource::ResourceFile load_resource_file(const std::filesystem::path& path);
 
 /// scans the project and updates tracked resources
 /// returns a set with untracked resources
