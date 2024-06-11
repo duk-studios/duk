@@ -30,7 +30,14 @@ void iterate_descriptors(const InputIterator& begin, const InputIterator& end, B
             }
             case DescriptorType::UNIFORM_BUFFER:
             case DescriptorType::STORAGE_BUFFER: {
-                if (!bufferPredicate(dynamic_cast<VulkanBuffer*>(descriptor.buffer()), index, descriptor)) {
+                auto buffer = descriptor.buffer();
+                if (!buffer) {
+                    if (undefinedPredicate(index)) {
+                        continue;
+                    }
+                    return;
+                }
+                if (!bufferPredicate(static_cast<VulkanBuffer*>(buffer), index, descriptor)) {
                     return;
                 }
                 break;
@@ -38,7 +45,14 @@ void iterate_descriptors(const InputIterator& begin, const InputIterator& end, B
             case DescriptorType::IMAGE:
             case DescriptorType::STORAGE_IMAGE:
             case DescriptorType::IMAGE_SAMPLER: {
-                if (!imagePredicate(dynamic_cast<VulkanImage*>(descriptor.image()), index, descriptor)) {
+                auto image = descriptor.image();
+                if (!image) {
+                    if (undefinedPredicate(index)) {
+                        continue;
+                    }
+                    return;
+                }
+                if (!imagePredicate(static_cast<VulkanImage*>(image), index, descriptor)) {
                     return;
                 }
                 break;
@@ -199,7 +213,6 @@ void VulkanDescriptorSet::create(uint32_t imageCount) {
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate VkDescriptorSet");
     }
-    m_resourceManager->schedule_for_update(this);
 }
 
 void VulkanDescriptorSet::clean() {
