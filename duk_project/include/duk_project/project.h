@@ -13,8 +13,8 @@
 namespace duk::project {
 
 struct ResourceEntry {
+    std::filesystem::path dataFile;
     std::filesystem::path resourceFile;
-    std::filesystem::path trackFile;
 };
 
 struct Project {
@@ -28,6 +28,8 @@ void init(Project* project, std::filesystem::path path);
 void open(Project* project, std::filesystem::path path);
 
 void update(Project* project);
+
+void pack(Project* project);
 
 }// namespace duk::project
 

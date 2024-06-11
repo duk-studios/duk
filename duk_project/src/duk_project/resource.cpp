@@ -47,15 +47,6 @@ static duk::resource::Id resource_id_generate(const Project* project) {
     return id;
 }
 
-static duk::resource::ResourceFile read_resource_file(const std::filesystem::path& path) {
-    auto json = duk::tools::load_text(path);
-
-    duk::resource::ResourceFile resourceFile = {};
-    duk::serial::read_json(json, resourceFile);
-
-    return resourceFile;
-}
-
 static void add_resource(Project* project, const duk::resource::Id& id, const std::filesystem::path& resourceFile, const std::filesystem::path& trackFile) {
     if (has_resource_id(project, id)) {
         throw std::invalid_argument(fmt::format("tried to add duplicate resource id ({})", id.value()));
@@ -64,6 +55,11 @@ static void add_resource(Project* project, const duk::resource::Id& id, const st
 }
 
 }// namespace detail
+
+duk::resource::ResourceFile load_resource_file(const std::filesystem::path& path) {
+    const auto json = duk::tools::load_text(path);
+    return duk::serial::read_json<duk::resource::ResourceFile>(json);
+}
 
 std::set<std::filesystem::path> resource_scan(Project* project) {
     if (!std::filesystem::exists(project->root)) {
@@ -89,7 +85,7 @@ std::set<std::filesystem::path> resource_scan(Project* project) {
     for (auto resourceFilepath: resourceFiles) {
         auto trackFile = std::filesystem::path(resourceFilepath).replace_extension(".res");
         if (trackFiles.find(trackFile) != trackFiles.end()) {
-            auto resourceFile = detail::read_resource_file(trackFile);
+            auto resourceFile = load_resource_file(trackFile);
             detail::add_resource(project, resourceFile.id, resourceFilepath, trackFile);
         } else {
             untrackedResourceFiles.insert(resourceFilepath);

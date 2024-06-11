@@ -10,6 +10,7 @@ set(DUK_CLI_HEADERS
         include/duk_cli/command_line.h
         include/duk_cli/file_generator.h
         include/duk_cli/commands/json_command.h
+        include/duk_cli/commands/pack_command.h
         include/duk_cli/commands/update_command.h
         include/duk_cli/commands/init_command.h
         include/duk_cli/commands/status_command.h
@@ -20,6 +21,7 @@ set(DUK_CLI_SOURCES
         src/duk_cli/command_line.cpp
         src/duk_cli/file_generator.cpp
         src/duk_cli/commands/json_command.cpp
+        src/duk_cli/commands/pack_command.cpp
         src/duk_cli/commands/update_command.cpp
         src/duk_cli/commands/init_command.cpp
         src/duk_cli/commands/status_command.cpp
@@ -49,4 +51,9 @@ set_target_properties(duk_cli PROPERTIES OUTPUT_NAME duk)
 install(
         TARGETS duk_cli
         RUNTIME DESTINATION bin
+)
+
+install(
+        TARGETS duk_cli
+        EXPORT duk-targets
 )
