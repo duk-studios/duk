@@ -35,7 +35,6 @@ target_link_libraries(duk_log
         duk_task
         duk_tools
         duk_platform
-        fmt::fmt-header-only
         )
 
 set_target_properties(duk_log PROPERTIES CXX_STANDARD 20)

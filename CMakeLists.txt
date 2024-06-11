@@ -37,6 +37,7 @@ find_package(volk CONFIG REQUIRED)
 find_package(grapphs CONFIG REQUIRED)
 find_package(spirv-reflect CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(ZLIB REQUIRED)
 
 include(GNUInstallDirs)
 
