@@ -50,6 +50,7 @@ void TextCache::store(duk::hash::Hash hash, const std::shared_ptr<DynamicMesh>& 
 
 void TextCache::clear() {
     m_meshes.clear();
+    m_materials.clear();
 }
 
 }// namespace duk::renderer
