@@ -7,7 +7,7 @@
 
 namespace duk::renderer {
 
-static constexpr size_t kBufferBlockSize = 1024;
+static constexpr size_t kBufferElementBlockCount = 1024;
 
 namespace detail {
 
@@ -45,7 +45,10 @@ uint32_t MeshBuffer::ManagedBuffer::allocate(size_t size) {
     }
 
     // if we fail, expand the buffer by the given size
-    expand_by(size);
+    auto elementCount = size / m_buffer->element_size();
+    auto newBlockElementCount = (elementCount / kBufferElementBlockCount + 1) * kBufferElementBlockCount;
+    expand_by_element_count(newBlockElementCount);
+    duk::log::info("expanding managed buffer by {} elements", newBlockElementCount);
 
     // try to allocate again
     if (!allocate_from_free_blocks(&allocationHandle, size)) {
@@ -189,12 +192,12 @@ bool MeshBuffer::ManagedBuffer::allocate_from_free_blocks(uint32_t* allocationHa
     return false;
 }
 
-void MeshBuffer::ManagedBuffer::expand_by(size_t size) {
+void MeshBuffer::ManagedBuffer::expand_by_element_count(size_t count) {
     // clang-format off
     auto newBuffer = m_rhi->create_buffer({
         .type = m_buffer->type(),
         .updateFrequency = m_buffer->update_frequency(),
-        .elementCount = (m_buffer->byte_size() + size) / m_buffer->element_size(),
+        .elementCount = m_buffer->element_count() + count,
         .elementSize = m_buffer->element_size(),
         .commandQueue = m_buffer->command_queue()
     });
@@ -202,7 +205,7 @@ void MeshBuffer::ManagedBuffer::expand_by(size_t size) {
 
     newBuffer->copy_from(m_buffer.get(), m_buffer->byte_size(), 0, 0);
 
-    m_freeBlocks.push_back({.offset = m_buffer->byte_size(), .size = size});
+    m_freeBlocks.push_back({.offset = m_buffer->byte_size(), .size = count * m_buffer->element_size()});
 
     merge_free_blocks();
 
@@ -223,7 +226,7 @@ MeshBuffer::MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo)
         vertexBufferCreateInfo.rhi = meshBufferCreateInfo.rhi;
         vertexBufferCreateInfo.commandQueue = meshBufferCreateInfo.commandQueue;
         vertexBufferCreateInfo.elementSize = duk::rhi::VertexInput::size_of(format);
-        vertexBufferCreateInfo.elementCount = kBufferBlockSize / vertexBufferCreateInfo.elementSize;
+        vertexBufferCreateInfo.elementCount = kBufferElementBlockCount;
         vertexBufferCreateInfo.updateFrequency = meshBufferCreateInfo.updateFrequency;
         vertexBufferCreateInfo.type = rhi::Buffer::Type::VERTEX;
         m_vertexBuffers[i] = std::make_unique<ManagedBuffer>(vertexBufferCreateInfo);
@@ -234,7 +237,7 @@ MeshBuffer::MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo)
         indexBufferCreateInfo.rhi = meshBufferCreateInfo.rhi;
         indexBufferCreateInfo.commandQueue = meshBufferCreateInfo.commandQueue;
         indexBufferCreateInfo.elementSize = rhi::index_size(m_indexType);
-        indexBufferCreateInfo.elementCount = kBufferBlockSize / indexBufferCreateInfo.elementSize;
+        indexBufferCreateInfo.elementCount = kBufferElementBlockCount;
         indexBufferCreateInfo.updateFrequency = meshBufferCreateInfo.updateFrequency;
         indexBufferCreateInfo.type = rhi::buffer_type_from_index_type(m_indexType);
 

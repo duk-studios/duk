@@ -68,7 +68,7 @@ private:
 
         bool allocate_from_free_blocks(uint32_t* allocationHandle, size_t size);
 
-        void expand_by(size_t size);
+        void expand_by_element_count(size_t size);
 
     private:
         duk::rhi::RHI* m_rhi;
