@@ -325,7 +325,7 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     if (m_depthTesting) {
         depthStencil.depthTestEnable = VK_TRUE;
-        depthStencil.depthWriteEnable = VK_TRUE;
+        depthStencil.depthWriteEnable = !m_blend.enabled;
         depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
     } else {
         depthStencil.depthTestEnable = VK_FALSE;
