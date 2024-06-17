@@ -21,7 +21,8 @@ duk::resource::ResourceFile load_resource_file(const std::filesystem::path& path
 /// returns a set with untracked resources
 std::set<std::filesystem::path> resource_scan(Project* project);
 
-void resource_track(Project* project, const std::filesystem::path& resource);
+/// creates a resource file and returns its id
+duk::resource::Id resource_track(Project* project, const std::filesystem::path& resource);
 
 }// namespace duk::project
 
