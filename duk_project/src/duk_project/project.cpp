@@ -112,8 +112,8 @@ void update(Project* project) {
     }
 
     for (auto& untrackedFile: untrackedFiles) {
-        duk::log::info("Adding track file for {}", untrackedFile.string());
-        resource_track(project, untrackedFile);
+        auto id = resource_track(project, untrackedFile);
+        duk::log::info("Adding resource file for '{}', id: '{}'", untrackedFile.string(), id.value());
     }
 }
 

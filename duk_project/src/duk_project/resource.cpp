@@ -95,7 +95,7 @@ std::set<std::filesystem::path> resource_scan(Project* project) {
     return untrackedResourceFiles;
 }
 
-void resource_track(Project* project, const std::filesystem::path& resource) {
+duk::resource::Id resource_track(Project* project, const std::filesystem::path& resource) {
     if (!std::filesystem::exists(resource)) {
         throw std::invalid_argument(fmt::format("resource \"{}\" does not exist", resource.string()));
     }
@@ -120,6 +120,8 @@ void resource_track(Project* project, const std::filesystem::path& resource) {
     file << oss.str();
 
     detail::add_resource(project, resourceFile.id, resource, trackFilePath);
+
+    return resourceFile.id;
 }
 
 }// namespace duk::project
