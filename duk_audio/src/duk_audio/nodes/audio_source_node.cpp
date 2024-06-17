@@ -6,6 +6,7 @@
 #include <duk_audio/nodes/audio_source_node.h>
 
 #include <algorithm>
+#include <cmath>
 
 namespace duk::audio {
 
@@ -15,7 +16,8 @@ static void mix_float_samples(float* dst, const float* src, uint32_t frameCount,
     for (uint32_t i = 0; i < frameCount; i++) {
         uint32_t frameIndex = i * channelCount;
         for (uint32_t c = 0; c < channelCount; c++) {
-            dst[frameIndex + c] += src[frameIndex + c];
+            float sample = dst[frameIndex + c] + src[frameIndex + c];
+            dst[frameIndex + c] = std::tanh(sample);
         }
     }
 }
@@ -24,7 +26,7 @@ static void process_buffer_float(const AudioBuffer* buffer, float* output, uint3
     uint32_t framesRead = 0;
     float* dst = output;
     while (framesRead < frameCount && (currentFrame < buffer->frame_count() || loop)) {
-        auto readAmount = buffer->read_float(dst, frameCount, currentFrame, channelCount, frameRate);
+        auto readAmount = buffer->read_float(dst, frameCount - framesRead, currentFrame, channelCount, frameRate);
         dst += readAmount * channelCount;
         framesRead += readAmount;
         currentFrame += readAmount;
@@ -49,7 +51,7 @@ static void apply_volume(float* output, float volume, uint32_t frameCount, uint3
 
 static void process_slot(AudioSourceNode::Slot& slot, const std::shared_ptr<AudioBuffer>& buffer, void* output, uint32_t frameCount, uint32_t channelCount) {
     const uint32_t kBufferSampleCount = 1024;
-    float outputBuffer[kBufferSampleCount];
+    float outputBuffer[kBufferSampleCount]{};
     const uint32_t kBufferFrameCount = kBufferSampleCount / channelCount;
 
     float* dstFrames = (float*)output;
