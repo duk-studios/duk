@@ -223,58 +223,31 @@ static std::string generate_vertex_layout(const Reflector& reflector) {
     return oss.str();
 }
 
-static const std::string kHeaderFileIncludes[] = {"duk_rhi/pipeline/shader_data_source.h"};
+static const std::string kHeaderFileIncludes[] = {"vector", "cstdint"};
 
 /// header file template -----------------------------
 /// --------------------------------------------------
 const char* kClassDeclarationTemplate = R"(
-class TemplateShaderDataSource : public duk::rhi::ShaderDataSource {
-public:
-    TemplateShaderDataSource();
 
-    duk::rhi::ShaderModule::Mask module_mask() const override;
+extern std::vector<uint8_t> TemplateShaderName_vert_spir_v();
 
-    const std::vector<uint8_t>& shader_module_spir_v_code(duk::rhi::ShaderModule::Bits type) const override;
+extern std::vector<uint8_t> TemplateShaderName_frag_spir_v();
 
-private:
-    duk::hash::Hash calculate_hash() const override;
-
-private:
-    duk::rhi::ShaderModule::Mask m_moduleMask;
-    std::unordered_map<duk::rhi::ShaderModule::Bits, std::vector<uint8_t>> m_moduleSpirVCode;
-};)";
+)";
 /// ---------------------------------------------------
 
 /// source file template-------------------------------
 const char* kClassDefinitionTemplate = R"(
 
-TemplateShaderDataSource::TemplateShaderDataSource() {
-    m_moduleMask = TemplateModuleMask;
-
-    m_moduleSpirVCode = TemplateModuleSpirVCode;
-
-    update_hash();
+std::vector<uint8_t> TemplateShaderName_vert_spir_v() {
+    return TemplateModuleVertSpirvCode;
 }
 
-duk::rhi::ShaderModule::Mask TemplateShaderDataSource::module_mask() const {
-    return m_moduleMask;
+std::vector<uint8_t> TemplateShaderName_frag_spir_v() {
+    return TemplateModuleFragSpirvCode;
 }
 
-const std::vector<uint8_t>& TemplateShaderDataSource::shader_module_spir_v_code(duk::rhi::ShaderModule::Bits type) const {
-    return m_moduleSpirVCode.at(type);
-}
-
-duk::hash::Hash TemplateShaderDataSource::calculate_hash() const {
-    duk::hash::Hash hash = 0;
-
-    duk::hash::hash_combine(hash, m_moduleMask);
-    for (const auto&[type, module] : m_moduleSpirVCode) {
-        duk::hash::hash_combine(hash, type);
-        duk::hash::hash_combine(hash, module.data(), module.size());
-    }
-
-    return hash;
-})";
+)";
 /// ---------------------------------------------------
 
 }// namespace detail
@@ -284,7 +257,7 @@ ShaderDataSourceFileGenerator::ShaderDataSourceFileGenerator(const Parser& parse
     , m_reflector(reflector) {
     m_fileName = detail::shader_data_source_file_name(m_parser);
     m_headerIncludePath = detail::shader_header_include_path(m_parser, m_fileName);
-    m_className = detail::shader_data_source_class_name(m_parser);
+    m_className = m_parser.output_material_name();
 
     {
         std::ostringstream oss;
@@ -332,15 +305,16 @@ void ShaderDataSourceFileGenerator::generate_source_file_content(std::ostringstr
 }
 
 void ShaderDataSourceFileGenerator::generate_class_declaration(std::ostringstream& oss) {
-    auto classDeclaration = std::regex_replace(detail::kClassDeclarationTemplate, std::regex("TemplateShaderDataSource"), m_className);
+    auto classDeclaration = std::regex_replace(detail::kClassDeclarationTemplate, std::regex("TemplateShaderName"), m_className);
 
     oss << classDeclaration << std::endl;
 }
 
 void ShaderDataSourceFileGenerator::generate_class_definition(std::ostringstream& oss) {
-    auto classDefinition = std::regex_replace(detail::kClassDefinitionTemplate, std::regex("TemplateShaderDataSource"), m_className);
-    classDefinition = std::regex_replace(classDefinition, std::regex("TemplateModuleMask"), detail::generate_module_mask(m_reflector));
-    classDefinition = std::regex_replace(classDefinition, std::regex("TemplateModuleSpirVCode"), detail::generate_spir_v_code_map(m_reflector));
+    auto classDefinition = std::regex_replace(detail::kClassDefinitionTemplate, std::regex("TemplateShaderName"), m_className);
+    const auto& modules = m_reflector.modules();
+    classDefinition = std::regex_replace(classDefinition, std::regex("TemplateModuleVertSpirvCode"), detail::generate_spir_v_code(modules.at(duk::rhi::ShaderModule::VERTEX)));
+    classDefinition = std::regex_replace(classDefinition, std::regex("TemplateModuleFragSpirvCode"), detail::generate_spir_v_code(modules.at(duk::rhi::ShaderModule::FRAGMENT)));
 
     oss << classDefinition << std::endl;
 }
