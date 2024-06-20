@@ -54,11 +54,6 @@ struct DescriptorDescription {
     std::string name;
     uint32_t stride;
     std::vector<DescriptorMemberDescription> members;
-    //
-    // uint32_t total_size() const {
-    //     const auto& member = members.back();
-    //     return member.total_size() + member.offset;
-    // }
 };
 
 struct DescriptorSetDescription {
