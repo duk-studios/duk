@@ -3,19 +3,18 @@
 //
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/shader/shader_pipeline.h>
+#include <duk_rhi/pipeline/std_shader_data_source.h>
 
 namespace duk::renderer {
 
 ShaderPipeline::ShaderPipeline(const ShaderPipelineCreateInfo& shaderPipelineCreateInfo)
     : m_renderer(shaderPipelineCreateInfo.renderer) {
-    {
-        const auto rhi = m_renderer->rhi();
-        duk::rhi::RHI::ShaderCreateInfo shaderCreateInfo = {};
-        shaderCreateInfo.shaderDataSource = shaderPipelineCreateInfo.shaderDataSource;
-        m_shader = rhi->create_shader(shaderCreateInfo);
-    }
+    const auto pipelineData = shaderPipelineCreateInfo.shaderPipelineData;
 
-    const auto& settings = shaderPipelineCreateInfo.settings;
+    m_shaderModules[duk::rhi::ShaderModule::VERTEX] = pipelineData->shaders.vert;
+    m_shaderModules[duk::rhi::ShaderModule::FRAGMENT] = pipelineData->shaders.frag;
+
+    const auto& settings = pipelineData->settings;
     set_blend(settings.blend);
     set_depth(settings.depth);
     set_invert_y(settings.invertY);
@@ -24,6 +23,7 @@ ShaderPipeline::ShaderPipeline(const ShaderPipelineCreateInfo& shaderPipelineCre
     m_state.cullModeMask = settings.cullModeMask;
     m_state.fillMode = duk::rhi::GraphicsPipeline::FillMode::FILL;
     m_state.topology = duk::rhi::GraphicsPipeline::Topology::TRIANGLE_LIST;
+    create_shader();
 }
 
 const duk::rhi::DescriptorSetDescription& ShaderPipeline::descriptor_set_description() const {
@@ -105,6 +105,44 @@ void ShaderPipeline::update(PipelineCache& pipelineCache, duk::rhi::RenderPass* 
 
 void ShaderPipeline::bind(duk::rhi::CommandBuffer* commandBuffer) const {
     commandBuffer->bind_graphics_pipeline(m_pipeline.get());
+}
+
+void ShaderPipeline::solve_resources(duk::resource::DependencySolver* solver) {
+    for (auto& [type, module]: m_shaderModules) {
+        solver->solve(module);
+    }
+}
+
+void ShaderPipeline::solve_resources(duk::resource::ReferenceSolver* solver) {
+    for (auto& [type, module]: m_shaderModules) {
+        solver->solve(module);
+    }
+    create_shader();
+}
+
+void ShaderPipeline::create_shader() {
+    if (m_shader) {
+        return;
+    }
+    if (!m_shaderModules[duk::rhi::ShaderModule::VERTEX] || !m_shaderModules[duk::rhi::ShaderModule::FRAGMENT]) {
+        return;
+    }
+    const auto rhi = m_renderer->rhi();
+
+    duk::rhi::StdShaderDataSource shaderDataSource = {};
+    {
+        auto& module = m_shaderModules[duk::rhi::ShaderModule::VERTEX];
+        shaderDataSource.insert_spir_v_code(duk::rhi::ShaderModule::VERTEX, module->data(), module->size());
+    }
+    {
+        auto& module = m_shaderModules[duk::rhi::ShaderModule::FRAGMENT];
+        shaderDataSource.insert_spir_v_code(duk::rhi::ShaderModule::FRAGMENT, module->data(), module->size());
+    }
+    shaderDataSource.update_hash();
+
+    duk::rhi::RHI::ShaderCreateInfo shaderCreateInfo = {};
+    shaderCreateInfo.shaderDataSource = &shaderDataSource;
+    m_shader = rhi->create_shader(shaderCreateInfo);
 }
 
 }// namespace duk::renderer
