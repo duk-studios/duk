@@ -5,9 +5,9 @@
 #ifndef DUK_RENDERER_SHADER_PIPELINE_POOL_H
 #define DUK_RENDERER_SHADER_PIPELINE_POOL_H
 
+#include <duk_renderer/shader/shader_module_pool.h>
 #include <duk_renderer/shader/shader_pipeline.h>
 #include <duk_renderer/shader/shader_pipeline_data.h>
-
 #include <duk_resource/pool.h>
 
 namespace duk::renderer {
@@ -22,13 +22,14 @@ static constexpr duk::resource::Id kTextShaderPipelineId(100'005);
 
 struct ShaderPipelinePoolCreateInfo {
     Renderer* renderer;
+    ShaderModulePool* shaderModulePool;
 };
 
 class ShaderPipelinePool : public duk::resource::PoolT<ShaderPipelineResource> {
 public:
     explicit ShaderPipelinePool(const ShaderPipelinePoolCreateInfo& shaderPipelinePoolCreateInfo);
 
-    ShaderPipelineResource create(const duk::resource::Id& id, const duk::rhi::ShaderDataSource* shaderDataSource, const PipelineSettings& settings);
+    ShaderPipelineResource create(const duk::resource::Id& id, const ShaderPipelineData* shaderPipelineData);
 
     ShaderPipelineResource opaque_color() const;
 

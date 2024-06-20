@@ -9,10 +9,11 @@
 #include <duk_renderer/shader/shader_pipeline_data.h>
 
 #include <duk_resource/resource.h>
+#include <duk_resource/solver/dependency_solver.h>
+#include <duk_resource/solver/reference_solver.h>
 
 #include <duk_rhi/command/command_buffer.h>
 #include <duk_rhi/pipeline/shader.h>
-#include <duk_rhi/pipeline/shader_data_source.h>
 
 namespace duk::renderer {
 
@@ -21,8 +22,7 @@ class PipelineCache;
 
 struct ShaderPipelineCreateInfo {
     Renderer* renderer;
-    const duk::rhi::ShaderDataSource* shaderDataSource;
-    PipelineSettings settings;
+    const ShaderPipelineData* shaderPipelineData;
 };
 
 class ShaderPipeline {
@@ -49,8 +49,19 @@ public:
 
     void bind(duk::rhi::CommandBuffer* commandBuffer) const;
 
+    // hack: we need to create the shader object after solving our references,
+    // that's why we specialize both methods.
+    // we should be able to remove this if we change how we load resources, starting with the leafs instead of the root
+    void solve_resources(duk::resource::DependencySolver* solver);
+
+    void solve_resources(duk::resource::ReferenceSolver* solver);
+
+private:
+    void create_shader();
+
 private:
     Renderer* m_renderer;
+    std::unordered_map<duk::rhi::ShaderModule::Bits, ShaderModuleResource> m_shaderModules;
     std::shared_ptr<duk::rhi::Shader> m_shader;
     std::shared_ptr<duk::rhi::GraphicsPipeline> m_pipeline;
     PipelineState m_state;
@@ -62,5 +73,14 @@ private:
 using ShaderPipelineResource = duk::resource::Handle<ShaderPipeline>;
 
 }// namespace duk::renderer
+
+namespace duk::resource {
+
+template<typename Solver>
+void solve_resources(Solver* solver, duk::renderer::ShaderPipeline& shaderPipeline) {
+    shaderPipeline.solve_resources(solver);
+}
+
+}// namespace duk::resource
 
 #endif//DUK_RENDERER_SHADER_PIPELINE_H

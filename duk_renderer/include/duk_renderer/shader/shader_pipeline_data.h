@@ -5,15 +5,15 @@
 #ifndef DUK_RENDERER_SHADER_PIPELINE_DATA_H
 #define DUK_RENDERER_SHADER_PIPELINE_DATA_H
 
-#include <duk_serial/json/types.h>
+#include <duk_renderer/shader/shader_module.h>
 
-#include <filesystem>
+#include <duk_serial/json/types.h>
 
 namespace duk::renderer {
 
-struct ShaderPaths {
-    std::filesystem::path vertexPath;
-    std::filesystem::path fragmentPath;
+struct PipelineShaderModules {
+    ShaderModuleResource vert;
+    ShaderModuleResource frag;
 };
 
 struct PipelineSettings {
@@ -25,7 +25,7 @@ struct PipelineSettings {
 };
 
 struct ShaderPipelineData {
-    ShaderPaths shader;
+    PipelineShaderModules shaders;
     PipelineSettings settings;
 };
 
@@ -52,26 +52,26 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
 }
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::renderer::ShaderPaths& data) {
-    from_json_member(json, "vert", data.vertexPath);
-    from_json_member(json, "frag", data.fragmentPath);
+inline void from_json(const rapidjson::Value& json, duk::renderer::PipelineShaderModules& shaders) {
+    from_json_member(json, "vert", shaders.vert);
+    from_json_member(json, "frag", shaders.frag);
 }
 
 template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::ShaderPaths& data) {
-    to_json_member(document, json, "vert", data.vertexPath);
-    to_json_member(document, json, "frag", data.fragmentPath);
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::PipelineShaderModules& shaders) {
+    to_json_member(document, json, "vert", shaders.vert);
+    to_json_member(document, json, "frag", shaders.frag);
 }
 
 template<>
 inline void from_json(const rapidjson::Value& json, duk::renderer::ShaderPipelineData& data) {
-    from_json_member(json, "shader", data.shader);
+    from_json_member(json, "shaders", data.shaders);
     from_json_member(json, "settings", data.settings);
 }
 
 template<>
 inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::ShaderPipelineData& data) {
-    to_json_member(document, json, "shader", data.shader);
+    to_json_member(document, json, "shaders", data.shaders);
     to_json_member(document, json, "settings", data.settings);
 }
 

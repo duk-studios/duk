@@ -13,16 +13,6 @@
 
 namespace duk::renderer {
 
-namespace detail {
-
-static void load_shader_stage(rhi::StdShaderDataSource& shaderDataSource, duk::rhi::ShaderModule::Bits shaderModule, const std::filesystem::path& pipelinePath, const std::filesystem::path& relativeModulePath) {
-    const auto modulePath = pipelinePath.parent_path() / relativeModulePath;
-    const auto code = duk::tools::load_bytes(modulePath);
-    shaderDataSource.insert_spir_v_code(shaderModule, code);
-}
-
-}// namespace detail
-
 ShaderPipelineHandler::ShaderPipelineHandler()
     : ResourceHandlerT("spp") {
 }
@@ -40,13 +30,7 @@ duk::resource::Handle<ShaderPipeline> ShaderPipelineHandler::load(ShaderPipeline
 
     auto shaderPipelineData = duk::serial::read_json<ShaderPipelineData>(shaderPipelineDataJson);
 
-    duk::rhi::StdShaderDataSource shaderDataSource;
-    detail::load_shader_stage(shaderDataSource, duk::rhi::ShaderModule::VERTEX, path, shaderPipelineData.shader.vertexPath);
-    detail::load_shader_stage(shaderDataSource, duk::rhi::ShaderModule::FRAGMENT, path, shaderPipelineData.shader.fragmentPath);
-
-    shaderDataSource.update_hash();
-
-    return pool->create(id, &shaderDataSource, shaderPipelineData.settings);
+    return pool->create(id, &shaderPipelineData);
 }
 
 }// namespace duk::renderer

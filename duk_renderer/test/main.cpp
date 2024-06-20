@@ -179,7 +179,7 @@ int main() {
         duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());
 
         //Telling to our renderer to render the objects we want.
-        application.renderer()->render(objects);
+        application.renderer()->render(objects, *application.pools());
 
         timer.stop();
     }

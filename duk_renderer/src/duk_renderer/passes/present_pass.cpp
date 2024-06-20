@@ -3,8 +3,7 @@
 
 #include <duk_platform/window.h>
 #include <duk_renderer/passes/present_pass.h>
-
-#include "duk_renderer/shader/fullscreen/fullscreen_shader_data_source.h"
+#include <duk_renderer/shader/shader_pipeline_pool.h>
 
 namespace duk::renderer {
 
@@ -36,27 +35,6 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
 
         m_renderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
     }
-
-    {
-        // FullscreenMaterialDataSource fullscreenMaterialDataSource = {};
-        // fullscreenMaterialDataSource.sampler = duk::rhi::Sampler(duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER);
-        // fullscreenMaterialDataSource.update_hash();
-
-        FullscreenShaderDataSource fullscreenShaderDataSource;
-
-        ShaderPipelineCreateInfo shaderPipelineCreateInfo = {};
-        shaderPipelineCreateInfo.renderer = m_renderer;
-        // necessary when using vulkan, need to take that into account when supporting other APIs
-        shaderPipelineCreateInfo.settings.invertY = true;
-        shaderPipelineCreateInfo.shaderDataSource = &fullscreenShaderDataSource;
-
-        MaterialCreateInfo materialCreateInfo = {};
-        materialCreateInfo.renderer = m_renderer;
-        materialCreateInfo.materialData.shader = std::make_shared<ShaderPipeline>(shaderPipelineCreateInfo);
-        ;
-
-        m_fullscreenMaterial = std::make_unique<Material>(materialCreateInfo);
-    }
 }
 
 PresentPass::~PresentPass() = default;
@@ -79,6 +57,14 @@ void PresentPass::update(const Pass::UpdateParams& params) {
         frameBufferCreateInfo.renderPass = m_renderPass.get();
 
         m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
+    }
+
+    if (!m_fullscreenMaterial) {
+        MaterialCreateInfo materialCreateInfo = {};
+        materialCreateInfo.renderer = m_renderer;
+        materialCreateInfo.materialData.shader = params.pools->get<ShaderPipelinePool>()->fullscreen();
+
+        m_fullscreenMaterial = std::make_unique<Material>(materialCreateInfo);
     }
 
     m_fullscreenMaterial->set("uTexture", duk::rhi::Descriptor::image_sampler(m_inColor.image(), m_inColor.image_layout(), kDefaultTextureSampler));

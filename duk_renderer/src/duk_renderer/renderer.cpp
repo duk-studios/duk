@@ -66,7 +66,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
 Renderer::~Renderer() = default;
 
-void Renderer::render(duk::objects::Objects& objects) {
+void Renderer::render(duk::objects::Objects& objects, duk::resource::Pools& pools) {
     // if rendering to a window, but it's minimized, skip
     if (m_window && m_window->minimized()) {
         return;
@@ -76,7 +76,7 @@ void Renderer::render(duk::objects::Objects& objects) {
 
     update_global_descriptors(objects);
 
-    update_passes(objects);
+    update_passes(objects, pools);
 
     m_rhi->update();
 
@@ -195,13 +195,14 @@ void Renderer::update_global_descriptors(duk::objects::Objects& objects) {
     m_globalDescriptors->update_lights(objects);
 }
 
-void Renderer::update_passes(objects::Objects& objects) {
+void Renderer::update_passes(objects::Objects& objects, duk::resource::Pools& pools) {
     Pass::UpdateParams updateParams = {};
     updateParams.objects = &objects;
     updateParams.globalDescriptors = m_globalDescriptors.get();
     updateParams.viewport = {render_width(), render_height()};
     updateParams.pipelineCache = m_pipelineCache.get();
     updateParams.spriteCache = m_spriteCache.get();
+    updateParams.pools = &pools;
 
     for (auto& pass: m_passes) {
         pass->update(updateParams);

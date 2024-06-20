@@ -51,6 +51,9 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/material/material_descriptor_set.h
         include/duk_renderer/shader/pipeline_cache.h
         include/duk_renderer/shader/shader_pipeline.h
+        include/duk_renderer/shader/shader_module.h
+        include/duk_renderer/shader/shader_module_pool.h
+        include/duk_renderer/shader/shader_module_handler.h
         include/duk_renderer/shader/shader_pipeline_data.h
         include/duk_renderer/shader/shader_pipeline_pool.h
         include/duk_renderer/shader/shader_pipeline_handler.h
@@ -87,6 +90,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/sprite/sprite_mesh.cpp
         src/duk_renderer/sprite/sprite_pool.cpp
         src/duk_renderer/shader/pipeline_cache.cpp
+        src/duk_renderer/shader/shader_module.cpp
+        src/duk_renderer/shader/shader_module_pool.cpp
+        src/duk_renderer/shader/shader_module_handler.cpp
         src/duk_renderer/shader/shader_pipeline.cpp
         src/duk_renderer/shader/shader_pipeline_pool.cpp
         src/duk_renderer/shader/shader_pipeline_handler.cpp

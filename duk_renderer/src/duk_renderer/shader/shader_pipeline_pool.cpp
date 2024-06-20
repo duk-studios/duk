@@ -3,67 +3,67 @@
 //
 
 #include <duk_renderer/shader/shader_pipeline_pool.h>
-#include <duk_renderer/shader/color/color_shader_data_source.h>
-#include <duk_renderer/shader/phong/phong_shader_data_source.h>
-#include <duk_renderer/shader/fullscreen/fullscreen_shader_data_source.h>
-#include <duk_renderer/shader/text/text_shader_data_source.h>
 
 namespace duk::renderer {
 
 ShaderPipelinePool::ShaderPipelinePool(const ShaderPipelinePoolCreateInfo& shaderPipelinePoolCreateInfo)
     : m_renderer(shaderPipelinePoolCreateInfo.renderer) {
+    auto shaderModulePool = shaderPipelinePoolCreateInfo.shaderModulePool;
     {
-        ColorShaderDataSource colorShaderDataSource = {};
-        PipelineSettings settings = {};
-        settings.blend = false;
-        settings.depth = true;
-        settings.invertY = false;
-        settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
-        m_opaqueColor = create(kOpaqueColorShaderPipelineId, &colorShaderDataSource, settings);
-        settings.blend = true;
-        settings.priority = 1000;
-        m_transparentColor = create(kTransparentColorShaderPipelineId, &colorShaderDataSource, settings);
+        ShaderPipelineData colorShaderPipelineData = {};
+        colorShaderPipelineData.settings.blend = false;
+        colorShaderPipelineData.settings.depth = true;
+        colorShaderPipelineData.settings.invertY = false;
+        colorShaderPipelineData.settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
+        colorShaderPipelineData.shaders.vert = shaderModulePool->color(duk::rhi::ShaderModule::VERTEX);
+        colorShaderPipelineData.shaders.frag = shaderModulePool->color(duk::rhi::ShaderModule::FRAGMENT);
+        m_opaqueColor = create(kOpaqueColorShaderPipelineId, &colorShaderPipelineData);
+        colorShaderPipelineData.settings.blend = true;
+        colorShaderPipelineData.settings.priority = 1000;
+        m_transparentColor = create(kTransparentColorShaderPipelineId, &colorShaderPipelineData);
     }
 
     {
-        PhongShaderDataSource phongShaderDataSource = {};
-        PipelineSettings settings = {};
-        settings.blend = false;
-        settings.depth = true;
-        settings.invertY = false;
-        settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
-        m_opaquePhong = create(kOpaquePhongShaderPipelineId, &phongShaderDataSource, settings);
-        settings.blend = true;
-        settings.priority = 1000;
-        m_transparentPhong = create(kTransparentPhongShaderPipelineId, &phongShaderDataSource, settings);
+        ShaderPipelineData phongShaderPipelineData = {};
+        phongShaderPipelineData.settings.blend = false;
+        phongShaderPipelineData.settings.depth = true;
+        phongShaderPipelineData.settings.invertY = false;
+        phongShaderPipelineData.settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
+        phongShaderPipelineData.shaders.vert = shaderModulePool->phong(duk::rhi::ShaderModule::VERTEX);
+        phongShaderPipelineData.shaders.frag = shaderModulePool->phong(duk::rhi::ShaderModule::FRAGMENT);
+        m_opaquePhong = create(kOpaquePhongShaderPipelineId, &phongShaderPipelineData);
+        phongShaderPipelineData.settings.blend = true;
+        phongShaderPipelineData.settings.priority = 1000;
+        m_transparentPhong = create(kTransparentPhongShaderPipelineId, &phongShaderPipelineData);
     }
 
     {
-        FullscreenShaderDataSource fullscreenShaderDataSource = {};
-        PipelineSettings settings = {};
-        settings.blend = false;
-        settings.depth = false;
-        settings.invertY = true;
-        settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
-        m_fullscreen = create(kFullscreenShaderPipelineId, &fullscreenShaderDataSource, settings);
+        ShaderPipelineData fullscreenShaderPipelineData = {};
+        fullscreenShaderPipelineData.settings.blend = false;
+        fullscreenShaderPipelineData.settings.depth = false;
+        fullscreenShaderPipelineData.settings.invertY = true;
+        fullscreenShaderPipelineData.settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
+        fullscreenShaderPipelineData.shaders.vert = shaderModulePool->fullscreen(duk::rhi::ShaderModule::VERTEX);
+        fullscreenShaderPipelineData.shaders.frag = shaderModulePool->fullscreen(duk::rhi::ShaderModule::FRAGMENT);
+        m_fullscreen = create(kFullscreenShaderPipelineId, &fullscreenShaderPipelineData);
     }
 
     {
-        TextShaderDataSource textShaderDataSource = {};
-        PipelineSettings settings = {};
-        settings.depth = false;
-        settings.blend = true;
-        settings.priority = 2000;
-        settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
-        m_text = create(kTextShaderPipelineId, &textShaderDataSource, settings);
+        ShaderPipelineData textShaderPipelineData = {};
+        textShaderPipelineData.settings.depth = false;
+        textShaderPipelineData.settings.blend = true;
+        textShaderPipelineData.settings.priority = 2000;
+        textShaderPipelineData.settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
+        textShaderPipelineData.shaders.vert = shaderModulePool->text(duk::rhi::ShaderModule::VERTEX);
+        textShaderPipelineData.shaders.frag = shaderModulePool->text(duk::rhi::ShaderModule::FRAGMENT);
+        m_text = create(kTextShaderPipelineId, &textShaderPipelineData);
     }
 }
 
-ShaderPipelineResource ShaderPipelinePool::create(const duk::resource::Id& id, const duk::rhi::ShaderDataSource* shaderDataSource, const PipelineSettings& settings) {
+ShaderPipelineResource ShaderPipelinePool::create(const duk::resource::Id& id, const ShaderPipelineData* shaderPipelineData) {
     ShaderPipelineCreateInfo shaderPipelineCreateInfo = {};
     shaderPipelineCreateInfo.renderer = m_renderer;
-    shaderPipelineCreateInfo.shaderDataSource = shaderDataSource;
-    shaderPipelineCreateInfo.settings = settings;
+    shaderPipelineCreateInfo.shaderPipelineData = shaderPipelineData;
 
     return insert(id, std::make_shared<ShaderPipeline>(shaderPipelineCreateInfo));
 }

@@ -29,7 +29,7 @@ void Director::update(Engine& engine) {
 
     m_scene->update(engine, m_activeSystemGroup);
 
-    m_renderer->render(m_scene->objects());
+    m_renderer->render(m_scene->objects(), *m_resources->pools());
 }
 
 void Director::request_scene(duk::resource::Id id) {

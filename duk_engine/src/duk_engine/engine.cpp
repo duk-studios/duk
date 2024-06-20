@@ -10,10 +10,10 @@
 #include <duk_audio/clip/audio_clip_handler.h>
 
 #include <duk_renderer/font/font_handler.h>
-#include <duk_renderer/image/image_handler.h>
 #include <duk_renderer/material/material_handler.h>
 #include <duk_renderer/mesh/mesh_pool.h>
 #include <duk_renderer/sprite/sprite_pool.h>
+#include <duk_renderer/shader/shader_module_pool.h>
 #include <duk_renderer/shader/shader_pipeline_pool.h>
 
 #include <duk_log/log.h>
@@ -78,8 +78,11 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         imagePoolCreateInfo.renderer = m_renderer.get();
         m_pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
 
+        auto shaderModulePool = m_pools.create_pool<duk::renderer::ShaderModulePool>();
+
         duk::renderer::ShaderPipelinePoolCreateInfo shaderPipelinePoolCreateInfo = {};
         shaderPipelinePoolCreateInfo.renderer = m_renderer.get();
+        shaderPipelinePoolCreateInfo.shaderModulePool = shaderModulePool;
         m_pools.create_pool<duk::renderer::ShaderPipelinePool>(shaderPipelinePoolCreateInfo);
 
         duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
