@@ -37,7 +37,7 @@ public:
 
     virtual ~Renderer();
 
-    void render(duk::objects::Objects& objects);
+    void render(duk::objects::Objects& objects, duk::resource::Pools& pools);
 
     void clear_cache();
 
@@ -69,7 +69,7 @@ public:
 private:
     void update_global_descriptors(duk::objects::Objects& objects);
 
-    void update_passes(objects::Objects& objects);
+    void update_passes(objects::Objects& objects, duk::resource::Pools& pools);
 
 protected:
     duk::platform::Window* m_window;

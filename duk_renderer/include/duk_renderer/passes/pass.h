@@ -8,7 +8,8 @@
 #include <duk_rhi/command/command_buffer.h>
 #include <duk_rhi/pipeline/pipeline_flags.h>
 
-#include <cstdint>
+#include <duk_resource/pool.h>
+
 #include <list>
 
 namespace duk {
@@ -70,6 +71,7 @@ public:
         glm::vec2 viewport;
         PipelineCache* pipelineCache;
         SpriteCache* spriteCache;
+        duk::resource::Pools* pools;
     };
 
     virtual void update(const UpdateParams& params) = 0;

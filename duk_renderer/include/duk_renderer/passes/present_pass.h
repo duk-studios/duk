@@ -10,8 +10,11 @@
 
 namespace duk::renderer {
 
+class ShaderPipelinePool;
+
 struct PresentPassCreateInfo {
     Renderer* renderer;
+    ShaderPipelinePool* shaderPipelinePool;
     duk::platform::Window* window;
 };
 
