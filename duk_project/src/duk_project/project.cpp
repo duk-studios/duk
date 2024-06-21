@@ -133,12 +133,11 @@ void pack(Project* project) {
     resourceFiles.reserve(project->resources.size());
     for (const auto& [id, entry]: project->resources) {
         auto resourceFile = load_resource_file(entry.resourceFile);
+        resourceFile.file = fmt::format("{}.bin", id.value());
         resourceFiles.emplace_back(resourceFile);
         auto resourceData = duk::tools::load_bytes(entry.dataFile);
 
-        auto compressedResourceDataPath = resourcesPath / fmt::format("{}.bin", id.value());
-
-        duk::tools::save_compressed_bytes(compressedResourceDataPath, resourceData.data(), resourceData.size());
+        duk::tools::save_compressed_bytes(resourcesPath / resourceFile.file, resourceData.data(), resourceData.size());
     }
 
     std::ostringstream oss;
