@@ -11,14 +11,14 @@
 
 namespace duk::animation {
 
-class AnimationClipHandler : public duk::resource::ResourceHandlerT<AnimationClipPool> {
+class AnimationClipHandler : public duk::resource::TextResourceHandlerT<AnimationClipPool> {
 public:
     AnimationClipHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<AnimationClip> load(AnimationClipPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<AnimationClip> load_from_text(AnimationClipPool* pool, const resource::Id& id, const std::string_view& text) override;
 };
 
 }// namespace duk::animation

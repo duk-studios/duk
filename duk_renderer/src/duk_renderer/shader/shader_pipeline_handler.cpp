@@ -9,27 +9,18 @@
 
 #include <duk_serial/json/serializer.h>
 
-#include <duk_tools/file.h>
-
 namespace duk::renderer {
 
 ShaderPipelineHandler::ShaderPipelineHandler()
-    : ResourceHandlerT("spp") {
+    : TextResourceHandlerT("spp") {
 }
 
 bool ShaderPipelineHandler::accepts(const std::string& extension) const {
     return extension == ".spp";
 }
 
-duk::resource::Handle<ShaderPipeline> ShaderPipelineHandler::load(ShaderPipelinePool* pool, const resource::Id& id, const std::filesystem::path& path) {
-    if (!std::filesystem::exists(path)) {
-        throw std::runtime_error(fmt::format("File '{}' does not exist", path.string()));
-    }
-
-    auto shaderPipelineDataJson = duk::tools::load_text(path);
-
-    auto shaderPipelineData = duk::serial::read_json<ShaderPipelineData>(shaderPipelineDataJson);
-
+duk::resource::Handle<ShaderPipeline> ShaderPipelineHandler::load_from_text(ShaderPipelinePool* pool, const resource::Id& id, const std::string_view& text) {
+    auto shaderPipelineData = duk::serial::read_json<ShaderPipelineData>(text);
     return pool->create(id, &shaderPipelineData);
 }
 

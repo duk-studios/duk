@@ -11,16 +11,15 @@
 namespace duk::renderer {
 
 SpriteHandler::SpriteHandler()
-    : ResourceHandlerT("spt") {
+    : TextResourceHandlerT("spt") {
 }
 
 bool SpriteHandler::accepts(const std::string& extension) const {
     return extension == ".spt";
 }
 
-duk::resource::Handle<Sprite> SpriteHandler::load(SpritePool* pool, const resource::Id& id, const std::filesystem::path& path) {
-    auto content = duk::tools::load_text(path);
-    auto spriteAtlasData = duk::serial::read_json<SpriteAtlasData>(content);
+duk::resource::Handle<Sprite> SpriteHandler::load_from_text(SpritePool* pool, const resource::Id& id, const std::string_view& text) {
+    auto spriteAtlasData = duk::serial::read_json<SpriteAtlasData>(text);
 
     SpriteAtlasCreateInfo spriteAtlasCreateInfo = {};
     spriteAtlasCreateInfo.spriteAtlasData = &spriteAtlasData;

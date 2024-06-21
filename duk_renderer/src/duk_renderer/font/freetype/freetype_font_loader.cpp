@@ -24,14 +24,16 @@ bool FreetypeFontLoader::accepts(const std::filesystem::path& extension) {
     return extension == ".ttf";
 }
 
-std::shared_ptr<Font> FreetypeFontLoader::load(const std::filesystem::path& path) {
-    if (!std::filesystem::exists(path)) {
-        throw std::invalid_argument(fmt::format("failed to load freetype font, file ({}) does not exist", path.string()));
-    }
+bool FreetypeFontLoader::accepts(const void* data, size_t size) {
+    // for now we only have ttf files, so we can just trust that the data is a valid ttf file
+    // but if we have different font formats we might need to validate it here
+    return true;
+}
 
+std::shared_ptr<Font> FreetypeFontLoader::load(const void* data, size_t size) {
     FreetypeFontCreateInfo freetypeFontCreateInfo = {};
     freetypeFontCreateInfo.library = m_library;
-    freetypeFontCreateInfo.fontData = duk::tools::load_bytes(path);
+    freetypeFontCreateInfo.fontData.assign(static_cast<const uint8_t*>(data), static_cast<const uint8_t*>(data) + size);
 
     return std::make_shared<FreetypeFont>(freetypeFontCreateInfo);
 }

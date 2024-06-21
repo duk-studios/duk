@@ -18,14 +18,13 @@ bool FontHandler::accepts(const std::string& extension) const {
     });
 }
 
-duk::resource::Handle<Font> FontHandler::load(FontPool* pool, const resource::Id& id, const std::filesystem::path& path) {
+duk::resource::Handle<Font> FontHandler::load_from_memory(FontPool* pool, const resource::Id& id, const void* data, size_t size) {
     for (auto& loader: m_loaders) {
-        auto extension = path.extension();
-        if (loader->accepts(extension)) {
-            return pool->insert(id, loader->load(path));
+        if (loader->accepts(data, size)) {
+            return pool->insert(id, loader->load(data, size));
         }
     }
-    throw std::runtime_error(fmt::format("failed to find font loader for {}", path.string()));
+    throw std::runtime_error(fmt::format("failed to find font loader for {}", id.value()));
 }
 
 }// namespace duk::renderer

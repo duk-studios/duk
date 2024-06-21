@@ -4,8 +4,6 @@
 
 #include <duk_objects/objects_handler.h>
 
-#include <duk_tools/file.h>
-
 #include <duk_serial/json/serializer.h>
 
 namespace duk::objects {
@@ -35,20 +33,18 @@ inline void to_json<duk::objects::ObjectsWrapper>(rapidjson::Document& document,
 namespace duk::objects {
 
 ObjectsHandler::ObjectsHandler()
-    : ResourceHandlerT("obj") {
+    : TextResourceHandlerT("obj") {
 }
 
 bool ObjectsHandler::accepts(const std::string& extension) const {
     return extension == ".obj";
 }
 
-duk::resource::Handle<Objects> ObjectsHandler::load(ObjectsPool* pool, const resource::Id& id, const std::filesystem::path& path) {
-    auto content = duk::tools::load_text(path);
-
+duk::resource::Handle<Objects> ObjectsHandler::load_from_text(ObjectsPool* pool, const resource::Id& id, const std::string_view& text) {
     ObjectsWrapper objectsWrapper = {};
     objectsWrapper.objects = std::make_shared<Objects>();
 
-    duk::serial::read_json(content, objectsWrapper);
+    duk::serial::read_json(text, objectsWrapper);
 
     return pool->insert(id, objectsWrapper.objects);
 }

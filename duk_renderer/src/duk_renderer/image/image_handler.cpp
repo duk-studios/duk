@@ -46,15 +46,14 @@ bool ImageHandler::accepts(const std::string& extension) const {
     });
 }
 
-duk::resource::Handle<Image> ImageHandler::load(ImagePool* pool, const resource::Id& id, const std::filesystem::path& path) {
+duk::resource::Handle<Image> ImageHandler::load_from_memory(ImagePool* pool, const resource::Id& id, const void* data, size_t size) {
     for (auto& loader: m_loaders) {
-        auto extension = path.extension();
-        if (loader->accepts(extension)) {
-            auto dataSource = loader->load(path);
+        if (loader->accepts(data, size)) {
+            auto dataSource = loader->load(data, size);
             return pool->create(id, dataSource.get());
         }
     }
-    throw std::runtime_error(fmt::format("failed to find suitable image loader for ({})", path.string()));
+    throw std::runtime_error(fmt::format("failed to find suitable image loader for ({})", id.value()));
 }
 
 }// namespace duk::renderer

@@ -11,14 +11,14 @@
 
 namespace duk::objects {
 
-class ObjectsHandler : public duk::resource::ResourceHandlerT<ObjectsPool> {
+class ObjectsHandler : public duk::resource::TextResourceHandlerT<ObjectsPool> {
 public:
     ObjectsHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Objects> load(ObjectsPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Objects> load_from_text(ObjectsPool* pool, const resource::Id& id, const std::string_view& text) override;
 };
 
 }// namespace duk::objects

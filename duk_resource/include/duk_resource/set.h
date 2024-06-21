@@ -12,9 +12,15 @@
 
 namespace duk::resource {
 
+enum class LoadMode {
+    UNPACKED = 0,
+    PACKED
+};
+
 struct ResourceSetCreateInfo {
     std::filesystem::path path;
     Pools* pools;
+    LoadMode loadMode;
 };
 
 class ResourceSet {
@@ -31,6 +37,7 @@ public:
 
 private:
     Pools* m_pools;
+    LoadMode m_mode;
     std::unordered_map<Id, ResourceFile> m_resourceFiles;
     std::unordered_map<std::string, Id> m_resourceIdAliases;
 };

@@ -4,8 +4,6 @@
 
 #include <duk_audio/clip/audio_clip_handler.h>
 
-#include <duk_tools/file.h>
-
 namespace duk::audio {
 
 AudioClipHandler::AudioClipHandler()
@@ -16,10 +14,8 @@ bool AudioClipHandler::accepts(const std::string& extension) const {
     return extension == ".mp3" || extension == ".flac" || extension == ".ogg" || extension == ".wav";
 }
 
-duk::resource::Handle<AudioClip> AudioClipHandler::load(AudioClipPool* pool, const resource::Id& id, const std::filesystem::path& path) {
-    if (!std::filesystem::exists(path)) {
-        throw std::invalid_argument(fmt::format("failed to load AudioClip, path ({}) does not exist", path.string()));
-    }
-    return pool->create(id, duk::tools::load_bytes(path));
+duk::resource::Handle<AudioClip> AudioClipHandler::load_from_memory(AudioClipPool* pool, const resource::Id& id, const void* data, size_t size) {
+    return pool->create(id, data, size);
 }
+
 }// namespace duk::audio

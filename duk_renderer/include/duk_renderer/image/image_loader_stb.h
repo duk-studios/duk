@@ -10,9 +10,11 @@ namespace duk::renderer {
 
 class ImageLoaderStb : public ImageLoader {
 public:
-    bool accepts(const std::filesystem::path& extension) override;
+    bool accepts(const std::string_view& extension) override;
 
-    std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) override;
+    bool accepts(const void* data, size_t size) override;
+
+    std::unique_ptr<duk::rhi::ImageDataSource> load(const void* data, size_t size) override;
 };
 
 }// namespace duk::renderer
