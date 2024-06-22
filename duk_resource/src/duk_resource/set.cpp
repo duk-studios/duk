@@ -100,7 +100,7 @@ Handle<void> ResourceSet::load(const Id id) {
 
     auto resourceIt = m_resourceFiles.find(id);
     if (resourceIt == m_resourceFiles.end()) {
-        throw std::invalid_argument("resource id not found");
+        throw std::invalid_argument(fmt::format("resource id {} not found", id.value()));
     }
 
     const auto& resourceFile = resourceIt->second;

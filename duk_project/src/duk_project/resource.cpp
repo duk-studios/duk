@@ -16,9 +16,19 @@ namespace duk::project {
 
 namespace detail {
 
-static bool is_resource(const std::string& extension) {
+static bool is_resource(const Project* project, const std::string& extension) {
     const auto handler = duk::resource::ResourceRegistry::instance()->find_handler_for_extension(extension);
-    return handler != nullptr;
+    if (handler) {
+        return true;
+    }
+
+    const auto& settings = project->settings;
+    for (auto& resourceExtension: settings.resourceExtensions) {
+        if (resourceExtension == extension) {
+            return true;
+        }
+    }
+    return false;
 }
 
 static std::string resource_tag(const std::string& extension) {
@@ -47,11 +57,11 @@ static duk::resource::Id resource_id_generate(const Project* project) {
     return id;
 }
 
-static void add_resource(Project* project, const duk::resource::Id& id, const std::filesystem::path& resourceFile, const std::filesystem::path& trackFile) {
+static void add_resource(Project* project, const duk::resource::Id& id, const std::filesystem::path& dataFile, const std::filesystem::path& resourceFile) {
     if (has_resource_id(project, id)) {
         throw std::invalid_argument(fmt::format("tried to add duplicate resource id ({})", id.value()));
     }
-    project->resources.emplace(id, ResourceEntry{resourceFile, trackFile});
+    project->resources.emplace(id, ResourceEntry{dataFile, resourceFile});
 }
 
 }// namespace detail
@@ -66,33 +76,33 @@ std::set<std::filesystem::path> resource_scan(Project* project) {
         throw std::invalid_argument(fmt::format("resource scan failed: \"{}\" does not exist", project->root.string()));
     }
 
-    std::set<std::filesystem::path> trackFiles;
     std::set<std::filesystem::path> resourceFiles;
+    std::set<std::filesystem::path> dataFiles;
     for (const auto& entry: std::filesystem::recursive_directory_iterator(project->root / "resources")) {
         if (!entry.is_regular_file()) {
             continue;
         }
         const auto file = entry.path();
-        const auto extension = file.extension();
+        const auto extension = file.extension().string();
         if (extension == ".res") {
-            trackFiles.insert(file);
-        } else if (detail::is_resource(extension.string())) {
-            resourceFiles.insert(entry);
+            resourceFiles.insert(file);
+        } else if (detail::is_resource(project, extension)) {
+            dataFiles.insert(file);
         }
     }
 
-    std::set<std::filesystem::path> untrackedResourceFiles;
-    for (auto resourceFilepath: resourceFiles) {
-        auto trackFile = std::filesystem::path(resourceFilepath).replace_extension(".res");
-        if (trackFiles.find(trackFile) != trackFiles.end()) {
-            auto resourceFile = load_resource_file(trackFile);
-            detail::add_resource(project, resourceFile.id, resourceFilepath, trackFile);
+    std::set<std::filesystem::path> untrackedDataFiles;
+    for (const auto& dataFile: dataFiles) {
+        auto resourceFilePath = std::filesystem::path(dataFile).replace_extension(".res");
+        if (resourceFiles.contains(resourceFilePath)) {
+            auto resourceFile = load_resource_file(resourceFilePath);
+            detail::add_resource(project, resourceFile.id, dataFile, resourceFilePath);
         } else {
-            untrackedResourceFiles.insert(resourceFilepath);
+            untrackedDataFiles.insert(dataFile);
         }
     }
 
-    return untrackedResourceFiles;
+    return untrackedDataFiles;
 }
 
 duk::resource::Id resource_track(Project* project, const std::filesystem::path& resource) {
@@ -102,7 +112,7 @@ duk::resource::Id resource_track(Project* project, const std::filesystem::path& 
 
     const auto extension = resource.extension().string();
 
-    if (!detail::is_resource(extension)) {
+    if (!detail::is_resource(project, extension)) {
         throw std::invalid_argument(fmt::format("resource \"{}\" is not a resource", resource.string()));
     }
 

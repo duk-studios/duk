@@ -12,19 +12,24 @@ set(DUK_RUNTIME_SOURCES
         src/duk_runtime/application.cpp
 )
 
-add_executable("${DUK_RUNTIME_TARGET_NAME}" ${DUK_RUNTIME_SOURCES})
+add_executable(${DUK_RUNTIME_TARGET_NAME} ${DUK_RUNTIME_SOURCES})
 
-target_include_directories("${DUK_RUNTIME_TARGET_NAME}"
+target_include_directories(${DUK_RUNTIME_TARGET_NAME}
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
 
-target_link_libraries("${DUK_RUNTIME_TARGET_NAME}"
+target_link_libraries(${DUK_RUNTIME_TARGET_NAME}
         PRIVATE
         duk::duk_api
 )
 
-set_target_properties("${DUK_RUNTIME_TARGET_NAME}"
+set_target_properties(${DUK_RUNTIME_TARGET_NAME}
         PROPERTIES
         CXX_STANDARD 20
 )
+
+if (DUK_PACK)
+    message(STATUS "Defining DUK_PACK for target ${DUK_RUNTIME_TARGET_NAME}")
+    target_compile_definitions(${DUK_RUNTIME_TARGET_NAME} PRIVATE -DDUK_PACK=1)
+endif ()

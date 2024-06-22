@@ -4,7 +4,6 @@ if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     set(DUK_AS_SOURCE TRUE)
 endif ()
 
-option(DUK_BUILD_SAMPLE "Enables building of duk_sample" ON)
 option(DUK_FORMAT_FILES "Enables format target" ON)
 option(DUK_VCPKG_INSTALL "Enables using vcpkg to install dependencies" ON)
 
@@ -60,10 +59,6 @@ add_subdirectory(duk_animation)
 add_subdirectory(duk_project)
 add_subdirectory(duk_cli)
 add_subdirectory(duk_api)
-add_subdirectory(duk_runtime)
-if (DUK_BUILD_SAMPLE)
-    add_subdirectory(duk_sample)
-endif ()
 
 include(CMakePackageConfigHelpers)
 
