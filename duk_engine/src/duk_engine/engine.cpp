@@ -23,17 +23,16 @@
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
-    : m_run(false)
-    , m_workingDirectory(engineCreateInfo.workingDirectory) {
+    : m_workingDirectory(engineCreateInfo.workingDirectory)
+    , m_run(false) {
     duk::platform::System::create();
 
-    const auto settingsPath = m_workingDirectory / ".duk/settings.json";
-    m_settings = load_settings(settingsPath.string());
+    const auto& settings = engineCreateInfo.settings;
 
     duk::platform::WindowCreateInfo windowCreateInfo = {};
-    windowCreateInfo.windowTitle = m_settings.name.c_str();
-    windowCreateInfo.width = m_settings.resolution.x;
-    windowCreateInfo.height = m_settings.resolution.y;
+    windowCreateInfo.windowTitle = settings.name.c_str();
+    windowCreateInfo.width = settings.resolution.x;
+    windowCreateInfo.height = settings.resolution.y;
 
     m_window = duk::platform::Window::create_window(windowCreateInfo);
 
@@ -51,7 +50,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         rendererCreateInfo.pools = &m_pools;
         rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
-        rendererCreateInfo.applicationName = m_settings.name.c_str();
+        rendererCreateInfo.applicationName = settings.name.c_str();
 
         m_renderer = duk::renderer::make_forward_renderer(rendererCreateInfo);
     }
@@ -68,6 +67,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     {
         duk::resource::ResourceSetCreateInfo resourceSetCreateInfo = {};
         resourceSetCreateInfo.path = m_workingDirectory / "resources";
+        resourceSetCreateInfo.loadMode = settings.loadMode;
         resourceSetCreateInfo.pools = &m_pools;
         m_resources = std::make_unique<duk::resource::ResourceSet>(resourceSetCreateInfo);
     }
@@ -107,7 +107,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         DirectorCreateInfo directorCreateInfo = {};
         directorCreateInfo.renderer = m_renderer.get();
         directorCreateInfo.resources = m_resources.get();
-        directorCreateInfo.firstScene = m_settings.scene;
+        directorCreateInfo.firstScene = settings.scene;
 
         m_director = std::make_unique<Director>(directorCreateInfo);
     }

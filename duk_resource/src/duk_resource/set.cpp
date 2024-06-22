@@ -26,19 +26,15 @@ ResourceFile load_resource_file(const std::filesystem::path& path) {
     return resourceFile;
 }
 
-}// namespace detail
-
-ResourceSet::ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo)
-    : m_pools(resourceSetCreateInfo.pools) {
-    auto directory = resourceSetCreateInfo.path;
+static std::vector<ResourceFile> scan_resource_files(const std::filesystem::path& path) {
+    auto directory = path;
     if (!std::filesystem::is_directory(directory)) {
         directory = directory.parent_path();
     }
-
-    // recursively search for .res files and add them to the resourceSet
+    std::vector<ResourceFile> resourceFiles;
     for (const auto& entry: std::filesystem::recursive_directory_iterator(directory)) {
         if (std::filesystem::is_regular_file(entry.path()) && entry.path().extension() == ".res") {
-            auto resourceDescription = detail::load_resource_file(entry.path());
+            auto resourceDescription = load_resource_file(entry.path());
 
             // check if resource actually exists, ignore if not
             if (!std::filesystem::exists(resourceDescription.file)) {
@@ -46,10 +42,51 @@ ResourceSet::ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo)
                 continue;
             }
 
-            m_resourceFiles.emplace(resourceDescription.id, resourceDescription);
-            for (auto& alias: resourceDescription.aliases) {
-                m_resourceIdAliases.emplace(alias, resourceDescription.id);
-            }
+            resourceFiles.emplace_back(std::move(resourceDescription));
+        }
+    }
+    return resourceFiles;
+}
+
+static std::vector<ResourceFile> load_compressed_resource_files(const std::filesystem::path& path) {
+    if (!std::filesystem::exists(path)) {
+        throw std::invalid_argument(fmt::format("resource set file '{}' does not exist", path.string()));
+    }
+
+    auto compressedResources = path / "resources.bin";
+
+    const auto json = duk::tools::load_compressed_text(compressedResources);
+
+    auto resourceFiles = duk::serial::read_json<std::vector<ResourceFile>>(json);
+
+    for (auto& resourceFile: resourceFiles) {
+        // convert relative path into absolute path
+        resourceFile.file = (path / resourceFile.file).string();
+    }
+
+    return resourceFiles;
+}
+
+static std::vector<ResourceFile> load_resource_files(const std::filesystem::path& path, LoadMode mode) {
+    switch (mode) {
+        case LoadMode::UNPACKED:
+            return detail::scan_resource_files(path);
+        case LoadMode::PACKED:
+            return detail::load_compressed_resource_files(path);
+    }
+    return {};
+}
+
+}// namespace detail
+
+ResourceSet::ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo)
+    : m_pools(resourceSetCreateInfo.pools)
+    , m_mode(resourceSetCreateInfo.loadMode) {
+    const auto resourceFiles = detail::load_resource_files(resourceSetCreateInfo.path, m_mode);
+    for (const auto& resourceFile: resourceFiles) {
+        m_resourceFiles.emplace(resourceFile.id, resourceFile);
+        for (auto& alias: resourceFile.aliases) {
+            m_resourceIdAliases.emplace(alias, resourceFile.id);
         }
     }
 }
@@ -63,7 +100,7 @@ Handle<void> ResourceSet::load(const Id id) {
 
     auto resourceIt = m_resourceFiles.find(id);
     if (resourceIt == m_resourceFiles.end()) {
-        throw std::invalid_argument("resource id not found");
+        throw std::invalid_argument(fmt::format("resource id {} not found", id.value()));
     }
 
     const auto& resourceFile = resourceIt->second;
@@ -74,7 +111,7 @@ Handle<void> ResourceSet::load(const Id id) {
     }
 
     try {
-        handle = handler->load(m_pools, resourceFile.id, resourceFile.file);
+        handle = handler->load(m_pools, resourceFile.id, resourceFile.file, m_mode);
     } catch (const std::exception& e) {
         throw std::runtime_error(fmt::format("Failed to load resource '{}' at '{}', reason: {}\n", resourceFile.id.value(), resourceFile.file, e.what()));
     }

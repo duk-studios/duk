@@ -6,23 +6,19 @@
 
 #include <duk_serial/json/serializer.h>
 
-#include <duk_tools/file.h>
-
 namespace duk::engine {
 
 SceneHandler::SceneHandler()
-    : ResourceHandlerT("scn") {
+    : TextResourceHandlerT("scn") {
 }
 
 bool SceneHandler::accepts(const std::string& extension) const {
     return extension == ".scn";
 }
 
-duk::resource::Handle<Scene> SceneHandler::load(ScenePool* pool, const resource::Id& id, const std::filesystem::path& path) {
-    auto content = duk::tools::load_text(path);
-
+duk::resource::Handle<Scene> SceneHandler::load_from_text(ScenePool* pool, const resource::Id& id, const std::string_view& text) {
     auto scene = std::make_shared<Scene>();
-    duk::serial::read_json(content, *scene);
+    duk::serial::read_json(text, *scene);
 
     return pool->insert(id, scene);
 }

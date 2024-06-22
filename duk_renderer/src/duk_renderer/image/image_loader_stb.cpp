@@ -6,7 +6,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#include <fstream>
 #include <stdexcept>
 
 namespace duk::renderer {
@@ -30,31 +29,20 @@ duk::rhi::PixelFormat build_pixel_format(int channelCount) {
 
 }// namespace detail
 
-bool ImageLoaderStb::accepts(const std::filesystem::path& extension) {
+bool ImageLoaderStb::accepts(const std::string_view& extension) {
     if (extension != ".png" && extension != ".jpg" && extension != ".jpeg") {
         return false;
     }
     return true;
 }
 
-std::unique_ptr<duk::rhi::ImageDataSource> ImageLoaderStb::load(const std::filesystem::path& path) {
-    const auto pathStr = path.string();
-    if (!std::filesystem::exists(path)) {
-        throw std::runtime_error("file does not exist: " + pathStr);
-    }
+bool ImageLoaderStb::accepts(const void* data, size_t size) {
+    return stbi_info_from_memory(static_cast<const stbi_uc*>(data), size, nullptr, nullptr, nullptr);
+}
 
-    std::ifstream file(path, std::ios::ate | std::ios::binary);
-    if (!file) {
-        throw std::runtime_error("failed to open file");
-    }
-    auto size = file.tellg();
-    file.seekg(0);
-
-    std::vector<uint8_t> buffer(size);
-    file.read(reinterpret_cast<char*>(buffer.data()), static_cast<std::streamsize>(buffer.size()));
-
+std::unique_ptr<duk::rhi::ImageDataSource> ImageLoaderStb::load(const void* data, size_t size) {
     int width, height, channelCount;
-    if (!stbi_info_from_memory(buffer.data(), static_cast<int>(buffer.size()), &width, &height, &channelCount)) {
+    if (!stbi_info_from_memory(static_cast<stbi_uc const*>(data), static_cast<int>(size), &width, &height, &channelCount)) {
         throw std::runtime_error("failed to read image memory");
     }
 
@@ -67,17 +55,17 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageLoaderStb::load(const std::files
 
     auto format = detail::build_pixel_format(channelCount);
 
-    void* data = stbi_load_from_memory(buffer.data(), static_cast<int>(buffer.size()), &width, &height, &channelCount, channelCount);
+    const auto pixels = stbi_load_from_memory(static_cast<stbi_uc const*>(data), static_cast<int>(size), &width, &height, &channelCount, channelCount);
 
-    if (!data) {
+    if (!pixels) {
         throw std::runtime_error("failed to decode image: " + std::string(stbi_failure_reason()));
     }
 
-    auto image = ImageHandler::create(data, format, width, height);
+    auto image = ImageHandler::create(pixels, format, width, height);
 
     image->update_hash();
 
-    stbi_image_free(data);
+    stbi_image_free(pixels);
 
     return image;
 }

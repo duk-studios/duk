@@ -6,22 +6,19 @@
 
 #include <duk_serial/json/serializer.h>
 
-#include <duk_tools/file.h>
-
 namespace duk::animation {
 
 AnimationControllerHandler::AnimationControllerHandler()
-    : ResourceHandlerT("anc") {
+    : TextResourceHandlerT("anc") {
 }
 
 bool AnimationControllerHandler::accepts(const std::string& extension) const {
     return extension == ".anc";
 }
 
-duk::resource::Handle<AnimationController> AnimationControllerHandler::load(AnimationControllerPool* pool, const resource::Id& id, const std::filesystem::path& path) {
-    auto content = duk::tools::load_text(path);
+duk::resource::Handle<AnimationController> AnimationControllerHandler::load_from_text(AnimationControllerPool* pool, const resource::Id& id, const std::string_view& text) {
     auto controller = std::make_shared<AnimationController>();
-    duk::serial::read_json(content, *controller);
+    duk::serial::read_json(text, *controller);
     return pool->insert(id, controller);
 }
 

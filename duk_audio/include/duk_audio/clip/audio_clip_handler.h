@@ -18,7 +18,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<AudioClip> load(AudioClipPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<AudioClip> load_from_memory(AudioClipPool* pool, const resource::Id& id, const void* data, size_t size) override;
 };
 
 }// namespace duk::audio

@@ -17,7 +17,9 @@ public:
 
     virtual bool accepts(const std::filesystem::path& extension) = 0;
 
-    virtual std::shared_ptr<Font> load(const std::filesystem::path& path) = 0;
+    virtual bool accepts(const void* data, size_t size) = 0;
+
+    virtual std::shared_ptr<Font> load(const void* data, size_t size) = 0;
 };
 
 struct FontHandlerCreateInfo {
@@ -32,7 +34,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Font> load(FontPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Font> load_from_memory(FontPool* pool, const resource::Id& id, const void* data, size_t size) override;
 
 private:
     std::vector<std::unique_ptr<FontLoader>> m_loaders;

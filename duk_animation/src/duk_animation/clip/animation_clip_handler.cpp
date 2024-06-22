@@ -11,19 +11,18 @@
 namespace duk::animation {
 
 AnimationClipHandler::AnimationClipHandler()
-    : ResourceHandlerT("ani") {
+    : TextResourceHandlerT("ani") {
 }
 
 bool AnimationClipHandler::accepts(const std::string& extension) const {
     return extension == ".ani";
 }
 
-duk::resource::Handle<AnimationClip> AnimationClipHandler::load(AnimationClipPool* pool, const resource::Id& id, const std::filesystem::path& path) {
-    const auto content = duk::tools::load_text(path);
-
+duk::resource::Handle<AnimationClip> AnimationClipHandler::load_from_text(AnimationClipPool* pool, const resource::Id& id, const std::string_view& text) {
     const auto animation = std::make_shared<AnimationClip>();
-    duk::serial::read_json(content, *animation);
+    duk::serial::read_json(text, *animation);
 
     return pool->insert(id, animation);
 }
+
 }// namespace duk::animation

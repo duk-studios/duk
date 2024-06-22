@@ -11,14 +11,14 @@
 
 namespace duk::renderer {
 
-class ShaderPipelineHandler : public duk::resource::ResourceHandlerT<ShaderPipelinePool> {
+class ShaderPipelineHandler : public duk::resource::TextResourceHandlerT<ShaderPipelinePool> {
 public:
     ShaderPipelineHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<ShaderPipeline> load(ShaderPipelinePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<ShaderPipeline> load_from_text(ShaderPipelinePool* pool, const resource::Id& id, const std::string_view& text) override;
 
 private:
 };

@@ -13,14 +13,14 @@
 
 namespace duk::renderer {
 
-class MaterialHandler : public duk::resource::ResourceHandlerT<MaterialPool> {
+class MaterialHandler : public duk::resource::TextResourceHandlerT<MaterialPool> {
 public:
     explicit MaterialHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Material> load(MaterialPool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Material> load_from_text(MaterialPool* pool, const resource::Id& id, const std::string_view& text) override;
 };
 
 }// namespace duk::renderer

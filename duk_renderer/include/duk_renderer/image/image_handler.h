@@ -19,9 +19,11 @@ class ImageLoader {
 public:
     virtual ~ImageLoader() = default;
 
-    virtual bool accepts(const std::filesystem::path& extension) = 0;
+    virtual bool accepts(const std::string_view& extension) = 0;
 
-    virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const std::filesystem::path& path) = 0;
+    virtual bool accepts(const void* data, size_t size) = 0;
+
+    virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const void* data, size_t size) = 0;
 };
 
 class ImageHandler : public duk::resource::ResourceHandlerT<ImagePool> {
@@ -33,7 +35,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Image> load(ImagePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Image> load_from_memory(ImagePool* pool, const resource::Id& id, const void* data, size_t size) override;
 
 private:
     std::vector<std::unique_ptr<ImageLoader>> m_loaders;

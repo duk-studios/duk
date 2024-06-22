@@ -11,14 +11,14 @@
 
 namespace duk::renderer {
 
-class SpriteHandler : public duk::resource::ResourceHandlerT<SpritePool> {
+class SpriteHandler : public duk::resource::TextResourceHandlerT<SpritePool> {
 public:
     SpriteHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Sprite> load(SpritePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Sprite> load_from_text(SpritePool* pool, const resource::Id& id, const std::string_view& text) override;
 };
 
 }// namespace duk::renderer

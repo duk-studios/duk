@@ -18,7 +18,9 @@ public:
 
     bool accepts(const std::filesystem::path& extension) override;
 
-    std::shared_ptr<Font> load(const std::filesystem::path& path) override;
+    bool accepts(const void* data, size_t size) override;
+
+    std::shared_ptr<Font> load(const void* data, size_t size) override;
 
 private:
     FT_Library m_library;

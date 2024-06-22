@@ -13,14 +13,14 @@
 
 namespace duk::engine {
 
-class SceneHandler : public duk::resource::ResourceHandlerT<ScenePool> {
+class SceneHandler : public duk::resource::TextResourceHandlerT<ScenePool> {
 public:
     SceneHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Scene> load(ScenePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<Scene> load_from_text(ScenePool* pool, const resource::Id& id, const std::string_view& text) override;
 };
 
 }// namespace duk::engine

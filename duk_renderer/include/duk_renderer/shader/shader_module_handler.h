@@ -17,7 +17,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<ShaderModule> load(ShaderModulePool* pool, const resource::Id& id, const std::filesystem::path& path) override;
+    duk::resource::Handle<ShaderModule> load_from_memory(ShaderModulePool* pool, const resource::Id& id, const void* data, size_t size) override;
 };
 
 }// namespace duk::renderer

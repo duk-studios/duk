@@ -41,17 +41,56 @@ static void write_project_settings(const Project* project) {
     std::ostringstream oss;
     duk::serial::write_json(oss, settings, true);
 
-    duk::tools::save_text(project->root / ".duk/settings.json", oss.str());
+    duk::tools::save_text(project->root / "settings.json", oss.str());
 }
 
 static void read_project_settings(Project* project) {
-    auto settingsPath = project->root / ".duk/settings.json";
+    auto settingsPath = project->root / "settings.json";
     if (!std::filesystem::exists(settingsPath)) {
         throw std::runtime_error(fmt::format("settings.json not found at {}", settingsPath.string()));
     }
 
     auto settingsJson = duk::tools::load_text(settingsPath);
     duk::serial::read_json(settingsJson, project->settings);
+}
+
+static void pack_resources(Project* project, const std::filesystem::path& packPath) {
+    resource_scan(project);
+
+    auto resourcesPath = packPath / "resources";
+    if (!std::filesystem::exists(resourcesPath)) {
+        std::filesystem::create_directories(resourcesPath);
+    }
+
+    std::vector<duk::resource::ResourceFile> resourceFiles;
+    resourceFiles.reserve(project->resources.size());
+    for (const auto& [id, entry]: project->resources) {
+        auto resourceFile = load_resource_file(entry.resourceFile);
+        resourceFile.file = fmt::format("{}.bin", id.value());
+        resourceFiles.emplace_back(resourceFile);
+        auto resourceData = duk::tools::load_bytes(entry.dataFile);
+
+        duk::tools::save_compressed_bytes(resourcesPath / resourceFile.file, resourceData.data(), resourceData.size());
+    }
+
+    std::ostringstream oss;
+    duk::serial::write_json(oss, resourceFiles);
+
+    auto json = oss.str();
+
+    auto resourcesBinPath = resourcesPath / "resources.bin";
+
+    duk::tools::save_compressed_text(resourcesBinPath, json);
+}
+
+static void pack_settings(const Project* project, const std::filesystem::path& packPath) {
+    duk::engine::Settings settings = project->settings;
+
+    std::ostringstream oss;
+    duk::serial::write_json(oss, settings, false);
+
+    const auto settingsPath = packPath / "settings.bin";
+    duk::tools::save_compressed_text(settingsPath, oss.str());
 }
 
 }// namespace detail
@@ -122,33 +161,11 @@ void pack(Project* project) {
         throw std::invalid_argument("project root is not initialized");
     }
 
-    resource_scan(project);
+    auto packPath = project->root / ".duk/pack";
 
-    auto resourcesPath = project->root / ".duk/pack/resources";
-    if (!std::filesystem::exists(resourcesPath)) {
-        std::filesystem::create_directories(resourcesPath);
-    }
+    detail::pack_resources(project, packPath);
 
-    std::vector<duk::resource::ResourceFile> resourceFiles;
-    resourceFiles.reserve(project->resources.size());
-    for (const auto& [id, entry]: project->resources) {
-        auto resourceFile = load_resource_file(entry.resourceFile);
-        resourceFiles.emplace_back(resourceFile);
-        auto resourceData = duk::tools::load_bytes(entry.dataFile);
-
-        auto compressedResourceDataPath = resourcesPath / fmt::format("{}.bin", id.value());
-
-        duk::tools::save_compressed_bytes(compressedResourceDataPath, resourceData.data(), resourceData.size());
-    }
-
-    std::ostringstream oss;
-    duk::serial::write_json(oss, resourceFiles);
-
-    auto json = oss.str();
-
-    auto resourcesBinPath = resourcesPath / "resources.bin";
-
-    duk::tools::save_compressed_text(resourcesBinPath, json);
+    detail::pack_settings(project, packPath);
 }
 
 }// namespace duk::project

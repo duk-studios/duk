@@ -1,34 +1,40 @@
+cmake_minimum_required(VERSION 3.24)
+
 project(duk_sample)
 
-if (NOT MSVC)
-    set(CMAKE_EXE_LINKER_FLAGS "-static")
+if (MSVC)
+    add_compile_options(/MP)
 endif ()
 
-set(DUK_SAMPLE_HEADERS
-        )
+set(CMAKE_CXX_STANDARD 20)
 
-set(DUK_SAMPLE_SOURCES
-        src/duk_sample/api.cpp
-        src/duk_sample/camera_system.h
-        src/duk_sample/camera_system.cpp
-        src/duk_sample/sprite_animator_system.h
-        src/duk_sample/sprite_animator_system.cpp
-        src/duk_sample/stats_system.h
-        src/duk_sample/stats_system.cpp
+set(DUK_RUNTIME_TARGET_NAME duk_sample)
+
+include(.duk/cmake/duk.cmake)
+
+set(DUK_SAMPLE_HEADERS
 )
 
-add_library(duk_sample STATIC ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
+set(DUK_SAMPLE_SOURCES
+    src/duk_sample/api.cpp
+    src/duk_sample/camera_system.h
+    src/duk_sample/camera_system.cpp
+    src/duk_sample/sprite_animator_system.h
+    src/duk_sample/sprite_animator_system.cpp
+    src/duk_sample/stats_system.h
+    src/duk_sample/stats_system.cpp
+)
 
-target_include_directories(duk_sample
-        PRIVATE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        )
+add_library(duk_sample_lib STATIC ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
 
-target_link_libraries(duk_sample
-        PRIVATE
-        duk_api
-        )
+target_include_directories(duk_sample_lib
+    PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+)
 
-set_target_properties(duk_sample PROPERTIES CXX_STANDARD 20)
+target_link_libraries(duk_sample_lib
+    PRIVATE
+    duk::duk_api
+)
 
-target_link_libraries(duk_runtime PRIVATE duk_sample)
+target_link_libraries(duk_sample PRIVATE duk_sample_lib)

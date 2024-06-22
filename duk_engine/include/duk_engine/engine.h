@@ -21,6 +21,7 @@ namespace duk::engine {
 
 struct EngineCreateInfo {
     std::filesystem::path workingDirectory;
+    Settings settings;
 };
 
 class Engine {
@@ -51,7 +52,6 @@ public:
 
 private:
     std::filesystem::path m_workingDirectory;
-    Settings m_settings;
     duk::event::Listener m_listener;
     duk::event::Dispatcher m_dispatcher;
     std::shared_ptr<duk::platform::Window> m_window;
