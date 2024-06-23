@@ -16,17 +16,18 @@
 #include <duk_renderer/renderer.h>
 #include <duk_tools/timer.h>
 #include <duk_renderer/register_types.h>
+#include <duk_renderer/components/material_slot.h>
+#include <duk_renderer/components/mesh_slot.h>
 
-#include "duk_renderer/components/material_slot.h"
-#include "duk_renderer/components/mesh_slot.h"
+#include <duk_platform/win32/platform_win_32.h>
 
 class Application {
 public:
-    Application() {
+    Application(duk::platform::Platform* platform) {
         duk::platform::WindowCreateInfo windowCreateInfo = {"RendererWindow", 640, 720};
 
         //The result of window creation is checked, and if successful, the program proceeds
-        m_window = duk::platform::Window::create_window(windowCreateInfo);
+        m_window = platform->create_window(windowCreateInfo);
         m_run = true;
 
         //Event listeners are set up to respond to window close and destroy event.
@@ -95,7 +96,12 @@ private:
 int main() {
     duk::renderer::register_types();
 
-    Application application;
+    duk::platform::PlatformWin32CreateInfo platformWin32CreateInfo = {};
+    platformWin32CreateInfo.instance = GetModuleHandle(NULL);
+
+    duk::platform::PlatformWin32 platform(platformWin32CreateInfo);
+
+    Application application(&platform);
 
     duk::objects::Objects objects;
 
@@ -162,10 +168,10 @@ int main() {
     while (application.run()) {
         timer.start();
 
-        application.window()->pool_events();
+        platform.pool_events();
 
         while (application.window()->minimized()) {
-            application.window()->wait_events();
+            platform.wait_events();
         }
 
         auto time = timer.time();

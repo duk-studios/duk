@@ -289,13 +289,15 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo)
 
     // Create the window.
 
+    DWORD style = WS_MAXIMIZE | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
+
     m_hwnd = CreateWindowEx(0,                                                 // Optional window styles.
                             m_windowClassEntry->className.c_str(),             // Window class
                             windowWin32CreateInfo.windowCreateInfo.windowTitle,// Window text
-                            WS_OVERLAPPEDWINDOW,                               // Window style
+                            style,                                             // Window style
 
                             // Size and position
-                            CW_USEDEFAULT, CW_USEDEFAULT, static_cast<int32_t>(m_width), static_cast<int32_t>(m_height),
+                            CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 
                             NULL,                          // Parent window
                             NULL,                          // Menu
@@ -395,24 +397,11 @@ HINSTANCE WindowWin32::win32_instance_handle() const {
 }
 
 void WindowWin32::show() {
-    ShowWindow(m_hwnd, SW_SHOW);
+    ShowWindow(m_hwnd, SW_MAXIMIZE);
 }
 
 void WindowWin32::hide() {
     ShowWindow(m_hwnd, SW_MINIMIZE);
-}
-
-void WindowWin32::pool_events() {
-    MSG msg = {};
-    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-}
-
-void WindowWin32::wait_events() {
-    WaitMessage();
-    pool_events();
 }
 
 void WindowWin32::close() {

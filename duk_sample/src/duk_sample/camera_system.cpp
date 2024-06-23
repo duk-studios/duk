@@ -3,7 +3,7 @@
 //
 
 #include <duk_engine/engine.h>
-#include <duk_platform/systems.h>
+#include <duk_platform/platform.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_sample/camera_system.h>
@@ -79,7 +79,7 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
     auto input = engine.input();
 
     const auto deltaTime = engine.timer()->delta_time();
-    auto cursor = duk::platform::System::instance()->cursor();
+    auto cursor = engine.platform()->cursor();
 
     auto controller = object.component<CameraController>();
 

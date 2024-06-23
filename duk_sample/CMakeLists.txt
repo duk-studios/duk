@@ -8,10 +8,6 @@ endif ()
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(DUK_RUNTIME_TARGET_NAME duk_sample)
-
-include(.duk/cmake/duk.cmake)
-
 set(DUK_SAMPLE_HEADERS
 )
 

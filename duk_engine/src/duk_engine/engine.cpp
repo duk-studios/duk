@@ -18,23 +18,16 @@
 
 #include <duk_log/log.h>
 
-#include <duk_platform/systems.h>
+#include <duk_platform/platform.h>
 
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     : m_workingDirectory(engineCreateInfo.workingDirectory)
+    , m_platform(engineCreateInfo.platform)
+    , m_window(engineCreateInfo.window)
     , m_run(false) {
-    duk::platform::System::create();
-
     const auto& settings = engineCreateInfo.settings;
-
-    duk::platform::WindowCreateInfo windowCreateInfo = {};
-    windowCreateInfo.windowTitle = settings.name.c_str();
-    windowCreateInfo.width = settings.resolution.x;
-    windowCreateInfo.height = settings.resolution.y;
-
-    m_window = duk::platform::Window::create_window(windowCreateInfo);
 
     m_listener.listen(m_window->window_close_event, [this] {
         m_window->close();
@@ -46,7 +39,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
     {
         duk::renderer::RendererCreateInfo rendererCreateInfo = {};
-        rendererCreateInfo.window = m_window.get();
+        rendererCreateInfo.window = m_window;
         rendererCreateInfo.pools = &m_pools;
         rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
@@ -113,7 +106,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     }
 
     duk::engine::InputCreateInfo inputCreateInfo = {};
-    inputCreateInfo.window = m_window.get();
+    inputCreateInfo.window = m_window;
     m_input = std::make_unique<duk::engine::Input>(inputCreateInfo);
 }
 
@@ -138,10 +131,10 @@ void Engine::run() {
 
         m_input->refresh();
 
-        m_window->pool_events();
+        m_platform->pool_events();
 
         while (m_window->minimized()) {
-            m_window->wait_events();
+            m_platform->wait_events();
         }
 
         m_audio->update();
@@ -150,8 +143,12 @@ void Engine::run() {
     }
 }
 
+duk::platform::Platform* Engine::platform() {
+    return m_platform;
+}
+
 duk::platform::Window* Engine::window() {
-    return m_window.get();
+    return m_window;
 }
 
 duk::renderer::Renderer* Engine::renderer() {
