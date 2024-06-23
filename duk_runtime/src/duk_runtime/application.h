@@ -7,17 +7,24 @@
 
 #include <duk_engine/engine.h>
 
+#include <duk_platform/platform.h>
+
 namespace duk::runtime {
+
+struct ApplicationCreateInfo {
+    duk::platform::Platform* platform;
+};
 
 class Application {
 public:
-    Application();
+    Application(const ApplicationCreateInfo& applicationCreateInfo);
 
     ~Application();
 
     void run();
 
 private:
+    std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::engine::Engine> m_engine;
 };
 

@@ -10,6 +10,7 @@
 #include <duk_engine/input.h>
 #include <duk_engine/settings.h>
 #include <duk_platform/window.h>
+#include <duk_platform/platform.h>
 #include <duk_renderer/renderer.h>
 #include <duk_resource/handler.h>
 #include <duk_resource/set.h>
@@ -21,6 +22,8 @@ namespace duk::engine {
 
 struct EngineCreateInfo {
     std::filesystem::path workingDirectory;
+    duk::platform::Platform* platform;
+    duk::platform::Window* window;
     Settings settings;
 };
 
@@ -31,6 +34,8 @@ public:
     ~Engine();
 
     void run();
+
+    DUK_NO_DISCARD duk::platform::Platform* platform();
 
     DUK_NO_DISCARD duk::platform::Window* window();
 
@@ -52,9 +57,10 @@ public:
 
 private:
     std::filesystem::path m_workingDirectory;
+    duk::platform::Platform* m_platform;
+    duk::platform::Window* m_window;
     duk::event::Listener m_listener;
     duk::event::Dispatcher m_dispatcher;
-    std::shared_ptr<duk::platform::Window> m_window;
     std::unique_ptr<duk::renderer::Renderer> m_renderer;
     std::unique_ptr<duk::audio::AudioDevice> m_audio;
     std::unique_ptr<duk::resource::ResourceSet> m_resources;

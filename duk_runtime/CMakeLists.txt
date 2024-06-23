@@ -12,7 +12,13 @@ set(DUK_RUNTIME_SOURCES
         src/duk_runtime/application.cpp
 )
 
-add_executable(${DUK_RUNTIME_TARGET_NAME} ${DUK_RUNTIME_SOURCES})
+if (WIN32)
+    message(STATUS "Adding Win32 executable ${DUK_RUNTIME_TARGET_NAME}")
+    add_executable(${DUK_RUNTIME_TARGET_NAME} WIN32 ${DUK_RUNTIME_SOURCES})
+else ()
+    message(STATUS "Adding executable ${DUK_RUNTIME_TARGET_NAME}")
+    add_executable(${DUK_RUNTIME_TARGET_NAME} ${DUK_RUNTIME_SOURCES})
+endif ()
 
 target_include_directories(${DUK_RUNTIME_TARGET_NAME}
         PRIVATE

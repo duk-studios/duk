@@ -42,12 +42,24 @@ static duk::engine::Settings load_settings() {
 
 }// namespace detail
 
-Application::Application() {
+Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     duk::api::register_types();
+
+    auto settings = detail::load_settings();
+    auto platform = applicationCreateInfo.platform;
+
+    duk::platform::WindowCreateInfo windowCreateInfo = {};
+    windowCreateInfo.windowTitle = settings.name.c_str();
+    windowCreateInfo.width = settings.resolution.x;
+    windowCreateInfo.height = settings.resolution.y;
+
+    m_window = platform->create_window(windowCreateInfo);
 
     duk::engine::EngineCreateInfo engineCreateInfo = {};
     engineCreateInfo.workingDirectory = ".";
     engineCreateInfo.settings = detail::load_settings();
+    engineCreateInfo.platform = platform;
+    engineCreateInfo.window = m_window.get();
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
