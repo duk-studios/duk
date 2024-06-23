@@ -1,18 +1,23 @@
 ﻿#include <duk_platform/window.h>
 #include <iostream>
 
+#include "duk_platform/win32/platform_win_32.h"
+
 int main() {
     bool run = false;
 
-    duk::event::Listener listener;
+    duk::platform::PlatformWin32CreateInfo platformWin32CreateInfo = {};
+    platformWin32CreateInfo.instance = GetModuleHandle(NULL);
 
-    std::shared_ptr<duk::platform::Window> window;
+    duk::platform::PlatformWin32 platform(platformWin32CreateInfo);
+
+    duk::event::Listener listener;
 
     duk::platform::WindowCreateInfo windowCreateInfo = {"MyWindow", 640, 720};
 
     std::cout << "Creating window" << std::endl;
 
-    window = duk::platform::Window::create_window(windowCreateInfo);
+    auto window = platform.create_window(windowCreateInfo);
     run = true;
 
     uint32_t myWindowHeight = window->height();
@@ -64,7 +69,7 @@ int main() {
     window->show();
 
     while (run) {
-        window->pool_events();
+        platform.pool_events();
     }
 
     return 0;

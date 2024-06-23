@@ -35,8 +35,6 @@ public:
     using KeyEvent = duk::event::EventT<Keys, KeyModifiers::Mask, KeyAction>;
 
 public:
-    static std::shared_ptr<Window> create_window(const WindowCreateInfo& windowCreateInfo);
-
     explicit Window(const WindowCreateInfo& windowCreateInfo);
 
     virtual ~Window();
@@ -50,10 +48,6 @@ public:
     virtual void show() = 0;
 
     virtual void hide() = 0;
-
-    virtual void pool_events() = 0;
-
-    virtual void wait_events() = 0;
 
     virtual void close() = 0;
 

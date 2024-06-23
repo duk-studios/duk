@@ -50,10 +50,6 @@ public:
 
     void hide() override;
 
-    void pool_events() override;
-
-    void wait_events() override;
-
     void close() override;
 
     DUK_NO_DISCARD bool minimized() const override;

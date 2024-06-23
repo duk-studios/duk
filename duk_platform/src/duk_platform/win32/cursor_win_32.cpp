@@ -17,7 +17,7 @@ CursorWin32::CursorWin32() {
     SetCursor(m_cursorTypes[CursorType::ARROW]);
 }
 
-void duk::platform::CursorWin32::show(bool visible) {
+void CursorWin32::show(bool visible) {
     ShowCursor(visible);
 }
 
@@ -27,4 +27,5 @@ void CursorWin32::set_cursor(CursorType::Type cursorType) {
         m_currentCursorType = cursorType;
     }
 }
+
 }// namespace duk::platform
