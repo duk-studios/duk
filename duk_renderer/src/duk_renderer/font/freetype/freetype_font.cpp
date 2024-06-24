@@ -102,14 +102,18 @@ FontAtlas* FreetypeFont::atlas(const BuildAtlasParams& buildAtlasParams) {
 
     /// place each glyph on the upper right of the previous one (starting at the upper left)
     const int32_t kMaxWidth = 1024;
-    glm::ivec2 pen(kMaxWidth, 0);
+
+    // start pen at the end of a row with height of -1
+    // this way we can guarantee that glyphs won't overlap
+    glm::ivec2 pen(kMaxWidth, -1);
 
     for (auto& glyph: glyphs) {
         auto& bitmap = glyphBitmaps.at(glyph.chr);
         /// if a glyph would be outside of the determined maximum width of the image, wrap into next row
         if (pen.x + bitmap.width > kMaxWidth) {
             pen.x = 0;
-            pen.y += bitmap.height;
+            // next row is height + 1 so glyphs don't overlap
+            pen.y += bitmap.height + 1;
         }
 
         glyph.min.x = pen.x;
