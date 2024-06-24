@@ -11,6 +11,7 @@
 namespace duk::platform {
 
 class CursorWin32;
+class ConsoleWin32;
 
 struct PlatformWin32CreateInfo {
     HINSTANCE instance;
@@ -24,6 +25,8 @@ public:
 
     Cursor* cursor() override;
 
+    Console* console() override;
+
     std::shared_ptr<Window> create_window(const WindowCreateInfo& windowCreateInfo) override;
 
     void pool_events() override;
@@ -33,6 +36,7 @@ public:
 private:
     HINSTANCE m_instance;
     std::unique_ptr<CursorWin32> m_cursor;
+    std::unique_ptr<ConsoleWin32> m_console;
 };
 
 }// namespace duk::platform
