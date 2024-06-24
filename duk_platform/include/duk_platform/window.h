@@ -22,8 +22,6 @@ struct WindowCreateInfo {
     uint32_t height;
 };
 
-class Window;
-
 class Window {
 public:
     using CloseEvent = duk::event::EventVoid;
@@ -35,23 +33,23 @@ public:
     using KeyEvent = duk::event::EventT<Keys, KeyModifiers::Mask, KeyAction>;
 
 public:
-    explicit Window(const WindowCreateInfo& windowCreateInfo);
-
     virtual ~Window();
 
-    DUK_NO_DISCARD uint32_t width() const;
+    DUK_NO_DISCARD virtual uint32_t width() const = 0;
 
-    DUK_NO_DISCARD uint32_t height() const;
+    DUK_NO_DISCARD virtual uint32_t height() const = 0;
 
-    DUK_NO_DISCARD glm::uvec2 size() const;
+    DUK_NO_DISCARD virtual glm::uvec2 size() const = 0;
+
+    DUK_NO_DISCARD virtual bool minimized() const = 0;
+
+    DUK_NO_DISCARD virtual bool valid() const = 0;
 
     virtual void show() = 0;
 
     virtual void hide() = 0;
 
     virtual void close() = 0;
-
-    DUK_NO_DISCARD virtual bool minimized() const = 0;
 
 public:
     CloseEvent window_close_event;
@@ -67,10 +65,6 @@ public:
     MouseWheelMovementEvent mouse_wheel_movement_event;
 
     KeyEvent key_event;
-
-protected:
-    uint32_t m_width;
-    uint32_t m_height;
 };
 
 }// namespace duk::platform
