@@ -4,6 +4,7 @@
 
 #include <duk_platform/win32/platform_win_32.h>
 #include <duk_platform/win32/window_win_32.h>
+#include <duk_platform/win32/console_win_32.h>
 #include <duk_platform/win32/cursor_win_32.h>
 
 namespace duk::platform {
@@ -11,12 +12,17 @@ namespace duk::platform {
 PlatformWin32::PlatformWin32(const PlatformWin32CreateInfo& platformWin32CreateInfo)
     : m_instance(platformWin32CreateInfo.instance) {
     m_cursor = std::make_unique<CursorWin32>();
+    m_console = std::make_unique<ConsoleWin32>();
 }
 
 PlatformWin32::~PlatformWin32() = default;
 
 Cursor* PlatformWin32::cursor() {
     return m_cursor.get();
+}
+
+Console* PlatformWin32::console() {
+    return m_console.get();
 }
 
 std::shared_ptr<Window> PlatformWin32::create_window(const WindowCreateInfo& windowCreateInfo) {

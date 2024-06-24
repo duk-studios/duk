@@ -22,7 +22,7 @@ struct CursorType {
 
 class Cursor {
 public:
-    virtual ~Cursor() = default;
+    virtual ~Cursor();
 
     virtual void show(bool visible) = 0;
 

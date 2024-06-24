@@ -133,8 +133,12 @@ void Engine::run() {
 
         m_platform->pool_events();
 
-        while (m_window->minimized()) {
+        while (m_window->valid() && m_window->minimized()) {
             m_platform->wait_events();
+        }
+
+        if (!m_window->valid()) {
+            continue;
         }
 
         m_audio->update();

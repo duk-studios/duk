@@ -13,6 +13,16 @@ namespace duk::platform {
 
 namespace detail {
 
+struct WindowClassEntry {
+    WindowClassEntry(const WindowWin32CreateInfo& windowWin32CreateInfo, const std::string& className);
+
+    ~WindowClassEntry();
+
+    std::string className;
+    WNDCLASS windowClass;
+    HINSTANCE instance;
+};
+
 static LRESULT window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     WindowWin32* self;
 
@@ -266,6 +276,17 @@ static Keys convert_key(int windowsKeyCode) {
     }
 }
 
+static void query_window_size(HWND hwnd, uint32_t& width, uint32_t& height) {
+    RECT rect;
+    if (!GetClientRect(hwnd, &rect)) {
+        width = 0;
+        height = 0;
+        return;
+    }
+    width = rect.right - rect.left;
+    height = rect.bottom - rect.top;
+}
+
 WindowClassEntry::WindowClassEntry(const WindowWin32CreateInfo& windowWin32CreateInfo, const std::string& className)
     : className(className)
     , windowClass({})
@@ -284,7 +305,10 @@ WindowClassEntry::~WindowClassEntry() {
 }// namespace detail
 
 WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo)
-    : Window(windowWin32CreateInfo.windowCreateInfo) {
+    : m_hwnd(nullptr)
+    , m_width(0)
+    , m_height(0)
+    , m_destroyRequired(true) {
     m_windowClassEntry = detail::build_window_class(windowWin32CreateInfo);
 
     // Create the window.
@@ -308,9 +332,23 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo)
     if (!m_hwnd) {
         throw std::runtime_error("failed to create WindowWin32");
     }
+
+    detail::query_window_size(m_hwnd, m_width, m_height);
+}
+
+WindowWin32::WindowWin32(const WindowWin32OpenInfo& windowWin32OpenInfo)
+    : m_width(0)
+    , m_height(0)
+    , m_hwnd(windowWin32OpenInfo.hwnd)
+    , m_destroyRequired(false) {
+    detail::query_window_size(m_hwnd, m_width, m_height);
 }
 
 WindowWin32::~WindowWin32() {
+    if (!m_destroyRequired) {
+        return;
+    }
+
     detail::destroy_window_class_entry(m_windowClassEntry);
 
     if (m_hwnd) {
@@ -396,6 +434,26 @@ HINSTANCE WindowWin32::win32_instance_handle() const {
     return m_windowClassEntry->instance;
 }
 
+uint32_t WindowWin32::width() const {
+    return m_width;
+}
+
+uint32_t WindowWin32::height() const {
+    return m_height;
+}
+
+glm::uvec2 WindowWin32::size() const {
+    return {width(), height()};
+}
+
+bool WindowWin32::minimized() const {
+    return m_width == 0 || m_height == 0;
+}
+
+bool WindowWin32::valid() const {
+    return m_hwnd != nullptr;
+}
+
 void WindowWin32::show() {
     ShowWindow(m_hwnd, SW_MAXIMIZE);
 }
@@ -407,10 +465,6 @@ void WindowWin32::hide() {
 void WindowWin32::close() {
     DestroyWindow(m_hwnd);
     m_hwnd = nullptr;
-}
-
-bool WindowWin32::minimized() const {
-    return m_width == 0 || m_height == 0;
 }
 
 }// namespace duk::platform
