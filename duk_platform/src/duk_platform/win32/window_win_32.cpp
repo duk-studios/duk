@@ -313,7 +313,10 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo)
 
     // Create the window.
 
-    DWORD style = WS_MAXIMIZE | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX;
+    DWORD style = 0;
+
+    int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
     m_hwnd = CreateWindowEx(0,                                                 // Optional window styles.
                             m_windowClassEntry->className.c_str(),             // Window class
@@ -332,6 +335,17 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo)
     if (!m_hwnd) {
         throw std::runtime_error("failed to create WindowWin32");
     }
+
+    // Remove window borders and title bar
+    style = GetWindowLong(m_hwnd, GWL_STYLE);
+    style &= ~(WS_CAPTION | WS_THICKFRAME);
+    SetWindowLong(m_hwnd, GWL_STYLE, style);
+
+    LONG exStyle = GetWindowLong(m_hwnd, GWL_EXSTYLE);
+    exStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
+    SetWindowLong(m_hwnd, GWL_EXSTYLE, exStyle);
+
+    SetWindowPos(m_hwnd, HWND_TOP, 0, 0, screenWidth, screenHeight, SWP_NOZORDER | SWP_FRAMECHANGED);
 
     detail::query_window_size(m_hwnd, m_width, m_height);
 }
