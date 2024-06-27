@@ -29,6 +29,8 @@ void open(Project* project, std::filesystem::path path);
 
 void update(Project* project);
 
+void build(Project* project, const std::string_view& generator, const std::string_view& folderName, const std::string_view& config, const std::string_view& additionalCmakeOptions = "");
+
 void pack(Project* project);
 
 }// namespace duk::project
