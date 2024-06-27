@@ -54,6 +54,12 @@ static void read_project_settings(Project* project) {
     duk::serial::read_json(settingsJson, project->settings);
 }
 
+static void pack_binaries(const std::filesystem::path& packPath, const std::filesystem::path& buildPath) {
+    auto binariesPath = buildPath / "install/bin";
+
+    std::filesystem::copy(binariesPath, packPath, std::filesystem::copy_options::update_existing | std::filesystem::copy_options::recursive);
+}
+
 static void pack_resources(Project* project, const std::filesystem::path& packPath) {
     resource_scan(project);
 
@@ -156,16 +162,66 @@ void update(Project* project) {
     }
 }
 
+void build(Project* project, const std::string_view& generator, const std::filesystem::path& buildPath, const std::string_view& config, const std::string_view& additionalCmakeOptions) {
+    if (project->root.empty()) {
+        throw std::invalid_argument("project root is not initialized");
+    }
+
+    if (!std::filesystem::exists(buildPath)) {
+        std::filesystem::create_directories(buildPath);
+    }
+
+    {
+        std::ostringstream oss;
+        oss << "cmake -G \"" << generator << "\" -S \"" << project->root.string() << "\" -B \"" << buildPath.string() << "\" "
+        << " -DCMAKE_INSTALL_PREFIX=\"" << buildPath.string() << "/install\" "
+        << additionalCmakeOptions;
+
+        auto commandLine = oss.str();
+
+        duk::log::info("Generating project with: '{}'", commandLine);
+
+        int exitCode = std::system(commandLine.c_str());
+
+        if (exitCode != 0) {
+            throw std::runtime_error(fmt::format("failed to generate project, exit code: {}", exitCode));
+        }
+    }
+
+    {
+        std::ostringstream oss;
+        oss << "cmake --build \"" << buildPath.string() << "\" --target install --config " << config;
+
+        auto commandLine = oss.str();
+
+        duk::log::info("Building project with: '{}'", commandLine);
+
+        int exitCode = std::system(oss.str().c_str());
+
+        if (exitCode != 0) {
+            throw std::runtime_error(fmt::format("failed to build project, exit code: {}", exitCode));
+        }
+    }
+}
+
 void pack(Project* project) {
     if (project->root.empty()) {
         throw std::invalid_argument("project root is not initialized");
     }
 
-    auto packPath = project->root / ".duk/pack";
+    const auto projectPath = project->root / ".duk";
+    const auto packPath = projectPath / "pack";
+    const auto buildPath = projectPath / "builds/vs2022-pack";
+
+    build(project, "Visual Studio 17 2022", buildPath, "Release", "-DDUK_PACK=ON");
+
+    detail::pack_binaries(packPath, buildPath);
 
     detail::pack_resources(project, packPath);
 
     detail::pack_settings(project, packPath);
+
+    duk::log::info("Completed packing project to '{}'", packPath.string());
 }
 
 }// namespace duk::project
