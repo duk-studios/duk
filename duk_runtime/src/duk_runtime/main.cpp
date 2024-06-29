@@ -10,9 +10,27 @@
 #include <duk_platform/win32/platform_win_32.h>
 #endif
 
-int duk_main(duk::platform::Platform* platform) {
+#include <cxxopts.hpp>
+
+int duk_main(duk::platform::Platform* platform, int argc, const char* const* argv) {
     try {
-        platform->console()->attach();
+
+        cxxopts::Options options("duk", "duk runtime application");
+        options.add_options()
+            ("c,console", "Forces a new console window to be opened");
+
+        auto result = options.parse(argc, argv);
+
+        // forces a new console window to be opened
+        auto console = platform->console();
+        if (result.count("console")) {
+            console->close();
+            console->open();
+        }
+        else {
+            // tries to attach the console to the current process
+            console->attach();
+        }
 
         duk::runtime::ApplicationCreateInfo applicationCreateInfo = {};
         applicationCreateInfo.platform = platform;
@@ -37,7 +55,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     duk::platform::PlatformWin32 platformWin32(platformWin32CreateInfo);
 
-    return duk_main(&platformWin32);
+    return duk_main(&platformWin32, __argc, __argv);
 }
 #else
 int main() {
