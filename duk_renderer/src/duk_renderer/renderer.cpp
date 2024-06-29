@@ -123,7 +123,7 @@ std::shared_ptr<duk::rhi::Image> Renderer::create_depth_image(uint32_t width, ui
 
     duk::rhi::RHI::ImageCreateInfo depthImageCreateInfo = {};
     depthImageCreateInfo.usage = duk::rhi::Image::Usage::DEPTH_STENCIL_ATTACHMENT;
-    depthImageCreateInfo.initialLayout = duk::rhi::Image::Layout::DEPTH_ATTACHMENT;
+    depthImageCreateInfo.initialLayout = duk::rhi::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
     depthImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
     depthImageCreateInfo.imageDataSource = &depthImageDataSource;
     depthImageCreateInfo.commandQueue = m_mainQueue.get();
