@@ -5,6 +5,7 @@ set(DUK_LOG_HEADERS
         include/duk_log/logger.h
         include/duk_log/sink.h
         include/duk_log/sink_cout.h
+        include/duk_log/sink_file.h
         include/duk_log/sink_fmt.h
         )
 set(DUK_LOG_SOURCES
@@ -12,6 +13,7 @@ set(DUK_LOG_SOURCES
         src/duk_log/logger.cpp
         src/duk_log/sink.cpp
         src/duk_log/sink_cout.cpp
+        src/duk_log/sink_file.cpp
         src/duk_log/sink_fmt.cpp
         )
 
