@@ -5,7 +5,7 @@
 #include <duk_runtime/application.h>
 
 #include <duk_log/log.h>
-#include <duk_log/sink_file.h>
+#include <duk_log/file_sink.h>
 
 #ifdef DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/platform_win_32.h>
@@ -41,7 +41,7 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
             if (result.count("output")) {
                 path = result["output"].as<std::string>();
             }
-            duk::log::add_sink(std::make_unique<duk::log::SinkFile>(path, duk::log::INFO));
+            duk::log::add_sink(std::make_unique<duk::log::FileSink>(path, duk::log::INFO));
         }
 
         duk::runtime::ApplicationCreateInfo applicationCreateInfo = {};

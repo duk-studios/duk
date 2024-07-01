@@ -1,7 +1,7 @@
 /// 18/04/2023
 /// sink_std.cpp
 
-#include <duk_log/sink_cout.h>
+#include <duk_log/cout_sink.h>
 
 #define TERMCOLOR_USE_ANSI_ESCAPE_SEQUENCES
 #include <termcolor/termcolor.hpp>
@@ -14,7 +14,7 @@
 
 namespace duk::log {
 
-SinkCout::SinkCout(Level level)
+CoutSink::CoutSink(Level level)
     : Sink(level) {
 #if DUK_PLATFORM_IS_WINDOWS
     // On windows, set output mode to handle virtual terminal sequences
@@ -29,7 +29,7 @@ SinkCout::SinkCout(Level level)
 #endif
 }
 
-void SinkCout::flush(Level level, const std::string& message) {
+void CoutSink::flush(Level level, const std::string& message) {
     std::lock_guard lock(m_mutex);
     switch (level) {
         default:

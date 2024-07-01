@@ -2,14 +2,14 @@
 // Created by rov on 12/13/2023.
 //
 #include <duk_log/log.h>
-#include <duk_log/sink_cout.h>
-#include <duk_log/sink_fmt.h>
+#include <duk_log/cout_sink.h>
+#include <duk_log/fmt_sink.h>
 
 namespace duk::log {
 
 Logging::Logging() {
     m_defaultLogger = add_logger(std::make_unique<Logger>(Level::VERBOSE));
-    m_defaultSink = add_sink(std::make_unique<SinkCout>(Level::VERBOSE));
+    m_defaultSink = add_sink(std::make_unique<CoutSink>(Level::VERBOSE));
 }
 
 Logging::~Logging() {

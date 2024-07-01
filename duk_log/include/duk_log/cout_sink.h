@@ -1,16 +1,16 @@
 /// 18/04/2023
 /// sink_std.h
 
-#ifndef DUK_LOG_SINK_C0UT_H
-#define DUK_LOG_SINK_C0UT_H
+#ifndef DUK_LOG_C0UT_SINK_H
+#define DUK_LOG_C0UT_SINK_H
 
 #include <duk_log/sink.h>
 
 namespace duk::log {
 
-class SinkCout : public Sink {
+class CoutSink : public Sink {
 public:
-    explicit SinkCout(Level level);
+    explicit CoutSink(Level level);
 
     void flush(Level level, const std::string& message) override;
 
@@ -20,4 +20,4 @@ private:
 
 }// namespace duk::log
 
-#endif// DUK_LOG_SINK_C0UT_H
+#endif// DUK_LOG_C0UT_SINK_H

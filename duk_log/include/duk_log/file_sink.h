@@ -2,8 +2,8 @@
 // Created by Ricardo on 29/06/2024.
 //
 
-#ifndef DUK_LOG_SINK_FILE_H
-#define DUK_LOG_SINK_FILE_H
+#ifndef DUK_LOG_FILE_SINK_H
+#define DUK_LOG_FILE_SINK_H
 
 #include <duk_log/sink.h>
 
@@ -12,9 +12,9 @@
 
 namespace duk::log {
 
-class SinkFile : public Sink {
+class FileSink : public Sink {
 public:
-    SinkFile(const std::filesystem::path& filename, Level level);
+    FileSink(const std::filesystem::path& filename, Level level);
 
     void flush(Level level, const std::string& message) override;
 
@@ -25,4 +25,4 @@ private:
 
 }
 
-#endif //DUK_LOG_SINK_FILE_H
+#endif //DUK_LOG_FILE_SINK_H

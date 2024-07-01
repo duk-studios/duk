@@ -2,16 +2,16 @@
 // Created by Ricardo on 30/06/2024.
 //
 
-#include <duk_log/sink_file.h>
+#include <duk_log/file_sink.h>
 
 namespace duk::log {
 
-SinkFile::SinkFile(const std::filesystem::path& filename, Level level)
+FileSink::FileSink(const std::filesystem::path& filename, Level level)
     : Sink(level) {
     m_file.open(filename);
 }
 
-void SinkFile::flush(Level level, const std::string& message) {
+void FileSink::flush(Level level, const std::string& message) {
     if (!m_file.is_open()) {
         return;
     }
