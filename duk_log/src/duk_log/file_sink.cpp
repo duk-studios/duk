@@ -20,4 +20,4 @@ void FileSink::flush(Level level, const std::string& message) {
     m_file.flush();
 }
 
-}
+}// namespace duk::log

@@ -174,8 +174,7 @@ void build(Project* project, const std::string_view& generator, const std::files
     {
         std::ostringstream oss;
         oss << "cmake -G \"" << generator << "\" -S \"" << project->root.string() << "\" -B \"" << buildPath.string() << "\" "
-        << " -DCMAKE_INSTALL_PREFIX=\"" << buildPath.string() << "/install\" "
-        << additionalCmakeOptions;
+            << " -DCMAKE_INSTALL_PREFIX=\"" << buildPath.string() << "/install\" " << additionalCmakeOptions;
 
         auto commandLine = oss.str();
 

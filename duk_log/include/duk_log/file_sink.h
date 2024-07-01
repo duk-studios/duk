@@ -23,6 +23,6 @@ private:
     std::ofstream m_file;
 };
 
-}
+}// namespace duk::log
 
-#endif //DUK_LOG_FILE_SINK_H
+#endif//DUK_LOG_FILE_SINK_H
