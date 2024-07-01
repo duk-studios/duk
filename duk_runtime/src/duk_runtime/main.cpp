@@ -5,6 +5,7 @@
 #include <duk_runtime/application.h>
 
 #include <duk_log/log.h>
+#include <duk_log/sink_file.h>
 
 #ifdef DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/platform_win_32.h>
@@ -15,9 +16,12 @@
 int duk_main(duk::platform::Platform* platform, int argc, const char* const* argv) {
     try {
 
+        // clang-format off
         cxxopts::Options options("duk", "duk runtime application");
         options.add_options()
-            ("c,console", "Forces a new console window to be opened");
+            ("c,console", "Forces a new console window to be opened")
+            ("o,output", "Path to output logging");
+        // clang-format on
 
         auto result = options.parse(argc, argv);
 
@@ -30,6 +34,14 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
         else {
             // tries to attach the console to the current process
             console->attach();
+        }
+
+        {
+            std::filesystem::path path = "./log.txt";
+            if (result.count("output")) {
+                path = result["output"].as<std::string>();
+            }
+            duk::log::add_sink(std::make_unique<duk::log::SinkFile>(path, duk::log::INFO));
         }
 
         duk::runtime::ApplicationCreateInfo applicationCreateInfo = {};
@@ -58,8 +70,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return duk_main(&platformWin32, __argc, __argv);
 }
 #else
-int main() {
+int main(int argc, const char* const* argv) {
     duk::platform::PlatformLinux platformLinux;
-    return duk_main(&platformLinux);
+    return duk_main(&platformLinux, argc, argv);
 }
 #endif
