@@ -1,6 +1,6 @@
 ﻿#include <duk_log/log.h>
 #include <duk_log/logger.h>
-#include <duk_log/sink_cout.h>
+#include <duk_log/cout_sink.h>
 
 int main() {
     //Simple usage of Duk Log for basic logging messages
@@ -33,7 +33,7 @@ int main() {
         auto logger = std::make_unique<duk::log::Logger>(duk::log::DEBUG);
 
         //Create a new log sink (output destination) for advanced logging
-        auto sinkCout = std::make_unique<duk::log::SinkCout>(duk::log::INFO);
+        auto sinkCout = std::make_unique<duk::log::CoutSink>(duk::log::INFO);
 
         //Flush a log message to the new sink
         sinkCout->flush(duk::log::INFO, "An info message sent directly into a new sink");

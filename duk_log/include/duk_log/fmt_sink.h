@@ -2,8 +2,8 @@
 // Created by rov on 12/15/2023.
 //
 
-#ifndef DUK_LOG_SINK_FMT_H
-#define DUK_LOG_SINK_FMT_H
+#ifndef DUK_LOG_FMT_SINK_H
+#define DUK_LOG_FMT_SINK_H
 
 #include <array>
 #include <duk_log/sink.h>
@@ -11,9 +11,9 @@
 
 namespace duk::log {
 
-class SinkFmt : public Sink {
+class FmtSink : public Sink {
 public:
-    explicit SinkFmt(Level level);
+    explicit FmtSink(Level level);
 
     void flush(Level level, const std::string& message) override;
 
@@ -23,4 +23,4 @@ private:
 
 }// namespace duk::log
 
-#endif//DUK_LOG_SINK_FMT_H
+#endif//DUK_LOG_FMT_SINK_H
