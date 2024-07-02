@@ -131,6 +131,7 @@ static uint32_t find_compute_queue_index(VulkanPhysicalDevice* physicalDevice) {
 
 VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& vulkanRendererCreateInfo)
     : m_instance(VK_NULL_HANDLE)
+    , m_debugMessenger(VK_NULL_HANDLE)
     , m_physicalDevice(VK_NULL_HANDLE)
     , m_surface(VK_NULL_HANDLE)
     , m_device(VK_NULL_HANDLE)
