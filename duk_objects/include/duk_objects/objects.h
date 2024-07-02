@@ -29,11 +29,13 @@ class ComponentPool {
 public:
     virtual ~ComponentPool() = default;
 
+    virtual void construct(uint32_t index) = 0;
+
     virtual void destruct(uint32_t index) = 0;
 };
 
 template<typename T>
-class ComponentPoolT : public ComponentPool {
+class ComponentPoolT final : public ComponentPool {
 public:
     explicit ComponentPoolT(uint32_t componentsPerChunk)
         : m_componentsPerChunk(componentsPerChunk) {
@@ -45,13 +47,12 @@ public:
         }
     }
 
-    template<typename... Args>
-    void construct(uint32_t index, Args&&... args) {
+    void construct(uint32_t index) {
         auto ptr = get(index);
-        ::new (ptr) T(std::forward<Args>(args)...);
+        ::new (ptr) T();
     }
 
-    void destruct(uint32_t index) override {
+    void destruct(uint32_t index) {
         auto ptr = get(index);
         ptr->~T();
     }
@@ -122,6 +123,8 @@ public:
 
     ObjectHandle();
 
+    ObjectHandle(Id id, ObjectsType* objects);
+
     ObjectHandle(uint32_t index, uint32_t version, ObjectsType* objects);
 
     DUK_NO_DISCARD Id id() const;
@@ -136,8 +139,8 @@ public:
 
     const ComponentMask& component_mask() const;
 
-    template<typename T, typename... Args>
-    ComponentHandle<T, isConst> add(Args&&... args) const;
+    template<typename T>
+    ComponentHandle<T, isConst> add() const;
 
     template<typename T>
     void remove() const;
@@ -197,8 +200,8 @@ public:
 
     DUK_NO_DISCARD ObjectsType* objects() const;
 
-    template<typename U, typename... Args>
-    ComponentHandle<U, isConst> add(Args&&... args) const;
+    template<typename U>
+    ComponentHandle<U, isConst> add() const;
 
     template<typename U>
     void remove() const;
@@ -246,6 +249,8 @@ private:
         virtual void to_json(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) = 0;
 
         virtual const std::string& name() const = 0;
+
+        virtual std::unique_ptr<detail::ComponentPool> create_pool() const = 0;
     };
 
     template<typename T>
@@ -277,6 +282,10 @@ private:
 
         const std::string& name() const override {
             return duk::tools::type_name_of<T>();
+        }
+
+        std::unique_ptr<detail::ComponentPool> create_pool() const override {
+            return std::make_unique<detail::ComponentPoolT<T>>(detail::kComponentsPerChunk);
         }
     };
 
@@ -340,6 +349,10 @@ public:
         m_componentNameToIndex.emplace(name, index);
     }
 
+    std::unique_ptr<detail::ComponentPool> create_pool(uint32_t index) const {
+        return m_componentEntries.at(index)->create_pool();
+    }
+
     const std::string& name_of(uint32_t index) const;
 
     uint32_t index_of(const std::string& componentTypeName) const;
@@ -363,6 +376,8 @@ template<typename T>
 void register_component() {
     ComponentRegistry::instance()->add<T>();
 }
+
+class ComponentEventDispatcher;
 
 class Objects {
 public:
@@ -471,6 +486,8 @@ public:
     };
 
 public:
+    Objects();
+
     ~Objects();
 
     ObjectHandle<false> add_object();
@@ -518,8 +535,8 @@ public:
 
     DUK_NO_DISCARD const ComponentMask& component_mask(const Id& id) const;
 
-    template<typename T, typename... Args>
-    void add_component(const Id& id, Args&&... args);
+    template<typename T>
+    void add_component(const Id& id);
 
     template<typename T>
     void remove_component(const Id& id);
@@ -533,14 +550,13 @@ public:
     template<typename T>
     DUK_NO_DISCARD bool valid_component(const Id& id) const;
 
+    void attach_dispatcher(ComponentEventDispatcher* dispatcher);
+
     void update();
 
 private:
     template<typename T>
-    detail::ComponentPoolT<T>* pool();
-
-    template<typename T>
-    const detail::ComponentPoolT<T>* pool() const;
+    detail::ComponentPoolT<T>* pool() const;
 
     template<typename T>
     static ComponentMask component_mask();
@@ -548,23 +564,70 @@ private:
     template<typename T1, typename T2, typename... Ts>
     static ComponentMask component_mask();
 
+    void add_component(uint32_t index, uint32_t componentIndex);
+
     void remove_component(uint32_t index, uint32_t componentIndex);
+
+    void update_create();
+
+    void update_destroy();
 
 private:
     std::array<std::unique_ptr<detail::ComponentPool>, detail::kMaxComponents> m_componentPools;
     std::vector<ComponentMask> m_componentMasks;
     std::vector<uint32_t> m_versions;
     std::vector<uint32_t> m_freeList;
-    std::vector<Id> m_destroyedIds;
+    std::vector<Id> m_idsToCreate;
+    std::vector<Id> m_idsToDestroy;
+    ComponentEventDispatcher* m_dispatcher;
 };
 
 using ObjectsResource = duk::resource::Handle<Objects>;
+
+class ComponentEventDispatcher {
+public:
+    template<typename E>
+    void emit_all(const Object& object, const E& event = {});
+
+    template<typename E>
+    void emit_one(const Object& object, uint32_t componentIndex, const E& event = {});
+
+    template<typename C, typename E>
+    void emit_one(const Object& object, const E& event = {});
+
+    template<typename C, typename E, typename F>
+    void listen(duk::event::Listener& listener, F&& callback);
+
+private:
+    template<typename E>
+    struct ObjectEvent {
+        Object object;
+        const E& event;
+    };
+
+    std::vector<duk::event::Dispatcher> m_componentDispatchers;
+};
+
+class ComponentEventListener {
+public:
+    template<typename C, typename E, typename Derived>
+    void listen(Derived* derived, ComponentEventDispatcher& dispatcher);
+
+private:
+    duk::event::Listener m_listener;
+};
 
 // Object Implementation //
 
 template<bool isConst>
 ObjectHandle<isConst>::ObjectHandle()
     : ObjectHandle(detail::kMaxObjects, 0, nullptr) {
+}
+
+template<bool isConst>
+ObjectHandle<isConst>::ObjectHandle(Id id, ObjectsType* objects)
+    : m_id(id)
+    , m_objects(objects) {
 }
 
 template<bool isConst>
@@ -607,9 +670,9 @@ const ComponentMask& ObjectHandle<isConst>::component_mask() const {
 }
 
 template<bool isConst>
-template<typename T, typename... Args>
-ComponentHandle<T, isConst> ObjectHandle<isConst>::add(Args&&... args) const {
-    m_objects->template add_component<T>(m_id, std::forward<Args>(args)...);
+template<typename T>
+ComponentHandle<T, isConst> ObjectHandle<isConst>::add() const {
+    m_objects->template add_component<T>(m_id);
     return component<T>();
 }
 
@@ -735,9 +798,9 @@ typename ComponentHandle<T, isConst>::ObjectsType* ComponentHandle<T, isConst>::
 }
 
 template<typename T, bool isConst>
-template<typename U, typename... Args>
-ComponentHandle<U, isConst> ComponentHandle<T, isConst>::add(Args&&... args) const {
-    return object().template add<U>(std::forward<Args>(args)...);
+template<typename U>
+ComponentHandle<U, isConst> ComponentHandle<T, isConst>::add() const {
+    return object().template add<U>();
 }
 
 template<typename T, bool isConst>
@@ -983,13 +1046,12 @@ std::tuple<ComponentHandle<Ts, true>...> Objects::first_of() const {
     return std::tuple<ComponentHandle<Ts, true>...>();
 }
 
-template<typename T, typename... Args>
-void Objects::add_component(const Id& id, Args&&... args) {
+template<typename T>
+void Objects::add_component(const Id& id) {
     DUK_ASSERT(valid_object(id));
     DUK_ASSERT(!valid_component<T>(id));
-    auto componentPool = pool<T>();
-    componentPool->construct(id.index(), std::forward<Args>(args)...);
-    m_componentMasks[id.index()].set(ComponentRegistry::instance()->index_of<T>());
+    const auto index = ComponentRegistry::instance()->index_of<T>();
+    add_component(id.index(), index);
 }
 
 template<typename T>
@@ -997,7 +1059,6 @@ void Objects::remove_component(const Id& id) {
     DUK_ASSERT(valid_component<T>(id));
     const auto index = ComponentRegistry::instance()->index_of<T>();
     remove_component(id.index(), index);
-    m_componentMasks[id.index()].reset(index);
 }
 
 template<typename T>
@@ -1024,29 +1085,13 @@ bool Objects::valid_component(const Id& id) const {
 }
 
 template<typename T>
-detail::ComponentPoolT<T>* Objects::pool() {
-    const auto index = ComponentRegistry::instance()->index_of<T>();
-    auto& pool = m_componentPools[index];
-    if (!pool) {
-        pool = std::make_unique<detail::ComponentPoolT<T>>(detail::kComponentsPerChunk);
-    }
-
-    auto componentPool = dynamic_cast<detail::ComponentPoolT<T>*>(pool.get());
-    if (!componentPool) {
-        throw std::logic_error("invalid pool type allocated");
-    }
-
-    return componentPool;
-}
-
-template<typename T>
-const detail::ComponentPoolT<T>* Objects::pool() const {
+detail::ComponentPoolT<T>* Objects::pool() const {
     const auto index = ComponentRegistry::instance()->index_of<T>();
     const auto& pool = m_componentPools[index];
     if (!pool) {
         return nullptr;
     }
-    return dynamic_cast<const detail::ComponentPoolT<T>*>(pool.get());
+    return dynamic_cast<detail::ComponentPoolT<T>*>(pool.get());
 }
 
 template<typename T>
@@ -1059,6 +1104,50 @@ ComponentMask Objects::component_mask() {
 template<typename T1, typename T2, typename... Ts>
 ComponentMask Objects::component_mask() {
     return component_mask<T1>() | component_mask<T2, Ts...>();
+}
+
+template<typename E>
+void ComponentEventDispatcher::emit_all(const Object& object, const E& event) {
+    ObjectEvent<E> objectEvent = {object, event};
+    for (auto componentIndex: object.component_mask().bits<true>()) {
+        if (componentIndex >= m_componentDispatchers.size()) {
+            break;// reached first component which has no dispatcher, no need to continue
+        }
+        m_componentDispatchers[componentIndex].emit(objectEvent);
+    }
+}
+
+template<typename E>
+void ComponentEventDispatcher::emit_one(const Object& object, uint32_t componentIndex, const E& event) {
+    if (m_componentDispatchers.size() <= componentIndex) {
+        return;
+    }
+    ObjectEvent<E> objectEvent = {object, event};
+    m_componentDispatchers[componentIndex].emit(objectEvent);
+}
+
+template<typename C, typename E>
+void ComponentEventDispatcher::emit_one(const Object& object, const E& event) {
+    emit<E>(object, ComponentRegistry::instance()->index_of<C>(), event);
+}
+
+template<typename C, typename E, typename F>
+void ComponentEventDispatcher::listen(duk::event::Listener& listener, F&& callback) {
+    const auto componentIndex = ComponentRegistry::instance()->index_of<C>();
+    if (m_componentDispatchers.size() <= componentIndex) {
+        m_componentDispatchers.resize(componentIndex + 1);
+    }
+    auto& dispatcher = m_componentDispatchers[componentIndex];
+    dispatcher.template add_listener<ObjectEvent<E>>(listener, [_callback = std::move(callback)](const ObjectEvent<E>& objectEvent) {
+        _callback(objectEvent.object.template component<C>(), objectEvent.event);
+    });
+}
+
+template<typename C, typename E, typename Derived>
+void ComponentEventListener::listen(Derived* derived, ComponentEventDispatcher& dispatcher) {
+    dispatcher.listen<C, E>(m_listener, [derived](const Component<C>& component, const E& event) {
+        derived->component_event(component, event);
+    });
 }
 
 }// namespace duk::objects

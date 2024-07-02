@@ -1,6 +1,7 @@
 project(duk_objects)
 
 set(DUK_OBJECTS_HEADERS
+        include/duk_objects/events.h
         include/duk_objects/objects.h
         include/duk_objects/objects_pool.h
         include/duk_objects/objects_handler.h
