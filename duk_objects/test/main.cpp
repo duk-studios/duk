@@ -4,6 +4,7 @@
 
 #include <duk_resource/resource.h>
 #include <duk_objects/objects.h>
+#include <duk_objects/events.h>
 #include <duk_serial/json/serializer.h>
 #include <iostream>
 
@@ -96,8 +97,32 @@ int main() {
     duk::objects::register_component<ComponentTest2>();
     duk::objects::register_component<ComponentTest3>();
 
+    duk::event::Listener listener;
+
+    duk::objects::ComponentEventDispatcher componentEventDispatcher;
+    componentEventDispatcher.listen<ComponentTest, duk::objects::ObjectEnterEvent>(listener, [](const duk::objects::Component<ComponentTest>& component, const duk::objects::ObjectEnterEvent& event) {
+        duk::log::debug("ObjectEnterEvent: ComponentTest {}", component.id().index());
+    });
+    componentEventDispatcher.listen<ComponentTest2, duk::objects::ObjectEnterEvent>(listener, [](const duk::objects::Component<ComponentTest2>& component, const duk::objects::ObjectEnterEvent& event) {
+        duk::log::debug("ObjectEnterEvent: ComponentTest2 {}", component.id().index());
+    });
+    componentEventDispatcher.listen<ComponentTest3, duk::objects::ObjectEnterEvent>(listener, [](const duk::objects::Component<ComponentTest3>& component, const duk::objects::ObjectEnterEvent& event) {
+        duk::log::debug("ObjectEnterEvent: ComponentTest3 {}", component.id().index());
+    });
+    componentEventDispatcher.listen<ComponentTest, duk::objects::ObjectExitEvent>(listener, [](const duk::objects::Component<ComponentTest>& component, const duk::objects::ObjectExitEvent& event) {
+        duk::log::debug("ObjectExitEvent: ComponentTest {}", component.id().index());
+    });
+    componentEventDispatcher.listen<ComponentTest2, duk::objects::ComponentExitEvent>(listener, [](const duk::objects::Component<ComponentTest2>& component, const duk::objects::ComponentExitEvent& event) {
+        duk::log::debug("ObjectExitEvent: ComponentTest2 {}", component.id().index());
+    });
+    componentEventDispatcher.listen<ComponentTest3, duk::objects::ObjectExitEvent>(listener, [](const duk::objects::Component<ComponentTest3>& component, const duk::objects::ObjectExitEvent& event) {
+        duk::log::debug("ObjectExitEvent: ComponentTest3 {}", component.id().index());
+    });
+
     //The objects which is in use
     duk::objects::Objects objects;
+
+    objects.attach_dispatcher(&componentEventDispatcher);
 
     //Adding a new object to the objects
     auto obj0 = objects.add_object();
@@ -117,6 +142,15 @@ int main() {
     objects.add_object();
     objects.add_object();
 
+    struct CollisionEvent {
+        duk::objects::Object object;
+        duk::objects::Object other;
+    };
+
+    componentEventDispatcher.listen<ComponentTest2, CollisionEvent>(listener, [](const duk::objects::Component<ComponentTest2>& component, const CollisionEvent& event) {
+        duk::log::debug("CollisionEvent: ComponentTest2 {}", component.id().index());
+    });
+
     //Iterating through all the objects with specified components
     //The objects that have any component type like: ComponentTest, ComponentTest2, ComponentTest3, will be listed below
     for (auto object: objects.all_with<ComponentTest, ComponentTest2, ComponentTest3>()) {
@@ -127,6 +161,12 @@ int main() {
         comp2->b = 2;
         comp3->c = 3;
     }
+
+    CollisionEvent collisionEvent = {};
+    collisionEvent.object = obj1;
+    collisionEvent.other = obj2;
+
+    componentEventDispatcher.emit_all<CollisionEvent>(obj0, collisionEvent);
 
     //Removing the Component from obj with id
     obj0.remove<ComponentTest>();
