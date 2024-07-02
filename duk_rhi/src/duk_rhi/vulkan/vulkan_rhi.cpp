@@ -467,6 +467,7 @@ void VulkanRHI::create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreate
     VkPhysicalDeviceFeatures2 enabledFeatures = {};
     enabledFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     enabledFeatures.features.fillModeNonSolid = VK_TRUE;
+    enabledFeatures.features.robustBufferAccess = VK_TRUE;
     if (deviceFeatures.multiDrawIndirect) {
         enabledFeatures.features.multiDrawIndirect = VK_TRUE;
     }
