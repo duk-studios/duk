@@ -3,7 +3,7 @@
 
 #include <duk_renderer/material/uniform_buffer.h>
 #include <duk_renderer/material/storage_buffer.h>
-#include <glm/glm.hpp>
+#include <duk_math/math.h>
 
 namespace duk::renderer::globals {
 

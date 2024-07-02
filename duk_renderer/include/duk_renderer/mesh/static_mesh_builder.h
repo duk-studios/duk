@@ -6,9 +6,6 @@
 #define DUK_RENDERER_STATIC_MESH_BUILDER_H
 
 #include <duk_renderer/mesh/static_mesh_data_source.h>
-
-#include <glm/glm.hpp>
-
 #include <span>
 
 namespace duk::renderer {

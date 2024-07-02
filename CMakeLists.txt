@@ -41,6 +41,7 @@ find_package(ZLIB REQUIRED)
 
 include(GNUInstallDirs)
 
+add_subdirectory(duk_math)
 add_subdirectory(duk_macros)
 add_subdirectory(duk_tools)
 add_subdirectory(duk_hash)

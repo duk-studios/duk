@@ -4,7 +4,7 @@
 #include <duk_objects/objects.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
-#include <glm/ext/matrix_clip_space.hpp>
+#include <duk_math/math.h>
 
 namespace duk::renderer {
 

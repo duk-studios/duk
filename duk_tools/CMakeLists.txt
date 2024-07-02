@@ -34,6 +34,7 @@ target_include_directories(duk_tools
 target_link_libraries(duk_tools
         PUBLIC
         duk_macros
+        duk_math
 
         ZLIB::ZLIB
         fmt::fmt-header-only

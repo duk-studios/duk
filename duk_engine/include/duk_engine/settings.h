@@ -5,7 +5,7 @@
 #define DUK_ENGINE_SETTINGS_H
 
 #include <duk_resource/set.h>
-#include <glm/vec2.hpp>
+#include <duk_math/math.h>
 #include <string>
 
 namespace duk::engine {

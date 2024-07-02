@@ -5,7 +5,7 @@
 #define DUK_RENDERER_LIGHTING_H
 
 #include <duk_objects/objects.h>
-#include <glm/glm.hpp>
+#include <duk_math/math.h>
 
 namespace duk::renderer {
 
