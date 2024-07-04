@@ -11,7 +11,7 @@
 
 namespace duk::audio {
 
-class AudioDevice;
+class AudioEngine;
 class AudioClip;
 
 class AudioPlayer {
@@ -20,7 +20,7 @@ public:
 
     ~AudioPlayer();
 
-    void play(AudioDevice* device, const AudioClip* clip, float volume = 1.0f, float frameRate = 1.0f, bool loop = false, int32_t priority = 0);
+    void play(AudioEngine* engine, const AudioClip* clip, float volume = 1.0f, float frameRate = 1.0f, bool loop = false, int32_t priority = 0);
 
     void stop();
 
@@ -35,7 +35,7 @@ public:
     float frame_rate() const;
 
 private:
-    AudioDevice* m_device;
+    AudioEngine* m_engine;
     AudioId m_id;
 };
 

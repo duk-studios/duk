@@ -10,6 +10,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <vector>
 
 namespace duk::audio {
 

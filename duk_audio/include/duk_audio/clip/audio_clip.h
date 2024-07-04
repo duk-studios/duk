@@ -15,7 +15,7 @@
 namespace duk::audio {
 
 struct AudioClipCreateInfo {
-    duk::audio::Encoding encoding;
+    Encoding encoding;
     const void* encodedData;
     size_t encodedSize;
     uint32_t channelCount;

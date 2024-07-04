@@ -5,20 +5,18 @@
 #ifndef DUK_AUDIO_AUDIO_DEVICE
 #define DUK_AUDIO_AUDIO_DEVICE
 
-#include <duk_audio/audio_id.h>
+#include <duk_audio/audio_processor.h>
 
 #include <memory>
 
 namespace duk::audio {
-
-class AudioBuffer;
-class AudioClip;
 
 enum class Backend {
     MINIAUDIO
 };
 
 struct AudioDeviceCreateInfo {
+    AudioProcessor* processor;
     Backend backend;
     size_t frameRate;
     size_t channelCount;
@@ -26,7 +24,7 @@ struct AudioDeviceCreateInfo {
 
 class AudioDevice {
 public:
-    static std::unique_ptr<AudioDevice> create(const AudioDeviceCreateInfo& audioEngineCreateInfo);
+    static std::unique_ptr<AudioDevice> create(const AudioDeviceCreateInfo& audioDeviceCreateInfo);
 
     virtual ~AudioDevice();
 
@@ -38,23 +36,6 @@ public:
 
     virtual void stop() = 0;
 
-    virtual void update() = 0;
-
-    virtual AudioId play(const std::shared_ptr<AudioBuffer>& buffer, float volume = 1.0f, float frameRate = 1.0f, bool loop = false, int32_t priority = 0) = 0;
-
-    AudioId play(const AudioClip* clip, float volume = 1.0f, float frameRate = 1.0f, bool loop = false, int32_t priority = 0);
-
-    virtual void stop(const AudioId& id) = 0;
-
-    virtual bool is_playing(const AudioId& id) const = 0;
-
-    virtual void set_volume(const AudioId& id, float volume) = 0;
-
-    virtual float volume(const AudioId& id) const = 0;
-
-    virtual void set_frame_rate(const AudioId& id, float frameRate) = 0;
-
-    virtual float frame_rate(const AudioId& id) const = 0;
 };
 
 }// namespace duk::audio
