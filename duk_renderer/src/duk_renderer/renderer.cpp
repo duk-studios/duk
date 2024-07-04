@@ -209,25 +209,21 @@ void Renderer::update_passes(objects::Objects& objects, duk::resource::Pools& po
     }
 }
 
-std::unique_ptr<Renderer> make_forward_renderer(const RendererCreateInfo& rendererCreateInfo) {
-    auto renderer = std::make_unique<Renderer>(rendererCreateInfo);
-
+void add_forward_passes(Renderer* renderer, duk::platform::Window* window) {
     ForwardPassCreateInfo forwardPassCreateInfo = {};
-    forwardPassCreateInfo.renderer = renderer.get();
+    forwardPassCreateInfo.renderer = renderer;
 
     auto forwardPass = renderer->add_pass<ForwardPass>(forwardPassCreateInfo);
 
-    if (rendererCreateInfo.window) {
+    if (window) {
         PresentPassCreateInfo presentPassCreateInfo = {};
-        presentPassCreateInfo.renderer = renderer.get();
-        presentPassCreateInfo.window = rendererCreateInfo.window;
+        presentPassCreateInfo.renderer = renderer;
+        presentPassCreateInfo.window = window;
 
         auto presentPass = renderer->add_pass<PresentPass>(presentPassCreateInfo);
 
         forwardPass->out_color()->connect(presentPass->in_color());
     }
-
-    return renderer;
 }
 
 }// namespace duk::renderer
