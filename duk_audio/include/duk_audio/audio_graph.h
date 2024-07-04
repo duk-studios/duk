@@ -25,7 +25,6 @@ public:
 
 class AudioGraph : public AudioProcessor {
 public:
-
     void process(void* output, uint32_t frameCount, uint32_t channelCount) override;
 
     void update();

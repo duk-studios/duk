@@ -10,7 +10,6 @@ namespace duk::audio {
 
 AudioEngine::AudioEngine(const AudioEngineCreateInfo& audioEngineCreateInfo)
     : m_sourceNode(nullptr) {
-
     AudioDeviceCreateInfo audioDeviceCreateInfo = {};
     audioDeviceCreateInfo.backend = Backend::MINIAUDIO;
     audioDeviceCreateInfo.frameRate = audioEngineCreateInfo.frameRate;
@@ -73,4 +72,4 @@ float AudioEngine::frame_rate(const AudioId& id) const {
     return m_sourceNode->frame_rate(id);
 }
 
-}
+}// namespace duk::audio

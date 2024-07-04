@@ -15,10 +15,8 @@ public:
 
 class Global2 {
 public:
-
     Global2(int a)
         : m_a(a) {
-
     }
 
     void foo() {

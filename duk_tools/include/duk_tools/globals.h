@@ -16,8 +16,7 @@ namespace duk::tools {
 
 class Globals {
 public:
-
-    template<typename T, typename ...Args>
+    template<typename T, typename... Args>
     T* add(Args&&... args);
 
     template<typename T>
@@ -33,7 +32,6 @@ public:
     T* get() const;
 
 private:
-
     template<typename T>
     static uint64_t hash_of();
 
@@ -47,8 +45,7 @@ private:
     template<typename T>
     class GlobalT final : public Global {
     public:
-
-        template<typename ...Args>
+        template<typename... Args>
         GlobalT(Args&&... args);
 
         void* get() override;
@@ -60,7 +57,6 @@ private:
     template<typename T>
     class ExternalGlobalT final : public Global {
     public:
-
         ExternalGlobalT(T* data);
 
         void* get() override;
@@ -73,7 +69,7 @@ private:
     std::unordered_map<uint64_t, std::unique_ptr<Global>> m_globals;
 };
 
-template<typename T, typename ... Args>
+template<typename T, typename... Args>
 T* Globals::add(Args&&... args) {
     DUK_ASSERT(!has<T>());
     m_globals.emplace(hash_of<T>(), std::make_unique<GlobalT<T>>(std::forward<Args>(args)...));
@@ -109,10 +105,9 @@ bool Globals::has() const {
 }
 
 template<typename T>
-template<typename ... Args>
+template<typename... Args>
 Globals::GlobalT<T>::GlobalT(Args&&... args)
     : m_data(std::forward<Args>(args)...) {
-
 }
 
 template<typename T>
@@ -130,6 +125,6 @@ void* Globals::ExternalGlobalT<T>::get() {
     return m_data;
 }
 
-}
+}// namespace duk::tools
 
-#endif //DUK_TOOLS_GLOBALS_H
+#endif//DUK_TOOLS_GLOBALS_H

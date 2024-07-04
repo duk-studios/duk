@@ -18,7 +18,6 @@ struct AudioEngineCreateInfo {
 
 class AudioEngine {
 public:
-
     AudioEngine(const AudioEngineCreateInfo& audioEngineCreateInfo);
 
     uint32_t frame_rate() const;
@@ -53,6 +52,6 @@ private:
     AudioSourceNode* m_sourceNode;
 };
 
-}
+}// namespace duk::audio
 
-#endif //DUK_AUDIO_AUDIO_ENGINE_H
+#endif//DUK_AUDIO_AUDIO_ENGINE_H

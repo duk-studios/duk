@@ -16,6 +16,6 @@ public:
     virtual void process(void* output, uint32_t frameCount, uint32_t channelCount) = 0;
 };
 
-}
+}// namespace duk::audio
 
-#endif //AUDIO_PROCESSOR_H
+#endif//AUDIO_PROCESSOR_H
