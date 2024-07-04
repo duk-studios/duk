@@ -46,7 +46,9 @@ public:
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.logger = duk::log::Logging::instance(true)->default_logger();
 
-        m_renderer = duk::renderer::make_forward_renderer(rendererCreateInfo);
+        m_renderer = std::make_unique<duk::renderer::Renderer>(rendererCreateInfo);
+
+        duk::renderer::add_forward_passes(m_renderer.get(), m_window.get());
 
         // mesh pool
         duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};

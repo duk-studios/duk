@@ -3,7 +3,7 @@
 //
 
 #include <duk_audio/audio_buffer.h>
-#include <duk_audio/audio_device.h>
+#include <duk_audio/audio_engine.h>
 #include <duk_audio/decode.h>
 
 #include <duk_tools/file.h>
@@ -43,32 +43,31 @@ int main() {
     const float kFrameRate = 48000;
     const uint32_t kChannelCount = 2;
 
-    duk::audio::AudioDeviceCreateInfo audioDeviceCreateInfo = {};
-    audioDeviceCreateInfo.backend = duk::audio::Backend::MINIAUDIO;
-    audioDeviceCreateInfo.channelCount = kChannelCount;
-    audioDeviceCreateInfo.frameRate = kFrameRate;
+    duk::audio::AudioEngineCreateInfo audioEngineCreateInfo = {};
+    audioEngineCreateInfo.channelCount = kChannelCount;
+    audioEngineCreateInfo.frameRate = kFrameRate;
 
-    auto audioDevice = duk::audio::AudioDevice::create(audioDeviceCreateInfo);
+    duk::audio::AudioEngine audioEngine(audioEngineCreateInfo);
 
     auto buffer = create_buffer("sample.flac", kChannelCount, kFrameRate);
     auto buffer2 = create_buffer("sample.wav", kChannelCount, kFrameRate);
-    audioDevice->start();
+    audioEngine.start();
 
-    auto id1 = audioDevice->play(buffer, 1.0f, 1.0f, false, 100);
+    auto id1 = audioEngine.play(buffer, 1.0f, 1.0f, false, 100);
 
     std::this_thread::sleep_for(std::chrono::seconds(5));
 
-    auto id2 = audioDevice->play(buffer2, 0.5f, 1.0f, false);
+    auto id2 = audioEngine.play(buffer2, 0.5f, 1.0f, false);
 
     std::this_thread::sleep_for(std::chrono::seconds(2));
 
-    audioDevice->stop(id1);
+    audioEngine.stop(id1);
 
-    while (audioDevice->is_playing(id2)) {
-        audioDevice->update();
+    while (audioEngine.is_playing(id2)) {
+        audioEngine.update();
     }
 
-    audioDevice->stop();
+    audioEngine.stop();
 
     return 0;
 }
