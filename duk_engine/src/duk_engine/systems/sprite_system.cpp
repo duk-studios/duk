@@ -15,8 +15,9 @@ void SpriteUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
 }
 
 void SpriteUpdateSystem::update(duk::objects::Objects& objects, Engine& engine) {
+    auto renderer = engine.globals()->get<duk::renderer::Renderer>();
     for (auto object: objects.all_with<duk::renderer::SpriteRenderer>()) {
-        duk::renderer::update_sprite_renderer(engine.renderer(), object.component<duk::renderer::SpriteRenderer>());
+        duk::renderer::update_sprite_renderer(renderer, object.component<duk::renderer::SpriteRenderer>());
     }
 }
 

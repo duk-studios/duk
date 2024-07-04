@@ -25,7 +25,7 @@ void StatsSystem::update(objects::Objects& objects, engine::Engine& engine) {
         return;
     }
 
-    auto timer = engine.timer();
+    auto timer = engine.globals()->get<duk::tools::Timer>();
 
     auto [stats, textRenderer] = object.components<Stats, duk::renderer::TextRenderer>();
 

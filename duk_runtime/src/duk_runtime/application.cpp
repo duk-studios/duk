@@ -63,8 +63,9 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
-    m_engine->pools()->create_pool<duk::animation::AnimationClipPool>();
-    m_engine->pools()->create_pool<duk::animation::AnimationControllerPool>();
+    auto pools = m_engine->globals()->get<duk::resource::Pools>();
+    pools->create_pool<duk::animation::AnimationClipPool>();
+    pools->create_pool<duk::animation::AnimationControllerPool>();
 }
 
 Application::~Application() = default;

@@ -11,6 +11,7 @@ namespace detail {
 
 std::unique_ptr<AudioDevice> create_miniaudio_device(const AudioDeviceCreateInfo& audioDeviceCreateInfo) {
     MiniaudioDeviceCreateInfo miniaudioDeviceCreateInfo = {};
+    miniaudioDeviceCreateInfo.processor = audioDeviceCreateInfo.processor;
     miniaudioDeviceCreateInfo.frameRate = audioDeviceCreateInfo.frameRate;
     miniaudioDeviceCreateInfo.channelCount = audioDeviceCreateInfo.channelCount;
     return std::make_unique<MiniaudioDevice>(miniaudioDeviceCreateInfo);
@@ -18,19 +19,15 @@ std::unique_ptr<AudioDevice> create_miniaudio_device(const AudioDeviceCreateInfo
 
 }// namespace detail
 
-std::unique_ptr<AudioDevice> AudioDevice::create(const AudioDeviceCreateInfo& audioEngineCreateInfo) {
-    switch (audioEngineCreateInfo.backend) {
+std::unique_ptr<AudioDevice> AudioDevice::create(const AudioDeviceCreateInfo& audioDeviceCreateInfo) {
+    switch (audioDeviceCreateInfo.backend) {
         case Backend::MINIAUDIO:
-            return detail::create_miniaudio_device(audioEngineCreateInfo);
+            return detail::create_miniaudio_device(audioDeviceCreateInfo);
         default:
             throw std::invalid_argument("unsupported audio backend");
     }
 }
 
 AudioDevice::~AudioDevice() = default;
-
-AudioId AudioDevice::play(const AudioClip* clip, float volume, float frameRate, bool loop, int32_t priority) {
-    return play(clip->buffer(), volume, frameRate, loop, priority);
-}
 
 }// namespace duk::audio

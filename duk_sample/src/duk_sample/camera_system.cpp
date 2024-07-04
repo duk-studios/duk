@@ -76,10 +76,16 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
         return;
     }
 
-    auto input = engine.input();
+    auto globals = engine.globals();
 
-    const auto deltaTime = engine.timer()->delta_time();
-    auto cursor = engine.platform()->cursor();
+    auto input = globals->get<duk::engine::Input>();
+    auto timer = globals->get<duk::tools::Timer>();
+    auto audio = globals->get<duk::audio::AudioEngine>();
+    auto platform = globals->get<duk::platform::Platform>();
+    auto window = globals->get<duk::platform::Window>();
+
+    const auto deltaTime = timer->delta_time();
+    auto cursor = platform->cursor();
 
     auto controller = object.component<CameraController>();
 
@@ -97,7 +103,7 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
 
     if (input->mouse_down(duk::platform::MouseButton::RIGHT)) {
         auto camera = object.component<duk::renderer::Camera>();
-        auto worldPos = duk::renderer::screen_to_world(camera, engine.window()->size(), glm::vec3(input->mouse_position(), -30));
+        auto worldPos = duk::renderer::screen_to_world(camera, window->size(), glm::vec3(input->mouse_position(), -30));
 
         auto spawnedObject = objects.copy_objects(*controller->sphere);
         auto spawnedTransform = spawnedObject.component<duk::renderer::Transform>();
@@ -108,7 +114,7 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
             spriteRenderer->index = spriteIndex++ % spriteRenderer->sprite->count();
         }
 
-        controller->audioPlayer.play(engine.audio(), controller->spawnClip.get(), 1.0f, glm::linearRand(1.0f, 1.05f));
+        controller->audioPlayer.play(audio, controller->spawnClip.get(), 1.0f, glm::linearRand(1.0f, 1.05f));
     }
 }
 

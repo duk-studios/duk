@@ -21,7 +21,8 @@ static void data_callback(ma_device* device, void* output, const void* input, ma
 }// namespace detail
 
 MiniaudioDevice::MiniaudioDevice(const MiniaudioDeviceCreateInfo& miniaudioEngineCreateInfo)
-    : m_frameRate(miniaudioEngineCreateInfo.frameRate)
+    : m_processor(miniaudioEngineCreateInfo.processor)
+    , m_frameRate(miniaudioEngineCreateInfo.frameRate)
     , m_channelCount(miniaudioEngineCreateInfo.channelCount) {
     ma_device_config config;
     config = ma_device_config_init(ma_device_type_playback);
@@ -35,8 +36,6 @@ MiniaudioDevice::MiniaudioDevice(const MiniaudioDeviceCreateInfo& miniaudioEngin
     if (result != MA_SUCCESS) {
         throw std::runtime_error(fmt::format("failed to initialize miniaudio device, error code: {}", (int)result));
     }
-
-    m_sourceNode = m_graph.add<AudioSourceNode>(32);
 }
 
 MiniaudioDevice::~MiniaudioDevice() {
@@ -59,40 +58,10 @@ void MiniaudioDevice::stop() {
     ma_device_stop(&m_device);
 }
 
-void MiniaudioDevice::update() {
-    m_graph.update();
-}
-
-AudioId MiniaudioDevice::play(const std::shared_ptr<AudioBuffer>& buffer, float volume, float frameRate, bool loop, int32_t priority) {
-    return m_sourceNode->play(buffer, volume, frameRate, loop, priority);
-}
-
-void MiniaudioDevice::stop(const AudioId& id) {
-    m_sourceNode->stop(id);
-}
-
-bool MiniaudioDevice::is_playing(const AudioId& id) const {
-    return m_sourceNode->is_playing(id);
-}
-
-void MiniaudioDevice::set_volume(const AudioId& id, float volume) {
-    m_sourceNode->set_volume(id, volume);
-}
-
-float MiniaudioDevice::volume(const AudioId& id) const {
-    return m_sourceNode->volume(id);
-}
-
-void MiniaudioDevice::set_frame_rate(const AudioId& id, float frameRate) {
-    m_sourceNode->set_frame_rate(id, frameRate);
-}
-
-float MiniaudioDevice::frame_rate(const AudioId& id) const {
-    return m_sourceNode->frame_rate(id);
-}
-
-void MiniaudioDevice::data_callback(void* output, const void* input, ma_uint32 frameCount) {
-    m_graph.process(output, frameCount, m_channelCount);
+void MiniaudioDevice::data_callback(void* output, const void* input, ma_uint32 frameCount) const {
+    if (m_processor) {
+        m_processor->process(output, frameCount, m_channelCount);
+    }
 }
 
 }// namespace audio

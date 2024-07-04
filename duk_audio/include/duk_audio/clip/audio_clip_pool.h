@@ -5,7 +5,7 @@
 #ifndef DUK_AUDIO_AUDIO_CLIP_POOL_H
 #define DUK_AUDIO_AUDIO_CLIP_POOL_H
 
-#include <duk_audio/audio_device.h>
+#include <duk_audio/audio_engine.h>
 #include <duk_audio/clip/audio_clip.h>
 
 #include <duk_resource/pool.h>
@@ -13,7 +13,7 @@
 namespace duk::audio {
 
 struct AudioClipPoolCreateInfo {
-    AudioDevice* device;
+    AudioEngine* engine;
 };
 
 class AudioClipPool : public duk::resource::PoolT<AudioClipResource> {
@@ -29,7 +29,7 @@ public:
     AudioClipResource create(duk::resource::Id id, const std::vector<uint8_t>& encodedData);
 
 private:
-    AudioDevice* m_device;
+    AudioEngine* m_engine;
 };
 
 }// namespace duk::audio
