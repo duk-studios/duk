@@ -36,40 +36,11 @@ public:
 
     void run();
 
-    DUK_NO_DISCARD duk::platform::Platform* platform();
-
-    DUK_NO_DISCARD duk::platform::Window* window();
-
-    DUK_NO_DISCARD duk::renderer::Renderer* renderer();
-
-    DUK_NO_DISCARD duk::audio::AudioEngine* audio();
-
-    DUK_NO_DISCARD duk::resource::Pools* pools();
-
-    DUK_NO_DISCARD duk::resource::ResourceSet* resources();
-
-    DUK_NO_DISCARD Director* director();
-
-    DUK_NO_DISCARD const duk::engine::Input* input() const;
-
-    DUK_NO_DISCARD duk::tools::Timer* timer();
-
-    DUK_NO_DISCARD duk::event::Dispatcher* dispatcher();
+    duk::tools::Globals* globals();
 
 private:
-    std::filesystem::path m_workingDirectory;
-    duk::platform::Platform* m_platform;
-    duk::platform::Window* m_window;
     duk::event::Listener m_listener;
     duk::tools::Globals m_globals;
-    duk::resource::Pools* m_pools;
-    duk::resource::ResourceSet* m_resources;
-    duk::renderer::Renderer* m_renderer;
-    duk::audio::AudioEngine* m_audio;
-    Director* m_director;
-    Input* m_input;
-    duk::tools::Timer* m_timer;
-    duk::event::Dispatcher* m_dispatcher;
     bool m_run;
 };
 

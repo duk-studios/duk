@@ -17,10 +17,12 @@ void SpriteAnimatorSystem::enter(duk::objects::Objects& objects, engine::Engine&
 }
 
 void SpriteAnimatorSystem::update(duk::objects::Objects& objects, engine::Engine& engine) {
-    auto input = engine.input();
+    auto globals = engine.globals();
+    auto input = globals->get<duk::engine::Input>();
 
     if (input->key_down(platform::Keys::R)) {
-        engine.director()->request_scene("directions");
+        auto director = globals->get<duk::engine::Director>();
+        director->request_scene("directions");
     }
 
     auto rotating = input->key_down(platform::Keys::G);

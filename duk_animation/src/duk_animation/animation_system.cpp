@@ -16,7 +16,7 @@ void AnimationSystem::enter(duk::objects::Objects& objects, engine::Engine& engi
 }
 
 void AnimationSystem::update(duk::objects::Objects& objects, engine::Engine& engine) {
-    const auto deltaTime = engine.timer()->delta_time();
+    const auto deltaTime = engine.globals()->get<duk::tools::Timer>()->delta_time();
 
     for (auto object: objects.all_with<Animator>()) {
         auto animator = object.component<Animator>();

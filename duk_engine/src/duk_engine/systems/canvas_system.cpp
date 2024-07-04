@@ -22,10 +22,11 @@ CanvasUpdateSystem::CanvasUpdateSystem()
 }
 
 void CanvasUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
-    m_listener.listen(engine.window()->window_resize_event, [&objects](uint32_t width, uint32_t height) {
+    auto window = engine.globals()->get<duk::platform::Window>();
+    m_listener.listen(window->window_resize_event, [&objects](uint32_t width, uint32_t height) {
         detail::update_canvas(objects, width, height);
     });
-    detail::update_canvas(objects, engine.window()->width(), engine.window()->height());
+    detail::update_canvas(objects, window->width(), window->height());
 }
 
 void CanvasUpdateSystem::update(duk::objects::Objects& objects, Engine& engine) {

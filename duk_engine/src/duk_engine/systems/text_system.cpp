@@ -16,9 +16,10 @@ void TextUpdateSystem::enter(objects::Objects& objects, Engine& engine) {
 }
 
 void TextUpdateSystem::update(objects::Objects& objects, Engine& engine) {
+    auto renderer = engine.globals()->get<duk::renderer::Renderer>();
     for (auto object: objects.all_with<duk::renderer::TextRenderer>()) {
         auto textRenderer = object.component<duk::renderer::TextRenderer>();
-        duk::renderer::update_text_renderer(engine.renderer(), textRenderer);
+        duk::renderer::update_text_renderer(renderer, textRenderer);
     }
 }
 

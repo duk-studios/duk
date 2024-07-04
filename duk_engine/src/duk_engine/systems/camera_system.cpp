@@ -12,12 +12,12 @@ CameraUpdateSystem::CameraUpdateSystem()
 }
 
 void CameraUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
-    auto renderer = engine.renderer();
+    auto renderer = engine.globals()->get<duk::renderer::Renderer>();
     duk::renderer::update_cameras(objects, renderer->render_width(), renderer->render_height());
 }
 
 void CameraUpdateSystem::update(duk::objects::Objects& objects, Engine& engine) {
-    auto renderer = engine.renderer();
+    auto renderer = engine.globals()->get<duk::renderer::Renderer>();
     duk::renderer::update_cameras(objects, renderer->render_width(), renderer->render_height());
 }
 

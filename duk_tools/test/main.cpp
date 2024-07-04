@@ -32,11 +32,11 @@ private:
 int test_globals() {
     duk::tools::Globals globals;
 
-    auto global1 = globals.make<Global1>();
+    auto global1 = globals.add<Global1>();
 
     global1->foo();
 
-    auto global2 = globals.make<Global2>(42);
+    auto global2 = globals.add<Global2>(42);
 
     global2->foo();
 

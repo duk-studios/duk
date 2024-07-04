@@ -18,7 +18,10 @@ class Globals {
 public:
 
     template<typename T, typename ...Args>
-    T* make(Args&&... args);
+    T* add(Args&&... args);
+
+    template<typename T>
+    T* add_external(T* data);
 
     template<typename T>
     void reset();
@@ -31,9 +34,14 @@ public:
 
 private:
 
+    template<typename T>
+    static uint64_t hash_of();
+
     class Global {
     public:
         virtual ~Global() = default;
+
+        virtual void* get() = 0;
     };
 
     template<typename T>
@@ -43,36 +51,61 @@ private:
         template<typename ...Args>
         GlobalT(Args&&... args);
 
-        T* get();
+        void* get() override;
 
     private:
         T m_data;
     };
 
+    template<typename T>
+    class ExternalGlobalT final : public Global {
+    public:
+
+        ExternalGlobalT(T* data);
+
+        void* get() override;
+
+    private:
+        T* m_data;
+    };
+
 private:
-    std::unordered_map<std::string, std::unique_ptr<Global>> m_globals;
+    std::unordered_map<uint64_t, std::unique_ptr<Global>> m_globals;
 };
 
 template<typename T, typename ... Args>
-T* Globals::make(Args&&... args) {
+T* Globals::add(Args&&... args) {
     DUK_ASSERT(!has<T>());
-    m_globals.emplace(type_name_of<T>(), std::make_unique<GlobalT<T>>(std::forward<Args>(args)...));
+    m_globals.emplace(hash_of<T>(), std::make_unique<GlobalT<T>>(std::forward<Args>(args)...));
+    return get<T>();
+}
+
+template<typename T>
+T* Globals::add_external(T* data) {
+    DUK_ASSERT(!has<T>());
+    m_globals.emplace(hash_of<T>(), std::make_unique<ExternalGlobalT<T>>(data));
     return get<T>();
 }
 
 template<typename T>
 void Globals::reset() {
-    m_globals.erase(type_name_of<T>());
+    m_globals.erase(hash_of<T>());
 }
 
 template<typename T>
 T* Globals::get() const {
-    return static_cast<GlobalT<T>*>(m_globals.at(type_name_of<T>()).get())->get();
+    return static_cast<T*>(m_globals.at(hash_of<T>())->get());
+}
+
+template<typename T>
+uint64_t Globals::hash_of() {
+    static uint64_t hash = std::hash<std::string>()(type_name_of<T>());
+    return hash;
 }
 
 template<typename T>
 bool Globals::has() const {
-    return m_globals.contains(type_name_of<T>());
+    return m_globals.contains(hash_of<T>());
 }
 
 template<typename T>
@@ -83,8 +116,18 @@ Globals::GlobalT<T>::GlobalT(Args&&... args)
 }
 
 template<typename T>
-T* Globals::GlobalT<T>::get() {
+void* Globals::GlobalT<T>::get() {
     return &m_data;
+}
+
+template<typename T>
+Globals::ExternalGlobalT<T>::ExternalGlobalT(T* data)
+    : m_data(data) {
+}
+
+template<typename T>
+void* Globals::ExternalGlobalT<T>::get() {
+    return m_data;
 }
 
 }
