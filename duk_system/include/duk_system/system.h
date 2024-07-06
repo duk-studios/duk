@@ -1,38 +1,24 @@
 /// 21/02/2024
 /// system.h
 
-#ifndef DUK_ENGINE_SYSTEMS_H
-#define DUK_ENGINE_SYSTEMS_H
+#ifndef DUK_SYSTEM_SYSTEM_H
+#define DUK_SYSTEM_SYSTEM_H
 
 #include <duk_objects/objects.h>
+#include <duk_tools/globals.h>
 #include <duk_tools/types.h>
 
-static constexpr uint32_t kMainThreadGroup = 1 << 0;
-static constexpr uint32_t kGameplayGroup = 1 << 1;
-static constexpr uint32_t kPhysicsThreadGroup = 1 << 2;
+namespace duk::system {
 
-namespace duk::engine {
-
-class Engine;
-
-class System {
+class System : public duk::objects::ComponentEventListener {
 public:
-    System(uint32_t groupMask);
-
     virtual ~System() = default;
 
-    virtual void enter(duk::objects::Objects& objects, Engine& engine) = 0;
+    virtual void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) = 0;
 
-    virtual void update(duk::objects::Objects& objects, Engine& engine) = 0;
+    virtual void update(duk::objects::Objects& objects, duk::tools::Globals& globals) = 0;
 
-    virtual void exit(duk::objects::Objects& objects, Engine& engine) = 0;
-
-    uint32_t group_mask() const;
-
-    bool belongs(const uint32_t groupMask) const;
-
-private:
-    uint32_t m_groupMask;
+    virtual void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) = 0;
 };
 
 class Systems;
@@ -43,7 +29,9 @@ private:
     public:
         virtual ~SystemEntry() = default;
 
-        virtual void build(Systems& systems) = 0;
+        virtual void from_json(Systems& systems, const rapidjson::Value& json) = 0;
+
+        virtual void to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) = 0;
 
         virtual const std::string& name() = 0;
     };
@@ -51,7 +39,9 @@ private:
     template<typename T>
     class SystemEntryT : public SystemEntry {
     public:
-        void build(Systems& systems) override;
+        void from_json(Systems& systems, const rapidjson::Value& json) override;
+
+        void to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) override;
 
         const std::string& name() override;
     };
@@ -67,7 +57,9 @@ public:
     template<typename T>
     void add();
 
-    void build(const std::string& systemName, Systems& systems);
+    void from_json(Systems& systems, const rapidjson::Value& json, const std::string& systemName);
+
+    void to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json, const std::string& systemName);
 
     DUK_NO_DISCARD const std::string& system_name(size_t systemIndex) const;
 
@@ -110,17 +102,24 @@ public:
     };
 
 public:
-    template<typename T>
-    void add();
+    Systems();
+
+    void attach(duk::objects::ComponentEventDispatcher* dispatcher);
 
     template<typename T>
-    T* get();
+    T* add(uint32_t group);
 
-    void enter(duk::objects::Objects& objects, Engine& engine);
+    template<typename T>
+    T* get() const;
 
-    void update(duk::objects::Objects& objects, Engine& engine, uint32_t activeGroupMask);
+    template<typename T>
+    uint32_t group() const;
 
-    void exit(duk::objects::Objects& objects, Engine& engine);
+    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals, uint32_t disabledGroupsMask);
+
+    void update(duk::objects::Objects& objects, duk::tools::Globals& globals, uint32_t disabledGroupsMask);
+
+    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals, uint32_t disabledGroupsMask);
 
     SystemIterator<false> begin();
 
@@ -134,9 +133,15 @@ private:
     DUK_NO_DISCARD size_t system_index(size_t containerIndex) const;
 
 private:
-    std::vector<std::unique_ptr<System>> m_container;
+    struct SystemGroupEntry {
+        std::unique_ptr<System> system;
+        uint32_t group;
+    };
+
+    std::vector<SystemGroupEntry> m_systemGroup;
     std::unordered_map<size_t, size_t> m_systemIndexToContainerIndex;
     std::unordered_map<size_t, size_t> m_containerIndexToSystemIndex;
+    duk::objects::ComponentEventDispatcher* m_dispatcher;
 };
 
 template<typename T, typename... Args>
@@ -144,13 +149,21 @@ void register_system(Args&&... args) {
     SystemRegistry::instance()->add<T>(std::forward<Args>(args)...);
 }
 
-void build_system(const std::string& systemName, Systems& systems);
+template<typename T>
+void SystemRegistry::SystemEntryT<T>::from_json(Systems& systems, const rapidjson::Value& json) {
+    uint32_t group;
+    duk::serial::from_json_member(json, "group", group);
 
-const std::string& system_name(size_t systemIndex);
+    auto system = systems.add<T>(group);
+    if (!system) {
+        return;
+    }
+    duk::serial::from_json(json, *system);
+}
 
 template<typename T>
-void SystemRegistry::SystemEntryT<T>::build(Systems& systems) {
-    systems.add<T>();
+void SystemRegistry::SystemEntryT<T>::to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) {
+    duk::serial::to_json(document, json, *systems.get<T>());
 }
 
 template<typename T>
@@ -195,12 +208,12 @@ Systems::SystemIterator<isConst> Systems::SystemIterator<isConst>::operator*() c
 
 template<bool isConst>
 typename Systems::SystemIterator<isConst>::SystemType* Systems::SystemIterator<isConst>::operator->() {
-    return m_systems.m_container.at(m_i).get();
+    return m_systems.m_systems.at(m_i).get();
 }
 
 template<bool isConst>
 typename Systems::SystemIterator<isConst>::SystemType* Systems::SystemIterator<isConst>::operator->() const {
-    return m_systems.m_container.at(m_i).get();
+    return m_systems.m_systems.at(m_i).get();
 }
 
 template<bool isConst>
@@ -225,58 +238,72 @@ size_t Systems::SystemIterator<isConst>::system_index() const {
 
 template<bool isConst>
 const std::string& Systems::SystemIterator<isConst>::system_name() const {
-    return duk::engine::system_name(system_index());
+    return SystemRegistry::instance()->system_name(system_index());
 }
 
 template<typename T>
-void Systems::add() {
+T* Systems::add(uint32_t group) {
     static const auto entryIndex = SystemRegistry::instance()->index_of<T>();
-    const auto containerIndex = m_container.size();
-    if (m_systemIndexToContainerIndex.find(entryIndex) != m_systemIndexToContainerIndex.end()) {
+    const auto containerIndex = m_systemGroup.size();
+    if (m_systemIndexToContainerIndex.contains(entryIndex)) {
         duk::log::warn("System of same type already exists, skipping");
-        return;
+        return nullptr;
     }
-    m_container.emplace_back(std::make_unique<T>());
+    auto& systemGroup = m_systemGroup.emplace_back(std::make_unique<T>(), group);
     m_systemIndexToContainerIndex.emplace(entryIndex, containerIndex);
     m_containerIndexToSystemIndex.emplace(containerIndex, entryIndex);
+    auto system = static_cast<T*>(systemGroup.system.get());
+    system->attach(m_dispatcher);
+    return system;
 }
 
 template<typename T>
-T* Systems::get() {
+T* Systems::get() const {
     static const auto entryIndex = SystemRegistry::instance()->index_of<T>();
     auto it = m_systemIndexToContainerIndex.find(entryIndex);
     if (it == m_systemIndexToContainerIndex.end()) {
         return nullptr;
     }
-    const auto containerIndex = it.second;
-    return dynamic_cast<T*>(m_container.at(containerIndex).get());
+    const auto containerIndex = it->second;
+    return static_cast<T*>(m_systemGroup.at(containerIndex).system.get());
 }
 
-}// namespace duk::engine
+template<typename T>
+uint32_t Systems::group() const {
+    static const auto entryIndex = SystemRegistry::instance()->index_of<T>();
+    auto it = m_systemIndexToContainerIndex.find(entryIndex);
+    if (it == m_systemIndexToContainerIndex.end()) {
+        return ~0;
+    }
+    const auto containerIndex = it->second;
+    return m_systemGroup.at(containerIndex).group;
+}
+}// namespace duk::system
 
 namespace duk::serial {
 
 template<>
-inline void from_json<duk::engine::Systems>(const rapidjson::Value& json, duk::engine::Systems& systems) {
-    auto jsonSystemsArray = json.GetArray();
-    for (auto& jsonSystem: jsonSystemsArray) {
+inline void from_json<duk::system::Systems>(const rapidjson::Value& json, duk::system::Systems& systems) {
+    auto systemJsonArray = json.GetArray();
+    for (auto& systemJson: systemJsonArray) {
         std::string systemName;
-        from_json(jsonSystem, systemName);
-        duk::engine::build_system(systemName, systems);
+        from_json_member(systemJson, "type", systemName);
+        duk::system::SystemRegistry::instance()->from_json(systems, systemJson, systemName);
     }
 }
 
 template<>
-inline void to_json<duk::engine::Systems>(rapidjson::Document& document, rapidjson::Value& json, const duk::engine::Systems& systems) {
+inline void to_json<duk::system::Systems>(rapidjson::Document& document, rapidjson::Value& json, const duk::system::Systems& systems) {
     auto jsonSystemsArray = json.SetArray().GetArray();
     for (auto it: systems) {
         const auto& systemName = it.system_name();
-        rapidjson::Value jsonSystem;
-        jsonSystem.SetString(systemName.c_str(), systemName.size(), document.GetAllocator());
-        jsonSystemsArray.PushBack(std::move(jsonSystem), document.GetAllocator());
+        rapidjson::Value systemJson;
+        to_json_member(document, systemJson, "type", systemName);
+
+        duk::system::SystemRegistry::instance()->to_json(systems, document, systemJson, systemName);
     }
 }
 
 }// namespace duk::serial
 
-#endif// DUK_ENGINE_SYSTEMS_H
+#endif// DUK_SYSTEM_SYSTEM_H

@@ -5,22 +5,23 @@
 #ifndef DUK_ENGINE_CANVAS_SYSTEM_H
 #define DUK_ENGINE_CANVAS_SYSTEM_H
 
-#include <duk_engine/systems.h>
+#include <duk_system/system.h>
+#include <duk_objects/events.h>
+#include <duk_renderer/components/canvas.h>
 
 namespace duk::engine {
 
-class CanvasUpdateSystem : public System {
+class CanvasUpdateSystem : public duk::system::System {
 public:
-    explicit CanvasUpdateSystem();
+    using CanvasEnterEvent = duk::objects::ComponentEvent<duk::renderer::Canvas, duk::objects::ComponentEnterEvent>;
 
-    void enter(objects::Objects& objects, Engine& engine) override;
+    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
 
-    void update(objects::Objects& objects, Engine& engine) override;
+    void update(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
 
-    void exit(objects::Objects& objects, Engine& engine) override;
+    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
 
-private:
-    duk::event::Listener m_listener;
+    void receive(const CanvasEnterEvent& event);
 };
 
 }// namespace duk::engine

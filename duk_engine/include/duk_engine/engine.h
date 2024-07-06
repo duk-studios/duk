@@ -26,6 +26,7 @@ struct EngineCreateInfo {
     duk::platform::Platform* platform;
     duk::platform::Window* window;
     Settings settings;
+    bool rendererApiValidationLayers;
 };
 
 class Engine {

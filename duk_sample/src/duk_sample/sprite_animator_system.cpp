@@ -9,19 +9,15 @@
 #include <duk_engine/engine.h>
 
 namespace duk::sample {
-SpriteAnimatorSystem::SpriteAnimatorSystem()
-    : System(kGameplayGroup) {
+
+void SpriteAnimatorSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
 }
 
-void SpriteAnimatorSystem::enter(duk::objects::Objects& objects, engine::Engine& engine) {
-}
-
-void SpriteAnimatorSystem::update(duk::objects::Objects& objects, engine::Engine& engine) {
-    auto globals = engine.globals();
-    auto input = globals->get<duk::engine::Input>();
+void SpriteAnimatorSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
+    auto input = globals.get<duk::engine::Input>();
 
     if (input->key_down(platform::Keys::R)) {
-        auto director = globals->get<duk::engine::Director>();
+        auto director = globals.get<duk::engine::Director>();
         director->request_scene("directions");
     }
 
@@ -39,7 +35,6 @@ void SpriteAnimatorSystem::update(duk::objects::Objects& objects, engine::Engine
     }
 }
 
-void SpriteAnimatorSystem::exit(duk::objects::Objects& objects, engine::Engine& engine) {
+void SpriteAnimatorSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
 }
-
 }// namespace duk::sample

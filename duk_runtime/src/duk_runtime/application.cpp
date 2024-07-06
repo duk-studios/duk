@@ -60,6 +60,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     engineCreateInfo.settings = detail::load_settings();
     engineCreateInfo.platform = platform;
     engineCreateInfo.window = m_window.get();
+    engineCreateInfo.rendererApiValidationLayers = applicationCreateInfo.rendererApiValidationLayers;
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 

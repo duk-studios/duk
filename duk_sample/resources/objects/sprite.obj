@@ -19,6 +19,10 @@
         },
         {
           "type": "duk::sample::SpriteAnimator"
+        },
+        {
+          "type": "duk::sample::Temporary",
+          "duration": 1
         }
       ]
     }

@@ -44,8 +44,9 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         rendererCreateInfo.window = window;
         rendererCreateInfo.pools = pools;
         rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::VERBOSE));
-        rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.applicationName = settings.name.c_str();
+        rendererCreateInfo.api = duk::rhi::API::VULKAN;
+        rendererCreateInfo.apiValidationLayers = engineCreateInfo.rendererApiValidationLayers;
 
         auto renderer = m_globals.add<duk::renderer::Renderer>(rendererCreateInfo);
         duk::renderer::add_forward_passes(renderer, window);
@@ -102,8 +103,6 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     // director
     {
         DirectorCreateInfo directorCreateInfo = {};
-        directorCreateInfo.renderer = m_globals.get<duk::renderer::Renderer>();
-        directorCreateInfo.resources = m_globals.get<duk::resource::ResourceSet>();
         directorCreateInfo.firstScene = settings.scene;
 
         m_globals.add<Director>(directorCreateInfo);
@@ -118,8 +117,8 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
 Engine::~Engine() {
     m_globals.reset<Director>();
-    m_globals.reset<duk::resource::Pools>();
     m_globals.reset<duk::resource::ResourceSet>();
+    m_globals.reset<resource::Pools>();
 }
 
 void Engine::run() {
@@ -156,7 +155,7 @@ void Engine::run() {
 
         audio->update();
 
-        director->update(*this);
+        director->update(m_globals);
     }
 }
 

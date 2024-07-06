@@ -12,8 +12,6 @@
 namespace duk::engine {
 
 struct DirectorCreateInfo {
-    duk::renderer::Renderer* renderer;
-    duk::resource::ResourceSet* resources;
     duk::resource::Id firstScene;
 };
 
@@ -23,7 +21,7 @@ public:
 
     ~Director();
 
-    void update(Engine& engine);
+    void update(duk::tools::Globals& globals);
 
     void request_scene(duk::resource::Id id);
 
@@ -36,14 +34,13 @@ public:
     void disable(uint32_t systemGroup);
 
 private:
-    void load_scene(Engine& engine, duk::resource::Id id);
+    void load_scene(duk::tools::Globals& globals, duk::resource::Id id);
 
 private:
-    duk::renderer::Renderer* m_renderer;
-    duk::resource::ResourceSet* m_resources;
     SceneResource m_scene;
     duk::resource::Id m_requestedSceneId;
-    uint32_t m_activeSystemGroup;
+    std::string m_requestedSceneAlias;
+    uint32_t m_disabledGroupsMask;
 };
 
 }// namespace duk::engine

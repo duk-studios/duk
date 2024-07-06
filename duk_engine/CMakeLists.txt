@@ -13,7 +13,6 @@ set(DUK_ENGINE_HEADERS
         include/duk_engine/scene/scene.h
         include/duk_engine/scene/scene_pool.h
         include/duk_engine/scene/scene_handler.h
-        include/duk_engine/systems.h
         include/duk_engine/systems/camera_system.h
         include/duk_engine/systems/canvas_system.h
         include/duk_engine/systems/sprite_system.h
@@ -30,7 +29,6 @@ set(DUK_ENGINE_SOURCES
         src/duk_engine/scene/scene.cpp
         src/duk_engine/scene/scene_pool.cpp
         src/duk_engine/scene/scene_handler.cpp
-        src/duk_engine/systems.cpp
         src/duk_engine/systems/camera_system.cpp
         src/duk_engine/systems/canvas_system.cpp
         src/duk_engine/systems/sprite_system.cpp
@@ -51,6 +49,7 @@ target_include_directories(duk_engine
 
 target_link_libraries(duk_engine
         PUBLIC
+        duk_system
         duk_renderer
         duk_audio
         )

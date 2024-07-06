@@ -8,7 +8,7 @@
 #include <duk_objects/objects.h>
 #include <duk_audio/audio_player.h>
 #include <duk_audio/clip/audio_clip.h>
-#include <duk_engine/systems.h>
+#include <duk_system/system.h>
 
 namespace duk::sample {
 
@@ -20,15 +20,13 @@ struct CameraController {
     duk::audio::AudioPlayer audioPlayer;
 };
 
-class CameraSystem : public duk::engine::System {
+class CameraSystem : public duk::system::System {
 public:
-    explicit CameraSystem();
+    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
 
-    void enter(duk::objects::Objects& objects, duk::engine::Engine& environment) override;
+    void update(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
 
-    void update(duk::objects::Objects& objects, duk::engine::Engine& environment) override;
-
-    void exit(duk::objects::Objects& objects, duk::engine::Engine& environment) override;
+    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
 };
 
 }// namespace duk::sample

@@ -6,7 +6,6 @@
 
 #include <duk_engine/register_types.h>
 #include <duk_engine/scene/scene_handler.h>
-#include <duk_engine/systems.h>
 #include <duk_engine/systems/camera_system.h>
 #include <duk_engine/systems/canvas_system.h>
 #include <duk_engine/systems/sprite_system.h>
@@ -21,11 +20,11 @@ void register_types() {
     duk::renderer::register_types();
     duk::audio::register_types();
     duk::resource::register_handler<SceneHandler>();
-    register_system<CameraUpdateSystem>();
-    register_system<TransformUpdateSystem>();
-    register_system<CanvasUpdateSystem>();
-    register_system<SpriteUpdateSystem>();
-    register_system<TextUpdateSystem>();
+    duk::system::register_system<CameraUpdateSystem>();
+    duk::system::register_system<TransformUpdateSystem>();
+    duk::system::register_system<CanvasUpdateSystem>();
+    duk::system::register_system<SpriteUpdateSystem>();
+    duk::system::register_system<TextUpdateSystem>();
 }
 
 }// namespace duk::engine

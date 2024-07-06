@@ -7,21 +7,18 @@
 #include <duk_renderer/components/camera.h>
 
 namespace duk::engine {
-CameraUpdateSystem::CameraUpdateSystem()
-    : System(kMainThreadGroup) {
-}
 
-void CameraUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
-    auto renderer = engine.globals()->get<duk::renderer::Renderer>();
+void CameraUpdateSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
+    auto renderer = globals.get<duk::renderer::Renderer>();
     duk::renderer::update_cameras(objects, renderer->render_width(), renderer->render_height());
 }
 
-void CameraUpdateSystem::update(duk::objects::Objects& objects, Engine& engine) {
-    auto renderer = engine.globals()->get<duk::renderer::Renderer>();
+void CameraUpdateSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
+    auto renderer = globals.get<duk::renderer::Renderer>();
     duk::renderer::update_cameras(objects, renderer->render_width(), renderer->render_height());
 }
 
-void CameraUpdateSystem::exit(duk::objects::Objects& objects, Engine& engine) {
+void CameraUpdateSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
 }
 
 }// namespace duk::engine
