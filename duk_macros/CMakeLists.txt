@@ -17,6 +17,12 @@ target_include_directories(duk_macros
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         )
 
+target_compile_definitions(duk_macros
+        PUBLIC
+        $<$<CONFIG:Debug>:DUK_DEBUG=1>
+        $<$<CONFIG:Release>:DUK_RELEASE=1>
+)
+
 set_target_properties(duk_macros PROPERTIES
         CXX_STANDARD 20
         )
