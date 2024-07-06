@@ -122,7 +122,7 @@ int main() {
     //The objects which is in use
     duk::objects::Objects objects;
 
-    objects.attach_dispatcher(&componentEventDispatcher);
+    objects.attach(&componentEventDispatcher);
 
     //Adding a new object to the objects
     auto obj0 = objects.add_object();

@@ -47,31 +47,46 @@ bool Id::operator!=(const Id& rhs) const {
 }
 
 Objects::Objects()
-    : m_dispatcher(nullptr) {
+    : m_dirty(false) {
+
 }
 
 Objects::~Objects() {
-    for (auto object: all()) {
+    for (auto object: all(true)) {
         object.destroy();
     }
-    update_destroy();
+
+    for (int index = 0; index < m_exitComponentMasks.size(); index++) {
+        auto& componentMask = m_exitComponentMasks[index];
+        for (auto componentIndex: componentMask.bits<true>()) {
+            m_componentPools[componentIndex]->destruct(index);
+            componentMask.reset(componentIndex);
+        }
+    }
 }
 
 ObjectHandle<false> Objects::add_object() {
+    m_dirty = true;
     if (!m_freeList.empty()) {
         auto freeIndex = m_freeList.back();
         m_freeList.pop_back();
         auto version = m_versions[freeIndex];
-        m_componentMasks[freeIndex].reset();
-        auto id = m_idsToCreate.emplace_back(freeIndex, version);
-        return {id, this};
+        m_activeComponentMasks[freeIndex].reset();
+        m_enterComponentMasks[freeIndex].reset();
+        m_exitComponentMasks[freeIndex].reset();
+        m_enterIndices[freeIndex] = true;
+        return {freeIndex, version, this};
     }
     auto index = (uint32_t)m_versions.size();
     m_versions.resize(m_versions.size() + 1);
-    m_componentMasks.resize(m_versions.size());
+    m_enterComponentMasks.resize(m_versions.size());
+    m_activeComponentMasks.resize(m_versions.size());
+    m_exitComponentMasks.resize(m_versions.size());
+    m_enterIndices.resize(m_versions.size());
+    m_exitIndices.resize(m_versions.size());
     m_versions[index] = 0;
-    auto id = m_idsToCreate.emplace_back(index, 0);
-    return {id, this};
+    m_enterIndices[index] = true;
+    return {index, 0, this};
 }
 
 ObjectHandle<false> Objects::copy_object(const ObjectHandle<true>& src) {
@@ -85,7 +100,7 @@ ObjectHandle<false> Objects::copy_object(const ObjectHandle<true>& src) {
 
 ObjectHandle<false> Objects::copy_objects(const Objects& src) {
     ObjectHandle<false> root;
-    for (const auto obj: src.all()) {
+    for (const auto obj: src.all(true)) {
         const auto copy = copy_object(obj);
         if (!root.valid()) {
             root = copy;
@@ -95,10 +110,15 @@ ObjectHandle<false> Objects::copy_objects(const Objects& src) {
 }
 
 void Objects::destroy_object(const Id& id) {
-    if (std::ranges::find(m_idsToDestroy, id) != m_idsToDestroy.end()) {
+    const auto index = id.index();
+    if (m_exitIndices[index]) {
         return;
     }
-    m_idsToDestroy.emplace_back(id);
+    m_exitIndices[index] = true;
+    m_enterIndices[index] = false;
+    m_exitComponentMasks[index] = m_activeComponentMasks[index];
+    m_enterComponentMasks[index].reset();
+    m_dirty = true;
 }
 
 ObjectHandle<false> Objects::object(const Id& id) {
@@ -114,80 +134,91 @@ bool Objects::valid_object(const Id& id) const {
     return m_versions.size() > index && m_versions[index] == id.version();
 }
 
-Objects::ObjectView<false> Objects::all() {
-    return ObjectView<false>(this, {});
+Objects::ObjectView<false> Objects::all(bool includeInactive) {
+    return ObjectView<false>(this, {}, includeInactive);
 }
 
-Objects::ObjectView<true> Objects::all() const {
-    return ObjectView<true>(this, {});
+Objects::ObjectView<true> Objects::all(bool includeInactive) const {
+    return ObjectView<true>(this, {}, includeInactive);
 }
 
-const ComponentMask& Objects::component_mask(const Id& id) const {
-    assert(valid_object(id));
-    return m_componentMasks.at(id.index());
+ComponentMask Objects::component_mask(const Id& id) const {
+    DUK_ASSERT(valid_object(id));
+    const auto index = id.index();
+    return m_activeComponentMasks.at(index);
 }
 
-void Objects::attach_dispatcher(ComponentEventDispatcher* dispatcher) {
-    m_dispatcher = dispatcher;
-}
-
-void Objects::update() {
-    update_create();
-    update_destroy();
+void Objects::update(ComponentEventDispatcher& dispatcher, duk::tools::Globals& globals) {
+    if (!m_dirty) {
+        return;
+    }
+    m_dirty = false;
+    // we need to while iterate, because new ids might be added during event dispatching
+    for (auto index = 0; index < m_enterComponentMasks.size(); index++) {
+        auto& enterComponentMask = m_enterComponentMasks[index];
+        for (auto componentIndex: enterComponentMask.bits<true>()) {
+            enterComponentMask.reset(componentIndex);
+            dispatcher.emit_one<ComponentEnterEvent>(globals, object(Id(index, m_versions[index])), componentIndex);
+        }
+    }
+    for (auto index = 0; index < m_versions.size(); index++) {
+        if (m_enterIndices[index]) {
+            m_enterIndices[index] = false;
+            dispatcher.emit_all<ObjectEnterEvent>(globals, object(Id(index, m_versions[index])));
+        }
+    }
+    std::vector<uint32_t> destroyedIndices;
+    for (auto index = 0; index < m_exitIndices.size(); index++) {
+        if (m_exitIndices[index]) {
+            dispatcher.emit_all<ObjectExitEvent>(globals, object(Id(index, m_versions[index])));
+            m_exitIndices[index] = false;
+            destroyedIndices.emplace_back(index);
+        }
+    }
+    for (auto index = 0; index < m_exitComponentMasks.size(); index++) {
+        auto& exitComponentMask = m_exitComponentMasks[index];
+        for (auto componentIndex: exitComponentMask.bits<true>()) {
+            dispatcher.emit_one<ComponentExitEvent>(globals, object(Id(index, m_versions[index])), componentIndex);
+            exitComponentMask.reset(componentIndex);
+            m_activeComponentMasks[index].reset(componentIndex);
+            m_componentPools[componentIndex]->destruct(index);
+        }
+    }
+    if (!destroyedIndices.empty()) {
+        for (auto index: destroyedIndices) {
+            m_versions[index]++;
+            m_freeList.push_back(index);
+        }
+        std::ranges::sort(m_freeList);
+    }
 }
 
 void Objects::add_component(uint32_t index, uint32_t componentIndex) {
-    m_componentMasks[index].set(componentIndex);
+    m_enterComponentMasks[index].set(componentIndex);
+    m_activeComponentMasks[index].set(componentIndex);
     auto& pool = m_componentPools[componentIndex];
     if (!pool) {
         pool = ComponentRegistry::instance()->create_pool(componentIndex);
     }
     pool->construct(index);
-    if (m_dispatcher) {
-        m_dispatcher->emit_one<ComponentEnterEvent>(object(Id(index, m_versions[index])), componentIndex);
-    }
+    m_dirty = true;
 }
 
 void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
-    if (m_dispatcher) {
-        m_dispatcher->emit_one<ComponentExitEvent>(object(Id(index, m_versions[index])), componentIndex);
-    }
-    m_componentPools[componentIndex]->destruct(index);
-    m_componentMasks[index].reset(componentIndex);
+    m_exitComponentMasks[index].set(componentIndex);
+    m_dirty = true;
 }
 
-void Objects::update_create() {
-    // we need to while iterate, because new ids might be added during event dispatching
-    while (!m_idsToCreate.empty()) {
-        std::vector<Id> idsToCreate;
-        std::swap(idsToCreate, m_idsToCreate);
-        if (m_dispatcher) {
-            for (auto& id: idsToCreate) {
-                m_dispatcher->emit_all<ObjectEnterEvent>(object(id));
-            }
-        }
-    }
+ComponentEventListener::ComponentEventListener()
+    : m_dispatcher(nullptr) {
+
 }
 
-void Objects::update_destroy() {
-    // same as create, we need to while iterate, because ids might be added during event dispatching
-    while (!m_idsToDestroy.empty()) {
-        std::vector<Id> idsToDestroy;
-        std::swap(idsToDestroy, m_idsToDestroy);
-        for (auto& id: idsToDestroy) {
-            if (m_dispatcher) {
-                m_dispatcher->emit_all<ObjectExitEvent>(object(id));
-            }
-
-            auto index = id.index();
-            m_versions[index]++;
-            m_freeList.push_back(index);
-            auto componentMask = m_componentMasks[index];
-            for (auto componentIndex: componentMask.bits<true>()) {
-                remove_component(index, componentIndex);
-            }
-        }
-        std::ranges::sort(m_freeList);
+void ComponentEventListener::attach(ComponentEventDispatcher* dispatcher) {
+    if (m_dispatcher == dispatcher) {
+        return;
     }
+    m_listener.clear();
+    m_dispatcher = dispatcher;
 }
 }// namespace duk::objects
