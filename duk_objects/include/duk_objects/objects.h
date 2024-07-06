@@ -859,7 +859,7 @@ Objects::ObjectView<IsConst>::Iterator::Iterator(uint32_t index, uint32_t end, O
     , m_freeListCursor(0)
     , m_objects(objects)
     , m_componentMask(componentMask)
-    , m_includeInactive(includeInactive){
+    , m_includeInactive(includeInactive) {
     next();
 }
 

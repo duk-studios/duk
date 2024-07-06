@@ -16,7 +16,7 @@ Globals::~Globals() {
 }
 
 void Globals::clear() {
-    for (auto it = m_globals.rbegin(); it!= m_globals.rend(); ++it) {
+    for (auto it = m_globals.rbegin(); it != m_globals.rend(); ++it) {
         it->reset();
     }
 }
@@ -25,4 +25,4 @@ std::unordered_map<uint64_t, uint32_t>& Globals::hash_to_index() {
     return detail::g_hashToIndex;
 }
 
-}
+}// namespace duk::tools

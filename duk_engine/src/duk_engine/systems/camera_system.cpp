@@ -21,5 +21,4 @@ void CameraUpdateSystem::update(duk::objects::Objects& objects, duk::tools::Glob
 void CameraUpdateSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
 }
 
-
 }// namespace duk::engine

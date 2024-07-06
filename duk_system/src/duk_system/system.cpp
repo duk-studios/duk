@@ -14,7 +14,7 @@ static bool is_group_enabled(uint32_t groupIndex, uint32_t disabledGroupMask) {
     return (groupMask & disabledGroupMask) == 0;
 }
 
-}
+}// namespace detail
 
 void SystemRegistry::from_json(Systems& systems, const rapidjson::Value& json, const std::string& systemName) {
     auto it = m_systemNameToIndex.find(systemName);
@@ -105,4 +105,4 @@ size_t Systems::system_index(size_t containerIndex) const {
     return m_containerIndexToSystemIndex.at(containerIndex);
 }
 
-}// namespace duk::engine
+}// namespace duk::system

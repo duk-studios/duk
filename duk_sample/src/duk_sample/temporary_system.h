@@ -27,7 +27,7 @@ public:
     void receive(const duk::objects::ComponentEvent<Temporary, duk::objects::ComponentEnterEvent>& event);
 };
 
-} // duk
+}// namespace duk::sample
 
 namespace duk::serial {
 
@@ -41,6 +41,6 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
     to_json_member(document, json, "duration", temporary.duration);
 }
 
-}
+}// namespace duk::serial
 
-#endif //DUK_SAMPLE_TEMPORARY_SYSTEM_H
+#endif//DUK_SAMPLE_TEMPORARY_SYSTEM_H

@@ -14,7 +14,7 @@ void TemporarySystem::enter(duk::objects::Objects& objects, duk::tools::Globals&
 
 void TemporarySystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
     auto time = globals.get<duk::tools::Timer>()->time();
-    for (auto [temporary] : objects.all_of<Temporary>()) {
+    for (auto [temporary]: objects.all_of<Temporary>()) {
         if (time > temporary->startTime + temporary->duration) {
             temporary.object().destroy();
         }
@@ -28,4 +28,4 @@ void TemporarySystem::receive(const duk::objects::ComponentEvent<Temporary, duk:
     event.component->startTime = event.globals.get<duk::tools::Timer>()->time();
 }
 
-} // duk
+}// namespace duk::sample

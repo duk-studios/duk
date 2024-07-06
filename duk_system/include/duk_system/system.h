@@ -102,7 +102,6 @@ public:
     };
 
 public:
-
     Systems();
 
     void attach(duk::objects::ComponentEventDispatcher* dispatcher);
@@ -134,7 +133,6 @@ private:
     DUK_NO_DISCARD size_t system_index(size_t containerIndex) const;
 
 private:
-
     struct SystemGroupEntry {
         std::unique_ptr<System> system;
         uint32_t group;
@@ -279,16 +277,15 @@ uint32_t Systems::group() const {
     }
     const auto containerIndex = it->second;
     return m_systemGroup.at(containerIndex).group;
-
 }
-}// namespace duk::engine
+}// namespace duk::system
 
 namespace duk::serial {
 
 template<>
 inline void from_json<duk::system::Systems>(const rapidjson::Value& json, duk::system::Systems& systems) {
     auto systemJsonArray = json.GetArray();
-    for (auto& systemJson : systemJsonArray) {
+    for (auto& systemJson: systemJsonArray) {
         std::string systemName;
         from_json_member(systemJson, "type", systemName);
         duk::system::SystemRegistry::instance()->from_json(systems, systemJson, systemName);

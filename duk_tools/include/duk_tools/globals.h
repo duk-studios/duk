@@ -16,7 +16,6 @@ namespace duk::tools {
 
 class Globals {
 public:
-
     ~Globals();
 
     void clear();

@@ -48,7 +48,6 @@ bool Id::operator!=(const Id& rhs) const {
 
 Objects::Objects()
     : m_dirty(false) {
-
 }
 
 Objects::~Objects() {
@@ -211,7 +210,6 @@ void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
 
 ComponentEventListener::ComponentEventListener()
     : m_dispatcher(nullptr) {
-
 }
 
 void ComponentEventListener::attach(ComponentEventDispatcher* dispatcher) {

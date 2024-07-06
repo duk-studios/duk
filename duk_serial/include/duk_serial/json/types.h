@@ -20,12 +20,10 @@ namespace duk::serial {
 
 template<typename T>
 void from_json(const rapidjson::Value& json, T& value) {
-
 }
 
 template<typename T>
 void to_json(rapidjson::Document& document, rapidjson::Value& json, const T& value) {
-
 }
 
 template<>
