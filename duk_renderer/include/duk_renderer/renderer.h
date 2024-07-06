@@ -28,6 +28,7 @@ struct RendererCreateInfo {
     duk::resource::Pools* pools;
     duk::log::Logger* logger;
     duk::rhi::API api;
+    bool apiValidationLayers;
     const char* applicationName;
 };
 

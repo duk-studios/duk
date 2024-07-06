@@ -44,8 +44,9 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         rendererCreateInfo.window = window;
         rendererCreateInfo.pools = pools;
         rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::VERBOSE));
-        rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.applicationName = settings.name.c_str();
+        rendererCreateInfo.api = duk::rhi::API::VULKAN;
+        rendererCreateInfo.apiValidationLayers = engineCreateInfo.rendererApiValidationLayers;
 
         auto renderer = m_globals.add<duk::renderer::Renderer>(rendererCreateInfo);
         duk::renderer::add_forward_passes(renderer, window);

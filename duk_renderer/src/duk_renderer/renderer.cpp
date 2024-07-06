@@ -27,6 +27,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
         rhiCreateInfo.engineVersion = 1;
         rhiCreateInfo.engineName = "duk::renderer::Renderer::m_rhi";
         rhiCreateInfo.api = rendererCreateInfo.api;
+        rhiCreateInfo.validationLayers = rendererCreateInfo.apiValidationLayers;
 
         m_rhi = duk::rhi::RHI::create_rhi(rhiCreateInfo);
     }
