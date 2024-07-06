@@ -4,30 +4,33 @@
 #ifndef DUK_ENGINE_SCENE_H
 #define DUK_ENGINE_SCENE_H
 
-#include <duk_engine/systems.h>
+#include <duk_system/system.h>
 #include <duk_objects/objects.h>
 
 namespace duk::engine {
 
 class Scene {
 public:
+    Scene();
+
     duk::objects::Objects& objects();
 
     const duk::objects::Objects& objects() const;
 
-    Systems& systems();
+    duk::system::Systems& systems();
 
-    const Systems& systems() const;
+    const duk::system::Systems& systems() const;
 
-    void enter(Engine& engine);
+    void enter(duk::tools::Globals& globals, uint32_t disabledGroupsMask);
 
-    void update(Engine& engine, uint32_t activeSystemsGroup);
+    void update(duk::tools::Globals& globals, uint32_t disabledGroupsMask);
 
-    void exit(Engine& engine);
+    void exit(duk::tools::Globals& globals, uint32_t disabledGroupsMask);
 
 private:
+    duk::objects::ComponentEventDispatcher m_dispatcher;
     duk::objects::Objects m_objects;
-    Systems m_systems;
+    duk::system::Systems m_systems;
 };
 
 using SceneResource = duk::resource::Handle<Scene>;

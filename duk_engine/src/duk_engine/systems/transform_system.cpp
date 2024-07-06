@@ -5,19 +5,16 @@
 #include <duk_renderer/components/transform.h>
 
 namespace duk::engine {
-TransformUpdateSystem::TransformUpdateSystem()
-    : System(kMainThreadGroup) {
-}
 
-void TransformUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
+void TransformUpdateSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
     duk::renderer::update_transforms(objects);
 }
 
-void TransformUpdateSystem::update(duk::objects::Objects& objects, Engine& engine) {
+void TransformUpdateSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
     duk::renderer::update_transforms(objects);
 }
 
-void TransformUpdateSystem::exit(duk::objects::Objects& objects, Engine& engine) {
+void TransformUpdateSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
 }
 
 }// namespace duk::engine

@@ -5,6 +5,10 @@
 
 namespace duk::engine {
 
+Scene::Scene() {
+    m_systems.attach(&m_dispatcher);
+}
+
 duk::objects::Objects& Scene::objects() {
     return m_objects;
 }
@@ -13,24 +17,25 @@ const duk::objects::Objects& Scene::objects() const {
     return m_objects;
 }
 
-Systems& Scene::systems() {
+duk::system::Systems& Scene::systems() {
     return m_systems;
 }
 
-const Systems& Scene::systems() const {
+const duk::system::Systems& Scene::systems() const {
     return m_systems;
 }
 
-void Scene::enter(Engine& engine) {
-    m_systems.enter(m_objects, engine);
+void Scene::enter(duk::tools::Globals& globals, uint32_t disabledGroupsMask) {
+    m_systems.enter(m_objects, globals, disabledGroupsMask);
 }
 
-void Scene::update(Engine& engine, uint32_t activeSystemsGroup) {
-    m_systems.update(m_objects, engine, activeSystemsGroup);
+void Scene::update(duk::tools::Globals& globals, uint32_t disabledGroupsMask) {
+    m_objects.update(m_dispatcher, globals);
+    m_systems.update(m_objects, globals, disabledGroupsMask);
 }
 
-void Scene::exit(Engine& engine) {
-    m_systems.exit(m_objects, engine);
+void Scene::exit(duk::tools::Globals& globals, uint32_t disabledGroupsMask) {
+    m_systems.exit(m_objects, globals, disabledGroupsMask);
 }
 
 }// namespace duk::engine

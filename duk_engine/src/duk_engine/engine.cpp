@@ -102,8 +102,6 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     // director
     {
         DirectorCreateInfo directorCreateInfo = {};
-        directorCreateInfo.renderer = m_globals.get<duk::renderer::Renderer>();
-        directorCreateInfo.resources = m_globals.get<duk::resource::ResourceSet>();
         directorCreateInfo.firstScene = settings.scene;
 
         m_globals.add<Director>(directorCreateInfo);
@@ -118,8 +116,8 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
 Engine::~Engine() {
     m_globals.reset<Director>();
-    m_globals.reset<duk::resource::Pools>();
     m_globals.reset<duk::resource::ResourceSet>();
+    m_globals.reset<resource::Pools>();
 }
 
 void Engine::run() {
@@ -156,7 +154,7 @@ void Engine::run() {
 
         audio->update();
 
-        director->update(*this);
+        director->update(m_globals);
     }
 }
 

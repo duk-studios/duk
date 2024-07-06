@@ -37,7 +37,7 @@ public:
 
     virtual ~Renderer();
 
-    void render(duk::objects::Objects& objects, duk::resource::Pools& pools);
+    void render(duk::objects::Objects& objects);
 
     void clear_cache();
 
