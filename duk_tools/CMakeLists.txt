@@ -15,6 +15,7 @@ set(DUK_TOOLS_HEADERS
 
 set(DUK_TOOLS_SOURCES
         src/duk_tools/file.cpp
+        src/duk_tools/globals.cpp
         src/duk_tools/string.cpp
         src/duk_tools/timer.cpp
         src/duk_tools/types.cpp

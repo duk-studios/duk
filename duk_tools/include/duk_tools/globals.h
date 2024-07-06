@@ -16,6 +16,11 @@ namespace duk::tools {
 
 class Globals {
 public:
+
+    ~Globals();
+
+    void clear();
+
     template<typename T, typename... Args>
     T* add(Args&&... args);
 
@@ -34,6 +39,11 @@ public:
 private:
     template<typename T>
     static uint64_t hash_of();
+
+    static std::unordered_map<uint64_t, uint32_t>& hash_to_index();
+
+    template<typename T>
+    uint32_t index_of() const;
 
     class Global {
     public:
@@ -66,31 +76,41 @@ private:
     };
 
 private:
-    std::unordered_map<uint64_t, std::unique_ptr<Global>> m_globals;
+    std::vector<std::unique_ptr<Global>> m_globals;
 };
 
 template<typename T, typename... Args>
 T* Globals::add(Args&&... args) {
     DUK_ASSERT(!has<T>());
-    m_globals.emplace(hash_of<T>(), std::make_unique<GlobalT<T>>(std::forward<Args>(args)...));
-    return get<T>();
+    const auto index = index_of<T>();
+    if (index >= m_globals.size()) {
+        m_globals.resize(index + 1);
+    }
+    auto& global = m_globals[index] = std::make_unique<GlobalT<T>>(std::forward<Args>(args)...);
+    return static_cast<T*>(global->get());
 }
 
 template<typename T>
 T* Globals::add_external(T* data) {
+    const auto index = index_of<T>();
     DUK_ASSERT(!has<T>());
-    m_globals.emplace(hash_of<T>(), std::make_unique<ExternalGlobalT<T>>(data));
-    return get<T>();
+    if (index >= m_globals.size()) {
+        m_globals.resize(index + 1);
+    }
+    auto& global = m_globals[index] = std::make_unique<ExternalGlobalT<T>>(data);
+    return static_cast<T*>(global->get());
 }
 
 template<typename T>
 void Globals::reset() {
-    m_globals.erase(hash_of<T>());
+    const auto index = index_of<T>();
+    m_globals.at(index).reset();
 }
 
 template<typename T>
 T* Globals::get() const {
-    return static_cast<T*>(m_globals.at(hash_of<T>())->get());
+    DUK_ASSERT(has<T>());
+    return static_cast<T*>(m_globals[index_of<T>()]->get());
 }
 
 template<typename T>
@@ -100,8 +120,26 @@ uint64_t Globals::hash_of() {
 }
 
 template<typename T>
+uint32_t Globals::index_of() const {
+    static uint32_t index = []() -> uint32_t {
+        auto hash = hash_of<T>();
+        auto& hashToIndex = hash_to_index();
+        auto it = hashToIndex.find(hash);
+        uint32_t index = hashToIndex.size();
+        if (it != hashToIndex.end()) {
+            index = it->second;
+        } else {
+            hashToIndex.emplace(hash, index);
+        }
+        return index;
+    }();
+    return index;
+}
+
+template<typename T>
 bool Globals::has() const {
-    return m_globals.contains(hash_of<T>());
+    const auto index = index_of<T>();
+    return index < m_globals.size() && m_globals.at(index);
 }
 
 template<typename T>
