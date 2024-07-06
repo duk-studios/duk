@@ -3,6 +3,9 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.9 (duk)" />
   </component>
+  <component name="CMakePythonSetting">
+    <option name="pythonIntegrationState" value="YES" />
+  </component>
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
   <component name="CidrRootsConfiguration">
     <sourceRoots>
@@ -28,6 +31,7 @@
       <file path="$PROJECT_DIR$/duk_sample" />
       <file path="$PROJECT_DIR$/duk_serial" />
       <file path="$PROJECT_DIR$/duk_shader_generator" />
+      <file path="$PROJECT_DIR$/duk_system" />
       <file path="$PROJECT_DIR$/duk_task" />
       <file path="$PROJECT_DIR$/duk_tools" />
       <file path="$PROJECT_DIR$/external" />
