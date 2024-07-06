@@ -62,27 +62,21 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 
 }// namespace detail
 
-CameraSystem::CameraSystem()
-    : System(kMainThreadGroup) {
+void CameraSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
 }
 
-void CameraSystem::enter(duk::objects::Objects& objects, duk::engine::Engine& engine) {
-}
-
-void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& engine) {
+void CameraSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
     auto object = objects.first_with<CameraController>();
 
     if (!object) {
         return;
     }
 
-    auto globals = engine.globals();
-
-    auto input = globals->get<duk::engine::Input>();
-    auto timer = globals->get<duk::tools::Timer>();
-    auto audio = globals->get<duk::audio::AudioEngine>();
-    auto platform = globals->get<duk::platform::Platform>();
-    auto window = globals->get<duk::platform::Window>();
+    auto input = globals.get<duk::engine::Input>();
+    auto timer = globals.get<duk::tools::Timer>();
+    auto audio = globals.get<duk::audio::AudioEngine>();
+    auto platform = globals.get<duk::platform::Platform>();
+    auto window = globals.get<duk::platform::Window>();
 
     const auto deltaTime = timer->delta_time();
     auto cursor = platform->cursor();
@@ -118,7 +112,6 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
     }
 }
 
-void CameraSystem::exit(duk::objects::Objects& objects, duk::engine::Engine& engine) {
+void CameraSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
 }
-
 }// namespace duk::sample

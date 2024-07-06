@@ -5,7 +5,8 @@
 #ifndef DUK_STATS_SYSTEM_H
 #define DUK_STATS_SYSTEM_H
 
-#include <duk_engine/systems.h>
+#include <duk_objects/events.h>
+#include <duk_system/system.h>
 
 namespace duk::sample {
 
@@ -15,15 +16,15 @@ struct Stats {
     uint32_t currentSample = 0;
 };
 
-class StatsSystem : public duk::engine::System {
+class StatsSystem : public duk::system::System {
 public:
-    explicit StatsSystem();
+    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
 
-    void enter(objects::Objects& objects, engine::Engine& engine) override;
+    void update(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
 
-    void update(objects::Objects& objects, engine::Engine& engine) override;
+    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
 
-    void exit(objects::Objects& objects, engine::Engine& engine) override;
+    void receive(const duk::objects::ComponentEvent<Stats, duk::objects::ObjectEnterEvent>& event);
 };
 
 }// namespace duk::sample
