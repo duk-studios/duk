@@ -5,9 +5,9 @@
 #ifndef DUK_API_H
 #define DUK_API_H
 
-namespace duk::engine {
+namespace duk::tools {
 
-class Engine;
+class Globals;
 
 }
 
@@ -15,9 +15,9 @@ extern "C" {
 
 void duk_api_register_types();
 
-void duk_api_run_enter(duk::engine::Engine& engine);
+void duk_api_run_enter(duk::tools::Globals& globals);
 
-void duk_api_run_exit(duk::engine::Engine& engine);
+void duk_api_run_exit(duk::tools::Globals& globals);
 }
 
 #endif//DUK_API_H

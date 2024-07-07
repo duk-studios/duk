@@ -10,22 +10,18 @@
 
 namespace duk::sample {
 
-void SpriteAnimatorSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-}
-
-void SpriteAnimatorSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    auto input = globals.get<duk::engine::Input>();
+void SpriteAnimatorSystem::update() {
+    auto input = global<duk::engine::Input>();
 
     if (input->key_down(platform::Keys::R)) {
-        auto director = globals.get<duk::engine::Director>();
+        auto director = global<duk::engine::Director>();
         director->request_scene("directions");
     }
 
     auto rotating = input->key_down(platform::Keys::G);
     auto scaling = input->key_down(platform::Keys::H);
 
-    for (auto object: objects.all_with<SpriteAnimator, duk::animation::Animator>()) {
-        auto [spriteAnimator, animator] = object.components<SpriteAnimator, duk::animation::Animator>();
+    for (auto [spriteAnimator, animator]: all_components_of<SpriteAnimator, duk::animation::Animator>()) {
         if (rotating) {
             animator->state.variables.set("rotating", true);
         }
@@ -35,6 +31,4 @@ void SpriteAnimatorSystem::update(duk::objects::Objects& objects, duk::tools::Gl
     }
 }
 
-void SpriteAnimatorSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-}
 }// namespace duk::sample

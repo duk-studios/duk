@@ -33,7 +33,7 @@ void Director::update(duk::tools::Globals& globals) {
         return;
     }
 
-    m_scene->update(globals, m_disabledGroupsMask);
+    m_scene->update(m_disabledGroupsMask);
 
     globals.get<duk::renderer::Renderer>()->render(m_scene->objects());
 }
@@ -59,8 +59,8 @@ void Director::disable(uint32_t systemGroup) {
 }
 
 void Director::load_scene(duk::tools::Globals& globals, duk::resource::Id id) {
-    auto resources = globals.get<duk::resource::ResourceSet>();
-    auto renderer = globals.get<duk::renderer::Renderer>();
+    const auto resources = globals.get<duk::resource::ResourceSet>();
+    const auto renderer = globals.get<duk::renderer::Renderer>();
     resources->load(id);
 
     auto scene = resources->pools()->get<ScenePool>()->find(id);
@@ -68,11 +68,12 @@ void Director::load_scene(duk::tools::Globals& globals, duk::resource::Id id) {
         throw std::runtime_error(fmt::format("failed to load scene with id \"{}\"", m_requestedSceneId.value()));
     }
     if (m_scene) {
-        m_scene->exit(globals, m_disabledGroupsMask);
+        m_scene->exit(m_disabledGroupsMask);
     }
     m_scene = scene;
     if (m_scene) {
-        m_scene->enter(globals, m_disabledGroupsMask);
+        m_scene->attach(globals);
+        m_scene->enter(m_disabledGroupsMask);
     }
 
     resources->pools()->clear();

@@ -100,24 +100,6 @@ int main() {
     duk::event::Listener listener;
 
     duk::objects::ComponentEventDispatcher componentEventDispatcher;
-    componentEventDispatcher.listen<ComponentTest, duk::objects::ObjectEnterEvent>(listener, [](const duk::objects::ComponentEvent<ComponentTest, duk::objects::ObjectEnterEvent>& event) {
-        duk::log::debug("ObjectEnterEvent: ComponentTest {}", event.component.id().index());
-    });
-    componentEventDispatcher.listen<ComponentTest2, duk::objects::ObjectEnterEvent>(listener, [](const duk::objects::ComponentEvent<ComponentTest2, duk::objects::ObjectEnterEvent>& event) {
-        duk::log::debug("ObjectEnterEvent: ComponentTest2 {}", event.component.id().index());
-    });
-    componentEventDispatcher.listen<ComponentTest3, duk::objects::ObjectEnterEvent>(listener, [](const duk::objects::ComponentEvent<ComponentTest3, duk::objects::ObjectEnterEvent>& event) {
-        duk::log::debug("ObjectEnterEvent: ComponentTest3 {}", event.component.id().index());
-    });
-    componentEventDispatcher.listen<ComponentTest, duk::objects::ObjectExitEvent>(listener, [](const duk::objects::ComponentEvent<ComponentTest, duk::objects::ObjectExitEvent>& event) {
-        duk::log::debug("ObjectExitEvent: ComponentTest {}", event.component.id().index());
-    });
-    componentEventDispatcher.listen<ComponentTest2, duk::objects::ComponentExitEvent>(listener, [](const duk::objects::ComponentEvent<ComponentTest2, duk::objects::ComponentExitEvent>& event) {
-        duk::log::debug("ObjectExitEvent: ComponentTest2 {}", event.component.id().index());
-    });
-    componentEventDispatcher.listen<ComponentTest3, duk::objects::ObjectExitEvent>(listener, [](const duk::objects::ComponentEvent<ComponentTest3, duk::objects::ObjectExitEvent>& event) {
-        duk::log::debug("ObjectExitEvent: ComponentTest3 {}", event.component.id().index());
-    });
 
     //The objects which is in use
     duk::objects::Objects objects;
@@ -145,17 +127,11 @@ int main() {
         duk::objects::Object other;
     };
 
-    componentEventDispatcher.listen<ComponentTest2, CollisionEvent>(listener, [](const duk::objects::ComponentEvent<ComponentTest2, CollisionEvent>& event) {
-        duk::log::debug("CollisionEvent: ComponentTest2 {}", event.component.id().index());
-    });
-
-    duk::tools::Globals globals;
-
     CollisionEvent collisionEvent = {};
     collisionEvent.object = obj1;
     collisionEvent.other = obj2;
 
-    componentEventDispatcher.emit_all<CollisionEvent>(globals, obj0, collisionEvent);
+    componentEventDispatcher.emit_object<CollisionEvent>(obj0, collisionEvent);
 
     //Removing the Component from obj with id
     obj0.remove<ComponentTest>();
@@ -164,7 +140,7 @@ int main() {
     obj1.destroy();
 
     // updating destroys all objects marked for destruction (via destroy)
-    objects.update(componentEventDispatcher, globals);
+    objects.update(componentEventDispatcher);
 
     //Iterating through all the objects with specified components
     //The objects that have any component type like: ComponentTest, ComponentTest2, ComponentTest3, will be listed below

@@ -21,8 +21,8 @@ void duk_api_register_types() {
     duk::system::register_system<duk::sample::TemporarySystem>();
 }
 
-void duk_api_run_enter(duk::engine::Engine& engine) {
+void duk_api_run_enter(duk::tools::Globals& globals) {
 }
 
-void duk_api_run_exit(duk::engine::Engine& engine) {
+void duk_api_run_exit(duk::tools::Globals& globals) {
 }

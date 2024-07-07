@@ -13,22 +13,25 @@ class Scene {
 public:
     Scene();
 
-    duk::objects::Objects& objects();
+    DUK_NO_DISCARD duk::objects::Objects& objects();
 
-    const duk::objects::Objects& objects() const;
+    DUK_NO_DISCARD const duk::objects::Objects& objects() const;
 
-    duk::system::Systems& systems();
+    DUK_NO_DISCARD duk::system::Systems& systems();
 
-    const duk::system::Systems& systems() const;
+    DUK_NO_DISCARD const duk::system::Systems& systems() const;
 
-    void enter(duk::tools::Globals& globals, uint32_t disabledGroupsMask);
+    void attach(duk::tools::Globals& globals);
 
-    void update(duk::tools::Globals& globals, uint32_t disabledGroupsMask);
+    void enter(uint32_t disabledGroupsMask);
 
-    void exit(duk::tools::Globals& globals, uint32_t disabledGroupsMask);
+    void update(uint32_t disabledGroupsMask);
+
+    void exit(uint32_t disabledGroupsMask);
 
 private:
-    duk::objects::ComponentEventDispatcher m_dispatcher;
+    duk::objects::ComponentEventDispatcher m_componentDispatcher;
+    duk::system::SystemEventDispatcher m_systemDispatcher;
     duk::objects::Objects m_objects;
     duk::system::Systems m_systems;
 };
@@ -57,6 +60,7 @@ namespace duk::resource {
 
 template<typename Solver>
 void solve_resources(Solver* solver, duk::engine::Scene& scene) {
+    solver->solve(scene.systems());
     solver->solve(scene.objects());
 }
 

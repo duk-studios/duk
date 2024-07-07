@@ -8,17 +8,14 @@
 
 namespace duk::engine {
 
-void CameraUpdateSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    auto renderer = globals.get<duk::renderer::Renderer>();
-    duk::renderer::update_cameras(objects, renderer->render_width(), renderer->render_height());
+void CameraUpdateSystem::enter() {
+    auto renderer = global<duk::renderer::Renderer>();
+    duk::renderer::update_cameras(*objects(), renderer->render_width(), renderer->render_height());
 }
 
-void CameraUpdateSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    auto renderer = globals.get<duk::renderer::Renderer>();
-    duk::renderer::update_cameras(objects, renderer->render_width(), renderer->render_height());
-}
-
-void CameraUpdateSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
+void CameraUpdateSystem::update() {
+    auto renderer = global<duk::renderer::Renderer>();
+    duk::renderer::update_cameras(*objects(), renderer->render_width(), renderer->render_height());
 }
 
 }// namespace duk::engine

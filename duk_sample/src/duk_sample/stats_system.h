@@ -18,13 +18,13 @@ struct Stats {
 
 class StatsSystem : public duk::system::System {
 public:
-    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    using StatsEnterEvent = duk::objects::ComponentEvent<Stats, duk::objects::ComponentEnterEvent>;
 
-    void update(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    void attach() override;
 
-    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    void update() override;
 
-    void receive(const duk::objects::ComponentEvent<Stats, duk::objects::ObjectEnterEvent>& event);
+    void receive(const StatsEnterEvent& event);
 };
 
 }// namespace duk::sample

@@ -11,11 +11,9 @@ namespace duk::engine {
 
 class CameraUpdateSystem : public duk::system::System {
 public:
-    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    void enter() override;
 
-    void update(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
-
-    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    void update() override;
 };
 
 }// namespace duk::engine

@@ -72,9 +72,9 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
 Application::~Application() = default;
 
 void Application::run() {
-    duk_api_run_enter(*m_engine);
+    duk_api_run_enter(*m_engine->globals());
     m_engine->run();
-    duk_api_run_exit(*m_engine);
+    duk_api_run_exit(*m_engine->globals());
 }
 
 }// namespace duk::runtime

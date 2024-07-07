@@ -62,28 +62,23 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 
 }// namespace detail
 
-void CameraSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-}
+void CameraSystem::update() {
+    auto [controller] = first_components_of<CameraController>();
 
-void CameraSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    auto object = objects.first_with<CameraController>();
-
-    if (!object) {
+    if (!controller) {
         return;
     }
 
-    auto input = globals.get<duk::engine::Input>();
-    auto timer = globals.get<duk::tools::Timer>();
-    auto audio = globals.get<duk::audio::AudioEngine>();
-    auto platform = globals.get<duk::platform::Platform>();
-    auto window = globals.get<duk::platform::Window>();
+    auto input = global<duk::engine::Input>();
+    auto timer = global<duk::tools::Timer>();
+    auto audio = global<duk::audio::Audio>();
+    auto platform = global<duk::platform::Platform>();
+    auto window = global<duk::platform::Window>();
 
     const auto deltaTime = timer->delta_time();
     auto cursor = platform->cursor();
 
-    auto controller = object.component<CameraController>();
-
-    auto transform = object.component<duk::renderer::Transform>();
+    auto transform = controller.component<duk::renderer::Transform>();
     if (!transform) {
         duk::log::fatal("No transform attached to CameraController, skipping CameraSystem");
         return;
@@ -96,10 +91,10 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::tools::Globals& g
     transform->position += moveDirection * controller->speed * deltaTime;
 
     if (input->mouse_down(duk::platform::MouseButton::RIGHT)) {
-        auto camera = object.component<duk::renderer::Camera>();
+        auto camera = controller.component<duk::renderer::Camera>();
         auto worldPos = duk::renderer::screen_to_world(camera, window->size(), glm::vec3(input->mouse_position(), -30));
 
-        auto spawnedObject = objects.copy_objects(*controller->sphere);
+        auto spawnedObject = create_object(controller->sphere);
         auto spawnedTransform = spawnedObject.component<duk::renderer::Transform>();
         spawnedTransform->position = worldPos;
 
@@ -112,6 +107,4 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::tools::Globals& g
     }
 }
 
-void CameraSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-}
 }// namespace duk::sample
