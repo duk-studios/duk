@@ -42,6 +42,60 @@ const std::string& SystemRegistry::system_name(size_t systemIndex) const {
     return m_systemEntries.at(systemIndex)->name();
 }
 
+SystemEventDispatcher::SystemEventDispatcher(duk::objects::ComponentEventDispatcher& componentDispatcher)
+    : m_componentDispatcher(componentDispatcher) {
+}
+
+System::System()
+    : m_globals(nullptr)
+    , m_dispatcher(nullptr) {
+}
+
+System::~System() = default;
+
+void System::attach(duk::tools::Globals& globals, duk::objects::Objects& objects, SystemEventDispatcher& dispatcher) {
+    m_globals = &globals;
+    m_objects = &objects;
+    m_dispatcher = &dispatcher;
+    attach();
+}
+
+void System::attach() {
+}
+
+void System::enter() {
+}
+
+void System::update() {
+}
+
+void System::exit() {
+}
+
+duk::tools::Globals* System::globals() const {
+    return m_globals;
+}
+
+duk::objects::Objects* System::objects() const {
+    return m_objects;
+}
+
+duk::objects::Object System::create_object() const {
+    return m_objects->add_object();
+}
+
+duk::objects::Object System::create_object(const duk::objects::ConstObject& object) const {
+    return m_objects->copy_object(object);
+}
+
+duk::objects::Object System::create_object(const duk::objects::Objects& objects) const {
+    return m_objects->copy_objects(objects);
+}
+
+duk::objects::Object System::create_object(const duk::objects::ObjectsResource& objects) const {
+    return create_object(*objects);
+}
+
 SystemRegistry* SystemRegistry::instance() {
     return &detail::g_systemRegistry;
 }
@@ -66,37 +120,34 @@ Systems::SystemIterator<true> Systems::end() const {
     return SystemIterator<true>(*this, 0);
 }
 
-Systems::Systems()
-    : m_dispatcher(nullptr) {
-}
+Systems::Systems() = default;
 
-void Systems::attach(duk::objects::ComponentEventDispatcher* dispatcher) {
-    m_dispatcher = dispatcher;
+void Systems::attach(duk::tools::Globals& globals, duk::objects::Objects& objects, SystemEventDispatcher& dispatcher) {
     for (auto& [system, group]: m_systemGroup) {
-        system->attach(dispatcher);
+        system->attach(globals, objects, dispatcher);
     }
 }
 
-void Systems::enter(duk::objects::Objects& objects, duk::tools::Globals& globals, uint32_t disabledGroupsMask) {
+void Systems::enter(uint32_t disabledGroupsMask) {
     for (auto& [system, group]: m_systemGroup) {
         if (detail::is_group_enabled(group, disabledGroupsMask)) {
-            system->enter(objects, globals);
+            system->enter();
         }
     }
 }
 
-void Systems::update(duk::objects::Objects& objects, duk::tools::Globals& globals, uint32_t disabledGroupsMask) {
+void Systems::update(uint32_t disabledGroupsMask) {
     for (auto& [system, group]: m_systemGroup) {
         if (detail::is_group_enabled(group, disabledGroupsMask)) {
-            system->update(objects, globals);
+            system->update();
         }
     }
 }
 
-void Systems::exit(duk::objects::Objects& objects, duk::tools::Globals& globals, uint32_t disabledGroupsMask) {
+void Systems::exit(uint32_t disabledGroupsMask) {
     for (auto& [system, group]: m_systemGroup) {
         if (detail::is_group_enabled(group, disabledGroupsMask)) {
-            system->exit(objects, globals);
+            system->exit();
         }
     }
 }
