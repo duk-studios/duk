@@ -11,14 +11,14 @@
 
 namespace duk::audio {
 
-struct AudioEngineCreateInfo {
+struct AudioCreateInfo {
     uint32_t frameRate;
     uint32_t channelCount;
 };
 
-class AudioEngine {
+class Audio {
 public:
-    AudioEngine(const AudioEngineCreateInfo& audioEngineCreateInfo);
+    Audio(const AudioCreateInfo& audioCreateInfo);
 
     uint32_t frame_rate() const;
 

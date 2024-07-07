@@ -13,7 +13,7 @@
 namespace duk::audio {
 
 struct AudioClipPoolCreateInfo {
-    AudioEngine* engine;
+    Audio* engine;
 };
 
 class AudioClipPool : public duk::resource::PoolT<AudioClipResource> {
@@ -29,7 +29,7 @@ public:
     AudioClipResource create(duk::resource::Id id, const std::vector<uint8_t>& encodedData);
 
 private:
-    AudioEngine* m_engine;
+    Audio* m_engine;
 };
 
 }// namespace duk::audio

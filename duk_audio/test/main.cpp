@@ -43,11 +43,11 @@ int main() {
     const float kFrameRate = 48000;
     const uint32_t kChannelCount = 2;
 
-    duk::audio::AudioEngineCreateInfo audioEngineCreateInfo = {};
+    duk::audio::AudioCreateInfo audioEngineCreateInfo = {};
     audioEngineCreateInfo.channelCount = kChannelCount;
     audioEngineCreateInfo.frameRate = kFrameRate;
 
-    duk::audio::AudioEngine audioEngine(audioEngineCreateInfo);
+    duk::audio::Audio audioEngine(audioEngineCreateInfo);
 
     auto buffer = create_buffer("sample.flac", kChannelCount, kFrameRate);
     auto buffer2 = create_buffer("sample.wav", kChannelCount, kFrameRate);
