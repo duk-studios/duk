@@ -53,11 +53,11 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     }
 
     {
-        duk::audio::AudioEngineCreateInfo audioEngineCreateInfo = {};
+        duk::audio::AudioCreateInfo audioEngineCreateInfo = {};
         audioEngineCreateInfo.channelCount = 2;
         audioEngineCreateInfo.frameRate = 48000;
 
-        m_globals.add<duk::audio::AudioEngine>(audioEngineCreateInfo);
+        m_globals.add<duk::audio::Audio>(audioEngineCreateInfo);
     }
 
     {
@@ -92,7 +92,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         pools->create_pool<duk::renderer::SpritePool>();
 
         duk::audio::AudioClipPoolCreateInfo audioClipPoolCreateInfo = {};
-        audioClipPoolCreateInfo.engine = m_globals.get<duk::audio::AudioEngine>();
+        audioClipPoolCreateInfo.engine = m_globals.get<duk::audio::Audio>();
         pools->create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
 
         pools->create_pool<duk::renderer::FontPool>();
@@ -112,7 +112,6 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     inputCreateInfo.window = window;
     m_globals.add<Input>(inputCreateInfo);
     m_globals.add<duk::tools::Timer>();
-    m_globals.add<duk::event::Dispatcher>();
 }
 
 Engine::~Engine() {
@@ -126,7 +125,7 @@ void Engine::run() {
 
     const auto platform = m_globals.get<duk::platform::Platform>();
     const auto window = m_globals.get<duk::platform::Window>();
-    const auto audio = m_globals.get<duk::audio::AudioEngine>();
+    const auto audio = m_globals.get<duk::audio::Audio>();
     const auto timer = m_globals.get<duk::tools::Timer>();
     const auto input = m_globals.get<Input>();
     const auto director = m_globals.get<Director>();

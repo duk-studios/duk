@@ -147,37 +147,49 @@ ComponentMask Objects::component_mask(const Id& id) const {
     return m_activeComponentMasks.at(index);
 }
 
-void Objects::update(ComponentEventDispatcher& dispatcher, duk::tools::Globals& globals) {
+void Objects::update(ComponentEventDispatcher& dispatcher) {
     if (!m_dirty) {
         return;
     }
     m_dirty = false;
+
+    // swap with clean data to make sure that we don't iterate over modified vectors
+    std::vector<ComponentMask> enterComponentMasks(m_enterComponentMasks.size());
+    std::vector<ComponentMask> exitComponentMasks(m_exitComponentMasks.size());
+    std::vector<bool> enterIndices(m_enterIndices.size());
+    std::vector<bool> exitIndices(m_exitIndices.size());
+
+    std::swap(enterComponentMasks, m_enterComponentMasks);
+    std::swap(exitComponentMasks, m_exitComponentMasks);
+    std::swap(enterIndices, m_enterIndices);
+    std::swap(exitIndices, m_exitIndices);
+
     // we need to while iterate, because new ids might be added during event dispatching
-    for (auto index = 0; index < m_enterComponentMasks.size(); index++) {
-        auto& enterComponentMask = m_enterComponentMasks[index];
+    for (auto index = 0; index < enterComponentMasks.size(); index++) {
+        auto& enterComponentMask = enterComponentMasks[index];
         for (auto componentIndex: enterComponentMask.bits<true>()) {
             enterComponentMask.reset(componentIndex);
-            dispatcher.emit_one<ComponentEnterEvent>(globals, object(Id(index, m_versions[index])), componentIndex);
+            dispatcher.emit_component<ComponentEnterEvent>(object(Id(index, m_versions[index])), componentIndex);
         }
     }
-    for (auto index = 0; index < m_versions.size(); index++) {
-        if (m_enterIndices[index]) {
-            m_enterIndices[index] = false;
-            dispatcher.emit_all<ObjectEnterEvent>(globals, object(Id(index, m_versions[index])));
+    for (auto index = 0; index < enterIndices.size(); index++) {
+        if (enterIndices[index]) {
+            enterIndices[index] = false;
+            dispatcher.emit_object<ObjectEnterEvent>(object(Id(index, m_versions[index])));
         }
     }
     std::vector<uint32_t> destroyedIndices;
-    for (auto index = 0; index < m_exitIndices.size(); index++) {
-        if (m_exitIndices[index]) {
-            dispatcher.emit_all<ObjectExitEvent>(globals, object(Id(index, m_versions[index])));
-            m_exitIndices[index] = false;
+    for (auto index = 0; index < exitIndices.size(); index++) {
+        if (exitIndices[index]) {
+            dispatcher.emit_object<ObjectExitEvent>(object(Id(index, m_versions[index])));
+            exitIndices[index] = false;
             destroyedIndices.emplace_back(index);
         }
     }
-    for (auto index = 0; index < m_exitComponentMasks.size(); index++) {
-        auto& exitComponentMask = m_exitComponentMasks[index];
+    for (auto index = 0; index < exitComponentMasks.size(); index++) {
+        auto& exitComponentMask = exitComponentMasks[index];
         for (auto componentIndex: exitComponentMask.bits<true>()) {
-            dispatcher.emit_one<ComponentExitEvent>(globals, object(Id(index, m_versions[index])), componentIndex);
+            dispatcher.emit_component<ComponentExitEvent>(object(Id(index, m_versions[index])), componentIndex);
             exitComponentMask.reset(componentIndex);
             m_activeComponentMasks[index].reset(componentIndex);
             m_componentPools[componentIndex]->destruct(index);

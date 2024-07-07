@@ -10,15 +10,110 @@
 
 namespace duk::system {
 
-class System : public duk::objects::ComponentEventListener {
+class SystemEventDispatcher {
 public:
-    virtual ~System() = default;
+    SystemEventDispatcher(duk::objects::ComponentEventDispatcher& componentDispatcher);
 
-    virtual void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) = 0;
+    // emits an event E to component C for this object
+    template<typename E, typename C>
+    void emit_component(const duk::objects::Component<C>& component, const E& event);
 
-    virtual void update(duk::objects::Objects& objects, duk::tools::Globals& globals) = 0;
+    // emits an event E to component C for this object
+    template<typename E, typename C>
+    void emit_component(const duk::objects::Object& object, const E& event);
 
-    virtual void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) = 0;
+    // emits an event E to component C for all objects
+    template<typename E, typename C>
+    void emit_component(duk::objects::Objects& objects, const E& event);
+
+    // emits an event E to all components for this object
+    template<typename E>
+    void emit_object(const duk::objects::Object& object, const E& event);
+
+    template<typename E>
+    void emit_global(const E& event);
+
+    template<typename E, typename C, typename F>
+    void listen_component(duk::event::Listener& listener, F&& callback);
+
+    template<typename E, typename F>
+    void listen_global(duk::event::Listener& listener, F&& callback);
+
+private:
+    duk::objects::ComponentEventDispatcher& m_componentDispatcher;
+    duk::event::Dispatcher m_globalDispatcher;
+};
+
+class System {
+public:
+    System();
+
+    virtual ~System();
+
+    void attach(duk::tools::Globals& globals, duk::objects::Objects& objects, SystemEventDispatcher& dispatcher);
+
+    virtual void attach();
+
+    virtual void enter();
+
+    virtual void update();
+
+    virtual void exit();
+
+    DUK_NO_DISCARD duk::tools::Globals* globals() const;
+
+    template<typename T>
+    DUK_NO_DISCARD T* global() const;
+
+    DUK_NO_DISCARD duk::objects::Objects* objects() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD auto all_objects_with() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD auto first_object_with() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD auto all_components_of() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD auto first_components_of() const;
+
+    DUK_NO_DISCARD duk::objects::Object create_object() const;
+
+    DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::ConstObject& object) const;
+
+    DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::Objects& objects) const;
+
+    DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::ObjectsResource& objects) const;
+
+    template<typename E>
+    void emit_global(const E& event = {}) const;
+
+    template<typename E>
+    void emit_object(const duk::objects::Object& object, const E& event = {}) const;
+
+    template<typename E, typename C>
+    void emit_component(const duk::objects::Component<C>& component, const E& event = {}) const;
+
+    template<typename E, typename C>
+    void emit_component(const duk::objects::Object& object, const E& event = {}) const;
+
+protected:
+    template<typename E, typename C, typename R>
+    void listen_component(R* receiver);
+
+    template<typename TComponentEvent, typename R>
+    void listen_component(R* receiver);
+
+    template<typename E, typename R>
+    void listen_global(R* receiver);
+
+private:
+    duk::tools::Globals* m_globals;
+    duk::objects::Objects* m_objects;
+    SystemEventDispatcher* m_dispatcher;
+    duk::event::Listener m_listener;
 };
 
 class Systems;
@@ -33,6 +128,10 @@ private:
 
         virtual void to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) = 0;
 
+        virtual void solve(duk::resource::DependencySolver* dependencySolver, Systems& systems) = 0;
+
+        virtual void solve(duk::resource::ReferenceSolver* referenceSolver, Systems& systems) = 0;
+
         virtual const std::string& name() = 0;
     };
 
@@ -42,6 +141,10 @@ private:
         void from_json(Systems& systems, const rapidjson::Value& json) override;
 
         void to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) override;
+
+        void solve(duk::resource::DependencySolver* solver, Systems& systems) override;
+
+        void solve(duk::resource::ReferenceSolver* solver, Systems& systems) override;
 
         const std::string& name() override;
     };
@@ -60,6 +163,9 @@ public:
     void from_json(Systems& systems, const rapidjson::Value& json, const std::string& systemName);
 
     void to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json, const std::string& systemName);
+
+    template<typename Solver>
+    void solve_resources(Solver* solver, Systems& systems, const std::string& systemName);
 
     DUK_NO_DISCARD const std::string& system_name(size_t systemIndex) const;
 
@@ -104,7 +210,7 @@ public:
 public:
     Systems();
 
-    void attach(duk::objects::ComponentEventDispatcher* dispatcher);
+    void attach(duk::tools::Globals& globals, duk::objects::Objects& objects, SystemEventDispatcher& dispatcher);
 
     template<typename T>
     T* add(uint32_t group);
@@ -115,11 +221,11 @@ public:
     template<typename T>
     uint32_t group() const;
 
-    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals, uint32_t disabledGroupsMask);
+    void enter(uint32_t disabledGroupsMask);
 
-    void update(duk::objects::Objects& objects, duk::tools::Globals& globals, uint32_t disabledGroupsMask);
+    void update(uint32_t disabledGroupsMask);
 
-    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals, uint32_t disabledGroupsMask);
+    void exit(uint32_t disabledGroupsMask);
 
     SystemIterator<false> begin();
 
@@ -141,12 +247,114 @@ private:
     std::vector<SystemGroupEntry> m_systemGroup;
     std::unordered_map<size_t, size_t> m_systemIndexToContainerIndex;
     std::unordered_map<size_t, size_t> m_containerIndexToSystemIndex;
-    duk::objects::ComponentEventDispatcher* m_dispatcher;
 };
 
 template<typename T, typename... Args>
 void register_system(Args&&... args) {
     SystemRegistry::instance()->add<T>(std::forward<Args>(args)...);
+}
+
+template<typename E, typename C>
+void SystemEventDispatcher::emit_component(const duk::objects::Component<C>& component, const E& event) {
+    m_componentDispatcher.emit_component<E, C>(component, event);
+}
+
+template<typename E, typename C>
+void SystemEventDispatcher::emit_component(const duk::objects::Object& object, const E& event) {
+    m_componentDispatcher.emit_component<E, C>(object, event);
+}
+
+template<typename E, typename C>
+void SystemEventDispatcher::emit_component(duk::objects::Objects& objects, const E& event) {
+    for (auto object: objects.all_with<C>()) {
+        emit_component<E, C>(object, event);
+    }
+}
+
+template<typename E>
+void SystemEventDispatcher::emit_object(const duk::objects::Object& object, const E& event) {
+    m_componentDispatcher.emit_object<E>(object, event);
+}
+
+template<typename E>
+void SystemEventDispatcher::emit_global(const E& event) {
+    m_globalDispatcher.emit(event);
+}
+
+template<typename E, typename C, typename F>
+void SystemEventDispatcher::listen_component(duk::event::Listener& listener, F&& callback) {
+    m_componentDispatcher.listen<E, C>(listener, std::forward<F>(callback));
+}
+
+template<typename E, typename F>
+void SystemEventDispatcher::listen_global(duk::event::Listener& listener, F&& callback) {
+    m_globalDispatcher.add_listener<E>(listener, std::forward<F>(callback));
+}
+
+template<typename T>
+T* System::global() const {
+    return m_globals->get<T>();
+}
+
+template<typename... Ts>
+auto System::all_objects_with() const {
+    return m_objects->all_with<Ts...>();
+}
+
+template<typename... Ts>
+auto System::first_object_with() const {
+    return m_objects->first_with<Ts...>();
+}
+
+template<typename... Ts>
+auto System::all_components_of() const {
+    return m_objects->all_of<Ts...>();
+}
+
+template<typename... Ts>
+auto System::first_components_of() const {
+    return m_objects->first_of<Ts...>();
+}
+
+template<typename E>
+void System::emit_global(const E& event) const {
+    m_dispatcher->emit_global<E>(event);
+}
+
+template<typename E>
+void System::emit_object(const duk::objects::Object& object, const E& event) const {
+    m_dispatcher->emit_object<E>(object, event);
+}
+
+template<typename E, typename C>
+void System::emit_component(const duk::objects::Component<C>& component, const E& event) const {
+    m_dispatcher->emit_component<E, C>(component, event);
+}
+
+template<typename E, typename C>
+void System::emit_component(const duk::objects::Object& object, const E& event) const {
+    m_dispatcher->emit_component<E, C>(object, event);
+}
+
+template<typename E, typename C, typename R>
+void System::listen_component(R* receiver) {
+    m_dispatcher->listen_component<E, C>(m_listener, [receiver](const duk::objects::ComponentEvent<C, E>& event) {
+        receiver->receive(event);
+    });
+}
+
+template<typename TComponentEvent, typename R>
+void System::listen_component(R* receiver) {
+    using C = typename TComponentEvent::ComponentType;
+    using E = typename TComponentEvent::EventType;
+    listen_component<E, C, R>(receiver);
+}
+
+template<typename E, typename R>
+void System::listen_global(R* receiver) {
+    m_dispatcher->listen_global<E>(m_listener, [receiver](const E& event) {
+        receiver->receive(event);
+    });
 }
 
 template<typename T>
@@ -164,6 +372,16 @@ void SystemRegistry::SystemEntryT<T>::from_json(Systems& systems, const rapidjso
 template<typename T>
 void SystemRegistry::SystemEntryT<T>::to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) {
     duk::serial::to_json(document, json, *systems.get<T>());
+}
+
+template<typename T>
+void SystemRegistry::SystemEntryT<T>::solve(duk::resource::DependencySolver* solver, Systems& systems) {
+    solver->solve(*systems.get<T>());
+}
+
+template<typename T>
+void SystemRegistry::SystemEntryT<T>::solve(duk::resource::ReferenceSolver* solver, Systems& systems) {
+    solver->solve(*systems.get<T>());
 }
 
 template<typename T>
@@ -187,6 +405,18 @@ void SystemRegistry::add() {
     const auto index = m_systemEntries.size();
     m_systemEntries.emplace_back(std::make_unique<SystemEntryT<T>>());
     m_systemNameToIndex.emplace(name, index);
+}
+
+template<typename Solver>
+void SystemRegistry::solve_resources(Solver* solver, Systems& systems, const std::string& systemName) {
+    auto it = m_systemNameToIndex.find(systemName);
+    if (it == m_systemNameToIndex.end()) {
+        duk::log::warn("System entry name \"{}\" not registered", systemName);
+        return;
+    }
+    const auto index = it->second;
+    auto& entry = m_systemEntries.at(index);
+    entry->solve(solver, systems);
 }
 
 template<bool isConst>
@@ -252,9 +482,7 @@ T* Systems::add(uint32_t group) {
     auto& systemGroup = m_systemGroup.emplace_back(std::make_unique<T>(), group);
     m_systemIndexToContainerIndex.emplace(entryIndex, containerIndex);
     m_containerIndexToSystemIndex.emplace(containerIndex, entryIndex);
-    auto system = static_cast<T*>(systemGroup.system.get());
-    system->attach(m_dispatcher);
-    return system;
+    return static_cast<T*>(systemGroup.system.get());
 }
 
 template<typename T>
@@ -305,5 +533,17 @@ inline void to_json<duk::system::Systems>(rapidjson::Document& document, rapidjs
 }
 
 }// namespace duk::serial
+
+namespace duk::resource {
+
+template<typename Solver>
+void solve_resources(Solver* solver, duk::system::Systems& systems) {
+    for (auto it: systems) {
+        const auto& systemName = it.system_name();
+        duk::system::SystemRegistry::instance()->solve_resources(solver, systems, systemName);
+    }
+}
+
+}// namespace duk::resource
 
 #endif// DUK_SYSTEM_SYSTEM_H

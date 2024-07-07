@@ -6,15 +6,12 @@
 
 namespace duk::engine {
 
-void TransformUpdateSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    duk::renderer::update_transforms(objects);
+void TransformUpdateSystem::enter() {
+    duk::renderer::update_transforms(*objects());
 }
 
-void TransformUpdateSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    duk::renderer::update_transforms(objects);
-}
-
-void TransformUpdateSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
+void TransformUpdateSystem::update() {
+    duk::renderer::update_transforms(*objects());
 }
 
 }// namespace duk::engine

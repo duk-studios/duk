@@ -18,13 +18,13 @@ struct Temporary {
 
 class TemporarySystem : public duk::system::System {
 public:
-    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    using TemporaryEnterEvent = duk::objects::ComponentEvent<Temporary, duk::objects::ComponentEnterEvent>;
 
-    void update(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    void attach() override;
 
-    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    void update() override;
 
-    void receive(const duk::objects::ComponentEvent<Temporary, duk::objects::ComponentEnterEvent>& event);
+    void receive(const TemporaryEnterEvent& event);
 };
 
 }// namespace duk::sample

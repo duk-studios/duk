@@ -553,7 +553,7 @@ public:
     template<typename T>
     DUK_NO_DISCARD bool valid_component(const Id& id) const;
 
-    void update(ComponentEventDispatcher& dispatcher, duk::tools::Globals& globals);
+    void update(ComponentEventDispatcher& dispatcher);
 
 private:
     template<typename T>
@@ -590,7 +590,8 @@ using ObjectsResource = duk::resource::Handle<Objects>;
 
 template<typename C, typename E>
 struct ComponentEvent {
-    duk::tools::Globals& globals;
+    using ComponentType = C;
+    using EventType = E;
     Component<C> component;
     const E& event;
 };
@@ -598,21 +599,23 @@ struct ComponentEvent {
 class ComponentEventDispatcher {
 public:
     template<typename E>
-    void emit_all(duk::tools::Globals& globals, const Object& object, const E& event = {});
+    void emit_object(const Object& object, const E& event = {});
 
     template<typename E>
-    void emit_one(duk::tools::Globals& globals, const Object& object, uint32_t componentIndex, const E& event = {});
+    void emit_component(const Object& object, uint32_t componentIndex, const E& event = {});
 
     template<typename E, typename C>
-    void emit_one(duk::tools::Globals& globals, const Object& object, const E& event = {});
+    void emit_component(const Object& object, const E& event = {});
 
-    template<typename C, typename E, typename F>
+    template<typename E, typename C>
+    void emit_component(const Component<C>& component, const E& event = {});
+
+    template<typename E, typename C, typename F>
     void listen(duk::event::Listener& listener, F&& callback);
 
 private:
     template<typename E>
     struct ObjectEvent {
-        duk::tools::Globals& globals;
         Object object;
         const E& event;
     };
@@ -626,7 +629,7 @@ public:
 
     void attach(ComponentEventDispatcher* dispatcher);
 
-    template<typename C, typename E, typename Derived>
+    template<typename E, typename C, typename Derived>
     void listen(Derived* derived);
 
 private:
@@ -885,7 +888,7 @@ typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::It
 
 template<bool IsConst>
 typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::Iterator::operator+(int value) const {
-    return Iterator(m_i + value, m_end, m_objects, m_componentMask);
+    return Iterator(m_i + value, m_end, m_objects, m_componentMask, m_includeInactive);
 }
 
 template<bool IsConst>
@@ -1134,8 +1137,8 @@ ComponentMask Objects::component_mask() {
 }
 
 template<typename E>
-void ComponentEventDispatcher::emit_all(duk::tools::Globals& globals, const Object& object, const E& event) {
-    ObjectEvent<E> objectEvent = {globals, object, event};
+void ComponentEventDispatcher::emit_object(const Object& object, const E& event) {
+    ObjectEvent<E> objectEvent = {object, event};
     const auto componentMask = object.component_mask();
     for (const auto componentIndex: componentMask.bits<true>()) {
         if (componentIndex >= m_componentDispatchers.size()) {
@@ -1146,20 +1149,25 @@ void ComponentEventDispatcher::emit_all(duk::tools::Globals& globals, const Obje
 }
 
 template<typename E>
-void ComponentEventDispatcher::emit_one(duk::tools::Globals& globals, const Object& object, uint32_t componentIndex, const E& event) {
+void ComponentEventDispatcher::emit_component(const Object& object, uint32_t componentIndex, const E& event) {
     if (m_componentDispatchers.size() <= componentIndex) {
         return;
     }
-    ObjectEvent<E> objectEvent = {globals, object, event};
+    ObjectEvent<E> objectEvent = {object, event};
     m_componentDispatchers[componentIndex].emit(objectEvent);
 }
 
 template<typename E, typename C>
-void ComponentEventDispatcher::emit_one(duk::tools::Globals& globals, const Object& object, const E& event) {
-    emit_one(globals, object, ComponentRegistry::instance()->index_of<C>(), event);
+void ComponentEventDispatcher::emit_component(const Object& object, const E& event) {
+    emit_component(object, ComponentRegistry::instance()->index_of<C>(), event);
 }
 
-template<typename C, typename E, typename F>
+template<typename E, typename C>
+void ComponentEventDispatcher::emit_component(const Component<C>& component, const E& event) {
+    emit_component(component.object(), ComponentRegistry::instance()->index_of<C>(), event);
+}
+
+template<typename E, typename C, typename F>
 void ComponentEventDispatcher::listen(duk::event::Listener& listener, F&& callback) {
     const auto componentIndex = ComponentRegistry::instance()->index_of<C>();
     if (m_componentDispatchers.size() <= componentIndex) {
@@ -1167,12 +1175,12 @@ void ComponentEventDispatcher::listen(duk::event::Listener& listener, F&& callba
     }
     auto& dispatcher = m_componentDispatchers[componentIndex];
     dispatcher.template add_listener<ObjectEvent<E>>(listener, [_callback = std::move(callback)](const ObjectEvent<E>& objectEvent) {
-        ComponentEvent<C, E> componentEvent = {objectEvent.globals, objectEvent.object.template component<C>(), objectEvent.event};
+        ComponentEvent<C, E> componentEvent = {objectEvent.object.template component<C>(), objectEvent.event};
         _callback(componentEvent);
     });
 }
 
-template<typename C, typename E, typename Derived>
+template<typename E, typename C, typename Derived>
 void ComponentEventListener::listen(Derived* derived) {
     if (!m_dispatcher) {
         throw std::runtime_error(fmt::format("Attempting to listen to a component which has no dispatcher: {}", duk::tools::type_name_of<Derived>()));

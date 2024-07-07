@@ -5,7 +5,7 @@
 #include <duk_renderer/components/canvas.h>
 #include <duk_renderer/material/material.h>
 
-#include "duk_renderer/components/material_slot.h"
+#include <duk_renderer/components/material_slot.h>
 
 namespace duk::renderer {
 

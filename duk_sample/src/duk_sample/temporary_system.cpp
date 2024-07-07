@@ -8,24 +8,21 @@
 
 namespace duk::sample {
 
-void TemporarySystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    listen<Temporary, duk::objects::ComponentEnterEvent>(this);
+void TemporarySystem::attach() {
+    listen_component<TemporaryEnterEvent>(this);
 }
 
-void TemporarySystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    auto time = globals.get<duk::tools::Timer>()->time();
-    for (auto [temporary]: objects.all_of<Temporary>()) {
+void TemporarySystem::update() {
+    auto time = global<duk::tools::Timer>()->time();
+    for (auto [temporary]: all_components_of<Temporary>()) {
         if (time > temporary->startTime + temporary->duration) {
             temporary.object().destroy();
         }
     }
 }
 
-void TemporarySystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-}
-
-void TemporarySystem::receive(const duk::objects::ComponentEvent<Temporary, duk::objects::ComponentEnterEvent>& event) {
-    event.component->startTime = event.globals.get<duk::tools::Timer>()->time();
+void TemporarySystem::receive(const TemporaryEnterEvent& event) {
+    event.component->startTime = global<duk::tools::Timer>()->time();
 }
 
 }// namespace duk::sample

@@ -8,17 +8,20 @@
 
 namespace duk::engine {
 
-void SpriteUpdateSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
+void SpriteUpdateSystem::attach() {
 }
 
-void SpriteUpdateSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    auto renderer = globals.get<duk::renderer::Renderer>();
-    for (auto object: objects.all_with<duk::renderer::SpriteRenderer>()) {
+void SpriteUpdateSystem::enter() {
+}
+
+void SpriteUpdateSystem::update() {
+    const auto renderer = global<duk::renderer::Renderer>();
+    for (auto object: all_objects_with<duk::renderer::SpriteRenderer>()) {
         duk::renderer::update_sprite_renderer(renderer, object.component<duk::renderer::SpriteRenderer>());
     }
 }
 
-void SpriteUpdateSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
+void SpriteUpdateSystem::exit() {
 }
 
 }// namespace duk::engine

@@ -7,31 +7,25 @@
 
 namespace duk::engine {
 
-void CanvasUpdateSystem::enter(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    listen<duk::renderer::Canvas, duk::objects::ComponentEnterEvent>(this);
+void CanvasUpdateSystem::attach() {
+    listen_component<CanvasEnterEvent>(this);
 }
 
-void CanvasUpdateSystem::update(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-    auto canvasObject = objects.first_with<duk::renderer::Canvas>();
+void CanvasUpdateSystem::update() {
+    auto [canvas] = first_components_of<duk::renderer::Canvas>();
 
-    if (!canvasObject) {
+    if (!canvas) {
         duk::log::warn("No object with Canvas component found, skipping CanvasUpdateSystem::update");
         return;
     }
 
-    auto canvas = canvasObject.component<duk::renderer::Canvas>();
-
-    for (auto object: objects.all_with<duk::renderer::CanvasTransform>()) {
-        auto canvasTransform = object.component<duk::renderer::CanvasTransform>();
+    for (auto [canvasTransform]: all_components_of<duk::renderer::CanvasTransform>()) {
         duk::renderer::update_canvas_transform(canvas, canvasTransform);
     }
 }
 
-void CanvasUpdateSystem::exit(duk::objects::Objects& objects, duk::tools::Globals& globals) {
-}
-
 void CanvasUpdateSystem::receive(const CanvasEnterEvent& event) {
-    auto window = event.globals.get<duk::platform::Window>();
+    const auto window = global<duk::platform::Window>();
     duk::renderer::update_canvas(event.component, window->width(), window->height());
 }
 

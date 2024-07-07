@@ -15,11 +15,9 @@ class CanvasUpdateSystem : public duk::system::System {
 public:
     using CanvasEnterEvent = duk::objects::ComponentEvent<duk::renderer::Canvas, duk::objects::ComponentEnterEvent>;
 
-    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    void attach() override;
 
-    void update(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
-
-    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    void update() override;
 
     void receive(const CanvasEnterEvent& event);
 };

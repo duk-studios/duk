@@ -17,7 +17,7 @@ AudioPlayer::~AudioPlayer() {
     stop();
 }
 
-void AudioPlayer::play(AudioEngine* engine, const AudioClip* clip, float volume, float frameRate, bool loop, int32_t priority) {
+void AudioPlayer::play(Audio* engine, const AudioClip* clip, float volume, float frameRate, bool loop, int32_t priority) {
     stop();
     m_id = engine->play(clip->buffer(), volume, frameRate, loop, priority);
     m_engine = engine;

@@ -22,11 +22,7 @@ struct CameraController {
 
 class CameraSystem : public duk::system::System {
 public:
-    void enter(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
-
-    void update(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
-
-    void exit(duk::objects::Objects& objects, duk::tools::Globals& globals) override;
+    void update() override;
 };
 
 }// namespace duk::sample
