@@ -7,6 +7,8 @@
 
 namespace duk::log {
 
+extern std::unique_ptr<Logging> GlobalLogging = nullptr;
+
 Logging::Logging() {
     m_defaultLogger = add_logger(std::make_unique<Logger>(Level::VERBOSE));
     m_defaultSink = add_sink(std::make_unique<CoutSink>(Level::VERBOSE));
@@ -81,6 +83,10 @@ void remove_sink(Sink* sink) {
 
 void wait() {
     Logging::instance(true)->wait();
+}
+
+void set(std::unique_ptr<Logging> logging) {
+    GlobalLogging = logging;
 }
 
 }// namespace duk::log

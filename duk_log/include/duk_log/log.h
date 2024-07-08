@@ -58,6 +58,8 @@ void remove_sink(Sink* sink);
 
 void wait();
 
+void set(std::unique_ptr<Logging> logging);
+
 template<typename... Args>
 auto verb(const std::string& format, Args&&... args) {
     return Logging::instance(true)->print(Level::VERBOSE, format, std::forward<Args>(args)...);

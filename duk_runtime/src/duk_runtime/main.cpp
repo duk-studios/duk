@@ -42,11 +42,14 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
             duk::log::add_sink(std::make_unique<duk::log::FileSink>(path, duk::log::INFO));
         }
 
+        std::unique_ptr<duk::log::Logging> logging;
+
         duk::runtime::ApplicationCreateInfo applicationCreateInfo = {};
         applicationCreateInfo.platform = platform;
 
         duk::runtime::Application application(applicationCreateInfo);
 
+        duk::log::set(std::move(logging));
         application.run();
     } catch (const std::exception& e) {
         duk::log::fatal("exception caught: {}", e.what());
