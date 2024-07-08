@@ -7,7 +7,7 @@
 #include <duk_resource/file.h>
 #include <duk_resource/pool.h>
 #include <duk_resource/handle.h>
-#include <duk_resource/set.h>
+#include <duk_resource/resources.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 

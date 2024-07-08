@@ -2,7 +2,7 @@
 // Created by Ricardo on 13/04/2024.
 //
 #include <duk_resource/handler.h>
-#include <duk_resource/set.h>
+#include <duk_resource/resources.h>
 
 #include <duk_tools/file.h>
 
@@ -79,10 +79,10 @@ static std::vector<ResourceFile> load_resource_files(const std::filesystem::path
 
 }// namespace detail
 
-ResourceSet::ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo)
-    : m_pools(resourceSetCreateInfo.pools)
-    , m_mode(resourceSetCreateInfo.loadMode) {
-    const auto resourceFiles = detail::load_resource_files(resourceSetCreateInfo.path, m_mode);
+Resources::Resources(const ResourcesCreateInfo& resourcesCreateInfo)
+    : m_pools(resourcesCreateInfo.pools)
+    , m_mode(resourcesCreateInfo.loadMode) {
+    const auto resourceFiles = detail::load_resource_files(resourcesCreateInfo.path, m_mode);
     for (const auto& resourceFile: resourceFiles) {
         m_resourceFiles.emplace(resourceFile.id, resourceFile);
         for (auto& alias: resourceFile.aliases) {
@@ -91,7 +91,7 @@ ResourceSet::ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo)
     }
 }
 
-Handle<void> ResourceSet::load(const Id id) {
+Handle<void> Resources::load(const Id id) {
     Handle<void> handle;
     if (id < kMaxBuiltInResourceId) {
         // this is a builtin resource, skip
@@ -128,7 +128,7 @@ Handle<void> ResourceSet::load(const Id id) {
     return handle;
 }
 
-Handle<void> ResourceSet::load(const std::string& alias) {
+Handle<void> Resources::load(const std::string& alias) {
     auto id = find_id(alias);
     if (id == kInvalidId) {
         throw std::invalid_argument(fmt::format("resource alias '{}' not found", alias));
@@ -136,11 +136,11 @@ Handle<void> ResourceSet::load(const std::string& alias) {
     return load(id);
 }
 
-Pools* ResourceSet::pools() const {
+Pools* Resources::pools() const {
     return m_pools;
 }
 
-Id ResourceSet::find_id(const std::string& alias) const {
+Id Resources::find_id(const std::string& alias) const {
     auto it = m_resourceIdAliases.find(alias);
     if (it != m_resourceIdAliases.end()) {
         return it->second;

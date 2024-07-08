@@ -16,7 +16,7 @@ Director::~Director() {
 
 void Director::update(duk::tools::Globals& globals) {
     if (!m_requestedSceneAlias.empty()) {
-        m_requestedSceneId = globals.get<duk::resource::ResourceSet>()->find_id(m_requestedSceneAlias);
+        m_requestedSceneId = globals.get<duk::resource::Resources>()->find_id(m_requestedSceneAlias);
         if (m_requestedSceneId == duk::resource::kInvalidId) {
             throw std::runtime_error(fmt::format("failed to find id for scene with alias '{}'", m_requestedSceneAlias));
         }
@@ -59,11 +59,9 @@ void Director::disable(uint32_t systemGroup) {
 }
 
 void Director::load_scene(duk::tools::Globals& globals, duk::resource::Id id) {
-    const auto resources = globals.get<duk::resource::ResourceSet>();
-    const auto renderer = globals.get<duk::renderer::Renderer>();
-    resources->load(id);
+    const auto resources = globals.get<duk::resource::Resources>();
+    const auto scene = resources->load(id).as<Scene>();
 
-    auto scene = resources->pools()->get<ScenePool>()->find(id);
     if (!scene) {
         throw std::runtime_error(fmt::format("failed to load scene with id \"{}\"", m_requestedSceneId.value()));
     }
@@ -75,6 +73,8 @@ void Director::load_scene(duk::tools::Globals& globals, duk::resource::Id id) {
         m_scene->attach(globals);
         m_scene->enter(m_disabledGroupsMask);
     }
+
+    const auto renderer = globals.get<duk::renderer::Renderer>();
 
     resources->pools()->clear();
     renderer->clear_cache();

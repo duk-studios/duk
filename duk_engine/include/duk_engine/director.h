@@ -7,7 +7,7 @@
 #include <duk_engine/scene/scene_pool.h>
 
 #include <duk_renderer/renderer.h>
-#include <duk_resource/set.h>
+#include <duk_resource/resources.h>
 
 namespace duk::engine {
 

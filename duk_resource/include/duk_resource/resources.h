@@ -17,15 +17,15 @@ enum class LoadMode {
     PACKED
 };
 
-struct ResourceSetCreateInfo {
+struct ResourcesCreateInfo {
     std::filesystem::path path;
     Pools* pools;
     LoadMode loadMode;
 };
 
-class ResourceSet {
+class Resources {
 public:
-    explicit ResourceSet(const ResourceSetCreateInfo& resourceSetCreateInfo);
+    explicit Resources(const ResourcesCreateInfo& resourcesCreateInfo);
 
     Handle<void> load(Id id);
 

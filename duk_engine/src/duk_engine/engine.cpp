@@ -61,11 +61,11 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     }
 
     {
-        duk::resource::ResourceSetCreateInfo resourceSetCreateInfo = {};
-        resourceSetCreateInfo.path = engineCreateInfo.workingDirectory / "resources";
-        resourceSetCreateInfo.loadMode = settings.loadMode;
-        resourceSetCreateInfo.pools = pools;
-        m_globals.add<duk::resource::ResourceSet>(resourceSetCreateInfo);
+        duk::resource::ResourcesCreateInfo resourcesCreateInfo = {};
+        resourcesCreateInfo.path = engineCreateInfo.workingDirectory / "resources";
+        resourcesCreateInfo.loadMode = settings.loadMode;
+        resourcesCreateInfo.pools = pools;
+        m_globals.add<duk::resource::Resources>(resourcesCreateInfo);
     }
 
     /* init pools */
@@ -116,7 +116,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
 Engine::~Engine() {
     m_globals.reset<Director>();
-    m_globals.reset<duk::resource::ResourceSet>();
+    m_globals.reset<duk::resource::Resources>();
     m_globals.reset<resource::Pools>();
 }
 
