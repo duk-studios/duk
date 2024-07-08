@@ -4,7 +4,7 @@ set(DUK_RESOURCE_HEADERS
         include/duk_resource/file.h
         include/duk_resource/handler.h
         include/duk_resource/pool.h
-        include/duk_resource/resource.h
+        include/duk_resource/handle.h
         include/duk_resource/set.h
         include/duk_resource/solver/reference_solver.h
         include/duk_resource/solver/dependency_solver.h
@@ -14,7 +14,7 @@ set(DUK_RESOURCE_SOURCES
         src/duk_resource/file.cpp
         src/duk_resource/handler.cpp
         src/duk_resource/pool.cpp
-        src/duk_resource/resource.cpp
+        src/duk_resource/handle.cpp
         src/duk_resource/set.cpp
         src/duk_resource/solver/reference_solver.cpp
         src/duk_resource/solver/dependency_solver.cpp

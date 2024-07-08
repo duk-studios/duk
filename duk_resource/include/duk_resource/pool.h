@@ -5,7 +5,7 @@
 #ifndef DUK_RESOURCE_POOL_H
 #define DUK_RESOURCE_POOL_H
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 #include <cassert>
 #include <cstdint>

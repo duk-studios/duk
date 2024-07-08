@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_SPRITE_RENDERER_H
 #define DUK_RENDERER_SPRITE_RENDERER_H
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/sprite/sprite.h>

@@ -1,5 +1,5 @@
 /// 04/03/2024
-/// resource.cpp
+/// handle.cpp
 
 #include <duk_project/project.h>
 #include <duk_project/resource.h>

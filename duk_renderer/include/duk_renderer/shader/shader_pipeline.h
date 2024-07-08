@@ -8,7 +8,7 @@
 #include <duk_renderer/shader/pipeline_cache.h>
 #include <duk_renderer/shader/shader_pipeline_data.h>
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 

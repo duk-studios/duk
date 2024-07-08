@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_SHADER_MODULE_H
 #define DUK_RENDERER_SHADER_MODULE_H
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 namespace duk::renderer {
 
