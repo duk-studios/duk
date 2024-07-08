@@ -14,10 +14,8 @@
 
 int duk_main(duk::platform::Platform* platform, int argc, const char* const* argv) {
     try {
-
         cxxopts::Options options("duk", "duk runtime application");
-        options.add_options()
-            ("c,console", "Forces a new console window to be opened");
+        options.add_options()("c,console", "Forces a new console window to be opened");
 
         auto result = options.parse(argc, argv);
 
@@ -26,8 +24,7 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
         if (result.count("console")) {
             console->close();
             console->open();
-        }
-        else {
+        } else {
             // tries to attach the console to the current process
             console->attach();
         }

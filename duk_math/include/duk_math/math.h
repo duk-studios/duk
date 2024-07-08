@@ -18,7 +18,6 @@
 
 namespace duk::math {
 
-
 glm::vec3 smooth_damp(const glm::vec3& current, glm::vec3 target, glm::vec3& currentVelocity, float smoothTime, float maxSpeed, float deltaTime);
 
 }// namespace duk::math
