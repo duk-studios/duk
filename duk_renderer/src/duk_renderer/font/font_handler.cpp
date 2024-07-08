@@ -8,7 +8,7 @@
 namespace duk::renderer {
 
 FontHandler::FontHandler()
-    : ResourceHandlerT("fnt") {
+    : HandlerT("fnt") {
     m_loaders.emplace_back(std::make_unique<FreetypeFontLoader>());
 }
 

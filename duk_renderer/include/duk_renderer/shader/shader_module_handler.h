@@ -10,7 +10,7 @@
 
 namespace duk::renderer {
 
-class ShaderModuleHandler : public resource::ResourceHandlerT<ShaderModulePool> {
+class ShaderModuleHandler : public resource::HandlerT<ShaderModulePool> {
 public:
     ShaderModuleHandler();
 

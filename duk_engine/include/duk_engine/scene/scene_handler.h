@@ -13,7 +13,7 @@
 
 namespace duk::engine {
 
-class SceneHandler : public duk::resource::TextResourceHandlerT<ScenePool> {
+class SceneHandler : public duk::resource::TextHandlerT<ScenePool> {
 public:
     SceneHandler();
 

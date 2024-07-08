@@ -33,7 +33,7 @@ inline void to_json<duk::objects::ObjectsWrapper>(rapidjson::Document& document,
 namespace duk::objects {
 
 ObjectsHandler::ObjectsHandler()
-    : TextResourceHandlerT("obj") {
+    : TextHandlerT("obj") {
 }
 
 bool ObjectsHandler::accepts(const std::string& extension) const {

@@ -11,7 +11,7 @@
 
 namespace duk::objects {
 
-class ObjectsHandler : public duk::resource::TextResourceHandlerT<ObjectsPool> {
+class ObjectsHandler : public duk::resource::TextHandlerT<ObjectsPool> {
 public:
     ObjectsHandler();
 

@@ -11,7 +11,7 @@
 namespace duk::renderer {
 
 SpriteHandler::SpriteHandler()
-    : TextResourceHandlerT("spt") {
+    : TextHandlerT("spt") {
 }
 
 bool SpriteHandler::accepts(const std::string& extension) const {

@@ -26,7 +26,7 @@ public:
     virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const void* data, size_t size) = 0;
 };
 
-class ImageHandler : public duk::resource::ResourceHandlerT<ImagePool> {
+class ImageHandler : public duk::resource::HandlerT<ImagePool> {
 public:
     static std::unique_ptr<duk::rhi::ImageDataSource> create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height);
 

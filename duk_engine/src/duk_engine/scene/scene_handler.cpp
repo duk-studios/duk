@@ -9,7 +9,7 @@
 namespace duk::engine {
 
 SceneHandler::SceneHandler()
-    : TextResourceHandlerT("scn") {
+    : TextHandlerT("scn") {
 }
 
 bool SceneHandler::accepts(const std::string& extension) const {

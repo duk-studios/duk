@@ -11,7 +11,7 @@
 namespace duk::animation {
 
 AnimationClipHandler::AnimationClipHandler()
-    : TextResourceHandlerT("ani") {
+    : TextHandlerT("ani") {
 }
 
 bool AnimationClipHandler::accepts(const std::string& extension) const {

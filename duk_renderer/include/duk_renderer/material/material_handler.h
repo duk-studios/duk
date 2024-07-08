@@ -13,7 +13,7 @@
 
 namespace duk::renderer {
 
-class MaterialHandler : public duk::resource::TextResourceHandlerT<MaterialPool> {
+class MaterialHandler : public duk::resource::TextHandlerT<MaterialPool> {
 public:
     explicit MaterialHandler();
 

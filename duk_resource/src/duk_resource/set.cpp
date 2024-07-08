@@ -107,7 +107,7 @@ Handle<void> ResourceSet::load(const Id id) {
 
     auto handler = ResourceRegistry::instance()->find_handler(resourceFile.tag);
     if (!handler) {
-        throw std::runtime_error(fmt::format("Failed to find a ResourceHandler for tag ({})", resourceFile.tag));
+        throw std::runtime_error(fmt::format("Failed to find a Handler for tag ({})", resourceFile.tag));
     }
 
     try {

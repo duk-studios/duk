@@ -11,7 +11,7 @@
 
 namespace duk::renderer {
 
-class ShaderPipelineHandler : public duk::resource::TextResourceHandlerT<ShaderPipelinePool> {
+class ShaderPipelineHandler : public duk::resource::TextHandlerT<ShaderPipelinePool> {
 public:
     ShaderPipelineHandler();
 

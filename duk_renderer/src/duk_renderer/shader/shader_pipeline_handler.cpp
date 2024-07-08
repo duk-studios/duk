@@ -12,7 +12,7 @@
 namespace duk::renderer {
 
 ShaderPipelineHandler::ShaderPipelineHandler()
-    : TextResourceHandlerT("spp") {
+    : TextHandlerT("spp") {
 }
 
 bool ShaderPipelineHandler::accepts(const std::string& extension) const {

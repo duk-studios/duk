@@ -9,7 +9,7 @@
 namespace duk::animation {
 
 AnimationControllerHandler::AnimationControllerHandler()
-    : TextResourceHandlerT("anc") {
+    : TextHandlerT("anc") {
 }
 
 bool AnimationControllerHandler::accepts(const std::string& extension) const {

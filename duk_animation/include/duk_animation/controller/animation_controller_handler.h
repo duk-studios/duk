@@ -13,7 +13,7 @@ namespace duk::animation {
 
 class AnimationControllerPool : public duk::resource::PoolT<AnimationControllerResource> {};
 
-class AnimationControllerHandler : public duk::resource::TextResourceHandlerT<AnimationControllerPool> {
+class AnimationControllerHandler : public duk::resource::TextHandlerT<AnimationControllerPool> {
 public:
     AnimationControllerHandler();
 

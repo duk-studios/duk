@@ -11,7 +11,7 @@
 
 namespace duk::animation {
 
-class AnimationClipHandler : public duk::resource::TextResourceHandlerT<AnimationClipPool> {
+class AnimationClipHandler : public duk::resource::TextHandlerT<AnimationClipPool> {
 public:
     AnimationClipHandler();
 

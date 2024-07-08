@@ -11,7 +11,7 @@
 
 namespace duk::renderer {
 
-class SpriteHandler : public duk::resource::TextResourceHandlerT<SpritePool> {
+class SpriteHandler : public duk::resource::TextHandlerT<SpritePool> {
 public:
     SpriteHandler();
 

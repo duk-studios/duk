@@ -36,7 +36,7 @@ std::unique_ptr<duk::rhi::ImageDataSource> ImageHandler::create(const void* data
 }
 
 ImageHandler::ImageHandler()
-    : ResourceHandlerT("img") {
+    : HandlerT("img") {
     m_loaders.emplace_back(std::make_unique<ImageLoaderStb>());
 }
 

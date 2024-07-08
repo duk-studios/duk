@@ -27,7 +27,7 @@ struct FontHandlerCreateInfo {
     Renderer* renderer;
 };
 
-class FontHandler : public duk::resource::ResourceHandlerT<FontPool> {
+class FontHandler : public duk::resource::HandlerT<FontPool> {
 public:
     FontHandler();
 

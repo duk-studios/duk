@@ -11,7 +11,7 @@
 
 namespace duk::audio {
 
-class AudioClipHandler : public duk::resource::ResourceHandlerT<AudioClipPool> {
+class AudioClipHandler : public duk::resource::HandlerT<AudioClipPool> {
 public:
     AudioClipHandler();
 

@@ -15,7 +15,7 @@ ResourceRegistry* ResourceRegistry::instance() {
     return &g_resourceRegistry;
 }
 
-ResourceHandler* ResourceRegistry::find_handler(const std::string& tag) {
+Handler* ResourceRegistry::find_handler(const std::string& tag) {
     auto it = m_handlers.find(tag);
     if (it == m_handlers.end()) {
         return nullptr;
@@ -23,7 +23,7 @@ ResourceHandler* ResourceRegistry::find_handler(const std::string& tag) {
     return it->second.get();
 }
 
-ResourceHandler* ResourceRegistry::find_handler_for_extension(const std::string& extension) {
+Handler* ResourceRegistry::find_handler_for_extension(const std::string& extension) {
     for (auto& handler: m_handlers | std::views::values) {
         if (handler->accepts(extension)) {
             return handler.get();

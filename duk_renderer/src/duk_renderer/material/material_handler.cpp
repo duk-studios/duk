@@ -9,7 +9,7 @@
 namespace duk::renderer {
 
 MaterialHandler::MaterialHandler()
-    : TextResourceHandlerT("mat") {
+    : TextHandlerT("mat") {
 }
 
 bool MaterialHandler::accepts(const std::string& extension) const {

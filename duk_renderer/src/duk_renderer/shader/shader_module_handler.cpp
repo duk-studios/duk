@@ -7,7 +7,7 @@
 namespace duk::renderer {
 
 ShaderModuleHandler::ShaderModuleHandler()
-    : ResourceHandlerT("spv") {
+    : HandlerT("spv") {
 }
 
 bool ShaderModuleHandler::accepts(const std::string& extension) const {
