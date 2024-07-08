@@ -5,7 +5,6 @@
 #ifndef DUK_MATH_MATH_H
 #define DUK_MATH_MATH_H
 
-#include <random>
 #include <glm/gtc/random.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -19,9 +18,6 @@
 
 namespace duk::math {
 
-float generate_random_float(float min, float max, float scaleFactor = 1.0f);
-
-int generate_random_int(int min, int max, int scaleFactor = 1.0f);
 
 glm::vec3 smooth_damp(const glm::vec3& current, glm::vec3 target, glm::vec3& currentVelocity, float smoothTime, float maxSpeed, float deltaTime);
 

@@ -6,20 +6,6 @@
 
 namespace duk::math {
 
-float generate_random_float(float min, float max, float scaleFactor) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> rand_number(min * scaleFactor, max * scaleFactor);
-    return rand_number(gen);
-}
-
-float generate_random_inte(int min, int max, int scaleFactor) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> rand_number(min * scaleFactor, max * scaleFactor);
-    return rand_number(gen);
-}
-
 glm::vec3 smooth_damp(const glm::vec3& current, glm::vec3 target, glm::vec3& currentVelocity, float smoothTime, float maxSpeed, float deltaTime) {
     float outputX = 0.0f;
     float outputY = 0.0f;
