@@ -46,7 +46,9 @@ public:
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.logger = duk::log::Logging::instance(true)->default_logger();
 
-        m_renderer = duk::renderer::make_forward_renderer(rendererCreateInfo);
+        m_renderer = std::make_unique<duk::renderer::Renderer>(rendererCreateInfo);
+
+        duk::renderer::add_forward_passes(m_renderer.get(), m_window.get());
 
         // mesh pool
         duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};
@@ -185,7 +187,7 @@ int main() {
         duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());
 
         //Telling to our renderer to render the objects we want.
-        application.renderer()->render(objects, *application.pools());
+        application.renderer()->render(objects);
 
         timer.stop();
     }

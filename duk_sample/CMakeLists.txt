@@ -19,6 +19,8 @@ set(DUK_SAMPLE_SOURCES
     src/duk_sample/sprite_animator_system.cpp
     src/duk_sample/stats_system.h
     src/duk_sample/stats_system.cpp
+    src/duk_sample/temporary_system.h
+    src/duk_sample/temporary_system.cpp
 )
 
 add_library(duk_sample_lib STATIC ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})

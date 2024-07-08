@@ -8,21 +8,11 @@
 
 namespace duk::engine {
 
-TextUpdateSystem::TextUpdateSystem()
-    : System(kMainThreadGroup) {
-}
-
-void TextUpdateSystem::enter(objects::Objects& objects, Engine& engine) {
-}
-
-void TextUpdateSystem::update(objects::Objects& objects, Engine& engine) {
-    for (auto object: objects.all_with<duk::renderer::TextRenderer>()) {
-        auto textRenderer = object.component<duk::renderer::TextRenderer>();
-        duk::renderer::update_text_renderer(engine.renderer(), textRenderer);
+void TextUpdateSystem::update() {
+    auto renderer = global<duk::renderer::Renderer>();
+    for (auto [textRenderer]: all_components_of<duk::renderer::TextRenderer>()) {
+        duk::renderer::update_text_renderer(renderer, textRenderer);
     }
-}
-
-void TextUpdateSystem::exit(objects::Objects& objects, Engine& engine) {
 }
 
 }// namespace duk::engine

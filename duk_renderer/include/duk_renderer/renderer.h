@@ -28,6 +28,7 @@ struct RendererCreateInfo {
     duk::resource::Pools* pools;
     duk::log::Logger* logger;
     duk::rhi::API api;
+    bool apiValidationLayers;
     const char* applicationName;
 };
 
@@ -37,7 +38,7 @@ public:
 
     virtual ~Renderer();
 
-    void render(duk::objects::Objects& objects, duk::resource::Pools& pools);
+    void render(duk::objects::Objects& objects);
 
     void clear_cache();
 
@@ -84,8 +85,8 @@ protected:
     std::unique_ptr<TextCache> m_textMeshCache;
 };
 
-/// Creates a Renderer with a Forward Pass (and PresentPass if a window is provided)
-std::unique_ptr<Renderer> make_forward_renderer(const RendererCreateInfo& rendererCreateInfo);
+/// Add passes for a forward Renderer
+void add_forward_passes(Renderer* renderer, duk::platform::Window* window = nullptr);
 
 template<typename T, typename... Args>
 T* Renderer::add_pass(Args&&... args) {

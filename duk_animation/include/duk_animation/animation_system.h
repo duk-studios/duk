@@ -5,21 +5,13 @@
 #ifndef DUK_ANIMATION_ANIMATION_SYSTEM_H
 #define DUK_ANIMATION_ANIMATION_SYSTEM_H
 
-#include <duk_animation/controller/animation_set.h>
-
-#include <duk_engine/systems.h>
+#include <duk_system/system.h>
 
 namespace duk::animation {
 
-class AnimationSystem : public duk::engine::System {
+class AnimationSystem : public duk::system::System {
 public:
-    AnimationSystem();
-
-    void enter(duk::objects::Objects& objects, engine::Engine& engine) override;
-
-    void update(duk::objects::Objects& objects, engine::Engine& engine) override;
-
-    void exit(duk::objects::Objects& objects, engine::Engine& engine) override;
+    void update() override;
 };
 
 }// namespace duk::animation

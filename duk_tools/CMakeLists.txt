@@ -2,7 +2,7 @@ project(duk_tools)
 
 set(DUK_TOOLS_HEADERS
         include/duk_tools/singleton.h
-        include/duk_tools/format.h
+        include/duk_tools/globals.h
         include/duk_tools/fixed_vector.h
         include/duk_tools/interval_map.h
         include/duk_tools/fixed_allocator.h
@@ -15,6 +15,7 @@ set(DUK_TOOLS_HEADERS
 
 set(DUK_TOOLS_SOURCES
         src/duk_tools/file.cpp
+        src/duk_tools/globals.cpp
         src/duk_tools/string.cpp
         src/duk_tools/timer.cpp
         src/duk_tools/types.cpp

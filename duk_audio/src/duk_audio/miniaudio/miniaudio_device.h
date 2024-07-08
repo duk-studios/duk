@@ -6,14 +6,13 @@
 #define DUK_AUDIO_MINIAUDIO_DEVICE_H
 
 #include <duk_audio/audio_device.h>
-#include <duk_audio/audio_graph.h>
 #include <duk_audio/miniaudio/miniaudio_import.h>
-#include <duk_audio/nodes/audio_source_node.h>
 
 namespace duk {
 namespace audio {
 
 struct MiniaudioDeviceCreateInfo {
+    AudioProcessor* processor;
     uint32_t frameRate;
     uint32_t channelCount;
 };
@@ -32,30 +31,13 @@ public:
 
     void stop() override;
 
-    void update() override;
-
-    AudioId play(const std::shared_ptr<AudioBuffer>& buffer, float volume, float frameRate, bool loop, int32_t priority) override;
-
-    void stop(const AudioId& id) override;
-
-    bool is_playing(const AudioId& id) const override;
-
-    void set_volume(const AudioId& id, float volume) override;
-
-    float volume(const AudioId& id) const override;
-
-    void set_frame_rate(const AudioId& id, float frameRate) override;
-
-    float frame_rate(const AudioId& id) const override;
-
-    void data_callback(void* output, const void* input, uint32_t frameCount);
+    void data_callback(void* output, const void* input, uint32_t frameCount) const;
 
 private:
+    AudioProcessor* m_processor;
     uint32_t m_frameRate;
     uint32_t m_channelCount;
     ma_device m_device;
-    AudioGraph m_graph;
-    AudioSourceNode* m_sourceNode;
 };
 
 }// namespace audio

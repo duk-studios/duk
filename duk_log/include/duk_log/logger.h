@@ -4,9 +4,7 @@
 #define DUK_LOG_LOGGER_H
 
 #include <duk_event/event.h>
-#include <duk_macros/macros.h>
 #include <duk_task/task_queue.h>
-#include <duk_tools/format.h>
 
 #include <fmt/core.h>
 

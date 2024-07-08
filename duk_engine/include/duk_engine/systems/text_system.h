@@ -5,19 +5,13 @@
 #ifndef DUK_RENDERER_TEXT_SYSTEM_H
 #define DUK_RENDERER_TEXT_SYSTEM_H
 
-#include <duk_engine/systems.h>
+#include <duk_system/system.h>
 
 namespace duk::engine {
 
-class TextUpdateSystem : public System {
+class TextUpdateSystem : public duk::system::System {
 public:
-    explicit TextUpdateSystem();
-
-    void enter(objects::Objects& objects, Engine& engine) override;
-
-    void update(objects::Objects& objects, Engine& engine) override;
-
-    void exit(objects::Objects& objects, Engine& engine) override;
+    void update() override;
 };
 
 }// namespace duk::engine

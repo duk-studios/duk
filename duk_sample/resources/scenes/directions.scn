@@ -1,14 +1,46 @@
 {
   "systems":[
-    "duk::sample::CameraSystem",
-    "duk::sample::StatsSystem",
-    "duk::animation::AnimationSystem",
-    "duk::sample::SpriteAnimatorSystem",
-    "duk::engine::TransformUpdateSystem",
-    "duk::engine::CameraUpdateSystem",
-    "duk::engine::SpriteUpdateSystem",
-    "duk::engine::TextUpdateSystem",
-    "duk::engine::CanvasUpdateSystem"
+    {
+      "type": "duk::sample::CameraSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::sample::StatsSystem",
+      "group": 0,
+      "myData": "safe"
+    },
+    {
+      "type": "duk::sample::TemporarySystem",
+      "group": 0
+    },
+    {
+      "type": "duk::animation::AnimationSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::sample::SpriteAnimatorSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::engine::TransformUpdateSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::engine::CameraUpdateSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::engine::SpriteUpdateSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::engine::TextUpdateSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::engine::CanvasUpdateSystem",
+      "group": 0
+    }
   ],
   "objects":[
     {

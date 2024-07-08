@@ -1,4 +1,18 @@
 {
-  "systems": [],
+  "systems": [
+    {
+      "type": "ast::LevelSystem",
+      "group": 1,
+      "level": 4320948320942
+    },
+    {
+      "type": "duk::renderer::UpdateTextSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::renderer::UpdateSpriteSystem",
+      "group": 0
+    }
+  ],
   "objects": []
 }

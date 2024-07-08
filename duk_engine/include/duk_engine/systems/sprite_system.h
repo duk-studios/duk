@@ -5,19 +5,19 @@
 #ifndef DUK_ENGINE_SPRITE_SYSTEM_H
 #define DUK_ENGINE_SPRITE_SYSTEM_H
 
-#include <duk_engine/systems.h>
+#include <duk_system/system.h>
 
 namespace duk::engine {
 
-class SpriteUpdateSystem : public System {
+class SpriteUpdateSystem : public duk::system::System {
 public:
-    SpriteUpdateSystem();
+    void attach() override;
 
-    void enter(duk::objects::Objects& objects, Engine& engine) override;
+    void enter() override;
 
-    void update(duk::objects::Objects& objects, Engine& engine) override;
+    void update() override;
 
-    void exit(duk::objects::Objects& objects, Engine& engine) override;
+    void exit() override;
 };
 
 }// namespace duk::engine

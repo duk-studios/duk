@@ -19,7 +19,8 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
         cxxopts::Options options("duk", "duk runtime application");
         options.add_options()
             ("c,console", "Forces a new console window to be opened")
-            ("o,output", "Path to output logging");
+            ("o,output", "Path to output logging")
+            ("v,validation", "Asks for renderer validation layers, if available");
         // clang-format on
 
         auto result = options.parse(argc, argv);
@@ -46,6 +47,11 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
 
         duk::runtime::ApplicationCreateInfo applicationCreateInfo = {};
         applicationCreateInfo.platform = platform;
+#ifdef DUK_DEBUG
+        applicationCreateInfo.rendererApiValidationLayers = true;
+#else
+        applicationCreateInfo.rendererApiValidationLayers = result.count("validation") ? true : false;
+#endif
 
         duk::runtime::Application application(applicationCreateInfo);
 

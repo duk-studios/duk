@@ -115,6 +115,8 @@ public:
         m_events.erase(it);
     }
 
+    void clear();
+
 private:
     size_t m_id;
     std::vector<Event::Handle> m_events;

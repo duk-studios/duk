@@ -10,7 +10,7 @@ namespace duk::rhi {
 
 static std::shared_ptr<VulkanRHI> create_vulkan_rhi(const RHICreateInfo& rendererCreateInfo) {
     VulkanRHICreateInfo vulkanRendererCreateInfo = {};
-    vulkanRendererCreateInfo.hasValidationLayers = true;
+    vulkanRendererCreateInfo.hasValidationLayers = rendererCreateInfo.validationLayers;
     vulkanRendererCreateInfo.renderHardwareInterfaceCreateInfo = rendererCreateInfo;
     vulkanRendererCreateInfo.maxFramesInFlight = 3;
     return std::make_shared<VulkanRHI>(vulkanRendererCreateInfo);

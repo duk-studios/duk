@@ -62,28 +62,23 @@ static glm::vec3 input_move_direction(const duk::engine::Input* input) {
 
 }// namespace detail
 
-CameraSystem::CameraSystem()
-    : System(kMainThreadGroup) {
-}
+void CameraSystem::update() {
+    auto [controller] = first_components_of<CameraController>();
 
-void CameraSystem::enter(duk::objects::Objects& objects, duk::engine::Engine& engine) {
-}
-
-void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& engine) {
-    auto object = objects.first_with<CameraController>();
-
-    if (!object) {
+    if (!controller) {
         return;
     }
 
-    auto input = engine.input();
+    auto input = global<duk::engine::Input>();
+    auto timer = global<duk::tools::Timer>();
+    auto audio = global<duk::audio::Audio>();
+    auto platform = global<duk::platform::Platform>();
+    auto window = global<duk::platform::Window>();
 
-    const auto deltaTime = engine.timer()->delta_time();
-    auto cursor = engine.platform()->cursor();
+    const auto deltaTime = timer->delta_time();
+    auto cursor = platform->cursor();
 
-    auto controller = object.component<CameraController>();
-
-    auto transform = object.component<duk::renderer::Transform>();
+    auto transform = controller.component<duk::renderer::Transform>();
     if (!transform) {
         duk::log::fatal("No transform attached to CameraController, skipping CameraSystem");
         return;
@@ -96,10 +91,10 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
     transform->position += moveDirection * controller->speed * deltaTime;
 
     if (input->mouse_down(duk::platform::MouseButton::RIGHT)) {
-        auto camera = object.component<duk::renderer::Camera>();
-        auto worldPos = duk::renderer::screen_to_world(camera, engine.window()->size(), glm::vec3(input->mouse_position(), -30));
+        auto camera = controller.component<duk::renderer::Camera>();
+        auto worldPos = duk::renderer::screen_to_world(camera, window->size(), glm::vec3(input->mouse_position(), -30));
 
-        auto spawnedObject = objects.copy_objects(*controller->sphere);
+        auto spawnedObject = create_object(controller->sphere);
         auto spawnedTransform = spawnedObject.component<duk::renderer::Transform>();
         spawnedTransform->position = worldPos;
 
@@ -108,11 +103,8 @@ void CameraSystem::update(duk::objects::Objects& objects, duk::engine::Engine& e
             spriteRenderer->index = spriteIndex++ % spriteRenderer->sprite->count();
         }
 
-        controller->audioPlayer.play(engine.audio(), controller->spawnClip.get(), 1.0f, glm::linearRand(1.0f, 1.05f));
+        controller->audioPlayer.play(audio, controller->spawnClip.get(), 1.0f, glm::linearRand(1.0f, 1.05f));
     }
-}
-
-void CameraSystem::exit(duk::objects::Objects& objects, duk::engine::Engine& engine) {
 }
 
 }// namespace duk::sample
