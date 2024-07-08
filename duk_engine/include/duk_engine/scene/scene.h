@@ -4,30 +4,36 @@
 #ifndef DUK_ENGINE_SCENE_H
 #define DUK_ENGINE_SCENE_H
 
-#include <duk_engine/systems.h>
+#include <duk_system/system.h>
 #include <duk_objects/objects.h>
 
 namespace duk::engine {
 
 class Scene {
 public:
-    duk::objects::Objects& objects();
+    Scene();
 
-    const duk::objects::Objects& objects() const;
+    DUK_NO_DISCARD duk::objects::Objects& objects();
 
-    Systems& systems();
+    DUK_NO_DISCARD const duk::objects::Objects& objects() const;
 
-    const Systems& systems() const;
+    DUK_NO_DISCARD duk::system::Systems& systems();
 
-    void enter(Engine& engine);
+    DUK_NO_DISCARD const duk::system::Systems& systems() const;
 
-    void update(Engine& engine, uint32_t activeSystemsGroup);
+    void attach(duk::tools::Globals& globals);
 
-    void exit(Engine& engine);
+    void enter(uint32_t disabledGroupsMask);
+
+    void update(uint32_t disabledGroupsMask);
+
+    void exit(uint32_t disabledGroupsMask);
 
 private:
+    duk::objects::ComponentEventDispatcher m_componentDispatcher;
+    duk::system::SystemEventDispatcher m_systemDispatcher;
     duk::objects::Objects m_objects;
-    Systems m_systems;
+    duk::system::Systems m_systems;
 };
 
 using SceneResource = duk::resource::Handle<Scene>;
@@ -54,6 +60,7 @@ namespace duk::resource {
 
 template<typename Solver>
 void solve_resources(Solver* solver, duk::engine::Scene& scene) {
+    solver->solve(scene.systems());
     solver->solve(scene.objects());
 }
 

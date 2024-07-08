@@ -60,19 +60,21 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     engineCreateInfo.settings = detail::load_settings();
     engineCreateInfo.platform = platform;
     engineCreateInfo.window = m_window.get();
+    engineCreateInfo.rendererApiValidationLayers = applicationCreateInfo.rendererApiValidationLayers;
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
 
-    m_engine->pools()->create_pool<duk::animation::AnimationClipPool>();
-    m_engine->pools()->create_pool<duk::animation::AnimationControllerPool>();
+    auto pools = m_engine->globals()->get<duk::resource::Pools>();
+    pools->create_pool<duk::animation::AnimationClipPool>();
+    pools->create_pool<duk::animation::AnimationControllerPool>();
 }
 
 Application::~Application() = default;
 
 void Application::run() {
-    duk_api_run_enter(*m_engine);
+    duk_api_run_enter(*m_engine->globals());
     m_engine->run();
-    duk_api_run_exit(*m_engine);
+    duk_api_run_exit(*m_engine->globals());
 }
 
 }// namespace duk::runtime

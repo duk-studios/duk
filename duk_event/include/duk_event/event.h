@@ -115,6 +115,8 @@ public:
         m_events.erase(it);
     }
 
+    void clear();
+
 private:
     size_t m_id;
     std::vector<Event::Handle> m_events;
@@ -125,8 +127,7 @@ public:
     template<typename T>
     void emit(const T& ev) {
         const auto idx = index<T>();
-        if (m_events.size() <= idx) {
-            // no one is listening to this event, ignore it
+        if (m_events.size() <= idx || !m_events[idx]) {
             return;
         }
 
@@ -139,9 +140,10 @@ public:
         const auto idx = index<T>();
         if (m_events.size() <= idx) {
             m_events.resize(idx + 1);
+        }
+        if (!m_events[idx]) {
             m_events[idx] = std::make_unique<EventT<T>>();
         }
-
         const auto event = dynamic_cast<EventT<T>*>(m_events[idx].get());
         listener.listen(*event, std::move(callback));
     }

@@ -19,12 +19,80 @@ namespace duk::serial {
 
 template<typename T>
 void from_json(const rapidjson::Value& json, T& value) {
-    value = json.Get<T>();
 }
 
 template<typename T>
 void to_json(rapidjson::Document& document, rapidjson::Value& json, const T& value) {
-    json.Set(value, document.GetAllocator());
+}
+
+template<>
+inline void from_json(const rapidjson::Value& json, float& value) {
+    value = json.Get<float>();
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const float& value) {
+    json.Set<float>(value);
+}
+
+template<>
+inline void from_json(const rapidjson::Value& json, double& value) {
+    value = json.Get<double>();
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const double& value) {
+    json.Set<double>(value);
+}
+
+template<>
+inline void from_json(const rapidjson::Value& json, int32_t& value) {
+    value = json.Get<int32_t>();
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const int32_t& value) {
+    json.Set<int32_t>(value);
+}
+
+template<>
+inline void from_json(const rapidjson::Value& json, uint32_t& value) {
+    value = json.Get<uint32_t>();
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const uint32_t& value) {
+    json.Set<uint32_t>(value);
+}
+
+template<>
+inline void from_json(const rapidjson::Value& json, int64_t& value) {
+    value = json.Get<int64_t>();
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const int64_t& value) {
+    json.Set<int64_t>(value);
+}
+
+template<>
+inline void from_json(const rapidjson::Value& json, uint64_t& value) {
+    value = json.Get<uint64_t>();
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const uint64_t& value) {
+    json.Set<uint64_t>(value);
+}
+
+template<>
+inline void from_json(const rapidjson::Value& json, bool& value) {
+    value = json.Get<bool>();
+}
+
+template<>
+inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const bool& value) {
+    json.Set<bool>(value);
 }
 
 template<>

@@ -8,23 +8,12 @@
 
 namespace duk::animation {
 
-AnimationSystem::AnimationSystem()
-    : System(kMainThreadGroup) {
-}
+void AnimationSystem::update() {
+    const auto deltaTime = global<duk::tools::Timer>()->delta_time();
 
-void AnimationSystem::enter(duk::objects::Objects& objects, engine::Engine& engine) {
-}
-
-void AnimationSystem::update(duk::objects::Objects& objects, engine::Engine& engine) {
-    const auto deltaTime = engine.timer()->delta_time();
-
-    for (auto object: objects.all_with<Animator>()) {
-        auto animator = object.component<Animator>();
+    for (auto [animator]: all_components_of<Animator>()) {
         animator->controller->evaluate(animator, deltaTime);
     }
-}
-
-void AnimationSystem::exit(duk::objects::Objects& objects, engine::Engine& engine) {
 }
 
 }// namespace duk::animation

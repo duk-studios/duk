@@ -79,3 +79,4 @@ fabric.properties
 # duk
 venv
 install
+duk_sample/log.txt

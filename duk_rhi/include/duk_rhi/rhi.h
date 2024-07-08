@@ -47,6 +47,7 @@ struct RHICreateInfo {
     const char* engineName;
     uint32_t engineVersion;
     API api;
+    bool validationLayers;
     size_t deviceIndex;
 };
 

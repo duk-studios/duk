@@ -6,35 +6,30 @@
 
 #include <duk_engine/engine.h>
 
+#include <duk_objects/events.h>
+
 #include <duk_renderer/components/text_renderer.h>
 
 #include <numeric>
 
 namespace duk::sample {
 
-StatsSystem::StatsSystem()
-    : System(kMainThreadGroup) {
+void StatsSystem::attach() {
+    listen_component<StatsEnterEvent>(this);
 }
 
-void StatsSystem::enter(objects::Objects& objects, engine::Engine& engine) {
-}
-
-void StatsSystem::update(objects::Objects& objects, engine::Engine& engine) {
-    auto object = objects.first_with<Stats>();
+void StatsSystem::update() {
+    auto object = first_object_with<Stats>();
     if (!object.valid()) {
         return;
     }
 
-    auto timer = engine.timer();
+    auto timer = global<duk::tools::Timer>();
 
     auto [stats, textRenderer] = object.components<Stats, duk::renderer::TextRenderer>();
 
     auto& fpsSamples = stats->fpsSamples;
     auto& currentSample = stats->currentSample;
-
-    if (stats->sampleCount != fpsSamples.size()) {
-        fpsSamples.resize(stats->sampleCount, 0.f);
-    }
 
     fpsSamples[currentSample++] = 1.f / timer->unscaled_delta_time();
 
@@ -45,7 +40,9 @@ void StatsSystem::update(objects::Objects& objects, engine::Engine& engine) {
     }
 }
 
-void StatsSystem::exit(objects::Objects& objects, engine::Engine& engine) {
+void StatsSystem::receive(const StatsEnterEvent& event) {
+    const auto& stats = event.component;
+    stats->fpsSamples.resize(stats->sampleCount, 0.f);
 }
 
 }// namespace duk::sample

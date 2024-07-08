@@ -4,6 +4,7 @@
 
 #include <duk_resource/resource.h>
 #include <duk_objects/objects.h>
+#include <duk_objects/events.h>
 #include <duk_serial/json/serializer.h>
 #include <iostream>
 
@@ -96,6 +97,10 @@ int main() {
     duk::objects::register_component<ComponentTest2>();
     duk::objects::register_component<ComponentTest3>();
 
+    duk::event::Listener listener;
+
+    duk::objects::ComponentEventDispatcher componentEventDispatcher;
+
     //The objects which is in use
     duk::objects::Objects objects;
 
@@ -117,6 +122,26 @@ int main() {
     objects.add_object();
     objects.add_object();
 
+    struct CollisionEvent {
+        duk::objects::Object object;
+        duk::objects::Object other;
+    };
+
+    CollisionEvent collisionEvent = {};
+    collisionEvent.object = obj1;
+    collisionEvent.other = obj2;
+
+    componentEventDispatcher.emit_object<CollisionEvent>(obj0, collisionEvent);
+
+    //Removing the Component from obj with id
+    obj0.remove<ComponentTest>();
+
+    //Destroying object from objects
+    obj1.destroy();
+
+    // updating destroys all objects marked for destruction (via destroy)
+    objects.update(componentEventDispatcher);
+
     //Iterating through all the objects with specified components
     //The objects that have any component type like: ComponentTest, ComponentTest2, ComponentTest3, will be listed below
     for (auto object: objects.all_with<ComponentTest, ComponentTest2, ComponentTest3>()) {
@@ -127,15 +152,6 @@ int main() {
         comp2->b = 2;
         comp3->c = 3;
     }
-
-    //Removing the Component from obj with id
-    obj0.remove<ComponentTest>();
-
-    //Destroying object from objects
-    obj1.destroy();
-
-    // updating destroys all objects marked for destruction (via destroy)
-    objects.update();
 
     std::ostringstream oss;
     duk::serial::write_json(oss, objects, true);

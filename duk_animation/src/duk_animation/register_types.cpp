@@ -12,7 +12,6 @@
 #include <duk_animation/controller/animation_controller_handler.h>
 
 #include <duk_engine/register_types.h>
-#include <duk_engine/systems.h>
 #include <duk_serial/json/serializer.h>
 
 namespace duk::animation {
@@ -30,7 +29,7 @@ void register_types() {
     register_property<CanvasScaleProperty>();
     duk::resource::register_handler<AnimationClipHandler>();
     duk::resource::register_handler<AnimationControllerHandler>();
-    duk::engine::register_system<AnimationSystem>();
+    duk::system::register_system<AnimationSystem>();
     duk::objects::register_component<Animator>();
 }
 

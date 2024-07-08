@@ -7,18 +7,24 @@
 namespace duk::engine {
 
 Director::Director(const DirectorCreateInfo& directorCreateInfo)
-    : m_renderer(directorCreateInfo.renderer)
-    , m_resources(directorCreateInfo.resources)
-    , m_requestedSceneId(directorCreateInfo.firstScene)
-    , m_activeSystemGroup(~0) {
+    : m_requestedSceneId(directorCreateInfo.firstScene)
+    , m_disabledGroupsMask(0) {
 }
 
 Director::~Director() {
 }
 
-void Director::update(Engine& engine) {
+void Director::update(duk::tools::Globals& globals) {
+    if (!m_requestedSceneAlias.empty()) {
+        m_requestedSceneId = globals.get<duk::resource::ResourceSet>()->find_id(m_requestedSceneAlias);
+        if (m_requestedSceneId == duk::resource::kInvalidId) {
+            throw std::runtime_error(fmt::format("failed to find id for scene with alias '{}'", m_requestedSceneAlias));
+        }
+        m_requestedSceneAlias.clear();
+    }
+
     if (m_requestedSceneId != duk::resource::kInvalidId) {
-        load_scene(engine, m_requestedSceneId);
+        load_scene(globals, m_requestedSceneId);
         m_requestedSceneId = duk::resource::kInvalidId;
     }
 
@@ -27,9 +33,9 @@ void Director::update(Engine& engine) {
         return;
     }
 
-    m_scene->update(engine, m_activeSystemGroup);
+    m_scene->update(m_disabledGroupsMask);
 
-    m_renderer->render(m_scene->objects(), *m_resources->pools());
+    globals.get<duk::renderer::Renderer>()->render(m_scene->objects());
 }
 
 void Director::request_scene(duk::resource::Id id) {
@@ -37,10 +43,7 @@ void Director::request_scene(duk::resource::Id id) {
 }
 
 void Director::request_scene(const std::string& alias) {
-    m_requestedSceneId = m_resources->find_id(alias);
-    if (m_requestedSceneId == duk::resource::kInvalidId) {
-        throw std::runtime_error(fmt::format("failed to find id for scene with alias '{}'", alias));
-    }
+    m_requestedSceneAlias = alias;
 }
 
 Scene* Director::scene() {
@@ -48,30 +51,33 @@ Scene* Director::scene() {
 }
 
 void Director::enable(uint32_t systemGroup) {
-    m_activeSystemGroup |= systemGroup;
+    m_disabledGroupsMask &= ~systemGroup;
 }
 
 void Director::disable(uint32_t systemGroup) {
-    m_activeSystemGroup &= ~systemGroup;
+    m_disabledGroupsMask |= systemGroup;
 }
 
-void Director::load_scene(Engine& engine, duk::resource::Id id) {
-    m_resources->load(id);
+void Director::load_scene(duk::tools::Globals& globals, duk::resource::Id id) {
+    const auto resources = globals.get<duk::resource::ResourceSet>();
+    const auto renderer = globals.get<duk::renderer::Renderer>();
+    resources->load(id);
 
-    auto scene = m_resources->pools()->get<ScenePool>()->find(id);
+    auto scene = resources->pools()->get<ScenePool>()->find(id);
     if (!scene) {
         throw std::runtime_error(fmt::format("failed to load scene with id \"{}\"", m_requestedSceneId.value()));
     }
     if (m_scene) {
-        m_scene->exit(engine);
+        m_scene->exit(m_disabledGroupsMask);
     }
     m_scene = scene;
     if (m_scene) {
-        m_scene->enter(engine);
+        m_scene->attach(globals);
+        m_scene->enter(m_disabledGroupsMask);
     }
 
-    m_resources->pools()->clear();
-    m_renderer->clear_cache();
+    resources->pools()->clear();
+    renderer->clear_cache();
 }
 
 }// namespace duk::engine

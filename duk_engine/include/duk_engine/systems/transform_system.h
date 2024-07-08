@@ -5,19 +5,15 @@
 #ifndef DUK_ENGINE_TRANSFORM_SYSTEM_H
 #define DUK_ENGINE_TRANSFORM_SYSTEM_H
 
-#include <duk_engine/systems.h>
+#include <duk_system/system.h>
 
 namespace duk::engine {
 
-class TransformUpdateSystem : public System {
+class TransformUpdateSystem : public duk::system::System {
 public:
-    explicit TransformUpdateSystem();
+    void enter() override;
 
-    void enter(duk::objects::Objects& objects, Engine& engine) override;
-
-    void update(duk::objects::Objects& objects, Engine& engine) override;
-
-    void exit(duk::objects::Objects& objects, Engine& engine) override;
+    void update() override;
 };
 
 }// namespace duk::engine

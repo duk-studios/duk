@@ -7,15 +7,15 @@
 namespace duk::audio {
 
 AudioClipPool::AudioClipPool(const AudioClipPoolCreateInfo& audioClipPoolCreateInfo)
-    : m_device(audioClipPoolCreateInfo.device) {
+    : m_engine(audioClipPoolCreateInfo.engine) {
 }
 
 AudioClipResource AudioClipPool::create(duk::resource::Id id, Encoding encoding, const void* encodedData, size_t encodedSize) {
     AudioClipCreateInfo audioClipCreateInfo = {};
     audioClipCreateInfo.encodedData = encodedData;
     audioClipCreateInfo.encodedSize = encodedSize;
-    audioClipCreateInfo.frameRate = m_device->frame_rate();
-    audioClipCreateInfo.channelCount = m_device->channel_count();
+    audioClipCreateInfo.frameRate = m_engine->frame_rate();
+    audioClipCreateInfo.channelCount = m_engine->channel_count();
     audioClipCreateInfo.encoding = encoding;
 
     return insert(id, std::make_shared<AudioClip>(audioClipCreateInfo));

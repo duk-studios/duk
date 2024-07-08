@@ -13,6 +13,7 @@ namespace duk::runtime {
 
 struct ApplicationCreateInfo {
     duk::platform::Platform* platform;
+    bool rendererApiValidationLayers;
 };
 
 class Application {

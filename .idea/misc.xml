@@ -32,6 +32,7 @@
       <file path="$PROJECT_DIR$/duk_sample" />
       <file path="$PROJECT_DIR$/duk_serial" />
       <file path="$PROJECT_DIR$/duk_shader_generator" />
+      <file path="$PROJECT_DIR$/duk_system" />
       <file path="$PROJECT_DIR$/duk_task" />
       <file path="$PROJECT_DIR$/duk_tools" />
       <file path="$PROJECT_DIR$/external" />

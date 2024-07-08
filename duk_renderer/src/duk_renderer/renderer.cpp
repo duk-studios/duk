@@ -27,6 +27,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
         rhiCreateInfo.engineVersion = 1;
         rhiCreateInfo.engineName = "duk::renderer::Renderer::m_rhi";
         rhiCreateInfo.api = rendererCreateInfo.api;
+        rhiCreateInfo.validationLayers = rendererCreateInfo.apiValidationLayers;
 
         m_rhi = duk::rhi::RHI::create_rhi(rhiCreateInfo);
     }
@@ -66,7 +67,7 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
 
 Renderer::~Renderer() = default;
 
-void Renderer::render(duk::objects::Objects& objects, duk::resource::Pools& pools) {
+void Renderer::render(duk::objects::Objects& objects) {
     // if rendering to a window, but it's minimized, skip
     if (m_window && m_window->minimized()) {
         return;
@@ -76,7 +77,7 @@ void Renderer::render(duk::objects::Objects& objects, duk::resource::Pools& pool
 
     update_global_descriptors(objects);
 
-    update_passes(objects, pools);
+    update_passes(objects, *m_pools);
 
     m_rhi->update();
 
@@ -209,25 +210,21 @@ void Renderer::update_passes(objects::Objects& objects, duk::resource::Pools& po
     }
 }
 
-std::unique_ptr<Renderer> make_forward_renderer(const RendererCreateInfo& rendererCreateInfo) {
-    auto renderer = std::make_unique<Renderer>(rendererCreateInfo);
-
+void add_forward_passes(Renderer* renderer, duk::platform::Window* window) {
     ForwardPassCreateInfo forwardPassCreateInfo = {};
-    forwardPassCreateInfo.renderer = renderer.get();
+    forwardPassCreateInfo.renderer = renderer;
 
     auto forwardPass = renderer->add_pass<ForwardPass>(forwardPassCreateInfo);
 
-    if (rendererCreateInfo.window) {
+    if (window) {
         PresentPassCreateInfo presentPassCreateInfo = {};
-        presentPassCreateInfo.renderer = renderer.get();
-        presentPassCreateInfo.window = rendererCreateInfo.window;
+        presentPassCreateInfo.renderer = renderer;
+        presentPassCreateInfo.window = window;
 
         auto presentPass = renderer->add_pass<PresentPass>(presentPassCreateInfo);
 
         forwardPass->out_color()->connect(presentPass->in_color());
     }
-
-    return renderer;
 }
 
 }// namespace duk::renderer

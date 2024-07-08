@@ -9,7 +9,8 @@
 
 #include <cstdint>
 #include <memory>
-#include <vector>
+
+#include "audio_processor.h"
 
 namespace duk::audio {
 
@@ -22,9 +23,9 @@ public:
     virtual void update() = 0;
 };
 
-class AudioGraph {
+class AudioGraph : public AudioProcessor {
 public:
-    void process(void* output, uint32_t frameCount, uint32_t channelCount);
+    void process(void* output, uint32_t frameCount, uint32_t channelCount) override;
 
     void update();
 

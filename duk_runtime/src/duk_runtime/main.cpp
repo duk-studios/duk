@@ -5,6 +5,7 @@
 #include <duk_runtime/application.h>
 
 #include <duk_log/log.h>
+#include <duk_log/file_sink.h>
 
 #ifdef DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/platform_win_32.h>
@@ -14,8 +15,13 @@
 
 int duk_main(duk::platform::Platform* platform, int argc, const char* const* argv) {
     try {
+        // clang-format off
         cxxopts::Options options("duk", "duk runtime application");
-        options.add_options()("c,console", "Forces a new console window to be opened");
+        options.add_options()
+            ("c,console", "Forces a new console window to be opened")
+            ("o,output", "Path to output logging")
+            ("v,validation", "Asks for renderer validation layers, if available");
+        // clang-format on
 
         auto result = options.parse(argc, argv);
 
@@ -29,8 +35,21 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
             console->attach();
         }
 
+        {
+            std::filesystem::path path = "./log.txt";
+            if (result.count("output")) {
+                path = result["output"].as<std::string>();
+            }
+            duk::log::add_sink(std::make_unique<duk::log::FileSink>(path, duk::log::INFO));
+        }
+
         duk::runtime::ApplicationCreateInfo applicationCreateInfo = {};
         applicationCreateInfo.platform = platform;
+#ifdef DUK_DEBUG
+        applicationCreateInfo.rendererApiValidationLayers = true;
+#else
+        applicationCreateInfo.rendererApiValidationLayers = result.count("validation") ? true : false;
+#endif
 
         duk::runtime::Application application(applicationCreateInfo);
 
@@ -55,8 +74,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return duk_main(&platformWin32, __argc, __argv);
 }
 #else
-int main() {
+int main(int argc, const char* const* argv) {
     duk::platform::PlatformLinux platformLinux;
-    return duk_main(&platformLinux);
+    return duk_main(&platformLinux, argc, argv);
 }
 #endif

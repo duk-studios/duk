@@ -4,15 +4,17 @@ set(DUK_LOG_HEADERS
         include/duk_log/log.h
         include/duk_log/logger.h
         include/duk_log/sink.h
-        include/duk_log/sink_cout.h
-        include/duk_log/sink_fmt.h
+        include/duk_log/cout_sink.h
+        include/duk_log/file_sink.h
+        include/duk_log/fmt_sink.h
         )
 set(DUK_LOG_SOURCES
         src/duk_log/log.cpp
         src/duk_log/logger.cpp
         src/duk_log/sink.cpp
-        src/duk_log/sink_cout.cpp
-        src/duk_log/sink_fmt.cpp
+        src/duk_log/cout_sink.cpp
+        src/duk_log/file_sink.cpp
+        src/duk_log/fmt_sink.cpp
         )
 
 add_library(duk_log STATIC ${DUK_LOG_HEADERS} ${DUK_LOG_SOURCES})

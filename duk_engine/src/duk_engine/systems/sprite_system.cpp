@@ -7,20 +7,21 @@
 #include <duk_renderer/components/sprite_renderer.h>
 
 namespace duk::engine {
-SpriteUpdateSystem::SpriteUpdateSystem()
-    : System(kGameplayGroup) {
+
+void SpriteUpdateSystem::attach() {
 }
 
-void SpriteUpdateSystem::enter(duk::objects::Objects& objects, Engine& engine) {
+void SpriteUpdateSystem::enter() {
 }
 
-void SpriteUpdateSystem::update(duk::objects::Objects& objects, Engine& engine) {
-    for (auto object: objects.all_with<duk::renderer::SpriteRenderer>()) {
-        duk::renderer::update_sprite_renderer(engine.renderer(), object.component<duk::renderer::SpriteRenderer>());
+void SpriteUpdateSystem::update() {
+    const auto renderer = global<duk::renderer::Renderer>();
+    for (auto object: all_objects_with<duk::renderer::SpriteRenderer>()) {
+        duk::renderer::update_sprite_renderer(renderer, object.component<duk::renderer::SpriteRenderer>());
     }
 }
 
-void SpriteUpdateSystem::exit(duk::objects::Objects& objects, Engine& engine) {
+void SpriteUpdateSystem::exit() {
 }
 
 }// namespace duk::engine

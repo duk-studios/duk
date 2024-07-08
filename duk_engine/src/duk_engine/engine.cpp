@@ -23,168 +23,143 @@
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
-    : m_workingDirectory(engineCreateInfo.workingDirectory)
-    , m_platform(engineCreateInfo.platform)
-    , m_window(engineCreateInfo.window)
-    , m_run(false) {
+    : m_run(false) {
     const auto& settings = engineCreateInfo.settings;
 
-    m_listener.listen(m_window->window_close_event, [this] {
-        m_window->close();
+    m_globals.add_external<duk::platform::Platform>(engineCreateInfo.platform);
+    auto window = m_globals.add_external<duk::platform::Window>(engineCreateInfo.window);
+
+    m_listener.listen(window->window_close_event, [window] {
+        window->close();
     });
 
-    m_listener.listen(m_window->window_destroy_event, [this]() {
+    m_listener.listen(window->window_destroy_event, [this] {
         m_run = false;
     });
 
+    auto pools = m_globals.add<duk::resource::Pools>();
+
     {
         duk::renderer::RendererCreateInfo rendererCreateInfo = {};
-        rendererCreateInfo.window = m_window;
-        rendererCreateInfo.pools = &m_pools;
+        rendererCreateInfo.window = window;
+        rendererCreateInfo.pools = pools;
         rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::VERBOSE));
-        rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.applicationName = settings.name.c_str();
+        rendererCreateInfo.api = duk::rhi::API::VULKAN;
+        rendererCreateInfo.apiValidationLayers = engineCreateInfo.rendererApiValidationLayers;
 
-        m_renderer = duk::renderer::make_forward_renderer(rendererCreateInfo);
+        auto renderer = m_globals.add<duk::renderer::Renderer>(rendererCreateInfo);
+        duk::renderer::add_forward_passes(renderer, window);
     }
 
     {
-        duk::audio::AudioDeviceCreateInfo audioDeviceCreateInfo = {};
-        audioDeviceCreateInfo.backend = audio::Backend::MINIAUDIO;
-        audioDeviceCreateInfo.channelCount = 2;
-        audioDeviceCreateInfo.frameRate = 48000;
+        duk::audio::AudioCreateInfo audioEngineCreateInfo = {};
+        audioEngineCreateInfo.channelCount = 2;
+        audioEngineCreateInfo.frameRate = 48000;
 
-        m_audio = duk::audio::AudioDevice::create(audioDeviceCreateInfo);
+        m_globals.add<duk::audio::Audio>(audioEngineCreateInfo);
     }
 
     {
         duk::resource::ResourceSetCreateInfo resourceSetCreateInfo = {};
-        resourceSetCreateInfo.path = m_workingDirectory / "resources";
+        resourceSetCreateInfo.path = engineCreateInfo.workingDirectory / "resources";
         resourceSetCreateInfo.loadMode = settings.loadMode;
-        resourceSetCreateInfo.pools = &m_pools;
-        m_resources = std::make_unique<duk::resource::ResourceSet>(resourceSetCreateInfo);
+        resourceSetCreateInfo.pools = pools;
+        m_globals.add<duk::resource::ResourceSet>(resourceSetCreateInfo);
     }
 
     /* init pools */
     {
+        auto renderer = m_globals.get<duk::renderer::Renderer>();
         duk::renderer::ImagePoolCreateInfo imagePoolCreateInfo = {};
-        imagePoolCreateInfo.renderer = m_renderer.get();
-        m_pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
+        imagePoolCreateInfo.renderer = renderer;
+        pools->create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
 
-        auto shaderModulePool = m_pools.create_pool<duk::renderer::ShaderModulePool>();
+        auto shaderModulePool = pools->create_pool<duk::renderer::ShaderModulePool>();
 
         duk::renderer::ShaderPipelinePoolCreateInfo shaderPipelinePoolCreateInfo = {};
-        shaderPipelinePoolCreateInfo.renderer = m_renderer.get();
+        shaderPipelinePoolCreateInfo.renderer = renderer;
         shaderPipelinePoolCreateInfo.shaderModulePool = shaderModulePool;
-        m_pools.create_pool<duk::renderer::ShaderPipelinePool>(shaderPipelinePoolCreateInfo);
+        pools->create_pool<duk::renderer::ShaderPipelinePool>(shaderPipelinePoolCreateInfo);
 
         duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
-        materialPoolCreateInfo.renderer = m_renderer.get();
-        m_pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
+        materialPoolCreateInfo.renderer = renderer;
+        pools->create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
 
         duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};
-        meshPoolCreateInfo.meshBufferPool = m_renderer->mesh_buffer_pool();
-        m_pools.create_pool<duk::renderer::MeshPool>(meshPoolCreateInfo);
-        m_pools.create_pool<duk::renderer::SpritePool>();
-        duk::audio::AudioClipPoolCreateInfo audioClipPoolCreateInfo = {};
-        audioClipPoolCreateInfo.device = m_audio.get();
-        m_pools.create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
+        meshPoolCreateInfo.meshBufferPool = renderer->mesh_buffer_pool();
+        pools->create_pool<duk::renderer::MeshPool>(meshPoolCreateInfo);
+        pools->create_pool<duk::renderer::SpritePool>();
 
-        m_pools.create_pool<duk::renderer::FontPool>();
-        m_pools.create_pool<duk::objects::ObjectsPool>();
-        m_pools.create_pool<ScenePool>();
+        duk::audio::AudioClipPoolCreateInfo audioClipPoolCreateInfo = {};
+        audioClipPoolCreateInfo.engine = m_globals.get<duk::audio::Audio>();
+        pools->create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
+
+        pools->create_pool<duk::renderer::FontPool>();
+        pools->create_pool<duk::objects::ObjectsPool>();
+        pools->create_pool<ScenePool>();
     }
 
     // director
     {
         DirectorCreateInfo directorCreateInfo = {};
-        directorCreateInfo.renderer = m_renderer.get();
-        directorCreateInfo.resources = m_resources.get();
         directorCreateInfo.firstScene = settings.scene;
 
-        m_director = std::make_unique<Director>(directorCreateInfo);
+        m_globals.add<Director>(directorCreateInfo);
     }
 
     duk::engine::InputCreateInfo inputCreateInfo = {};
-    inputCreateInfo.window = m_window;
-    m_input = std::make_unique<duk::engine::Input>(inputCreateInfo);
+    inputCreateInfo.window = window;
+    m_globals.add<Input>(inputCreateInfo);
+    m_globals.add<duk::tools::Timer>();
 }
 
 Engine::~Engine() {
-    m_director.reset();
-    m_pools.clear();
-    m_resources.reset();
+    m_globals.reset<Director>();
+    m_globals.reset<duk::resource::ResourceSet>();
+    m_globals.reset<resource::Pools>();
 }
 
 void Engine::run() {
     m_run = true;
 
-    m_window->show();
+    const auto platform = m_globals.get<duk::platform::Platform>();
+    const auto window = m_globals.get<duk::platform::Window>();
+    const auto audio = m_globals.get<duk::audio::Audio>();
+    const auto timer = m_globals.get<duk::tools::Timer>();
+    const auto input = m_globals.get<Input>();
+    const auto director = m_globals.get<Director>();
 
-    m_audio->start();
+    window->show();
+
+    audio->start();
 
     // assume 60fps for the first frame
-    m_timer.add_duration(std::chrono::milliseconds(16));
+    timer->add_duration(std::chrono::milliseconds(16));
 
     while (m_run) {
-        m_timer.tick();
+        timer->tick();
 
-        m_input->refresh();
+        input->refresh();
 
-        m_platform->pool_events();
+        platform->pool_events();
 
-        while (m_window->valid() && m_window->minimized()) {
-            m_platform->wait_events();
+        while (window->valid() && window->minimized()) {
+            platform->wait_events();
         }
 
-        if (!m_window->valid()) {
+        if (!window->valid()) {
             continue;
         }
 
-        m_audio->update();
+        audio->update();
 
-        m_director->update(*this);
+        director->update(m_globals);
     }
 }
 
-duk::platform::Platform* Engine::platform() {
-    return m_platform;
-}
-
-duk::platform::Window* Engine::window() {
-    return m_window;
-}
-
-duk::renderer::Renderer* Engine::renderer() {
-    return m_renderer.get();
-}
-
-duk::audio::AudioDevice* Engine::audio() {
-    return m_audio.get();
-}
-
-duk::resource::Pools* Engine::pools() {
-    return &m_pools;
-}
-
-duk::resource::ResourceSet* Engine::resources() {
-    return m_resources.get();
-}
-
-Director* Engine::director() {
-    return m_director.get();
-}
-
-const duk::engine::Input* Engine::input() const {
-    return m_input.get();
-}
-
-duk::tools::Timer* Engine::timer() {
-    return &m_timer;
-}
-
-duk::event::Dispatcher* Engine::dispatcher() {
-    return &m_dispatcher;
+duk::tools::Globals* Engine::globals() {
+    return &m_globals;
 }
 
 }// namespace duk::engine

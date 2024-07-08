@@ -43,6 +43,10 @@ Listener::Listener() {
 }
 
 Listener::~Listener() {
+    clear();
+}
+
+void Listener::clear() {
     for (auto& event: m_events) {
         event.unsubscribe(m_id);
     }
