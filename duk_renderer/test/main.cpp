@@ -8,11 +8,11 @@
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/transform.h>
-#include <duk_renderer/shader/shader_pipeline_pool.h>
-#include <duk_renderer/image/image_pool.h>
+#include <duk_renderer/shader/shader_pipeline_builtins.h>
+#include <duk_renderer/image/image_builtins.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
 #include <duk_renderer/material/material_pool.h>
-#include <duk_renderer/mesh/mesh_pool.h>
+#include <duk_renderer/mesh/mesh_builtins.h>
 #include <duk_renderer/renderer.h>
 #include <duk_tools/timer.h>
 #include <duk_renderer/register_types.h>
@@ -51,14 +51,14 @@ public:
         duk::renderer::add_forward_passes(m_renderer.get(), m_window.get());
 
         // mesh pool
-        duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};
+        duk::renderer::MeshBuiltinsCreateInfo meshPoolCreateInfo = {};
         meshPoolCreateInfo.meshBufferPool = m_renderer->mesh_buffer_pool();
-        m_pools.create_pool<duk::renderer::MeshPool>(meshPoolCreateInfo);
+        m_pools.create_pool<duk::renderer::MeshBuiltins>(meshPoolCreateInfo);
 
         // image pool
-        duk::renderer::ImagePoolCreateInfo imagePoolCreateInfo = {};
+        duk::renderer::ImageBuiltinsCreateInfo imagePoolCreateInfo = {};
         imagePoolCreateInfo.renderer = m_renderer.get();
-        m_pools.create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
+        m_pools.create_pool<duk::renderer::ImageBuiltins>(imagePoolCreateInfo);
 
         // shader pool
         duk::renderer::ShaderPipelinePoolCreateInfo shaderPipelinePoolCreateInfo = {};
@@ -147,9 +147,9 @@ int main() {
     // Create a phong material
     auto material = duk::renderer::create_phong_material(application.renderer());
     // material->set("uProperties", "color", glm::vec4(1.0f, 0.5f, 0.8f, 1.0f));
-    // material->set("uBaseColor", imagePool->white_image(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
+    // material->set("uBaseColor", imagePool->white(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
 
-    auto mesh = application.pools()->get<duk::renderer::MeshPool>()->cube();
+    auto mesh = application.pools()->get<duk::renderer::MeshBuiltins>()->cube();
 
     auto cube1 = add_mesh_object(objects, mesh, material, glm::vec3(0, 2, -10));
     auto cube2 = add_mesh_object(objects, mesh, material, glm::vec3(0, -2, -10));

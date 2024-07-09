@@ -5,20 +5,20 @@
 #ifndef DUK_RENDERER_SPRITE_HANDLER_H
 #define DUK_RENDERER_SPRITE_HANDLER_H
 
-#include <duk_renderer/sprite/sprite_pool.h>
+#include <duk_renderer/sprite/sprite.h>
 
 #include <duk_resource/handler.h>
 
 namespace duk::renderer {
 
-class SpriteHandler : public duk::resource::TextHandlerT<SpritePool> {
+class SpriteHandler : public duk::resource::TextHandlerT<Sprite> {
 public:
     SpriteHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Sprite> load_from_text(SpritePool* pool, const resource::Id& id, const std::string_view& text) override;
+    std::shared_ptr<Sprite> load_from_text(duk::tools::Globals* globals, const std::string_view& text) override;
 };
 
 }// namespace duk::renderer

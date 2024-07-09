@@ -1,5 +1,5 @@
 /// 04/08/2023
-/// mesh_pool.h
+/// mesh_builtins.h
 
 #ifndef DUK_RENDERER_STATIC_MESH_H
 #define DUK_RENDERER_STATIC_MESH_H

@@ -3,8 +3,6 @@
 
 #include <duk_resource/handler.h>
 
-#include <duk_log/log.h>
-
 #include <ranges>
 
 namespace duk::resource {

@@ -80,7 +80,7 @@ static std::vector<ResourceFile> load_resource_files(const std::filesystem::path
 }// namespace detail
 
 Resources::Resources(const ResourcesCreateInfo& resourcesCreateInfo)
-    : m_pools(resourcesCreateInfo.pools)
+    : m_globals(resourcesCreateInfo.globals)
     , m_mode(resourcesCreateInfo.loadMode) {
     const auto resourceFiles = detail::load_resource_files(resourcesCreateInfo.path, m_mode);
     for (const auto& resourceFile: resourceFiles) {
@@ -98,9 +98,14 @@ Handle<void> Resources::load(const Id id) {
         return handle;
     }
 
+    if (m_pools.contains(id)) {
+        duk::log::verb("Resource '{}' already loaded, skipping", id.value());
+        return handle;
+    }
+
     auto resourceIt = m_resourceFiles.find(id);
     if (resourceIt == m_resourceFiles.end()) {
-        throw std::invalid_argument(fmt::format("resource id {} not found", id.value()));
+        throw std::invalid_argument(fmt::format("Resource id {} not found", id.value()));
     }
 
     const auto& resourceFile = resourceIt->second;
@@ -111,7 +116,7 @@ Handle<void> Resources::load(const Id id) {
     }
 
     try {
-        handle = handler->load(m_pools, resourceFile.id, resourceFile.file, m_mode);
+        handle = handler->load(m_globals, m_pools, resourceFile.id, resourceFile.file, m_mode);
     } catch (const std::exception& e) {
         throw std::runtime_error(fmt::format("Failed to load resource '{}' at '{}', reason: {}\n", resourceFile.id.value(), resourceFile.file, e.what()));
     }
@@ -136,16 +141,20 @@ Handle<void> Resources::load(const std::string& alias) {
     return load(id);
 }
 
-Pools* Resources::pools() const {
-    return m_pools;
-}
-
 Id Resources::find_id(const std::string& alias) const {
     auto it = m_resourceIdAliases.find(alias);
     if (it != m_resourceIdAliases.end()) {
         return it->second;
     }
     return kInvalidId;
+}
+
+const Pools* Resources::pools() const {
+    return &m_pools;
+}
+
+Pools* Resources::pools() {
+    return &m_pools;
 }
 
 }// namespace duk::resource

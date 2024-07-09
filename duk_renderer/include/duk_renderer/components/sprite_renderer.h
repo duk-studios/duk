@@ -17,7 +17,7 @@ struct SpriteRenderer {
     uint32_t index;
 };
 
-void update_sprite_renderer(const Renderer* renderer, const duk::objects::Component<SpriteRenderer>& spriteRenderer);
+void update_sprite_renderer(duk::tools::Globals* globals, const duk::objects::Component<SpriteRenderer>& spriteRenderer);
 
 }// namespace duk::renderer
 

@@ -17,15 +17,10 @@ class PipelineCache;
 class SpriteCache;
 class TextCache;
 class GlobalDescriptors;
-class ImagePool;
-class MaterialPool;
-class MeshPool;
 class MeshBufferPool;
-class SpritePool;
 
 struct RendererCreateInfo {
     duk::platform::Window* window;
-    duk::resource::Pools* pools;
     duk::log::Logger* logger;
     duk::rhi::API api;
     bool apiValidationLayers;
@@ -46,15 +41,9 @@ public:
 
     DUK_NO_DISCARD uint32_t render_height() const;
 
-    DUK_NO_DISCARD std::shared_ptr<duk::rhi::Image> create_depth_image(uint32_t width, uint32_t height);
-
-    DUK_NO_DISCARD std::shared_ptr<duk::rhi::Image> create_color_image(uint32_t width, uint32_t height, duk::rhi::PixelFormat format);
-
     DUK_NO_DISCARD duk::rhi::RHI* rhi() const;
 
     DUK_NO_DISCARD duk::rhi::CommandQueue* main_command_queue() const;
-
-    DUK_NO_DISCARD duk::resource::Pools* pools() const;
 
     DUK_NO_DISCARD GlobalDescriptors* global_descriptors() const;
 
@@ -70,11 +59,10 @@ public:
 private:
     void update_global_descriptors(duk::objects::Objects& objects);
 
-    void update_passes(objects::Objects& objects, duk::resource::Pools& pools);
+    void update_passes(objects::Objects& objects);
 
 protected:
     duk::platform::Window* m_window;
-    duk::resource::Pools* m_pools;
     std::shared_ptr<duk::rhi::RHI> m_rhi;
     std::shared_ptr<duk::rhi::CommandQueue> m_mainQueue;
     std::vector<std::shared_ptr<Pass>> m_passes;
@@ -84,9 +72,6 @@ protected:
     std::unique_ptr<SpriteCache> m_spriteCache;
     std::unique_ptr<TextCache> m_textMeshCache;
 };
-
-/// Add passes for a forward Renderer
-void add_forward_passes(Renderer* renderer, duk::platform::Window* window = nullptr);
 
 template<typename T, typename... Args>
 T* Renderer::add_pass(Args&&... args) {

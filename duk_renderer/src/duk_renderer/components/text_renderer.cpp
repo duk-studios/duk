@@ -15,7 +15,9 @@
 
 namespace duk::renderer {
 
-void update_text_renderer(Renderer* renderer, const objects::Component<TextRenderer>& textRenderer) {
+void update_text_renderer(duk::tools::Globals* globals, const objects::Component<TextRenderer>& textRenderer) {
+    auto renderer = globals->get<Renderer>();
+
     Font::BuildAtlasParams buildAtlasParams = {};
     buildAtlasParams.rhi = renderer->rhi();
     buildAtlasParams.commandQueue = renderer->main_command_queue();
@@ -29,7 +31,7 @@ void update_text_renderer(Renderer* renderer, const objects::Component<TextRende
 
     const auto transform = textRenderer.component<Transform>();
     if (!materialSlot->material) {
-        materialSlot->material = textCache->find_material(renderer, atlas, transform.valid());
+        materialSlot->material = textCache->find_material(globals, atlas, transform.valid());
     }
 
     if (!meshSlot->mesh) {

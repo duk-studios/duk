@@ -60,7 +60,7 @@ void Director::disable(uint32_t systemGroup) {
 
 void Director::load_scene(duk::tools::Globals& globals, duk::resource::Id id) {
     const auto resources = globals.get<duk::resource::Resources>();
-    const auto scene = resources->load(id).as<Scene>();
+    const auto scene = resources->load<Scene>(id);
 
     if (!scene) {
         throw std::runtime_error(fmt::format("failed to load scene with id \"{}\"", m_requestedSceneId.value()));

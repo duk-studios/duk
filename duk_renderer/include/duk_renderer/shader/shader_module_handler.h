@@ -5,19 +5,19 @@
 #ifndef DUK_RENDERER_SHADER_MODULE_HANDLER_H
 #define DUK_RENDERER_SHADER_MODULE_HANDLER_H
 
-#include <duk_renderer/shader/shader_module_pool.h>
+#include <duk_renderer/shader/shader_module.h>
 #include <duk_resource/handler.h>
 
 namespace duk::renderer {
 
-class ShaderModuleHandler : public resource::HandlerT<ShaderModulePool> {
+class ShaderModuleHandler : public resource::HandlerT<ShaderModule> {
 public:
     ShaderModuleHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<ShaderModule> load_from_memory(ShaderModulePool* pool, const resource::Id& id, const void* data, size_t size) override;
+    std::shared_ptr<ShaderModule> load_from_memory(duk::tools::Globals* globals, const void* data, size_t size) override;
 };
 
 }// namespace duk::renderer

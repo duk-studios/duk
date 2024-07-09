@@ -4,8 +4,7 @@
 
 #include <duk_renderer/shader/shader_pipeline_handler.h>
 #include <duk_renderer/shader/shader_pipeline_data.h>
-
-#include <duk_rhi/pipeline/std_shader_data_source.h>
+#include <duk_renderer/renderer.h>
 
 #include <duk_serial/json/serializer.h>
 
@@ -19,9 +18,16 @@ bool ShaderPipelineHandler::accepts(const std::string& extension) const {
     return extension == ".spp";
 }
 
-duk::resource::Handle<ShaderPipeline> ShaderPipelineHandler::load_from_text(ShaderPipelinePool* pool, const resource::Id& id, const std::string_view& text) {
-    auto shaderPipelineData = duk::serial::read_json<ShaderPipelineData>(text);
-    return pool->create(id, &shaderPipelineData);
+std::shared_ptr<ShaderPipeline> ShaderPipelineHandler::load_from_text(duk::tools::Globals* globals, const std::string_view& text) {
+    const auto shaderPipelineData = duk::serial::read_json<ShaderPipelineData>(text);
+
+    const auto renderer = globals->get<Renderer>();
+
+    ShaderPipelineCreateInfo shaderPipelineCreateInfo = {};
+    shaderPipelineCreateInfo.rhi = renderer->rhi();
+    shaderPipelineCreateInfo.shaderPipelineData = &shaderPipelineData;
+
+    return std::make_shared<ShaderPipeline>(shaderPipelineCreateInfo);
 }
 
 }// namespace duk::renderer

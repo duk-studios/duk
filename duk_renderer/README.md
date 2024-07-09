@@ -16,7 +16,7 @@
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/forward/forward_renderer.h>
 #include <duk_renderer/materials/globals/global_descriptors.h>
-#include <duk_renderer/mesh/mesh_pool.h>
+#include <duk_renderer/mesh/mesh_builtins.h>
 #include <duk_tools/timer.h>
 #include <duk_log/log.h>
 

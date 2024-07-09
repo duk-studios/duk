@@ -14,6 +14,7 @@
 
 #include <duk_rhi/command/command_buffer.h>
 #include <duk_rhi/pipeline/shader.h>
+#include <duk_rhi/rhi.h>
 
 namespace duk::renderer {
 
@@ -21,7 +22,7 @@ class Renderer;
 class PipelineCache;
 
 struct ShaderPipelineCreateInfo {
-    Renderer* renderer;
+    duk::rhi::RHI* rhi;
     const ShaderPipelineData* shaderPipelineData;
 };
 
@@ -60,7 +61,7 @@ private:
     void create_shader();
 
 private:
-    Renderer* m_renderer;
+    duk::rhi::RHI* m_rhi;
     std::unordered_map<duk::rhi::ShaderModule::Bits, ShaderModuleResource> m_shaderModules;
     std::shared_ptr<duk::rhi::Shader> m_shader;
     std::shared_ptr<duk::rhi::GraphicsPipeline> m_pipeline;

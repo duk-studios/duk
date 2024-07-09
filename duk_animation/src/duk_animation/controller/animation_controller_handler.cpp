@@ -16,10 +16,10 @@ bool AnimationControllerHandler::accepts(const std::string& extension) const {
     return extension == ".anc";
 }
 
-duk::resource::Handle<AnimationController> AnimationControllerHandler::load_from_text(AnimationControllerPool* pool, const resource::Id& id, const std::string_view& text) {
+std::shared_ptr<AnimationController> AnimationControllerHandler::load_from_text(duk::tools::Globals* globals, const std::string_view& text) {
     auto controller = std::make_shared<AnimationController>();
     duk::serial::read_json(text, *controller);
-    return pool->insert(id, controller);
+    return controller;
 }
 
 }// namespace duk::animation

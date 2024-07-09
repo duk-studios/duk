@@ -13,7 +13,7 @@ namespace duk::renderer {
 
 static constexpr duk::rhi::Sampler kDefaultTextureSampler(duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE);
 
-class ImagePool;
+class ImageBuiltins;
 
 class Texture {
 public:

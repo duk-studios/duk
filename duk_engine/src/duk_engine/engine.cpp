@@ -3,55 +3,49 @@
 //
 
 #include <duk_engine/engine.h>
-#include <duk_engine/scene/scene_handler.h>
-
-#include <duk_objects/objects_handler.h>
-
-#include <duk_audio/clip/audio_clip_handler.h>
-
-#include <duk_renderer/font/font_handler.h>
-#include <duk_renderer/material/material_handler.h>
-#include <duk_renderer/mesh/mesh_pool.h>
-#include <duk_renderer/sprite/sprite_pool.h>
-#include <duk_renderer/shader/shader_module_pool.h>
-#include <duk_renderer/shader/shader_pipeline_pool.h>
 
 #include <duk_log/log.h>
 
 #include <duk_platform/platform.h>
+
+#include <duk_renderer/passes/forward_pass.h>
+#include <duk_renderer/passes/present_pass.h>
+#include <duk_renderer/builtins.h>
 
 namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     : m_run(false) {
     const auto& settings = engineCreateInfo.settings;
+    const auto window = engineCreateInfo.window;
 
     m_globals.add_external<duk::platform::Platform>(engineCreateInfo.platform);
-    auto window = m_globals.add_external<duk::platform::Window>(engineCreateInfo.window);
 
-    m_listener.listen(window->window_close_event, [window] {
-        window->close();
-    });
+    if (window) {
+        m_globals.add_external<duk::platform::Window>(engineCreateInfo.window);
 
-    m_listener.listen(window->window_destroy_event, [this] {
-        m_run = false;
-    });
+        m_listener.listen(window->window_close_event, [window] {
+            window->close();
+        });
 
-    auto pools = m_globals.add<duk::resource::Pools>();
+        m_listener.listen(window->window_destroy_event, [this] {
+            m_run = false;
+        });
+    }
 
+    // renderer
     {
         duk::renderer::RendererCreateInfo rendererCreateInfo = {};
         rendererCreateInfo.window = window;
-        rendererCreateInfo.pools = pools;
         rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::VERBOSE));
         rendererCreateInfo.applicationName = settings.name.c_str();
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.apiValidationLayers = engineCreateInfo.rendererApiValidationLayers;
 
-        auto renderer = m_globals.add<duk::renderer::Renderer>(rendererCreateInfo);
-        duk::renderer::add_forward_passes(renderer, window);
+        m_globals.add<duk::renderer::Renderer>(rendererCreateInfo);
     }
 
+    // audio
     {
         duk::audio::AudioCreateInfo audioEngineCreateInfo = {};
         audioEngineCreateInfo.channelCount = 2;
@@ -60,44 +54,27 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         m_globals.add<duk::audio::Audio>(audioEngineCreateInfo);
     }
 
+    // resources
     {
         duk::resource::ResourcesCreateInfo resourcesCreateInfo = {};
         resourcesCreateInfo.path = engineCreateInfo.workingDirectory / "resources";
         resourcesCreateInfo.loadMode = settings.loadMode;
-        resourcesCreateInfo.pools = pools;
+        resourcesCreateInfo.globals = &m_globals;
         m_globals.add<duk::resource::Resources>(resourcesCreateInfo);
     }
 
-    /* init pools */
+    // builtin resources
     {
-        auto renderer = m_globals.get<duk::renderer::Renderer>();
-        duk::renderer::ImagePoolCreateInfo imagePoolCreateInfo = {};
-        imagePoolCreateInfo.renderer = renderer;
-        pools->create_pool<duk::renderer::ImagePool>(imagePoolCreateInfo);
+        const auto resources = m_globals.get<duk::resource::Resources>();
+        const auto renderer = m_globals.get<duk::renderer::Renderer>();
 
-        auto shaderModulePool = pools->create_pool<duk::renderer::ShaderModulePool>();
+        duk::renderer::BuiltinsCreateInfo builtinsCreateInfo = {};
+        builtinsCreateInfo.pools = resources->pools();
+        builtinsCreateInfo.rhi = renderer->rhi();
+        builtinsCreateInfo.commandQueue = renderer->main_command_queue();
+        builtinsCreateInfo.meshBufferPool = renderer->mesh_buffer_pool();
 
-        duk::renderer::ShaderPipelinePoolCreateInfo shaderPipelinePoolCreateInfo = {};
-        shaderPipelinePoolCreateInfo.renderer = renderer;
-        shaderPipelinePoolCreateInfo.shaderModulePool = shaderModulePool;
-        pools->create_pool<duk::renderer::ShaderPipelinePool>(shaderPipelinePoolCreateInfo);
-
-        duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
-        materialPoolCreateInfo.renderer = renderer;
-        pools->create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
-
-        duk::renderer::MeshPoolCreateInfo meshPoolCreateInfo = {};
-        meshPoolCreateInfo.meshBufferPool = renderer->mesh_buffer_pool();
-        pools->create_pool<duk::renderer::MeshPool>(meshPoolCreateInfo);
-        pools->create_pool<duk::renderer::SpritePool>();
-
-        duk::audio::AudioClipPoolCreateInfo audioClipPoolCreateInfo = {};
-        audioClipPoolCreateInfo.engine = m_globals.get<duk::audio::Audio>();
-        pools->create_pool<duk::audio::AudioClipPool>(audioClipPoolCreateInfo);
-
-        pools->create_pool<duk::renderer::FontPool>();
-        pools->create_pool<duk::objects::ObjectsPool>();
-        pools->create_pool<ScenePool>();
+        m_globals.add<duk::renderer::Builtins>(builtinsCreateInfo);
     }
 
     // director
@@ -108,16 +85,44 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
         m_globals.add<Director>(directorCreateInfo);
     }
 
-    duk::engine::InputCreateInfo inputCreateInfo = {};
-    inputCreateInfo.window = window;
-    m_globals.add<Input>(inputCreateInfo);
+    // input
+    {
+        InputCreateInfo inputCreateInfo = {};
+        inputCreateInfo.window = window;
+        m_globals.add<Input>(inputCreateInfo);
+    }
+
     m_globals.add<duk::tools::Timer>();
+
+    // render passes
+    {
+        const auto renderer = m_globals.get<duk::renderer::Renderer>();
+        duk::renderer::ForwardPassCreateInfo forwardPassCreateInfo = {};
+        forwardPassCreateInfo.rhi = renderer->rhi();
+        forwardPassCreateInfo.commandQueue = renderer->main_command_queue();
+
+        const auto forwardPass = renderer->add_pass<duk::renderer::ForwardPass>(forwardPassCreateInfo);
+
+        if (window) {
+            auto builtins = m_globals.get<duk::renderer::Builtins>();
+            duk::renderer::PresentPassCreateInfo presentPassCreateInfo = {};
+            presentPassCreateInfo.rhi = renderer->rhi();
+            presentPassCreateInfo.commandQueue = renderer->main_command_queue();
+            presentPassCreateInfo.shader = builtins->shader_pipelines()->fullscreen();
+            presentPassCreateInfo.window = window;
+
+            auto presentPass = renderer->add_pass<duk::renderer::PresentPass>(presentPassCreateInfo);
+
+            forwardPass->out_color()->connect(presentPass->in_color());
+        }
+    }
 }
 
 Engine::~Engine() {
     m_globals.reset<Director>();
+    m_globals.reset<duk::renderer::Builtins>();
     m_globals.reset<duk::resource::Resources>();
-    m_globals.reset<resource::Pools>();
+    m_globals.reset<duk::renderer::Renderer>();
 }
 
 void Engine::run() {

@@ -14,11 +14,11 @@ bool ShaderModuleHandler::accepts(const std::string& extension) const {
     return extension == ".spv";
 }
 
-duk::resource::Handle<ShaderModule> ShaderModuleHandler::load_from_memory(ShaderModulePool* pool, const resource::Id& id, const void* data, size_t size) {
+std::shared_ptr<ShaderModule> ShaderModuleHandler::load_from_memory(duk::tools::Globals* globals, const void* data, size_t size) {
     ShaderModuleCreateInfo shaderModuleCreateInfo = {};
     shaderModuleCreateInfo.code = static_cast<const uint8_t*>(data);
     shaderModuleCreateInfo.size = size;
-    return pool->insert(id, std::make_shared<ShaderModule>(shaderModuleCreateInfo));
+    return std::make_shared<ShaderModule>(shaderModuleCreateInfo);
 }
 
 }// namespace duk::renderer

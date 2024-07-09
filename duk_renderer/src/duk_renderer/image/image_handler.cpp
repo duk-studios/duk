@@ -46,14 +46,22 @@ bool ImageHandler::accepts(const std::string& extension) const {
     });
 }
 
-duk::resource::Handle<Image> ImageHandler::load_from_memory(ImagePool* pool, const resource::Id& id, const void* data, size_t size) {
+std::shared_ptr<Image> ImageHandler::load_from_memory(duk::tools::Globals* globals, const void* data, size_t size) {
     for (auto& loader: m_loaders) {
         if (loader->accepts(data, size)) {
-            auto dataSource = loader->load(data, size);
-            return pool->create(id, dataSource.get());
+            const auto dataSource = loader->load(data, size);
+
+            const auto renderer = globals->get<Renderer>();
+
+            ImageCreateInfo imageCreateInfo = {};
+            imageCreateInfo.rhi = renderer->rhi();
+            imageCreateInfo.commandQueue = renderer->main_command_queue();
+            imageCreateInfo.imageDataSource = dataSource.get();
+
+            return std::make_shared<Image>(imageCreateInfo);
         }
     }
-    throw std::runtime_error(fmt::format("failed to find suitable image loader for ({})", id.value()));
+    throw std::runtime_error("failed to load image from memory");
 }
 
 }// namespace duk::renderer

@@ -1,5 +1,5 @@
 /// 04/08/2023
-/// mesh_pool.cpp
+/// mesh_builtins.cpp
 
 #include <duk_renderer/mesh/static_mesh.h>
 #include <duk_renderer/mesh/mesh_buffer.h>

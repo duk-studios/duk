@@ -7,9 +7,6 @@
 #include <duk_api/register_types.h>
 #include <duk_api/api.h>
 
-#include <duk_animation/clip/animation_clip_pool.h>
-#include <duk_animation/controller/animation_controller_handler.h>
-
 #include <duk_serial/json/serializer.h>
 
 namespace duk::runtime {
@@ -63,10 +60,6 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo) {
     engineCreateInfo.rendererApiValidationLayers = applicationCreateInfo.rendererApiValidationLayers;
 
     m_engine = std::make_unique<duk::engine::Engine>(engineCreateInfo);
-
-    auto pools = m_engine->globals()->get<duk::resource::Pools>();
-    pools->create_pool<duk::animation::AnimationClipPool>();
-    pools->create_pool<duk::animation::AnimationControllerPool>();
 }
 
 Application::~Application() = default;

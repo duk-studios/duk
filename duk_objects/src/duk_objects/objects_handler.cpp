@@ -40,13 +40,12 @@ bool ObjectsHandler::accepts(const std::string& extension) const {
     return extension == ".obj";
 }
 
-duk::resource::Handle<Objects> ObjectsHandler::load_from_text(ObjectsPool* pool, const resource::Id& id, const std::string_view& text) {
+std::shared_ptr<Objects> ObjectsHandler::load_from_text(duk::tools::Globals* globals, const std::string_view& text) {
     ObjectsWrapper objectsWrapper = {};
     objectsWrapper.objects = std::make_shared<Objects>();
 
     duk::serial::read_json(text, objectsWrapper);
-
-    return pool->insert(id, objectsWrapper.objects);
+    return objectsWrapper.objects;
 }
 
 }// namespace duk::objects

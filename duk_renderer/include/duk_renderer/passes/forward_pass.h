@@ -34,7 +34,8 @@ struct DrawData {
 };
 
 struct ForwardPassCreateInfo {
-    Renderer* renderer;
+    duk::rhi::RHI* rhi;
+    duk::rhi::CommandQueue* commandQueue;
 };
 
 class ForwardPass : public Pass {
@@ -50,7 +51,8 @@ public:
     DUK_NO_DISCARD PassConnection* out_color();
 
 private:
-    Renderer* m_renderer;
+    duk::rhi::RHI* m_rhi;
+    duk::rhi::CommandQueue* m_commandQueue;
     std::shared_ptr<duk::rhi::Image> m_colorImage;
     std::shared_ptr<duk::rhi::Image> m_depthImage;
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;

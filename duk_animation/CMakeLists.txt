@@ -10,7 +10,6 @@ set(DUK_ANIMATION_HEADERS
         include/duk_animation/clip/property.h
         include/duk_animation/clip/animation_clip.h
         include/duk_animation/clip/animation_clip_handler.h
-        include/duk_animation/clip/animation_clip_pool.h
         include/duk_animation/clip/properties/canvas_property.h
         include/duk_animation/clip/properties/sprite_property.h
         include/duk_animation/clip/properties/transform_property.h
@@ -28,7 +27,6 @@ set(DUK_ANIMATION_SOURCES
         src/duk_animation/clip/property.cpp
         src/duk_animation/clip/animation_clip.cpp
         src/duk_animation/clip/animation_clip_handler.cpp
-        src/duk_animation/clip/animation_clip_pool.cpp
         src/duk_animation/clip/properties/canvas_property.cpp
         src/duk_animation/clip/properties/sprite_property.cpp
         src/duk_animation/clip/properties/transform_property.cpp
