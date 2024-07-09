@@ -11,7 +11,6 @@
 #include <duk_renderer/shader/shader_pipeline_builtins.h>
 #include <duk_renderer/image/image_builtins.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
-#include <duk_renderer/material/material_pool.h>
 #include <duk_renderer/mesh/mesh_builtins.h>
 #include <duk_renderer/renderer.h>
 #include <duk_tools/timer.h>
@@ -42,33 +41,10 @@ public:
         // Create renderer
         duk::renderer::RendererCreateInfo rendererCreateInfo = {};
         rendererCreateInfo.window = m_window.get();
-        rendererCreateInfo.pools = &m_pools;
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.logger = duk::log::Logging::instance(true)->default_logger();
 
         m_renderer = std::make_unique<duk::renderer::Renderer>(rendererCreateInfo);
-
-        duk::renderer::add_forward_passes(m_renderer.get(), m_window.get());
-
-        // mesh pool
-        duk::renderer::MeshBuiltinsCreateInfo meshPoolCreateInfo = {};
-        meshPoolCreateInfo.meshBufferPool = m_renderer->mesh_buffer_pool();
-        m_pools.create_pool<duk::renderer::MeshBuiltins>(meshPoolCreateInfo);
-
-        // image pool
-        duk::renderer::ImageBuiltinsCreateInfo imagePoolCreateInfo = {};
-        imagePoolCreateInfo.renderer = m_renderer.get();
-        m_pools.create_pool<duk::renderer::ImageBuiltins>(imagePoolCreateInfo);
-
-        // shader pool
-        duk::renderer::ShaderPipelinePoolCreateInfo shaderPipelinePoolCreateInfo = {};
-        shaderPipelinePoolCreateInfo.renderer = m_renderer.get();
-        m_pools.create_pool<duk::renderer::ShaderPipelinePool>(shaderPipelinePoolCreateInfo);
-
-        // material pool
-        duk::renderer::MaterialPoolCreateInfo materialPoolCreateInfo = {};
-        materialPoolCreateInfo.renderer = m_renderer.get();
-        m_pools.create_pool<duk::renderer::MaterialPool>(materialPoolCreateInfo);
     }
 
     duk::platform::Window* window() {
@@ -142,23 +118,21 @@ int main() {
         return object;
     };
 
-    auto materialPool = application.pools()->get<duk::renderer::MaterialPool>();
-
     // Create a phong material
-    auto material = duk::renderer::create_phong_material(application.renderer());
-    // material->set("uProperties", "color", glm::vec4(1.0f, 0.5f, 0.8f, 1.0f));
-    // material->set("uBaseColor", imagePool->white(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
+    // auto material = duk::renderer::create_phong_material(application.renderer());
+    // // material->set("uProperties", "color", glm::vec4(1.0f, 0.5f, 0.8f, 1.0f));
+    // // material->set("uBaseColor", imagePool->white(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
+    //
+    // auto mesh = application.pools()->get<duk::renderer::MeshBuiltins>()->cube();
+    //
+    // auto cube1 = add_mesh_object(objects, mesh, material, glm::vec3(0, 2, -10));
+    // auto cube2 = add_mesh_object(objects, mesh, material, glm::vec3(0, -2, -10));
 
-    auto mesh = application.pools()->get<duk::renderer::MeshBuiltins>()->cube();
-
-    auto cube1 = add_mesh_object(objects, mesh, material, glm::vec3(0, 2, -10));
-    auto cube2 = add_mesh_object(objects, mesh, material, glm::vec3(0, -2, -10));
-
-    auto cube1Transform = cube1.component<duk::renderer::Transform>();
-    auto cube2Transform = cube2.component<duk::renderer::Transform>();
-
-    material->set(cube1.id(), "uProperties", "color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-    material->set(cube2.id(), "uProperties", "color", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    // auto cube1Transform = cube1.component<duk::renderer::Transform>();
+    // auto cube2Transform = cube2.component<duk::renderer::Transform>();
+    //
+    // material->set(cube1.id(), "uProperties", "color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    // material->set(cube2.id(), "uProperties", "color", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
     //Show the window we created.
     application.window()->show();
@@ -178,10 +152,10 @@ int main() {
 
         auto time = timer.time();
 
-        //Rotating the cube in the X value by the timer total duration.
-        cube1Transform->rotation = glm::radians(glm::vec3(time * 30, 45.0f, 0.0f));
-
-        cube2Transform->rotation = glm::radians(glm::vec3(time * -52, sinf(time * 4) * 85, 15.0f));
+        // //Rotating the cube in the X value by the timer total duration.
+        // cube1Transform->rotation = glm::radians(glm::vec3(time * 30, 45.0f, 0.0f));
+        //
+        // cube2Transform->rotation = glm::radians(glm::vec3(time * -52, sinf(time * 4) * 85, 15.0f));
 
         duk::renderer::update_transforms(objects);
         duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());
