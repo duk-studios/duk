@@ -26,13 +26,16 @@ std::shared_ptr<DynamicMesh> TextCache::find_mesh(duk::hash::Hash hash) const {
     return nullptr;
 }
 
-std::shared_ptr<Material> TextCache::find_material(Renderer* renderer, const FontAtlas* atlas, bool worldSpace) {
+std::shared_ptr<Material> TextCache::find_material(duk::tools::Globals* globals, const FontAtlas* atlas, bool worldSpace) {
     auto hash = detail::calculate_material_hash(atlas, worldSpace);
     if (const auto it = m_materials.find(hash); it != m_materials.end()) {
         return it->second;
     }
 
-    auto material = create_text_material(renderer);
+    const auto renderer = globals->get<Renderer>();
+    const auto builtins = globals->get<Builtins>();
+
+    auto material = create_text_material(renderer, builtins);
     material->set("uBaseColor", atlas->image(), kDefaultTextureSampler);
 
     auto globalDescriptors = renderer->global_descriptors();

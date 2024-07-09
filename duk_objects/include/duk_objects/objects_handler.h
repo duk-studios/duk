@@ -5,20 +5,20 @@
 #ifndef DUK_OBJECTS_HANDLER_H
 #define DUK_OBJECTS_HANDLER_H
 
-#include <duk_objects/objects_pool.h>
+#include <duk_objects/objects.h>
 
 #include <duk_resource/handler.h>
 
 namespace duk::objects {
 
-class ObjectsHandler : public duk::resource::TextResourceHandlerT<ObjectsPool> {
+class ObjectsHandler : public duk::resource::TextHandlerT<Objects> {
 public:
     ObjectsHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Objects> load_from_text(ObjectsPool* pool, const resource::Id& id, const std::string_view& text) override;
+    std::shared_ptr<Objects> load_from_text(duk::tools::Globals* globals, const std::string_view& text) override;
 };
 
 }// namespace duk::objects

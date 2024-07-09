@@ -19,7 +19,7 @@ class TextCache {
 public:
     std::shared_ptr<DynamicMesh> find_mesh(duk::hash::Hash hash) const;
 
-    std::shared_ptr<Material> find_material(Renderer* renderer, const FontAtlas* atlas, bool worldSpace);
+    std::shared_ptr<Material> find_material(duk::tools::Globals* globals, const FontAtlas* atlas, bool worldSpace);
 
     void store(duk::hash::Hash hash, const std::shared_ptr<DynamicMesh>& mesh);
 

@@ -6,6 +6,7 @@ set(DUK_RENDERER_SRC_DIR ${DUK_RENDERER_ROOT}/src/duk_renderer)
 
 set(DUK_RENDERER_HEADERS
         include/duk_renderer/renderer.h
+        include/duk_renderer/builtins.h
         include/duk_renderer/vertex_types.h
         include/duk_renderer/sort.h
         include/duk_renderer/register_types.h
@@ -22,21 +23,19 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/sprite/sprite_cache.h
         include/duk_renderer/sprite/sprite_handler.h
         include/duk_renderer/sprite/sprite_mesh.h
-        include/duk_renderer/sprite/sprite_pool.h
         include/duk_renderer/image/image.h
-        include/duk_renderer/image/image_pool.h
+        include/duk_renderer/image/image_builtins.h
         include/duk_renderer/image/image_handler.h
         include/duk_renderer/image/image_loader_stb.h
         include/duk_renderer/font/font.h
         include/duk_renderer/font/font_atlas.h
-        include/duk_renderer/font/font_pool.h
         include/duk_renderer/font/font_handler.h
         include/duk_renderer/mesh/draw_buffer.h
         include/duk_renderer/mesh/dynamic_mesh.h
         include/duk_renderer/mesh/empty_mesh.h
         include/duk_renderer/mesh/mesh.h
         include/duk_renderer/mesh/mesh_buffer.h
-        include/duk_renderer/mesh/mesh_pool.h
+        include/duk_renderer/mesh/mesh_builtins.h
         include/duk_renderer/mesh/static_mesh.h
         include/duk_renderer/mesh/static_mesh_builder.h
         include/duk_renderer/mesh/static_mesh_data_source.h
@@ -52,15 +51,14 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/shader/pipeline_cache.h
         include/duk_renderer/shader/shader_pipeline.h
         include/duk_renderer/shader/shader_module.h
-        include/duk_renderer/shader/shader_module_pool.h
+        include/duk_renderer/shader/shader_module_builtins.h
         include/duk_renderer/shader/shader_module_handler.h
         include/duk_renderer/shader/shader_pipeline_data.h
-        include/duk_renderer/shader/shader_pipeline_pool.h
+        include/duk_renderer/shader/shader_pipeline_builtins.h
         include/duk_renderer/shader/shader_pipeline_handler.h
         include/duk_renderer/material/globals/lights_types.h
         include/duk_renderer/material/globals/camera_types.h
         include/duk_renderer/material/draw_entry.h
-        include/duk_renderer/material/material_pool.h
         include/duk_renderer/passes/forward_pass.h
         include/duk_renderer/passes/pass.h
         include/duk_renderer/passes/present_pass.h
@@ -72,6 +70,7 @@ set(DUK_RENDERER_HEADERS
 
 set(DUK_RENDERER_SOURCES
         src/duk_renderer/renderer.cpp
+        src/duk_renderer/builtins.cpp
         src/duk_renderer/sort.cpp
         src/duk_renderer/vertex_types.cpp
         src/duk_renderer/register_types.cpp
@@ -88,13 +87,12 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/sprite/sprite_cache.cpp
         src/duk_renderer/sprite/sprite_handler.cpp
         src/duk_renderer/sprite/sprite_mesh.cpp
-        src/duk_renderer/sprite/sprite_pool.cpp
         src/duk_renderer/shader/pipeline_cache.cpp
         src/duk_renderer/shader/shader_module.cpp
-        src/duk_renderer/shader/shader_module_pool.cpp
+        src/duk_renderer/shader/shader_module_builtins.cpp
         src/duk_renderer/shader/shader_module_handler.cpp
         src/duk_renderer/shader/shader_pipeline.cpp
-        src/duk_renderer/shader/shader_pipeline_pool.cpp
+        src/duk_renderer/shader/shader_pipeline_builtins.cpp
         src/duk_renderer/shader/shader_pipeline_handler.cpp
         src/duk_renderer/shader/color/color_shader_data_source.h
         src/duk_renderer/shader/color/color_shader_data_source.cpp
@@ -109,17 +107,16 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/mesh/empty_mesh.cpp
         src/duk_renderer/mesh/mesh.cpp
         src/duk_renderer/mesh/mesh_buffer.cpp
-        src/duk_renderer/mesh/mesh_pool.cpp
+        src/duk_renderer/mesh/mesh_builtins.cpp
         src/duk_renderer/mesh/static_mesh.cpp
         src/duk_renderer/mesh/static_mesh_builder.cpp
         src/duk_renderer/mesh/static_mesh_data_source.cpp
         src/duk_renderer/image/image.cpp
-        src/duk_renderer/image/image_pool.cpp
+        src/duk_renderer/image/image_builtins.cpp
         src/duk_renderer/image/image_handler.cpp
         src/duk_renderer/image/image_loader_stb.cpp
         src/duk_renderer/font/font.cpp
         src/duk_renderer/font/font_atlas.cpp
-        src/duk_renderer/font/font_pool.cpp
         src/duk_renderer/font/font_handler.cpp
         src/duk_renderer/font/freetype/freetype_import.h
         src/duk_renderer/font/freetype/freetype_import.cpp
@@ -136,7 +133,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/material/storage_buffer.cpp
         src/duk_renderer/material/material_descriptor_set.cpp
         src/duk_renderer/material/globals/global_descriptors.cpp
-        src/duk_renderer/material/material_pool.cpp
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp
         src/duk_renderer/passes/present_pass.cpp

@@ -12,7 +12,7 @@
 #include <duk_platform/platform.h>
 #include <duk_renderer/renderer.h>
 #include <duk_resource/handler.h>
-#include <duk_resource/set.h>
+#include <duk_resource/resources.h>
 #include <duk_tools/timer.h>
 #include <duk_audio/audio_engine.h>
 #include <duk_tools/globals.h>

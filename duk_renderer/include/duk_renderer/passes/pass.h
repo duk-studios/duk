@@ -70,8 +70,6 @@ public:
         GlobalDescriptors* globalDescriptors;
         glm::vec2 viewport;
         PipelineCache* pipelineCache;
-        SpriteCache* spriteCache;
-        duk::resource::Pools* pools;
     };
 
     virtual void update(const UpdateParams& params) = 0;

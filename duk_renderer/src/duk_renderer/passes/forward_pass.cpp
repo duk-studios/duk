@@ -12,11 +12,55 @@
 #include <duk_renderer/mesh/draw_buffer.h>
 #include <duk_renderer/mesh/mesh_buffer.h>
 
+#include "duk_rhi/image_data_source.h"
+
 namespace duk::renderer {
 
 namespace detail {
 
 static constexpr auto kColorFormat = duk::rhi::PixelFormat::RGBA8U;
+
+static std::shared_ptr<duk::rhi::Image> create_color_image(duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue, uint32_t width, uint32_t height) {
+    duk::rhi::ImageDataSourceEmpty colorImageDataSource(width, height, kColorFormat);
+    colorImageDataSource.update_hash();
+
+    duk::rhi::RHI::ImageCreateInfo colorImageCreateInfo = {};
+    colorImageCreateInfo.usage = duk::rhi::Image::Usage::COLOR_ATTACHMENT;
+    colorImageCreateInfo.initialLayout = duk::rhi::Image::Layout::COLOR_ATTACHMENT;
+    colorImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
+    colorImageCreateInfo.imageDataSource = &colorImageDataSource;
+    colorImageCreateInfo.commandQueue = commandQueue;
+    colorImageCreateInfo.dstStages = duk::rhi::PipelineStage::FRAGMENT_SHADER | duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT;
+
+    auto colorImage = rhi->create_image(colorImageCreateInfo);
+
+    if (!colorImage) {
+        throw std::runtime_error("failed to create color image!");
+    }
+
+    return colorImage;
+}
+
+static std::shared_ptr<duk::rhi::Image> create_depth_image(duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue, uint32_t width, uint32_t height) {
+    duk::rhi::ImageDataSourceEmpty depthImageDataSource(width, height, rhi->capabilities()->depth_format());
+    depthImageDataSource.update_hash();
+
+    duk::rhi::RHI::ImageCreateInfo depthImageCreateInfo = {};
+    depthImageCreateInfo.usage = duk::rhi::Image::Usage::DEPTH_STENCIL_ATTACHMENT;
+    depthImageCreateInfo.initialLayout = duk::rhi::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
+    depthImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
+    depthImageCreateInfo.imageDataSource = &depthImageDataSource;
+    depthImageCreateInfo.commandQueue = commandQueue;
+    depthImageCreateInfo.dstStages = duk::rhi::PipelineStage::EARLY_FRAGMENT_TESTS;
+
+    auto depthImage = rhi->create_image(depthImageCreateInfo);
+
+    if (!depthImage) {
+        throw std::runtime_error("failed to create depth image!");
+    }
+
+    return depthImage;
+}
 
 static SortKey calculate_opaque_sort_key(const duk::objects::Object& object) {
     auto [meshSlot, materialSlot] = object.components<MeshSlot, MaterialSlot>();
@@ -300,7 +344,8 @@ void DrawData::clear() {
 }
 
 ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
-    : m_renderer(forwardPassCreateInfo.renderer)
+    : m_rhi(forwardPassCreateInfo.rhi)
+    , m_commandQueue(forwardPassCreateInfo.commandQueue)
     , m_outColor(duk::rhi::Access::COLOR_ATTACHMENT_WRITE, duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
     {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};
@@ -312,7 +357,7 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
         colorAttachmentDescription.loadOp = duk::rhi::LoadOp::CLEAR;
 
         duk::rhi::AttachmentDescription depthAttachmentDescription = {};
-        depthAttachmentDescription.format = m_renderer->rhi()->capabilities()->depth_format();
+        depthAttachmentDescription.format = m_rhi->capabilities()->depth_format();
         depthAttachmentDescription.initialLayout = duk::rhi::Image::Layout::UNDEFINED;
         depthAttachmentDescription.layout = duk::rhi::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
         depthAttachmentDescription.finalLayout = duk::rhi::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
@@ -326,15 +371,15 @@ ForwardPass::ForwardPass(const ForwardPassCreateInfo& forwardPassCreateInfo)
         renderPassCreateInfo.colorAttachmentCount = std::size(attachmentDescriptions);
         renderPassCreateInfo.depthAttachment = &depthAttachmentDescription;
 
-        m_renderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
+        m_renderPass = m_rhi->create_render_pass(renderPassCreateInfo);
     }
     m_drawData.opaqueGroup.calculateSortKey = detail::calculate_opaque_sort_key;
     m_drawData.transparentGroup.calculateSortKey = detail::calculate_transparent_sort_key;
 
     {
         DrawBufferCreateInfo drawBufferCreateInfo = {};
-        drawBufferCreateInfo.rhi = m_renderer->rhi();
-        drawBufferCreateInfo.commandQueue = m_renderer->main_command_queue();
+        drawBufferCreateInfo.rhi = m_rhi;
+        drawBufferCreateInfo.commandQueue = m_commandQueue;
         m_drawData.drawBuffer = std::make_unique<DrawBuffer>(drawBufferCreateInfo);
     }
 }
@@ -347,7 +392,7 @@ PassConnection* ForwardPass::out_color() {
 
 void ForwardPass::update(const Pass::UpdateParams& params) {
     if (!m_colorImage || glm::vec2(m_colorImage->size()) != params.viewport) {
-        m_colorImage = m_renderer->create_color_image(params.viewport.x, params.viewport.y, detail::kColorFormat);
+        m_colorImage = detail::create_color_image(m_rhi, m_commandQueue, params.viewport.x, params.viewport.y);
 
         // recreate frame buffer in case image was resized
         m_frameBuffer.reset();
@@ -356,7 +401,7 @@ void ForwardPass::update(const Pass::UpdateParams& params) {
     }
 
     if (!m_depthImage || glm::vec2(m_depthImage->size()) != params.viewport) {
-        m_depthImage = m_renderer->create_depth_image(params.viewport.x, params.viewport.y);
+        m_depthImage = detail::create_depth_image(m_rhi, m_commandQueue, params.viewport.x, params.viewport.y);
 
         // recreate frame buffer in case image was resized
         m_frameBuffer.reset();
@@ -370,7 +415,7 @@ void ForwardPass::update(const Pass::UpdateParams& params) {
         frameBufferCreateInfo.attachments = frameBufferAttachments;
         frameBufferCreateInfo.renderPass = m_renderPass.get();
 
-        m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
+        m_frameBuffer = m_rhi->create_frame_buffer(frameBufferCreateInfo);
     }
 
     detail::update_draw_data(params, m_renderPass.get(), m_drawData);
@@ -379,7 +424,7 @@ void ForwardPass::update(const Pass::UpdateParams& params) {
 void ForwardPass::render(duk::rhi::CommandBuffer* commandBuffer) {
     commandBuffer->begin_render_pass(m_renderPass.get(), m_frameBuffer.get());
 
-    const auto isMultiDrawIndirectSupported = m_renderer->rhi()->capabilities()->is_multi_draw_indirect_supported();
+    const auto isMultiDrawIndirectSupported = m_rhi->capabilities()->is_multi_draw_indirect_supported();
 
     detail::render_draw_data(commandBuffer, m_drawData, isMultiDrawIndirectSupported);
 

@@ -3,24 +3,16 @@
 
 #include <duk_platform/window.h>
 #include <duk_renderer/passes/present_pass.h>
-#include <duk_renderer/shader/shader_pipeline_pool.h>
+#include <duk_renderer/shader/shader_pipeline_builtins.h>
 
 namespace duk::renderer {
 
 PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
-    : m_renderer(presentPassCreateInfo.renderer)
+    : m_rhi(presentPassCreateInfo.rhi)
     , m_inColor(duk::rhi::Access::SHADER_READ, duk::rhi::PipelineStage::FRAGMENT_SHADER, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
     {
-        //ensure that we recreate the framebuffer on this frame
-        auto window = presentPassCreateInfo.window;
-        m_listener.listen(window->window_resize_event, [this](uint32_t width, uint32_t height) {
-            m_frameBuffer.reset();
-        });
-    }
-
-    {
         duk::rhi::AttachmentDescription colorAttachmentDescription = {};
-        colorAttachmentDescription.format = m_renderer->rhi()->present_image()->format();
+        colorAttachmentDescription.format = m_rhi->present_image()->format();
         colorAttachmentDescription.initialLayout = duk::rhi::Image::Layout::UNDEFINED;
         colorAttachmentDescription.layout = duk::rhi::Image::Layout::COLOR_ATTACHMENT;
         colorAttachmentDescription.finalLayout = duk::rhi::Image::Layout::PRESENT_SRC;
@@ -33,7 +25,16 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
         renderPassCreateInfo.colorAttachments = attachmentDescriptions;
         renderPassCreateInfo.colorAttachmentCount = std::size(attachmentDescriptions);
 
-        m_renderPass = m_renderer->rhi()->create_render_pass(renderPassCreateInfo);
+        m_renderPass = m_rhi->create_render_pass(renderPassCreateInfo);
+    }
+
+    if (!m_fullscreenMaterial) {
+        MaterialCreateInfo materialCreateInfo = {};
+        materialCreateInfo.rhi = m_rhi;
+        materialCreateInfo.commandQueue = presentPassCreateInfo.commandQueue;
+        materialCreateInfo.materialData.shader = presentPassCreateInfo.shader;
+
+        m_fullscreenMaterial = std::make_unique<Material>(materialCreateInfo);
     }
 }
 
@@ -48,23 +49,15 @@ void PresentPass::update(const Pass::UpdateParams& params) {
         return;
     }
 
-    if (!m_frameBuffer) {
-        duk::rhi::Image* frameBufferAttachments[] = {m_renderer->rhi()->present_image()};
+    if (!m_frameBuffer || params.viewport.x != m_frameBuffer->width() || params.viewport.y != m_frameBuffer->height()) {
+        duk::rhi::Image* frameBufferAttachments[] = {m_rhi->present_image()};
 
         duk::rhi::RHI::FrameBufferCreateInfo frameBufferCreateInfo = {};
         frameBufferCreateInfo.attachmentCount = std::size(frameBufferAttachments);
         frameBufferCreateInfo.attachments = frameBufferAttachments;
         frameBufferCreateInfo.renderPass = m_renderPass.get();
 
-        m_frameBuffer = m_renderer->rhi()->create_frame_buffer(frameBufferCreateInfo);
-    }
-
-    if (!m_fullscreenMaterial) {
-        MaterialCreateInfo materialCreateInfo = {};
-        materialCreateInfo.renderer = m_renderer;
-        materialCreateInfo.materialData.shader = params.pools->get<ShaderPipelinePool>()->fullscreen();
-
-        m_fullscreenMaterial = std::make_unique<Material>(materialCreateInfo);
+        m_frameBuffer = m_rhi->create_frame_buffer(frameBufferCreateInfo);
     }
 
     m_fullscreenMaterial->set("uTexture", duk::rhi::Descriptor::image_sampler(m_inColor.image(), m_inColor.image_layout(), kDefaultTextureSampler));

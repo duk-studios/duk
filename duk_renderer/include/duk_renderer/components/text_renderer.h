@@ -26,7 +26,7 @@ struct TextRenderer {
     std::shared_ptr<TextMesh> mesh;
 };
 
-void update_text_renderer(Renderer* renderer, const duk::objects::Component<TextRenderer>& textRenderer);
+void update_text_renderer(duk::tools::Globals* globals, const duk::objects::Component<TextRenderer>& textRenderer);
 
 }// namespace duk::renderer
 

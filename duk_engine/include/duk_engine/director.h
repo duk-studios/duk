@@ -4,10 +4,10 @@
 #ifndef DUK_ENGINE_DIRECTOR_H
 #define DUK_ENGINE_DIRECTOR_H
 
-#include <duk_engine/scene/scene_pool.h>
+#include <duk_engine/scene/scene.h>
 
 #include <duk_renderer/renderer.h>
-#include <duk_resource/set.h>
+#include <duk_resource/resources.h>
 
 namespace duk::engine {
 

@@ -9,9 +9,8 @@
 namespace duk::engine {
 
 void TextUpdateSystem::update() {
-    auto renderer = global<duk::renderer::Renderer>();
     for (auto [textRenderer]: all_components_of<duk::renderer::TextRenderer>()) {
-        duk::renderer::update_text_renderer(renderer, textRenderer);
+        duk::renderer::update_text_renderer(globals(), textRenderer);
     }
 }
 

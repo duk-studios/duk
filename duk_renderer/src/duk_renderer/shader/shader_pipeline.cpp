@@ -8,7 +8,7 @@
 namespace duk::renderer {
 
 ShaderPipeline::ShaderPipeline(const ShaderPipelineCreateInfo& shaderPipelineCreateInfo)
-    : m_renderer(shaderPipelineCreateInfo.renderer) {
+    : m_rhi(shaderPipelineCreateInfo.rhi) {
     const auto pipelineData = shaderPipelineCreateInfo.shaderPipelineData;
 
     m_shaderModules[duk::rhi::ShaderModule::VERTEX] = pipelineData->shaders.vert;
@@ -127,7 +127,6 @@ void ShaderPipeline::create_shader() {
     if (!m_shaderModules[duk::rhi::ShaderModule::VERTEX] || !m_shaderModules[duk::rhi::ShaderModule::FRAGMENT]) {
         return;
     }
-    const auto rhi = m_renderer->rhi();
 
     duk::rhi::StdShaderDataSource shaderDataSource = {};
     {
@@ -142,7 +141,7 @@ void ShaderPipeline::create_shader() {
 
     duk::rhi::RHI::ShaderCreateInfo shaderCreateInfo = {};
     shaderCreateInfo.shaderDataSource = &shaderDataSource;
-    m_shader = rhi->create_shader(shaderCreateInfo);
+    m_shader = m_rhi->create_shader(shaderCreateInfo);
 }
 
 }// namespace duk::renderer

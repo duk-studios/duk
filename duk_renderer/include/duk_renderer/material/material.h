@@ -10,6 +10,7 @@
 #include <duk_renderer/material/material_buffer.h>
 #include <duk_renderer/material/instance_buffer.h>
 #include <duk_renderer/shader/shader_pipeline.h>
+#include <duk_renderer/builtins.h>
 
 namespace duk::renderer {
 
@@ -37,7 +38,8 @@ private:
 };
 
 struct MaterialCreateInfo {
-    Renderer* renderer;
+    duk::rhi::RHI* rhi;
+    duk::rhi::CommandQueue* commandQueue;
     MaterialData materialData;
 };
 
@@ -111,7 +113,8 @@ private:
     void init();
 
 private:
-    Renderer* m_renderer;
+    duk::rhi::RHI* m_rhi;
+    duk::rhi::CommandQueue* m_commandQueue;
     ShaderPipelineResource m_shader;
     std::vector<Binding> m_bindings;
     std::shared_ptr<duk::rhi::DescriptorSet> m_descriptorSet;
@@ -121,11 +124,11 @@ private:
     bool m_dirty;
 };
 
-std::shared_ptr<Material> create_color_material(Renderer* renderer, bool transparent);
+std::shared_ptr<Material> create_color_material(Renderer* renderer, Builtins* builtins, bool transparent);
 
-std::shared_ptr<Material> create_phong_material(Renderer* renderer);
+std::shared_ptr<Material> create_phong_material(Renderer* renderer, Builtins* builtins);
 
-std::shared_ptr<Material> create_text_material(Renderer* renderer);
+std::shared_ptr<Material> create_text_material(Renderer* renderer, Builtins* builtins);
 
 using MaterialResource = duk::resource::Handle<Material>;
 

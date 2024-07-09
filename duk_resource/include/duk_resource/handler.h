@@ -6,8 +6,8 @@
 
 #include <duk_resource/file.h>
 #include <duk_resource/pool.h>
-#include <duk_resource/resource.h>
-#include <duk_resource/set.h>
+#include <duk_resource/handle.h>
+#include <duk_resource/resources.h>
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
 
@@ -17,90 +17,84 @@
 
 namespace duk::resource {
 
-class ResourceHandler {
+class Handler {
 public:
-    virtual ~ResourceHandler() = default;
+    virtual ~Handler() = default;
 
     virtual const std::string& tag() const = 0;
 
     virtual bool accepts(const std::string& extension) const = 0;
 
-    virtual Handle<void> load(Pools* pools, const Id& id, const std::filesystem::path& path, LoadMode loadMode) = 0;
+    virtual Handle<void> load(duk::tools::Globals* globals, Pools& pools, const Id& id, const std::filesystem::path& path, LoadMode loadMode) = 0;
 
     virtual void solve_dependencies(const Handle<void>& handle, std::set<Id>& dependencies) = 0;
 
-    virtual void solve_references(const Handle<void>& handle, Pools* pools) = 0;
+    virtual void solve_references(const Handle<void>& handle, Pools& pools) = 0;
 };
 
-template<typename TPool>
-class ResourceHandlerT : public ResourceHandler {
+template<typename T>
+class HandlerT : public Handler {
 public:
-    using Type = typename TPool::Type;
-
-    explicit ResourceHandlerT(const char* tag);
+    explicit HandlerT(const char* tag);
 
     const std::string& tag() const final;
 
-    Handle<void> load(Pools* pools, const Id& id, const std::filesystem::path& path, LoadMode loadMode) override;
+    Handle<void> load(duk::tools::Globals* globals, Pools& pools, const Id& id, const std::filesystem::path& path, LoadMode loadMode) override;
 
     void solve_dependencies(const Handle<void>& handle, std::set<Id>& dependencies) override;
 
-    void solve_references(const Handle<void>& handle, Pools* pools) override;
+    void solve_references(const Handle<void>& handle, Pools& pools) override;
 
 protected:
-    virtual Handle<Type> load_from_memory(TPool* pool, const Id& id, const void* data, size_t size) = 0;
+    virtual std::shared_ptr<T> load_from_memory(duk::tools::Globals* globals, const void* data, size_t size) = 0;
 
 private:
-    static TPool* find_pool(Pools* pools);
-
     std::string m_tag;
 };
 
-template<typename TPool>
-class TextResourceHandlerT : public ResourceHandlerT<TPool> {
+template<typename T>
+class TextHandlerT : public HandlerT<T> {
 public:
-    using Type = typename TPool::Type;
-
-    using ResourceHandlerT<TPool>::ResourceHandlerT;
+    using HandlerT<T>::HandlerT;
 
 protected:
-    Handle<Type> load_from_memory(TPool* pool, const Id& id, const void* data, size_t size) override;
+    std::shared_ptr<T> load_from_memory(duk::tools::Globals* globals, const void* data, size_t size) override;
 
-    virtual Handle<Type> load_from_text(TPool* pool, const Id& id, const std::string_view& text) = 0;
+    virtual std::shared_ptr<T> load_from_text(duk::tools::Globals* globals, const std::string_view& text) = 0;
 };
 
 class ResourceRegistry {
 public:
     static ResourceRegistry* instance();
 
-    template<typename TResourceHandler>
+    template<typename THandler>
     void add();
 
-    ResourceHandler* find_handler(const std::string& tag);
+    Handler* find_handler(const std::string& tag);
 
-    ResourceHandler* find_handler_for_extension(const std::string& extension);
+    Handler* find_handler_for_extension(const std::string& extension);
 
 private:
-    std::unordered_map<std::string, std::unique_ptr<ResourceHandler>> m_handlers;
+    std::unordered_map<std::string, std::unique_ptr<Handler>> m_handlers;
 };
 
-template<typename TResourceHandler>
+template<typename THandler>
 void register_handler() {
-    ResourceRegistry::instance()->add<TResourceHandler>();
+    ResourceRegistry::instance()->add<THandler>();
 }
 
-template<typename TPool>
-ResourceHandlerT<TPool>::ResourceHandlerT(const char* tag)
+template<typename T>
+HandlerT<T>::HandlerT(const char* tag)
     : m_tag(tag) {
 }
 
-template<typename TPool>
-const std::string& ResourceHandlerT<TPool>::tag() const {
+template<typename T>
+const std::string& HandlerT<T>::tag() const {
     return m_tag;
 }
 
-template<typename TPool>
-Handle<void> ResourceHandlerT<TPool>::load(Pools* pools, const Id& id, const std::filesystem::path& path, LoadMode loadMode) {
+template<typename T>
+Handle<void> HandlerT<T>::load(duk::tools::Globals* globals, Pools& pools, const Id& id, const std::filesystem::path& path, LoadMode loadMode) {
     std::vector<uint8_t> memory;
     switch (loadMode) {
         case LoadMode::UNPACKED:
@@ -110,45 +104,38 @@ Handle<void> ResourceHandlerT<TPool>::load(Pools* pools, const Id& id, const std
             memory = duk::tools::load_compressed_bytes(path);
             break;
     }
-    auto pool = find_pool(pools);
-    return load_from_memory(pool, id, memory.data(), memory.size());
+
+    auto resource = load_from_memory(globals, memory.data(), memory.size());
+
+    return pools.insert(id, std::move(resource));
 }
 
-template<typename TPool>
-void ResourceHandlerT<TPool>::solve_dependencies(const Handle<void>& handle, std::set<Id>& dependencies) {
+template<typename T>
+void HandlerT<T>::solve_dependencies(const Handle<void>& handle, std::set<Id>& dependencies) {
     DependencySolver dependencySolver;
-    dependencySolver.solve(*handle.as<Type>());
+    dependencySolver.solve(*handle.as<T>());
     dependencies = dependencySolver.dependencies();
 }
 
-template<typename TPool>
-void ResourceHandlerT<TPool>::solve_references(const Handle<void>& handle, Pools* pools) {
+template<typename T>
+void HandlerT<T>::solve_references(const Handle<void>& handle, Pools& pools) {
     ReferenceSolver referenceSolver(pools);
-    referenceSolver.solve(*handle.as<Type>());
+    referenceSolver.solve(*handle.as<T>());
 }
 
-template<typename TPool>
-TPool* ResourceHandlerT<TPool>::find_pool(Pools* pools) {
-    auto pool = pools->get<TPool>();
-    if (!pool) {
-        throw std::logic_error("Failed to find valid pool for ResourceHandlerT");
-    }
-    return pool;
-}
-
-template<typename TPool>
-Handle<typename TextResourceHandlerT<TPool>::Type> TextResourceHandlerT<TPool>::load_from_memory(TPool* pool, const Id& id, const void* data, size_t size) {
+template<typename T>
+std::shared_ptr<T> TextHandlerT<T>::load_from_memory(duk::tools::Globals* globals, const void* data, size_t size) {
     const auto text = std::string(static_cast<const char*>(data), size);
-    return load_from_text(pool, id, text);
+    return load_from_text(globals, text);
 }
 
-template<typename TResourceHandler>
+template<typename THandler>
 void ResourceRegistry::add() {
     static bool alreadyAdded = false;
     if (alreadyAdded) {
         return;
     }
-    auto handler = std::make_unique<TResourceHandler>();
+    auto handler = std::make_unique<THandler>();
     m_handlers.emplace(handler->tag(), std::move(handler));
     alreadyAdded = true;
 }
