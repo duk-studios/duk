@@ -10,6 +10,7 @@
 #include <duk_serial/json/serializer.h>
 
 #include <fstream>
+#include <random>
 
 namespace duk::project {
 
