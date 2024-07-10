@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_SPRITE_RENDERER_H
 #define DUK_RENDERER_SPRITE_RENDERER_H
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/sprite/sprite.h>
@@ -17,7 +17,7 @@ struct SpriteRenderer {
     uint32_t index;
 };
 
-void update_sprite_renderer(const Renderer* renderer, const duk::objects::Component<SpriteRenderer>& spriteRenderer);
+void update_sprite_renderer(duk::tools::Globals* globals, const duk::objects::Component<SpriteRenderer>& spriteRenderer);
 
 }// namespace duk::renderer
 

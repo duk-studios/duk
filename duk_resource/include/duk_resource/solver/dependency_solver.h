@@ -4,7 +4,7 @@
 #ifndef DUK_RESOURCE_DEPENDENCY_SOLVER_H
 #define DUK_RESOURCE_DEPENDENCY_SOLVER_H
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 #include <duk_resource/solver/solver.h>
 #include <set>
 

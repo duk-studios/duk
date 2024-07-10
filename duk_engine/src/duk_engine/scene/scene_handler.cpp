@@ -9,18 +9,17 @@
 namespace duk::engine {
 
 SceneHandler::SceneHandler()
-    : TextResourceHandlerT("scn") {
+    : TextHandlerT("scn") {
 }
 
 bool SceneHandler::accepts(const std::string& extension) const {
     return extension == ".scn";
 }
 
-duk::resource::Handle<Scene> SceneHandler::load_from_text(ScenePool* pool, const resource::Id& id, const std::string_view& text) {
+std::shared_ptr<Scene> SceneHandler::load_from_text(duk::tools::Globals* globals, const std::string_view& text) {
     auto scene = std::make_shared<Scene>();
     duk::serial::read_json(text, *scene);
-
-    return pool->insert(id, scene);
+    return scene;
 }
 
 }// namespace duk::engine

@@ -2,7 +2,7 @@
 // Created by Ricardo on 24/05/2024.
 //
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 struct Foo {
     float a;

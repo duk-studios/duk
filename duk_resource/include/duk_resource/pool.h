@@ -5,12 +5,12 @@
 #ifndef DUK_RESOURCE_POOL_H
 #define DUK_RESOURCE_POOL_H
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
-#include <cassert>
-#include <cstdint>
-#include <memory>
-#include <stdexcept>
+#include <duk_log/log.h>
+
+#include <duk_tools/types.h>
+
 #include <unordered_map>
 #include <vector>
 
@@ -19,112 +19,114 @@ namespace duk::resource {
 class Pool {
 public:
     virtual ~Pool();
+
     virtual void clean() = 0;
+
+    virtual bool contains(Id id) const = 0;
 };
 
-template<typename THandle>
-class PoolT : public Pool {
+template<typename T>
+class PoolT final : public Pool {
 public:
-    using Type = typename THandle::Type;
-
     void clean() override;
+
+    DUK_NO_DISCARD bool contains(Id id) const override;
 
     DUK_NO_DISCARD size_t size() const;
 
     DUK_NO_DISCARD bool empty() const;
 
-    DUK_NO_DISCARD THandle find(Id id) const;
+    DUK_NO_DISCARD Handle<T> find(Id id) const;
 
-    DUK_NO_DISCARD THandle find_or_default(Id id, const THandle& def) const;
+    DUK_NO_DISCARD Handle<T> find_or_default(Id id, const Handle<T>& def) const;
 
-    THandle insert(duk::resource::Id id, const std::shared_ptr<Type>& resource);
+    Handle<T> insert(duk::resource::Id id, const std::shared_ptr<T>& resource);
 
 private:
-    std::unordered_map<Id, THandle> m_objects;
+    std::unordered_map<Id, Handle<T>> m_resources;
 };
 
 class Pools {
 public:
     ~Pools();
 
-    template<typename T, typename... Args>
-    T* create_pool(Args&&... args)
-        requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>;
+    template<typename T>
+    DUK_NO_DISCARD PoolT<T>* get();
 
     template<typename T>
-    T* get()
-        requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>;
+    Handle<T> insert(Id id, const std::shared_ptr<T>& resource);
 
     template<typename T>
-    const T* get() const
-        requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>;
+    DUK_NO_DISCARD Handle<T> find(Id id) const;
+
+    DUK_NO_DISCARD bool contains(Id id) const;
 
     void clear();
 
 private:
+    static std::unordered_map<std::string, size_t>& pool_type_name_to_index();
+
     template<typename T>
     size_t pool_index() const;
 
 private:
-    static size_t s_poolIndexCounter;
     std::vector<std::unique_ptr<Pool>> m_pools;
 };
 
-template<typename T, typename... Args>
-T* Pools::create_pool(Args&&... args)
-    requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>
-{
-    const auto index = pool_index<typename T::Type>();
-    if (m_pools.size() <= index) {
+template<typename T>
+PoolT<T>* Pools::get() {
+    const auto index = pool_index<T>();
+    if (index >= m_pools.size()) {
         m_pools.resize(index + 1);
     }
 
     auto& pool = m_pools.at(index);
     if (!pool) {
-        pool = std::make_unique<T>(std::forward<Args>(args)...);
+        pool = std::make_unique<PoolT<T>>();
     }
-    return dynamic_cast<T*>(pool.get());
+
+    return static_cast<PoolT<T>*>(pool.get());
 }
 
 template<typename T>
-T* Pools::get()
-    requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>
-{
-    const auto index = pool_index<typename T::Type>();
-    if (index >= m_pools.size()) {
-        return nullptr;
-    }
-    return dynamic_cast<T*>(m_pools.at(index).get());
+Handle<T> Pools::insert(Id id, const std::shared_ptr<T>& resource) {
+    auto pool = get<T>();
+    return pool->insert(id, resource);
 }
 
 template<typename T>
-const T* Pools::get() const
-    requires std::is_base_of_v<PoolT<Handle<typename T::Type>>, T>
-{
-    const auto index = pool_index<typename T::Type>();
-    if (index >= m_pools.size()) {
-        return nullptr;
-    }
-    return dynamic_cast<const T*>(m_pools.at(index).get());
+Handle<T> Pools::find(Id id) const {
+    auto pool = get<T>();
+    return pool->find(id);
 }
 
 template<typename T>
 size_t Pools::pool_index() const {
-    static const auto index = s_poolIndexCounter++;
+    static const auto index = [] {
+        auto& typeNameToIndex = pool_type_name_to_index();
+        const auto& typeName = duk::tools::type_name_of<T>();
+        auto it = typeNameToIndex.find(typeName);
+        if (it != typeNameToIndex.end()) {
+            return it->second;
+        }
+        size_t index = typeNameToIndex.size();
+        typeNameToIndex[typeName] = index;
+        return index;
+    }();
     return index;
 }
 
-template<typename THandle>
-THandle PoolT<THandle>::find(Id id) const {
-    auto it = m_objects.find(id);
-    if (it == m_objects.end()) {
-        return THandle(id);
+template<typename T>
+Handle<T> PoolT<T>::find(Id id) const {
+    auto it = m_resources.find(id);
+    if (it == m_resources.end()) {
+        return Handle<T>(id);
     }
     return it->second;
 }
 
-template<typename THandle>
-THandle PoolT<THandle>::find_or_default(Id id, const THandle& def) const {
+template<typename T>
+Handle<T> PoolT<T>::find_or_default(Id id, const Handle<T>& def) const {
     auto it = find(id);
     if (it.valid()) {
         return it;
@@ -132,31 +134,39 @@ THandle PoolT<THandle>::find_or_default(Id id, const THandle& def) const {
     return def;
 }
 
-template<typename THandle>
-void PoolT<THandle>::clean() {
-    for (auto it = m_objects.cbegin(); it != m_objects.cend();) {
+template<typename T>
+void PoolT<T>::clean() {
+    for (auto it = m_resources.cbegin(); it != m_resources.cend();) {
         const auto& object = it->second;
         if (object.use_count() == 1) {
-            m_objects.erase(it++);
+            m_resources.erase(it++);
             continue;
         }
         ++it;
     }
 }
 
-template<typename THandle>
-size_t PoolT<THandle>::size() const {
-    return m_objects.size();
+template<typename T>
+bool PoolT<T>::contains(Id id) const {
+    return m_resources.contains(id);
 }
 
-template<typename THandle>
-bool PoolT<THandle>::empty() const {
+template<typename T>
+size_t PoolT<T>::size() const {
+    return m_resources.size();
+}
+
+template<typename T>
+bool PoolT<T>::empty() const {
     return size() == 0;
 }
 
-template<typename THandle>
-THandle PoolT<THandle>::insert(duk::resource::Id id, const std::shared_ptr<Type>& resource) {
-    auto [it, inserted] = m_objects.insert_or_assign(id, THandle(id, resource));
+template<typename T>
+Handle<T> PoolT<T>::insert(duk::resource::Id id, const std::shared_ptr<T>& resource) {
+    auto [it, inserted] = m_resources.insert_or_assign(id, Handle<T>(id, resource));
+    if (!inserted) {
+        duk::log::info("Resource with id {} already exists, replacing", id.value());
+    }
 
     return it->second;
 }

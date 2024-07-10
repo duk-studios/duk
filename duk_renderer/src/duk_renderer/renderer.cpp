@@ -4,19 +4,16 @@
 #include <duk_platform/window.h>
 #include <duk_renderer/mesh/mesh_buffer.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
-#include <duk_renderer/passes/forward_pass.h>
 #include <duk_renderer/passes/pass.h>
-#include <duk_renderer/passes/present_pass.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/sprite/sprite_cache.h>
 #include <duk_renderer/text/text_mesh_cache.h>
-#include <duk_rhi/image_data_source.h>
+#include <duk_renderer/builtins.h>
 
 namespace duk::renderer {
 
 Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
-    : m_window(rendererCreateInfo.window)
-    , m_pools(rendererCreateInfo.pools) {
+    : m_window(rendererCreateInfo.window) {
     {
         duk::rhi::RHICreateInfo rhiCreateInfo = {};
         rhiCreateInfo.window = rendererCreateInfo.window;
@@ -49,20 +46,15 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
         meshBufferPoolCreateInfo.rhi = m_rhi.get();
         meshBufferPoolCreateInfo.commandQueue = m_mainQueue.get();
 
-        m_meshBufferPool = std::make_unique<renderer::MeshBufferPool>(meshBufferPoolCreateInfo);
+        m_meshBufferPool = std::make_unique<MeshBufferPool>(meshBufferPoolCreateInfo);
     }
     {
         PipelineCacheCreateInfo pipelineCacheCreateInfo = {};
         pipelineCacheCreateInfo.renderer = this;
         m_pipelineCache = std::make_unique<PipelineCache>(pipelineCacheCreateInfo);
     }
-    {
-        SpriteCacheCreateInfo spriteCacheCreateInfo = {};
-        spriteCacheCreateInfo.renderer = this;
-
-        m_spriteCache = std::make_unique<SpriteCache>(spriteCacheCreateInfo);
-    }
-    { m_textMeshCache = std::make_unique<TextCache>(); }
+    m_spriteCache = std::make_unique<SpriteCache>();
+    m_textMeshCache = std::make_unique<TextCache>();
 }
 
 Renderer::~Renderer() = default;
@@ -77,7 +69,7 @@ void Renderer::render(duk::objects::Objects& objects) {
 
     update_global_descriptors(objects);
 
-    update_passes(objects, *m_pools);
+    update_passes(objects);
 
     m_rhi->update();
 
@@ -118,58 +110,12 @@ uint32_t Renderer::render_height() const {
     return m_window ? m_window->height() : 0;
 }
 
-std::shared_ptr<duk::rhi::Image> Renderer::create_depth_image(uint32_t width, uint32_t height) {
-    duk::rhi::ImageDataSourceEmpty depthImageDataSource(width, height, m_rhi->capabilities()->depth_format());
-    depthImageDataSource.update_hash();
-
-    duk::rhi::RHI::ImageCreateInfo depthImageCreateInfo = {};
-    depthImageCreateInfo.usage = duk::rhi::Image::Usage::DEPTH_STENCIL_ATTACHMENT;
-    depthImageCreateInfo.initialLayout = duk::rhi::Image::Layout::DEPTH_STENCIL_ATTACHMENT;
-    depthImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
-    depthImageCreateInfo.imageDataSource = &depthImageDataSource;
-    depthImageCreateInfo.commandQueue = m_mainQueue.get();
-    depthImageCreateInfo.dstStages = duk::rhi::PipelineStage::EARLY_FRAGMENT_TESTS;
-
-    auto expectedDepthImage = m_rhi->create_image(depthImageCreateInfo);
-
-    if (!expectedDepthImage) {
-        throw std::runtime_error("failed to create depth image!");
-    }
-
-    return expectedDepthImage;
-}
-
-std::shared_ptr<duk::rhi::Image> Renderer::create_color_image(uint32_t width, uint32_t height, duk::rhi::PixelFormat format) {
-    duk::rhi::ImageDataSourceEmpty colorImageDataSource(width, height, format);
-    colorImageDataSource.update_hash();
-
-    duk::rhi::RHI::ImageCreateInfo colorImageCreateInfo = {};
-    colorImageCreateInfo.usage = duk::rhi::Image::Usage::COLOR_ATTACHMENT;
-    colorImageCreateInfo.initialLayout = duk::rhi::Image::Layout::COLOR_ATTACHMENT;
-    colorImageCreateInfo.updateFrequency = duk::rhi::Image::UpdateFrequency::DEVICE_DYNAMIC;
-    colorImageCreateInfo.imageDataSource = &colorImageDataSource;
-    colorImageCreateInfo.commandQueue = m_mainQueue.get();
-    colorImageCreateInfo.dstStages = duk::rhi::PipelineStage::FRAGMENT_SHADER | duk::rhi::PipelineStage::COLOR_ATTACHMENT_OUTPUT;
-
-    auto expectedColorImage = m_rhi->create_image(colorImageCreateInfo);
-
-    if (!expectedColorImage) {
-        throw std::runtime_error("failed to create color image!");
-    }
-
-    return expectedColorImage;
-}
-
 duk::rhi::RHI* Renderer::rhi() const {
     return m_rhi.get();
 }
 
 duk::rhi::CommandQueue* Renderer::main_command_queue() const {
     return m_mainQueue.get();
-}
-
-duk::resource::Pools* Renderer::pools() const {
-    return m_pools;
 }
 
 GlobalDescriptors* Renderer::global_descriptors() const {
@@ -196,34 +142,15 @@ void Renderer::update_global_descriptors(duk::objects::Objects& objects) {
     m_globalDescriptors->update_lights(objects);
 }
 
-void Renderer::update_passes(objects::Objects& objects, duk::resource::Pools& pools) {
+void Renderer::update_passes(objects::Objects& objects) {
     Pass::UpdateParams updateParams = {};
     updateParams.objects = &objects;
     updateParams.globalDescriptors = m_globalDescriptors.get();
     updateParams.viewport = {render_width(), render_height()};
     updateParams.pipelineCache = m_pipelineCache.get();
-    updateParams.spriteCache = m_spriteCache.get();
-    updateParams.pools = &pools;
 
     for (auto& pass: m_passes) {
         pass->update(updateParams);
-    }
-}
-
-void add_forward_passes(Renderer* renderer, duk::platform::Window* window) {
-    ForwardPassCreateInfo forwardPassCreateInfo = {};
-    forwardPassCreateInfo.renderer = renderer;
-
-    auto forwardPass = renderer->add_pass<ForwardPass>(forwardPassCreateInfo);
-
-    if (window) {
-        PresentPassCreateInfo presentPassCreateInfo = {};
-        presentPassCreateInfo.renderer = renderer;
-        presentPassCreateInfo.window = window;
-
-        auto presentPass = renderer->add_pass<PresentPass>(presentPassCreateInfo);
-
-        forwardPass->out_color()->connect(presentPass->in_color());
     }
 }
 

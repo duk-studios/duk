@@ -3,14 +3,12 @@ project(duk_objects)
 set(DUK_OBJECTS_HEADERS
         include/duk_objects/events.h
         include/duk_objects/objects.h
-        include/duk_objects/objects_pool.h
         include/duk_objects/objects_handler.h
         include/duk_objects/register_types.h
 )
 
 set(DUK_OBJECTS_SOURCES
         src/duk_objects/objects.cpp
-        src/duk_objects/objects_pool.cpp
         src/duk_objects/objects_handler.cpp
         src/duk_objects/register_types.cpp
 )

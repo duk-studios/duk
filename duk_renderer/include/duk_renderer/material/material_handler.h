@@ -7,20 +7,20 @@
 
 #include <duk_resource/handler.h>
 
-#include <duk_renderer/material/material_pool.h>
+#include <duk_renderer/material/material.h>
 
 #include <filesystem>
 
 namespace duk::renderer {
 
-class MaterialHandler : public duk::resource::TextResourceHandlerT<MaterialPool> {
+class MaterialHandler : public duk::resource::TextHandlerT<Material> {
 public:
     explicit MaterialHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Material> load_from_text(MaterialPool* pool, const resource::Id& id, const std::string_view& text) override;
+    std::shared_ptr<Material> load_from_text(duk::tools::Globals* globals, const std::string_view& text) override;
 };
 
 }// namespace duk::renderer

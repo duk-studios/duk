@@ -11,16 +11,14 @@
 
 namespace duk::animation {
 
-class AnimationControllerPool : public duk::resource::PoolT<AnimationControllerResource> {};
-
-class AnimationControllerHandler : public duk::resource::TextResourceHandlerT<AnimationControllerPool> {
+class AnimationControllerHandler : public duk::resource::TextHandlerT<AnimationController> {
 public:
     AnimationControllerHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<AnimationController> load_from_text(AnimationControllerPool* pool, const resource::Id& id, const std::string_view& text) override;
+    std::shared_ptr<AnimationController> load_from_text(duk::tools::Globals* globals, const std::string_view& text) override;
 };
 
 }// namespace duk::animation

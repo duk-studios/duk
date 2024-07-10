@@ -1,10 +1,10 @@
 /// 04/03/2024
-/// resource.h
+/// handle.h
 
 #ifndef DUK_PROJECT_RESOURCE_H
 #define DUK_PROJECT_RESOURCE_H
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 #include <filesystem>
 #include <string>

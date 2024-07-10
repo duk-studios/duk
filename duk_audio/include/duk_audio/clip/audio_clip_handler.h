@@ -7,18 +7,18 @@
 
 #include <duk_resource/handler.h>
 
-#include <duk_audio/clip/audio_clip_pool.h>
+#include <duk_audio/clip/audio_clip.h>
 
 namespace duk::audio {
 
-class AudioClipHandler : public duk::resource::ResourceHandlerT<AudioClipPool> {
+class AudioClipHandler : public duk::resource::HandlerT<AudioClip> {
 public:
     AudioClipHandler();
 
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<AudioClip> load_from_memory(AudioClipPool* pool, const resource::Id& id, const void* data, size_t size) override;
+    std::shared_ptr<AudioClip> load_from_memory(duk::tools::Globals* globals, const void* data, size_t size) override;
 };
 
 }// namespace duk::audio

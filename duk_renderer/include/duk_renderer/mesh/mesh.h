@@ -6,7 +6,7 @@
 
 #include <duk_rhi/command/command_buffer.h>
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 namespace duk::renderer {
 

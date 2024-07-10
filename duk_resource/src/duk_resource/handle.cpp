@@ -2,7 +2,7 @@
 // Created by rov on 11/20/2023.
 //
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 namespace duk::resource {
 

@@ -9,7 +9,7 @@
 
 #include <duk_objects/objects.h>
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 namespace duk::animation {
 
