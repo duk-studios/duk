@@ -6,8 +6,7 @@
 
 #include <duk_objects/objects.h>
 
-#include <glm/gtc/quaternion.hpp>
-#include <glm/matrix.hpp>
+#include <duk_math/math.h>
 
 namespace duk::renderer {
 

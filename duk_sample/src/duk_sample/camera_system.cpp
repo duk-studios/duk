@@ -8,7 +8,7 @@
 #include <duk_renderer/components/transform.h>
 #include <duk_sample/camera_system.h>
 #include <duk_renderer/components/sprite_renderer.h>
-#include <glm/gtc/random.hpp>
+#include <duk_math/math.h>
 
 namespace duk::sample {
 

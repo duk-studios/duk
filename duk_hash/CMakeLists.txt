@@ -23,6 +23,7 @@ target_link_libraries(duk_hash
         PUBLIC
         duk_macros
         glm::glm
+        duk_math
         )
 
 set_target_properties(duk_hash PROPERTIES

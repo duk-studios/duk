@@ -6,9 +6,6 @@
 
 #include <duk_hash/hash.h>
 #include <duk_macros/macros.h>
-
-#include <glm/vec2.hpp>
-
 #include <cstdint>
 
 namespace duk::rhi {

@@ -3,7 +3,7 @@
 //
 
 #include <duk_renderer/mesh/static_mesh_builder.h>
-#include <glm/ext/scalar_constants.hpp>
+#include <duk_math/math.h>
 
 namespace duk::renderer {
 

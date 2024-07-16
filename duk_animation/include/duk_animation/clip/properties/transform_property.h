@@ -5,8 +5,6 @@
 #ifndef DUK_ANIMATION_TRANSFORM_PROPERTY_H
 #define DUK_ANIMATION_TRANSFORM_PROPERTY_H
 
-#include <glm/gtc/random.hpp>
-
 #include <duk_animation/clip/property.h>
 
 namespace duk::animation {
