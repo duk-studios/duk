@@ -2,13 +2,14 @@
 // Created by Ricardo on 07/04/2024.
 //
 
-#include <duk_engine/systems/canvas_system.h>
-#include <duk_engine/engine.h>
+#include <duk_platform/window.h>
+#include <duk_renderer/systems/canvas_system.h>
 
-namespace duk::engine {
+namespace duk::renderer {
 
 void CanvasUpdateSystem::attach() {
     listen_component<CanvasEnterEvent>(this);
+    listen_component<CanvasExitEvent>(this);
 }
 
 void CanvasUpdateSystem::update() {
@@ -29,4 +30,6 @@ void CanvasUpdateSystem::receive(const CanvasEnterEvent& event) {
     duk::renderer::update_canvas(event.component, window->width(), window->height());
 }
 
-}// namespace duk::engine
+void CanvasUpdateSystem::receive(const CanvasExitEvent& event) {
+}
+}// namespace duk::renderer

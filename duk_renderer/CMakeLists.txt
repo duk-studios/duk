@@ -66,6 +66,11 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/text/text_mesh.h
         include/duk_renderer/text/text_mesh_builder.h
         include/duk_renderer/text/text_mesh_cache.h
+        include/duk_renderer/systems/sprite_system.h
+        include/duk_renderer/systems/transform_system.h
+        include/duk_renderer/systems/text_system.h
+        include/duk_renderer/systems/camera_system.h
+        include/duk_renderer/systems/canvas_system.h
 )
 
 set(DUK_RENDERER_SOURCES
@@ -139,6 +144,11 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/text/text_mesh.cpp
         src/duk_renderer/text/text_mesh_builder.cpp
         src/duk_renderer/text/text_mesh_cache.cpp
+        src/duk_renderer/systems/transform_system.cpp
+        src/duk_renderer/systems/sprite_system.cpp
+        src/duk_renderer/systems/text_system.cpp
+        src/duk_renderer/systems/camera_system.cpp
+        src/duk_renderer/systems/canvas_system.cpp
 )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
@@ -157,6 +167,7 @@ target_link_libraries(duk_renderer
         duk_objects
         duk_rhi
         duk_resource
+        duk_system
         Freetype::Freetype
         )
 
