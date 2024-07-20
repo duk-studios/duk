@@ -14,15 +14,12 @@ namespace duk::renderer {
 class SpriteUpdateSystem : public duk::system::System {
 public:
     using SpriteRendererEnterEvent = objects::ComponentEnterEventT<duk::renderer::SpriteRenderer>;
-    using SpriteRendererExitEvent = objects::ComponentExitEventT<duk::renderer::SpriteRenderer>;
 
     void attach() override;
 
     void update() override;
 
     void receive(const SpriteRendererEnterEvent& event);
-
-    void receive(const SpriteRendererExitEvent& event);
 };
 
 }// namespace duk::renderer

@@ -9,7 +9,6 @@ namespace duk::renderer {
 
 void CanvasUpdateSystem::attach() {
     listen_component<CanvasEnterEvent>(this);
-    listen_component<CanvasExitEvent>(this);
 }
 
 void CanvasUpdateSystem::update() {
@@ -28,8 +27,5 @@ void CanvasUpdateSystem::update() {
 void CanvasUpdateSystem::receive(const CanvasEnterEvent& event) {
     const auto window = global<duk::platform::Window>();
     duk::renderer::update_canvas(event.component, window->width(), window->height());
-}
-
-void CanvasUpdateSystem::receive(const CanvasExitEvent& event) {
 }
 }// namespace duk::renderer

@@ -14,15 +14,12 @@ namespace duk::renderer {
 class TextUpdateSystem : public duk::system::System {
 public:
     using TextRendererEnterEvent = objects::ComponentEnterEventT<TextRenderer>;
-    using TextRendererExitEvent = objects::ComponentExitEventT<TextRenderer>;
 
     void attach();
 
     void update() override;
 
     void receive(const TextRendererEnterEvent& event);
-
-    void receive(const TextRendererExitEvent& event);
 };
 
 }// namespace duk::renderer

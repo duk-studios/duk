@@ -8,7 +8,6 @@ namespace duk::renderer {
 
 void SpriteUpdateSystem::attach() {
     listen_component<SpriteRendererEnterEvent>(this);
-    listen_component<SpriteRendererExitEvent>(this);
 }
 
 void SpriteUpdateSystem::update() {
@@ -19,8 +18,5 @@ void SpriteUpdateSystem::update() {
 
 void SpriteUpdateSystem::receive(const SpriteRendererEnterEvent& event) {
     duk::renderer::update_sprite_renderer(globals(), event.component);
-}
-
-void SpriteUpdateSystem::receive(const SpriteRendererExitEvent& event) {
 }
 }// namespace duk::renderer

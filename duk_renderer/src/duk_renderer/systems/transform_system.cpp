@@ -7,7 +7,6 @@ namespace duk::renderer {
 
 void TransformUpdateSystem::attach() {
     listen_component<TransformEnterEvent>(this);
-    listen_component<TransformExitEvent>(this);
 }
 
 void TransformUpdateSystem::update() {
@@ -16,9 +15,6 @@ void TransformUpdateSystem::update() {
 
 void TransformUpdateSystem::receive(const TransformEnterEvent& event) {
     duk::renderer::update_transform(event.component);
-}
-
-void TransformUpdateSystem::receive(const TransformExitEvent& event) {
 }
 
 }// namespace duk::renderer

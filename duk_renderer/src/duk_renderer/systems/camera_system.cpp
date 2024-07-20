@@ -10,12 +10,6 @@ namespace duk::renderer {
 
 void CameraUpdateSystem::attach() {
     listen_component<CameraEnterEvent>(this);
-    listen_component<CameraExitEvent>(this);
-}
-
-void CameraUpdateSystem::enter() {
-    auto renderer = global<duk::renderer::Renderer>();
-    duk::renderer::update_cameras(*objects(), renderer->render_width(), renderer->render_height());
 }
 
 void CameraUpdateSystem::update() {
@@ -24,10 +18,9 @@ void CameraUpdateSystem::update() {
 }
 
 void CameraUpdateSystem::receive(const CameraEnterEvent& event) {
+    auto camera = event.component;
+    auto perspectiveCamera = camera.component<duk::renderer::PerspectiveCamera>();
     auto renderer = global<duk::renderer::Renderer>();
-    duk::renderer::update_cameras(*objects(), renderer->render_width(), renderer->render_height());
-}
-
-void CameraUpdateSystem::receive(const CameraExitEvent& event) {
+    duk::renderer::update_camera(camera, perspectiveCamera, renderer->render_width(), renderer->render_height());
 }
 }// namespace duk::renderer
