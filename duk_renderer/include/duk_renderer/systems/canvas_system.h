@@ -2,18 +2,18 @@
 // Created by Ricardo on 07/04/2024.
 //
 
-#ifndef DUK_ENGINE_CANVAS_SYSTEM_H
-#define DUK_ENGINE_CANVAS_SYSTEM_H
+#ifndef DUK_RENDERER_CANVAS_SYSTEM_H
+#define DUK_RENDERER_CANVAS_SYSTEM_H
 
 #include <duk_system/system.h>
 #include <duk_objects/events.h>
 #include <duk_renderer/components/canvas.h>
 
-namespace duk::engine {
+namespace duk::renderer {
 
 class CanvasUpdateSystem : public duk::system::System {
 public:
-    using CanvasEnterEvent = duk::objects::ComponentEvent<duk::renderer::Canvas, duk::objects::ComponentEnterEvent>;
+    using CanvasEnterEvent = duk::objects::ComponentEnterEventT<duk::renderer::Canvas>;
 
     void attach() override;
 
@@ -22,6 +22,6 @@ public:
     void receive(const CanvasEnterEvent& event);
 };
 
-}// namespace duk::engine
+}// namespace duk::renderer
 
-#endif//DUK_ENGINE_CANVAS_SYSTEM_H
+#endif//DUK_RENDERER_CANVAS_SYSTEM_H

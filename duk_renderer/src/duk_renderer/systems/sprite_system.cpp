@@ -1,17 +1,13 @@
 //
 // Created by Ricardo on 02/06/2024.
 //
-#include <duk_engine/systems/sprite_system.h>
-#include <duk_engine/engine.h>
-
+#include <duk_renderer/systems/sprite_system.h>
 #include <duk_renderer/components/sprite_renderer.h>
 
-namespace duk::engine {
+namespace duk::renderer {
 
 void SpriteUpdateSystem::attach() {
-}
-
-void SpriteUpdateSystem::enter() {
+    listen_component<SpriteRendererEnterEvent>(this);
 }
 
 void SpriteUpdateSystem::update() {
@@ -20,7 +16,7 @@ void SpriteUpdateSystem::update() {
     }
 }
 
-void SpriteUpdateSystem::exit() {
+void SpriteUpdateSystem::receive(const SpriteRendererEnterEvent& event) {
+    duk::renderer::update_sprite_renderer(globals(), event.component);
 }
-
-}// namespace duk::engine
+}// namespace duk::renderer
