@@ -6,10 +6,7 @@
 #define DUK_HASH_COMMON_HASHES_H
 
 #include <duk_hash/hash_combine.h>
-
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
+#include <duk_math/math.h>
 
 namespace std {
 

@@ -7,31 +7,22 @@
 
 #include <duk_renderer/sprite/sprite.h>
 
+#include "duk_tools/globals.h"
+
 namespace duk::renderer {
 
 class Material;
 class SpriteMesh;
-class MeshBufferPool;
-
-struct SpriteCacheCreateInfo {
-    Renderer* renderer;
-};
 
 class SpriteCache {
 public:
-    explicit SpriteCache(const SpriteCacheCreateInfo& spriteCacheCreateInfo);
+    std::shared_ptr<Material> material_for(duk::tools::Globals* globals, Sprite* atlas);
 
-    ~SpriteCache();
-
-    std::shared_ptr<Material> material_for(Sprite* atlas);
-
-    std::shared_ptr<SpriteMesh> mesh_for(Sprite* atlas, uint32_t index);
+    std::shared_ptr<SpriteMesh> mesh_for(duk::tools::Globals* globals, Sprite* atlas, uint32_t index);
 
     void clear();
 
 private:
-    Renderer* m_renderer;
-    std::unique_ptr<MeshBufferPool> m_meshBufferPool;
     std::unordered_map<duk::hash::Hash, std::shared_ptr<Material>> m_materials;
     std::unordered_map<duk::hash::Hash, std::shared_ptr<SpriteMesh>> m_meshes;
 };

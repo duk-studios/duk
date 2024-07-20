@@ -5,8 +5,7 @@
 #define DUK_RENDERER_CAMERA_H
 
 #include <duk_objects/objects.h>
-
-#include <glm/mat4x4.hpp>
+#include <duk_math/math.h>
 
 namespace duk::renderer {
 

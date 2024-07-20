@@ -21,6 +21,7 @@
       <file path="$PROJECT_DIR$/duk_json" />
       <file path="$PROJECT_DIR$/duk_log" />
       <file path="$PROJECT_DIR$/duk_macros" />
+      <file path="$PROJECT_DIR$/duk_math" />
       <file path="$PROJECT_DIR$/duk_objects" />
       <file path="$PROJECT_DIR$/duk_platform" />
       <file path="$PROJECT_DIR$/duk_project" />

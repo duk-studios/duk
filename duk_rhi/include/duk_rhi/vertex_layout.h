@@ -8,9 +8,7 @@
 #include <duk_hash/hash.h>
 #include <duk_macros/macros.h>
 
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
+#include <duk_math/math.h>
 
 #include <cstdint>
 #include <vector>

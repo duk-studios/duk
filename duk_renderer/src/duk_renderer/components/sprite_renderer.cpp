@@ -12,7 +12,8 @@
 
 namespace duk::renderer {
 
-void update_sprite_renderer(const Renderer* renderer, const duk::objects::Component<SpriteRenderer>& spriteRenderer) {
+void update_sprite_renderer(duk::tools::Globals* globals, const duk::objects::Component<SpriteRenderer>& spriteRenderer) {
+    auto renderer = globals->get<Renderer>();
     auto cache = renderer->sprite_cache();
     auto spriteObject = spriteRenderer.object();
     auto [meshSlot, materialSlot] = spriteObject.components<MeshSlot, MaterialSlot>();
@@ -22,8 +23,8 @@ void update_sprite_renderer(const Renderer* renderer, const duk::objects::Compon
     if (!materialSlot) {
         materialSlot = spriteObject.add<MaterialSlot>();
     }
-    materialSlot->material = cache->material_for(spriteRenderer->sprite.get());
-    meshSlot->mesh = cache->mesh_for(spriteRenderer->sprite.get(), spriteRenderer->index);
+    materialSlot->material = cache->material_for(globals, spriteRenderer->sprite.get());
+    meshSlot->mesh = cache->mesh_for(globals, spriteRenderer->sprite.get(), spriteRenderer->index);
 }
 
 }// namespace duk::renderer

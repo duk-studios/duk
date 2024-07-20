@@ -2,8 +2,6 @@
 #define DUK_RENDERER_CAMERA_TYPES_H
 
 #include <duk_renderer/material/uniform_buffer.h>
-#include <duk_renderer/material/storage_buffer.h>
-#include <glm/glm.hpp>
 
 namespace duk::renderer::globals {
 

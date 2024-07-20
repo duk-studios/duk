@@ -5,7 +5,7 @@
 #ifndef DUK_RESOURCE_FILE_H
 #define DUK_RESOURCE_FILE_H
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 #include <duk_serial/json/types.h>
 

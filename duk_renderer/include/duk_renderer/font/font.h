@@ -7,7 +7,7 @@
 
 #include <duk_renderer/font/font_atlas.h>
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 namespace duk::renderer {
 

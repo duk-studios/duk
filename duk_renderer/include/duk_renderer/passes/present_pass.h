@@ -13,9 +13,10 @@ namespace duk::renderer {
 class ShaderPipelinePool;
 
 struct PresentPassCreateInfo {
-    Renderer* renderer;
-    ShaderPipelinePool* shaderPipelinePool;
+    duk::rhi::RHI* rhi;
+    duk::rhi::CommandQueue* commandQueue;
     duk::platform::Window* window;
+    duk::resource::Handle<ShaderPipeline> shader;
 };
 
 class PresentPass : public Pass {
@@ -31,8 +32,7 @@ public:
     PassConnection* in_color();
 
 private:
-    Renderer* m_renderer;
-    duk::event::Listener m_listener;
+    duk::rhi::RHI* m_rhi;
     PassConnection m_inColor;
     std::shared_ptr<duk::rhi::RenderPass> m_renderPass;
     std::shared_ptr<duk::rhi::FrameBuffer> m_frameBuffer;

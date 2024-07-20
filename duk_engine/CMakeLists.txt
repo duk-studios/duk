@@ -11,13 +11,7 @@ set(DUK_ENGINE_HEADERS
         include/duk_engine/director.h
         include/duk_engine/register_types.h
         include/duk_engine/scene/scene.h
-        include/duk_engine/scene/scene_pool.h
         include/duk_engine/scene/scene_handler.h
-        include/duk_engine/systems/camera_system.h
-        include/duk_engine/systems/canvas_system.h
-        include/duk_engine/systems/sprite_system.h
-        include/duk_engine/systems/text_system.h
-        include/duk_engine/systems/transform_system.h
 )
 
 set(DUK_ENGINE_SOURCES
@@ -27,14 +21,9 @@ set(DUK_ENGINE_SOURCES
         src/duk_engine/director.cpp
         src/duk_engine/register_types.cpp
         src/duk_engine/scene/scene.cpp
-        src/duk_engine/scene/scene_pool.cpp
         src/duk_engine/scene/scene_handler.cpp
-        src/duk_engine/systems/camera_system.cpp
-        src/duk_engine/systems/canvas_system.cpp
-        src/duk_engine/systems/sprite_system.cpp
-        src/duk_engine/systems/text_system.cpp
-        src/duk_engine/systems/transform_system.cpp
 )
+
 
 add_library(duk_engine STATIC ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})
 add_library(duk::duk_engine ALIAS duk_engine)

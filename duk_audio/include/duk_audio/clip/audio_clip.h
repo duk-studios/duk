@@ -8,7 +8,7 @@
 #include <duk_audio/audio_buffer.h>
 #include <duk_audio/decode.h>
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 #include <memory>
 

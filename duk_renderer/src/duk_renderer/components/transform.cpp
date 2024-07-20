@@ -5,8 +5,6 @@
 #include <duk_renderer/components/material_slot.h>
 #include <duk_renderer/material/material.h>
 
-#include <glm/gtc/matrix_transform.hpp>
-
 namespace duk::renderer {
 
 namespace detail {

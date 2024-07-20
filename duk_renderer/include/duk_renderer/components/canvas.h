@@ -7,8 +7,6 @@
 
 #include <duk_objects/objects.h>
 
-#include <glm/glm.hpp>
-
 namespace duk::renderer {
 
 struct Canvas {

@@ -6,7 +6,7 @@
 #define DUK_INPUT_H
 
 #include <duk_platform/window.h>
-#include <glm/vec2.hpp>
+#include <duk_math/math.h>
 #include <set>
 
 namespace duk::engine {

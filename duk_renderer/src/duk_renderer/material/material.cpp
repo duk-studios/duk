@@ -3,8 +3,8 @@
 
 #include <duk_renderer/material/material.h>
 #include <duk_renderer/renderer.h>
-#include <duk_renderer/shader/shader_pipeline_pool.h>
-#include <duk_renderer/image/image_pool.h>
+#include <duk_renderer/shader/shader_pipeline_builtins.h>
+#include <duk_renderer/image/image_builtins.h>
 
 namespace duk::renderer {
 
@@ -151,7 +151,8 @@ bool MaterialLocationId::valid() const {
 }
 
 Material::Material(const MaterialCreateInfo& materialCreateInfo)
-    : m_renderer(materialCreateInfo.renderer)
+    : m_rhi(materialCreateInfo.rhi)
+    , m_commandQueue(materialCreateInfo.commandQueue)
     , m_shader(materialCreateInfo.materialData.shader)
     , m_bindings(std::move(materialCreateInfo.materialData.bindings))
     , m_instanceCount(0)
@@ -343,15 +344,13 @@ void Material::bind(duk::rhi::CommandBuffer* commandBuffer) const {
 }
 
 void Material::init() {
-    auto rhi = m_renderer->rhi();
-    auto commandQueue = m_renderer->main_command_queue();
     // create descriptor set
     const auto& descriptorSetDescription = m_shader->descriptor_set_description();
 
     {
         duk::rhi::RHI::DescriptorSetCreateInfo descriptorSetCreateInfo = {};
         descriptorSetCreateInfo.description = descriptorSetDescription;
-        m_descriptorSet = rhi->create_descriptor_set(descriptorSetCreateInfo);
+        m_descriptorSet = m_rhi->create_descriptor_set(descriptorSetCreateInfo);
     }
 
     // initialize descriptors
@@ -370,8 +369,8 @@ void Material::init() {
         switch (binding.type) {
             case BindingType::UNIFORM: {
                 MaterialBufferCreateInfo materialBufferCreateInfo = {};
-                materialBufferCreateInfo.rhi = rhi;
-                materialBufferCreateInfo.commandQueue = commandQueue;
+                materialBufferCreateInfo.rhi = m_rhi;
+                materialBufferCreateInfo.commandQueue = m_commandQueue;
                 materialBufferCreateInfo.description = descriptorDescription;
                 m_uniformBuffers[bindingIndex] = std::make_unique<MaterialUniformBuffer>(materialBufferCreateInfo);
                 detail::set_buffer_members(this, binding, bindingIndex, descriptorDescription);
@@ -380,8 +379,8 @@ void Material::init() {
             }
             case BindingType::INSTANCE: {
                 MaterialInstanceBufferCreateInfo instanceBufferCreateInfo = {};
-                instanceBufferCreateInfo.rhi = rhi;
-                instanceBufferCreateInfo.commandQueue = commandQueue;
+                instanceBufferCreateInfo.rhi = m_rhi;
+                instanceBufferCreateInfo.commandQueue = m_commandQueue;
                 instanceBufferCreateInfo.description = descriptorSetDescription.bindings[bindingIndex];
                 instanceBufferCreateInfo.instanceCount = 1;
                 m_instanceBuffers[bindingIndex] = std::make_unique<MaterialInstanceBuffer>(instanceBufferCreateInfo);
@@ -406,12 +405,16 @@ void Material::init() {
     m_dirty = true;
 }
 
-std::shared_ptr<Material> create_color_material(Renderer* renderer, bool transparent) {
-    auto pools = renderer->pools();
-    auto shaderPool = pools->get<ShaderPipelinePool>();
+std::shared_ptr<Material> create_color_material(Renderer* renderer, Builtins* builtins, bool transparent) {
+    const auto shaderPipelines = builtins->shader_pipelines();
+
     MaterialData materialData = {};
-    materialData.shader = transparent ? shaderPool->transparent_color() : shaderPool->opaque_color();
+    materialData.shader = transparent ? shaderPipelines->transparent_color() : shaderPipelines->opaque_color();
+
     detail::add_transform_binding(materialData);
+
+    const auto images = builtins->images();
+
     {
         auto& properties = materialData.bindings.emplace_back();
         properties.name = "uProperties";
@@ -431,9 +434,9 @@ std::shared_ptr<Material> create_color_material(Renderer* renderer, bool transpa
         auto& baseColor = materialData.bindings.emplace_back();
         baseColor.type = BindingType::IMAGE_SAMPLER;
         baseColor.name = "uBaseColor";
-        baseColor.data = [&pools]() -> std::unique_ptr<BindingData> {
+        baseColor.data = [images]() -> std::unique_ptr<BindingData> {
             auto imageSamplerBinding = std::make_unique<ImageSamplerBinding>();
-            imageSamplerBinding->image = pools->get<ImagePool>()->white_image();
+            imageSamplerBinding->image = images->white();
             imageSamplerBinding->sampler = kDefaultTextureSampler;
             return imageSamplerBinding;
         }();
@@ -441,15 +444,19 @@ std::shared_ptr<Material> create_color_material(Renderer* renderer, bool transpa
 
     MaterialCreateInfo materialCreateInfo = {};
     materialCreateInfo.materialData = std::move(materialData);
-    materialCreateInfo.renderer = renderer;
+    materialCreateInfo.rhi = renderer->rhi();
+    materialCreateInfo.commandQueue = renderer->main_command_queue();
 
     return std::make_shared<Material>(materialCreateInfo);
 }
 
-std::shared_ptr<Material> create_phong_material(Renderer* renderer) {
-    auto pools = renderer->pools();
+std::shared_ptr<Material> create_phong_material(Renderer* renderer, Builtins* builtins) {
+    const auto shaderPipelines = builtins->shader_pipelines();
     MaterialData materialData = {};
-    materialData.shader = pools->get<ShaderPipelinePool>()->opaque_phong();
+    materialData.shader = shaderPipelines->opaque_phong();
+
+    const auto images = builtins->images();
+
     detail::add_transform_binding(materialData);
     {
         auto& properties = materialData.bindings.emplace_back();
@@ -488,9 +495,9 @@ std::shared_ptr<Material> create_phong_material(Renderer* renderer) {
         auto& baseColor = materialData.bindings.emplace_back();
         baseColor.type = BindingType::IMAGE_SAMPLER;
         baseColor.name = "uBaseColor";
-        baseColor.data = [&pools]() -> std::unique_ptr<BindingData> {
+        baseColor.data = [images]() -> std::unique_ptr<BindingData> {
             auto imageSamplerBinding = std::make_unique<ImageSamplerBinding>();
-            imageSamplerBinding->image = pools->get<ImagePool>()->white_image();
+            imageSamplerBinding->image = images->white();
             imageSamplerBinding->sampler = kDefaultTextureSampler;
             return imageSamplerBinding;
         }();
@@ -499,9 +506,9 @@ std::shared_ptr<Material> create_phong_material(Renderer* renderer) {
         auto& specular = materialData.bindings.emplace_back();
         specular.type = BindingType::IMAGE_SAMPLER;
         specular.name = "uSpecular";
-        specular.data = [&pools]() -> std::unique_ptr<BindingData> {
+        specular.data = [images]() -> std::unique_ptr<BindingData> {
             auto imageSamplerBinding = std::make_unique<ImageSamplerBinding>();
-            imageSamplerBinding->image = pools->get<ImagePool>()->white_image();
+            imageSamplerBinding->image = images->white();
             imageSamplerBinding->sampler = kDefaultTextureSampler;
             return imageSamplerBinding;
         }();
@@ -510,9 +517,9 @@ std::shared_ptr<Material> create_phong_material(Renderer* renderer) {
         auto& emissive = materialData.bindings.emplace_back();
         emissive.type = BindingType::IMAGE_SAMPLER;
         emissive.name = "uEmissive";
-        emissive.data = [&pools]() -> std::unique_ptr<BindingData> {
+        emissive.data = [images]() -> std::unique_ptr<BindingData> {
             auto imageSamplerBinding = std::make_unique<ImageSamplerBinding>();
-            imageSamplerBinding->image = pools->get<ImagePool>()->black_image();
+            imageSamplerBinding->image = images->black();
             imageSamplerBinding->sampler = kDefaultTextureSampler;
             return imageSamplerBinding;
         }();
@@ -520,15 +527,19 @@ std::shared_ptr<Material> create_phong_material(Renderer* renderer) {
 
     MaterialCreateInfo materialCreateInfo = {};
     materialCreateInfo.materialData = std::move(materialData);
-    materialCreateInfo.renderer = renderer;
+    materialCreateInfo.rhi = renderer->rhi();
+    materialCreateInfo.commandQueue = renderer->main_command_queue();
 
     return std::make_shared<Material>(materialCreateInfo);
 }
 
-std::shared_ptr<Material> create_text_material(Renderer* renderer) {
-    auto pools = renderer->pools();
+std::shared_ptr<Material> create_text_material(Renderer* renderer, Builtins* builtins) {
+    const auto shaderPipelines = builtins->shader_pipelines();
     MaterialData materialData = {};
-    materialData.shader = pools->get<ShaderPipelinePool>()->text();
+    materialData.shader = shaderPipelines->text();
+
+    const auto images = builtins->images();
+
     detail::add_transform_binding(materialData);
     {
         auto& properties = materialData.bindings.emplace_back();
@@ -549,9 +560,9 @@ std::shared_ptr<Material> create_text_material(Renderer* renderer) {
         auto& baseColor = materialData.bindings.emplace_back();
         baseColor.type = BindingType::IMAGE_SAMPLER;
         baseColor.name = "uBaseColor";
-        baseColor.data = [&pools]() -> std::unique_ptr<BindingData> {
+        baseColor.data = [images]() -> std::unique_ptr<BindingData> {
             auto imageSamplerBinding = std::make_unique<ImageSamplerBinding>();
-            imageSamplerBinding->image = pools->get<ImagePool>()->white_image();
+            imageSamplerBinding->image = images->white();
             imageSamplerBinding->sampler = kDefaultTextureSampler;
             return imageSamplerBinding;
         }();
@@ -559,7 +570,8 @@ std::shared_ptr<Material> create_text_material(Renderer* renderer) {
 
     MaterialCreateInfo materialCreateInfo = {};
     materialCreateInfo.materialData = std::move(materialData);
-    materialCreateInfo.renderer = renderer;
+    materialCreateInfo.rhi = renderer->rhi();
+    materialCreateInfo.commandQueue = renderer->main_command_queue();
 
     return std::make_shared<Material>(materialCreateInfo);
 }

@@ -8,8 +8,7 @@
 #include <duk_serial/json/rapidjson_import.h>
 
 #include <fmt/format.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <duk_math/math.h>
 
 #include <set>
 #include <vector>

@@ -8,7 +8,7 @@
 namespace duk::renderer {
 
 FontHandler::FontHandler()
-    : ResourceHandlerT("fnt") {
+    : HandlerT("fnt") {
     m_loaders.emplace_back(std::make_unique<FreetypeFontLoader>());
 }
 
@@ -18,13 +18,13 @@ bool FontHandler::accepts(const std::string& extension) const {
     });
 }
 
-duk::resource::Handle<Font> FontHandler::load_from_memory(FontPool* pool, const resource::Id& id, const void* data, size_t size) {
+std::shared_ptr<Font> FontHandler::load_from_memory(duk::tools::Globals* globals, const void* data, size_t size) {
     for (auto& loader: m_loaders) {
         if (loader->accepts(data, size)) {
-            return pool->insert(id, loader->load(data, size));
+            return loader->load(data, size);
         }
     }
-    throw std::runtime_error(fmt::format("failed to find font loader for {}", id.value()));
+    throw std::runtime_error("failed to find font loader for memory data");
 }
 
 }// namespace duk::renderer

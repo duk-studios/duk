@@ -6,7 +6,7 @@
 
 #include <duk_resource/handler.h>
 
-#include <duk_renderer/image/image_pool.h>
+#include <duk_renderer/image/image_builtins.h>
 #include <duk_renderer/renderer.h>
 
 #include <duk_rhi/image_data_source.h>
@@ -26,7 +26,7 @@ public:
     virtual std::unique_ptr<duk::rhi::ImageDataSource> load(const void* data, size_t size) = 0;
 };
 
-class ImageHandler : public duk::resource::ResourceHandlerT<ImagePool> {
+class ImageHandler : public duk::resource::HandlerT<Image> {
 public:
     static std::unique_ptr<duk::rhi::ImageDataSource> create(const void* data, duk::rhi::PixelFormat format, uint32_t width, uint32_t height);
 
@@ -35,7 +35,7 @@ public:
     bool accepts(const std::string& extension) const override;
 
 protected:
-    duk::resource::Handle<Image> load_from_memory(ImagePool* pool, const resource::Id& id, const void* data, size_t size) override;
+    std::shared_ptr<Image> load_from_memory(duk::tools::Globals* globals, const void* data, size_t size) override;
 
 private:
     std::vector<std::unique_ptr<ImageLoader>> m_loaders;

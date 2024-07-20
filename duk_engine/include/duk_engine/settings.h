@@ -4,7 +4,7 @@
 #ifndef DUK_ENGINE_SETTINGS_H
 #define DUK_ENGINE_SETTINGS_H
 
-#include <duk_resource/set.h>
+#include <duk_resource/resources.h>
 #include <glm/vec2.hpp>
 #include <string>
 

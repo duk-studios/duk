@@ -5,7 +5,7 @@
 #ifndef DUK_RENDERER_SPRITE_H
 #define DUK_RENDERER_SPRITE_H
 
-#include <duk_renderer/image/image_pool.h>
+#include <duk_renderer/image/image_builtins.h>
 
 namespace duk::renderer {
 

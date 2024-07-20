@@ -4,7 +4,7 @@
 #ifndef DUK_RENDERER_IMAGE_H
 #define DUK_RENDERER_IMAGE_H
 
-#include <duk_resource/resource.h>
+#include <duk_resource/handle.h>
 
 #include <duk_rhi/descriptor.h>
 #include <duk_rhi/image.h>
