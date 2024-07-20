@@ -10,7 +10,7 @@
 #include <duk_animation/clip/properties/transform_property.h>
 #include <duk_animation/clip/properties/canvas_property.h>
 #include <duk_animation/controller/animation_controller_handler.h>
-
+#include <duk_objects/object_solver.h>
 #include <duk_engine/register_types.h>
 #include <duk_serial/json/serializer.h>
 

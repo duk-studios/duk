@@ -18,7 +18,8 @@
           "controller": 11638404355231501488
         },
         {
-          "type": "duk::sample::SpriteAnimator"
+          "type": "duk::sample::SpriteAnimator",
+          "animator": 0
         },
         {
           "type": "duk::sample::Temporary",

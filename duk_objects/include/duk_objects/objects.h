@@ -18,6 +18,8 @@
 
 #include <array>
 
+#include <duk_hash/hash_combine.h>
+
 namespace duk::objects {
 
 namespace detail {
@@ -175,6 +177,8 @@ public:
 
     ComponentHandle(const Id& ownerId, ObjectsType* objects);
 
+    ComponentHandle(uint32_t index, uint32_t version, ObjectsType* objects);
+
     ComponentHandle(const ObjectHandle<isConst>& owner);
 
     ComponentHandle();
@@ -230,6 +234,8 @@ using Component = ComponentHandle<T, false>;
 template<typename T>
 using ConstComponent = ComponentHandle<T, true>;
 
+class ObjectSolver;
+
 class ComponentRegistry {
 private:
     // Unfortunately we have to duplicate the solve method for each solver type.
@@ -244,6 +250,8 @@ private:
         virtual void solve(duk::resource::ReferenceSolver* solver, ObjectHandle<false>& object) = 0;
 
         virtual void solve(duk::resource::DependencySolver* solver, ObjectHandle<false>& object) = 0;
+
+        virtual void solve(ObjectSolver* solver, ObjectHandle<false>& object) = 0;
 
         virtual void from_json(const rapidjson::Value& json, ObjectHandle<false>& object) = 0;
 
@@ -265,13 +273,16 @@ private:
 
         void solve(duk::resource::ReferenceSolver* solver, ObjectHandle<false>& object) override {
             auto component = ComponentHandle<T, false>(object);
-            solver->solve(component);
+            solver->solve(*component);
         }
 
         void solve(duk::resource::DependencySolver* solver, ObjectHandle<false>& object) override {
             auto component = ComponentHandle<T, false>(object);
-            solver->solve(component);
+            solver->solve(*component);
         }
+
+        // has to be implemented on a different file, otherwise our entire hacky-template stuff would break
+        void solve(ObjectSolver* solver, ObjectHandle<false>& object) override;
 
         void from_json(const rapidjson::Value& json, ObjectHandle<false>& object) override {
             duk::serial::from_json(json, *object.add<T>());
@@ -555,6 +566,8 @@ public:
 
     void update(ComponentEventDispatcher& dispatcher);
 
+    friend void duk::serial::from_json<Objects>(const rapidjson::Value& json, Objects& objects);
+
 private:
     template<typename T>
     detail::ComponentPoolT<T>* pool() const;
@@ -568,6 +581,8 @@ private:
     void add_component(uint32_t index, uint32_t componentIndex);
 
     void remove_component(uint32_t index, uint32_t componentIndex);
+
+    void solve_references();
 
 private:
     struct ComponentEntry {
@@ -734,6 +749,12 @@ std::tuple<ComponentHandle<Ts, isConst>...> ObjectHandle<isConst>::components_or
 template<typename T, bool isConst>
 ComponentHandle<T, isConst>::ComponentHandle(const Id& ownerId, ObjectsType* objects)
     : m_ownerId(ownerId)
+    , m_objects(objects) {
+}
+
+template<typename T, bool isConst>
+ComponentHandle<T, isConst>::ComponentHandle(uint32_t index, uint32_t version, ObjectsType* objects)
+    : m_ownerId(index, version)
     , m_objects(objects) {
 }
 
@@ -1195,46 +1216,67 @@ void ComponentEventListener::listen(Derived* derived) {
 namespace duk::serial {
 
 template<>
-inline void from_json<duk::objects::ObjectHandle<false>>(const rapidjson::Value& json, duk::objects::ObjectHandle<false>& object) {
-    DUK_ASSERT(json.IsObject());
-    auto jsonComponentsArray = json["components"].GetArray();
-    for (auto& jsonComponent: jsonComponentsArray) {
-        std::string type;
-        from_json_member(jsonComponent, "type", type);
-        objects::ComponentRegistry::instance()->from_json(jsonComponent, object, type);
-    }
+inline void from_json<duk::objects::Object>(const rapidjson::Value& json, duk::objects::Object& object) {
+    DUK_ASSERT(json.IsUint());
+    uint32_t index;
+    from_json(json, index);
+    object = duk::objects::Object(index, 0, nullptr);
 }
 
 template<>
-inline void to_json<duk::objects::ObjectHandle<true>>(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::ObjectHandle<true>& object) {
-    rapidjson::Value jsonComponents;
-    auto jsonComponentsArray = jsonComponents.SetArray().GetArray();
-    auto registry = objects::ComponentRegistry::instance();
-    for (auto componentIndex: object.component_mask().bits<true>()) {
-        rapidjson::Value jsonComponent;
-        registry->to_json(document, jsonComponent, object, componentIndex);
-        jsonComponentsArray.PushBack(jsonComponent, document.GetAllocator());
-    }
-    json.SetObject();
-    json.AddMember("components", std::move(jsonComponentsArray), document.GetAllocator());
+inline void to_json<duk::objects::ConstObject>(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::ConstObject& object) {
+    DUK_ASSERT(false && "Not supported at the moment, we need to 'normalize' object indices before serializing them");
+}
+
+template<typename T>
+void from_json(const rapidjson::Value& json, duk::objects::Component<T>& component) {
+    DUK_ASSERT(json.IsUint());
+    uint32_t index;
+    from_json(json, index);
+    component = duk::objects::Component<T>(index, 0, nullptr);
+}
+
+template<typename T>
+void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::ConstComponent<T>& component) {
+    DUK_ASSERT(false && "Not supported at the moment, we need to 'normalize' object indices before serializing them");
 }
 
 template<>
 inline void from_json<duk::objects::Objects>(const rapidjson::Value& json, duk::objects::Objects& objects) {
     DUK_ASSERT(json.IsArray());
+    auto componentRegistry = objects::ComponentRegistry::instance();
     auto jsonArray = json.GetArray();
     for (auto& jsonElement: jsonArray) {
+        DUK_ASSERT(jsonElement.IsObject());
         auto object = objects.add_object();
-        from_json(jsonElement, object);
+        auto jsonComponentsArray = jsonElement["components"].GetArray();
+        for (auto& jsonComponent: jsonComponentsArray) {
+            std::string type;
+            from_json_member(jsonComponent, "type", type);
+            componentRegistry->from_json(jsonComponent, object, type);
+        }
     }
+    objects.solve_references();
 }
 
 template<>
 inline void to_json<duk::objects::Objects>(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Objects& objects) {
     auto jsonArray = json.SetArray().GetArray();
+    auto componentRegistry = objects::ComponentRegistry::instance();
     for (auto object: objects.all()) {
         rapidjson::Value jsonElement;
-        to_json(document, jsonElement, object);
+        {
+            rapidjson::Value jsonComponents;
+            auto jsonComponentsArray = jsonComponents.SetArray().GetArray();
+            auto mask = object.component_mask();
+            for (auto componentIndex: mask.bits<true>()) {
+                rapidjson::Value jsonComponent;
+                componentRegistry->to_json(document, jsonComponent, object, componentIndex);
+                jsonComponentsArray.PushBack(jsonComponent, document.GetAllocator());
+            }
+            jsonElement.SetObject();
+            jsonElement.AddMember("components", std::move(jsonComponents), document.GetAllocator());
+        }
         jsonArray.PushBack(std::move(jsonElement), document.GetAllocator());
     }
 }
@@ -1243,29 +1285,32 @@ inline void to_json<duk::objects::Objects>(rapidjson::Document& document, rapidj
 
 namespace duk::resource {
 
-template<typename Solver, typename T>
-void solve_resources(Solver* solver, duk::objects::ComponentHandle<T, false>& component) {
-    solver->solve(*component);
-}
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::objects::ObjectHandle<false>& object) {
-    auto componentRegistry = duk::objects::ComponentRegistry::instance();
-
-    const auto& componentMask = object.component_mask();
-
-    for (auto componentId: componentMask.bits<true>()) {
-        componentRegistry->solve(solver, object, componentId);
-    }
-}
-
 template<typename Solver>
 void solve_resources(Solver* solver, duk::objects::Objects& objects) {
+    auto componentRegistry = duk::objects::ComponentRegistry::instance();
     for (auto object: objects.all(true)) {
-        solver->solve(object);
+        const auto& componentMask = object.component_mask();
+
+        for (auto componentId: componentMask.bits<true>()) {
+            componentRegistry->solve(solver, object, componentId);
+        }
     }
 }
 
 }// namespace duk::resource
+
+namespace std {
+
+template<>
+struct hash<duk::objects::Id> {
+    std::size_t operator()(const duk::objects::Id& id) const noexcept {
+        std::size_t hash = 0;
+        duk::hash::hash_combine(hash, id.index());
+        duk::hash::hash_combine(hash, id.version());
+        return hash;
+    }
+};
+
+}// namespace std
 
 #endif// DUK_OBJECTS_OBJECTS_H

@@ -17,6 +17,7 @@
 #include <duk_renderer/sprite/sprite_handler.h>
 #include <duk_renderer/register_types.h>
 #include <duk_objects/register_types.h>
+#include <duk_objects/object_solver.h>
 
 #include <duk_serial/json/serializer.h>
 
