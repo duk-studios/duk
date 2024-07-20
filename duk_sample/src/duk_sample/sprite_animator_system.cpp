@@ -21,12 +21,12 @@ void SpriteAnimatorSystem::update() {
     auto rotating = input->key_down(platform::Keys::G);
     auto scaling = input->key_down(platform::Keys::H);
 
-    for (auto [spriteAnimator, animator]: all_components_of<SpriteAnimator, duk::animation::Animator>()) {
+    for (auto [spriteAnimator]: all_components_of<SpriteAnimator>()) {
         if (rotating) {
-            animator->state.variables.set("rotating", true);
+            spriteAnimator->animator->state.variables.set("rotating", true);
         }
         if (scaling) {
-            animator->state.variables.set("scaling", true);
+            spriteAnimator->animator->state.variables.set("scaling", true);
         }
     }
 }

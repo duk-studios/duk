@@ -8,10 +8,13 @@
 #include <duk_objects/events.h>
 #include <duk_system/system.h>
 
+#include <duk_renderer/components/text_renderer.h>
+
 namespace duk::sample {
 
 struct Stats {
     uint32_t sampleCount;
+    duk::objects::Component<duk::renderer::TextRenderer> textObject;
     std::vector<float> fpsSamples;
     uint32_t currentSample = 0;
 };
@@ -34,13 +37,24 @@ namespace duk::serial {
 template<>
 inline void from_json<duk::sample::Stats>(const rapidjson::Value& json, duk::sample::Stats& stats) {
     from_json_member(json, "sampleCount", stats.sampleCount);
+    from_json_member(json, "textObject", stats.textObject);
 }
 
 template<>
 inline void to_json<duk::sample::Stats>(rapidjson::Document& document, rapidjson::Value& json, const duk::sample::Stats& stats) {
     to_json_member(document, json, "sampleCount", stats.sampleCount);
+    to_json_member(document, json, "textObject", stats.textObject);
 }
 
 }// namespace duk::serial
+
+namespace duk::resource {
+
+template<typename Solver>
+void solve_resources(Solver* solver, duk::sample::Stats& stats) {
+    solver->solve(stats.textObject);
+}
+
+}// namespace duk::resource
 
 #endif//DUK_STATS_SYSTEM_H
