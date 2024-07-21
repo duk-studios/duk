@@ -10,11 +10,50 @@
 
 namespace duk::platform {
 
+namespace detail {
+
+static void enable_terminal_mode(DWORD stdHandle, DWORD mode) {
+    HANDLE hOut = GetStdHandle(stdHandle);
+
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+
+    dwMode |= mode;
+    SetConsoleMode(hOut, dwMode);
+}
+
+static void disable_terminal_mode(DWORD stdHandle, DWORD mode) {
+    HANDLE hOut = GetStdHandle(stdHandle);
+
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+
+    dwMode &= ~mode;
+    SetConsoleMode(hOut, dwMode);
+}
+
+static void enable_virtual_terminal() {
+    enable_terminal_mode(STD_OUTPUT_HANDLE, ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    enable_terminal_mode(STD_INPUT_HANDLE, ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    enable_terminal_mode(STD_ERROR_HANDLE, ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+}
+
+static void disable_virtual_terminal() {
+    disable_terminal_mode(STD_OUTPUT_HANDLE, ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    disable_terminal_mode(STD_INPUT_HANDLE, ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    disable_terminal_mode(STD_ERROR_HANDLE, ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+}
+
+}// namespace detail
+
 ConsoleWin32::ConsoleWin32()
     : m_fOut(nullptr)
     , m_fErr(nullptr)
     , m_fIn(nullptr)
-    , m_open(GetStdHandle(STD_OUTPUT_HANDLE) && GetStdHandle(STD_INPUT_HANDLE) && GetStdHandle(STD_OUTPUT_HANDLE)) {
+    , m_open(GetStdHandle(STD_OUTPUT_HANDLE) && GetStdHandle(STD_INPUT_HANDLE) && GetStdHandle(STD_ERROR_HANDLE)) {
+    if (m_open) {
+        detail::enable_virtual_terminal();
+    }
 }
 
 ConsoleWin32::~ConsoleWin32() {
@@ -34,6 +73,8 @@ bool ConsoleWin32::attach() {
 
     m_open = true;
 
+    detail::enable_virtual_terminal();
+
     return true;
 }
 
@@ -50,6 +91,8 @@ bool ConsoleWin32::open() {
 
     m_open = true;
 
+    detail::enable_virtual_terminal();
+
     return true;
 }
 
@@ -57,6 +100,9 @@ void ConsoleWin32::close() {
     if (!m_open) {
         return;
     }
+
+    detail::disable_virtual_terminal();
+
     close_streams();
 
     FreeConsole();
