@@ -18,7 +18,7 @@ void from_json_member(const rapidjson::Value& json, const char* name, T& value, 
     auto member = json.FindMember(name);
     if (member == json.MemberEnd()) {
         if (optional) {
-            duk::log::info("Missing optional member '{}' in json object, skipping", name);
+            duk::log::verb("Missing optional member '{}' in json object, skipping", name);
             return;
         }
         throw std::runtime_error(fmt::format("Mandatory json member '{}' missing", name));

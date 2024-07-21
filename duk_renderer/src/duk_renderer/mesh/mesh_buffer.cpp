@@ -48,7 +48,7 @@ uint32_t MeshBuffer::ManagedBuffer::allocate(size_t size) {
     auto elementCount = size / m_buffer->element_size();
     auto newBlockElementCount = (elementCount / kBufferElementBlockCount + 1) * kBufferElementBlockCount;
     expand_by_element_count(newBlockElementCount);
-    duk::log::info("expanding managed buffer by {} elements", newBlockElementCount);
+    duk::log::verb("expanding managed buffer by {} elements", newBlockElementCount);
 
     // try to allocate again
     if (!allocate_from_free_blocks(&allocationHandle, size)) {
