@@ -6,6 +6,7 @@
 
 #include <duk_log/log.h>
 #include <duk_log/file_sink.h>
+#include <duk_log/cout_sink.h>
 
 #ifdef DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/platform_win_32.h>
@@ -13,34 +14,63 @@
 
 #include <cxxopts.hpp>
 
+duk::log::Level parse_log_level(const std::string_view& level) {
+    if (level == "verbose") {
+        return duk::log::Level::VERBOSE;
+    }
+    if (level == "info") {
+        return duk::log::Level::INFO;
+    }
+    if (level == "debug") {
+        return duk::log::Level::DEBUG;
+    }
+    if (level == "warn") {
+        return duk::log::Level::WARN;
+    }
+    if (level == "fatal") {
+        return duk::log::Level::FATAL;
+    }
+    return duk::log::Level::DEBUG;
+}
+
+void init_log(duk::log::Level level) {
+    duk::log::add_logger("duk", level);
+    duk::log::add_sink(std::make_unique<duk::log::CoutSink>("duk-cout", level));
+    duk::log::add_sink(std::make_unique<duk::log::FileSink>("log.txt", "duk-fout", level));
+}
+
 int duk_main(duk::platform::Platform* platform, int argc, const char* const* argv) {
     try {
         // clang-format off
         cxxopts::Options options("duk", "duk runtime application");
         options.add_options()
             ("c,console", "Forces a new console window to be opened")
-            ("o,output", "Path to output logging")
-            ("v,validation", "Asks for renderer validation layers, if available");
+            ("v,validation", "Enables renderer validation layers, if available")
+            ("l,log", "Sets logging level", cxxopts::value<std::string>());
         // clang-format on
 
         auto result = options.parse(argc, argv);
 
-        // forces a new console window to be opened
-        auto console = platform->console();
-        if (result.count("console")) {
-            console->close();
-            console->open();
-        } else {
-            // tries to attach the console to the current process
-            console->attach();
+        // init console output
+        {
+            auto console = platform->console();
+            if (result.count("console")) {
+                // forces a new console window to be opened
+                console->close();
+                console->open();
+            } else {
+                // tries to attach the console to the current process
+                console->attach();
+            }
         }
 
+        // init logging
         {
-            std::filesystem::path path = "./log.txt";
-            if (result.count("output")) {
-                path = result["output"].as<std::string>();
+            duk::log::Level logLevel = duk::log::Level::DEBUG;
+            if (result.count("log")) {
+                logLevel = parse_log_level(result["log"].as<std::string>());
             }
-            duk::log::add_sink(std::make_unique<duk::log::FileSink>(path, duk::log::INFO));
+            init_log(logLevel);
         }
 
         duk::runtime::ApplicationCreateInfo applicationCreateInfo = {};
