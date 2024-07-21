@@ -4,6 +4,7 @@
 
 #include <duk_resource/handle.h>
 #include <duk_objects/objects.h>
+#include <duk_objects/object_solver.h>
 #include <duk_objects/events.h>
 #include <duk_serial/json/serializer.h>
 #include <iostream>

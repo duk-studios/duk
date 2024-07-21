@@ -3,6 +3,8 @@
 
 #include <duk_objects/objects.h>
 #include <duk_objects/events.h>
+#include <duk_objects/object_solver.h>
+#include <ranges>
 
 namespace duk::objects {
 
@@ -99,10 +101,20 @@ ObjectHandle<false> Objects::copy_object(const ObjectHandle<true>& src) {
 
 ObjectHandle<false> Objects::copy_objects(const Objects& src) {
     ObjectHandle<false> root;
-    for (const auto obj: src.all(true)) {
-        const auto copy = copy_object(obj);
+    std::unordered_map<Id, Id> runtimeIds;
+    for (const auto srcObj: src.all(true)) {
+        const auto dstObj = copy_object(srcObj);
         if (!root.valid()) {
-            root = copy;
+            root = dstObj;
+        }
+        runtimeIds[srcObj.id()] = dstObj.id();
+    }
+    ObjectSolver solver(*this, runtimeIds);
+    for (auto runtimeId: runtimeIds | std::views::values) {
+        auto runtimeObj = object(runtimeId);
+        auto componentMask = runtimeObj.component_mask();
+        for (auto componentIndex: componentMask.bits<true>()) {
+            ComponentRegistry::instance()->solve(&solver, runtimeObj, componentIndex);
         }
     }
     return root;
@@ -220,6 +232,16 @@ void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
     m_dirty = true;
 }
 
+void Objects::solve_references() {
+    ObjectSolver solver(*this);
+    for (auto object: all(true)) {
+        auto componentMask = object.component_mask();
+        for (auto componentIndex: componentMask.bits<true>()) {
+            ComponentRegistry::instance()->solve(&solver, object, componentIndex);
+        }
+    }
+}
+
 ComponentEventListener::ComponentEventListener()
     : m_dispatcher(nullptr) {
 }
@@ -231,4 +253,5 @@ void ComponentEventListener::attach(ComponentEventDispatcher* dispatcher) {
     m_listener.clear();
     m_dispatcher = dispatcher;
 }
+
 }// namespace duk::objects

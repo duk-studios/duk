@@ -6,8 +6,6 @@
 
 #include <duk_engine/engine.h>
 
-#include <duk_objects/events.h>
-
 #include <duk_renderer/components/text_renderer.h>
 
 #include <numeric>
@@ -26,7 +24,7 @@ void StatsSystem::update() {
 
     auto timer = global<duk::tools::Timer>();
 
-    auto [stats, textRenderer] = object.components<Stats, duk::renderer::TextRenderer>();
+    auto stats = object.component<Stats>();
 
     auto& fpsSamples = stats->fpsSamples;
     auto& currentSample = stats->currentSample;
@@ -35,7 +33,7 @@ void StatsSystem::update() {
 
     if (currentSample >= stats->sampleCount) {
         float average = std::reduce(fpsSamples.begin(), fpsSamples.end()) / currentSample;
-        textRenderer->text = fmt::format("FPS: {}", average);
+        stats->textObject->text = fmt::format("FPS: {}", average);
         currentSample = 0;
     }
 }
