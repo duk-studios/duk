@@ -6,8 +6,8 @@
 
 namespace duk::log {
 
-FileSink::FileSink(const std::filesystem::path& filename, Level level)
-    : Sink(level) {
+FileSink::FileSink(const std::filesystem::path& filename, const std::string& name, Level level)
+    : Sink(name, level) {
     m_file.open(filename);
 }
 

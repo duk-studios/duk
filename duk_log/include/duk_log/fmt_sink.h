@@ -13,7 +13,7 @@ namespace duk::log {
 
 class FmtSink : public Sink {
 public:
-    explicit FmtSink(Level level);
+    explicit FmtSink(const std::string& name, Level level);
 
     void flush(Level level, const std::string& message) override;
 

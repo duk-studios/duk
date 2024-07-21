@@ -25,8 +25,9 @@ static std::string level_to_string(Level level) {
 
 }// namespace detail
 
-Logger::Logger(Level minimumLevel)
-    : m_minimumLevel(minimumLevel) {
+Logger::Logger(const std::string& name, Level minimumLevel)
+    : m_name(name)
+    , m_minimumLevel(minimumLevel) {
     m_printQueue.start();
 }
 
@@ -44,8 +45,20 @@ void Logger::wait() {
     m_printQueue.wait();
 }
 
+const std::string& Logger::name() const {
+    return m_name;
+}
+
+Level Logger::level() const {
+    return m_minimumLevel;
+}
+
+void Logger::set_level(Level level) {
+    m_minimumLevel = level;
+}
+
 void Logger::dispatch_print(Level level, const std::string& message) {
-    auto messageWithHeader = fmt::format("[{}]: {}", detail::level_to_string(level), message);
+    auto messageWithHeader = fmt::format("[{}::{}]: {}", m_name, detail::level_to_string(level), message);
     std::lock_guard lock(m_printMutex);
     m_printEvent(level, messageWithHeader);
 }

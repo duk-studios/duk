@@ -6,8 +6,8 @@
 
 namespace duk::log {
 
-FmtSink::FmtSink(Level level)
-    : Sink(level) {
+FmtSink::FmtSink(const std::string& name, Level level)
+    : Sink(name, level) {
     m_styles[Level::VERBOSE] = fmt::fg(fmt::color::white_smoke) | fmt::emphasis::faint;
     m_styles[Level::INFO] = fmt::fg(fmt::color::forest_green) | fmt::emphasis::bold;
     m_styles[Level::DEBUG] = fmt::fg(fmt::color::yellow_green) | fmt::emphasis::bold;

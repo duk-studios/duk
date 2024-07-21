@@ -14,8 +14,6 @@
 
 namespace duk::log {
 
-CoutSink::CoutSink(Level level)
-    : Sink(level) {
 #if DUK_PLATFORM_IS_WINDOWS
     // On windows, set output mode to handle virtual terminal sequences
     // it would be a good idea to move this to duk_platform once we have a console abstraction
@@ -27,6 +25,8 @@ CoutSink::CoutSink(Level level)
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hOut, dwMode);
 #endif
+CoutSink::CoutSink(const std::string& name, Level level)
+    : Sink(name, level) {
 }
 
 void CoutSink::flush(Level level, const std::string& message) {
