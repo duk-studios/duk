@@ -16,6 +16,8 @@ namespace duk::engine {
 
 Engine::Engine(const EngineCreateInfo& engineCreateInfo)
     : m_run(false) {
+    duk::log::verb("Initializing engine for {}", engineCreateInfo.settings.name);
+
     const auto& settings = engineCreateInfo.settings;
     const auto window = engineCreateInfo.window;
 
@@ -35,18 +37,22 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
     // renderer
     {
+        duk::log::verb("Initializing renderer");
+
+        bool validationLayers = engineCreateInfo.rendererApiValidationLayers;
         duk::renderer::RendererCreateInfo rendererCreateInfo = {};
         rendererCreateInfo.window = window;
-        rendererCreateInfo.logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::VERBOSE));
+        rendererCreateInfo.logger = duk::log::add_logger("duk-rhi", validationLayers ? log::Level::INFO : log::Level::DEBUG);
         rendererCreateInfo.applicationName = settings.name.c_str();
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
-        rendererCreateInfo.apiValidationLayers = engineCreateInfo.rendererApiValidationLayers;
+        rendererCreateInfo.apiValidationLayers = validationLayers;
 
         m_globals.add<duk::renderer::Renderer>(rendererCreateInfo);
     }
 
     // audio
     {
+        duk::log::verb("Initializing audio");
         duk::audio::AudioCreateInfo audioEngineCreateInfo = {};
         audioEngineCreateInfo.channelCount = 2;
         audioEngineCreateInfo.frameRate = 48000;
@@ -56,6 +62,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
     // resources
     {
+        duk::log::verb("Initializing resources");
         duk::resource::ResourcesCreateInfo resourcesCreateInfo = {};
         resourcesCreateInfo.path = engineCreateInfo.workingDirectory / "resources";
         resourcesCreateInfo.loadMode = settings.loadMode;
@@ -65,6 +72,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
     // builtin resources
     {
+        duk::log::verb("Initializing builtin resources");
         const auto resources = m_globals.get<duk::resource::Resources>();
         const auto renderer = m_globals.get<duk::renderer::Renderer>();
 
@@ -79,6 +87,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
     // director
     {
+        duk::log::verb("Initializing director");
         DirectorCreateInfo directorCreateInfo = {};
         directorCreateInfo.firstScene = settings.scene;
 
@@ -87,6 +96,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
     // input
     {
+        duk::log::verb("Initializing input");
         InputCreateInfo inputCreateInfo = {};
         inputCreateInfo.window = window;
         m_globals.add<Input>(inputCreateInfo);
@@ -96,6 +106,7 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 
     // render passes
     {
+        duk::log::verb("Initializing render passes");
         const auto renderer = m_globals.get<duk::renderer::Renderer>();
         duk::renderer::ForwardPassCreateInfo forwardPassCreateInfo = {};
         forwardPassCreateInfo.rhi = renderer->rhi();
@@ -119,13 +130,11 @@ Engine::Engine(const EngineCreateInfo& engineCreateInfo)
 }
 
 Engine::~Engine() {
-    m_globals.reset<Director>();
-    m_globals.reset<duk::renderer::Builtins>();
-    m_globals.reset<duk::resource::Resources>();
-    m_globals.reset<duk::renderer::Renderer>();
+    duk::log::verb("Destroying engine");
 }
 
 void Engine::run() {
+    duk::log::verb("Running engine");
     m_run = true;
 
     const auto platform = m_globals.get<duk::platform::Platform>();

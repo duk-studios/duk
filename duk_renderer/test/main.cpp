@@ -42,7 +42,7 @@ public:
         duk::renderer::RendererCreateInfo rendererCreateInfo = {};
         rendererCreateInfo.window = m_window.get();
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
-        rendererCreateInfo.logger = duk::log::Logging::instance(true)->default_logger();
+        rendererCreateInfo.logger = duk::log::instance()->default_logger();
 
         m_renderer = std::make_unique<duk::renderer::Renderer>(rendererCreateInfo);
     }

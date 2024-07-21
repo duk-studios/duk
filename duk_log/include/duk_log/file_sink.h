@@ -14,7 +14,7 @@ namespace duk::log {
 
 class FileSink : public Sink {
 public:
-    FileSink(const std::filesystem::path& filename, Level level);
+    FileSink(const std::filesystem::path& filename, const std::string& name, Level level);
 
     void flush(Level level, const std::string& message) override;
 

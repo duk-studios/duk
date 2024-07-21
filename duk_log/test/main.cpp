@@ -18,7 +18,7 @@ int main() {
         duk::log::info("Hello {} from a constant!", "my constant");
 
         //Adding a new logger to the default log sink of the engine
-        auto logger = duk::log::add_logger(std::make_unique<duk::log::Logger>(duk::log::DEBUG));
+        auto logger = duk::log::add_logger("duk_log", duk::log::DEBUG);
 
         duk::log::debug(logger, "A debug log message from a new logger");
 
@@ -30,10 +30,10 @@ int main() {
 
     {
         //Create a new logger for specific logging separated from the engine logs already created 100% independent
-        auto logger = std::make_unique<duk::log::Logger>(duk::log::DEBUG);
+        auto logger = std::make_unique<duk::log::Logger>("logger1", duk::log::DEBUG);
 
         //Create a new log sink (output destination) for advanced logging
-        auto sinkCout = std::make_unique<duk::log::CoutSink>(duk::log::INFO);
+        auto sinkCout = std::make_unique<duk::log::CoutSink>("sink-1", duk::log::INFO);
 
         //Flush a log message to the new sink
         sinkCout->flush(duk::log::INFO, "An info message sent directly into a new sink");

@@ -43,19 +43,20 @@ class Logger {
 public:
     using PrintEvent = duk::event::EventT<Level, const std::string&>;
 
-public:
-    explicit Logger(Level minimumLevel);
+    explicit Logger(const std::string& name, Level minimumLevel);
 
     ~Logger();
 
     template<typename... Args>
-    auto print(Level level, const std::string& format, Args... args) {
+    auto print(Level level, const std::string& format, Args&&... args) {
+        if (level < m_minimumLevel) {
+            std::promise<void> promise;
+            promise.set_value();
+            return promise.get_future();
+        }
         return m_printQueue.enqueue(
                 [this](Level level, const std::string& format, auto... args) -> void {
-                    if (level < m_minimumLevel) {
-                        return;
-                    }
-                    dispatch_print(level, fmt::vformat(format, fmt::make_format_args(args...)));
+                    dispatch_print(level, fmt::format(fmt::runtime(format), args...));
                 },
                 level, format, detail::build_arg(args)...);
     }
@@ -64,10 +65,17 @@ public:
 
     void wait();
 
+    const std::string& name() const;
+
+    Level level() const;
+
+    void set_level(Level level);
+
 private:
     void dispatch_print(Level level, const std::string& message);
 
 private:
+    std::string m_name;
     Level m_minimumLevel;
     task::TaskQueue m_printQueue;
     PrintEvent m_printEvent;

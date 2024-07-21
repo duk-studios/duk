@@ -10,7 +10,7 @@ namespace duk::log {
 
 class CoutSink : public Sink {
 public:
-    explicit CoutSink(Level level);
+    explicit CoutSink(const std::string& name, Level level);
 
     void flush(Level level, const std::string& message) override;
 

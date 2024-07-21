@@ -5,11 +5,24 @@
 
 namespace duk::log {
 
-Sink::Sink(Level minimumLevel)
-    : m_level(minimumLevel) {
+Sink::Sink(const std::string& name, Level minimumLevel)
+    : m_name(name)
+    , m_level(minimumLevel) {
 }
 
 Sink::~Sink() = default;
+
+const std::string& Sink::name() const {
+    return m_name;
+}
+
+Level Sink::level() const {
+    return m_level;
+}
+
+void Sink::set_level(Level minimumLevel) {
+    m_level = minimumLevel;
+}
 
 void Sink::flush_from(Logger& logger) {
     logger.add_print_listener(m_listener, [this](Level level, const auto& message) {
