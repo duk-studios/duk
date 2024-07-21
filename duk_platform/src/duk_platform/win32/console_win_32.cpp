@@ -14,10 +14,7 @@ ConsoleWin32::ConsoleWin32()
     : m_fOut(nullptr)
     , m_fErr(nullptr)
     , m_fIn(nullptr)
-    , m_open(GetConsoleWindow() != nullptr) {
-    if (m_open) {
-        open_streams();
-    }
+    , m_open(GetStdHandle(STD_OUTPUT_HANDLE) && GetStdHandle(STD_INPUT_HANDLE) && GetStdHandle(STD_OUTPUT_HANDLE)) {
 }
 
 ConsoleWin32::~ConsoleWin32() {
