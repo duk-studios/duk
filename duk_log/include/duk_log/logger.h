@@ -43,19 +43,18 @@ class Logger {
 public:
     using PrintEvent = duk::event::EventT<Level, const std::string&>;
 
-public:
     explicit Logger(Level minimumLevel);
 
     ~Logger();
 
     template<typename... Args>
-    auto print(Level level, const std::string& format, Args... args) {
+    auto print(Level level, const std::string& format, Args&&... args) {
         return m_printQueue.enqueue(
                 [this](Level level, const std::string& format, auto... args) -> void {
                     if (level < m_minimumLevel) {
                         return;
                     }
-                    dispatch_print(level, fmt::vformat(format, fmt::make_format_args(args...)));
+                    dispatch_print(level, fmt::format(fmt::runtime(format), args...));
                 },
                 level, format, detail::build_arg(args)...);
     }
