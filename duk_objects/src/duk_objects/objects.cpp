@@ -47,9 +47,10 @@ ObjectHandle<false> Objects::add_object() {
         auto freeIndex = m_freeList.back();
         m_freeList.pop_back();
         auto version = m_versions[freeIndex];
-        m_activeComponentMasks[freeIndex].reset();
         m_enterComponentMasks[freeIndex].reset();
+        m_activeComponentMasks[freeIndex].reset();
         m_exitComponentMasks[freeIndex].reset();
+        m_nodes[freeIndex] = {.self = freeIndex};
         m_enterIndices[freeIndex] = true;
         return {freeIndex, version, this};
     }
@@ -60,13 +61,23 @@ ObjectHandle<false> Objects::add_object() {
     m_exitComponentMasks.resize(m_versions.size());
     m_enterIndices.resize(m_versions.size());
     m_exitIndices.resize(m_versions.size());
+    m_nodes.resize(m_versions.size());
+    m_nodes[index].self = index;
     m_versions[index] = 0;
     m_enterIndices[index] = true;
     return {index, 0, this};
 }
 
-ObjectHandle<false> Objects::copy_object(const ObjectHandle<true>& src) {
-    auto dst = add_object();
+ObjectHandle<false> Objects::add_object(const Id& parent) {
+    auto object = add_object();
+    auto index = object.id().index();
+    // only connect this object to it's parent, the rest of the hierarchy will be resolved on update
+    m_nodes[index].parent = parent.index();
+    return object;
+}
+
+ObjectHandle<false> Objects::copy_object(const ObjectHandle<true>& src, const Id& parent) {
+    auto dst = add_object(parent);
     auto originalComponentMask = src.component_mask();
     for (auto componentIndex: originalComponentMask.bits<true>()) {
         ComponentRegistry::instance()->copy_component(src, dst, componentIndex);
@@ -74,19 +85,33 @@ ObjectHandle<false> Objects::copy_object(const ObjectHandle<true>& src) {
     return dst;
 }
 
-ObjectHandle<false> Objects::copy_objects(const Objects& src) {
+ObjectHandle<false> Objects::copy_objects(const Objects& src, const Id& parent) {
     ObjectHandle<false> root;
     std::unordered_map<Id, Id> runtimeIds;
     for (const auto srcObj: src.all(true)) {
-        const auto dstObj = copy_object(srcObj);
+        const auto dstObj = copy_object(srcObj, srcObj.parent().id());
         if (!root.valid()) {
             root = dstObj;
         }
         runtimeIds[srcObj.id()] = dstObj.id();
     }
+
+    // resolve object hierarchy and component references
     ObjectSolver solver(*this, runtimeIds);
     for (auto runtimeId: runtimeIds | std::views::values) {
         auto runtimeObj = object(runtimeId);
+
+        // resolve parent and children
+        auto& node = m_nodes[runtimeId.index()];
+        auto parentId = runtimeObj.parent().id();
+
+        // if object was at root, place it as a child of the provided parent
+        if (parentId.index() == kInvalidObjectIndex) {
+            parentId = parent;
+        }
+        solver.solve(parentId);
+        node.parent = parentId.index();
+
         auto componentMask = runtimeObj.component_mask();
         for (auto componentIndex: componentMask.bits<true>()) {
             ComponentRegistry::instance()->solve(&solver, runtimeObj, componentIndex);
@@ -100,10 +125,16 @@ void Objects::destroy_object(const Id& id) {
     if (m_exitIndices[index]) {
         return;
     }
+    auto& node = m_nodes[index];
+    auto childIndex = node.child;
+    while (childIndex != kInvalidObjectIndex) {
+        auto childId = Id(childIndex, m_versions[childIndex]);
+        destroy_object(childId);
+        childIndex = m_nodes[childIndex].next;
+    }
     m_exitIndices[index] = true;
     m_enterIndices[index] = false;
     m_exitComponentMasks[index] = m_activeComponentMasks[index];
-    m_enterComponentMasks[index].reset();
     m_dirty = true;
 }
 
@@ -113,6 +144,22 @@ ObjectHandle<false> Objects::object(const Id& id) {
 
 ObjectHandle<true> Objects::object(const Id& id) const {
     return {id.index(), id.version(), this};
+}
+
+ObjectHandle<false> Objects::parent(const Id& id) {
+    const auto parentIndex = m_nodes[id.index()].parent;
+    if (parentIndex == kInvalidObjectIndex) {
+        return {kInvalidObjectIndex, 0, this};
+    }
+    return {parentIndex, m_versions[parentIndex], this};
+}
+
+ObjectHandle<true> Objects::parent(const Id& id) const {
+    const auto parentIndex = m_nodes[id.index()].parent;
+    if (parentIndex == kInvalidObjectIndex) {
+        return {kInvalidObjectIndex, 0, this};
+    }
+    return {parentIndex, m_versions[parentIndex], this};
 }
 
 bool Objects::valid_object(const Id& id) const {
@@ -151,26 +198,60 @@ void Objects::update(ComponentEventDispatcher& dispatcher) {
     std::swap(enterIndices, m_enterIndices);
     std::swap(exitIndices, m_exitIndices);
 
+    auto add_node = [this](Node& node) {
+        auto& parent = node.parent != kInvalidObjectIndex ? m_nodes[node.parent] : m_root;
+
+        if (parent.child == kInvalidObjectIndex) {
+            parent.child = node.self;
+            node.parent = parent.self;
+            return;
+        }
+
+        uint32_t siblingIndex = parent.child;
+        while (siblingIndex != kInvalidObjectIndex) {
+            const auto& sibling = m_nodes[siblingIndex];
+            if (sibling.next == kInvalidObjectIndex) {
+                break;
+            }
+            siblingIndex = sibling.next;
+        }
+
+        auto& sibling = m_nodes[siblingIndex];
+        sibling.next = node.self;
+
+        node.parent = parent.self;
+        node.previous = siblingIndex;
+    };
+
+    auto remove_node = [this](Node& node) {
+        if (node.previous != kInvalidObjectIndex) {
+            auto& previous = m_nodes[node.previous];
+            previous.next = node.next;
+        }
+        if (node.next != kInvalidObjectIndex) {
+            auto& next = m_nodes[node.next];
+            next.previous = node.previous;
+        }
+        auto& parent = node.parent != kInvalidObjectIndex ? m_nodes[node.parent] : m_root;
+        if (parent.child == node.self) {
+            parent.child = node.next;
+        }
+    };
+
+    // update node tree
+    for (auto index = 0; index < enterIndices.size(); index++) {
+        if (enterIndices[index]) {
+            enterIndices[index] = false;
+            add_node(m_nodes[index]);
+        }
+    }
+
     // we need to while iterate, because new ids might be added during event dispatching
     for (auto index = 0; index < enterComponentMasks.size(); index++) {
         auto& enterComponentMask = enterComponentMasks[index];
         for (auto componentIndex: enterComponentMask.bits<true>()) {
             enterComponentMask.reset(componentIndex);
             dispatcher.emit_component<ComponentEnterEvent>(object(Id(index, m_versions[index])), componentIndex);
-        }
-    }
-    for (auto index = 0; index < enterIndices.size(); index++) {
-        if (enterIndices[index]) {
-            enterIndices[index] = false;
-            dispatcher.emit_object<ObjectEnterEvent>(object(Id(index, m_versions[index])));
-        }
-    }
-    std::vector<uint32_t> destroyedIndices;
-    for (auto index = 0; index < exitIndices.size(); index++) {
-        if (exitIndices[index]) {
-            dispatcher.emit_object<ObjectExitEvent>(object(Id(index, m_versions[index])));
-            exitIndices[index] = false;
-            destroyedIndices.emplace_back(index);
         }
     }
     for (auto index = 0; index < exitComponentMasks.size(); index++) {
@@ -182,11 +263,17 @@ void Objects::update(ComponentEventDispatcher& dispatcher) {
             m_componentPools[componentIndex]->destruct(index);
         }
     }
-    if (!destroyedIndices.empty()) {
-        for (auto index: destroyedIndices) {
+    bool needsSort = false;
+    for (auto index = 0; index < exitIndices.size(); index++) {
+        if (exitIndices[index]) {
+            exitIndices[index] = false;
+            remove_node(m_nodes[index]);
             m_versions[index]++;
             m_freeList.push_back(index);
+            needsSort = true;
         }
+    }
+    if (needsSort) {
         std::ranges::sort(m_freeList);
     }
 }

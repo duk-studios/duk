@@ -9,16 +9,6 @@
 
 namespace duk::objects {
 
-struct ObjectEnterEvent {};
-
-template<typename C>
-using ObjectEnterEventT = ComponentEvent<C, ObjectEnterEvent>;
-
-struct ObjectExitEvent {};
-
-template<typename C>
-using ObjectExitEventT = ComponentEvent<C, ObjectExitEvent>;
-
 struct ComponentEnterEvent {};
 
 template<typename C>
