@@ -236,7 +236,7 @@
           "size": "600;600",
           "horiAlignment": "middle",
           "vertAlignment": "middle",
-          "text": "",
+          "text": "This text is in world space!",
           "dynamic": false
         }
       ]
@@ -401,10 +401,11 @@
       ]
     },
     {
+      "parent": 0,
       "components":[
         {
           "type": "duk::renderer::Transform",
-          "position": "0;0;0",
+          "position": "0;0;-10",
           "rotation": "0;0;0",
           "scale": "0.3;0.3;0.3"
         },

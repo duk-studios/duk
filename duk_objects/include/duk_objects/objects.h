@@ -4,6 +4,8 @@
 #ifndef DUK_OBJECTS_OBJECTS_H
 #define DUK_OBJECTS_OBJECTS_H
 
+#include <duk_objects/id.h>
+
 #include <duk_log/log.h>
 
 #include <duk_macros/assert.h>
@@ -26,7 +28,6 @@ namespace detail {
 
 static constexpr uint32_t kComponentsPerChunk = 32;
 static constexpr uint32_t kMaxComponents = 128;
-static constexpr uint32_t kMaxObjects = std::numeric_limits<uint32_t>::max();
 
 class ComponentPool {
 public:
@@ -100,25 +101,6 @@ class ComponentHandle;
 
 using ComponentMask = duk::tools::BitBlock<detail::kMaxComponents>;
 
-class Id {
-public:
-    Id();
-
-    explicit Id(uint32_t index, uint32_t version);
-
-    DUK_NO_DISCARD uint32_t index() const;
-
-    DUK_NO_DISCARD uint32_t version() const;
-
-    bool operator==(const Id& rhs) const;
-
-    bool operator!=(const Id& rhs) const;
-
-private:
-    uint32_t m_index;
-    uint32_t m_version;
-};
-
 template<bool isConst>
 class ObjectHandle {
 public:
@@ -159,6 +141,8 @@ public:
 
     template<typename... Ts>
     std::tuple<ComponentHandle<Ts, isConst>...> components_or_add() const;
+
+    ObjectHandle parent() const;
 
 private:
     Id m_id;
@@ -266,7 +250,7 @@ private:
     class ComponentEntryT : public ComponentEntry {
     public:
         void copy(const ObjectHandle<true>& src, ObjectHandle<false>& dst) override {
-            auto dstComponent = dst.add<T>();
+            auto dstComponent = dst.component_or_add<T>();
             const auto srcComponent = src.component<T>();
             *dstComponent = *srcComponent;
         }
@@ -285,7 +269,7 @@ private:
         void solve(ObjectSolver* solver, ObjectHandle<false>& object) override;
 
         void from_json(const rapidjson::Value& json, ObjectHandle<false>& object) override {
-            duk::serial::from_json(json, *object.add<T>());
+            duk::serial::from_json(json, *object.component_or_add<T>());
         }
 
         void to_json(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) override {
@@ -396,6 +380,7 @@ public:
     template<bool isConst>
     class ObjectView {
     public:
+        static constexpr bool kIsConst = isConst;
         using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
 
         class Iterator {
@@ -451,19 +436,72 @@ public:
         bool m_includeInactive;
     };
 
-    template<bool isConst, typename... Ts>
+    template<bool isConst>
+    class ObjectHierarchyView {
+    public:
+        static constexpr bool kIsConst = isConst;
+        using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
+
+        class Iterator {
+        public:
+            Iterator(ObjectsType* objects, uint32_t index, ComponentMask componentMask);
+
+            // Dereference operator (*)
+            DUK_NO_DISCARD ObjectHandle<isConst> operator*() const;
+
+            // Pre-increment operator (++it)
+            Iterator& operator++();
+
+            // Post-increment operator (it++)
+            DUK_NO_DISCARD Iterator operator++(int);
+
+            // Equality operator (it1 == it2)
+            DUK_NO_DISCARD bool operator==(const Iterator& other) const;
+
+            // Inequality operator (it1 != it2)
+            DUK_NO_DISCARD bool operator!=(const Iterator& other) const;
+
+        private:
+            void next();
+
+            bool valid_object();
+
+        private:
+            ObjectsType* m_objects;
+            uint32_t m_i;
+            ComponentMask m_componentMask;
+        };
+
+    public:
+        ObjectHierarchyView(ObjectsType* objects, uint32_t startIndex, ComponentMask componentMask);
+
+        DUK_NO_DISCARD Iterator begin();
+
+        DUK_NO_DISCARD Iterator begin() const;
+
+        DUK_NO_DISCARD Iterator end();
+
+        DUK_NO_DISCARD Iterator end() const;
+
+    private:
+        ObjectsType* m_objects;
+        uint32_t m_startIndex;
+        ComponentMask m_componentMask;
+    };
+
+    template<typename ObjectViewT, typename... Ts>
     class ComponentView {
     public:
-        using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
-        using ObjectViewType = ObjectView<isConst>;
+        using ObjectViewType = ObjectViewT;
         using ObjectIteratorType = typename ObjectViewType::Iterator;
+        using ComponentTupleType = std::tuple<ComponentHandle<Ts, ObjectViewType::kIsConst>...>;
 
         class Iterator {
         public:
             Iterator(const ObjectIteratorType& it);
 
             // Dereference operator (*)
-            DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, isConst>...> operator*() const;
+            DUK_NO_DISCARD ComponentTupleType operator*() const;
 
             // Pre-increment operator (++it)
             Iterator& operator++();
@@ -485,7 +523,7 @@ public:
         };
 
     public:
-        ComponentView(ObjectsType* objects);
+        ComponentView(ObjectViewType objectView);
 
         DUK_NO_DISCARD Iterator begin();
 
@@ -506,16 +544,22 @@ public:
 
     ObjectHandle<false> add_object();
 
-    /// builds a new object which is an exact copy of the original object
-    ObjectHandle<false> copy_object(const ObjectHandle<true>& src);
+    ObjectHandle<false> add_object(const Id& parent);
 
-    ObjectHandle<false> copy_objects(const Objects& src);
+    /// builds a new object which is an exact copy of the original object
+    ObjectHandle<false> copy_object(const ObjectHandle<true>& src, const Id& parent = Id());
+
+    ObjectHandle<false> copy_objects(const Objects& src, const Id& parent = Id());
 
     void destroy_object(const Id& id);
 
     DUK_NO_DISCARD ObjectHandle<false> object(const Id& id);
 
     DUK_NO_DISCARD ObjectHandle<true> object(const Id& id) const;
+
+    DUK_NO_DISCARD ObjectHandle<false> parent(const Id& id);
+
+    DUK_NO_DISCARD ObjectHandle<true> parent(const Id& id) const;
 
     DUK_NO_DISCARD bool valid_object(const Id& id) const;
 
@@ -530,10 +574,10 @@ public:
     DUK_NO_DISCARD ObjectView<true> all_with() const;
 
     template<typename... Ts>
-    DUK_NO_DISCARD ComponentView<false, Ts...> all_of();
+    DUK_NO_DISCARD ComponentView<ObjectView<false>, Ts...> all_of();
 
     template<typename... Ts>
-    DUK_NO_DISCARD ComponentView<true, Ts...> all_of() const;
+    DUK_NO_DISCARD ComponentView<ObjectView<true>, Ts...> all_of() const;
 
     template<typename... Ts>
     DUK_NO_DISCARD ObjectHandle<false> first_with();
@@ -546,6 +590,30 @@ public:
 
     template<typename... Ts>
     DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, true>...> first_of() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ObjectHierarchyView<false> root_with();
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ObjectHierarchyView<true> root_with() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ObjectHierarchyView<false> children_with(const Id& parent);
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ObjectHierarchyView<true> children_with(const Id& parent) const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ComponentView<ObjectHierarchyView<false>, Ts...> root_of();
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ComponentView<ObjectHierarchyView<true>, Ts...> root_of() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ComponentView<ObjectHierarchyView<false>, Ts...> children_of(const Id& parent);
+
+    template<typename... Ts>
+    DUK_NO_DISCARD ComponentView<ObjectHierarchyView<true>, Ts...> children_of(const Id& parent) const;
 
     DUK_NO_DISCARD ComponentMask component_mask(const Id& id) const;
 
@@ -585,9 +653,21 @@ private:
     void solve_references();
 
 private:
-    struct ComponentEntry {
-        uint32_t index;
-        ComponentMask componentMask;
+    struct Node {
+        // index of this node
+        uint32_t self{kInvalidObjectIndex};
+
+        // parent node index
+        uint32_t parent{kInvalidObjectIndex};
+
+        // child node index
+        uint32_t child{kInvalidObjectIndex};
+
+        // next sibling node index
+        uint32_t next{kInvalidObjectIndex};
+
+        // previous sibling node index
+        uint32_t previous{kInvalidObjectIndex};
     };
 
     std::array<std::unique_ptr<detail::ComponentPool>, detail::kMaxComponents> m_componentPools;
@@ -598,8 +678,19 @@ private:
     std::vector<uint32_t> m_freeList;
     std::vector<bool> m_enterIndices;
     std::vector<bool> m_exitIndices;
+    std::vector<Node> m_nodes;
+    Node m_root;
     bool m_dirty;
 };
+
+using ObjectHierarchyView = Objects::ObjectHierarchyView<false>;
+using ConstObjectHierarchyView = Objects::ObjectHierarchyView<true>;
+
+template<typename... Ts>
+using ComponentHierarchyView = Objects::ComponentView<ObjectHierarchyView, Ts...>;
+
+template<typename... Ts>
+using ConstComponentHierarchyView = Objects::ComponentView<ConstObjectHierarchyView, Ts...>;
 
 using ObjectsResource = duk::resource::Handle<Objects>;
 
@@ -656,7 +747,7 @@ private:
 
 template<bool isConst>
 ObjectHandle<isConst>::ObjectHandle()
-    : ObjectHandle(detail::kMaxObjects, 0, nullptr) {
+    : ObjectHandle(Id(), nullptr) {
 }
 
 template<bool isConst>
@@ -742,6 +833,11 @@ template<bool isConst>
 template<typename... Ts>
 std::tuple<ComponentHandle<Ts, isConst>...> ObjectHandle<isConst>::components_or_add() const {
     return std::make_tuple(component_or_add<Ts>()...);
+}
+
+template<bool isConst>
+ObjectHandle<isConst> ObjectHandle<isConst>::parent() const {
+    return m_objects->parent(m_id);
 }
 
 // Component Implementation //
@@ -982,66 +1078,157 @@ typename Objects::ObjectView<IsConst>::Iterator Objects::ObjectView<IsConst>::en
     return {m_endIndex, m_endIndex, m_objects, m_componentMask, m_includeInactive};
 }
 
-template<bool isConst, typename... Ts>
-Objects::ComponentView<isConst, Ts...>::Iterator::Iterator(const ObjectIteratorType& it)
+template<bool isConst>
+Objects::ObjectHierarchyView<isConst>::Iterator::Iterator(ObjectsType* objects, uint32_t index, ComponentMask componentMask)
+    : m_objects(objects)
+    , m_i(index)
+    , m_componentMask(componentMask) {
+    next();
+}
+
+template<bool isConst>
+ObjectHandle<isConst> Objects::ObjectHierarchyView<isConst>::Iterator::operator*() const {
+    return m_objects->object(Id{m_i, m_objects->m_versions[m_i]});
+}
+
+template<bool isConst>
+typename Objects::ObjectHierarchyView<isConst>::Iterator& Objects::ObjectHierarchyView<isConst>::Iterator::operator++() {
+    const auto& node = m_objects->m_nodes[m_i];
+    m_i = node.next;
+    next();
+    return *this;
+}
+
+template<bool isConst>
+typename Objects::ObjectHierarchyView<isConst>::Iterator Objects::ObjectHierarchyView<isConst>::Iterator::operator++(int) {
+    auto old = *this;
+    const auto& node = m_objects->m_nodes[m_i];
+    m_i = node.next;
+    next();
+    return old;
+}
+
+template<bool isConst>
+bool Objects::ObjectHierarchyView<isConst>::Iterator::operator==(const Iterator& other) const {
+    return m_i == other.m_i && m_objects == other.m_objects;
+}
+
+template<bool isConst>
+bool Objects::ObjectHierarchyView<isConst>::Iterator::operator!=(const Iterator& other) const {
+    return !(*this == other);
+}
+
+template<bool isConst>
+void Objects::ObjectHierarchyView<isConst>::Iterator::next() {
+    while (m_i != kInvalidObjectIndex && !valid_object()) {
+        auto& node = m_objects->m_nodes[m_i];
+        m_i = node.next;
+    }
+}
+
+template<bool isConst>
+bool Objects::ObjectHierarchyView<isConst>::Iterator::valid_object() {
+    if (m_i == kInvalidObjectIndex) {
+        return false;
+    }
+
+    // do not iterate over inactive components
+    auto mask = m_objects->m_activeComponentMasks[m_i] & ~(m_objects->m_enterComponentMasks[m_i] | m_objects->m_exitComponentMasks[m_i]);
+
+    if ((m_componentMask & mask) != m_componentMask) {
+        return false;
+    }
+
+    return !(m_objects->m_enterIndices[m_i] || m_objects->m_exitIndices[m_i]);
+}
+
+template<bool isConst>
+Objects::ObjectHierarchyView<isConst>::ObjectHierarchyView(ObjectsType* objects, uint32_t startIndex, ComponentMask componentMask)
+    : m_objects(objects)
+    , m_startIndex(startIndex)
+    , m_componentMask(componentMask) {
+}
+
+template<bool isConst>
+typename Objects::ObjectHierarchyView<isConst>::Iterator Objects::ObjectHierarchyView<isConst>::begin() {
+    return Iterator(m_objects, m_startIndex, m_componentMask);
+}
+
+template<bool isConst>
+typename Objects::ObjectHierarchyView<isConst>::Iterator Objects::ObjectHierarchyView<isConst>::begin() const {
+    return Iterator(m_objects, m_startIndex, m_componentMask);
+}
+
+template<bool isConst>
+typename Objects::ObjectHierarchyView<isConst>::Iterator Objects::ObjectHierarchyView<isConst>::end() {
+    return Iterator(m_objects, kInvalidObjectIndex, m_componentMask);
+}
+
+template<bool isConst>
+typename Objects::ObjectHierarchyView<isConst>::Iterator Objects::ObjectHierarchyView<isConst>::end() const {
+    return Iterator(m_objects, kInvalidObjectIndex, m_componentMask);
+}
+
+template<typename ObjectViewT, typename... Ts>
+Objects::ComponentView<ObjectViewT, Ts...>::Iterator::Iterator(const ObjectIteratorType& it)
     : m_it(it) {
 }
 
-template<bool isConst, typename... Ts>
-std::tuple<ComponentHandle<Ts, isConst>...> Objects::ComponentView<isConst, Ts...>::Iterator::operator*() const {
+template<typename ObjectViewT, typename... Ts>
+typename Objects::ComponentView<ObjectViewT, Ts...>::ComponentTupleType Objects::ComponentView<ObjectViewT, Ts...>::Iterator::operator*() const {
     return (*m_it).template components<Ts...>();
 }
 
-template<bool isConst, typename... Ts>
-typename Objects::ComponentView<isConst, Ts...>::Iterator& Objects::ComponentView<isConst, Ts...>::Iterator::operator++() {
+template<typename ObjectViewT, typename... Ts>
+typename Objects::ComponentView<ObjectViewT, Ts...>::Iterator& Objects::ComponentView<ObjectViewT, Ts...>::Iterator::operator++() {
     ++m_it;
     return *this;
 }
 
-template<bool isConst, typename... Ts>
-typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::Iterator::operator++(int) {
+template<typename ObjectViewT, typename... Ts>
+typename Objects::ComponentView<ObjectViewT, Ts...>::Iterator Objects::ComponentView<ObjectViewT, Ts...>::Iterator::operator++(int) {
     auto old = *this;
     ++m_it;
     return old;
 }
 
-template<bool isConst, typename... Ts>
-typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::Iterator::operator+(int value) const {
+template<typename ObjectViewT, typename... Ts>
+typename Objects::ComponentView<ObjectViewT, Ts...>::Iterator Objects::ComponentView<ObjectViewT, Ts...>::Iterator::operator+(int value) const {
     return Iterator(m_it + value);
 }
 
-template<bool isConst, typename... Ts>
-bool Objects::ComponentView<isConst, Ts...>::Iterator::operator==(const Iterator& other) const {
+template<typename ObjectViewT, typename... Ts>
+bool Objects::ComponentView<ObjectViewT, Ts...>::Iterator::operator==(const Iterator& other) const {
     return m_it == other.m_it;
 }
 
-template<bool isConst, typename... Ts>
-bool Objects::ComponentView<isConst, Ts...>::Iterator::operator!=(const Iterator& other) const {
+template<typename ObjectViewT, typename... Ts>
+bool Objects::ComponentView<ObjectViewT, Ts...>::Iterator::operator!=(const Iterator& other) const {
     return !(*this == other);
 }
 
-template<bool isConst, typename... Ts>
-Objects::ComponentView<isConst, Ts...>::ComponentView(ObjectsType* objects)
-    : m_objectView(objects, objects->template component_mask<Ts...>(), false) {
+template<typename ObjectViewT, typename... Ts>
+Objects::ComponentView<ObjectViewT, Ts...>::ComponentView(ObjectViewType objectView)
+    : m_objectView(objectView) {
 }
 
-template<bool isConst, typename... Ts>
-typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::begin() {
+template<typename ObjectViewT, typename... Ts>
+typename Objects::ComponentView<ObjectViewT, Ts...>::Iterator Objects::ComponentView<ObjectViewT, Ts...>::begin() {
     return Iterator(m_objectView.begin());
 }
 
-template<bool isConst, typename... Ts>
-typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::begin() const {
+template<typename ObjectViewT, typename... Ts>
+typename Objects::ComponentView<ObjectViewT, Ts...>::Iterator Objects::ComponentView<ObjectViewT, Ts...>::begin() const {
     return Iterator(m_objectView.begin());
 }
 
-template<bool isConst, typename... Ts>
-typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::end() {
+template<typename ObjectViewT, typename... Ts>
+typename Objects::ComponentView<ObjectViewT, Ts...>::Iterator Objects::ComponentView<ObjectViewT, Ts...>::end() {
     return Iterator(m_objectView.end());
 }
 
-template<bool isConst, typename... Ts>
-typename Objects::ComponentView<isConst, Ts...>::Iterator Objects::ComponentView<isConst, Ts...>::end() const {
+template<typename ObjectViewT, typename... Ts>
+typename Objects::ComponentView<ObjectViewT, Ts...>::Iterator Objects::ComponentView<ObjectViewT, Ts...>::end() const {
     return Iterator(m_objectView.end());
 }
 
@@ -1056,13 +1243,13 @@ Objects::ObjectView<true> Objects::all_with() const {
 }
 
 template<typename... Ts>
-Objects::ComponentView<false, Ts...> Objects::all_of() {
-    return ComponentView<false, Ts...>(this);
+Objects::ComponentView<Objects::ObjectView<false>, Ts...> Objects::all_of() {
+    return ComponentView<ObjectView<false>, Ts...>(all_with<Ts...>());
 }
 
 template<typename... Ts>
-Objects::ComponentView<true, Ts...> Objects::all_of() const {
-    return ComponentView<true, Ts...>(this);
+Objects::ComponentView<Objects::ObjectView<true>, Ts...> Objects::all_of() const {
+    return ComponentView<ObjectView<true>, Ts...>(all_with<Ts...>());
 }
 
 template<typename... Ts>
@@ -1095,6 +1282,50 @@ std::tuple<ComponentHandle<Ts, true>...> Objects::first_of() const {
         return components;
     }
     return std::tuple<ComponentHandle<Ts, true>...>();
+}
+
+template<typename... Ts>
+Objects::ObjectHierarchyView<false> Objects::root_with() {
+    return ObjectHierarchyView<false>(this, m_root.child, component_mask<Ts...>());
+}
+
+template<typename... Ts>
+Objects::ObjectHierarchyView<true> Objects::root_with() const {
+    return ObjectHierarchyView<true>(this, m_root.child, component_mask<Ts...>());
+}
+
+template<typename... Ts>
+Objects::ObjectHierarchyView<false> Objects::children_with(const Id& parent) {
+    DUK_ASSERT(valid_object(parent));
+    const auto firstChild = m_nodes[parent.index()].child;
+    return ObjectHierarchyView<false>(this, firstChild, component_mask<Ts...>());
+}
+
+template<typename... Ts>
+Objects::ObjectHierarchyView<true> Objects::children_with(const Id& parent) const {
+    DUK_ASSERT(valid_object(parent));
+    const auto firstChild = m_nodes[parent.index()].child;
+    return ObjectHierarchyView<true>(this, firstChild, component_mask<Ts...>());
+}
+
+template<typename... Ts>
+Objects::ComponentView<Objects::ObjectHierarchyView<false>, Ts...> Objects::root_of() {
+    return ComponentView<ObjectHierarchyView<false>, Ts...>(root_with<Ts...>());
+}
+
+template<typename... Ts>
+Objects::ComponentView<Objects::ObjectHierarchyView<true>, Ts...> Objects::root_of() const {
+    return ComponentView<ObjectHierarchyView<true>, Ts...>(root_with<Ts...>());
+}
+
+template<typename... Ts>
+Objects::ComponentView<Objects::ObjectHierarchyView<false>, Ts...> Objects::children_of(const Id& parent) {
+    return ComponentView<ObjectHierarchyView<false>, Ts...>(children_with<Ts...>(parent));
+}
+
+template<typename... Ts>
+Objects::ComponentView<Objects::ObjectHierarchyView<true>, Ts...> Objects::children_of(const Id& parent) const {
+    return ComponentView<ObjectHierarchyView<true>, Ts...>(children_with<Ts...>(parent));
 }
 
 template<typename T>
@@ -1248,7 +1479,11 @@ inline void from_json<duk::objects::Objects>(const rapidjson::Value& json, duk::
     auto jsonArray = json.GetArray();
     for (auto& jsonElement: jsonArray) {
         DUK_ASSERT(jsonElement.IsObject());
-        auto object = objects.add_object();
+
+        duk::objects::Id parentId;
+        from_json_member(jsonElement, "parent", parentId, true);
+
+        auto object = objects.add_object(parentId);
         auto jsonComponentsArray = jsonElement["components"].GetArray();
         for (auto& jsonComponent: jsonComponentsArray) {
             std::string type;

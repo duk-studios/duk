@@ -157,7 +157,7 @@ int main() {
         //
         // cube2Transform->rotation = glm::radians(glm::vec3(time * -52, sinf(time * 4) * 85, 15.0f));
 
-        duk::renderer::update_transforms(objects);
+        // duk::renderer::update_transforms(objects);
         duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());
 
         //Telling to our renderer to render the objects we want.
