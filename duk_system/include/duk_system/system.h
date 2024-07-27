@@ -79,6 +79,18 @@ public:
     template<typename... Ts>
     DUK_NO_DISCARD auto first_components_of() const;
 
+    template<typename... Ts>
+    DUK_NO_DISCARD auto root_objects_with() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD auto child_objects_with(const duk::objects::Id& id) const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD auto root_components_of() const;
+
+    template<typename... Ts>
+    DUK_NO_DISCARD auto child_components_of(const duk::objects::Id& id) const;
+
     DUK_NO_DISCARD duk::objects::Object create_object() const;
 
     DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::ConstObject& object) const;
@@ -314,6 +326,26 @@ auto System::all_components_of() const {
 template<typename... Ts>
 auto System::first_components_of() const {
     return m_objects->first_of<Ts...>();
+}
+
+template<typename... Ts>
+auto System::root_objects_with() const {
+    return m_objects->root_with<Ts...>();
+}
+
+template<typename... Ts>
+auto System::child_objects_with(const duk::objects::Id& id) const {
+    return m_objects->children_with<Ts...>(id);
+}
+
+template<typename... Ts>
+auto System::root_components_of() const {
+    return m_objects->root_of<Ts...>();
+}
+
+template<typename... Ts>
+auto System::child_components_of(const duk::objects::Id& id) const {
+    return m_objects->children_of<Ts...>(id);
 }
 
 template<typename E>
