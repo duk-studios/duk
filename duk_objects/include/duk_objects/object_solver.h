@@ -21,6 +21,8 @@ public:
         , m_runtimeIds(&runtimeIds) {
     }
 
+    void solve(Id& id);
+
     template<bool isConst>
     void solve(ObjectHandle<isConst>& object);
 
@@ -31,37 +33,41 @@ public:
     void solve(T& object);
 
 private:
+    Id find_runtime_id(Id originalId) const;
+
+private:
     Objects& m_objects;
     const std::unordered_map<Id, Id>* m_runtimeIds;
 };
 
+inline void ObjectSolver::solve(Id& id) {
+    id = find_runtime_id(id);
+}
+
 template<bool isConst>
 void ObjectSolver::solve(ObjectHandle<isConst>& object) {
-    auto id = object.id();
-    if (m_runtimeIds) {
-        auto it = m_runtimeIds->find(id);
-        if (it != m_runtimeIds->end()) {
-            id = it->second;
-        }
-    }
+    auto id = find_runtime_id(object.id());
     object = m_objects.object(id);
 }
 
 template<typename T, bool isConst>
 void ObjectSolver::solve(ComponentHandle<T, isConst>& component) {
-    auto id = component.id();
-    if (m_runtimeIds) {
-        auto it = m_runtimeIds->find(id);
-        if (it != m_runtimeIds->end()) {
-            id = it->second;
-        }
-    }
+    auto id = find_runtime_id(component.id());
     component = ComponentHandle<T, isConst>(m_objects.object(id));
 }
 
 template<typename T>
 void ObjectSolver::solve(T& object) {
     duk::resource::solve_resources(this, object);
+}
+
+inline Id ObjectSolver::find_runtime_id(Id originalId) const {
+    if (m_runtimeIds) {
+        if (const auto it = m_runtimeIds->find(originalId); it != m_runtimeIds->end()) {
+            originalId = it->second;
+        }
+    }
+    return originalId;
 }
 
 template<typename T>
