@@ -26,6 +26,94 @@
           "duration": 1
         }
       ]
+    },
+    {
+      "parent": 0,
+      "components":[
+        {
+          "type": "duk::renderer::Transform",
+          "position": "-5;5;0",
+          "rotation": "0;0;0",
+          "scale": "5;5;5"
+        },
+        {
+          "type":"duk::renderer::TextRenderer",
+          "font":11859234415737620434,
+          "fontSize":11,
+          "size": "600;600",
+          "horiAlignment": "middle",
+          "vertAlignment": "middle",
+          "text": "Child 1",
+          "dynamic": false
+        }
+      ]
+    },
+    {
+      "parent": 0,
+      "components":[
+        {
+          "type": "duk::renderer::Transform",
+          "position": "5;5;0",
+          "rotation": "0;0;0",
+          "scale": "5;5;5"
+        },
+        {
+          "type":"duk::renderer::TextRenderer",
+          "font":11859234415737620434,
+          "fontSize":11,
+          "size": "600;600",
+          "horiAlignment": "middle",
+          "vertAlignment": "middle",
+          "text": "Child 2",
+          "dynamic": false
+        },
+        {
+          "type": "duk::sample::Temporary",
+          "duration": 0.5
+        }
+      ]
+    },
+    {
+      "parent": 1,
+      "components":[
+        {
+          "type": "duk::renderer::Transform",
+          "position": "0;1;0",
+          "rotation": "0;0;0",
+          "scale": "1;1;1"
+        },
+        {
+          "type":"duk::renderer::TextRenderer",
+          "font":11859234415737620434,
+          "fontSize":11,
+          "size": "600;600",
+          "horiAlignment": "middle",
+          "vertAlignment": "middle",
+          "text": "Child of child 1",
+          "dynamic": false
+        }
+      ]
+    },
+    {
+      "parent": 2,
+      "components":[
+        {
+          "type": "duk::renderer::Transform",
+          "position": "0;1;0",
+          "rotation": "0;0;0",
+          "scale": "1;1;1"
+        },
+        {
+          "type":"duk::renderer::TextRenderer",
+          "font":11859234415737620434,
+          "fontSize":11,
+          "size": "600;600",
+          "horiAlignment": "middle",
+          "vertAlignment": "middle",
+          "text": "Child of child 2",
+          "dynamic": false
+        }
+      ]
     }
   ]
 }
