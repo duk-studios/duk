@@ -4,6 +4,8 @@
 #ifndef DUK_OBJECTS_OBJECTS_H
 #define DUK_OBJECTS_OBJECTS_H
 
+#include <duk_objects/id.h>
+
 #include <duk_log/log.h>
 
 #include <duk_macros/assert.h>
@@ -26,7 +28,6 @@ namespace detail {
 
 static constexpr uint32_t kComponentsPerChunk = 32;
 static constexpr uint32_t kMaxComponents = 128;
-static constexpr uint32_t kMaxObjects = std::numeric_limits<uint32_t>::max();
 
 class ComponentPool {
 public:
@@ -99,25 +100,6 @@ template<typename T, bool isConst>
 class ComponentHandle;
 
 using ComponentMask = duk::tools::BitBlock<detail::kMaxComponents>;
-
-class Id {
-public:
-    Id();
-
-    explicit Id(uint32_t index, uint32_t version);
-
-    DUK_NO_DISCARD uint32_t index() const;
-
-    DUK_NO_DISCARD uint32_t version() const;
-
-    bool operator==(const Id& rhs) const;
-
-    bool operator!=(const Id& rhs) const;
-
-private:
-    uint32_t m_index;
-    uint32_t m_version;
-};
 
 template<bool isConst>
 class ObjectHandle {

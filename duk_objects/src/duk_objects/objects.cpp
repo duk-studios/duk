@@ -23,31 +23,6 @@ uint32_t ComponentRegistry::index_of(const std::string& componentTypeName) const
     return m_componentNameToIndex.at(componentTypeName);
 }
 
-Id::Id()
-    : Id(detail::kMaxObjects, 0) {
-}
-
-Id::Id(uint32_t index, uint32_t version)
-    : m_index(index)
-    , m_version(version) {
-}
-
-uint32_t Id::index() const {
-    return m_index;
-}
-
-uint32_t Id::version() const {
-    return m_version;
-}
-
-bool Id::operator==(const Id& rhs) const {
-    return m_index == rhs.m_index && m_version == rhs.m_version;
-}
-
-bool Id::operator!=(const Id& rhs) const {
-    return !(*this == rhs);
-}
-
 Objects::Objects()
     : m_dirty(false) {
 }
