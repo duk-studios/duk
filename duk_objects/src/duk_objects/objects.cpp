@@ -108,8 +108,9 @@ ObjectHandle<false> Objects::copy_objects(const Objects& src, const Id& parent) 
         // if object was at root, place it as a child of the provided parent
         if (parentId.index() == kInvalidObjectIndex) {
             parentId = parent;
+        } else {
+            solver.solve(parentId);
         }
-        solver.solve(parentId);
         node.parent = parentId.index();
 
         auto componentMask = runtimeObj.component_mask();
