@@ -93,11 +93,19 @@ public:
 
     DUK_NO_DISCARD duk::objects::Object create_object() const;
 
+    DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::Id& parent) const;
+
     DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::ConstObject& object) const;
+
+    DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::Id& parent, const duk::objects::ConstObject& object) const;
 
     DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::Objects& objects) const;
 
+    DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::Id& parent, const duk::objects::Objects& objects) const;
+
     DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::ObjectsResource& objects) const;
+
+    DUK_NO_DISCARD duk::objects::Object create_object(const duk::objects::Id& parent, const duk::objects::ObjectsResource& objects) const;
 
     template<typename E>
     void emit_global(const E& event = {}) const;

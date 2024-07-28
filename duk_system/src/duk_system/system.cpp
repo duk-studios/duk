@@ -84,16 +84,32 @@ duk::objects::Object System::create_object() const {
     return m_objects->add_object();
 }
 
+duk::objects::Object System::create_object(const duk::objects::Id& parent) const {
+    return m_objects->add_object(parent);
+}
+
 duk::objects::Object System::create_object(const duk::objects::ConstObject& object) const {
     return m_objects->copy_object(object);
+}
+
+duk::objects::Object System::create_object(const duk::objects::Id& parent, const duk::objects::ConstObject& object) const {
+    return m_objects->copy_object(object, parent);
 }
 
 duk::objects::Object System::create_object(const duk::objects::Objects& objects) const {
     return m_objects->copy_objects(objects);
 }
 
+duk::objects::Object System::create_object(const duk::objects::Id& parent, const duk::objects::Objects& objects) const {
+    return m_objects->copy_objects(objects, parent);
+}
+
 duk::objects::Object System::create_object(const duk::objects::ObjectsResource& objects) const {
     return create_object(*objects);
+}
+
+duk::objects::Object System::create_object(const duk::objects::Id& parent, const duk::objects::ObjectsResource& objects) const {
+    return create_object(parent, *objects);
 }
 
 SystemRegistry* SystemRegistry::instance() {

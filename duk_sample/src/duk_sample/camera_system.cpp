@@ -91,12 +91,9 @@ void CameraSystem::update() {
     transform->position += moveDirection * controller->speed * deltaTime;
 
     if (input->mouse_down(duk::platform::MouseButton::RIGHT)) {
-        auto camera = controller.component<duk::renderer::Camera>();
-        auto worldPos = duk::renderer::screen_to_world(camera, window->size(), glm::vec3(input->mouse_position(), -30));
-
-        auto spawnedObject = create_object(controller->sphere);
+        auto spawnedObject = create_object(controller.id(), controller->sphere);
         auto spawnedTransform = spawnedObject.component<duk::renderer::Transform>();
-        spawnedTransform->position = worldPos;
+        spawnedTransform->position = glm::vec3(0, -5, -30);
 
         if (auto spriteRenderer = spawnedObject.component<duk::renderer::SpriteRenderer>()) {
             static int spriteIndex = 0;
