@@ -39,9 +39,9 @@ glm::vec3 screen_to_world(const duk::objects::Component<Camera>& camera, const g
 }
 
 void update_camera(const duk::objects::Component<Camera>& camera, const duk::objects::Component<PerspectiveCamera>& perspectiveCamera, uint32_t width, uint32_t height) {
-    auto transform = camera.object().component<Transform>();
-    camera->view = transform->invModel;// the view is the inverse of the model
-    camera->invView = transform->model;
+    auto matrices = camera.object().component<Matrices>();
+    camera->view = matrices->invModel;// the view is the inverse of the model
+    camera->invView = matrices->model;
     camera->proj = detail::calculate_projection(*perspectiveCamera, width, height);
     camera->invProj = glm::inverse(camera->proj);
     camera->vp = camera->proj * camera->view;

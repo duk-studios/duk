@@ -14,15 +14,17 @@ struct Transform {
     glm::vec3 position{0};
     glm::quat rotation{glm::vec3(0)};
     glm::vec3 scale{1};
-
-    // internal use
-    glm::mat4 model{1};
-    glm::mat4 invModel{1};
 };
 
-glm::vec3 forward(const Transform& transform);
+struct Matrices {
+    glm::mat4 model{1};
+    glm::mat4 invModel{1};
+    size_t hash{0};
+};
 
-glm::vec3 world_position(const Transform& transform);
+glm::vec3 forward(const duk::objects::Component<Transform>& transform);
+
+glm::vec3 world_position(const duk::objects::Component<Transform>& transform);
 
 }// namespace duk::renderer
 
