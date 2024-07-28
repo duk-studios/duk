@@ -12,8 +12,8 @@ vec3 duk_calculate_phong_light(in LightValue light, in float shininess, in vec3 
     vec3 diffuse = lighting * diffuseIntensity;
 
     vec3 specular = vec3(0);
-    if (shininess <= 0.001) {
-        vec3 reflectDir = reflect(lightDirection, normal);
+    if (shininess >= 0.001) {
+        vec3 reflectDir = reflect(-lightDirection, normal);
         float specularIntensity = pow(max(dot(view, reflectDir), 0.0), shininess);
         specular = lighting * specularIntensity;
     }
