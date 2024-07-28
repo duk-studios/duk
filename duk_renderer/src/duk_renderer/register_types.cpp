@@ -34,6 +34,7 @@ void register_types() {
     duk::objects::register_component<DirectionalLight>();
     duk::objects::register_component<PointLight>();
     duk::objects::register_component<Transform>();
+    duk::objects::register_component<Matrices>();
     duk::objects::register_component<SpriteRenderer>();
     duk::objects::register_component<MeshSlot>();
     duk::objects::register_component<MaterialSlot>();

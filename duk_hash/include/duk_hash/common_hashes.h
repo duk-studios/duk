@@ -12,7 +12,7 @@ namespace std {
 
 template<>
 struct hash<glm::vec2> {
-    size_t operator()(const glm::vec2& vec) noexcept {
+    size_t operator()(const glm::vec2& vec) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vec.x);
         duk::hash::hash_combine(hash, vec.y);
@@ -22,7 +22,7 @@ struct hash<glm::vec2> {
 
 template<>
 struct hash<glm::vec3> {
-    size_t operator()(const glm::vec3& vec) noexcept {
+    size_t operator()(const glm::vec3& vec) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vec.x);
         duk::hash::hash_combine(hash, vec.y);
@@ -33,7 +33,7 @@ struct hash<glm::vec3> {
 
 template<>
 struct hash<glm::vec4> {
-    size_t operator()(const glm::vec4& vec) noexcept {
+    size_t operator()(const glm::vec4& vec) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vec.x);
         duk::hash::hash_combine(hash, vec.y);
@@ -45,7 +45,7 @@ struct hash<glm::vec4> {
 
 template<>
 struct hash<glm::u32vec2> {
-    size_t operator()(const glm::u32vec2& vec) noexcept {
+    size_t operator()(const glm::u32vec2& vec) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vec.x);
         duk::hash::hash_combine(hash, vec.y);
@@ -55,7 +55,7 @@ struct hash<glm::u32vec2> {
 
 template<>
 struct hash<glm::u32vec3> {
-    size_t operator()(const glm::u32vec3& vec) noexcept {
+    size_t operator()(const glm::u32vec3& vec) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vec.x);
         duk::hash::hash_combine(hash, vec.y);
@@ -66,7 +66,7 @@ struct hash<glm::u32vec3> {
 
 template<>
 struct hash<glm::u32vec4> {
-    size_t operator()(const glm::u32vec4& vec) noexcept {
+    size_t operator()(const glm::u32vec4& vec) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vec.x);
         duk::hash::hash_combine(hash, vec.y);
@@ -78,7 +78,7 @@ struct hash<glm::u32vec4> {
 
 template<>
 struct hash<glm::ivec2> {
-    size_t operator()(const glm::ivec2& vec) noexcept {
+    size_t operator()(const glm::ivec2& vec) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vec.x);
         duk::hash::hash_combine(hash, vec.y);
@@ -88,7 +88,7 @@ struct hash<glm::ivec2> {
 
 template<>
 struct hash<glm::ivec3> {
-    size_t operator()(const glm::ivec3& vec) noexcept {
+    size_t operator()(const glm::ivec3& vec) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vec.x);
         duk::hash::hash_combine(hash, vec.y);
@@ -99,12 +99,24 @@ struct hash<glm::ivec3> {
 
 template<>
 struct hash<glm::ivec4> {
-    size_t operator()(const glm::ivec4& vec) noexcept {
+    size_t operator()(const glm::ivec4& vec) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, vec.x);
         duk::hash::hash_combine(hash, vec.y);
         duk::hash::hash_combine(hash, vec.z);
         duk::hash::hash_combine(hash, vec.w);
+        return hash;
+    }
+};
+
+template<>
+struct hash<glm::quat> {
+    size_t operator()(const glm::quat& quat) const noexcept {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, quat.x);
+        duk::hash::hash_combine(hash, quat.y);
+        duk::hash::hash_combine(hash, quat.z);
+        duk::hash::hash_combine(hash, quat.w);
         return hash;
     }
 };

@@ -74,7 +74,7 @@ void GlobalDescriptors::update_lights(duk::objects::Objects& objects) {
     for (auto object: objects.all_with<DirectionalLight>()) {
         auto directionalLightComponent = object.component<DirectionalLight>();
         auto& directionalLight = lights.directionalLights[lights.directionalLightCount++];
-        directionalLight.direction = forward(*object.component<Transform>());
+        directionalLight.direction = forward(object.component<Transform>());
         directionalLight.value.color = directionalLightComponent->value.color;
         directionalLight.value.intensity = directionalLightComponent->value.intensity;
 
@@ -88,7 +88,7 @@ void GlobalDescriptors::update_lights(duk::objects::Objects& objects) {
         auto pointLightComponent = object.component<PointLight>();
         auto transform = object.component<Transform>();
         auto& pointLight = lights.pointLights[lights.pointLightCount++];
-        pointLight.position = transform ? world_position(*transform) : glm::vec3(0);
+        pointLight.position = transform ? world_position(transform) : glm::vec3(0);
         pointLight.linear = 0.14f;
         pointLight.quadratic = 0.07f;
         pointLight.value.color = pointLightComponent->value.color;
