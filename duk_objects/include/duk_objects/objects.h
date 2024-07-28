@@ -683,7 +683,18 @@ private:
     bool m_dirty;
 };
 
+using ObjectView = Objects::ObjectView<false>;
+
+using ConstObjectView = Objects::ObjectView<true>;
+
+template<typename... Ts>
+using ComponentView = Objects::ComponentView<ObjectView, Ts...>;
+
+template<typename... Ts>
+using ConstComponentView = Objects::ComponentView<ConstObjectView, Ts...>;
+
 using ObjectHierarchyView = Objects::ObjectHierarchyView<false>;
+
 using ConstObjectHierarchyView = Objects::ObjectHierarchyView<true>;
 
 template<typename... Ts>
