@@ -26,6 +26,9 @@ public:
     virtual void wait_events() = 0;
 };
 
+// creates the default platform object for this platform
+extern std::unique_ptr<Platform> create_default_platform();
+
 }// namespace duk::platform
 
 #endif//DUK_PLATFORM_PLATFORM_H
