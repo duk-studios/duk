@@ -144,6 +144,8 @@ public:
 
     ObjectHandle parent() const;
 
+    void reparent(const Id& id = {}) const;
+
 private:
     Id m_id;
     ObjectsType* m_objects;
@@ -187,10 +189,16 @@ public:
 
     DUK_NO_DISCARD ObjectHandle<isConst> object() const;
 
+    DUK_NO_DISCARD ObjectHandle<isConst> parent() const;
+
+    void reparent(const Id& id = {}) const;
+
     DUK_NO_DISCARD ObjectsType* objects() const;
 
     template<typename U>
     ComponentHandle<U, isConst> add() const;
+
+    void remove() const;
 
     template<typename U>
     void remove() const;
@@ -561,6 +569,8 @@ public:
 
     DUK_NO_DISCARD ObjectHandle<true> parent(const Id& id) const;
 
+    void reparent(const Id& id, const Id& parent);
+
     DUK_NO_DISCARD bool valid_object(const Id& id) const;
 
     DUK_NO_DISCARD ObjectView<false> all(bool includeInactive = false);
@@ -637,6 +647,20 @@ public:
     friend void duk::serial::from_json<Objects>(const rapidjson::Value& json, Objects& objects);
 
 private:
+    struct Node {
+        // index of this node
+        uint32_t self{kInvalidObjectIndex};
+
+        // child node index
+        uint32_t child{kInvalidObjectIndex};
+
+        // next sibling node index
+        uint32_t next{kInvalidObjectIndex};
+
+        // previous sibling node index
+        uint32_t previous{kInvalidObjectIndex};
+    };
+
     template<typename T>
     detail::ComponentPoolT<T>* pool() const;
 
@@ -652,23 +676,11 @@ private:
 
     void solve_references();
 
-private:
-    struct Node {
-        // index of this node
-        uint32_t self{kInvalidObjectIndex};
+    void add_node(uint32_t nodeIndex);
 
-        // parent node index
-        uint32_t parent{kInvalidObjectIndex};
+    void remove_node(uint32_t nodeIndex);
 
-        // child node index
-        uint32_t child{kInvalidObjectIndex};
-
-        // next sibling node index
-        uint32_t next{kInvalidObjectIndex};
-
-        // previous sibling node index
-        uint32_t previous{kInvalidObjectIndex};
-    };
+    Node& parent_node(uint32_t nodeIndex);
 
     std::array<std::unique_ptr<detail::ComponentPool>, detail::kMaxComponents> m_componentPools;
     std::vector<ComponentMask> m_activeComponentMasks;
@@ -678,6 +690,7 @@ private:
     std::vector<uint32_t> m_freeList;
     std::vector<bool> m_enterIndices;
     std::vector<bool> m_exitIndices;
+    std::vector<uint32_t> m_parentIndices;
     std::vector<Node> m_nodes;
     Node m_root;
     bool m_dirty;
@@ -851,6 +864,11 @@ ObjectHandle<isConst> ObjectHandle<isConst>::parent() const {
     return m_objects->parent(m_id);
 }
 
+template<bool isConst>
+void ObjectHandle<isConst>::reparent(const Id& id) const {
+    m_objects->reparent(m_id, id);
+}
+
 // Component Implementation //
 
 template<typename T, bool isConst>
@@ -941,6 +959,16 @@ ObjectHandle<isConst> ComponentHandle<T, isConst>::object() const {
 }
 
 template<typename T, bool isConst>
+ObjectHandle<isConst> ComponentHandle<T, isConst>::parent() const {
+    return object().parent();
+}
+
+template<typename T, bool isConst>
+void ComponentHandle<T, isConst>::reparent(const Id& id) const {
+    object().reparent(id);
+}
+
+template<typename T, bool isConst>
 typename ComponentHandle<T, isConst>::ObjectsType* ComponentHandle<T, isConst>::objects() const {
     return m_objects;
 }
@@ -949,6 +977,11 @@ template<typename T, bool isConst>
 template<typename U>
 ComponentHandle<U, isConst> ComponentHandle<T, isConst>::add() const {
     return object().template add<U>();
+}
+
+template<typename T, bool isConst>
+void ComponentHandle<T, isConst>::remove() const {
+    object().template remove<T>();
 }
 
 template<typename T, bool isConst>
