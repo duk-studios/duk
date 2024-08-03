@@ -309,21 +309,20 @@ void Objects::add_node(uint32_t nodeIndex) {
 
 void Objects::remove_node(uint32_t nodeIndex) {
     auto& node = m_nodes[nodeIndex];
-    if (node.previous != kInvalidObjectIndex) {
-        auto& previous = m_nodes[node.previous];
-        previous.next = node.next;
-        node.previous = kInvalidObjectIndex;
-    }
-    if (node.next != kInvalidObjectIndex) {
-        auto& next = m_nodes[node.next];
-        next.previous = node.previous;
-        node.next = kInvalidObjectIndex;
-    }
     auto& parent = parent_node(nodeIndex);
     if (parent.child == node.self) {
         parent.child = node.next;
     }
+    if (node.previous != kInvalidObjectIndex) {
+        auto& previous = m_nodes[node.previous];
+        previous.next = node.next;
+    }
+    if (node.next != kInvalidObjectIndex) {
+        auto& next = m_nodes[node.next];
+        next.previous = node.previous;
+    }
     m_parentIndices[nodeIndex] = kInvalidObjectIndex;
+    node = {};
 }
 
 Objects::Node& Objects::parent_node(uint32_t nodeIndex) {
