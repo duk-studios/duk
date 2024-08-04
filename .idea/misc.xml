@@ -35,6 +35,7 @@
       <file path="$PROJECT_DIR$/duk_system" />
       <file path="$PROJECT_DIR$/duk_task" />
       <file path="$PROJECT_DIR$/duk_tools" />
+      <file path="$PROJECT_DIR$/duk_ui" />
       <file path="$PROJECT_DIR$/external" />
     </sourceRoots>
     <excludeRoots>
