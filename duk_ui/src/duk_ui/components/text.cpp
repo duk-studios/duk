@@ -2,7 +2,7 @@
 // Created by Ricardo on 05/04/2024.
 //
 
-#include <duk_ui/components/text_renderer.h>
+#include <duk_ui/components/text.h>
 #include <duk_renderer/renderer.h>
 
 #include <duk_renderer/mesh/dynamic_mesh.h>
@@ -16,7 +16,7 @@
 
 namespace duk::ui {
 
-void update_text_renderer(duk::tools::Globals* globals, const objects::Component<TextRenderer>& textRenderer) {
+void update_text_renderer(duk::tools::Globals* globals, const objects::Component<Text>& textRenderer) {
     auto renderer = globals->get<duk::renderer::Renderer>();
 
     Font::BuildAtlasParams buildAtlasParams = {};
