@@ -2,12 +2,11 @@
 // Created by Ricardo on 30/03/2024.
 //
 
-#ifndef DUK_UI_TEXT_RENDERER_H
-#define DUK_UI_TEXT_RENDERER_H
+#ifndef DUK_UI_TEXT_H
+#define DUK_UI_TEXT_H
 
 #include <duk_ui/font/font.h>
 #include <duk_ui/text/text_alignment.h>
-#include <duk_ui/text/text_mesh.h>
 #include <duk_renderer/material/material.h>
 
 namespace duk::ui {
@@ -20,11 +19,9 @@ struct Text {
     TextHoriAlignment horiAlignment;
     TextVertAlignment vertAlignment;
     bool dynamic;
-
-    std::shared_ptr<TextMesh> mesh;
+    uint32_t capacity = 0;
+    duk::hash::Hash hash = 0;
 };
-
-void update_text_renderer(duk::tools::Globals* globals, const duk::objects::Component<Text>& textRenderer);
 
 }// namespace duk::ui
 
@@ -63,4 +60,4 @@ void solve_resources(Solver* solver, duk::ui::Text& textRenderer) {
 
 }// namespace duk::resource
 
-#endif//DUK_UI_TEXT_RENDERER_H
+#endif//DUK_UI_TEXT_H

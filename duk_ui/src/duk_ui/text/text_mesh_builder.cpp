@@ -182,16 +182,16 @@ std::shared_ptr<duk::renderer::DynamicMesh> allocate_text_mesh(duk::renderer::Me
     return std::make_shared<duk::renderer::DynamicMesh>(dynamicMeshCreateInfo);
 }
 
-void build_text_mesh(duk::renderer::DynamicMesh* mesh, const std::string_view& text, const FontAtlas* atlas, uint32_t fontSize, const glm::vec2& textBoxSize, float lineHeight, TextVertAlignment vertAlignment, TextHoriAlignment horiAlignment, float pixelsPerUnit) {
-    // create mesh if null or if it's too small
+void build_text_mesh(duk::renderer::DynamicMesh* mesh, const std::string_view& text, const FontAtlas* atlas, uint32_t fontSize, const glm::vec2& textBoxSize, TextVertAlignment vertAlignment, TextHoriAlignment horiAlignment, float pixelsPerUnit) {
+    const float kLineHeight = fontSize + fontSize * (1.f / 4.f);
     // get words
     auto words = detail::collect_words(text);
 
     // separate them in lines
-    auto lines = detail::collect_lines(words, atlas, fontSize, textBoxSize, lineHeight);
+    auto lines = detail::collect_lines(words, atlas, fontSize, textBoxSize, kLineHeight);
 
     // update content
-    detail::update_mesh(mesh, lines, atlas, fontSize, textBoxSize, lineHeight, vertAlignment, horiAlignment, pixelsPerUnit);
+    detail::update_mesh(mesh, lines, atlas, fontSize, textBoxSize, kLineHeight, vertAlignment, horiAlignment, pixelsPerUnit);
 }
 
 }// namespace duk::ui
