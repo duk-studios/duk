@@ -40,6 +40,7 @@ target_link_libraries(duk_engine
         PUBLIC
         duk_system
         duk_renderer
+        duk_ui
         duk_audio
         )
 

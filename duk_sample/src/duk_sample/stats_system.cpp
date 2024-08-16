@@ -6,8 +6,6 @@
 
 #include <duk_engine/engine.h>
 
-#include <duk_renderer/components/text_renderer.h>
-
 #include <numeric>
 
 namespace duk::sample {
