@@ -7,11 +7,15 @@
 
 #include <duk_objects/objects.h>
 
+#include <duk_renderer/material/uniform_buffer.h>
+#include <duk_renderer/material/globals/camera_types.h>
+
 namespace duk::ui {
 
 struct Canvas {
     glm::ivec2 size;
-    glm::mat4 proj;
+    duk::renderer::globals::ViewProjUBO ubo;
+    uint64_t hash = 0;
 };
 
 struct CanvasTransform {
@@ -33,10 +37,6 @@ struct CanvasTransform {
     // internal usage
     glm::mat4 model;
 };
-
-void update_canvas(const duk::objects::Component<Canvas>& canvas, uint32_t width, uint32_t height);
-
-void update_canvas_transform(const duk::objects::Component<Canvas>& canvas, duk::objects::Component<CanvasTransform>& canvasTransform);
 
 }// namespace duk::ui
 
