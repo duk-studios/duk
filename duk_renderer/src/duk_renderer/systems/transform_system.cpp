@@ -2,8 +2,9 @@
 // Created by Ricardo on 26/03/2024.
 //
 #include <duk_renderer/systems/transform_system.h>
-
 #include <duk_renderer/components/material_slot.h>
+#include <duk_renderer/renderer.h>
+#include <duk_renderer/material/globals/global_descriptors.h>
 
 namespace duk::renderer {
 
@@ -51,6 +52,7 @@ static void update_child_transforms(TransformUpdateSystem* system, const duk::ob
         if (auto material = materialSlot->material) {
             material->set(transform.id(), "uTransform", "model", matrices->model);
             material->set(transform.id(), "uTransform", "invModel", matrices->invModel);
+            material->set("uCamera", system->global<Renderer>()->global_descriptors()->camera_ubo()->descriptor());
         }
     }
 }
