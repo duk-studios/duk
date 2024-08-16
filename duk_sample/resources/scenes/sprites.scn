@@ -23,7 +23,7 @@
           "type":"duk::renderer::Camera"
         },
         {
-          "type": "duk::renderer::Canvas"
+          "type": "duk::ui::Canvas"
         },
         {
           "type":"duk::renderer::PerspectiveCamera",
@@ -62,7 +62,7 @@
     {
       "components":[
         {
-          "type": "duk::renderer::CanvasTransform",
+          "type": "duk::ui::CanvasTransform",
           "anchor": "0.0;0.0",
           "position": "6;6",
           "size": "200;50",
@@ -70,7 +70,7 @@
           "scale": "1;1"
         },
         {
-          "type":"duk::renderer::TextRenderer",
+          "type":"duk::ui::Text",
           "font":11859234415737620434,
           "fontSize":16,
           "size": "200;50",
@@ -94,7 +94,7 @@
           "scale": "1;1"
         },
         {
-          "type":"duk::renderer::TextRenderer",
+          "type":"duk::ui::Text",
           "font":11859234415737620434,
           "fontSize":24,
           "size": "200;50",

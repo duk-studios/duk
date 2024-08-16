@@ -10,6 +10,7 @@
 
 #include <duk_serial/json/serializer.h>
 #include <duk_objects/object_solver.h>
+#include <duk_system/system_solver.h>
 
 namespace duk::ui {
 

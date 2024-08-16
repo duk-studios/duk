@@ -152,6 +152,8 @@ private:
 
         virtual void solve(duk::resource::ReferenceSolver* referenceSolver, Systems& systems) = 0;
 
+        virtual void solve(duk::objects::ObjectSolver* objectSolver, Systems& systems) = 0;
+
         virtual const std::string& name() = 0;
     };
 
@@ -165,6 +167,8 @@ private:
         void solve(duk::resource::DependencySolver* solver, Systems& systems) override;
 
         void solve(duk::resource::ReferenceSolver* solver, Systems& systems) override;
+
+        void solve(duk::objects::ObjectSolver* objectSolver, Systems& systems) override;
 
         const std::string& name() override;
     };
