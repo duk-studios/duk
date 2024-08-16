@@ -2,7 +2,6 @@
 /// global_buffers.cpp
 
 #include <duk_renderer/components/camera.h>
-#include <duk_renderer/components/canvas.h>
 #include <duk_renderer/components/lighting.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_renderer/material/globals/global_descriptors.h>
@@ -13,11 +12,10 @@ GlobalDescriptors::GlobalDescriptors(const GlobalDescriptorsCreateInfo& globalDe
     auto rhi = globalDescriptorsCreateInfo.rhi;
     auto commandQueue = globalDescriptorsCreateInfo.commandQueue;
     {
-        UniformBufferCreateInfo<globals::CameraMatrices> cameraUBOCreateInfo = {};
+        UniformBufferCreateInfo<globals::ViewProjMatrices> cameraUBOCreateInfo = {};
         cameraUBOCreateInfo.rhi = rhi;
         cameraUBOCreateInfo.commandQueue = commandQueue;
-        m_cameraUBO = std::make_unique<globals::CameraUBO>(cameraUBOCreateInfo);
-        m_canvasCameraUBO = std::make_unique<globals::CameraUBO>(cameraUBOCreateInfo);
+        m_cameraUBO = std::make_unique<globals::ViewProjUBO>(cameraUBOCreateInfo);
     }
 
     {
@@ -47,24 +45,6 @@ void GlobalDescriptors::update_cameras(duk::objects::Objects& objects) {
     }
     if (cameraCount == 0) {
         duk::log::warn("no camera found in objects, nothing will be rendered");
-    }
-}
-
-void GlobalDescriptors::update_canvas(duk::objects::Objects& objects) {
-    uint32_t canvasCount = 0;
-    for (auto object: objects.all_with<Canvas>()) {
-        canvasCount++;
-        if (canvasCount > 1) {
-            duk::log::warn("multiple canvas detected, unsupported at the moment");
-            break;
-        }
-        auto canvas = object.component<Canvas>();
-        auto& uboData = m_canvasCameraUBO->data();
-        uboData.proj = canvas->proj;
-        uboData.view = glm::mat4(1);
-        uboData.invView = glm::mat4(1);
-        uboData.vp = canvas->proj;
-        m_canvasCameraUBO->flush();
     }
 }
 
@@ -102,12 +82,8 @@ void GlobalDescriptors::update_lights(duk::objects::Objects& objects) {
     m_lightsUBO->flush();
 }
 
-globals::CameraUBO* GlobalDescriptors::camera_ubo() {
+globals::ViewProjUBO* GlobalDescriptors::camera_ubo() {
     return m_cameraUBO.get();
-}
-
-globals::CameraUBO* GlobalDescriptors::canvas_ubo() {
-    return m_canvasCameraUBO.get();
 }
 
 globals::LightsUBO* GlobalDescriptors::lights_ubo() {

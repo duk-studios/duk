@@ -7,7 +7,6 @@
 #include <duk_renderer/passes/pass.h>
 #include <duk_renderer/renderer.h>
 #include <duk_renderer/sprite/sprite_cache.h>
-#include <duk_renderer/text/text_mesh_cache.h>
 #include <duk_renderer/builtins.h>
 
 namespace duk::renderer {
@@ -54,7 +53,6 @@ Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
         m_pipelineCache = std::make_unique<PipelineCache>(pipelineCacheCreateInfo);
     }
     m_spriteCache = std::make_unique<SpriteCache>();
-    m_textMeshCache = std::make_unique<TextCache>();
 }
 
 Renderer::~Renderer() = default;
@@ -99,7 +97,6 @@ void Renderer::render(duk::objects::Objects& objects) {
 void Renderer::clear_cache() {
     m_pipelineCache->clear();
     m_spriteCache->clear();
-    m_textMeshCache->clear();
 }
 
 uint32_t Renderer::render_width() const {
@@ -130,14 +127,8 @@ SpriteCache* Renderer::sprite_cache() const {
     return m_spriteCache.get();
 }
 
-TextCache* Renderer::text_cache() const {
-    return m_textMeshCache.get();
-}
-
 void Renderer::update_global_descriptors(duk::objects::Objects& objects) {
     m_globalDescriptors->update_cameras(objects);
-
-    m_globalDescriptors->update_canvas(objects);
 
     m_globalDescriptors->update_lights(objects);
 }
