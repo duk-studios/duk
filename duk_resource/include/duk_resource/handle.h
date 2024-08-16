@@ -84,6 +84,8 @@ public:
     template<typename U>
     Handle<U> as() const;
 
+    std::shared_ptr<T> shared() const;
+
     Id id() const;
 
     T* get() const;
@@ -162,6 +164,11 @@ template<typename T>
 template<typename U>
 Handle<U> Handle<T>::as() const {
     return Handle<U>(m_id, std::static_pointer_cast<U>(m_resource));
+}
+
+template<typename T>
+std::shared_ptr<T> Handle<T>::shared() const {
+    return m_resource;
 }
 
 template<typename T>

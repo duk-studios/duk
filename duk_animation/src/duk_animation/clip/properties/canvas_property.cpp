@@ -3,12 +3,12 @@
 //
 
 #include <duk_animation/clip/properties/canvas_property.h>
-#include <duk_renderer/components/canvas.h>
+#include <duk_ui/components/canvas.h>
 
 namespace duk::animation {
 
 void CanvasAnchorProperty::evaluate(const duk::objects::Object& object, const PropertyT<CanvasAnchorProperty>* property, uint32_t sample) {
-    auto canvasTransform = object.component<duk::renderer::CanvasTransform>();
+    auto canvasTransform = object.component<duk::ui::CanvasTransform>();
     if (!canvasTransform) {
         duk::log::warn("CanvasTransform not found for object with an animated anchor");
         return;
@@ -24,7 +24,7 @@ CanvasAnchorProperty::ValueType CanvasAnchorProperty::interpolate(const ValueTyp
 }
 
 void CanvasPivotProperty::evaluate(const duk::objects::Object& object, const PropertyT<CanvasPivotProperty>* property, uint32_t sample) {
-    auto canvasTransform = object.component<duk::renderer::CanvasTransform>();
+    auto canvasTransform = object.component<duk::ui::CanvasTransform>();
     if (!canvasTransform) {
         duk::log::warn("CanvasTransform not found for object with an animated pivot");
         return;
@@ -40,7 +40,7 @@ CanvasPivotProperty::ValueType CanvasPivotProperty::interpolate(const ValueType&
 }
 
 void CanvasPositionProperty::evaluate(const duk::objects::Object& object, const PropertyT<CanvasPositionProperty>* property, uint32_t sample) {
-    auto canvasTransform = object.component<duk::renderer::CanvasTransform>();
+    auto canvasTransform = object.component<duk::ui::CanvasTransform>();
     if (!canvasTransform) {
         duk::log::warn("CanvasTransform not found for object with an animated position");
         return;
@@ -56,7 +56,7 @@ CanvasPositionProperty::ValueType CanvasPositionProperty::interpolate(const Valu
 }
 
 void CanvasSizeProperty::evaluate(const duk::objects::Object& object, const PropertyT<CanvasSizeProperty>* property, uint32_t sample) {
-    auto canvasTransform = object.component<duk::renderer::CanvasTransform>();
+    auto canvasTransform = object.component<duk::ui::CanvasTransform>();
     if (!canvasTransform) {
         duk::log::warn("CanvasTransform not found for object with an animated size");
         return;
@@ -72,7 +72,7 @@ CanvasSizeProperty::ValueType CanvasSizeProperty::interpolate(const ValueType& f
 }
 
 void CanvasScaleProperty::evaluate(const duk::objects::Object& object, const PropertyT<CanvasScaleProperty>* property, uint32_t sample) {
-    auto canvasTransform = object.component<duk::renderer::CanvasTransform>();
+    auto canvasTransform = object.component<duk::ui::CanvasTransform>();
     if (!canvasTransform) {
         duk::log::warn("CanvasTransform not found for object with an animated scale");
         return;

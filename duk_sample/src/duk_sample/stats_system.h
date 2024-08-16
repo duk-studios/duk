@@ -8,13 +8,13 @@
 #include <duk_objects/events.h>
 #include <duk_system/system.h>
 
-#include <duk_renderer/components/text_renderer.h>
+#include <duk_ui/components/text.h>
 
 namespace duk::sample {
 
 struct Stats {
     uint32_t sampleCount;
-    duk::objects::Component<duk::renderer::TextRenderer> textObject;
+    duk::objects::Component<duk::ui::Text> textObject;
     std::vector<float> fpsSamples;
     uint32_t currentSample = 0;
 };

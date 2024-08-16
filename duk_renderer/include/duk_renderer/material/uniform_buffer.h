@@ -19,7 +19,11 @@ struct UniformBufferCreateInfo {
 template<typename T>
 class UniformBuffer {
 public:
+    UniformBuffer();
+
     explicit UniformBuffer(const UniformBufferCreateInfo<T>& uniformBufferCreateInfo);
+
+    void create(duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue);
 
     DUK_NO_DISCARD duk::rhi::Descriptor descriptor() const;
 
@@ -27,7 +31,13 @@ public:
 
     DUK_NO_DISCARD const T& data() const;
 
+    DUK_NO_DISCARD T* operator->();
+
+    DUK_NO_DISCARD const T* operator->() const;
+
     DUK_NO_DISCARD duk::rhi::Buffer* buffer() const;
+
+    DUK_NO_DISCARD bool valid() const;
 
     void flush();
 
@@ -37,17 +47,27 @@ private:
 };
 
 template<typename T>
+UniformBuffer<T>::UniformBuffer()
+    : m_data({}) {
+}
+
+template<typename T>
 UniformBuffer<T>::UniformBuffer(const UniformBufferCreateInfo<T>& uniformBufferCreateInfo)
     : m_data(uniformBufferCreateInfo.initialData) {
+    create(uniformBufferCreateInfo.rhi, uniformBufferCreateInfo.commandQueue);
+    flush();
+}
+
+template<typename T>
+void UniformBuffer<T>::create(duk::rhi::RHI* rhi, duk::rhi::CommandQueue* commandQueue) {
     duk::rhi::RHI::BufferCreateInfo bufferCreateInfo = {};
-    bufferCreateInfo.commandQueue = uniformBufferCreateInfo.commandQueue;
+    bufferCreateInfo.commandQueue = commandQueue;
     bufferCreateInfo.type = rhi::Buffer::Type::UNIFORM;
     bufferCreateInfo.elementSize = sizeof(T);
     bufferCreateInfo.elementCount = 1;
     bufferCreateInfo.updateFrequency = rhi::Buffer::UpdateFrequency::DYNAMIC;
 
-    m_buffer = uniformBufferCreateInfo.rhi->create_buffer(bufferCreateInfo);
-    flush();
+    m_buffer = rhi->create_buffer(bufferCreateInfo);
 }
 
 template<typename T>
@@ -66,8 +86,23 @@ const T& UniformBuffer<T>::data() const {
 }
 
 template<typename T>
+T* UniformBuffer<T>::operator->() {
+    return &m_data;
+}
+
+template<typename T>
+const T* UniformBuffer<T>::operator->() const {
+    return &m_data;
+}
+
+template<typename T>
 duk::rhi::Buffer* UniformBuffer<T>::buffer() const {
     return m_buffer.get();
+}
+
+template<typename T>
+bool UniformBuffer<T>::valid() const {
+    return m_buffer != nullptr;
 }
 
 template<typename T>

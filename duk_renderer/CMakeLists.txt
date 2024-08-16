@@ -12,12 +12,10 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/register_types.h
         include/duk_renderer/texture.h
         include/duk_renderer/components/camera.h
-        include/duk_renderer/components/canvas.h
         include/duk_renderer/components/lighting.h
         include/duk_renderer/components/material_slot.h
         include/duk_renderer/components/mesh_slot.h
         include/duk_renderer/components/sprite_renderer.h
-        include/duk_renderer/components/text_renderer.h
         include/duk_renderer/components/transform.h
         include/duk_renderer/sprite/sprite.h
         include/duk_renderer/sprite/sprite_cache.h
@@ -27,9 +25,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/image/image_builtins.h
         include/duk_renderer/image/image_handler.h
         include/duk_renderer/image/image_loader_stb.h
-        include/duk_renderer/font/font.h
-        include/duk_renderer/font/font_atlas.h
-        include/duk_renderer/font/font_handler.h
         include/duk_renderer/mesh/draw_buffer.h
         include/duk_renderer/mesh/dynamic_mesh.h
         include/duk_renderer/mesh/empty_mesh.h
@@ -62,15 +57,9 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/passes/forward_pass.h
         include/duk_renderer/passes/pass.h
         include/duk_renderer/passes/present_pass.h
-        include/duk_renderer/text/text_alignment.h
-        include/duk_renderer/text/text_mesh.h
-        include/duk_renderer/text/text_mesh_builder.h
-        include/duk_renderer/text/text_mesh_cache.h
         include/duk_renderer/systems/sprite_system.h
         include/duk_renderer/systems/transform_system.h
-        include/duk_renderer/systems/text_system.h
         include/duk_renderer/systems/camera_system.h
-        include/duk_renderer/systems/canvas_system.h
 )
 
 set(DUK_RENDERER_SOURCES
@@ -81,12 +70,10 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/register_types.cpp
         src/duk_renderer/texture.cpp
         src/duk_renderer/components/camera.cpp
-        src/duk_renderer/components/canvas.cpp
         src/duk_renderer/components/lighting.cpp
         src/duk_renderer/components/material_slot.cpp
         src/duk_renderer/components/mesh_slot.cpp
         src/duk_renderer/components/sprite_renderer.cpp
-        src/duk_renderer/components/text_renderer.cpp
         src/duk_renderer/components/transform.cpp
         src/duk_renderer/sprite/sprite.cpp
         src/duk_renderer/sprite/sprite_cache.cpp
@@ -120,15 +107,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/image/image_builtins.cpp
         src/duk_renderer/image/image_handler.cpp
         src/duk_renderer/image/image_loader_stb.cpp
-        src/duk_renderer/font/font.cpp
-        src/duk_renderer/font/font_atlas.cpp
-        src/duk_renderer/font/font_handler.cpp
-        src/duk_renderer/font/freetype/freetype_import.h
-        src/duk_renderer/font/freetype/freetype_import.cpp
-        src/duk_renderer/font/freetype/freetype_font.h
-        src/duk_renderer/font/freetype/freetype_font.cpp
-        src/duk_renderer/font/freetype/freetype_font_loader.h
-        src/duk_renderer/font/freetype/freetype_font_loader.cpp
         src/duk_renderer/material/material.cpp
         src/duk_renderer/material/material_handler.cpp
         src/duk_renderer/material/material_buffer.cpp
@@ -141,14 +119,9 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp
         src/duk_renderer/passes/present_pass.cpp
-        src/duk_renderer/text/text_mesh.cpp
-        src/duk_renderer/text/text_mesh_builder.cpp
-        src/duk_renderer/text/text_mesh_cache.cpp
         src/duk_renderer/systems/transform_system.cpp
         src/duk_renderer/systems/sprite_system.cpp
-        src/duk_renderer/systems/text_system.cpp
         src/duk_renderer/systems/camera_system.cpp
-        src/duk_renderer/systems/canvas_system.cpp
 )
 
 add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})

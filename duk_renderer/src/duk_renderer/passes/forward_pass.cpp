@@ -12,7 +12,7 @@
 #include <duk_renderer/mesh/draw_buffer.h>
 #include <duk_renderer/mesh/mesh_buffer.h>
 
-#include "duk_rhi/image_data_source.h"
+#include <duk_rhi/image_data_source.h>
 
 namespace duk::renderer {
 
@@ -252,13 +252,6 @@ static void update_draw_data(const Pass::UpdateParams& params, duk::rhi::RenderP
     }
 
     for (const auto material: uniqueMaterials) {
-        MaterialLocationId cameraLocationId = material->find_binding("uCamera");
-        if (cameraLocationId.valid()) {
-            auto cameraDescriptor = material->get(cameraLocationId);
-            if (cameraDescriptor.type() == duk::rhi::DescriptorType::UNDEFINED) {
-                material->set(cameraLocationId, params.globalDescriptors->camera_ubo()->descriptor());
-            }
-        }
         MaterialLocationId lights = material->find_binding("uLights");
         if (lights.valid()) {
             material->set(lights, params.globalDescriptors->lights_ubo()->descriptor());

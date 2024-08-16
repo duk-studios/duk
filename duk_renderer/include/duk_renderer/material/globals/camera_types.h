@@ -5,14 +5,14 @@
 
 namespace duk::renderer::globals {
 
-struct CameraMatrices {
+struct ViewProjMatrices {
     glm::mat4x4 view;
     glm::mat4x4 invView;
     glm::mat4x4 proj;
     glm::mat4x4 vp;
 };
 
-using CameraUBO = UniformBuffer<CameraMatrices>;
+using ViewProjUBO = UniformBuffer<ViewProjMatrices>;
 
 }// namespace duk::renderer::globals
 
