@@ -2,6 +2,7 @@ project(duk_system)
 
 set(DUK_SYSTEM_HEADERS
         include/duk_system/system.h
+        include/duk_system/system_solver.h
 )
 
 set(DUK_SYSTEM_SOURCES

@@ -3,6 +3,8 @@
 
 #include <duk_engine/scene/scene.h>
 
+#include <duk_objects/object_solver.h>
+
 namespace duk::engine {
 
 Scene::Scene()
@@ -27,6 +29,8 @@ const duk::system::Systems& Scene::systems() const {
 
 void Scene::attach(duk::tools::Globals& globals) {
     m_systems.attach(globals, m_objects, m_systemDispatcher);
+    duk::objects::ObjectSolver objectSolver(m_objects);
+    objectSolver.solve(m_systems);
 }
 
 void Scene::enter(uint32_t disabledGroupsMask) {

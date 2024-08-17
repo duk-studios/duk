@@ -27,7 +27,7 @@ public:
 
     void request_scene(const std::string& alias);
 
-    Scene* scene();
+    Scene* scene() const;
 
     void enable(uint32_t systemGroup);
 

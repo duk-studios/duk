@@ -34,11 +34,11 @@
       "group": 0
     },
     {
-      "type": "duk::renderer::TextUpdateSystem",
+      "type": "duk::ui::TextUpdateSystem",
       "group": 0
     },
     {
-      "type": "duk::renderer::CanvasUpdateSystem",
+      "type": "duk::ui::CanvasUpdateSystem",
       "group": 0
     }
   ],
@@ -55,7 +55,7 @@
           "type":"duk::renderer::Camera"
         },
         {
-          "type": "duk::renderer::Canvas"
+          "type": "duk::ui::Canvas"
         },
         {
           "type":"duk::renderer::PerspectiveCamera",
