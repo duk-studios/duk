@@ -23,10 +23,7 @@ void register_types() {
     register_property<PositionProperty>();
     register_property<RotationProperty>();
     register_property<ScaleProperty>();
-    register_property<CanvasAnchorProperty>();
     register_property<CanvasPivotProperty>();
-    register_property<CanvasPositionProperty>();
-    register_property<CanvasSizeProperty>();
     register_property<CanvasScaleProperty>();
     duk::resource::register_handler<AnimationClipHandler>();
     duk::resource::register_handler<AnimationControllerHandler>();

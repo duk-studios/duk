@@ -13,7 +13,7 @@ namespace duk::ui {
 
 std::shared_ptr<duk::renderer::DynamicMesh> allocate_text_mesh(duk::renderer::MeshBufferPool* meshBufferPool, uint32_t textCount, bool dynamic);
 
-void build_text_mesh(duk::renderer::DynamicMesh* mesh, const std::string_view& text, const FontAtlas* atlas, uint32_t fontSize, const glm::vec2& textBoxSize, TextVertAlignment vertAlignment, TextHoriAlignment horiAlignment, float pixelsPerUnit);
+void build_text_mesh(duk::renderer::DynamicMesh* mesh, const std::string_view& text, const FontAtlas* atlas, uint32_t fontSize, const glm::vec2& textBoxSize, TextVertAlignment vertAlignment, TextHoriAlignment horiAlignment);
 
 }// namespace duk::ui
 

@@ -71,8 +71,7 @@ static std::vector<Line> collect_lines(const std::vector<std::string_view>& word
     return lines;
 }
 
-static void update_mesh(duk::renderer::DynamicMesh* mesh, const std::vector<Line>& lines, const FontAtlas* atlas, uint32_t fontSize, const glm::vec2& textBoxSize, float lineHeight, TextVertAlignment vertAlignment, TextHoriAlignment horiAlignment,
-                        float pixelsPerUnit) {
+static void update_mesh(duk::renderer::DynamicMesh* mesh, const std::vector<Line>& lines, const FontAtlas* atlas, uint32_t fontSize, const glm::vec2& textBoxSize, float lineHeight, TextVertAlignment vertAlignment, TextHoriAlignment horiAlignment) {
     // build mesh by lines, taking alignment options into account
     glm::vec3 pen;
 
@@ -90,7 +89,6 @@ static void update_mesh(duk::renderer::DynamicMesh* mesh, const std::vector<Line
             break;
     }
     pen.y -= (textBoxSize.y / 2) + lineHeight;
-    pen.y /= pixelsPerUnit;
 
     uint32_t textCount = 0;
 
@@ -109,16 +107,15 @@ static void update_mesh(duk::renderer::DynamicMesh* mesh, const std::vector<Line
                 break;
         }
         pen.x -= textBoxSize.x / 2;
-        pen.x /= pixelsPerUnit;
 
         for (const auto& word: line.words) {
             for (auto chr: word) {
                 Glyph glyph;
                 atlas->find_glyph(chr, glyph, fontSize);
 
-                const auto bearing = glm::vec2(glyph.metrics.bearing) / pixelsPerUnit;
-                const auto size = glm::vec2(glyph.metrics.size) / pixelsPerUnit;
-                const auto advance = glyph.metrics.advance / pixelsPerUnit;
+                const auto bearing = glm::vec2(glyph.metrics.bearing);
+                const auto size = glm::vec2(glyph.metrics.size);
+                const auto advance = glyph.metrics.advance;
 
                 glm::vec2 min = glm::vec2(pen.x + bearing.x, pen.y + bearing.y - size.y);// bottom left
                 glm::vec2 max = glm::vec2(min.x + size.x, min.y + size.y);               // upper right
@@ -182,7 +179,7 @@ std::shared_ptr<duk::renderer::DynamicMesh> allocate_text_mesh(duk::renderer::Me
     return std::make_shared<duk::renderer::DynamicMesh>(dynamicMeshCreateInfo);
 }
 
-void build_text_mesh(duk::renderer::DynamicMesh* mesh, const std::string_view& text, const FontAtlas* atlas, uint32_t fontSize, const glm::vec2& textBoxSize, TextVertAlignment vertAlignment, TextHoriAlignment horiAlignment, float pixelsPerUnit) {
+void build_text_mesh(duk::renderer::DynamicMesh* mesh, const std::string_view& text, const FontAtlas* atlas, uint32_t fontSize, const glm::vec2& textBoxSize, TextVertAlignment vertAlignment, TextHoriAlignment horiAlignment) {
     const float kLineHeight = fontSize + fontSize * (1.f / 4.f);
     // get words
     auto words = detail::collect_words(text);
@@ -191,7 +188,7 @@ void build_text_mesh(duk::renderer::DynamicMesh* mesh, const std::string_view& t
     auto lines = detail::collect_lines(words, atlas, fontSize, textBoxSize, kLineHeight);
 
     // update content
-    detail::update_mesh(mesh, lines, atlas, fontSize, textBoxSize, kLineHeight, vertAlignment, horiAlignment, pixelsPerUnit);
+    detail::update_mesh(mesh, lines, atlas, fontSize, textBoxSize, kLineHeight, vertAlignment, horiAlignment);
 }
 
 }// namespace duk::ui
