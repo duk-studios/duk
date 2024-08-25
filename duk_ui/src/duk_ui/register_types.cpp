@@ -22,6 +22,7 @@ void register_types() {
     duk::objects::register_component<Text>();
     duk::objects::register_component<Canvas>();
     duk::objects::register_component<CanvasTransform>();
+    duk::objects::register_component<CanvasTransformRect>();
 }
 
 }// namespace duk::ui

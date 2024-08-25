@@ -116,9 +116,7 @@ void TextUpdateSystem::update_text_mesh(const duk::objects::Component<Text>& tex
         text->capacity = textCount;
     }
 
-    const auto pixelsPerUnit = text.component<duk::renderer::Transform>().valid() ? 100 : 1;
-
-    build_text_mesh(mesh.get(), text->text, atlas, text->fontSize, text->size, text->vertAlignment, text->horiAlignment, pixelsPerUnit);
+    build_text_mesh(mesh.get(), text->text, atlas, text->fontSize, text->size, text->vertAlignment, text->horiAlignment);
 
     if (!text->dynamic) {
         m_meshes.emplace(text->hash, mesh);
