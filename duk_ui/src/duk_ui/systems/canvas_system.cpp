@@ -54,7 +54,8 @@ static void update_canvas_transform_matrices(const CanvasTransform& canvasTransf
     matrices.invModel = glm::inverse(matrices.model);
 }
 
-static void update_canvas_transforms(CanvasUpdateSystem* system, const duk::objects::Component<Canvas>& canvas, const glm::mat4& parentModel, const glm::vec2& parentSize, const duk::objects::ComponentHierarchyView<CanvasTransform>& canvasTransforms, bool update) {
+static void update_canvas_transforms(CanvasUpdateSystem* system, const duk::objects::Component<Canvas>& canvas, const glm::mat4& parentModel, const glm::vec2& parentSize, const duk::objects::ComponentHierarchyView<CanvasTransform>& canvasTransforms,
+                                     bool update) {
     for (auto [canvasTransform]: canvasTransforms) {
         const auto matrices = canvasTransform.component_or_add<CanvasTransformRect>();
         const auto hash = calculate_canvas_transform_hash(*canvasTransform);
