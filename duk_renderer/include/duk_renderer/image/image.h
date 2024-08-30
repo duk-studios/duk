@@ -38,6 +38,8 @@ public:
 
     DUK_NO_DISCARD duk::rhi::Descriptor descriptor();
 
+    DUK_NO_DISCARD duk::rhi::Descriptor descriptor(const duk::rhi::Sampler& sampler);
+
 private:
     std::shared_ptr<duk::rhi::Image> m_image;
 };

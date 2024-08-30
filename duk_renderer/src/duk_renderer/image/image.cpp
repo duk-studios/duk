@@ -49,4 +49,8 @@ duk::rhi::Descriptor Image::descriptor() {
     return duk::rhi::Descriptor::image(m_image.get(), duk::rhi::Image::Layout::SHADER_READ_ONLY);
 }
 
+duk::rhi::Descriptor Image::descriptor(const duk::rhi::Sampler& sampler) {
+    return duk::rhi::Descriptor::image_sampler(m_image.get(), duk::rhi::Image::Layout::SHADER_READ_ONLY, sampler);
+}
+
 }// namespace duk::renderer

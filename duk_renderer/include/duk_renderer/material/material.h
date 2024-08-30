@@ -130,6 +130,8 @@ std::shared_ptr<Material> create_phong_material(Renderer* renderer, Builtins* bu
 
 std::shared_ptr<Material> create_text_material(Renderer* renderer, Builtins* builtins);
 
+std::shared_ptr<Material> create_image_material(Renderer* renderer, Builtins* builtins);
+
 using MaterialResource = duk::resource::Handle<Material>;
 
 template<typename T>

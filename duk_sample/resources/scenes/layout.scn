@@ -13,6 +13,10 @@
       "group": 0
     },
     {
+      "type": "duk::ui::ImageSystem",
+      "group": 0
+    },
+    {
       "type": "duk::ui::TextUpdateSystem",
       "group": 0
     }
@@ -55,126 +59,15 @@
           "anchorMaxOffsets": "0;0",
           "pivot": "0.0;0.0",
           "scale": "1;1"
-        }
-      ]
-    },
-    {
-      "parent": 2,
-      "components":[
-        {
-          "type": "duk::ui::CanvasTransform",
-          "anchorMin": "0;0.5",
-          "anchorMax": "0;0.5",
-          "anchorMinOffsets": "0;0",
-          "anchorMaxOffsets": "100;0",
-          "pivot": "1.0;0.5",
-          "scale": "1;1"
         },
         {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":32,
-          "size": "200;200",
-          "horiAlignment": "left",
-          "vertAlignment": "middle",
-          "text": "<",
-          "dynamic": false
-        }
-      ]
-    },
-    {
-      "parent": 2,
-      "components":[
-        {
-          "type": "duk::ui::CanvasTransform",
-          "anchorMin": "0;0",
-          "anchorMax": "1;1",
-          "anchorMinOffsets": "0;0",
-          "anchorMaxOffsets": "0;0",
-          "pivot": "0.5;0.5",
-          "scale": "1;1"
-        },
-        {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":32,
-          "size": "200;200",
-          "horiAlignment": "middle",
-          "vertAlignment": "middle",
-          "text": "=",
-          "dynamic": false
-        }
-      ]
-    },
-    {
-      "parent": 2,
-      "components":[
-        {
-          "type": "duk::ui::CanvasTransform",
-          "anchorMin": "1;0.5",
-          "anchorMax": "1;0.5",
-          "anchorMinOffsets": "-100;0",
-          "anchorMaxOffsets": "0;0",
-          "pivot": "0.0;0.5",
-          "scale": "1;1"
-        },
-        {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":32,
-          "size": "200;200",
-          "horiAlignment": "right",
-          "vertAlignment": "middle",
-          "text": ">",
-          "dynamic": false
-        }
-      ]
-    },
-    {
-      "parent": 2,
-      "components":[
-        {
-          "type": "duk::ui::CanvasTransform",
-          "anchorMin": "0;0",
-          "anchorMax": "1;1",
-          "anchorMinOffsets": "0;0",
-          "anchorMaxOffsets": "0;0",
-          "pivot": "0.5;0.5",
-          "scale": "1;1"
-        },
-        {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":32,
-          "size": "200;200",
-          "horiAlignment": "middle",
-          "vertAlignment": "top",
-          "text": "^",
-          "dynamic": false
-        }
-      ]
-    },
-    {
-      "parent": 2,
-      "components":[
-        {
-          "type": "duk::ui::CanvasTransform",
-          "anchorMin": "0;0",
-          "anchorMax": "1;1",
-          "anchorMinOffsets": "0;0",
-          "anchorMaxOffsets": "0;0",
-          "pivot": "0.5;0.5",
-          "scale": "1;1"
-        },
-        {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":32,
-          "size": "200;200",
-          "horiAlignment": "middle",
-          "vertAlignment": "bottom",
-          "text": "v",
-          "dynamic": false
+          "type": "duk::ui::Image",
+          "image": 1,
+          "sampler": {
+            "filter": "linear",
+            "wrap": "repeat"
+          },
+          "color": "1;1;1;1"
         }
       ]
     }
