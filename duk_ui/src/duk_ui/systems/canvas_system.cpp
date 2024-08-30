@@ -43,13 +43,16 @@ static uint64_t calculate_canvas_transform_hash(const CanvasTransform& canvasTra
     return hash;
 }
 
-static void update_canvas_transform_matrices(const CanvasTransform& canvasTransform, CanvasTransformRect& matrices, const glm::mat4& parentModel, const glm::vec2& parentSize) {
-    const auto parentMin = canvasTransform.anchorMinOffsets + canvasTransform.anchorMin * parentSize;
-    const auto parentMax = canvasTransform.anchorMaxOffsets + canvasTransform.anchorMax * parentSize;
-    const auto size = parentMax - parentMin;
-    const auto center = parentMin + size * canvasTransform.pivot;
-    matrices.size = size;
-    matrices.model = glm::translate(parentModel, glm::vec3(center, 0.0));
+static void update_canvas_transform(CanvasTransform& canvasTransform, duk::renderer::Matrices& matrices, const glm::mat4& parentModel, const glm::vec2& parentSize) {
+    const auto min = canvasTransform.anchorMinOffsets + canvasTransform.anchorMin * parentSize;
+    const auto max = canvasTransform.anchorMaxOffsets + canvasTransform.anchorMax * parentSize;
+    const auto size = max - min;
+    const auto position = min + size * canvasTransform.pivot;
+    canvasTransform.localMin = min;
+    canvasTransform.localMax = max;
+    canvasTransform.localPosition = position;
+    canvasTransform.size = size;
+    matrices.model = glm::translate(parentModel, glm::vec3(position, 0.0));
     matrices.model = glm::scale(matrices.model, glm::vec3(canvasTransform.scale, 0.0));
     matrices.invModel = glm::inverse(matrices.model);
 }
@@ -57,15 +60,15 @@ static void update_canvas_transform_matrices(const CanvasTransform& canvasTransf
 static void update_canvas_transforms(CanvasUpdateSystem* system, const duk::objects::Component<Canvas>& canvas, const glm::mat4& parentModel, const glm::vec2& parentSize, const duk::objects::ComponentHierarchyView<CanvasTransform>& canvasTransforms,
                                      bool update) {
     for (auto [canvasTransform]: canvasTransforms) {
-        const auto matrices = canvasTransform.component_or_add<CanvasTransformRect>();
+        const auto matrices = canvasTransform.component_or_add<duk::renderer::Matrices>();
         const auto hash = calculate_canvas_transform_hash(*canvasTransform);
         const auto changed = hash != matrices->hash || update;
         if (changed) {
-            update_canvas_transform_matrices(*canvasTransform, *matrices, parentModel, parentSize);
+            update_canvas_transform(*canvasTransform, *matrices, parentModel, parentSize);
             matrices->hash = hash;
         }
 
-        update_canvas_transforms(system, canvas, matrices->model, matrices->size, system->child_components_of<CanvasTransform>(canvasTransform.id()), changed);
+        update_canvas_transforms(system, canvas, matrices->model, canvasTransform->size, system->child_components_of<CanvasTransform>(canvasTransform.id()), changed);
 
         auto materialSlot = canvasTransform.component<duk::renderer::MaterialSlot>();
         if (!materialSlot || !changed) {

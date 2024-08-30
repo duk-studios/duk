@@ -32,13 +32,17 @@ struct CanvasTransform {
 
     // normalized
     glm::vec2 scale;
-};
 
-struct CanvasTransformRect {
-    glm::mat4 model;
-    glm::mat4 invModel;
-    glm::vec2 size;
+    // runtime properties
     uint64_t hash = 0;
+
+    glm::vec2 localPosition;
+
+    glm::vec2 localMin;
+
+    glm::vec2 localMax;
+
+    glm::vec2 size;
 };
 
 }// namespace duk::ui
