@@ -14,20 +14,16 @@ class SpriteCache;
 class Renderer;
 
 struct DrawGroupData {
-    typedef SortKey (*CalculateSortKeyFunc)(const duk::objects::Object& object);
-
     std::vector<ObjectEntry> objectEntries;
     std::vector<uint16_t> sortedIndices;
     std::vector<DrawEntry> instanceDrawEntries;
     std::vector<IndirectDrawEntry> drawEntries;
-    CalculateSortKeyFunc calculateSortKey;
 
     void clear();
 };
 
 struct DrawData {
-    DrawGroupData opaqueGroup;
-    DrawGroupData transparentGroup;
+    DrawGroupData group;
     std::unique_ptr<DrawBuffer> drawBuffer;
 
     void clear();

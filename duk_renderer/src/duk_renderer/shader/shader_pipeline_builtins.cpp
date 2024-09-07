@@ -63,7 +63,7 @@ ShaderPipelineBuiltins::ShaderPipelineBuiltins(const ShaderPipelineBuiltinsCreat
 
     {
         ShaderPipelineData textShaderPipelineData = {};
-        textShaderPipelineData.settings.depth = false;
+        textShaderPipelineData.settings.depth = true;
         textShaderPipelineData.settings.blend = true;
         textShaderPipelineData.settings.priority = 2000;
         textShaderPipelineData.settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
