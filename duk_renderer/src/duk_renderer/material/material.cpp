@@ -576,4 +576,47 @@ std::shared_ptr<Material> create_text_material(Renderer* renderer, Builtins* bui
     return std::make_shared<Material>(materialCreateInfo);
 }
 
+std::shared_ptr<Material> create_image_material(Renderer* renderer, Builtins* builtins) {
+    const auto shaderPipelines = builtins->shader_pipelines();
+    MaterialData materialData = {};
+    materialData.shader = shaderPipelines->image();
+
+    const auto images = builtins->images();
+
+    detail::add_transform_binding(materialData);
+    {
+        auto& properties = materialData.bindings.emplace_back();
+        properties.name = "uProperties";
+        properties.type = BindingType::INSTANCE;
+        properties.data = []() {
+            auto bindingData = std::make_unique<BufferBinding>();
+            {
+                auto& color = bindingData->members.emplace_back();
+                color.name = "color";
+                color.type = BufferBinding::Member::Type::VEC4;
+                color.data.vec4Value = glm::vec4(1.0f);
+            }
+            return bindingData;
+        }();
+    }
+    {
+        auto& baseColor = materialData.bindings.emplace_back();
+        baseColor.type = BindingType::IMAGE_SAMPLER;
+        baseColor.name = "uImage";
+        baseColor.data = [images]() -> std::unique_ptr<BindingData> {
+            auto imageSamplerBinding = std::make_unique<ImageSamplerBinding>();
+            imageSamplerBinding->image = images->white();
+            imageSamplerBinding->sampler = kDefaultTextureSampler;
+            return imageSamplerBinding;
+        }();
+    }
+
+    MaterialCreateInfo materialCreateInfo = {};
+    materialCreateInfo.materialData = std::move(materialData);
+    materialCreateInfo.rhi = renderer->rhi();
+    materialCreateInfo.commandQueue = renderer->main_command_queue();
+
+    return std::make_shared<Material>(materialCreateInfo);
+}
+
 }// namespace duk::renderer

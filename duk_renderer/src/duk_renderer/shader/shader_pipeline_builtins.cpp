@@ -71,6 +71,17 @@ ShaderPipelineBuiltins::ShaderPipelineBuiltins(const ShaderPipelineBuiltinsCreat
         textShaderPipelineData.shaders.frag = shaderModuleBuiltins->text(duk::rhi::ShaderModule::FRAGMENT);
         m_text = pools->insert(kTextShaderPipelineId, detail::create_shader_pipeline(rhi, &textShaderPipelineData));
     }
+
+    {
+        ShaderPipelineData imageShaderPipelineData = {};
+        imageShaderPipelineData.settings.depth = false;
+        imageShaderPipelineData.settings.blend = true;
+        imageShaderPipelineData.settings.priority = 2000;
+        imageShaderPipelineData.settings.cullModeMask = duk::rhi::GraphicsPipeline::CullMode::BACK;
+        imageShaderPipelineData.shaders.vert = shaderModuleBuiltins->image(duk::rhi::ShaderModule::VERTEX);
+        imageShaderPipelineData.shaders.frag = shaderModuleBuiltins->image(duk::rhi::ShaderModule::FRAGMENT);
+        m_image = pools->insert(kImageShaderPipelineId, detail::create_shader_pipeline(rhi, &imageShaderPipelineData));
+    }
 }
 
 duk::resource::Handle<ShaderPipeline> ShaderPipelineBuiltins::opaque_color() const {
@@ -95,6 +106,10 @@ duk::resource::Handle<ShaderPipeline> ShaderPipelineBuiltins::fullscreen() const
 
 duk::resource::Handle<ShaderPipeline> ShaderPipelineBuiltins::text() const {
     return m_text;
+}
+
+duk::resource::Handle<ShaderPipeline> ShaderPipelineBuiltins::image() const {
+    return m_image;
 }
 
 }// namespace duk::renderer

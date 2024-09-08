@@ -25,6 +25,8 @@ static constexpr duk::resource::Id kTextShaderVertModule(110'004);
 static constexpr duk::resource::Id kTextShaderFragModule(110'005);
 static constexpr duk::resource::Id kFullscreenShaderVertModule(110'006);
 static constexpr duk::resource::Id kFullscreenShaderFragModule(110'007);
+static constexpr duk::resource::Id kImageShaderVertModule(110'008);
+static constexpr duk::resource::Id kImageShaderFragModule(110'009);
 
 struct ShaderModuleBuiltinsCreateInfo {
     duk::resource::Pools* pools;
@@ -42,11 +44,14 @@ public:
 
     duk::resource::Handle<ShaderModule> fullscreen(duk::rhi::ShaderModule::Bits type) const;
 
+    duk::resource::Handle<ShaderModule> image(duk::rhi::ShaderModule::Bits type) const;
+
 private:
     std::unordered_map<duk::rhi::ShaderModule::Bits, duk::resource::Handle<ShaderModule>> m_color;
     std::unordered_map<duk::rhi::ShaderModule::Bits, duk::resource::Handle<ShaderModule>> m_phong;
     std::unordered_map<duk::rhi::ShaderModule::Bits, duk::resource::Handle<ShaderModule>> m_text;
     std::unordered_map<duk::rhi::ShaderModule::Bits, duk::resource::Handle<ShaderModule>> m_fullscreen;
+    std::unordered_map<duk::rhi::ShaderModule::Bits, duk::resource::Handle<ShaderModule>> m_image;
 };
 
 }// namespace duk::renderer
