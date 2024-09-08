@@ -18,7 +18,7 @@ struct Image {
     uint64_t hash = 0;
 };
 
-}
+}// namespace duk::ui
 
 namespace duk::serial {
 
@@ -38,7 +38,7 @@ inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const
     to_json_member(document, json, "keepAspectRatio", image.keepAspectRatio);
 }
 
-}
+}// namespace duk::serial
 
 namespace duk::resource {
 
@@ -48,6 +48,6 @@ void solve_resources(Solver* solver, duk::ui::Image& image) {
     solver->solve(image.color);
 }
 
-}
+}// namespace duk::resource
 
-#endif //DUK_UI_IMAGE_H
+#endif//DUK_UI_IMAGE_H

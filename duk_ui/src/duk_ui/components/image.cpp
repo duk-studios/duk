@@ -3,6 +3,4 @@
 //
 #include <duk_ui/components/image.h>
 
-namespace duk::ui {
-
-}
+namespace duk::ui {}

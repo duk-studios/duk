@@ -34,10 +34,7 @@ uint64_t calculate_image_hash(const CanvasTransform& canvasTransform, const Imag
 
 duk::resource::Handle<duk::renderer::DynamicMesh> create_mesh(const duk::renderer::Renderer* renderer) {
     duk::renderer::DynamicMeshCreateInfo dynamicMeshCreateInfo = {};
-    dynamicMeshCreateInfo.attributes = duk::renderer::VertexAttributes({
-        duk::renderer::VertexAttributes::POSITION,
-        duk::renderer::VertexAttributes::UV
-    });
+    dynamicMeshCreateInfo.attributes = duk::renderer::VertexAttributes({duk::renderer::VertexAttributes::POSITION, duk::renderer::VertexAttributes::UV});
     dynamicMeshCreateInfo.indexType = duk::rhi::IndexType::UINT16;
     dynamicMeshCreateInfo.maxVertexCount = 4;
     dynamicMeshCreateInfo.maxIndexCount = 6;
@@ -46,10 +43,10 @@ duk::resource::Handle<duk::renderer::DynamicMesh> create_mesh(const duk::rendere
     return std::make_shared<duk::renderer::DynamicMesh>(dynamicMeshCreateInfo);
 }
 
-}
+}// namespace detail
 
 void ImageSystem::update() {
-    for (auto [canvasTransform, image] : all_components_of<CanvasTransform, Image>()) {
+    for (auto [canvasTransform, image]: all_components_of<CanvasTransform, Image>()) {
         // check for hash changes
         const auto hash = detail::calculate_image_hash(*canvasTransform, *image);
         if (hash == image->hash) {
@@ -97,24 +94,11 @@ void ImageSystem::update_mesh(const duk::objects::Component<CanvasTransform>& ca
     }
     mesh->clear();
 
-    glm::vec3 positions[] = {
-        {min.x, min.y, 0.0f},
-        {max.x, min.y, 0.0f},
-        {min.x, max.y, 0.0f},
-        {max.x, max.y, 0.0f}
-    };
+    glm::vec3 positions[] = {{min.x, min.y, 0.0f}, {max.x, min.y, 0.0f}, {min.x, max.y, 0.0f}, {max.x, max.y, 0.0f}};
 
-    glm::vec2 uvs[] = {
-        {0.0, 1.0},
-        {1.0, 1.0},
-        {0.0, 0.0},
-        {1.0, 0.0}
-    };
+    glm::vec2 uvs[] = {{0.0, 1.0}, {1.0, 1.0}, {0.0, 0.0}, {1.0, 0.0}};
 
-    uint16_t indices[] = {
-        0, 2, 1,
-        2, 3, 1
-    };
+    uint16_t indices[] = {0, 2, 1, 2, 3, 1};
 
     mesh->write_vertices(duk::renderer::VertexAttributes::POSITION, positions);
     mesh->write_vertices(duk::renderer::VertexAttributes::UV, uvs);
@@ -122,4 +106,4 @@ void ImageSystem::update_mesh(const duk::objects::Component<CanvasTransform>& ca
     mesh->flush();
 }
 
-}
+}// namespace duk::ui
