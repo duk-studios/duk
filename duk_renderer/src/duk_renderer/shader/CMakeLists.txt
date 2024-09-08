@@ -163,6 +163,7 @@ add_subdirectory(color)
 add_subdirectory(fullscreen)
 add_subdirectory(phong)
 add_subdirectory(text)
+add_subdirectory(image)
 
 foreach (PACKED_ENTRY ${GENERATE_SHADER_ENTRIES})
     add_shader_generate_command(${PACKED_ENTRY})

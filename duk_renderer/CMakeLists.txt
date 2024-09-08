@@ -94,6 +94,8 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/shader/phong/phong_shader_data_source.cpp
         src/duk_renderer/shader/text/text_shader_data_source.h
         src/duk_renderer/shader/text/text_shader_data_source.cpp
+        src/duk_renderer/shader/image/image_shader_data_source.h
+        src/duk_renderer/shader/image/image_shader_data_source.cpp
         src/duk_renderer/mesh/draw_buffer.cpp
         src/duk_renderer/mesh/dynamic_mesh.cpp
         src/duk_renderer/mesh/empty_mesh.cpp

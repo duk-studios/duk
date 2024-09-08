@@ -7,6 +7,7 @@
 #include <duk_renderer/shader/fullscreen/fullscreen_shader_data_source.h>
 #include <duk_renderer/shader/phong/phong_shader_data_source.h>
 #include <duk_renderer/shader/text/text_shader_data_source.h>
+#include <duk_renderer/shader/image/image_shader_data_source.h>
 
 namespace duk::renderer {
 
@@ -42,6 +43,11 @@ ShaderModuleBuiltins::ShaderModuleBuiltins(const ShaderModuleBuiltinsCreateInfo&
         m_fullscreen[duk::rhi::ShaderModule::VERTEX] = pools->insert(kFullscreenShaderVertModule, detail::create_shader_module(fullscreen_vert_spir_v()));
         m_fullscreen[duk::rhi::ShaderModule::FRAGMENT] = pools->insert(kFullscreenShaderFragModule, detail::create_shader_module(fullscreen_frag_spir_v()));
     }
+
+    {
+        m_image[duk::rhi::ShaderModule::VERTEX] = pools->insert(kImageShaderVertModule, detail::create_shader_module(image_vert_spir_v()));
+        m_image[duk::rhi::ShaderModule::FRAGMENT] = pools->insert(kImageShaderFragModule, detail::create_shader_module(image_frag_spir_v()));
+    }
 }
 
 duk::resource::Handle<ShaderModule> ShaderModuleBuiltins::color(duk::rhi::ShaderModule::Bits type) const {
@@ -58,6 +64,10 @@ duk::resource::Handle<ShaderModule> ShaderModuleBuiltins::text(duk::rhi::ShaderM
 
 duk::resource::Handle<ShaderModule> ShaderModuleBuiltins::fullscreen(duk::rhi::ShaderModule::Bits type) const {
     return m_fullscreen.at(type);
+}
+
+duk::resource::Handle<ShaderModule> ShaderModuleBuiltins::image(duk::rhi::ShaderModule::Bits type) const {
+    return m_image.at(type);
 }
 
 }// namespace duk::renderer

@@ -7,6 +7,7 @@ set(DUK_UI_SRC_DIR ${DUK_UI_ROOT}/src/duk_ui)
 set(DUK_UI_HEADERS
         include/duk_ui/register_types.h
         include/duk_ui/components/canvas.h
+        include/duk_ui/components/image.h
         include/duk_ui/components/text.h
         include/duk_ui/font/font.h
         include/duk_ui/font/font_atlas.h
@@ -14,12 +15,14 @@ set(DUK_UI_HEADERS
         include/duk_ui/text/text_alignment.h
         include/duk_ui/text/text_mesh_builder.h
         include/duk_ui/systems/text_system.h
+        include/duk_ui/systems/image_system.h
         include/duk_ui/systems/canvas_system.h
 )
 
 set(DUK_UI_SOURCES
         src/duk_ui/register_types.cpp
         src/duk_ui/components/canvas.cpp
+        src/duk_ui/components/image.cpp
         src/duk_ui/components/text.cpp
         src/duk_ui/font/font.cpp
         src/duk_ui/font/font_atlas.cpp
@@ -32,6 +35,7 @@ set(DUK_UI_SOURCES
         src/duk_ui/font/freetype/freetype_font_loader.cpp
         src/duk_ui/text/text_mesh_builder.cpp
         src/duk_ui/systems/text_system.cpp
+        src/duk_ui/systems/image_system.cpp
         src/duk_ui/systems/canvas_system.cpp
 )
 

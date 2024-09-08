@@ -1,0 +1,75 @@
+{
+  "systems":[
+    {
+      "type": "duk::renderer::TransformUpdateSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::renderer::CameraUpdateSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::ui::ImageSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::ui::CanvasUpdateSystem",
+      "group": 0
+    },
+    {
+      "type": "duk::ui::TextUpdateSystem",
+      "group": 0
+    }
+  ],
+  "objects":[
+    {
+      "components":[
+        {
+          "type": "duk::renderer::Transform",
+          "position":"0;0;30",
+          "rotation": "0;0;0",
+          "scale": "1;1;1"
+        },
+        {
+          "type":"duk::renderer::Camera"
+        },
+        {
+          "type":"duk::renderer::PerspectiveCamera",
+          "fov": 45.0,
+          "near": 0.1,
+          "far": 110.0
+        }
+      ]
+    },
+    {
+      "components":[
+        {
+          "type": "duk::ui::Canvas"
+        }
+      ]
+    },
+    {
+      "parent": 1,
+      "components": [
+        {
+          "type": "duk::ui::CanvasTransform",
+          "anchor": "1.0;1.0",
+          "position": "0;0",
+          "size": "200;600",
+          "pivot": "1.0;1.0",
+          "scale": "1;1"
+        },
+        {
+          "type": "duk::ui::Image",
+          "image": 11733428921602145386,
+          "sampler": {
+            "filter": "linear",
+            "wrap": "repeat"
+          },
+          "color": "1;1;1;1",
+          "keepAspectRatio": true
+        }
+      ]
+    }
+  ]
+}

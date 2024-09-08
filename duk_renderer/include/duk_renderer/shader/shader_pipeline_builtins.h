@@ -21,6 +21,7 @@ static constexpr duk::resource::Id kOpaquePhongShaderPipelineId(100'002);
 static constexpr duk::resource::Id kTransparentPhongShaderPipelineId(100'003);
 static constexpr duk::resource::Id kFullscreenShaderPipelineId(100'004);
 static constexpr duk::resource::Id kTextShaderPipelineId(100'005);
+static constexpr duk::resource::Id kImageShaderPipelineId(100'007);
 
 struct ShaderPipelineBuiltinsCreateInfo {
     duk::rhi::RHI* rhi;
@@ -45,6 +46,8 @@ public:
 
     duk::resource::Handle<ShaderPipeline> text() const;
 
+    duk::resource::Handle<ShaderPipeline> image() const;
+
 private:
     duk::resource::Handle<ShaderPipeline> m_opaqueColor;
     duk::resource::Handle<ShaderPipeline> m_transparentColor;
@@ -52,6 +55,7 @@ private:
     duk::resource::Handle<ShaderPipeline> m_transparentPhong;
     duk::resource::Handle<ShaderPipeline> m_fullscreen;
     duk::resource::Handle<ShaderPipeline> m_text;
+    duk::resource::Handle<ShaderPipeline> m_image;
 };
 
 }// namespace duk::renderer
