@@ -89,7 +89,7 @@ static void update_mesh(duk::renderer::DynamicMesh* mesh, const std::vector<Line
             pen.y = kTextHeight;
             break;
     }
-    pen.y -= (textBoxSize.y / 2) + lineHeight;
+    pen.y -= lineHeight;
     pen.y /= pixelsPerUnit;
 
     uint32_t textCount = 0;
@@ -108,7 +108,6 @@ static void update_mesh(duk::renderer::DynamicMesh* mesh, const std::vector<Line
                 pen.x = textBoxSize.x - line.width;
                 break;
         }
-        pen.x -= textBoxSize.x / 2;
         pen.x /= pixelsPerUnit;
 
         for (const auto& word: line.words) {
