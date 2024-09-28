@@ -82,9 +82,9 @@ void ImageSystem::update_mesh(const duk::objects::Component<CanvasTransform>& ca
         auto aspectRatio = static_cast<float>(imageSize.x) / imageSize.y;
         height = width / aspectRatio;
     }
-    const auto halfSize = glm::vec2(width, height) * 0.5f;
-    const auto min = -halfSize;
-    const auto max = halfSize;
+
+    const auto min = glm::vec2(0.0, 0.0);
+    const auto max = glm::vec2(width, height);
 
     auto meshSlot = image.component_or_add<duk::renderer::MeshSlot>();
     auto mesh = meshSlot->mesh.as<duk::renderer::DynamicMesh>();

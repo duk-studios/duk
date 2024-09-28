@@ -36,17 +36,23 @@ static void update_canvas(CanvasUpdateSystem* system, const objects::Component<C
     }
 }
 
-static void update_canvas_transform(CanvasUpdateSystem* system, const duk::objects::Component<Canvas>& canvas, const duk::objects::ComponentHierarchyView<CanvasTransform>& canvasTransforms) {
+static void update_canvas_transform(CanvasUpdateSystem* system, const duk::objects::Component<Canvas>& canvas, const duk::objects::ComponentHierarchyView<CanvasTransform>& canvasTransforms, const glm::mat4& parentModel, const glm::vec2& parentSize) {
     for (auto [canvasTransform]: canvasTransforms) {
-        const auto anchorPosition = canvasTransform->anchor * glm::vec2(canvas->size);
+        const auto anchorPosition = canvasTransform->anchor * glm::vec2(parentSize);
         const auto position = canvasTransform->position + anchorPosition;
-        const auto halfSize = canvasTransform->size / 2.0f;
-        const auto pivotOffset = halfSize * ((canvasTransform->pivot * 2.0f) - 1.0f);
-        auto model = glm::translate(glm::mat4(1), glm::vec3(position - pivotOffset, 0.0));
-        model = glm::scale(model, glm::vec3(canvasTransform->scale, 1));
-        canvasTransform->model = model;
 
-        update_canvas_transform(system, canvas, system->child_components_of<CanvasTransform>(canvasTransform.id()));
+        // translate to actual positon
+        auto model = glm::translate(glm::mat4(1), glm::vec3(position, 0.0));
+
+        // scale
+        model = glm::scale(model, glm::vec3(canvasTransform->scale, 1));
+
+        // translate to min position
+        model = glm::translate(model, -glm::vec3(canvasTransform->pivot * canvasTransform->size, 0.0));
+
+        canvasTransform->model = parentModel * model;
+
+        update_canvas_transform(system, canvas, system->child_components_of<CanvasTransform>(canvasTransform.id()), canvasTransform->model, canvasTransform->size);
 
         auto materialSlot = canvasTransform.component<duk::renderer::MaterialSlot>();
         if (!materialSlot) {
@@ -67,7 +73,7 @@ void CanvasUpdateSystem::update() {
     for (auto [canvas]: all_components_of<Canvas>()) {
         detail::update_canvas(this, canvas, renderer->render_width(), renderer->render_height());
 
-        detail::update_canvas_transform(this, canvas, child_components_of<CanvasTransform>(canvas.id()));
+        detail::update_canvas_transform(this, canvas, child_components_of<CanvasTransform>(canvas.id()), glm::mat4(1), canvas->size);
     }
 }
 
