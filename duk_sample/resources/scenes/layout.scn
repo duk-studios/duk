@@ -53,10 +53,10 @@
       "components": [
         {
           "type": "duk::ui::CanvasTransform",
-          "anchor": "1.0;1.0",
+          "anchor": "0.5;0.5",
           "position": "0;0",
-          "size": "200;600",
-          "pivot": "1.0;1.0",
+          "size": "600;600",
+          "pivot": "0.5;0.5",
           "scale": "1;1"
         },
         {
