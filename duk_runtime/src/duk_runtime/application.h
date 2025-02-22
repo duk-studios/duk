@@ -5,7 +5,7 @@
 #ifndef DUK_RUNTIME_APPLICATION_H
 #define DUK_RUNTIME_APPLICATION_H
 
-#include <duk_engine/engine.h>
+#include <duk_engine/context.h>
 
 #include <duk_platform/platform.h>
 
@@ -24,9 +24,19 @@ public:
 
     void run();
 
+    void stop();
+
 private:
+    void loop_dynamic_delta_time();
+
+    void loop_sleep_excess();
+
+private:
+    duk::platform::Platform* m_platform;
     std::shared_ptr<duk::platform::Window> m_window;
-    std::unique_ptr<duk::engine::Engine> m_engine;
+    std::unique_ptr<duk::engine::Context> m_context;
+    duk::event::Listener m_listener;
+    bool m_run;
 };
 
 }// namespace duk::runtime

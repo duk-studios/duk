@@ -58,12 +58,12 @@ float Timer::scale() const {
     return m_scale;
 }
 
-float Timer::delta_time() const {
-    return m_deltaDuration.count();
-}
-
 float Timer::time() const {
     return m_duration.count();
+}
+
+float Timer::delta_time() const {
+    return m_deltaDuration.count();
 }
 
 float Timer::unscaled_time() const {
@@ -72,6 +72,30 @@ float Timer::unscaled_time() const {
 
 float Timer::unscaled_delta_time() const {
     return m_unscaledDeltaDuration.count();
+}
+
+Timer::Duration Timer::duration() const {
+    return m_duration;
+}
+
+Timer::Duration Timer::delta_duration() const {
+    return m_deltaDuration;
+}
+
+Timer::Duration Timer::unscaled_duration() const {
+    return m_unscaledDuration;
+}
+
+Timer::Duration Timer::unscaled_delta_duration() const {
+    return m_unscaledDeltaDuration;
+}
+
+Timer::TimePoint Timer::start_time_point() const {
+    return m_start;
+}
+
+Timer::TimePoint Timer::now() const {
+    return Clock::now();
 }
 
 }// namespace duk::tools

@@ -4,7 +4,7 @@
 #include <duk_animation/animation_system.h>
 #include <duk_animation/animator.h>
 
-#include <duk_engine/engine.h>
+#include <duk_engine/context.h>
 
 namespace duk::animation {
 

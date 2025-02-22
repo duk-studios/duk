@@ -4,7 +4,7 @@
 
 #include <duk_sample/stats_system.h>
 
-#include <duk_engine/engine.h>
+#include <duk_engine/context.h>
 
 #include <numeric>
 

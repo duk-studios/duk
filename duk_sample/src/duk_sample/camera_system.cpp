@@ -2,7 +2,7 @@
 // Created by rov on 11/18/2023.
 //
 
-#include <duk_engine/engine.h>
+#include <duk_engine/context.h>
 #include <duk_platform/platform.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
