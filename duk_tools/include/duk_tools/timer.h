@@ -13,7 +13,8 @@ namespace duk::tools {
 
 class Timer {
 public:
-    using Clock = std::chrono::high_resolution_clock;
+    using Clock = std::chrono::steady_clock;
+    using TimePoint = Clock::time_point;
     using Duration = std::chrono::duration<float>;
 
     Timer();
@@ -32,20 +33,32 @@ public:
 
     DUK_NO_DISCARD float scale() const;
 
-    DUK_NO_DISCARD float delta_time() const;
-
     DUK_NO_DISCARD float time() const;
+
+    DUK_NO_DISCARD float delta_time() const;
 
     DUK_NO_DISCARD float unscaled_time() const;
 
     DUK_NO_DISCARD float unscaled_delta_time() const;
+
+    DUK_NO_DISCARD Duration duration() const;
+
+    DUK_NO_DISCARD Duration delta_duration() const;
+
+    DUK_NO_DISCARD Duration unscaled_duration() const;
+
+    DUK_NO_DISCARD Duration unscaled_delta_duration() const;
+
+    DUK_NO_DISCARD TimePoint start_time_point() const;
+
+    DUK_NO_DISCARD TimePoint now() const;
 
 private:
     Duration m_duration;
     Duration m_deltaDuration;
     Duration m_unscaledDuration;
     Duration m_unscaledDeltaDuration;
-    Clock::time_point m_start;
+    TimePoint m_start;
     float m_scale;
     bool m_started;
 };
