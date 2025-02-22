@@ -121,7 +121,6 @@ void Application::loop_dynamic_delta_time() {
 }
 
 void Application::loop_sleep_excess() {
-
     const auto input = m_context->input();
     const auto audio = m_context->audio();
     const auto director = m_context->director();
@@ -159,8 +158,7 @@ void Application::loop_sleep_excess() {
         const auto realElapsed = timer->now() - start;
         if (sleepTime > std::chrono::nanoseconds(0)) {
             timer->add_duration(FrameDuration(1));
-        }
-        else {
+        } else {
             timer->add_duration(realElapsed);
             duk::log::warn("Frame rate falling behind, elapsed time was {0}ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(realElapsed).count());
         }

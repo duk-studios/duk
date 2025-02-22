@@ -27,7 +27,6 @@ public:
     void stop();
 
 private:
-
     void loop_dynamic_delta_time();
 
     void loop_sleep_excess();
