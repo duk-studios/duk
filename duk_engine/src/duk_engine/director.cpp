@@ -2,7 +2,7 @@
 /// director.cpp
 
 #include <duk_engine/director.h>
-#include <duk_engine/engine.h>
+#include <duk_engine/context.h>
 
 namespace duk::engine {
 
@@ -33,8 +33,6 @@ void Director::update(duk::tools::Globals& globals) {
     }
 
     m_scene->update(m_disabledGroupsMask);
-
-    globals.get<duk::renderer::Renderer>()->render(m_scene->objects());
 }
 
 void Director::request_scene(duk::resource::Id id) {

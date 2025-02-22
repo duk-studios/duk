@@ -5,7 +5,7 @@ set(DUK_ENGINE_INC_DIR ${DUK_ENGINE_ROOT}/include/duk_engine)
 set(DUK_ENGINE_SRC_DIR ${DUK_ENGINE_ROOT}/src/duk_engine)
 
 set(DUK_ENGINE_HEADERS
-        include/duk_engine/engine.h
+        include/duk_engine/context.h
         include/duk_engine/input.h
         include/duk_engine/settings.h
         include/duk_engine/director.h
@@ -15,7 +15,7 @@ set(DUK_ENGINE_HEADERS
 )
 
 set(DUK_ENGINE_SOURCES
-        src/duk_engine/engine.cpp
+        src/duk_engine/context.cpp
         src/duk_engine/input.cpp
         src/duk_engine/settings.cpp
         src/duk_engine/director.cpp
