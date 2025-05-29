@@ -27,10 +27,11 @@ static duk::hash::Hash calculate_text_hash(const std::string_view& text, const F
     return hash;
 }
 
-static duk::hash::Hash calculate_material_hash(const FontAtlas* atlas, bool worldSpace) {
+static duk::hash::Hash calculate_material_hash(const FontAtlas* atlas, bool worldSpace, const glm::vec4& color) {
     duk::hash::Hash hash = 0;
     duk::hash::hash_combine(hash, atlas);
     duk::hash::hash_combine(hash, worldSpace);
+    duk::hash::hash_combine(hash, color);
     return hash;
 }
 
@@ -83,7 +84,7 @@ void TextUpdateSystem::update_text(const duk::objects::Component<Text>& text) {
 void TextUpdateSystem::update_text_material(const duk::objects::Component<Text>& text, const FontAtlas* atlas) {
     const bool worldSpace = text.component<duk::renderer::Transform>().valid();
 
-    auto hash = detail::calculate_material_hash(atlas, worldSpace);
+    auto hash = detail::calculate_material_hash(atlas, worldSpace, text->color);
     auto it = m_materials.find(hash);
     if (it == m_materials.end()) {
         const auto renderer = global<duk::renderer::Renderer>();
@@ -91,6 +92,7 @@ void TextUpdateSystem::update_text_material(const duk::objects::Component<Text>&
 
         auto material = create_text_material(renderer, builtins);
         material->set("uBaseColor", atlas->image(), duk::renderer::kDefaultTextureSampler);
+        material->set("uProperties", "color", text->color);
 
         it = m_materials.emplace(hash, std::move(material)).first;
     }

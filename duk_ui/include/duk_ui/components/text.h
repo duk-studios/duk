@@ -16,6 +16,7 @@ struct Text {
     uint32_t fontSize;
     std::string text;
     glm::vec2 size;
+    glm::vec4 color = glm::vec4(1);
     TextHoriAlignment horiAlignment;
     TextVertAlignment vertAlignment;
     bool dynamic;
@@ -33,6 +34,7 @@ inline void from_json<duk::ui::Text>(const rapidjson::Value& json, duk::ui::Text
     from_json_member(json, "fontSize", textRenderer.fontSize);
     from_json_member(json, "text", textRenderer.text);
     from_json_member(json, "size", textRenderer.size);
+    from_json_member(json, "color", textRenderer.color, true);
     from_json_member(json, "horiAlignment", textRenderer.horiAlignment);
     from_json_member(json, "vertAlignment", textRenderer.vertAlignment);
     from_json_member(json, "dynamic", textRenderer.dynamic);
@@ -44,6 +46,7 @@ inline void to_json<duk::ui::Text>(rapidjson::Document& document, rapidjson::Val
     to_json_member(document, json, "fontSize", textRenderer.fontSize);
     to_json_member(document, json, "text", textRenderer.text);
     to_json_member(document, json, "size", textRenderer.size);
+    to_json_member(document, json, "color", textRenderer.color);
     to_json_member(document, json, "horiAlignment", textRenderer.horiAlignment);
     to_json_member(document, json, "vertAlignment", textRenderer.vertAlignment);
     to_json_member(document, json, "dynamic", textRenderer.dynamic);
