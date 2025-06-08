@@ -2,10 +2,12 @@ project(duk_math)
 
 set(DUK_MATH_HEADERS
         include/duk_math/math.h
+        include/duk_math/aabb.h
         )
 
 set(DUK_MATH_SOURCES
         src/duk_math/math.cpp
+        src/duk_math/aabb.cpp
         )
 
 add_library(duk_math STATIC ${DUK_MATH_HEADERS} ${DUK_MATH_SOURCES})
