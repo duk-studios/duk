@@ -26,9 +26,7 @@ public:
 
     DUK_NO_DISCARD uint32_t version() const;
 
-    bool operator==(const Id& rhs) const;
-
-    bool operator!=(const Id& rhs) const;
+    auto operator<=>(const Id& other) const = default;
 
 private:
     uint32_t m_index;
