@@ -67,6 +67,8 @@ public:
 
     DUK_NO_DISCARD duk::objects::Objects* objects() const;
 
+    DUK_NO_DISCARD duk::objects::Object object(const duk::objects::Id& id) const;
+
     template<typename... Ts>
     DUK_NO_DISCARD auto all_objects_with() const;
 

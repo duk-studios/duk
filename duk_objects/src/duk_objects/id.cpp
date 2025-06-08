@@ -23,12 +23,4 @@ uint32_t Id::version() const {
     return m_version;
 }
 
-bool Id::operator==(const Id& rhs) const {
-    return m_index == rhs.m_index && m_version == rhs.m_version;
-}
-
-bool Id::operator!=(const Id& rhs) const {
-    return !(*this == rhs);
-}
-
 }// namespace duk::objects
