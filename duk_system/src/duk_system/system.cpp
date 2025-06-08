@@ -82,6 +82,10 @@ duk::objects::Objects* System::objects() const {
     return m_objects;
 }
 
+duk::objects::Object System::object(const duk::objects::Id& id) const {
+    return m_objects->object(id);
+}
+
 duk::objects::Object System::create_object() const {
     return m_objects->add_object();
 }
