@@ -176,30 +176,30 @@ BitBlock<N>::BitBlock(BitBlock::Container container)
 
 template<size_t N>
 BitBlock<N> BitBlock<N>::operator~() const {
-    Container inverted;
+    BitBlock<N> result;
     for (int i = 0; i < m_container.size() - 1; i++) {
-        inverted[i] = ~m_container[i];
+        result.m_container[i] = ~m_container[i];
     }
-    inverted.back() = (~m_container.back()) & (kMaxBlockValue >> kLastBlockRemainder);
-    return BitBlock<N>(inverted);
+    result.m_container.back() = (~m_container.back()) & (kMaxBlockValue >> kLastBlockRemainder);
+    return result;
 }
 
 template<size_t N>
 BitBlock<N> BitBlock<N>::operator&(const BitBlock& other) const {
-    Container masked;
+    BitBlock<N> result;
     for (int i = 0; i < m_container.size(); i++) {
-        masked[i] = m_container[i] & other.m_container[i];
+        result.m_container[i] = m_container[i] & other.m_container[i];
     }
-    return BitBlock<N>(masked);
+    return result;
 }
 
 template<size_t N>
 BitBlock<N> BitBlock<N>::operator|(const BitBlock& other) const {
-    Container masked;
+    BitBlock<N> result;
     for (int i = 0; i < m_container.size(); i++) {
-        masked[i] = m_container[i] | other.m_container[i];
+        result.m_container[i] = m_container[i] | other.m_container[i];
     }
-    return BitBlock<N>(masked);
+    return result;
 }
 
 template<size_t N>
