@@ -28,6 +28,6 @@ struct AABB {
 
 AABB transform(const glm::mat4& matrix, const AABB& aabb) noexcept;
 
-}
+}// namespace duk::math
 
-#endif //DUK_MATH_AABB_H
+#endif//DUK_MATH_AABB_H
