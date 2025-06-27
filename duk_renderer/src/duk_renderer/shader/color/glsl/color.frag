@@ -7,7 +7,7 @@ struct Properties {
     vec4 color;
 };
 
-layout(binding = 2) buffer PropertiesSBO {
+layout(binding = 2) readonly buffer PropertiesSBO {
     DUK_INSTANCE_DECLARE(Properties);
 } uProperties;
 
