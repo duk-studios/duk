@@ -141,6 +141,7 @@ void Objects::destroy_object(const Id& id) {
     m_exitIndices[index] = true;
     m_enterIndices[index] = false;
     m_exitComponentMasks[index] = m_activeComponentMasks[index];
+    m_activeComponentMasks[index].reset();
     m_dirty = true;
 }
 
@@ -195,9 +196,8 @@ Objects::ObjectView<true> Objects::all(bool includeInactive) const {
 }
 
 ComponentMask Objects::component_mask(const Id& id) const {
-    DUK_ASSERT(valid_object(id));
     const auto index = id.index();
-    return m_activeComponentMasks.at(index);
+    return m_activeComponentMasks.at(index) | m_exitComponentMasks.at(index);
 }
 
 void Objects::update(ComponentEventDispatcher& dispatcher) {
@@ -208,12 +208,10 @@ void Objects::update(ComponentEventDispatcher& dispatcher) {
 
     // swap with clean data to make sure that we don't iterate over modified vectors
     std::vector<ComponentMask> enterComponentMasks(m_enterComponentMasks.size());
-    std::vector<ComponentMask> exitComponentMasks(m_exitComponentMasks.size());
     std::vector<bool> enterIndices(m_enterIndices.size());
     std::vector<bool> exitIndices(m_exitIndices.size());
 
     std::swap(enterComponentMasks, m_enterComponentMasks);
-    std::swap(exitComponentMasks, m_exitComponentMasks);
     std::swap(enterIndices, m_enterIndices);
     std::swap(exitIndices, m_exitIndices);
 
@@ -233,12 +231,11 @@ void Objects::update(ComponentEventDispatcher& dispatcher) {
             dispatcher.emit_component<ComponentEnterEvent>(object(Id(index, m_versions[index])), componentIndex);
         }
     }
-    for (auto index = 0; index < exitComponentMasks.size(); index++) {
-        auto& exitComponentMask = exitComponentMasks[index];
+    for (auto index = 0; index < m_exitComponentMasks.size(); index++) {
+        auto& exitComponentMask = m_exitComponentMasks[index];
         for (auto componentIndex: exitComponentMask.bits<true>()) {
             dispatcher.emit_component<ComponentExitEvent>(object(Id(index, m_versions[index])), componentIndex);
             exitComponentMask.reset(componentIndex);
-            m_activeComponentMasks[index].reset(componentIndex);
             m_componentPools[componentIndex]->destruct(index);
         }
     }
@@ -270,6 +267,7 @@ void Objects::add_component(uint32_t index, uint32_t componentIndex) {
 
 void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
     m_exitComponentMasks[index].set(componentIndex);
+    m_activeComponentMasks[index].reset(componentIndex);
     m_dirty = true;
 }
 
