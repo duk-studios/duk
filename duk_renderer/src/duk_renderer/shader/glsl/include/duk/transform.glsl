@@ -8,7 +8,7 @@ struct Transform {
     mat4 invModel;
 };
 
-layout(set = 0, binding = 1) buffer TransformSBO {
+layout(set = 0, binding = 1) readonly buffer TransformSBO {
     DUK_INSTANCE_DECLARE(Transform);
 } uTransform;
 

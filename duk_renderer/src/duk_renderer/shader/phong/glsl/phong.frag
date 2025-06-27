@@ -19,7 +19,7 @@ struct Properties {
     vec2 uvScale;
 };
 
-layout(binding = 3) buffer PropertiesUBO {
+layout(binding = 3) readonly buffer PropertiesUBO {
     DUK_INSTANCE_DECLARE(Properties);
 } uProperties;
 

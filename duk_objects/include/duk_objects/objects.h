@@ -216,8 +216,12 @@ public:
     DUK_NO_DISCARD std::tuple<ComponentHandle<Ts, isConst>...> components_or_add() const;
 
 private:
+    Type* fetch() const;
+
+private:
     Id m_ownerId;
     ObjectsType* m_objects;
+    Type* m_ptr;
 };
 
 template<typename T>
@@ -874,70 +878,63 @@ void ObjectHandle<isConst>::reparent(const Id& id) const {
 template<typename T, bool isConst>
 ComponentHandle<T, isConst>::ComponentHandle(const Id& ownerId, ObjectsType* objects)
     : m_ownerId(ownerId)
-    , m_objects(objects) {
+    , m_objects(objects)
+    , m_ptr(fetch()) {
 }
 
 template<typename T, bool isConst>
 ComponentHandle<T, isConst>::ComponentHandle(uint32_t index, uint32_t version, ObjectsType* objects)
     : m_ownerId(index, version)
-    , m_objects(objects) {
+    , m_objects(objects)
+    , m_ptr(fetch()) {
 }
 
 template<typename T, bool isConst>
 ComponentHandle<T, isConst>::ComponentHandle(const ObjectHandle<isConst>& owner)
     : m_ownerId(owner.id())
-    , m_objects(owner.objects()) {
+    , m_objects(owner.objects())
+    , m_ptr(fetch()) {
 }
 
 template<typename T, bool isConst>
 ComponentHandle<T, isConst>::ComponentHandle()
-    : m_ownerId()
-    , m_objects(nullptr) {
+    : m_objects(nullptr)
+    , m_ptr(nullptr) {
 }
 
 template<typename T, bool isConst>
 typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::operator->() {
-    DUK_ASSERT(valid());
-    return m_objects->template component<T>(m_ownerId);
+    return m_ptr;
 }
 
 template<typename T, bool isConst>
 typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::operator->() const {
-    DUK_ASSERT(valid());
-    return m_objects->template component<T>(m_ownerId);
+    return m_ptr;
 }
 
 template<typename T, bool isConst>
 typename ComponentHandle<T, isConst>::Type& ComponentHandle<T, isConst>::operator*() {
-    DUK_ASSERT(valid());
-    return *m_objects->template component<T>(m_ownerId);
+    return *m_ptr;
 }
 
 template<typename T, bool isConst>
 typename ComponentHandle<T, isConst>::Type& ComponentHandle<T, isConst>::operator*() const {
-    DUK_ASSERT(valid());
-    return *m_objects->template component<T>(m_ownerId);
+    return *m_ptr;
 }
 
 template<typename T, bool isConst>
 typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::get() const {
-    if (!valid()) {
-        return nullptr;
-    }
-    return m_objects->template component<T>(m_ownerId);
+    return m_ptr;
 }
 
 template<typename T, bool isConst>
 typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::get() {
-    if (!valid()) {
-        return nullptr;
-    }
-    return m_objects->template component<T>(m_ownerId);
+    return m_ptr;
 }
 
 template<typename T, bool isConst>
 bool ComponentHandle<T, isConst>::valid() const {
-    return m_objects && m_objects->template valid_component<T>(m_ownerId);
+    return m_objects && m_ptr;
 }
 
 template<typename T, bool isConst>
@@ -1014,6 +1011,14 @@ std::tuple<ComponentHandle<Ts, isConst>...> ComponentHandle<T, isConst>::compone
     return object().template components_or_add<Ts...>();
 }
 
+template<typename T, bool isConst>
+typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::fetch() const {
+    if (!m_objects) {
+        return nullptr;
+    }
+    return m_objects->template component<T>(m_ownerId);
+}
+
 // Objects Implementation //
 
 template<bool IsConst>
@@ -1082,10 +1087,6 @@ bool Objects::ObjectView<IsConst>::Iterator::valid_object() {
     }
 
     auto mask = m_objects->m_activeComponentMasks[m_i];
-    // do not iterate over inactive components
-    if (!m_includeInactive) {
-        mask = mask & ~(m_objects->m_enterComponentMasks[m_i] | m_objects->m_exitComponentMasks[m_i]);
-    }
 
     if ((m_componentMask & mask) != m_componentMask) {
         return false;
@@ -1177,7 +1178,7 @@ bool Objects::ObjectHierarchyView<isConst>::Iterator::valid_object() {
     }
 
     // do not iterate over inactive components
-    auto mask = m_objects->m_activeComponentMasks[m_i] & ~(m_objects->m_enterComponentMasks[m_i] | m_objects->m_exitComponentMasks[m_i]);
+    auto mask = m_objects->m_activeComponentMasks[m_i];
 
     if ((m_componentMask & mask) != m_componentMask) {
         return false;
@@ -1389,14 +1390,18 @@ void Objects::remove_component(const Id& id) {
 
 template<typename T>
 T* Objects::component(const Id& id) {
-    DUK_ASSERT(valid_component<T>(id));
+    if (!valid_component<T>(id)) {
+        return nullptr;
+    }
     auto componentPool = pool<T>();
     return componentPool->get(id.index());
 }
 
 template<typename T>
 const T* Objects::component(const Id& id) const {
-    DUK_ASSERT(valid_component<T>(id));
+    if (!valid_component<T>(id)) {
+        return nullptr;
+    }
     auto componentPool = pool<T>();
     return componentPool->get(id.index());
 }
@@ -1417,7 +1422,7 @@ detail::ComponentPoolT<T>* Objects::pool() const {
     if (!pool) {
         return nullptr;
     }
-    return dynamic_cast<detail::ComponentPoolT<T>*>(pool.get());
+    return static_cast<detail::ComponentPoolT<T>*>(pool.get());
 }
 
 template<typename T>

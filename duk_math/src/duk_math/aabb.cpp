@@ -26,9 +26,7 @@ bool AABB::contains(const glm::vec3& point) const noexcept {
 }
 
 bool AABB::intersects(const AABB& aabb) const noexcept {
-    return min.x <= aabb.max.x && max.x >= aabb.min.x &&
-         min.y <= aabb.max.y && max.y >= aabb.min.y &&
-         min.z <= aabb.max.z && max.z >= aabb.min.z;
+    return min.x <= aabb.max.x && max.x >= aabb.min.x && min.y <= aabb.max.y && max.y >= aabb.min.y && min.z <= aabb.max.z && max.z >= aabb.min.z;
 }
 
 bool AABB::valid() const noexcept {
@@ -37,6 +35,7 @@ bool AABB::valid() const noexcept {
 
 AABB transform(const glm::mat4& matrix, const AABB& aabb) noexcept {
     // Calculate the 8 corner points of the AABB
+    // clang-format off
     glm::vec3 corners[8] = {
         glm::vec3(aabb.min.x, aabb.min.y, aabb.min.z),
         glm::vec3(aabb.min.x, aabb.min.y, aabb.max.z),
@@ -47,6 +46,7 @@ AABB transform(const glm::mat4& matrix, const AABB& aabb) noexcept {
         glm::vec3(aabb.max.x, aabb.max.y, aabb.min.z),
         glm::vec3(aabb.max.x, aabb.max.y, aabb.max.z)
       };
+    // clang-format on
 
     // Apply the transformation to each corner point
     for (int i = 0; i < 8; ++i) {
@@ -61,4 +61,4 @@ AABB transform(const glm::mat4& matrix, const AABB& aabb) noexcept {
     return transformedAABB;
 }
 
-}
+}// namespace duk::math
