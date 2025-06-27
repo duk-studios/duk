@@ -57,7 +57,8 @@ uint32_t MaterialInstanceBuffer::byte_size() const {
 
 bool MaterialInstanceBuffer::expand(uint32_t instanceIndex) {
     if (m_instanceVersions.size() <= instanceIndex) {
-        m_instanceVersions.resize(instanceIndex + 1, ~0);
+        const auto newInstanceCapacity = instanceIndex * 2;
+        m_instanceVersions.resize(newInstanceCapacity, ~0);
         const auto size = m_instanceVersions.size() * m_description.stride;
         m_instanceData.resize(size);
         auto buffer = detail::create_storage_buffer(m_rhi, m_commandQueue, size);
