@@ -38,6 +38,7 @@ find_package(grapphs CONFIG REQUIRED)
 find_package(spirv-reflect CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(steamworks-sdk CONFIG REQUIRED)
 
 include(GNUInstallDirs)
 

@@ -27,6 +27,7 @@ target_link_libraries(duk_api
         PUBLIC
         duk_engine
         duk_animation
+        steamworks-sdk::steamworks-sdk
 )
 
 set_target_properties(duk_api PROPERTIES CXX_STANDARD 20)

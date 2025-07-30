@@ -128,6 +128,11 @@ void Application::loop_sleep_excess() {
     const auto globals = m_context->globals();
     const auto timer = m_context->timer();
     m_run = true;
+    float frameAccumulator = 0;
+    float realTimeAccumulator = 0;
+    float maxDeltaTime = std::numeric_limits<float>::lowest();
+    float minDeltaTime = std::numeric_limits<float>::max();
+    uint32_t frameCounter = 0;
     while (m_run) {
         while (m_window->valid() && m_window->minimized()) {
             m_platform->wait_events();
@@ -160,7 +165,22 @@ void Application::loop_sleep_excess() {
             timer->add_duration(FrameDuration(1));
         } else {
             timer->add_duration(realElapsed);
-            duk::log::warn("Frame rate falling behind, elapsed time was {0}ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(realElapsed).count());
+            // duk::log::warn("Frame rate falling behind, elapsed time was {0}ms", std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(realElapsed).count());
+        }
+        float realWorkingTime = std::chrono::duration_cast<std::chrono::duration<float>>(workingTime).count();
+        minDeltaTime = std::min(minDeltaTime, realWorkingTime);
+        maxDeltaTime = std::max(maxDeltaTime, realWorkingTime);
+        frameAccumulator += realWorkingTime;
+        realTimeAccumulator += timer->unscaled_delta_time();
+        ++frameCounter;
+        if (realTimeAccumulator >= 1.0) {
+            auto averageFrameAccumulator = frameAccumulator / frameCounter;
+            duk::log::debug("FPS: {}, Average: {}s, Min: {}s, s {}s", 1.0 / averageFrameAccumulator, averageFrameAccumulator, minDeltaTime, maxDeltaTime);
+            realTimeAccumulator -= 1.0;
+            frameAccumulator = 0;
+            frameCounter = 0;
+            minDeltaTime = std::numeric_limits<float>::max();
+            maxDeltaTime = std::numeric_limits<float>::lowest();
         }
     }
 }
