@@ -3,6 +3,7 @@
   "configurePresets": [
     {
       "name": "common",
+      "hidden": true,
       "displayName": "Default Config",
       "description": "Default build using Ninja generator",
       "binaryDir": "${sourceDir}/.duk/builds/${presetName}",
