@@ -20,8 +20,6 @@
         "error-strings"
       ]
     },
-    "gtest",
-    "approval-tests-cpp",
     "steamworks-sdk"
   ]
 }
