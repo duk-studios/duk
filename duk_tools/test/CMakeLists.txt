@@ -4,16 +4,14 @@ set(DUK_TOOLS_TEST_SOURCES
         main.cpp
         )
 
-add_executable(duk_tools_test ${DUK_TOOLS_TEST_SOURCES})
+add_executable(duk.tools.test ${DUK_TOOLS_TEST_SOURCES})
 
-target_include_directories(duk_tools_test
+target_include_directories(duk.tools.test
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_tools_test
+target_link_libraries(duk.tools.test
         PRIVATE
-        duk_tools
+        duk::tools
         )
-
-set_target_properties(duk_tools_test PROPERTIES CXX_STANDARD 20)

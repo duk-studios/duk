@@ -126,10 +126,10 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/systems/camera_system.cpp
 )
 
-add_library(duk_renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
-add_library(duk::duk_renderer ALIAS duk_renderer)
+add_library(duk.renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
+add_library(duk::renderer ALIAS duk.renderer)
 
-target_include_directories(duk_renderer
+target_include_directories(duk.renderer
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -137,16 +137,16 @@ target_include_directories(duk_renderer
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_renderer
+target_link_libraries(duk.renderer
         PUBLIC
-        duk_objects
-        duk_rhi
-        duk_resource
-        duk_system
+        duk::objects
+        duk::rhi
+        duk::resource
+        duk::system
         Freetype::Freetype
         )
 
-set_target_properties(duk_renderer PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.renderer PROPERTIES EXPORT_NAME renderer)
 
 # used for generating spv files
 add_subdirectory(src/duk_renderer/shader)
@@ -164,7 +164,7 @@ install(
 )
 
 install(
-        TARGETS duk_renderer
+        TARGETS duk.renderer
         EXPORT duk-targets
 )
 

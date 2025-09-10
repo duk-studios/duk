@@ -27,12 +27,7 @@ target_include_directories(${DUK_RUNTIME_TARGET_NAME}
 
 target_link_libraries(${DUK_RUNTIME_TARGET_NAME}
         PRIVATE
-        duk::duk_api
-)
-
-set_target_properties(${DUK_RUNTIME_TARGET_NAME}
-        PROPERTIES
-        CXX_STANDARD 20
+        duk::api
 )
 
 if (DUK_PACK)

@@ -8,16 +8,14 @@ if (NOT MSVC)
         set(CMAKE_EXE_LINKER_FLAGS "-static")
 endif ()
 
-add_executable(duk_log_test ${DUK_LOG_TEST_SOURCES})
+add_executable(duk.log.test ${DUK_LOG_TEST_SOURCES})
 
-target_include_directories(duk_log_test
+target_include_directories(duk.log.test
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_log_test
+target_link_libraries(duk.log.test
         PRIVATE
-        duk_log
+        duk::log
         )
-
-set_target_properties(duk_log_test PROPERTIES CXX_STANDARD 20)

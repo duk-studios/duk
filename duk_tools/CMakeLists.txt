@@ -21,10 +21,10 @@ set(DUK_TOOLS_SOURCES
         src/duk_tools/types.cpp
         )
 
-add_library(duk_tools STATIC ${DUK_TOOLS_HEADERS} ${DUK_TOOLS_SOURCES})
-add_library(duk::duk_tools ALIAS duk_tools)
+add_library(duk.tools STATIC ${DUK_TOOLS_HEADERS} ${DUK_TOOLS_SOURCES})
+add_library(duk::tools ALIAS duk.tools)
 
-target_include_directories(duk_tools
+target_include_directories(duk.tools
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -32,16 +32,16 @@ target_include_directories(duk_tools
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
      )
 
-target_link_libraries(duk_tools
+target_link_libraries(duk.tools
         PUBLIC
-        duk_macros
-        duk_math
+        duk::macros
+        duk::math
 
         ZLIB::ZLIB
         fmt::fmt-header-only
         )
 
-set_target_properties(duk_tools PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.tools PROPERTIES EXPORT_NAME tools)
 
 add_subdirectory(test)
 
@@ -51,6 +51,6 @@ install(
 )
 
 install(
-        TARGETS duk_tools
+        TARGETS duk.tools
         EXPORT duk-targets
 )

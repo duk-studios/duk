@@ -39,10 +39,10 @@ set(DUK_UI_SOURCES
         src/duk_ui/systems/canvas_system.cpp
 )
 
-add_library(duk_ui STATIC ${DUK_UI_SOURCES} ${DUK_UI_HEADERS})
-add_library(duk::duk_ui ALIAS duk_ui)
+add_library(duk.ui STATIC ${DUK_UI_SOURCES} ${DUK_UI_HEADERS})
+add_library(duk::ui ALIAS duk.ui)
 
-target_include_directories(duk_ui
+target_include_directories(duk.ui
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -50,13 +50,13 @@ target_include_directories(duk_ui
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_ui
+target_link_libraries(duk.ui
         PUBLIC
-        duk_renderer
+        duk::renderer
         Freetype::Freetype
         )
 
-set_target_properties(duk_ui PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.ui PROPERTIES EXPORT_NAME ui)
 
 install(
         DIRECTORY include/
@@ -64,7 +64,7 @@ install(
 )
 
 install(
-        TARGETS duk_ui
+        TARGETS duk.ui
         EXPORT duk-targets
 )
 

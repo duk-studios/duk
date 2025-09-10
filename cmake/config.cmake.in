@@ -1,8 +1,5 @@
 @PACKAGE_INIT@
 
-include(${CMAKE_CURRENT_LIST_DIR}/vcpkg.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/compile_shaders.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/duk-targets.cmake)
 include(CMakeFindDependencyMacro)
 
 find_dependency(cxxopts)
@@ -20,5 +17,8 @@ find_dependency(ZLIB)
 find_dependency(steamworks-sdk)
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/duk_runtime" "${CMAKE_BINARY_DIR}/duk_runtime")
+
+include(${CMAKE_CURRENT_LIST_DIR}/duk-compile-shaders.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/duk-targets.cmake)
 
 check_required_components(duk)

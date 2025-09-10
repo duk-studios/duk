@@ -6,8 +6,6 @@ if (MSVC)
     add_compile_options(/MP)
 endif ()
 
-set(CMAKE_CXX_STANDARD 20)
-
 set(DUK_SAMPLE_HEADERS
 )
 
@@ -23,16 +21,16 @@ set(DUK_SAMPLE_SOURCES
     src/duk_sample/temporary_system.cpp
 )
 
-add_library(duk_sample_lib STATIC ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
+add_library(duk.sample_lib STATIC ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
 
-target_include_directories(duk_sample_lib
+target_include_directories(duk.sample_lib
     PRIVATE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
 
-target_link_libraries(duk_sample_lib
+target_link_libraries(duk.sample_lib
     PRIVATE
-    duk::duk_api
+    duk::api
 )
 
-target_link_libraries(duk_sample PRIVATE duk_sample_lib)
+target_link_libraries(duk_sample PRIVATE duk.sample_lib)

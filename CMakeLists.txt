@@ -7,6 +7,10 @@ endif ()
 option(DUK_BUILD_SAMPLE "Enables building of duk_sample" OFF)
 option(DUK_FORMAT_FILES "Enables format target" OFF)
 
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 20)
+endif ()
+
 project(duk)
 
 if (MSVC)
@@ -14,7 +18,6 @@ if (MSVC)
     add_compile_options(/MP)
 endif ()
 
-# Changes here NEED to be reflected in cmake/config.cmake.in
 find_package(cxxopts CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
@@ -78,7 +81,7 @@ install(
 install(
         FILES
         "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/compile_shaders.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/duk-compile-shaders.cmake"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
 )
 

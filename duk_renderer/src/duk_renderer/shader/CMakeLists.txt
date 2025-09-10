@@ -146,8 +146,8 @@ function(add_shader_generate_command PACKED_ENTRY)
 
     add_custom_command(
             OUTPUT ${OUTPUT_FILES}
-            DEPENDS ${COMPILED_SPV_FILES} duk_shader_generator
-            COMMAND duk_shader_generator ${COMMAND_LINE}
+            DEPENDS ${COMPILED_SPV_FILES} duk::shader_generator
+            COMMAND duk::shader_generator ${COMMAND_LINE}
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Generating shader files for ${NAME}"
     )
@@ -191,9 +191,9 @@ if (DUK_FORMAT_FILES)
 
 endif ()
 
-add_custom_target(generate_shader_files
-        DEPENDS duk_shader_generator ${GENERATED_FILES} ${OUTPUT_STAMP} ${FORMAT_STAMP}
+add_custom_target(generate.shader.files
+        DEPENDS duk::shader_generator ${GENERATED_FILES} ${OUTPUT_STAMP} ${FORMAT_STAMP}
         COMMENT "Generating material files"
 )
 
-add_dependencies(duk_renderer generate_shader_files)
+add_dependencies(duk.renderer generate.shader.files)

@@ -99,10 +99,10 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.cpp
         )
 
-add_library(duk_rhi STATIC ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})
-add_library(duk::duk_rhi ALIAS duk_rhi)
+add_library(duk.rhi STATIC ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})
+add_library(duk::rhi ALIAS duk.rhi)
 
-target_include_directories(duk_rhi
+target_include_directories(duk.rhi
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -110,15 +110,15 @@ target_include_directories(duk_rhi
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_rhi
+target_link_libraries(duk.rhi
         PUBLIC
         # duk
-        duk_macros
-        duk_hash
-        duk_platform
-        duk_log
-        duk_task
-        duk_serial
+        duk::macros
+        duk::hash
+        duk::platform
+        duk::log
+        duk::task
+        duk::serial
 
         # external
         glm::glm
@@ -131,7 +131,7 @@ target_link_libraries(duk_rhi
         spirv-reflect::spirv-reflect-static
         )
 
-set_target_properties(duk_rhi PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.rhi PROPERTIES EXPORT_NAME rhi)
 
 install(
         DIRECTORY include/
@@ -139,6 +139,6 @@ install(
 )
 
 install(
-        TARGETS duk_rhi
+        TARGETS duk.rhi
         EXPORT duk-targets
 )

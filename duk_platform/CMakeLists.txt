@@ -25,10 +25,10 @@ set(DUK_PLATFORM_SOURCES
         src/duk_platform/win32/platform_win_32.cpp
 )
 
-add_library(duk_platform STATIC ${DUK_PLATFORM_SOURCES} ${DUK_PLATFORM_HEADERS})
-add_library(duk::duk_platform ALIAS duk_platform)
+add_library(duk.platform STATIC ${DUK_PLATFORM_SOURCES} ${DUK_PLATFORM_HEADERS})
+add_library(duk::platform ALIAS duk.platform)
 
-target_include_directories(duk_platform
+target_include_directories(duk.platform
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -36,25 +36,25 @@ target_include_directories(duk_platform
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_platform
+target_link_libraries(duk.platform
         PUBLIC
-        duk_macros
-        duk_hash
-        duk_event
+        duk::macros
+        duk::hash
+        duk::event
         glm::glm
 
         )
 
-set_target_properties(duk_platform PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.platform PROPERTIES EXPORT_NAME platform)
 
-target_compile_definitions(duk_platform
+target_compile_definitions(duk.platform
         PUBLIC
         DUK_PLATFORM_IS_WINDOWS=$<PLATFORM_ID:Windows,WindowsStore>
         DUK_PLATFORM_IS_LINUX=$<PLATFORM_ID:Linux>
         )
 
 if (MSVC)
-    target_compile_definitions(duk_platform
+    target_compile_definitions(duk.platform
             PUBLIC
             NOMINMAX
             )
@@ -68,6 +68,6 @@ install(
 )
 
 install(
-        TARGETS duk_platform
+        TARGETS duk.platform
         EXPORT duk-targets
 )

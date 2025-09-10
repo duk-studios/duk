@@ -6,24 +6,24 @@ set(DUK_SERIAL_HEADERS
         include/duk_serial/json/types.h
         )
 
-add_library(duk_serial INTERFACE ${DUK_SERIAL_HEADERS})
-add_library(duk::duk_serial ALIAS duk_serial)
+add_library(duk.serial INTERFACE ${DUK_SERIAL_HEADERS})
+add_library(duk::serial ALIAS duk.serial)
 
-target_include_directories(duk_serial
+target_include_directories(duk.serial
         INTERFACE
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 
      )
 
-target_link_libraries(duk_serial
+target_link_libraries(duk.serial
         INTERFACE
-        duk_log
+        duk::log
         glm::glm
         rapidjson
         )
 
-set_target_properties(duk_serial PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.serial PROPERTIES EXPORT_NAME serial)
 
 add_subdirectory(test)
 
@@ -33,6 +33,6 @@ install(
 )
 
 install(
-        TARGETS duk_serial
+        TARGETS duk.serial
         EXPORT duk-targets
 )
