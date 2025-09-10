@@ -1,0 +1,54 @@
+{
+  "version": 8,
+  "configurePresets": [
+    {
+      "name": "common",
+      "displayName": "Default Config",
+      "description": "Default build using Ninja generator",
+      "binaryDir": "${sourceDir}/.duk/builds/${presetName}",
+      "installDir": "${sourceDir}/.duk/builds/${presetName}/install",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_APPLOCAL_DEPS": "OFF",
+        "DUK_BUILD_SAMPLE": "ON",
+        "DUK_FORMAT_FILES": "ON"
+      }
+    },
+    {
+      "name": "visual-studio",
+      "inherits": "common",
+      "displayName": "Visual Studio 17 2022",
+      "description": "Visual Studio 17 2022 configuration",
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "visual-studio-debug",
+      "configurePreset": "visual-studio",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "visual-studio-release",
+      "configurePreset": "visual-studio",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ]
+}
