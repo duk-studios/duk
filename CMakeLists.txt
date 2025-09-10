@@ -11,7 +11,7 @@ if (NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
 endif ()
 
-project(duk)
+project(duk VERSION 0.13.0)
 
 if (MSVC)
     # enable parallel build for msvc
