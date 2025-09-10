@@ -38,7 +38,7 @@ set(DUK_ANIMATION_SOURCES
         src/duk_animation/controller/animation_variables.cpp
 )
 
-add_library(duk.animation STATIC ${DUK_ANIMATION_SOURCES} ${DUK_ANIMATION_HEADERS})
+add_library(duk.animation ${DUK_ANIMATION_SOURCES} ${DUK_ANIMATION_HEADERS})
 add_library(duk::animation ALIAS duk.animation)
 
 target_include_directories(duk.animation

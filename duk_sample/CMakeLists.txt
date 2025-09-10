@@ -21,7 +21,7 @@ set(DUK_SAMPLE_SOURCES
     src/duk_sample/temporary_system.cpp
 )
 
-add_library(duk.sample_lib STATIC ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
+add_library(duk.sample_lib ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
 
 target_include_directories(duk.sample_lib
     PRIVATE

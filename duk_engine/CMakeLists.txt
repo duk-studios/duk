@@ -25,7 +25,7 @@ set(DUK_ENGINE_SOURCES
 )
 
 
-add_library(duk.engine STATIC ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})
+add_library(duk.engine ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})
 add_library(duk::engine ALIAS duk.engine)
 
 target_include_directories(duk.engine

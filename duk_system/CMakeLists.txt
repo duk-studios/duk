@@ -9,7 +9,7 @@ set(DUK_SYSTEM_SOURCES
         src/duk_system/system.cpp
 )
 
-add_library(duk.system STATIC ${DUK_SYSTEM_SOURCES} ${DUK_SYSTEM_HEADERS})
+add_library(duk.system ${DUK_SYSTEM_SOURCES} ${DUK_SYSTEM_HEADERS})
 add_library(duk::system ALIAS duk.system)
 
 target_include_directories(duk.system

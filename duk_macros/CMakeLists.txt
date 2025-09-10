@@ -8,7 +8,7 @@ set(DUK_MACROS_SOURCES
         src/duk_macros/assert.cpp
         )
 
-add_library(duk.macros STATIC ${DUK_MACROS_HEADERS} ${DUK_MACROS_SOURCES})
+add_library(duk.macros ${DUK_MACROS_HEADERS} ${DUK_MACROS_SOURCES})
 add_library(duk::macros ALIAS duk.macros)
 
 target_include_directories(duk.macros

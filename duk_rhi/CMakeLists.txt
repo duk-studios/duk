@@ -99,7 +99,7 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.cpp
         )
 
-add_library(duk.rhi STATIC ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})
+add_library(duk.rhi ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})
 add_library(duk::rhi ALIAS duk.rhi)
 
 target_include_directories(duk.rhi

@@ -8,7 +8,7 @@ set(DUK_EVENT_SOURCES
         src/duk_event/event.cpp
 )
 
-add_library(duk.event STATIC ${DUK_EVENT_HEADERS} ${DUK_EVENT_SOURCES})
+add_library(duk.event ${DUK_EVENT_HEADERS} ${DUK_EVENT_SOURCES})
 add_library(duk::event ALIAS duk.event)
 
 target_include_directories(duk.event

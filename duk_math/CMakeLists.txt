@@ -10,7 +10,7 @@ set(DUK_MATH_SOURCES
         src/duk_math/aabb.cpp
         )
 
-add_library(duk.math STATIC ${DUK_MATH_HEADERS} ${DUK_MATH_SOURCES})
+add_library(duk.math ${DUK_MATH_HEADERS} ${DUK_MATH_SOURCES})
 add_library(duk::math ALIAS duk.math)
 
 target_include_directories(duk.math

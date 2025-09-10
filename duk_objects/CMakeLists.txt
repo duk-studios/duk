@@ -15,7 +15,7 @@ set(DUK_OBJECTS_SOURCES
         src/duk_objects/register_types.cpp
 )
 
-add_library(duk.objects STATIC ${DUK_OBJECTS_SOURCES} ${DUK_OBJECTS_HEADERS})
+add_library(duk.objects ${DUK_OBJECTS_SOURCES} ${DUK_OBJECTS_HEADERS})
 add_library(duk::objects ALIAS duk.objects)
 
 target_include_directories(duk.objects

@@ -21,7 +21,7 @@ set(DUK_TOOLS_SOURCES
         src/duk_tools/types.cpp
         )
 
-add_library(duk.tools STATIC ${DUK_TOOLS_HEADERS} ${DUK_TOOLS_SOURCES})
+add_library(duk.tools ${DUK_TOOLS_HEADERS} ${DUK_TOOLS_SOURCES})
 add_library(duk::tools ALIAS duk.tools)
 
 target_include_directories(duk.tools

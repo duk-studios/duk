@@ -20,7 +20,7 @@ set(DUK_RESOURCE_SOURCES
         src/duk_resource/solver/dependency_solver.cpp
         )
 
-add_library(duk.resource STATIC ${DUK_RESOURCE_HEADERS} ${DUK_RESOURCE_SOURCES})
+add_library(duk.resource ${DUK_RESOURCE_HEADERS} ${DUK_RESOURCE_SOURCES})
 add_library(duk::resource ALIAS duk.resource)
 
 target_link_libraries(duk.resource

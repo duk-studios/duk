@@ -25,7 +25,7 @@ set(DUK_PLATFORM_SOURCES
         src/duk_platform/win32/platform_win_32.cpp
 )
 
-add_library(duk.platform STATIC ${DUK_PLATFORM_SOURCES} ${DUK_PLATFORM_HEADERS})
+add_library(duk.platform ${DUK_PLATFORM_SOURCES} ${DUK_PLATFORM_HEADERS})
 add_library(duk::platform ALIAS duk.platform)
 
 target_include_directories(duk.platform

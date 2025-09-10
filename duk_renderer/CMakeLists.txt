@@ -126,7 +126,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/systems/camera_system.cpp
 )
 
-add_library(duk.renderer STATIC ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
+add_library(duk.renderer ${DUK_RENDERER_SOURCES} ${DUK_RENDERER_HEADERS})
 add_library(duk::renderer ALIAS duk.renderer)
 
 target_include_directories(duk.renderer

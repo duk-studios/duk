@@ -12,7 +12,7 @@ set(DUK_API_SOURCES
         src/duk_api/register_types.cpp
 )
 
-add_library(duk.api STATIC ${DUK_API_HEADERS} ${DUK_API_SOURCES})
+add_library(duk.api ${DUK_API_HEADERS} ${DUK_API_SOURCES})
 add_library(duk::api ALIAS duk.api)
 
 target_include_directories(duk.api

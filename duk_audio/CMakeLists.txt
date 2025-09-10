@@ -34,7 +34,7 @@ set(DUK_AUDIO_SOURCES
         src/duk_audio/miniaudio/miniaudio_import.cpp
 )
 
-add_library(duk.audio STATIC ${DUK_AUDIO_SOURCES} ${DUK_AUDIO_HEADERS})
+add_library(duk.audio ${DUK_AUDIO_SOURCES} ${DUK_AUDIO_HEADERS})
 add_library(duk::audio ALIAS duk.audio)
 
 target_include_directories(duk.audio

@@ -17,7 +17,7 @@ set(DUK_LOG_SOURCES
         src/duk_log/fmt_sink.cpp
         )
 
-add_library(duk.log STATIC ${DUK_LOG_HEADERS} ${DUK_LOG_SOURCES})
+add_library(duk.log ${DUK_LOG_HEADERS} ${DUK_LOG_SOURCES})
 add_library(duk::log ALIAS duk.log)
 
 target_include_directories(duk.log

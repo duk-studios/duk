@@ -39,7 +39,7 @@ set(DUK_UI_SOURCES
         src/duk_ui/systems/canvas_system.cpp
 )
 
-add_library(duk.ui STATIC ${DUK_UI_SOURCES} ${DUK_UI_HEADERS})
+add_library(duk.ui ${DUK_UI_SOURCES} ${DUK_UI_HEADERS})
 add_library(duk::ui ALIAS duk.ui)
 
 target_include_directories(duk.ui

@@ -7,7 +7,7 @@ set(DUK_TASK_SOURCES
         src/duk_task/task_queue.cpp
         )
 
-add_library(duk.task STATIC ${DUK_TASK_HEADERS} ${DUK_TASK_SOURCES})
+add_library(duk.task ${DUK_TASK_HEADERS} ${DUK_TASK_SOURCES})
 add_library(duk::task ALIAS duk.task)
 
 target_link_libraries(duk.task PUBLIC duk::macros)

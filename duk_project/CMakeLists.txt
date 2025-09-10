@@ -11,7 +11,7 @@ set(DUK_PROJECT_SOURCES
         src/duk_project/project.cpp
         )
 
-add_library(duk.project STATIC ${DUK_PROJECT_HEADERS} ${DUK_PROJECT_SOURCES})
+add_library(duk.project ${DUK_PROJECT_HEADERS} ${DUK_PROJECT_SOURCES})
 add_library(duk::project ALIAS duk.project)
 
 target_include_directories(duk.project

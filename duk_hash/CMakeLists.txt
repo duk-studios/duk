@@ -10,7 +10,7 @@ set(DUK_HASH_SOURCES
         src/duk_hash/data_source.cpp
         )
 
-add_library(duk.hash STATIC ${DUK_HASH_HEADERS} ${DUK_HASH_SOURCES})
+add_library(duk.hash ${DUK_HASH_HEADERS} ${DUK_HASH_SOURCES})
 add_library(duk::hash ALIAS duk.hash)
 
 target_include_directories(duk.hash
