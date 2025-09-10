@@ -1,22 +1,24 @@
 @PACKAGE_INIT@
 
-include(${CMAKE_CURRENT_LIST_DIR}/vcpkg.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/compile_shaders.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/duk-targets.cmake)
+include(CMakeFindDependencyMacro)
 
-find_package(cxxopts CONFIG REQUIRED)
-find_package(fmt CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
-find_package(RapidJSON CONFIG REQUIRED)
-find_package(Stb REQUIRED)
+find_dependency(cxxopts)
+find_dependency(fmt)
+find_dependency(glm)
+find_dependency(RapidJSON)
+find_dependency(Stb REQUIRED)
 find_path(TERMCOLOR_INCLUDE_DIRS "termcolor/termcolor.hpp" REQUIRED)
 find_path(MINIAUDIO_INCLUDE_DIRS "miniaudio.h" REQUIRED)
-find_package(volk CONFIG REQUIRED)
-find_package(grapphs CONFIG REQUIRED)
-find_package(spirv-reflect CONFIG REQUIRED)
-find_package(Freetype REQUIRED)
-find_package(ZLIB REQUIRED)
+find_dependency(volk)
+find_dependency(grapphs)
+find_dependency(spirv-reflect)
+find_dependency(Freetype)
+find_dependency(ZLIB)
+find_dependency(steamworks-sdk)
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/duk_runtime" "${CMAKE_BINARY_DIR}/duk_runtime")
+
+include(${CMAKE_CURRENT_LIST_DIR}/duk-compile-shaders.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/duk-targets.cmake)
 
 check_required_components(duk)

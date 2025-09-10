@@ -1,4 +1,3 @@
-project(duk_log)
 
 set(DUK_LOG_HEADERS
         include/duk_log/log.h
@@ -17,10 +16,10 @@ set(DUK_LOG_SOURCES
         src/duk_log/fmt_sink.cpp
         )
 
-add_library(duk_log STATIC ${DUK_LOG_HEADERS} ${DUK_LOG_SOURCES})
-add_library(duk::duk_log ALIAS duk_log)
+add_library(duk.log ${DUK_LOG_HEADERS} ${DUK_LOG_SOURCES})
+add_library(duk::log ALIAS duk.log)
 
-target_include_directories(duk_log
+target_include_directories(duk.log
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -30,16 +29,16 @@ target_include_directories(duk_log
         ${TERMCOLOR_INCLUDE_DIRS}
         )
 
-target_link_libraries(duk_log
+target_link_libraries(duk.log
         PUBLIC
-        duk_macros
-        duk_event
-        duk_task
-        duk_tools
-        duk_platform
+        duk::macros
+        duk::event
+        duk::task
+        duk::tools
+        duk::platform
         )
 
-set_target_properties(duk_log PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.log PROPERTIES EXPORT_NAME log)
 
 add_subdirectory(test)
 
@@ -49,6 +48,6 @@ install(
 )
 
 install(
-        TARGETS duk_log
+        TARGETS duk.log
         EXPORT duk-targets
 )

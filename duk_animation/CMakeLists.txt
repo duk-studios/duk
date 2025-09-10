@@ -1,4 +1,3 @@
-project(duk_animation)
 
 set(DUK_ANIMATION_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(DUK_ANIMATION_INC_DIR ${DUK_ANIMATION_ROOT}/include/duk_animation)
@@ -38,10 +37,10 @@ set(DUK_ANIMATION_SOURCES
         src/duk_animation/controller/animation_variables.cpp
 )
 
-add_library(duk_animation STATIC ${DUK_ANIMATION_SOURCES} ${DUK_ANIMATION_HEADERS})
-add_library(duk::duk_animation ALIAS duk_animation)
+add_library(duk.animation ${DUK_ANIMATION_SOURCES} ${DUK_ANIMATION_HEADERS})
+add_library(duk::animation ALIAS duk.animation)
 
-target_include_directories(duk_animation
+target_include_directories(duk.animation
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -49,12 +48,12 @@ target_include_directories(duk_animation
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
 
-target_link_libraries(duk_animation
+target_link_libraries(duk.animation
         PUBLIC
-        duk_engine
+        duk::engine
 )
 
-set_target_properties(duk_animation PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.animation PROPERTIES EXPORT_NAME animation)
 
 install(
         DIRECTORY include/
@@ -62,6 +61,6 @@ install(
 )
 
 install(
-        TARGETS duk_animation
+        TARGETS duk.animation
         EXPORT duk-targets
 )

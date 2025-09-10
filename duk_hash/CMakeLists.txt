@@ -1,4 +1,3 @@
-project(duk_hash)
 
 set(DUK_HASH_HEADERS
         include/duk_hash/hash.h
@@ -10,24 +9,24 @@ set(DUK_HASH_SOURCES
         src/duk_hash/data_source.cpp
         )
 
-add_library(duk_hash STATIC ${DUK_HASH_HEADERS} ${DUK_HASH_SOURCES})
-add_library(duk::duk_hash ALIAS duk_hash)
+add_library(duk.hash ${DUK_HASH_HEADERS} ${DUK_HASH_SOURCES})
+add_library(duk::hash ALIAS duk.hash)
 
-target_include_directories(duk_hash
+target_include_directories(duk.hash
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         )
 
-target_link_libraries(duk_hash
+target_link_libraries(duk.hash
         PUBLIC
-        duk_macros
+        duk::macros
+        duk::math
         glm::glm
-        duk_math
         )
 
-set_target_properties(duk_hash PROPERTIES
-        CXX_STANDARD 20
+set_target_properties(duk.hash PROPERTIES
+        EXPORT_NAME hash
         )
 
 install(
@@ -36,6 +35,6 @@ install(
 )
 
 install(
-        TARGETS duk_hash
+        TARGETS duk.hash
         EXPORT duk-targets
 )

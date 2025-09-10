@@ -1,4 +1,3 @@
-project(duk_project)
 
 set(DUK_PROJECT_HEADERS
         include/duk_project/resource.h
@@ -11,10 +10,10 @@ set(DUK_PROJECT_SOURCES
         src/duk_project/project.cpp
         )
 
-add_library(duk_project STATIC ${DUK_PROJECT_HEADERS} ${DUK_PROJECT_SOURCES})
-add_library(duk::duk_project ALIAS duk_project)
+add_library(duk.project ${DUK_PROJECT_HEADERS} ${DUK_PROJECT_SOURCES})
+add_library(duk::project ALIAS duk.project)
 
-target_include_directories(duk_project
+target_include_directories(duk.project
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -23,13 +22,13 @@ target_include_directories(duk_project
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_project
+target_link_libraries(duk.project
         PUBLIC
-        duk_engine
-        duk_animation
+        duk::engine
+        duk::animation
         )
 
-set_target_properties(duk_project PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.project PROPERTIES EXPORT_NAME project)
 
 install(
         DIRECTORY include/
@@ -37,6 +36,6 @@ install(
 )
 
 install(
-        TARGETS duk_project
+        TARGETS duk.project
         EXPORT duk-targets
 )

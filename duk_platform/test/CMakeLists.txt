@@ -1,19 +1,17 @@
-project(duk_platform_test)
 
 set(DUK_PLATFORM_TEST_SOURCES
         main.cpp
         )
 
-add_executable(duk_platform_test ${DUK_PLATFORM_TEST_SOURCES})
+add_executable(duk.platform.test ${DUK_PLATFORM_TEST_SOURCES})
 
-target_include_directories(duk_platform_test
+target_include_directories(duk.platform.test
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_platform_test
+target_link_libraries(duk.platform.test
         PRIVATE
-        duk_platform
+        duk::platform
         )
 
-set_target_properties(duk_platform_test PROPERTIES CXX_STANDARD 20)

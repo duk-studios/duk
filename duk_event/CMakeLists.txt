@@ -1,4 +1,3 @@
-project(duk_event)
 
 set(DUK_EVENT_HEADERS
         include/duk_event/event.h
@@ -8,10 +7,10 @@ set(DUK_EVENT_SOURCES
         src/duk_event/event.cpp
 )
 
-add_library(duk_event STATIC ${DUK_EVENT_HEADERS} ${DUK_EVENT_SOURCES})
-add_library(duk::duk_event ALIAS duk_event)
+add_library(duk.event ${DUK_EVENT_HEADERS} ${DUK_EVENT_SOURCES})
+add_library(duk::event ALIAS duk.event)
 
-target_include_directories(duk_event
+target_include_directories(duk.event
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -19,7 +18,7 @@ target_include_directories(duk_event
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-set_target_properties(duk_event PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.event PROPERTIES EXPORT_NAME event)
 
 add_subdirectory(test)
 
@@ -29,6 +28,6 @@ install(
 )
 
 install(
-        TARGETS duk_event
+        TARGETS duk.event
         EXPORT duk-targets
 )

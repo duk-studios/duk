@@ -12,11 +12,12 @@
     },
     {
       "kind": "git",
-      "baseline": "c664491bcf97f5300dc26d49c0906653b6d6f8ec",
+      "baseline": "b997b03f9993eaff72473b568e92696d75be7dcc",
       "repository": "https://github.com/duk-studios/vcpkg-registry",
       "packages": [
         "grapphs",
-        "spirv-reflect"
+        "spirv-reflect",
+        "steamworks-sdk"
       ]
     }
   ]

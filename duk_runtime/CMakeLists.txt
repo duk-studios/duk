@@ -27,15 +27,18 @@ target_include_directories(${DUK_RUNTIME_TARGET_NAME}
 
 target_link_libraries(${DUK_RUNTIME_TARGET_NAME}
         PRIVATE
-        duk::duk_api
-)
-
-set_target_properties(${DUK_RUNTIME_TARGET_NAME}
-        PROPERTIES
-        CXX_STANDARD 20
+        duk::api
 )
 
 if (DUK_PACK)
     message(STATUS "Defining DUK_PACK for target ${DUK_RUNTIME_TARGET_NAME}")
     target_compile_definitions(${DUK_RUNTIME_TARGET_NAME} PRIVATE -DDUK_PACK=1)
+endif ()
+
+if (WIN32)
+    add_custom_command (
+            TARGET ${DUK_RUNTIME_TARGET_NAME} POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy -t "$<TARGET_FILE_DIR:${DUK_RUNTIME_TARGET_NAME}>"
+            "$<TARGET_RUNTIME_DLLS:${DUK_RUNTIME_TARGET_NAME}>" USES_TERMINAL COMMAND_EXPAND_LISTS
+    )
 endif ()

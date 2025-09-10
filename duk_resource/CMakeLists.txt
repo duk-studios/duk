@@ -1,4 +1,3 @@
-project(duk_resource)
 
 set(DUK_RESOURCE_HEADERS
         include/duk_resource/file.h
@@ -20,16 +19,16 @@ set(DUK_RESOURCE_SOURCES
         src/duk_resource/solver/dependency_solver.cpp
         )
 
-add_library(duk_resource STATIC ${DUK_RESOURCE_HEADERS} ${DUK_RESOURCE_SOURCES})
-add_library(duk::duk_resource ALIAS duk_resource)
+add_library(duk.resource ${DUK_RESOURCE_HEADERS} ${DUK_RESOURCE_SOURCES})
+add_library(duk::resource ALIAS duk.resource)
 
-target_link_libraries(duk_resource
+target_link_libraries(duk.resource
         PUBLIC
-        duk_macros
-        duk_serial
+        duk::macros
+        duk::serial
         )
 
-target_include_directories(duk_resource
+target_include_directories(duk.resource
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -38,7 +37,7 @@ target_include_directories(duk_resource
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-set_target_properties(duk_resource PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.resource PROPERTIES EXPORT_NAME resource)
 
 add_subdirectory(test)
 
@@ -48,6 +47,6 @@ install(
 )
 
 install(
-        TARGETS duk_resource
+        TARGETS duk.resource
         EXPORT duk-targets
 )

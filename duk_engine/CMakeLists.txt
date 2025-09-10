@@ -1,4 +1,3 @@
-project(duk_engine)
 
 set(DUK_ENGINE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(DUK_ENGINE_INC_DIR ${DUK_ENGINE_ROOT}/include/duk_engine)
@@ -25,10 +24,10 @@ set(DUK_ENGINE_SOURCES
 )
 
 
-add_library(duk_engine STATIC ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})
-add_library(duk::duk_engine ALIAS duk_engine)
+add_library(duk.engine ${DUK_ENGINE_SOURCES} ${DUK_ENGINE_HEADERS})
+add_library(duk::engine ALIAS duk.engine)
 
-target_include_directories(duk_engine
+target_include_directories(duk.engine
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -36,15 +35,15 @@ target_include_directories(duk_engine
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_engine
+target_link_libraries(duk.engine
         PUBLIC
-        duk_system
-        duk_renderer
-        duk_ui
-        duk_audio
+        duk::system
+        duk::renderer
+        duk::ui
+        duk::audio
         )
 
-set_target_properties(duk_engine PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.engine PROPERTIES EXPORT_NAME engine)
 
 install(
         DIRECTORY include/
@@ -52,6 +51,6 @@ install(
 )
 
 install(
-        TARGETS duk_engine
+        TARGETS duk.engine
         EXPORT duk-targets
 )

@@ -1,4 +1,3 @@
-project(duk_audio)
 
 set(DUK_AUDIO_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(DUK_AUDIO_INC_DIR ${DUK_AUDIO_ROOT}/include/duk_audio)
@@ -34,10 +33,10 @@ set(DUK_AUDIO_SOURCES
         src/duk_audio/miniaudio/miniaudio_import.cpp
 )
 
-add_library(duk_audio STATIC ${DUK_AUDIO_SOURCES} ${DUK_AUDIO_HEADERS})
-add_library(duk::duk_audio ALIAS duk_audio)
+add_library(duk.audio ${DUK_AUDIO_SOURCES} ${DUK_AUDIO_HEADERS})
+add_library(duk::audio ALIAS duk.audio)
 
-target_include_directories(duk_audio
+target_include_directories(duk.audio
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -46,14 +45,14 @@ target_include_directories(duk_audio
         ${MINIAUDIO_INCLUDE_DIRS}
 )
 
-target_link_libraries(duk_audio
+target_link_libraries(duk.audio
         PUBLIC
-        duk_log
-        duk_platform
-        duk_resource
+        duk::log
+        duk::platform
+        duk::resource
 )
 
-set_target_properties(duk_audio PROPERTIES CXX_STANDARD 20)
+set_target_properties(duk.audio PROPERTIES EXPORT_NAME audio)
 
 add_subdirectory(test)
 
@@ -63,6 +62,6 @@ install(
 )
 
 install(
-        TARGETS duk_audio
+        TARGETS duk.audio
         EXPORT duk-targets
 )

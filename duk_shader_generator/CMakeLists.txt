@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.24)
-project(duk_shader_generator)
 
 set(DUK_SHADER_GENERATOR_HEADERS
         include/duk_shader_generator/parser.h
@@ -22,9 +20,10 @@ set(DUK_SHADER_GENERATOR_SOURCES
         src/duk_shader_generator/file_generators/generator_utils.cpp
         )
 
-add_executable(duk_shader_generator ${DUK_SHADER_GENERATOR_HEADERS} ${DUK_SHADER_GENERATOR_SOURCES})
+add_executable(duk.shader_generator ${DUK_SHADER_GENERATOR_HEADERS} ${DUK_SHADER_GENERATOR_SOURCES})
+add_executable(duk::shader_generator ALIAS duk.shader_generator)
 
-target_include_directories(duk_shader_generator
+target_include_directories(duk.shader_generator
         PUBLIC
         include
 
@@ -32,11 +31,9 @@ target_include_directories(duk_shader_generator
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_shader_generator
+target_link_libraries(duk.shader_generator
         PRIVATE
-        duk_rhi
+        duk::rhi
         cxxopts::cxxopts
         spirv-reflect::spirv-reflect-static
 )
-
-set_target_properties(duk_shader_generator PROPERTIES CXX_STANDARD 20)

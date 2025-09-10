@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.24)
-project(duk_cli)
 
 if (NOT MSVC)
         set(CMAKE_EXE_LINKER_FLAGS "-static")
@@ -27,9 +25,10 @@ set(DUK_CLI_SOURCES
         src/duk_cli/commands/status_command.cpp
         )
 
-add_executable(duk_cli ${DUK_CLI_HEADERS} ${DUK_CLI_SOURCES})
+add_executable(duk.cli ${DUK_CLI_HEADERS} ${DUK_CLI_SOURCES})
+add_executable(duk::cli ALIAS duk.cli)
 
-target_include_directories(duk_cli
+target_include_directories(duk.cli
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -38,23 +37,23 @@ target_include_directories(duk_cli
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
-target_link_libraries(duk_cli
+target_link_libraries(duk.cli
         PRIVATE
-        duk_log
-        duk_project
+        duk::log
+        duk::project
         cxxopts::cxxopts
         )
 
-set_target_properties(duk_cli PROPERTIES CXX_STANDARD 20)
-
-set_target_properties(duk_cli PROPERTIES OUTPUT_NAME duk)
+set_target_properties(duk.cli PROPERTIES
+        EXPORT_NAME cli
+        OUTPUT_NAME duk)
 
 install(
-        TARGETS duk_cli
+        TARGETS duk.cli
         RUNTIME DESTINATION bin
 )
 
 install(
-        TARGETS duk_cli
+        TARGETS duk.cli
         EXPORT duk-targets
 )

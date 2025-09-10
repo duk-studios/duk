@@ -4,28 +4,20 @@ if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
     set(DUK_AS_SOURCE TRUE)
 endif ()
 
-option(DUK_BUILD_SAMPLE "Enables building of duk_sample" ON)
-option(DUK_FORMAT_FILES "Enables format target" ON)
-option(DUK_VCPKG_INSTALL "Enables using vcpkg to install dependencies" ON)
+option(DUK_BUILD_SAMPLE "Enables building of duk_sample" OFF)
+option(DUK_FORMAT_FILES "Enables format target" OFF)
 
-set(DUK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-
-if (DUK_VCPKG_INSTALL)
-    include(cmake/vcpkg.cmake)
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 20)
 endif ()
 
-project(duk)
-
-if (NOT CMAKE_DEBUG_POSTFIX)
-    set(CMAKE_DEBUG_POSTFIX d)
-endif ()
+project(duk VERSION 0.13.0)
 
 if (MSVC)
     # enable parallel build for msvc
-    add_definitions(/MP)
+    add_compile_options(/MP)
 endif ()
 
-# Changes here NEED to be reflected in cmake/config.cmake.in
 find_package(cxxopts CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
@@ -38,6 +30,7 @@ find_package(grapphs CONFIG REQUIRED)
 find_package(spirv-reflect CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(steamworks-sdk CONFIG REQUIRED)
 
 include(GNUInstallDirs)
 
@@ -88,10 +81,7 @@ install(
 install(
         FILES
         "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/compile_shaders.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/vcpkg.cmake"
-        "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.json"
-        "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-configuration.json"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/duk-compile-shaders.cmake"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
 )
 

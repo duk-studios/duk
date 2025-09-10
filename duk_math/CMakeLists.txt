@@ -1,4 +1,3 @@
-project(duk_math)
 
 set(DUK_MATH_HEADERS
         include/duk_math/math.h
@@ -10,24 +9,24 @@ set(DUK_MATH_SOURCES
         src/duk_math/aabb.cpp
         )
 
-add_library(duk_math STATIC ${DUK_MATH_HEADERS} ${DUK_MATH_SOURCES})
-add_library(duk::duk_math ALIAS duk_math)
+add_library(duk.math ${DUK_MATH_HEADERS} ${DUK_MATH_SOURCES})
+add_library(duk::math ALIAS duk.math)
 
-target_include_directories(duk_math
+target_include_directories(duk.math
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
      )
 
-target_link_libraries(duk_math
+target_link_libraries(duk.math
         PUBLIC
-        duk_macros
+        duk::macros
         glm::glm
         )
 
 
-set_target_properties(duk_math PROPERTIES
-        CXX_STANDARD 20
+set_target_properties(duk.math PROPERTIES
+        EXPORT_NAME math
         )
 
 install(
@@ -36,6 +35,6 @@ install(
 )
 
 install(
-        TARGETS duk_math
+        TARGETS duk.math
         EXPORT duk-targets
 )
