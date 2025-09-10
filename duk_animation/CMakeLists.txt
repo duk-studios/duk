@@ -1,4 +1,3 @@
-project(duk_animation)
 
 set(DUK_ANIMATION_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(DUK_ANIMATION_INC_DIR ${DUK_ANIMATION_ROOT}/include/duk_animation)

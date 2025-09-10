@@ -1,4 +1,3 @@
-project(duk_platform)
 
 set(DUK_PLATFORM_HEADERS
         include/duk_platform/console.h

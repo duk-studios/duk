@@ -1,4 +1,3 @@
-project(duk_api)
 
 set(DUK_API_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(DUK_API_INC_DIR ${DUK_API_ROOT}/include/duk_api)

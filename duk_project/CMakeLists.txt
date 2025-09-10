@@ -1,4 +1,3 @@
-project(duk_project)
 
 set(DUK_PROJECT_HEADERS
         include/duk_project/resource.h

@@ -1,4 +1,3 @@
-project(duk_renderer)
 
 set(DUK_RENDERER_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(DUK_RENDERER_INC_DIR ${DUK_RENDERER_ROOT}/include/duk_renderer)

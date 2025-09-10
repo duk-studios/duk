@@ -1,4 +1,3 @@
-project(duk_tools)
 
 set(DUK_TOOLS_HEADERS
         include/duk_tools/singleton.h

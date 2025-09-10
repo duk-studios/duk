@@ -1,4 +1,3 @@
-project(duk_math)
 
 set(DUK_MATH_HEADERS
         include/duk_math/math.h

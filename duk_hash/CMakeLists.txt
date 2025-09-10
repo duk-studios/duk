@@ -1,4 +1,3 @@
-project(duk_hash)
 
 set(DUK_HASH_HEADERS
         include/duk_hash/hash.h

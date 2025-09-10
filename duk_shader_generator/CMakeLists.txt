@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.24)
-project(duk_shader_generator)
 
 set(DUK_SHADER_GENERATOR_HEADERS
         include/duk_shader_generator/parser.h

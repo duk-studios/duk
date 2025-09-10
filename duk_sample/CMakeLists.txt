@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.24)
-
-project(duk_sample)
 
 if (MSVC)
     add_compile_options(/MP)

@@ -1,4 +1,3 @@
-project(duk_engine)
 
 set(DUK_ENGINE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(DUK_ENGINE_INC_DIR ${DUK_ENGINE_ROOT}/include/duk_engine)

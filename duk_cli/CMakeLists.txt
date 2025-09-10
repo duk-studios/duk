@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.24)
-project(duk_cli)
 
 if (NOT MSVC)
         set(CMAKE_EXE_LINKER_FLAGS "-static")

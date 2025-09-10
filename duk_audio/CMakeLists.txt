@@ -1,4 +1,3 @@
-project(duk_audio)
 
 set(DUK_AUDIO_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(DUK_AUDIO_INC_DIR ${DUK_AUDIO_ROOT}/include/duk_audio)

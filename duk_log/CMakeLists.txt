@@ -1,4 +1,3 @@
-project(duk_log)
 
 set(DUK_LOG_HEADERS
         include/duk_log/log.h

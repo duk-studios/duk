@@ -1,4 +1,3 @@
-project(duk_system)
 
 set(DUK_SYSTEM_HEADERS
         include/duk_system/system.h

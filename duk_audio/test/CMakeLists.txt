@@ -1,4 +1,3 @@
-project(duk_audio_test)
 
 set(DUK_AUDIO_TEST_SOURCES
         main.cpp

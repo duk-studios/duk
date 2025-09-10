@@ -1,4 +1,3 @@
-project(duk_log_test)
 
 set(DUK_LOG_TEST_SOURCES
         main.cpp

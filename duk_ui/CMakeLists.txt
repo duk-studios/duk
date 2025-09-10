@@ -1,4 +1,3 @@
-project(duk_ui)
 
 set(DUK_UI_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(DUK_UI_INC_DIR ${DUK_UI_ROOT}/include/duk_ui)

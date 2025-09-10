@@ -1,4 +1,3 @@
-project(duk_platform_test)
 
 set(DUK_PLATFORM_TEST_SOURCES
         main.cpp

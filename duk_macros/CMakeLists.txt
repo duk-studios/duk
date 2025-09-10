@@ -1,4 +1,3 @@
-project(duk_macros)
 
 set(DUK_MACROS_HEADERS
         include/duk_macros/macros.h

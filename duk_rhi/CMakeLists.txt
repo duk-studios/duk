@@ -1,4 +1,3 @@
-project(duk_rhi)
 
 set(DUK_RHI_HEADERS
         include/duk_rhi/rhi.h

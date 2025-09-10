@@ -1,4 +1,3 @@
-project(duk_event_test)
 
 set(DUK_EVENT_TEST_SOURCES
         main.cpp

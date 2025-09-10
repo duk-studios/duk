@@ -1,4 +1,3 @@
-project(duk_task)
 
 set(DUK_TASK_HEADERS
         include/duk_task/task_queue.h

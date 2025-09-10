@@ -1,4 +1,3 @@
-project(duk_tools_test)
 
 set(DUK_TOOLS_TEST_SOURCES
         main.cpp

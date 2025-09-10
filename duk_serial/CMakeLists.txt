@@ -1,4 +1,3 @@
-project(duk_serial)
 
 set(DUK_SERIAL_HEADERS
         include/duk_serial/json/rapidjson_import.h

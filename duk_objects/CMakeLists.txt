@@ -1,4 +1,3 @@
-project(duk_objects)
 
 set(DUK_OBJECTS_HEADERS
         include/duk_objects/events.h
