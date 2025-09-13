@@ -22,11 +22,11 @@ function(duk_compile_shaders TARGET_NAME)
 
     set(DUK_GLSL_INCLUDE_DIRS)
     if (DUK_AS_SOURCE)
-        set(DUK_GLSL_INCLUDE_DIRS "$ENV{DUK_SOURCE_ROOT}/duk_renderer/src/duk_renderer/shader/glsl/include")
-        message(STATUS "DUK_AS_SOURCE, GLSL include dir: ${DUK_GLSL_INCLUDE_DIRS}")
+        set(DUK_GLSL_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/duk_renderer/src/duk_renderer/shader/glsl/include")
+        message(STATUS "GLSL include dir: ${DUK_GLSL_INCLUDE_DIRS} - using source duk (DUK_AS_SOURCE is defined)")
     else ()
-        set(DUK_GLSL_INCLUDE_DIRS "$ENV{DUK_INSTALL_ROOT}/share/duk/glsl/include")
-        message(STATUS "Global duk installation, GLSL include dir: ${DUK_GLSL_INCLUDE_DIRS}")
+        set(DUK_GLSL_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/glsl/include")
+        message(STATUS "GLSL include dir: ${DUK_GLSL_INCLUDE_DIRS} - using installed duk")
     endif ()
 
     set(GLSLC_FLAGS
