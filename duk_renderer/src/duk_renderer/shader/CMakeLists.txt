@@ -152,11 +152,6 @@ function(add_shader_generate_command PACKED_ENTRY)
             COMMENT "Generating shader files for ${NAME}"
     )
 
-    install(
-            FILES ${COMPILED_SPV_FILES}
-            DESTINATION "bin/spv/${NAME}"
-    )
-
 endfunction()
 
 add_subdirectory(color)
