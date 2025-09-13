@@ -56,10 +56,9 @@ add_subdirectory(duk_animation)
 add_subdirectory(duk_project)
 add_subdirectory(duk_cli)
 add_subdirectory(duk_api)
+add_subdirectory(duk_runtime)
 
 if (DUK_BUILD_SAMPLE)
-    set(DUK_RUNTIME_TARGET_NAME duk_sample)
-    add_subdirectory(duk_runtime)
     add_subdirectory(duk_sample)
 endif ()
 
@@ -71,12 +70,6 @@ configure_package_config_file(
         INSTALL_DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
         NO_SET_AND_CHECK_MACRO
         )
-
-# we need to install duk_runtime into the final install dir
-install(
-        DIRECTORY duk_runtime
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
-)
 
 install(
         FILES

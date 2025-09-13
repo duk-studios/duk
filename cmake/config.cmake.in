@@ -16,8 +16,6 @@ find_dependency(Freetype)
 find_dependency(ZLIB)
 find_dependency(steamworks-sdk)
 
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/duk_runtime" "${CMAKE_BINARY_DIR}/duk_runtime")
-
 include(${CMAKE_CURRENT_LIST_DIR}/duk-compile-shaders.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/duk-targets.cmake)
 
