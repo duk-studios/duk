@@ -26,7 +26,6 @@ target_include_directories(duk.sample
 
 target_link_libraries(duk.sample
     PRIVATE
-    duk::api
     duk::runtime
 )
 

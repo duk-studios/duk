@@ -17,7 +17,7 @@ target_include_directories(duk.runtime
 )
 
 target_link_libraries(duk.runtime
-        PRIVATE
+        PUBLIC
         duk::api
 )
 
