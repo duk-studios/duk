@@ -70,6 +70,7 @@ install(
         FILES
         "${CMAKE_CURRENT_BINARY_DIR}/duk-config.cmake"
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/duk-compile-shaders.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/duk"
 )
 
