@@ -21,7 +21,8 @@
       "displayName": "Visual Studio 17 2022",
       "description": "Visual Studio 17 2022 configuration",
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md"
+        "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/duk-msvc-toolchain.cmake"
       },
       "condition": {
         "type": "equals",
