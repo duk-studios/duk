@@ -306,21 +306,18 @@ public:
 
     void copy_component(const ObjectHandle<true>& src, ObjectHandle<false>& dst, uint32_t componentId) {
         auto& entry = m_componentEntries.at(componentId);
-        assert(entry);
-        m_componentEntries.at(componentId)->copy(src, dst);
+        entry->copy(src, dst);
     }
 
     template<typename Solver>
     void solve(Solver* solver, ObjectHandle<false>& object, uint32_t componentId) {
         auto& entry = m_componentEntries.at(componentId);
-        assert(entry);
-        m_componentEntries.at(componentId)->solve(solver, object);
+        entry->solve(solver, object);
     }
 
     void from_json(const rapidjson::Value& json, ObjectHandle<false>& object, uint32_t componentId) {
         auto& entry = m_componentEntries.at(componentId);
-        assert(entry);
-        m_componentEntries.at(componentId)->from_json(json, object);
+        entry->from_json(json, object);
     }
 
     void from_json(const rapidjson::Value& json, ObjectHandle<false>& object, const std::string& componentName) {
