@@ -119,11 +119,35 @@ namespace detail {
 
 template<typename VecT>
 static VecT parse_vec(const rapidjson::Value& member) {
+    using T = typename VecT::value_type;
     std::stringstream str(member.GetString());
     std::string segment;
     VecT result = {};
     for (int i = 0; std::getline(str, segment, ';') && i < VecT::length(); i++) {
-        result[i] = std::stof(segment);
+        if constexpr (std::is_same_v<T, float>) {
+            result[i] = std::stof(segment);
+        }
+        else if constexpr (std::is_same_v<T, double>) {
+            result[i] = std::stod(segment);
+        }
+        else if constexpr (std::is_same_v<T, int32_t>) {
+            result[i] = std::stoi(segment);
+        }
+        else if constexpr (std::is_same_v<T, uint32_t>) {
+            result[i] = std::stoul(segment);
+        }
+        else if constexpr (std::is_same_v<T, int64_t>) {
+            result[i] = std::stoll(segment);
+        }
+        else if constexpr (std::is_same_v<T, uint64_t>) {
+            result[i] = std::stoull(segment);
+        }
+        else if constexpr (std::is_same_v<T, bool>) {
+            result[i] = std::stoi(segment) != 0;
+        }
+        else {
+            static_assert(false, "Unsupported type");
+        }
     }
     return result;
 }
