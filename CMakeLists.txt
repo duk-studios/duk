@@ -11,7 +11,7 @@ if (NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
 endif ()
 
-project(duk VERSION 0.13.0)
+project(duk VERSION 0.14.0)
 
 find_package(cxxopts CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
