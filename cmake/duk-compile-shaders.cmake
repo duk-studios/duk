@@ -8,6 +8,15 @@ else ()
     message(WARNING "glslc not found. Skipping shader generation...")
 endif()
 
+set(DUK_GLSL_INCLUDE_DIRS)
+if (DUK_AS_SOURCE)
+    set(DUK_GLSL_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/duk_renderer/src/duk_renderer/shader/glsl/include")
+    message(STATUS "GLSL include dir: ${DUK_GLSL_INCLUDE_DIRS} - using source duk (DUK_AS_SOURCE is defined)")
+else ()
+    set(DUK_GLSL_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/glsl/include")
+    message(STATUS "GLSL include dir: ${DUK_GLSL_INCLUDE_DIRS} - using installed duk")
+endif ()
+
 function(duk_compile_shaders TARGET_NAME)
 
     if (NOT GLSLC_EXECUTABLE)
@@ -19,15 +28,6 @@ function(duk_compile_shaders TARGET_NAME)
     set(multiValueArgs GLSL_SOURCES)
 
     cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    set(DUK_GLSL_INCLUDE_DIRS)
-    if (DUK_AS_SOURCE)
-        set(DUK_GLSL_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/duk_renderer/src/duk_renderer/shader/glsl/include")
-        message(STATUS "GLSL include dir: ${DUK_GLSL_INCLUDE_DIRS} - using source duk (DUK_AS_SOURCE is defined)")
-    else ()
-        set(DUK_GLSL_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/glsl/include")
-        message(STATUS "GLSL include dir: ${DUK_GLSL_INCLUDE_DIRS} - using installed duk")
-    endif ()
 
     set(GLSLC_FLAGS
             -I "${DUK_GLSL_INCLUDE_DIRS}"

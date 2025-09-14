@@ -5,7 +5,6 @@
       "name": "common",
       "hidden": true,
       "displayName": "Default Config",
-      "description": "Default build using Ninja generator",
       "binaryDir": "${sourceDir}/.duk/builds/${presetName}",
       "installDir": "${sourceDir}/.duk/builds/${presetName}/install",
       "cacheVariables": {
