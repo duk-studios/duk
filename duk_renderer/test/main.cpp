@@ -102,38 +102,6 @@ int main() {
     globalPointLight->value.color = glm::vec3(1.0f, 1.0f, 1.0f);
     globalPointLight->value.intensity = 5.0f;
 
-    auto add_mesh_object = [](duk::objects::Objects& objects, const duk::renderer::MeshResource& mesh, const duk::renderer::MaterialResource& material, const glm::vec3& position) -> duk::objects::Object {
-        duk::objects::Object object = objects.add_object();
-        auto meshSlot = object.add<duk::renderer::MeshSlot>();
-        meshSlot->mesh = mesh;
-
-        auto materialSlot = object.add<duk::renderer::MaterialSlot>();
-        materialSlot->material = material;
-
-        auto transform = object.add<duk::renderer::Transform>();
-        transform->position = position;
-        transform->scale = glm::vec3(1.0f, 1.0f, 1.0f);
-        transform->rotation = glm::radians(glm::vec3(30, 45, 0));
-
-        return object;
-    };
-
-    // Create a phong material
-    // auto material = duk::renderer::create_phong_material(application.renderer());
-    // // material->set("uProperties", "color", glm::vec4(1.0f, 0.5f, 0.8f, 1.0f));
-    // // material->set("uBaseColor", imagePool->white(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
-    //
-    // auto mesh = application.pools()->get<duk::renderer::MeshBuiltins>()->cube();
-    //
-    // auto cube1 = add_mesh_object(objects, mesh, material, glm::vec3(0, 2, -10));
-    // auto cube2 = add_mesh_object(objects, mesh, material, glm::vec3(0, -2, -10));
-
-    // auto cube1Transform = cube1.component<duk::renderer::Transform>();
-    // auto cube2Transform = cube2.component<duk::renderer::Transform>();
-    //
-    // material->set(cube1.id(), "uProperties", "color", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
-    // material->set(cube2.id(), "uProperties", "color", glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
-
     //Show the window we created.
     application.window()->show();
 
@@ -149,14 +117,6 @@ int main() {
         while (application.window()->minimized()) {
             platform.wait_events();
         }
-
-        auto time = timer.time();
-
-        // //Rotating the cube in the X value by the timer total duration.
-        // cube1Transform->rotation = glm::radians(glm::vec3(time * 30, 45.0f, 0.0f));
-        //
-        // cube2Transform->rotation = glm::radians(glm::vec3(time * -52, sinf(time * 4) * 85, 15.0f));
-
         // duk::renderer::update_transforms(objects);
         duk::renderer::update_cameras(objects, application.renderer()->render_height(), application.renderer()->render_height());
 

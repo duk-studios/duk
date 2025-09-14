@@ -41,6 +41,8 @@ VkFormat convert_vertex_attribute_format(VertexInput::Format format) {
         case VertexInput::Format::VEC4:
             converted = VK_FORMAT_R32G32B32A32_SFLOAT;
             break;
+        default:
+            converted = VK_FORMAT_UNDEFINED;
     }
     return converted;
 }

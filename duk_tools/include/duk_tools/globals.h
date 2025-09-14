@@ -124,13 +124,13 @@ uint32_t Globals::index_of() const {
         auto hash = hash_of<T>();
         auto& hashToIndex = hash_to_index();
         auto it = hashToIndex.find(hash);
-        uint32_t index = hashToIndex.size();
+        uint32_t idx = hashToIndex.size();
         if (it != hashToIndex.end()) {
-            index = it->second;
+            idx = it->second;
         } else {
-            hashToIndex.emplace(hash, index);
+            hashToIndex.emplace(hash, idx);
         }
-        return index;
+        return idx;
     }();
     return index;
 }

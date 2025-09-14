@@ -20,11 +20,7 @@ T build_arg(T arg) {
     return T(arg);
 }
 
-static std::string build_arg(std::string_view arg) {
-    return std::string(arg);
-}
-
-static std::string build_arg(const char* arg) {
+inline std::string build_arg(std::string_view arg) {
     return std::string(arg);
 }
 

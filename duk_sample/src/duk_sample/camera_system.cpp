@@ -73,7 +73,6 @@ void CameraSystem::update() {
     auto timer = global<duk::tools::Timer>();
     auto audio = global<duk::audio::Audio>();
     auto platform = global<duk::platform::Platform>();
-    auto window = global<duk::platform::Window>();
 
     const auto deltaTime = timer->delta_time();
     auto cursor = platform->cursor();

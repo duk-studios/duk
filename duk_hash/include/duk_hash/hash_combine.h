@@ -28,7 +28,6 @@ inline void hash_combine(std::size_t& seed, InputIterator begin, InputIterator e
     auto n = std::distance(begin, end);
 
     /// iterates over all entries combining their hashes
-    std::hash<T> hash_f;
     for (auto i = 0; i < n; i++) {
         hash_combine(seed, *(begin + i));
     }

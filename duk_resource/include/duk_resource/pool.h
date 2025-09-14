@@ -109,9 +109,9 @@ size_t Pools::pool_index() const {
         if (it != typeNameToIndex.end()) {
             return it->second;
         }
-        size_t index = typeNameToIndex.size();
-        typeNameToIndex[typeName] = index;
-        return index;
+        size_t idx = typeNameToIndex.size();
+        typeNameToIndex[typeName] = idx;
+        return idx;
     }();
     return index;
 }

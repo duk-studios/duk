@@ -61,7 +61,7 @@ Parser::Parser(int argc, char* argv[])
         if (m_inputSpvPaths.empty()) {
             throw std::invalid_argument("no SPIR-V sources provided");
         }
-    } catch (const std::exception& e) {
+    } catch (const std::exception&) {
         std::cout << options.help() << std::endl;
         throw;
     }

@@ -12,23 +12,6 @@
 #include <numbers>
 #include <thread>
 
-static std::shared_ptr<duk::audio::AudioBuffer> create_sin_buffer(float duration, float frequency, uint32_t frameRate, uint32_t channelCount) {
-    auto buffer = std::make_shared<duk::audio::AudioBufferT<float>>((uint32_t)(duration * frameRate), channelCount);
-
-    float* frame = buffer->data();
-    for (uint32_t i = 0; i < buffer->frame_count(); i++) {
-        float percent = (float)i / (float)(frameRate - 1);
-        float angle = percent * std::numbers::pi_v<float> * 2;
-        float sample = sinf(angle * frequency);
-
-        for (uint32_t channel = 0; channel < channelCount; channel++) {
-            frame[channel] = sample;
-        }
-        frame += channelCount;
-    }
-    return buffer;
-}
-
 static std::shared_ptr<duk::audio::AudioBuffer> create_buffer(const char* filepath, uint32_t channelCount, uint32_t frameRate) {
     auto buffer = std::make_shared<duk::audio::AudioBufferT<float>>();
 

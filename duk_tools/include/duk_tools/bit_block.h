@@ -240,7 +240,9 @@ bool BitBlock<N>::test(size_t index) const {
         const size_t indexInBlock = index % 64;
         return m_container[block] & static_cast<Block>(1ull << indexInBlock);
     }
-    return m_container[0] & static_cast<Block>(1ull << index);
+    else {
+        return m_container[0] & static_cast<Block>(1ull << index);
+    }
 }
 
 template<size_t N>
@@ -261,8 +263,10 @@ BitBlock<N>& BitBlock<N>::set(size_t index) {
         m_container[block] |= static_cast<Block>(1ull << indexInBlock);
         return *this;
     }
-    m_container[0] |= static_cast<Block>(1ull << index);
-    return *this;
+    else {
+        m_container[0] |= static_cast<Block>(1ull << index);
+        return *this;
+    }
 }
 
 template<size_t N>
@@ -281,8 +285,10 @@ BitBlock<N>& BitBlock<N>::reset(size_t index) {
         m_container[block] &= static_cast<Block>(~(1ull << indexInBlock));
         return *this;
     }
-    m_container[0] &= static_cast<Block>(~(1ull << index));
-    return *this;
+    else {
+        m_container[0] &= static_cast<Block>(~(1ull << index));
+        return *this;
+    }
 }
 
 template<size_t N>
@@ -316,11 +322,13 @@ size_t BitBlock<N>::countr_zero(size_t startIndex) const {
         }
         return std::countr_zero(block) + acc;
     }
-    auto block = m_container[0] >> startIndex;
-    if (block == 0) {
-        return N - startIndex;
+    else {
+        auto block = m_container[0] >> startIndex;
+        if (block == 0) {
+            return N - startIndex;
+        }
+        return std::countr_zero((uint64_t)block);
     }
-    return std::countr_zero((uint64_t)block);
 }
 
 template<size_t N>

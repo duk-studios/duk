@@ -109,8 +109,6 @@ void VulkanCommandBuffer::end_render_pass() {
 void VulkanCommandBuffer::bind_graphics_pipeline(GraphicsPipeline* pipeline) {
     auto vulkanPipeline = dynamic_cast<VulkanGraphicsPipeline*>(pipeline);
 
-    auto imageIndex = *m_currentImagePtr;
-
     vkCmdBindPipeline(m_currentCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->handle(*m_currentImagePtr));
 
     m_currentPipelineLayout = vulkanPipeline->pipeline_layout();

@@ -74,7 +74,7 @@ static std::vector<Line> collect_lines(const std::vector<std::string_view>& word
 static void update_mesh(duk::renderer::DynamicMesh* mesh, const std::vector<Line>& lines, const FontAtlas* atlas, uint32_t fontSize, const glm::vec2& textBoxSize, float lineHeight, TextVertAlignment vertAlignment, TextHoriAlignment horiAlignment,
                         float pixelsPerUnit) {
     // build mesh by lines, taking alignment options into account
-    glm::vec3 pen;
+    glm::vec3 pen = {};
 
     const auto kTextHeight = lines.size() * lineHeight;
 
