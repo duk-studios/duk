@@ -23,12 +23,6 @@ target_link_libraries(duk.runtime
 
 set_target_properties(duk.runtime PROPERTIES EXPORT_NAME runtime)
 
-if (DUK_PACK)
-    message(STATUS "Defining DUK_PACK for target duk.runtime")
-    target_compile_definitions(duk.runtime PUBLIC -DDUK_PACK=1)
-endif ()
-
-
 install(
         TARGETS duk.runtime
         EXPORT duk-targets

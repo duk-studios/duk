@@ -212,7 +212,7 @@ void pack(Project* project) {
     const auto packPath = projectPath / "pack";
     const auto buildPath = projectPath / "builds/vs2022-pack";
 
-    build(project, "Visual Studio 17 2022", buildPath, "Release", "-DDUK_PACK=ON");
+    build(project, "Visual Studio 17 2022", buildPath, "Release", "");
 
     detail::pack_binaries(packPath, buildPath);
 

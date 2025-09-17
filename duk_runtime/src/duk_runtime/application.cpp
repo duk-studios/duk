@@ -15,16 +15,22 @@ using FrameDuration = std::chrono::duration<float, std::ratio<1, 144>>;
 
 namespace detail {
 
-static duk::resource::LoadMode load_mode() {
-#ifdef DUK_PACK
-    return duk::resource::LoadMode::PACKED;
-#else
-    return duk::resource::LoadMode::UNPACKED;
-#endif
+static resource::LoadMode detect_load_mode() {
+    // check if settings exist as either json or bin, for now this decides the resource load mode
+    // we for sure can come up with something fancier later
+    std::filesystem::path settingsPath = std::filesystem::current_path() / "settings.json";
+    if (std::filesystem::exists(settingsPath)) {
+        return resource::LoadMode::UNPACKED;
+    }
+    settingsPath = std::filesystem::current_path() / "settings.bin";
+    if (std::filesystem::exists(settingsPath)) {
+        return resource::LoadMode::PACKED;
+    }
+    throw std::runtime_error("No settings file detected");
 }
 
 static duk::engine::Settings load_settings() {
-    auto loadMode = load_mode();
+    const auto loadMode = detect_load_mode();
     std::string settingsJson;
     switch (loadMode) {
         case resource::LoadMode::UNPACKED:
@@ -47,7 +53,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo)
     DUK_ASSERT(m_platform);
     duk::api::register_types();
 
-    auto settings = detail::load_settings();
+    const auto settings = detail::load_settings();
 
     duk::platform::WindowCreateInfo windowCreateInfo = {};
     windowCreateInfo.windowTitle = settings.name.c_str();
@@ -58,7 +64,7 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo)
 
     duk::engine::ContextCreateInfo contextCreateInfo = {};
     contextCreateInfo.workingDirectory = ".";
-    contextCreateInfo.settings = detail::load_settings();
+    contextCreateInfo.settings = settings;
     contextCreateInfo.platform = m_platform;
     contextCreateInfo.window = m_window.get();
     contextCreateInfo.rendererApiValidationLayers = applicationCreateInfo.rendererApiValidationLayers;
