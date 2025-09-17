@@ -14,7 +14,9 @@
 
 #include <cxxopts.hpp>
 
-duk::log::Level parse_log_level(const std::string_view& level) {
+namespace detail {
+
+static duk::log::Level parse_log_level(const std::string_view& level) {
     if (level == "verbose") {
         return duk::log::Level::VERBOSE;
     }
@@ -33,11 +35,13 @@ duk::log::Level parse_log_level(const std::string_view& level) {
     return duk::log::Level::DEBUG;
 }
 
-void init_log(duk::log::Level level) {
+static void init_log(duk::log::Level level) {
     duk::log::add_logger("duk", level);
     duk::log::add_sink(std::make_unique<duk::log::CoutSink>("duk-cout", level));
     duk::log::add_sink(std::make_unique<duk::log::FileSink>("log.txt", "duk-fout", level));
 }
+
+}// namespace detail
 
 int duk_main(duk::platform::Platform* platform, int argc, const char* const* argv) {
     try {
@@ -68,9 +72,9 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
         {
             duk::log::Level logLevel = duk::log::Level::DEBUG;
             if (result.count("log")) {
-                logLevel = parse_log_level(result["log"].as<std::string>());
+                logLevel = detail::parse_log_level(result["log"].as<std::string>());
             }
-            init_log(logLevel);
+            detail::init_log(logLevel);
         }
 
         duk::runtime::ApplicationCreateInfo applicationCreateInfo = {};
