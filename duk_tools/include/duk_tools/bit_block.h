@@ -239,8 +239,7 @@ bool BitBlock<N>::test(size_t index) const {
         const size_t block = index / 64;
         const size_t indexInBlock = index % 64;
         return m_container[block] & static_cast<Block>(1ull << indexInBlock);
-    }
-    else {
+    } else {
         return m_container[0] & static_cast<Block>(1ull << index);
     }
 }
@@ -262,8 +261,7 @@ BitBlock<N>& BitBlock<N>::set(size_t index) {
         const size_t indexInBlock = index % 64;
         m_container[block] |= static_cast<Block>(1ull << indexInBlock);
         return *this;
-    }
-    else {
+    } else {
         m_container[0] |= static_cast<Block>(1ull << index);
         return *this;
     }
@@ -284,8 +282,7 @@ BitBlock<N>& BitBlock<N>::reset(size_t index) {
         const size_t indexInBlock = index % 64;
         m_container[block] &= static_cast<Block>(~(1ull << indexInBlock));
         return *this;
-    }
-    else {
+    } else {
         m_container[0] &= static_cast<Block>(~(1ull << index));
         return *this;
     }
@@ -321,8 +318,7 @@ size_t BitBlock<N>::countr_zero(size_t startIndex) const {
             block = m_container[blockIndex];
         }
         return std::countr_zero(block) + acc;
-    }
-    else {
+    } else {
         auto block = m_container[0] >> startIndex;
         if (block == 0) {
             return N - startIndex;

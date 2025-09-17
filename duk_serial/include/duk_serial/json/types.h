@@ -126,26 +126,19 @@ static VecT parse_vec(const rapidjson::Value& member) {
     for (int i = 0; std::getline(str, segment, ';') && i < VecT::length(); i++) {
         if constexpr (std::is_same_v<T, float>) {
             result[i] = std::stof(segment);
-        }
-        else if constexpr (std::is_same_v<T, double>) {
+        } else if constexpr (std::is_same_v<T, double>) {
             result[i] = std::stod(segment);
-        }
-        else if constexpr (std::is_same_v<T, int32_t>) {
+        } else if constexpr (std::is_same_v<T, int32_t>) {
             result[i] = std::stoi(segment);
-        }
-        else if constexpr (std::is_same_v<T, uint32_t>) {
+        } else if constexpr (std::is_same_v<T, uint32_t>) {
             result[i] = std::stoul(segment);
-        }
-        else if constexpr (std::is_same_v<T, int64_t>) {
+        } else if constexpr (std::is_same_v<T, int64_t>) {
             result[i] = std::stoll(segment);
-        }
-        else if constexpr (std::is_same_v<T, uint64_t>) {
+        } else if constexpr (std::is_same_v<T, uint64_t>) {
             result[i] = std::stoull(segment);
-        }
-        else if constexpr (std::is_same_v<T, bool>) {
+        } else if constexpr (std::is_same_v<T, bool>) {
             result[i] = std::stoi(segment) != 0;
-        }
-        else {
+        } else {
             static_assert(false, "Unsupported type");
         }
     }
