@@ -26,7 +26,7 @@ Requirements:
 Duk development is mainly done with MinGW, GCC and MSVC _should_ also work (minor issues might arise, PRs are welcome).
 
 # Contributing
-New features must have a corresponding open issue
+New features must have a corresponding open issue.
 
 Branch name must be in the following format:
 ```
