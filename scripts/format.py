@@ -17,6 +17,7 @@ def find_clang_format():
     try:
         result = subprocess.run(['clang-format', '--version'], 
                               capture_output=True, text=True, check=True)
+        print(result.stdout.strip())
         return 'clang-format'
     except (subprocess.CalledProcessError, FileNotFoundError):
         # Try common alternative names
