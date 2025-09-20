@@ -23,12 +23,17 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Setup vcpkg
-      uses: friendlyanon/setup-vcpkg@v1
-      with: { committish: 8d3649ba34aab36914ddd897958599aa0a91b08e }
+    - name: Install LLVM & clang-format 16.0.6
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "16.0.6"
 
     - name: Check formatting
       run: python scripts/format.py --check --verbose
+
+    - name: Setup vcpkg
+      uses: friendlyanon/setup-vcpkg@v1
+      with: { committish: 8d3649ba34aab36914ddd897958599aa0a91b08e }
 
     - name: Configure CMake
       run: cmake --preset visual-studio
