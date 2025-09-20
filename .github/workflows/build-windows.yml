@@ -8,10 +8,6 @@ on:
   pull_request:
     branches: [ "develop" ]
 
-env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  BUILD_TYPE: Release
-
 jobs:
   build:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
@@ -20,21 +16,23 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Authenticate private registries
-      shell: bash
-      run: git config --global credential.https://github.com/duk-studios/vcpkg-registry.helper '!f() { echo username=unused; echo password=${{ secrets.DUK_VCPKG_REGISTRY_PAT }}; }; f'
-
     - name: Checkout repository
       uses: actions/checkout@v3
+
+    - name: Install LLVM & clang-format 16.0.6
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "16.0.6"
+
+    - name: Check formatting
+      run: python scripts/format.py --check --verbose
 
     - name: Setup vcpkg
       uses: friendlyanon/setup-vcpkg@v1
       with: { committish: 8d3649ba34aab36914ddd897958599aa0a91b08e }
 
     - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake --preset visual-studio
 
     - name: Build
-      run: cmake --build --preset visual-studio-debug
+      run: cmake --build --preset visual-studio-release

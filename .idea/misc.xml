@@ -37,6 +37,7 @@
       <file path="$PROJECT_DIR$/duk_tools" />
       <file path="$PROJECT_DIR$/duk_ui" />
       <file path="$PROJECT_DIR$/external" />
+      <file path="$PROJECT_DIR$/scripts" />
     </sourceRoots>
     <excludeRoots>
       <file path="$PROJECT_DIR$/install" />
