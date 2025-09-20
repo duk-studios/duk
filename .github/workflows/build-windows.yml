@@ -16,10 +16,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Authenticate private registries
-      shell: bash
-      run: git config --global credential.https://github.com/duk-studios/vcpkg-registry.helper '!f() { echo username=unused; echo password=${{ secrets.DUK_VCPKG_REGISTRY_PAT }}; }; f'
-
     - name: Checkout repository
       uses: actions/checkout@v3
 
