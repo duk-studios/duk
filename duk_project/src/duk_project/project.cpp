@@ -54,8 +54,8 @@ static void read_project_settings(Project* project) {
     duk::serial::read_json(settingsJson, project->settings);
 }
 
-static void pack_binaries(const std::filesystem::path& packPath, const std::filesystem::path& buildPath) {
-    auto binariesPath = buildPath / "install/bin";
+static void pack_binaries(const std::filesystem::path& packPath, const std::filesystem::path& installedPath) {
+    auto binariesPath = installedPath / "bin";
 
     std::filesystem::copy(binariesPath, packPath, std::filesystem::copy_options::update_existing | std::filesystem::copy_options::recursive);
 }
@@ -130,7 +130,7 @@ void init(Project* project, std::filesystem::path path) {
     detail::write_project_settings(project);
 }
 
-void open(Project* project, std::filesystem::path path) {
+void open(Project* project, const std::filesystem::path &path) {
     if (!std::filesystem::exists(path)) {
         throw std::invalid_argument(fmt::format("cannot open a duk project in an invalid resourceFile: \"{}\"", path.string()));
     }
@@ -203,18 +203,12 @@ void build(Project* project, const std::string_view& generator, const std::files
     }
 }
 
-void pack(Project* project) {
+void pack(Project* project, const std::filesystem::path& installedPath, const std::filesystem::path& packPath) {
     if (project->root.empty()) {
         throw std::invalid_argument("project root is not initialized");
     }
 
-    const auto projectPath = project->root / ".duk";
-    const auto packPath = projectPath / "pack";
-    const auto buildPath = projectPath / "builds/vs2022-pack";
-
-    build(project, "Visual Studio 17 2022", buildPath, "Release", "");
-
-    detail::pack_binaries(packPath, buildPath);
+    detail::pack_binaries(packPath, installedPath);
 
     detail::pack_resources(project, packPath);
 

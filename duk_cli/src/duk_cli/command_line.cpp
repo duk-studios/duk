@@ -32,9 +32,11 @@ std::unique_ptr<Command> make_update_command() {
     return std::make_unique<UpdateCommand>(updateCommandCreateInfo);
 }
 
-std::unique_ptr<Command> make_pack_command() {
+std::unique_ptr<Command> make_pack_command(const std::filesystem::path& projectPath, const std::filesystem::path& installPath, const std::filesystem::path& packPath) {
     PackCommandCreateInfo packCommandCreateInfo = {};
-    packCommandCreateInfo.path = std::filesystem::current_path();
+    packCommandCreateInfo.projectPath = projectPath;
+    packCommandCreateInfo.installPath = installPath;
+    packCommandCreateInfo.packPath = packPath;
 
     return std::make_unique<PackCommand>(packCommandCreateInfo);
 }
@@ -67,6 +69,8 @@ CommandLine::CommandLine(int argc, const char* argv[]) {
 
     const auto commandName = result["command"].as<std::string>();
 
+    const auto projectPath = result.count("project") > 0 ? std::filesystem::path(result["project"].as<std::string>()) : std::filesystem::current_path();
+
     if (commandName == "init") {
         m_command = detail::make_init_command();
         return;
@@ -80,7 +84,9 @@ CommandLine::CommandLine(int argc, const char* argv[]) {
         return;
     }
     if (commandName == "pack") {
-        m_command = detail::make_pack_command();
+        const auto installPath = result["install"].as<std::string>();
+        const auto packPath = result["pack"].as<std::string>();
+        m_command = detail::make_pack_command(projectPath, installPath, packPath);
         return;
     }
 
