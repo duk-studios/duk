@@ -7,11 +7,12 @@
 #include <duk_cli/commands/init_command.h>
 #include <duk_cli/commands/status_command.h>
 #include <duk_cli/commands/update_command.h>
+#include <duk_cli/commands/pack_command.h>
 
 // std
+#include <cxxopts.hpp>
 #include <filesystem>
 
-#include "duk_cli/commands/pack_command.h"
 
 namespace duk::cli {
 
@@ -50,11 +51,21 @@ std::unique_ptr<Command> make_status_command() {
 Command::~Command() = default;
 
 CommandLine::CommandLine(int argc, const char* argv[]) {
-    if (argc < 1) {
-        throw std::invalid_argument("insufficient arguments");
-    }
 
-    std::string commandName = argv[0];
+    // clang-format off
+    cxxopts::Options options("duk");
+    options.add_options()
+        ("command", "Command to execute (init, update, status, pack)")
+        ("i,install", "Path to install directory")
+        ("p,project", "Path to project directory")
+        ("o,output", "Path to pack directory");
+    // clang-format on
+
+    options.parse_positional("command");
+
+    const auto result = options.parse(argc, argv);
+
+    const auto commandName = result["command"].as<std::string>();
 
     if (commandName == "init") {
         m_command = detail::make_init_command();
