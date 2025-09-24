@@ -20,7 +20,7 @@ int main(int argc, const char* argv[]) {
 
         duk::project::register_types();
 
-        duk::cli::CommandLine commandLine(argc - 1, argv + 1);
+        duk::cli::CommandLine commandLine(argc, argv);
 
         commandLine.command()->execute();
     } catch (const std::exception& e) {

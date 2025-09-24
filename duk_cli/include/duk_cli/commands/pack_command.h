@@ -12,8 +12,8 @@ namespace duk::cli {
 
 struct PackCommandCreateInfo {
     std::filesystem::path projectPath;
-    std::filesystem::path installPath;
     std::filesystem::path packPath;
+    std::vector<std::string> packFiles;
 };
 
 class PackCommand : public Command {
@@ -24,8 +24,8 @@ public:
 
 private:
     std::filesystem::path m_projectPath;
-    std::filesystem::path m_installPath;
     std::filesystem::path m_packPath;
+    std::vector<std::string> m_packFiles;
 };
 
 }// namespace duk::cli

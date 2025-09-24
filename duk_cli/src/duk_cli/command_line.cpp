@@ -8,11 +8,13 @@
 #include <duk_cli/commands/status_command.h>
 #include <duk_cli/commands/update_command.h>
 #include <duk_cli/commands/pack_command.h>
+#include <duk_log/log.h>
+
+#define CXXOPTS_VECTOR_DELIMITER ';'
+#include <cxxopts.hpp>
 
 // std
-#include <cxxopts.hpp>
 #include <filesystem>
-
 
 namespace duk::cli {
 
@@ -32,10 +34,10 @@ std::unique_ptr<Command> make_update_command() {
     return std::make_unique<UpdateCommand>(updateCommandCreateInfo);
 }
 
-std::unique_ptr<Command> make_pack_command(const std::filesystem::path& projectPath, const std::filesystem::path& installPath, const std::filesystem::path& packPath) {
+std::unique_ptr<Command> make_pack_command(const std::filesystem::path& projectPath, const std::filesystem::path& packPath, const std::vector<std::string>& packFiles) {
     PackCommandCreateInfo packCommandCreateInfo = {};
     packCommandCreateInfo.projectPath = projectPath;
-    packCommandCreateInfo.installPath = installPath;
+    packCommandCreateInfo.packFiles = packFiles;
     packCommandCreateInfo.packPath = packPath;
 
     return std::make_unique<PackCommand>(packCommandCreateInfo);
@@ -53,19 +55,25 @@ std::unique_ptr<Command> make_status_command() {
 Command::~Command() = default;
 
 CommandLine::CommandLine(int argc, const char* argv[]) {
-
     // clang-format off
     cxxopts::Options options("duk");
     options.add_options()
-        ("command", "Command to execute (init, update, status, pack)")
-        ("i,install", "Path to install directory")
-        ("p,project", "Path to project directory")
-        ("o,output", "Path to pack directory");
+        ("command", "Main command", cxxopts::value<std::string>())
+        ("f,files", "Files to pack", cxxopts::value<std::vector<std::string>>())
+        ("p,project", "Path to project directory", cxxopts::value<std::string>())
+        ("o,output", "Path to pack directory", cxxopts::value<std::string>())
+        ("h,help", "Print usage");
     // clang-format on
 
     options.parse_positional("command");
+    options.positional_help("command [--project path --output path --files [file1;file2;dir1;...]]");
 
     const auto result = options.parse(argc, argv);
+
+    if (result.count("help")) {
+        duk::log::info(options.help());
+        return;
+    }
 
     const auto commandName = result["command"].as<std::string>();
 
@@ -84,9 +92,9 @@ CommandLine::CommandLine(int argc, const char* argv[]) {
         return;
     }
     if (commandName == "pack") {
-        const auto installPath = result["install"].as<std::string>();
-        const auto packPath = result["pack"].as<std::string>();
-        m_command = detail::make_pack_command(projectPath, installPath, packPath);
+        const auto packFiles = result["files"].as<std::vector<std::string>>();
+        const auto packPath = result["output"].as<std::string>();
+        m_command = detail::make_pack_command(projectPath, packPath, packFiles);
         return;
     }
 

@@ -10,8 +10,8 @@ namespace duk::cli {
 
 PackCommand::PackCommand(const PackCommandCreateInfo& packCommandCreateInfo)
     : m_projectPath(packCommandCreateInfo.projectPath)
-    , m_installPath(packCommandCreateInfo.installPath)
-    , m_packPath(packCommandCreateInfo.packPath) {
+    , m_packPath(packCommandCreateInfo.packPath)
+    , m_packFiles(packCommandCreateInfo.packFiles) {
 }
 
 void PackCommand::execute() {
@@ -19,7 +19,7 @@ void PackCommand::execute() {
 
     duk::project::open(&project, m_projectPath);
 
-    duk::project::pack(&project, m_installPath, m_packPath);
+    duk::project::pack(&project, m_packPath, m_packFiles);
 }
 
 }// namespace duk::cli
