@@ -12,6 +12,8 @@ endif ()
 
 project(duk VERSION 0.15.0)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 find_package(cxxopts CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
@@ -53,7 +55,9 @@ add_subdirectory(duk_api)
 add_subdirectory(duk_runtime)
 
 if (DUK_BUILD_SAMPLE)
+    include(duk-pack)
     add_subdirectory(duk_sample)
+
 endif ()
 
 include(CMakePackageConfigHelpers)

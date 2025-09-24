@@ -36,3 +36,7 @@ if (WIN32)
         COMMAND_EXPAND_LISTS
     )
 endif ()
+
+duk_add_pack_target(
+        duk.sample
+)
