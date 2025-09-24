@@ -18,5 +18,6 @@ find_dependency(steamworks-sdk)
 
 include(${CMAKE_CURRENT_LIST_DIR}/duk-compile-shaders.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/duk-targets.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/duk-pack.cmake)
 
 check_required_components(duk)

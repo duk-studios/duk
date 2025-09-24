@@ -10,8 +10,7 @@
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_APPLOCAL_DEPS": "OFF",
-        "DUK_BUILD_SAMPLE": "ON",
-        "DUK_FORMAT_FILES": "ON"
+        "DUK_BUILD_SAMPLE": "ON"
       }
     },
     {

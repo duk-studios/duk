@@ -54,10 +54,26 @@ static void read_project_settings(Project* project) {
     duk::serial::read_json(settingsJson, project->settings);
 }
 
-static void pack_binaries(const std::filesystem::path& packPath, const std::filesystem::path& buildPath) {
-    auto binariesPath = buildPath / "install/bin";
+static void pack_files(const std::vector<std::string>& packFiles, const std::filesystem::path& packDirectory) {
+    if (!std::filesystem::exists(packDirectory)) {
+        throw std::runtime_error(fmt::format("pack directory not found at {}", packDirectory.string()));
+    }
 
-    std::filesystem::copy(binariesPath, packPath, std::filesystem::copy_options::update_existing | std::filesystem::copy_options::recursive);
+    for (const auto& pathToCopy: packFiles) {
+        if (!std::filesystem::exists(pathToCopy)) {
+            duk::log::warn("File {} does not exist", pathToCopy);
+            continue;
+        }
+
+        if (std::filesystem::is_directory(pathToCopy)) {
+            duk::log::info("Copying directory from {} to {}", pathToCopy, packDirectory.string());
+            std::filesystem::copy(pathToCopy, packDirectory, std::filesystem::copy_options::overwrite_existing | std::filesystem::copy_options::recursive);
+        } else if (std::filesystem::is_regular_file(pathToCopy)) {
+            const auto dstFile = packDirectory / std::filesystem::path(pathToCopy).filename();
+            duk::log::info("Copying file from {} to {}", pathToCopy, dstFile.string());
+            std::filesystem::copy(pathToCopy, dstFile, std::filesystem::copy_options::overwrite_existing);
+        }
+    }
 }
 
 static void pack_resources(Project* project, const std::filesystem::path& packPath) {
@@ -130,7 +146,7 @@ void init(Project* project, std::filesystem::path path) {
     detail::write_project_settings(project);
 }
 
-void open(Project* project, std::filesystem::path path) {
+void open(Project* project, const std::filesystem::path& path) {
     if (!std::filesystem::exists(path)) {
         throw std::invalid_argument(fmt::format("cannot open a duk project in an invalid resourceFile: \"{}\"", path.string()));
     }
@@ -203,18 +219,16 @@ void build(Project* project, const std::string_view& generator, const std::files
     }
 }
 
-void pack(Project* project) {
+void pack(Project* project, const std::filesystem::path& packPath, const std::vector<std::string>& packFiles) {
     if (project->root.empty()) {
         throw std::invalid_argument("project root is not initialized");
     }
 
-    const auto projectPath = project->root / ".duk";
-    const auto packPath = projectPath / "pack";
-    const auto buildPath = projectPath / "builds/vs2022-pack";
+    if (!std::filesystem::exists(packPath)) {
+        std::filesystem::create_directories(packPath);
+    }
 
-    build(project, "Visual Studio 17 2022", buildPath, "Release", "");
-
-    detail::pack_binaries(packPath, buildPath);
+    detail::pack_files(packFiles, packPath);
 
     detail::pack_resources(project, packPath);
 

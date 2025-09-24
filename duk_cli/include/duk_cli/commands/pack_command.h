@@ -11,7 +11,9 @@
 namespace duk::cli {
 
 struct PackCommandCreateInfo {
-    std::filesystem::path path;
+    std::filesystem::path projectPath;
+    std::filesystem::path packPath;
+    std::vector<std::string> packFiles;
 };
 
 class PackCommand : public Command {
@@ -21,7 +23,9 @@ public:
     void execute() override;
 
 private:
-    std::filesystem::path m_path;
+    std::filesystem::path m_projectPath;
+    std::filesystem::path m_packPath;
+    std::vector<std::string> m_packFiles;
 };
 
 }// namespace duk::cli

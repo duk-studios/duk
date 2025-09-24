@@ -25,13 +25,13 @@ struct Project {
 
 void init(Project* project, std::filesystem::path path);
 
-void open(Project* project, std::filesystem::path path);
+void open(Project* project, const std::filesystem::path& path);
 
 void update(Project* project);
 
 void build(Project* project, const std::string_view& generator, const std::string_view& folderName, const std::string_view& config, const std::string_view& additionalCmakeOptions = "");
 
-void pack(Project* project);
+void pack(Project* project, const std::filesystem::path& packPath, const std::vector<std::string>& packFiles);
 
 }// namespace duk::project
 
