@@ -5,8 +5,8 @@
 #include <duk_runtime/application.h>
 
 #include <duk_log/log.h>
-#include <duk_log/file_sink.h>
-#include <duk_log/cout_sink.h>
+#include <duk_log/sinks/file_sink.h>
+#include <duk_log/sinks/term_color_sink.h>
 
 #ifdef DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/platform_win_32.h>
@@ -37,7 +37,7 @@ static duk::log::Level parse_log_level(const std::string_view& level) {
 
 static void init_log(duk::log::Level level) {
     duk::log::add_logger("duk", level);
-    duk::log::add_sink(std::make_unique<duk::log::CoutSink>("duk-cout", level));
+    duk::log::add_sink(std::make_unique<duk::log::TermColorSink>("duk-cout", level));
     duk::log::add_sink(std::make_unique<duk::log::FileSink>("log.txt", "duk-fout", level));
 }
 

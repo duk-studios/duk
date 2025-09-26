@@ -15,13 +15,14 @@ namespace duk::log {
 
 namespace detail {
 
-template<typename T>
-T build_arg(T arg) {
-    return T(arg);
+template<size_t N, typename... Args>
+fmt::format_string<Args...> build_fmt_str(const char str[N]) {
+    return fmt::format_string<Args...>(str);
 }
 
-inline std::string build_arg(std::string_view arg) {
-    return std::string(arg);
+template<typename... Args>
+fmt::format_string<Args...> build_fmt_str(fmt::string_view str) {
+    return fmt::runtime(str);
 }
 
 }// namespace detail
@@ -43,18 +44,18 @@ public:
 
     ~Logger();
 
-    template<typename... Args>
-    auto print(Level level, const std::string& format, Args&&... args) {
+    template<typename S, typename... Args>
+    auto print(Level level, S&& format, Args&&... args) {
         if (level < m_minimumLevel) {
             std::promise<void> promise;
             promise.set_value();
             return promise.get_future();
         }
         return m_printQueue.enqueue(
-                [this](Level level, const std::string& format, auto... args) -> void {
-                    dispatch_print(level, fmt::format(fmt::runtime(format), args...));
+                [this](Level level, const std::string& message) -> void {
+                    dispatch_print(level, message);
                 },
-                level, format, detail::build_arg(args)...);
+                level, fmt::format(detail::build_fmt_str<Args...>(std::forward<S>(format)), std::forward<Args>(args)...));
     }
 
     void add_print_listener(event::Listener& listener, PrintEvent::Callback&& callback);

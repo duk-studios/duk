@@ -9,15 +9,15 @@ namespace detail {
 static std::string level_to_string(Level level) {
     switch (level) {
         case VERBOSE:
-            return "VERBOSE";
+            return "V";
         case INFO:
-            return "INFO";
+            return "I";
         case DEBUG:
-            return "DEBUG";
+            return "D";
         case WARN:
-            return "WARN";
+            return "W";
         case FATAL:
-            return "FATAL";
+            return "F";
         default:
             return "UNKNOWN";
     }
@@ -58,7 +58,7 @@ void Logger::set_level(Level level) {
 }
 
 void Logger::dispatch_print(Level level, const std::string& message) {
-    auto messageWithHeader = fmt::format("[{}::{}]: {}", m_name, detail::level_to_string(level), message);
+    const auto messageWithHeader = fmt::format("[{}::{}]: {}", m_name, detail::level_to_string(level), message);
     std::lock_guard lock(m_printMutex);
     m_printEvent(level, messageWithHeader);
 }

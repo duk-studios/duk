@@ -357,7 +357,7 @@ void Material::init() {
     for (auto& binding: m_bindings) {
         auto descriptorType = detail::get_descriptor_type(binding.type);
         if (descriptorType == duk::rhi::DescriptorType::UNDEFINED) {
-            duk::log::fatal("Binding '{}' with an undefined descriptor type '{}'", binding.name);
+            duk::log::fatal("Binding '{}' with an undefined descriptor type", binding.name);
             continue;
         }
         auto bindingIndex = detail::find_descriptor(descriptorSetDescription, descriptorType, binding.name);
