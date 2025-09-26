@@ -3,14 +3,13 @@
 //
 #include <ranges>
 #include <duk_log/log.h>
-#include <duk_log/cout_sink.h>
 
 namespace duk::log {
 
 std::unique_ptr<Log> g_log = nullptr;
 
 Log::Log()
-    : m_defaultLogger(nullptr) {
+    : m_defaultLogger(add_logger("duk", Level::INFO)) {
 }
 
 Log::~Log() {

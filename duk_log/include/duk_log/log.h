@@ -16,23 +16,6 @@ public:
 
     ~Log();
 
-    template<typename... Args>
-    auto print(const std::string& loggerName, Level level, const std::string& format, Args&&... args) {
-        auto logger = find_logger(loggerName);
-        if (!logger) {
-            logger = add_logger(loggerName, Level::DEBUG);
-        }
-        return logger->print(level, format, std::forward<Args>(args)...);
-    }
-
-    template<typename... Args>
-    auto print(Level level, const std::string& format, Args&&... args) {
-        if (!m_defaultLogger) {
-            m_defaultLogger = add_logger("duk", Level::DEBUG);
-        }
-        return m_defaultLogger->print(level, format, std::forward<Args>(args)...);
-    }
-
     Logger* add_logger(const std::string& name, Level level);
 
     Logger* find_logger(const std::string& name) const;
@@ -78,78 +61,53 @@ extern void remove_sink(const std::string& name);
 extern void wait();
 
 template<typename... Args>
-auto verb(Logger* logger, const std::string& format, Args&&... args) {
-    return logger->print(Level::VERBOSE, format, std::forward<Args>(args)...);
+auto verb(Logger* logger, Args&&... args) {
+    return logger->print(Level::VERBOSE, std::forward<Args>(args)...);
 }
 
 template<typename... Args>
-auto verb(const std::string& loggerName, const std::string& format, Args&&... args) {
-    return instance()->print(loggerName, Level::VERBOSE, format, std::forward<Args>(args)...);
+auto verb(Args&&... args) {
+    return instance()->default_logger()->print(Level::VERBOSE, std::forward<Args>(args)...);
 }
 
 template<typename... Args>
-auto verb(const std::string& format, Args&&... args) {
-    return instance()->print(Level::VERBOSE, format, std::forward<Args>(args)...);
+auto info(Logger* logger, Args&&... args) {
+    return logger->print(Level::INFO, std::forward<Args>(args)...);
 }
 
 template<typename... Args>
-auto info(Logger* logger, const std::string& format, Args&&... args) {
-    return logger->print(Level::INFO, format, std::forward<Args>(args)...);
+auto info(Args&&... args) {
+    return instance()->default_logger()->print(Level::INFO, std::forward<Args>(args)...);
 }
 
 template<typename... Args>
-auto info(const std::string& loggerName, const std::string& format, Args&&... args) {
-    return instance()->print(loggerName, Level::INFO, format, std::forward<Args>(args)...);
+auto debug(Logger* logger, Args&&... args) {
+    return logger->print(Level::DEBUG, std::forward<Args>(args)...);
 }
 
 template<typename... Args>
-auto info(const std::string& format, Args&&... args) {
-    return instance()->print(Level::INFO, format, std::forward<Args>(args)...);
+auto debug(Args&&... args) {
+    return instance()->default_logger()->print(Level::DEBUG, std::forward<Args>(args)...);
 }
 
 template<typename... Args>
-auto debug(Logger* logger, const std::string& format, Args&&... args) {
-    return logger->print(Level::DEBUG, format, std::forward<Args>(args)...);
+auto warn(Logger* logger, Args&&... args) {
+    return logger->print(Level::WARN, std::forward<Args>(args)...);
 }
 
 template<typename... Args>
-auto debug(const std::string& loggerName, const std::string& format, Args&&... args) {
-    return instance()->print(loggerName, Level::DEBUG, format, std::forward<Args>(args)...);
+auto warn(Args&&... args) {
+    return instance()->default_logger()->print(Level::WARN, std::forward<Args>(args)...);
 }
 
 template<typename... Args>
-auto debug(const std::string& format, Args&&... args) {
-    return instance()->print(Level::DEBUG, format, std::forward<Args>(args)...);
+auto fatal(Logger* logger, Args&&... args) {
+    return logger->print(Level::FATAL, std::forward<Args>(args)...);
 }
 
 template<typename... Args>
-auto warn(Logger* logger, const std::string& format, Args&&... args) {
-    return logger->print(Level::WARN, format, std::forward<Args>(args)...);
-}
-
-template<typename... Args>
-auto warn(const std::string& loggerName, const std::string& format, Args&&... args) {
-    return instance()->print(loggerName, Level::WARN, format, std::forward<Args>(args)...);
-}
-
-template<typename... Args>
-auto warn(const std::string& format, Args&&... args) {
-    return instance()->print(Level::WARN, format, std::forward<Args>(args)...);
-}
-
-template<typename... Args>
-auto fatal(Logger* logger, const std::string& format, Args&&... args) {
-    return logger->print(Level::FATAL, format, std::forward<Args>(args)...);
-}
-
-template<typename... Args>
-auto fatal(const std::string& loggerName, const std::string& format, Args&&... args) {
-    return instance()->print(loggerName, Level::FATAL, format, std::forward<Args>(args)...);
-}
-
-template<typename... Args>
-auto fatal(const std::string& format, Args&&... args) {
-    return instance()->print(Level::FATAL, format, std::forward<Args>(args)...);
+auto fatal(Args&&... args) {
+    return instance()->default_logger()->print(Level::FATAL, std::forward<Args>(args)...);
 }
 
 }// namespace duk::log
