@@ -5,9 +5,9 @@
 #ifndef DUK_LOG_FMT_SINK_H
 #define DUK_LOG_FMT_SINK_H
 
-#include <array>
 #include <duk_log/sink.h>
 #include <fmt/color.h>
+#include <array>
 
 namespace duk::log {
 

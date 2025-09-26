@@ -2,7 +2,7 @@
 // Created by Ricardo on 30/06/2024.
 //
 
-#include <duk_log/file_sink.h>
+#include <duk_log/sinks/file_sink.h>
 
 namespace duk::log {
 

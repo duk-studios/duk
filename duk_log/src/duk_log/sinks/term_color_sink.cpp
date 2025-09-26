@@ -1,7 +1,8 @@
-/// 18/04/2023
-/// sink_std.cpp
+//
+// Created by rov on 26/09/2025.
+//
 
-#include <duk_log/cout_sink.h>
+#include <duk_log/sinks/term_color_sink.h>
 
 #define TERMCOLOR_USE_ANSI_ESCAPE_SEQUENCES
 #include <termcolor/termcolor.hpp>
@@ -10,11 +11,11 @@
 
 namespace duk::log {
 
-CoutSink::CoutSink(const std::string& name, Level level)
+TermColorSink::TermColorSink(const std::string& name, Level level)
     : Sink(name, level) {
 }
 
-void CoutSink::flush(Level level, const std::string& message) {
+void TermColorSink::flush(Level level, const std::string& message) {
     std::lock_guard lock(m_mutex);
     switch (level) {
         default:

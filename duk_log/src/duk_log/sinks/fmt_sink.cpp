@@ -1,7 +1,7 @@
 //
 // Created by rov on 12/15/2023.
 //
-#include <duk_log/fmt_sink.h>
+#include <duk_log/sinks/fmt_sink.h>
 #include <fmt/core.h>
 
 namespace duk::log {
