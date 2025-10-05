@@ -2,9 +2,7 @@
 // Created by rov on 10/4/2025.
 //
 
-#include <duk_serial/json/json_parser.h>
-#include <duk_serial/json/glm_parser.h>
-#include <duk_serial/json/json_io.h>
+#include <duk_serial/serial.h>
 #include <catch2/catch_test_macros.hpp>
 
 

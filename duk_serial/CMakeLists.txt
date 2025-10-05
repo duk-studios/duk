@@ -1,8 +1,10 @@
 
 set(DUK_SERIAL_HEADERS
-        include/duk_serial/json/rapidjson_import.h
-        include/duk_serial/json/json_io.h
-        include/duk_serial/json/json_parser.h
+        include/duk_serial/rapidjson_import.h
+        include/duk_serial/serial.h
+        include/duk_serial/parser.h
+        include/duk_serial/glm_parsers.h
+        include/duk_serial/container_parsers.h
         )
 
 add_library(duk.serial INTERFACE ${DUK_SERIAL_HEADERS})

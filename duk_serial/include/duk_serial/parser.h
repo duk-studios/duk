@@ -5,7 +5,7 @@
 #ifndef DUK_SERIAL_JSON_PARSER_H
 #define DUK_SERIAL_JSON_PARSER_H
 
-#include <duk_serial/json/json_conversion.h>
+#include <duk_serial/rapidjson_import.h>
 
 #include <string>
 #include <unordered_map>
@@ -94,19 +94,10 @@ private:
     std::unordered_map<std::string, std::unique_ptr<Entry>> m_entries;
 };
 
-template<typename T>
-class ArrayParser : public Parser<T> {
-public:
-    void write(rapidjson::Document& document, rapidjson::Value& json, const T& value) const override;
-
-    void read(const rapidjson::Value& json, T& self) const override;
-};
-
 // basic make_parser() specializations
 
 struct PrimitiveParserTag {};
 struct ClassParserTag {};
-struct ArrayParserTag {};
 
 template<typename T>
 inline constexpr bool is_json_primitive_v = std::is_same_v<T, std::string> || std::is_arithmetic_v<T>;
@@ -117,21 +108,11 @@ struct select_parser_tag {
 };
 
 template<typename T>
-struct select_parser_tag<std::vector<T>> {
-    using type = ArrayParserTag;
-};
-
-template<typename T>
 using select_parser_tag_t = typename select_parser_tag<T>::type;
 
 template<typename T>
 std::unique_ptr<Parser<T>> make_parser(PrimitiveParserTag) {
     return std::make_unique<PrimitiveParser<T>>();
-}
-
-template<typename T>
-std::unique_ptr<Parser<T>> make_parser(ArrayParserTag) {
-    return std::make_unique<ArrayParser<T>>();
 }
 
 template<typename T>
@@ -227,28 +208,6 @@ void ClassParser<Class>::read(const rapidjson::Value& json, Class& self) const {
             continue;
         }
         entry->read(member->value, self);
-    }
-}
-
-// ArrayParser //
-
-template<typename T>
-void ArrayParser<T>::write(rapidjson::Document& document, rapidjson::Value& json, const T& value) const {
-    const auto elementParser = get_parser<typename T::value_type>();
-    auto& jsonArray = json.SetArray();
-    for (const auto& element : value) {
-        rapidjson::Value jsonElement;
-        elementParser->write(document, jsonElement, element);
-        jsonArray.PushBack(std::move(jsonElement), document.GetAllocator());
-    }
-}
-
-template<typename T>
-void ArrayParser<T>::read(const rapidjson::Value& json, T& self) const {
-    const auto elementParser = get_parser<typename T::value_type>();
-    const auto jsonArray = json.GetArray();
-    for (auto& jsonElement : jsonArray) {
-        elementParser->read(jsonElement, self.emplace_back());
     }
 }
 

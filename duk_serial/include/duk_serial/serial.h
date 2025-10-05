@@ -2,10 +2,14 @@
 // Created by Ricardo on 18/04/2024.
 //
 
-#ifndef DUK_SERIAL_JSON_TYPES_H
-#define DUK_SERIAL_JSON_TYPES_H
+#ifndef DUK_SERIAL_JSON_IO_H
+#define DUK_SERIAL_JSON_IO_H
 
-#include <duk_serial/json/json_parser.h>
+#include <duk_serial/parser.h>
+#include <duk_serial/container_parsers.h>
+#include <duk_serial/glm_parsers.h>
+
+#include <stdexcept>
 
 namespace duk::serial {
 
@@ -71,4 +75,4 @@ std::string write_json(const T& self, bool pretty = false) {
 
 }// namespace duk::serial
 
-#endif//DUK_SERIAL_JSON_TYPES_H
+#endif//DUK_SERIAL_JSON_IO_H
