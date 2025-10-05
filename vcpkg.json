@@ -21,6 +21,7 @@
         "error-strings"
       ]
     },
-    "steamworks-sdk"
+    "steamworks-sdk",
+    "catch2"
   ]
 }
