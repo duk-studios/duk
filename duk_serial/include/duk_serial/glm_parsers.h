@@ -2,10 +2,16 @@
 // Created by rov on 10/5/2025.
 //
 
-#ifndef DUK_GLM_PARSER_H
-#define DUK_GLM_PARSER_H
+#ifndef DUK_SERIAL_GLM_PARSERS_H
+#define DUK_SERIAL_GLM_PARSERS_H
 
-#include <duk_serial/json/json_parser.h>
+#include <duk_serial/parser.h>
+
+#include <duk_math/math.h>
+
+#include <fmt/format.h>
+
+#include <sstream>
 
 namespace duk::serial {
 
@@ -107,4 +113,4 @@ void QuatParser<T>::read(const rapidjson::Value& json, T& self) const {
 
 }
 
-#endif //DUK_GLM_PARSER_H
+#endif //DUK_SERIAL_GLM_PARSERS_H
