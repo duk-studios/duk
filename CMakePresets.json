@@ -10,13 +10,15 @@
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_APPLOCAL_DEPS": "OFF",
-        "DUK_BUILD_SAMPLE": "ON"
+        "DUK_BUILD_SAMPLE": "ON",
+        "DUK_BUILD_TESTS": "ON"
       }
     },
     {
       "name": "visual-studio",
       "inherits": "common",
       "displayName": "Visual Studio 17 2022",
+      "generator": "Visual Studio 17 2022",
       "description": "Visual Studio 17 2022 configuration",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-windows-static-md",

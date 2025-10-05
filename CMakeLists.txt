@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.24)
 set(DUK_AS_SOURCE TRUE)
 
 option(DUK_BUILD_SAMPLE "Enables building of duk_sample" OFF)
+option(DUK_BUILD_TESTS "Enables building of tests" OFF)
 
 if (NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
@@ -24,6 +25,11 @@ find_package(grapphs CONFIG REQUIRED)
 find_package(spirv-reflect CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ZLIB REQUIRED)
+if (DUK_BUILD_TESTS)
+    find_package(Catch2 CONFIG REQUIRED)
+    include(CTest)
+    include(Catch)
+endif ()
 
 include(GNUInstallDirs)
 

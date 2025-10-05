@@ -7,22 +7,6 @@
 #include <string>
 #include <vector>
 
-struct Foo {
-    uint32_t a;
-    std::string b;
-};
-
-struct Boo {
-    uint32_t var1;
-    Foo foo;
-    float var2;
-};
-
-struct Poo {
-    std::vector<Boo> boos;
-    float a;
-};
-
 namespace duk::serial {
 
 template<>

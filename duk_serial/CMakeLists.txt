@@ -1,8 +1,8 @@
 
 set(DUK_SERIAL_HEADERS
         include/duk_serial/json/rapidjson_import.h
-        include/duk_serial/json/serializer.h
-        include/duk_serial/json/types.h
+        include/duk_serial/json/json_io.h
+        include/duk_serial/json/json_parser.h
         )
 
 add_library(duk.serial INTERFACE ${DUK_SERIAL_HEADERS})
@@ -18,13 +18,15 @@ target_include_directories(duk.serial
 target_link_libraries(duk.serial
         INTERFACE
         duk::log
-        glm::glm
+        duk::math
         rapidjson
         )
 
 set_target_properties(duk.serial PROPERTIES EXPORT_NAME serial)
 
-add_subdirectory(test)
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
 
 install(
         DIRECTORY include/

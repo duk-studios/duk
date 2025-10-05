@@ -7,6 +7,8 @@
 
 #include <duk_macros/assert.h>
 
+// for rapidjson with std::string support
+#define RAPIDJSON_HAS_STDSTRING true
 #define RAPIDJSON_ASSERT(x) DUK_ASSERT(x)
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
