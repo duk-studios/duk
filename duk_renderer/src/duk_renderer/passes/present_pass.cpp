@@ -7,6 +7,22 @@
 
 namespace duk::renderer {
 
+namespace detail {
+
+static glm::vec2 compute_scale_to_fit_aspect_ratio(const glm::vec2& inputSize, const glm::vec2& outputSize) {
+    const auto inputAspectRatio = inputSize.x / inputSize.y;
+    const auto outputAspectRatio = outputSize.x / outputSize.y;
+    glm::vec2 scale = glm::vec2(1.0f);
+    if (inputAspectRatio > outputAspectRatio) {
+        scale = glm::vec2(1.0, outputAspectRatio / inputAspectRatio);
+    } else if (inputAspectRatio < outputAspectRatio) {
+        scale = glm::vec2(inputAspectRatio / outputAspectRatio, 1.0);
+    }
+    return scale;
+}
+
+}// namespace detail
+
 PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
     : m_rhi(presentPassCreateInfo.rhi)
     , m_inColor(duk::rhi::Access::SHADER_READ, duk::rhi::PipelineStage::FRAGMENT_SHADER, duk::rhi::Image::Layout::SHADER_READ_ONLY) {
@@ -28,11 +44,25 @@ PresentPass::PresentPass(const PresentPassCreateInfo& presentPassCreateInfo)
         m_renderPass = m_rhi->create_render_pass(renderPassCreateInfo);
     }
 
-    if (!m_fullscreenMaterial) {
+    {
         MaterialCreateInfo materialCreateInfo = {};
         materialCreateInfo.rhi = m_rhi;
         materialCreateInfo.commandQueue = presentPassCreateInfo.commandQueue;
         materialCreateInfo.materialData.shader = presentPassCreateInfo.shader;
+
+        auto& properties = materialCreateInfo.materialData.bindings.emplace_back();
+        properties.name = "uProperties";
+        properties.type = BindingType::UNIFORM;
+        properties.data = []() {
+            auto bindingData = std::make_unique<BufferBinding>();
+            {
+                auto& scale = bindingData->members.emplace_back();
+                scale.name = "scale";
+                scale.type = BufferBinding::Member::Type::VEC2;
+                scale.data.vec2Value = glm::vec2(1.0f);
+            }
+            return bindingData;
+        }();
 
         m_fullscreenMaterial = std::make_unique<Material>(materialCreateInfo);
     }
@@ -49,7 +79,9 @@ void PresentPass::update(const Pass::UpdateParams& params) {
         return;
     }
 
-    if (!m_frameBuffer || params.viewport.x != m_frameBuffer->width() || params.viewport.y != m_frameBuffer->height()) {
+    const auto outputSize = glm::vec2(m_rhi->present_image()->size());
+
+    if (!m_frameBuffer || outputSize != glm::vec2(m_frameBuffer->size())) {
         duk::rhi::Image* frameBufferAttachments[] = {m_rhi->present_image()};
 
         duk::rhi::RHI::FrameBufferCreateInfo frameBufferCreateInfo = {};
@@ -60,9 +92,14 @@ void PresentPass::update(const Pass::UpdateParams& params) {
         m_frameBuffer = m_rhi->create_frame_buffer(frameBufferCreateInfo);
     }
 
-    m_fullscreenMaterial->set("uTexture", duk::rhi::Descriptor::image_sampler(m_inColor.image(), m_inColor.image_layout(), kDefaultTextureSampler));
+    m_fullscreenMaterial->set("uTexture", duk::rhi::Descriptor::image_sampler(m_inColor.image(), m_inColor.image_layout(), {duk::rhi::Sampler::Filter::LINEAR, duk::rhi::Sampler::WrapMode::CLAMP_TO_BORDER}));
 
-    m_fullscreenMaterial->update(*params.pipelineCache, m_renderPass.get(), params.viewport);
+    const auto inputSize = glm::vec2(m_inColor.image()->size());
+    const auto scale = detail::compute_scale_to_fit_aspect_ratio(inputSize, outputSize);
+
+    m_fullscreenMaterial->set("uProperties", "scale", scale);
+
+    m_fullscreenMaterial->update(*params.pipelineCache, m_renderPass.get(), outputSize);
 }
 
 void PresentPass::render(duk::rhi::CommandBuffer* commandBuffer) {

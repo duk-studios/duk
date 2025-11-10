@@ -43,6 +43,7 @@ public:
         rendererCreateInfo.window = m_window.get();
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.logger = duk::log::instance()->default_logger();
+        rendererCreateInfo.renderSize = glm::vec2(640, 720);
 
         m_renderer = std::make_unique<duk::renderer::Renderer>(rendererCreateInfo);
     }
