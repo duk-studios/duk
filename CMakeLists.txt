@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
-    set(DUK_AS_SOURCE TRUE)
-endif ()
+set(DUK_AS_SOURCE TRUE)
 
 option(DUK_BUILD_SAMPLE "Enables building of duk_sample" OFF)
 
