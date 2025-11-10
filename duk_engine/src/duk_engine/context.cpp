@@ -14,6 +14,22 @@
 
 namespace duk::engine {
 
+namespace detail {
+
+glm::vec2 adjust_render_size(glm::vec2 size, float aspectRatio) {
+    const auto inputAspectRatio = size.x / size.y;
+    if (inputAspectRatio > aspectRatio) {
+        // input is wider than desired aspect ratio
+        size.x = size.y * aspectRatio;
+    } else if (inputAspectRatio < aspectRatio) {
+        // input is taller than desired aspect ratio
+        size.y = size.x / aspectRatio;
+    }
+    return size;
+}
+
+}// namespace detail
+
 Context::Context(const ContextCreateInfo& contextCreateInfo) {
     duk::log::verb("Initializing context for {}", contextCreateInfo.settings.name);
 
@@ -37,6 +53,11 @@ Context::Context(const ContextCreateInfo& contextCreateInfo) {
         rendererCreateInfo.applicationName = settings.name.c_str();
         rendererCreateInfo.api = duk::rhi::API::VULKAN;
         rendererCreateInfo.apiValidationLayers = validationLayers;
+        if (window) {
+            rendererCreateInfo.renderSize = detail::adjust_render_size(window->size(), 16.f / 9.f);
+        } else {
+            rendererCreateInfo.renderSize = settings.resolution;
+        }
 
         m_renderer = m_globals.add<duk::renderer::Renderer>(rendererCreateInfo);
     }
