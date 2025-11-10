@@ -56,7 +56,7 @@ static void update_canvas_transform(CanvasUpdateSystem* system, const duk::objec
 
         auto materialSlot = canvasTransform.component<duk::renderer::MaterialSlot>();
         if (!materialSlot) {
-            return;
+            continue;
         }
 
         if (auto material = materialSlot->material) {
