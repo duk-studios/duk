@@ -5,6 +5,7 @@
 #define DUK_RHI_FRAME_BUFFER_H
 
 #include <duk_macros/macros.h>
+#include <duk_math/math.h>
 
 #include <cstdint>
 
@@ -19,6 +20,8 @@ public:
     DUK_NO_DISCARD virtual uint32_t width() const = 0;
 
     DUK_NO_DISCARD virtual uint32_t height() const = 0;
+
+    DUK_NO_DISCARD virtual glm::uvec2 size() const = 0;
 
     DUK_NO_DISCARD virtual Image* at(uint32_t attachment) const = 0;
 };

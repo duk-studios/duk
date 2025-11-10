@@ -76,6 +76,10 @@ uint32_t VulkanFrameBuffer::height() const {
     return m_height;
 }
 
+glm::uvec2 VulkanFrameBuffer::size() const {
+    return {m_width, m_height};
+}
+
 Image* VulkanFrameBuffer::at(uint32_t attachment) const {
     return m_attachments.at(attachment);
 }

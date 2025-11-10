@@ -37,6 +37,8 @@ public:
 
     DUK_NO_DISCARD uint32_t height() const override;
 
+    DUK_NO_DISCARD glm::uvec2 size() const override;
+
     DUK_NO_DISCARD Image* at(uint32_t attachment) const override;
 
     void create(uint32_t imageCount);
