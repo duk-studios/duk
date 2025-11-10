@@ -276,6 +276,8 @@ void Material::set(const MaterialLocationId& binding, const MaterialLocationId& 
         m_uniformBuffers.at(bindingIndex)->write(memberIndex, data, size);
     } else if (m_instanceBuffers.contains(bindingIndex)) {
         m_instanceBuffers.at(bindingIndex)->write(memberIndex, data, size);
+    } else {
+        duk::log::fatal("Binding '{}' is not a buffer binding", binding.name());
     }
 }
 
