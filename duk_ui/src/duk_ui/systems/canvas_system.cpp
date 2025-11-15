@@ -22,7 +22,6 @@ static uint64_t calculate_canvas_hash(uint32_t width, uint32_t height) {
 static void update_canvas(CanvasUpdateSystem* system, const objects::Component<Canvas>& canvas, uint32_t width, uint32_t height) {
     const auto hash = calculate_canvas_hash(width, height);
     if (hash != canvas->hash) {
-        canvas->size = glm::ivec2(width, height);
         canvas->ubo->proj = glm::ortho(0.f, (float)width, 0.f, (float)height);
         canvas->ubo->view = glm::mat4(1);
         canvas->ubo->invView = glm::mat4(1);
@@ -54,14 +53,11 @@ static void update_canvas_transform(CanvasUpdateSystem* system, const duk::objec
 
         update_canvas_transform(system, canvas, system->child_components_of<CanvasTransform>(canvasTransform.id()), canvasTransform->model, canvasTransform->size);
 
-        auto materialSlot = canvasTransform.component<duk::renderer::MaterialSlot>();
-        if (!materialSlot) {
-            continue;
-        }
-
-        if (auto material = materialSlot->material) {
-            material->set(canvasTransform.id(), "uTransform", "model", canvasTransform->model);
-            material->set("uCamera", canvas->ubo.descriptor());
+        if (auto materialSlot = canvasTransform.component<duk::renderer::MaterialSlot>()) {
+            if (const auto material = materialSlot->material) {
+                material->set(canvasTransform.id(), "uTransform", "model", canvasTransform->model);
+                material->set("uCamera", canvas->ubo.descriptor());
+            }
         }
     }
 }
@@ -72,8 +68,10 @@ void CanvasUpdateSystem::update() {
     const auto renderer = global<duk::renderer::Renderer>();
     for (auto [canvas]: all_components_of<Canvas>()) {
         detail::update_canvas(this, canvas, renderer->render_width(), renderer->render_height());
+        const auto referenceSize = glm::vec2(canvas->size);
+        const auto scaleFactor = glm::vec2(renderer->render_width(), renderer->render_height()) / referenceSize;
 
-        detail::update_canvas_transform(this, canvas, child_components_of<CanvasTransform>(canvas.id()), glm::mat4(1), canvas->size);
+        detail::update_canvas_transform(this, canvas, child_components_of<CanvasTransform>(canvas.id()), glm::scale(glm::mat4(1), glm::vec3(scaleFactor, 1.0)), referenceSize);
     }
 }
 

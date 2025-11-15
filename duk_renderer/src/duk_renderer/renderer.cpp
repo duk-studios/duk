@@ -12,7 +12,8 @@
 namespace duk::renderer {
 
 Renderer::Renderer(const RendererCreateInfo& rendererCreateInfo)
-    : m_window(rendererCreateInfo.window) {
+    : m_window(rendererCreateInfo.window)
+    , m_renderSize(rendererCreateInfo.renderSize) {
     {
         duk::rhi::RHICreateInfo rhiCreateInfo = {};
         rhiCreateInfo.window = rendererCreateInfo.window;
@@ -100,11 +101,15 @@ void Renderer::clear_cache() {
 }
 
 uint32_t Renderer::render_width() const {
-    return m_window ? m_window->width() : 0;
+    return m_renderSize.x;
 }
 
 uint32_t Renderer::render_height() const {
-    return m_window ? m_window->height() : 0;
+    return m_renderSize.y;
+}
+
+glm::uvec2 Renderer::render_size() const {
+    return m_renderSize;
 }
 
 duk::rhi::RHI* Renderer::rhi() const {

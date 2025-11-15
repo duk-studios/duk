@@ -44,10 +44,12 @@ namespace duk::serial {
 
 template<>
 inline void from_json<duk::ui::Canvas>(const rapidjson::Value& json, duk::ui::Canvas& canvas) {
+    from_json_member(json, "size", canvas.size);
 }
 
 template<>
 inline void to_json<duk::ui::Canvas>(rapidjson::Document& document, rapidjson::Value& json, const duk::ui::Canvas& canvas) {
+    to_json_member(document, json, "size", canvas.size);
 }
 
 template<>

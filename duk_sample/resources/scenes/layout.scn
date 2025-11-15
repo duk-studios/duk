@@ -44,7 +44,8 @@
     {
       "components":[
         {
-          "type": "duk::ui::Canvas"
+          "type": "duk::ui::Canvas",
+          "size": "1920;1080"
         }
       ]
     },

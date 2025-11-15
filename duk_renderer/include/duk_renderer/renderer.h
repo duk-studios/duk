@@ -22,6 +22,7 @@ struct RendererCreateInfo {
     duk::platform::Window* window;
     duk::log::Logger* logger;
     duk::rhi::API api;
+    glm::vec2 renderSize;
     bool apiValidationLayers;
     const char* applicationName;
 };
@@ -39,6 +40,8 @@ public:
     DUK_NO_DISCARD uint32_t render_width() const;
 
     DUK_NO_DISCARD uint32_t render_height() const;
+
+    DUK_NO_DISCARD glm::uvec2 render_size() const;
 
     DUK_NO_DISCARD duk::rhi::RHI* rhi() const;
 
@@ -60,6 +63,7 @@ private:
 
 protected:
     duk::platform::Window* m_window;
+    glm::vec2 m_renderSize;
     std::shared_ptr<duk::rhi::RHI> m_rhi;
     std::shared_ptr<duk::rhi::CommandQueue> m_mainQueue;
     std::vector<std::shared_ptr<Pass>> m_passes;
