@@ -26,7 +26,6 @@ target_link_libraries(duk.api
         PUBLIC
         duk::engine
         duk::animation
-        steamworks-sdk::steamworks-sdk
 )
 
 set_target_properties(duk.api PROPERTIES EXPORT_NAME api)
