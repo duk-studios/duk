@@ -11,8 +11,7 @@
       "repository": "https://github.com/duk-studios/vcpkg-registry",
       "packages": [
         "grapphs",
-        "spirv-reflect",
-        "steamworks-sdk"
+        "spirv-reflect"
       ]
     }
   ]
