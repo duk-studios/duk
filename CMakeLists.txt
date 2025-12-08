@@ -6,7 +6,7 @@ option(DUK_BUILD_SAMPLE "Enables building of duk_sample" OFF)
 option(DUK_BUILD_TESTS "Enables building of tests" OFF)
 
 if (NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD 23)
 endif ()
 
 project(duk VERSION 0.17.1)
@@ -35,6 +35,7 @@ include(GNUInstallDirs)
 
 add_subdirectory(duk_macros)
 add_subdirectory(duk_math)
+add_subdirectory(duk_type)
 add_subdirectory(duk_tools)
 add_subdirectory(duk_hash)
 add_subdirectory(duk_serial)

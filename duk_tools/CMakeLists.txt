@@ -9,16 +9,14 @@ set(DUK_TOOLS_HEADERS
         include/duk_tools/file.h
         include/duk_tools/string.h
         include/duk_tools/timer.h
-        include/duk_tools/types.h
-        )
+)
 
 set(DUK_TOOLS_SOURCES
         src/duk_tools/file.cpp
         src/duk_tools/globals.cpp
         src/duk_tools/string.cpp
         src/duk_tools/timer.cpp
-        src/duk_tools/types.cpp
-        )
+)
 
 add_library(duk.tools ${DUK_TOOLS_HEADERS} ${DUK_TOOLS_SOURCES})
 add_library(duk::tools ALIAS duk.tools)
