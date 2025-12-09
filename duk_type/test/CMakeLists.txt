@@ -1,5 +1,5 @@
 set(DUK_TYPE_TEST_SOURCES
-        type.cc
+        describe.cc
 )
 
 add_executable(duk.type.test ${DUK_TYPE_TEST_SOURCES})

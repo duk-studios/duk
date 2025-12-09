@@ -1,9 +1,9 @@
 set(DUK_TYPE_HEADERS
-        include/duk_type/type.h
+        include/duk_type/describe.h
         )
 
 set(DUK_TYPE_SOURCES
-        src/duk_type/type.cpp
+        src/duk_type/describe.cpp
 )
 
 add_library(duk.type STATIC ${DUK_TYPE_HEADERS} ${DUK_TYPE_SOURCES})

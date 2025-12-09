@@ -2,7 +2,7 @@
 // Created by rov on 10/4/2025.
 //
 
-#include <duk_type/type.h>
+#include <duk_type/describe.h>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -28,7 +28,7 @@ using namespace foo;
 
 template<>
 consteval auto describe<Bar>() {
-    return ClassVisitor<Bar,
+    return Class<Bar,
         Member<"a", &Bar::a>,
         Member<"b", &Bar::b>
     >();
@@ -36,7 +36,7 @@ consteval auto describe<Bar>() {
 
 template<>
 consteval auto describe<Baz>() {
-    return ClassVisitor<Baz,
+    return Class<Baz,
         Member<"bar", &Baz::bar>,
         Member<"c", &Baz::c>
     >();
@@ -60,7 +60,7 @@ TEST_CASE("Basic type information can be retrieved", "[type]") {
 
         auto description = duk::type::describe<Bar>();
         std::unordered_map<std::string_view, std::string_view> visitedMembers;
-        description.visit([&](auto member) {
+        description.visit_members([&](auto member) {
             constexpr auto memberDescription = member.describe();
             visitedMembers[member.name()] = memberDescription.name();
         }, bar);
@@ -75,14 +75,14 @@ TEST_CASE("Basic type information can be retrieved", "[type]") {
 
 
         std::unordered_map<std::string_view, std::string_view> visitedMembers;
-        auto visitor = [&](this const auto &self, auto member) {
+        auto visitor = [&](this const auto& self, auto member) {
             constexpr auto memberDescription = member.describe();
             visitedMembers[member.name()] = memberDescription.name();
-            memberDescription.visit(self, member.value());
+            memberDescription.visit_members(self, member.value());
         };
         Baz baz{{42, 3.14f}, 2.718};
         auto description = duk::type::describe<Baz>();
-        description.visit(visitor, baz);
+        description.visit_members(visitor, baz);
 
         CHECK(visitedMembers.size() == 4);
         CHECK(visitedMembers["bar"] == "foo::Bar");

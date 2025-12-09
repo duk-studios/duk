@@ -2,7 +2,7 @@
 // Created by rov on 06/12/2025.
 //
 
-#include <duk_type/type.h>
+#include <duk_type/describe.h>
 #ifdef __GNUG__
 #include <cxxabi.h>
 #include <memory>

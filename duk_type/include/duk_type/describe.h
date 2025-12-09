@@ -21,21 +21,21 @@ std::string_view name_of() {
 }
 
 template<typename T>
-class TypeDescription {
+class Type {
 public:
     static constexpr std::string_view name() {
         return name_of<T>();
     }
 
     template<typename Visitor>
-    static constexpr void visit(Visitor&&, T&) {
+    static constexpr void visit_members(Visitor&&, T&) {
         // Default implementation does nothing
     }
 };
 
 template<typename T>
 consteval auto describe() {
-    return TypeDescription<T>();
+    return Type<T>();
 }
 
 template<string_literal Name, auto MemberPointer>
@@ -84,19 +84,18 @@ protected:
     ClassType& m_instance;
 };
 
-template<typename Class, typename ...Members>
-class ClassVisitor  {
+template<typename T, typename ...Members>
+class Class  {
 public:
-    static_assert((std::is_same_v<Class, typename Members::ClassType> && ...), "All Members must belong to the same Class");
+    static_assert((std::is_same_v<T, typename Members::ClassType> && ...), "All Members must belong to the same Class");
 
     static constexpr std::string_view name() {
-        return name_of<Class>();
+        return name_of<T>();
     }
 
     template<typename Visitor>
-    static constexpr void visit(Visitor&& visitor, Class& instance) {
+    static constexpr void visit_members(Visitor&& visitor, T& instance) {
         (std::invoke(std::forward<Visitor>(visitor), Members(instance)), ...);
-        // (visitor.template operator()<Members>(Members(instance)), ...);
     }
 
     static constexpr uint32_t member_count() {
