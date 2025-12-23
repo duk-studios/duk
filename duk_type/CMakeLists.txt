@@ -18,7 +18,8 @@ target_include_directories(duk.type
 
 target_link_libraries(duk.type
         PUBLIC
-        duk::log
+        duk::macros
+        fmt::fmt-header-only
         )
 
 set_target_properties(duk.type PROPERTIES EXPORT_NAME type)
