@@ -2,7 +2,7 @@
 // Created by rov on 10/4/2025.
 //
 
-#include <duk_serial/serial.h>
+#include <duk_serial/json.h>
 #include <catch2/catch_test_macros.hpp>
 
 
@@ -27,168 +27,88 @@ struct FriendGroup {
     bool operator==(const FriendGroup& other) const = default;
 };
 
-struct Transform {
-    glm::vec3 position;
-    glm::quat rotation;
-    glm::vec3 scale;
+// define types
+namespace duk::type {
 
-    bool operator==(const Transform& other) const {
-        return position == other.position && scale == other.scale && glm::all(glm::epsilonEqual(rotation, other.rotation, glm::epsilon<float>()));
-    }
+template<>
+struct Type<Address> : Class<Address,
+    Member<"city", &Address::city>,
+    Member<"zip", &Address::zip>> {
 };
 
-namespace duk::serial {
+template<>
+struct Type<Person> : Class<Person,
+    Member<"age", &Person::age>,
+    Member<"name", &Person::name>,
+    Member<"address", &Person::address>> {
+};
 
 template<>
-void define_class_parser(ClassParser<Address>& parser) {
-    parser.add("city", &Address::city);
-    parser.add("zip", &Address::zip);
-}
-
-template<>
-void define_class_parser(ClassParser<Person>& parser) {
-    parser.add("age", &Person::age);
-    parser.add("name", &Person::name);
-    parser.add("address", &Person::address);
-}
-
-template<>
-void define_class_parser(ClassParser<FriendGroup>& parser) {
-    parser.add("friends", &FriendGroup::friends);
-}
-
-template<>
-void define_class_parser(ClassParser<Transform>& parser) {
-    parser.add("position", &Transform::position);
-    parser.add("rotation", &Transform::rotation);
-    parser.add("scale", &Transform::scale);
-}
+struct Type<FriendGroup> : Class<FriendGroup,
+    Member<"friends", &FriendGroup::friends>> {
+};
 
 }
 
-TEST_CASE("JsonParser basic usage", "[parser]") {
-    using namespace duk::serial;
-    struct Foo {
-        int a;
-        std::string b;
-    };
-    ClassParser<Foo> fooParser;
+TEST_CASE("Basic json serialization", "[json]") {
 
-    fooParser.add("a", &Foo::a);
-    fooParser.add("b", &Foo::b);
-
-    SECTION("Write object to JSON") {
-        Foo p{42, "abcde"};
-
-        rapidjson::Document doc;
-        doc.SetObject();
-        rapidjson::Value json(rapidjson::kObjectType);
-        fooParser.write(doc, json, p);
-
-        REQUIRE(json.HasMember("a"));
-        REQUIRE(json["a"].IsInt());
-        REQUIRE(json["a"].GetInt() == 42);
-
-        REQUIRE(json.HasMember("b"));
-        REQUIRE(json["b"].IsString());
-        REQUIRE(json["b"].GetString() == std::string("abcde"));
+    SECTION("Basic type roundtrip") {
+        const auto input = Address{"New York", 10001};
+        const auto json = duk::serial::json_write(input);
+        INFO("Json: " << json);
+        const auto output = duk::serial::json_read<Address>(json);
+        CHECK(input == output);
     }
 
-    SECTION("Read object from JSON") {
-        const char* jsonStr = R"({"a": 13, "b": "xyz"})";
-        rapidjson::Document doc;
-        doc.Parse(jsonStr);
-
-        REQUIRE_FALSE(doc.HasParseError());
-        REQUIRE(doc.IsObject());
-
-        Foo p;
-        fooParser.read(doc, p);
-
-        REQUIRE(p.a == 13);
-        REQUIRE(p.b == "xyz");
+    SECTION("Nested type roundtrip") {
+        const auto input = Person{30, "Alice", {"Los Angeles", 90001}};
+        const auto json = duk::serial::json_write(input);
+        INFO("Json: " << json);
+        const auto output = duk::serial::json_read<Person>(json);
+        CHECK(input == output);
     }
 
-    SECTION("Round-trip serialization") {
-        Foo original{42, "abcde"};
-
-        // Write to JSON
-        rapidjson::Document doc;
-        doc.SetObject();
-        rapidjson::Value json(rapidjson::kObjectType);
-        fooParser.write(doc, json, original);
-
-        // Convert JSON value to string (optional, for visual debugging)
-        rapidjson::StringBuffer buffer;
-        rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        json.Accept(writer);
-        std::string jsonStr = buffer.GetString();
-        INFO("Serialized JSON: " << jsonStr);
-
-        // Parse back from JSON string
-        rapidjson::Document parsedDoc;
-        parsedDoc.Parse(jsonStr.c_str());
-        REQUIRE_FALSE(parsedDoc.HasParseError());
-
-        Foo roundTripped;
-        fooParser.read(parsedDoc, roundTripped);
-
-        // Check that the original and round-tripped objects match
-        REQUIRE(roundTripped.a == original.a);
-        REQUIRE(roundTripped.b == original.b);
-    }
-
-    SECTION("Convenience methods with specialized parsers") {
-        const auto original = Address{"fooland", 11110};
-        const auto json = write_json(original);
-        INFO("JSON: " << json);
-        const auto roundTripped = read_json<Address>(json);
-        REQUIRE(original == roundTripped);
-    }
-
-    SECTION("Nested type") {
-        const auto original = Person{33, "Dana", {"New York", 10001}};
-        const auto json = write_json(original);
-        INFO("JSON: " << json);
-        const auto roundTripped = read_json<Person>(json);
-        REQUIRE(roundTripped == original);
-    }
-
-    SECTION("Type with array") {
-        const auto original = FriendGroup{
+    SECTION("Type with array of structs") {
+        const auto input = FriendGroup{
             {
-                {25, "Tob", {"Fooland", 10021}},
-                {27, "Bob", {"Booland", 10031}},
-                {29, "Rob", {"Mooland", 10051}}
+                {25, "Bob", {"Chicago", 60601}},
+                {28, "Charlie", {"Houston", 77001}}
             }
         };
-        const auto json = write_json(original);
-        INFO("JSON: " << json);
-        const auto roundTripped = read_json<FriendGroup>(json);
-        REQUIRE(roundTripped == original);
+        const auto json = duk::serial::json_write(input);
+        INFO("Json: " << json);
+        const auto output = duk::serial::json_read<FriendGroup>(json);
+        CHECK(input == output);
     }
 
     SECTION("Root array") {
-        const auto original = std::vector<Person>{
-        {25, "Tob", {"Fooland", 10021}},
-        {27, "Bob", {"Booland", 10031}},
-        {29, "Rob", {"Mooland", 10051}}
+        auto input = std::vector<Person>{
+            {22, "Dave", {"Phoenix", 85001}},
+            {35, "Eve", {"Philadelphia", 19019}}
         };
-        const auto json = write_json(original);
-        INFO("JSON: " << json);
-        const auto roundTripped = read_json<std::vector<Person>>(json);
-        REQUIRE(roundTripped == original);
+        const auto json = duk::serial::json_write(input);
+        INFO("Json: " << json);
+        const auto output = duk::serial::json_read<std::vector<Person>>(json);
+        CHECK(input == output);
     }
 
-    SECTION("custom parser support (glm)") {
-        const auto original = Transform{
-            {140, 40.0, 20.0f},
-            glm::vec3{30.0f, 0.0f, 180.0f},
-            {1.0f, 0.5f, 2.0f}
+    SECTION("Array of arrays") {
+        auto input = std::vector<std::vector<int>>{
+            {1, 2, 3},
+            {4, 5, 6}
         };
-        const auto json = write_json(original);
-        INFO("JSON: " << json);
-        const auto roundTripped = read_json<Transform>(json);
-        REQUIRE(original == roundTripped);
+        const auto json = duk::serial::json_write(input);
+        INFO("Json: " << json);
+        const auto output = duk::serial::json_read<std::vector<std::vector<int>>>(json);
+        CHECK(input == output);
     }
+
+    SECTION("std::set support") {
+        auto input = std::set<std::string>{"apple", "banana", "cherry"};
+        const auto json = duk::serial::json_write(input);
+        INFO("Json: " << json);
+        const auto output = duk::serial::json_read<std::set<std::string>>(json);
+        CHECK(input == output);
+    }
+
 }

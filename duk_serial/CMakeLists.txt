@@ -1,11 +1,8 @@
 
 set(DUK_SERIAL_HEADERS
         include/duk_serial/rapidjson_import.h
-        include/duk_serial/serial.h
-        include/duk_serial/parser.h
-        include/duk_serial/glm_parsers.h
-        include/duk_serial/container_parsers.h
-        )
+        include/duk_serial/json.h
+)
 
 add_library(duk.serial INTERFACE ${DUK_SERIAL_HEADERS})
 add_library(duk::serial ALIAS duk.serial)
@@ -19,8 +16,7 @@ target_include_directories(duk.serial
 
 target_link_libraries(duk.serial
         INTERFACE
-        duk::log
-        duk::math
+        duk::type
         rapidjson
         )
 

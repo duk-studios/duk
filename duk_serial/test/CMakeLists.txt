@@ -1,9 +1,8 @@
-
-set(DUK_OBJECTS_TEST_SOURCES
+set(DUK_SERIAL_TEST_SOURCES
         json.cc
 )
 
-add_executable(duk.serial.test ${DUK_OBJECTS_TEST_SOURCES})
+add_executable(duk.serial.test ${DUK_SERIAL_TEST_SOURCES})
 
 target_include_directories(duk.serial.test
         PRIVATE
