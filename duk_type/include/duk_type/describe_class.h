@@ -79,14 +79,19 @@ private:
 };
 
 template<typename, typename = void>
-struct is_class_type : std::false_type {};
+struct is_class_description_type : std::false_type {};
 
 template<typename T>
-struct is_class_type<T, std::void_t<decltype(T::member_count())>> : std::true_type {};
+struct is_class_description_type<T, std::void_t<decltype(T::member_count())>> : std::true_type {};
 
 template<typename T>
-constexpr bool is_class(const T&) {
-    return is_class_type<std::decay_t<T>>::value;
+consteval bool is_class_description() {
+    return is_class_description_type<std::decay_t<T>>::value;
+}
+
+template<typename T>
+consteval bool is_class() {
+    return is_class_description<decltype(type::describe<T>())>();
 }
 
 template<string_literal Name, auto MemberPointer>

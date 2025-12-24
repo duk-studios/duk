@@ -133,14 +133,19 @@ constexpr bool has_insert_back(const T&) {
 }
 
 template<typename, typename = void>
-struct is_container_type : std::false_type {};
+struct is_container_description_type : std::false_type {};
 
 template<typename T>
-struct is_container_type<T, std::void_t<decltype(T::size(std::declval<typename T::container_type>()))>> : std::true_type {};
+struct is_container_description_type<T, std::void_t<decltype(T::size(std::declval<typename T::container_type>()))>> : std::true_type {};
 
 template<typename T>
-constexpr bool is_container(const T&) {
-    return is_container_type<std::decay_t<T>>::value;
+constexpr bool is_container_description() {
+    return is_container_description_type<std::decay_t<T>>::value;
+}
+
+template<typename T>
+constexpr bool is_container() {
+    return is_container_description<decltype(type::describe<T>())>();
 }
 
 }

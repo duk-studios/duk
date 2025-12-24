@@ -89,7 +89,7 @@ TEST_CASE("Basic type information can be retrieved", "[type]") {
         auto visitor = [&](this const auto& self, auto member) {
             constexpr auto memberDescription = member.describe();
             visitedMembers[member.name()] = memberDescription.name();
-            if constexpr (duk::type::is_class(memberDescription)) {
+            if constexpr (duk::type::is_class_description<decltype(memberDescription)>()) {
                 memberDescription.visit_members(self, member.value());
             }
         };
@@ -109,19 +109,19 @@ TEST_CASE("Basic type information can be retrieved", "[type]") {
         auto vecDescription = duk::type::describe<decltype(vec)>();
         CHECK(vecDescription.name() == "std::vector<int>");
         CHECK(vecDescription.size(vec) == 3);
-        CHECK(duk::type::is_container(vecDescription));
+        CHECK(duk::type::is_container_description<decltype(vecDescription)>());
 
         std::array<float, 4> arr = {0.1f, 0.2f, 0.3f, 0.4f};
         auto arrDescription = duk::type::describe<decltype(arr)>();
         CHECK(arrDescription.name() == "std::array<float,4>");
         CHECK(arrDescription.size(arr) == 4);
-        CHECK(duk::type::is_container(arrDescription));
+        CHECK(duk::type::is_container_description<decltype(arrDescription)>());
 
         std::set<std::string> strSet = {"foo", "bar", "baz"};
         auto setDescription = duk::type::describe<decltype(strSet)>();
         CHECK(setDescription.name() == "std::set<std::string>");
         CHECK(setDescription.size(strSet) == 3);
-        CHECK(duk::type::is_container(setDescription));
+        CHECK(duk::type::is_container_description<decltype(setDescription)>());
     }
 
     SECTION("We can iterate over container elements") {
