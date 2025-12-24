@@ -26,6 +26,7 @@ target_link_libraries(duk.resource
         PUBLIC
         duk::macros
         duk::serial
+        duk::log
         )
 
 target_include_directories(duk.resource
@@ -39,7 +40,9 @@ target_include_directories(duk.resource
 
 set_target_properties(duk.resource PROPERTIES EXPORT_NAME resource)
 
-add_subdirectory(test)
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
 
 install(
         DIRECTORY include/

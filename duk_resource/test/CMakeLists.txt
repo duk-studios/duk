@@ -1,9 +1,8 @@
-
-set(DUK_AUDIO_TEST_SOURCES
-        main.cpp
+set(DUK_RESOURCE_TEST_SOURCES
+        handle.cc
 )
 
-add_executable(duk.resource.test ${DUK_AUDIO_TEST_SOURCES})
+add_executable(duk.resource.test ${DUK_RESOURCE_TEST_SOURCES})
 
 target_include_directories(duk.resource.test
         PRIVATE
@@ -13,4 +12,7 @@ target_include_directories(duk.resource.test
 target_link_libraries(duk.resource.test
         PRIVATE
         duk::resource
+        Catch2::Catch2WithMain
 )
+
+catch_discover_tests(duk.resource.test)

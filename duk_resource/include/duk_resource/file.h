@@ -7,7 +7,7 @@
 
 #include <duk_resource/handle.h>
 
-#include <duk_serial/json/types.h>
+#include <duk_serial/json.h>
 
 #include <set>
 #include <string>
@@ -27,24 +27,17 @@ bool operator<(const ResourceFile& lhs, const ResourceFile& rhs);
 
 }// namespace duk::resource
 
-namespace duk::serial {
+namespace duk::type {
+
 
 template<>
-inline void from_json<duk::resource::ResourceFile>(const rapidjson::Value& json, duk::resource::ResourceFile& resourceFile) {
-    from_json_member(json, "tag", resourceFile.tag);
-    from_json_member(json, "id", resourceFile.id);
-    from_json_member(json, "file", resourceFile.file);
-    from_json_member(json, "aliases", resourceFile.aliases, true);
-}
+struct Type<duk::resource::ResourceFile> : Class<duk::resource::ResourceFile,
+    Member<"tag", &duk::resource::ResourceFile::tag>,
+    Member<"id", &duk::resource::ResourceFile::id>,
+    Member<"file", &duk::resource::ResourceFile::file>,
+    Member<"aliases", &duk::resource::ResourceFile::aliases>> {
+};
 
-template<>
-inline void to_json<duk::resource::ResourceFile>(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::ResourceFile& resourceFile) {
-    to_json_member(document, json, "tag", resourceFile.tag);
-    to_json_member(document, json, "id", resourceFile.id);
-    to_json_member(document, json, "file", resourceFile.file);
-    to_json_member(document, json, "aliases", resourceFile.aliases);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 #endif//DUK_RESOURCE_FILE_H

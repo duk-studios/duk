@@ -6,7 +6,7 @@
 #define DUK_RESOURCE_RESOURCE_H
 
 #include <duk_macros/macros.h>
-#include <duk_serial/json/types.h>
+#include <duk_serial/json.h>
 
 #include <memory>
 #include <typeindex>
@@ -207,43 +207,28 @@ T* Handle<T>::get() const {
 namespace duk::serial {
 
 template<>
-inline void from_json<duk::resource::Id>(const rapidjson::Value& jsonObject, duk::resource::Id& id) {
-    id = duk::resource::Id(jsonObject.Get<uint64_t>());
-}
+struct JsonPrimitiveValue<duk::resource::Id> {
 
-template<>
-inline void to_json<duk::resource::Id>(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Id& id) {
-    json.Set(id.value());
-}
-
-template<typename T>
-void from_json(const rapidjson::Value& jsonObject, duk::resource::Handle<T>& resource) {
-    resource.reset(duk::resource::Id(jsonObject.Get<uint64_t>()));
-}
-
-template<typename T>
-void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Handle<T>& resource) {
-    json.Set<uint64_t>(resource.id().value());
-}
-
-template<typename T>
-void from_json(const rapidjson::Value& jsonObject, std::vector<duk::resource::Handle<T>>& resources) {
-    DUK_ASSERT(jsonObject.IsArray());
-    auto jsonArray = jsonObject.GetArray();
-    for (auto& jsonElement: jsonArray) {
-        from_json(jsonElement, resources.emplace_back());
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Id& id) {
+        json.Set(id.value(), document.GetAllocator());
     }
-}
+
+    static void read(const rapidjson::Value& json, duk::resource::Id& id) {
+        id = duk::resource::Id(json.Get<uint64_t>());
+    }
+};
 
 template<typename T>
-void to_json(rapidjson::Document& document, rapidjson::Value& json, const std::vector<duk::resource::Handle<T>>& resources) {
-    auto jsonArray = json.SetArray().GetArray();
-    for (const auto& element: resources) {
-        rapidjson::Value jsonElement;
-        to_json(document, jsonElement, element);
-        jsonArray.PushBack(jsonElement, document.GetAllocator());
+struct JsonPrimitiveValue<duk::resource::Handle<T>> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Handle<T>& resource) {
+        json.Set(resource.id().value(), document.GetAllocator());
     }
-}
+
+    static void read(const rapidjson::Value& json, duk::resource::Handle<T>& resource) {
+        resource.reset(duk::resource::Id(json.Get<uint64_t>()));
+    }
+};
 
 }// namespace duk::serial
 
