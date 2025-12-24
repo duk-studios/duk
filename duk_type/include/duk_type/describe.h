@@ -13,7 +13,7 @@ namespace duk::type {
 std::string name_of(const std::type_info& info);
 
 template<typename T>
-std::string_view name_of() {
+std::string name_of() {
     static const std::string typeName = name_of(typeid(T));
     return typeName;
 }

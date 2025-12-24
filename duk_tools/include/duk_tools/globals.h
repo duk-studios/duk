@@ -6,7 +6,7 @@
 #define DUK_TOOLS_GLOBALS_H
 
 #include <duk_macros/assert.h>
-#include <duk_tools/types.h>
+#include <duk_type/describe.h>
 
 #include <memory>
 #include <string>
@@ -114,7 +114,7 @@ T* Globals::get() const {
 
 template<typename T>
 uint64_t Globals::hash_of() {
-    static uint64_t hash = std::hash<std::string>()(type_name_of<T>());
+    static uint64_t hash = std::hash<std::string>()(duk::type::name_of<T>());
     return hash;
 }
 
