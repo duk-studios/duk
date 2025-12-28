@@ -13,4 +13,7 @@ target_include_directories(duk.objects.test
 target_link_libraries(duk.objects.test
         PRIVATE
         duk::objects
+        Catch2::Catch2WithMain
         )
+
+catch_discover_tests(duk.objects.test)

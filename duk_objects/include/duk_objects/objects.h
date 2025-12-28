@@ -16,7 +16,8 @@
 #include <duk_tools/bit_block.h>
 #include <duk_tools/fixed_vector.h>
 #include <duk_tools/globals.h>
-#include <duk_tools/types.h>
+
+#include <duk_type/optional_const.h>
 
 #include <array>
 
@@ -104,7 +105,7 @@ using ComponentMask = duk::tools::BitBlock<detail::kMaxComponents>;
 template<bool isConst>
 class ObjectHandle {
 public:
-    using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
+    using ObjectsType = duk::type::optional_const_t<Objects, isConst>;
 
     ObjectHandle();
 
@@ -158,8 +159,8 @@ using ConstObject = ObjectHandle<true>;
 template<typename T, bool isConst>
 class ComponentHandle {
 public:
-    using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
-    using Type = duk::tools::maybe_const_t<T, isConst>;
+    using ObjectsType = duk::type::optional_const_t<Objects, isConst>;
+    using Type = duk::type::optional_const_t<T, isConst>;
 
     ComponentHandle(const Id& ownerId, ObjectsType* objects);
 
@@ -249,9 +250,9 @@ private:
 
         virtual void solve(ObjectSolver* solver, ObjectHandle<false>& object) = 0;
 
-        virtual void from_json(const rapidjson::Value& json, ObjectHandle<false>& object) = 0;
+        virtual void json_read(const rapidjson::Value& json, ObjectHandle<false>& object) = 0;
 
-        virtual void to_json(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) = 0;
+        virtual void json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) = 0;
 
         virtual const std::string& name() const = 0;
 
@@ -280,16 +281,16 @@ private:
         // has to be implemented on a different file, otherwise our entire hacky-template stuff would break
         void solve(ObjectSolver* solver, ObjectHandle<false>& object) override;
 
-        void from_json(const rapidjson::Value& json, ObjectHandle<false>& object) override {
-            duk::serial::from_json(json, *object.component_or_add<T>());
+        void json_read(const rapidjson::Value& json, ObjectHandle<false>& object) override {
+            duk::serial::json_read_value(json, *object.component_or_add<T>());
         }
 
-        void to_json(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) override {
-            duk::serial::to_json(document, json, *object.component<T>());
+        void json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) override {
+            duk::serial::json_write_value(document, json, *object.component<T>());
         }
 
         const std::string& name() const override {
-            return duk::tools::type_name_of<T>();
+            return duk::type::name_of<T>();
         }
 
         std::unique_ptr<detail::ComponentPool> create_pool() const override {
@@ -315,36 +316,38 @@ public:
         entry->solve(solver, object);
     }
 
-    void from_json(const rapidjson::Value& json, ObjectHandle<false>& object, uint32_t componentId) {
+    void json_read(const rapidjson::Value& json, ObjectHandle<false>& object, uint32_t componentId) {
         auto& entry = m_componentEntries.at(componentId);
-        entry->from_json(json, object);
+        entry->json_read(json, object);
     }
 
-    void from_json(const rapidjson::Value& json, ObjectHandle<false>& object, const std::string& componentName) {
+    void json_read(const rapidjson::Value& json, ObjectHandle<false>& object, const std::string& componentName) {
         const auto it = m_componentNameToIndex.find(componentName);
         if (it == m_componentNameToIndex.end()) {
             duk::log::warn("Unregistered Component type: \"{}\"", componentName);
             return;
         }
         const auto index = it->second;
-        from_json(json, object, index);
+        json_read(json, object, index);
     }
 
-    void from_json(const rapidjson::Value& json, ObjectHandle<false>& object) {
+    void json_read(const rapidjson::Value& json, ObjectHandle<false>& object) {
         std::string type;
-        duk::serial::from_json_member(json, "type", type);
-        from_json(json, object, type);
+        duk::serial::json_read_member_value(json, "type", type);
+        json_read(json, object, type);
     }
 
-    void to_json(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object, uint32_t componentIndex) {
+    void json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object, uint32_t componentIndex) {
         const auto& type = name_of(componentIndex);
-        duk::serial::to_json_member(document, json, "type", type);
-        m_componentEntries.at(componentIndex)->to_json(document, json, object);
+        m_componentEntries.at(componentIndex)->json_write(document, json, object);
+        // write last to make sure SetObject is called before adding members
+        // This should be removed after refactoring object serialization
+        duk::serial::json_write_member_value(document, json, "type", type);
     }
 
     template<typename T>
     void add() {
-        const auto& name = duk::tools::type_name_of<T>();
+        const auto& name = duk::type::name_of<T>();
         auto it = m_componentNameToIndex.find(name);
         if (it != m_componentNameToIndex.end()) {
             return;
@@ -373,7 +376,7 @@ private:
 
 template<typename T>
 uint32_t ComponentRegistry::index_of() const {
-    static const uint32_t index = index_of(duk::tools::type_name_of<T>());
+    static const uint32_t index = index_of(duk::type::name_of<T>());
     return index;
 }
 
@@ -390,7 +393,7 @@ public:
     class ObjectView {
     public:
         static constexpr bool kIsConst = isConst;
-        using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
+        using ObjectsType = duk::type::optional_const_t<Objects, isConst>;
 
         class Iterator {
         public:
@@ -449,7 +452,7 @@ public:
     class ObjectHierarchyView {
     public:
         static constexpr bool kIsConst = isConst;
-        using ObjectsType = duk::tools::maybe_const_t<Objects, isConst>;
+        using ObjectsType = duk::type::optional_const_t<Objects, isConst>;
 
         class Iterator {
         public:
@@ -574,6 +577,8 @@ public:
 
     DUK_NO_DISCARD bool valid_object(const Id& id) const;
 
+    DUK_NO_DISCARD uint32_t count() const;
+
     DUK_NO_DISCARD ObjectView<false> all(bool includeInactive = false);
 
     DUK_NO_DISCARD ObjectView<true> all(bool includeInactive = false) const;
@@ -645,8 +650,6 @@ public:
 
     void update(ComponentEventDispatcher& dispatcher);
 
-    friend void duk::serial::from_json<Objects>(const rapidjson::Value& json, Objects& objects);
-
 private:
     struct Node {
         // index of this node
@@ -674,8 +677,6 @@ private:
     void add_component(uint32_t index, uint32_t componentIndex);
 
     void remove_component(uint32_t index, uint32_t componentIndex);
-
-    void solve_references();
 
     void add_node(uint32_t nodeIndex);
 
@@ -767,6 +768,8 @@ private:
     duk::event::Listener m_listener;
     ComponentEventDispatcher* m_dispatcher;
 };
+
+void solve_object_references(Objects& objects);
 
 // Object Implementation //
 
@@ -1481,7 +1484,7 @@ void ComponentEventDispatcher::listen(duk::event::Listener& listener, F&& callba
 template<typename E, typename C, typename Derived>
 void ComponentEventListener::listen(Derived* derived) {
     if (!m_dispatcher) {
-        throw std::runtime_error(fmt::format("Attempting to listen to a component which has no dispatcher: {}", duk::tools::type_name_of<Derived>()));
+        throw std::runtime_error(fmt::format("Attempting to listen to a component which has no dispatcher: {}", duk::type::name_of<Derived>()));
     }
     m_dispatcher->listen<C, E>(m_listener, [derived](const ComponentEvent<C, E>& componentEvent) {
         derived->receive(componentEvent);
@@ -1492,74 +1495,52 @@ void ComponentEventListener::listen(Derived* derived) {
 
 namespace duk::serial {
 
-template<>
-inline void from_json<duk::objects::Object>(const rapidjson::Value& json, duk::objects::Object& object) {
-    DUK_ASSERT(json.IsUint());
-    uint32_t index;
-    from_json(json, index);
-    object = duk::objects::Object(index, 0, nullptr);
-}
+template<bool isConst>
+struct JsonPrimitiveValue<duk::objects::ObjectHandle<isConst>> {
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::ObjectHandle<isConst>& value);
+
+    static void read(const rapidjson::Value& json, duk::objects::ObjectHandle<isConst>& value);
+};
+
+template<typename T>
+struct JsonPrimitiveValue<duk::objects::Component<T>> {
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Component<T>& value);
+
+    static void read(const rapidjson::Value& json, duk::objects::Component<T>& value);
+};
 
 template<>
-inline void to_json<duk::objects::ConstObject>(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::ConstObject& object) {
+struct JsonPrimitiveValue<duk::objects::Objects> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Objects& value);
+
+    static void read(const rapidjson::Value& json, duk::objects::Objects& value);
+};
+
+template<bool isConst>
+void JsonPrimitiveValue<objects::ObjectHandle<isConst>>::write(rapidjson::Document& document, rapidjson::Value& json, const objects::ObjectHandle<isConst>& value) {
+    DUK_ASSERT(false && "Not supported at the moment, we need to 'normalize' object indices before serializing them");
+}
+
+template<bool isConst>
+void JsonPrimitiveValue<objects::ObjectHandle<isConst>>::read(const rapidjson::Value& json, objects::ObjectHandle<isConst>& value) {
+    DUK_ASSERT(json.IsUint());
+    uint32_t index;
+    json_read_value(json, index);
+    value = duk::objects::Object(index, 0, nullptr);
+}
+
+template<typename T>
+void JsonPrimitiveValue<objects::Component<T>>::write(rapidjson::Document& document, rapidjson::Value& json, const objects::Component<T>& value) {
     DUK_ASSERT(false && "Not supported at the moment, we need to 'normalize' object indices before serializing them");
 }
 
 template<typename T>
-void from_json(const rapidjson::Value& json, duk::objects::Component<T>& component) {
+void JsonPrimitiveValue<objects::Component<T>>::read(const rapidjson::Value& json, objects::Component<T>& value) {
     DUK_ASSERT(json.IsUint());
     uint32_t index;
-    from_json(json, index);
-    component = duk::objects::Component<T>(index, 0, nullptr);
-}
-
-template<typename T>
-void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::ConstComponent<T>& component) {
-    DUK_ASSERT(false && "Not supported at the moment, we need to 'normalize' object indices before serializing them");
-}
-
-template<>
-inline void from_json<duk::objects::Objects>(const rapidjson::Value& json, duk::objects::Objects& objects) {
-    DUK_ASSERT(json.IsArray());
-    auto componentRegistry = objects::ComponentRegistry::instance();
-    auto jsonArray = json.GetArray();
-    for (auto& jsonElement: jsonArray) {
-        DUK_ASSERT(jsonElement.IsObject());
-
-        duk::objects::Id parentId;
-        from_json_member(jsonElement, "parent", parentId, true);
-
-        auto object = objects.add_object(parentId);
-        auto jsonComponentsArray = jsonElement["components"].GetArray();
-        for (auto& jsonComponent: jsonComponentsArray) {
-            std::string type;
-            from_json_member(jsonComponent, "type", type);
-            componentRegistry->from_json(jsonComponent, object, type);
-        }
-    }
-    objects.solve_references();
-}
-
-template<>
-inline void to_json<duk::objects::Objects>(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Objects& objects) {
-    auto jsonArray = json.SetArray().GetArray();
-    auto componentRegistry = objects::ComponentRegistry::instance();
-    for (auto object: objects.all()) {
-        rapidjson::Value jsonElement;
-        {
-            rapidjson::Value jsonComponents;
-            auto jsonComponentsArray = jsonComponents.SetArray().GetArray();
-            auto mask = object.component_mask();
-            for (auto componentIndex: mask.bits<true>()) {
-                rapidjson::Value jsonComponent;
-                componentRegistry->to_json(document, jsonComponent, object, componentIndex);
-                jsonComponentsArray.PushBack(jsonComponent, document.GetAllocator());
-            }
-            jsonElement.SetObject();
-            jsonElement.AddMember("components", std::move(jsonComponents), document.GetAllocator());
-        }
-        jsonArray.PushBack(std::move(jsonElement), document.GetAllocator());
-    }
+    json_read_value(json, index);
+    value = duk::objects::Component<T>(index, 0, nullptr);
 }
 
 }// namespace duk::serial

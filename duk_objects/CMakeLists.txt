@@ -37,7 +37,9 @@ target_link_libraries(duk.objects
 
 set_target_properties(duk.objects PROPERTIES EXPORT_NAME objects)
 
-add_subdirectory(test)
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
 
 install(
         DIRECTORY include/

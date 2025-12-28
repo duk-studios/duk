@@ -7,7 +7,7 @@
 
 #include <duk_macros/macros.h>
 
-#include <duk_serial/json/types.h>
+#include <duk_serial/json.h>
 
 #include <cstdint>
 #include <limits>
@@ -38,16 +38,15 @@ private:
 namespace duk::serial {
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::objects::Id& id) {
-    uint32_t index;
-    from_json(json, index);
-    id = duk::objects::Id(index, 0);
-}
+struct JsonPrimitiveValue<duk::objects::Id> {
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Id& id) {
+        json.SetUint(id.index());
+    }
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Id& id) {
-    to_json(document, json, id.index());
-}
+    static void read(const rapidjson::Value& json, duk::objects::Id& id) {
+        id = duk::objects::Id(json.GetUint(), 0);
+    }
+};
 
 }// namespace duk::serial
 

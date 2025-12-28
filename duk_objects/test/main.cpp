@@ -6,8 +6,11 @@
 #include <duk_objects/objects.h>
 #include <duk_objects/object_solver.h>
 #include <duk_objects/events.h>
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json.h>
+#include <catch2/catch_test_macros.hpp>
 #include <iostream>
+#include <ranges>
+#include <sstream>
 
 struct TestData {
     int b;
@@ -45,132 +48,134 @@ struct ComponentTest3 {
     }
 };
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json<ComponentTest>(const rapidjson::Value& json, ComponentTest& componentTest) {
-    from_json_member(json, "a", componentTest.a);
-    from_json_member(json, "b", componentTest.b);
-    from_json_member(json, "c", componentTest.c);
-}
+struct Type<ComponentTest> : Class<ComponentTest,
+    Member<"a", &ComponentTest::a>,
+    Member<"b", &ComponentTest::b>,
+    Member<"c", &ComponentTest::c>> {
+};
 
 template<>
-inline void to_json<ComponentTest>(rapidjson::Document& document, rapidjson::Value& json, const ComponentTest& componentTest) {
-    to_json_member(document, json, "a", componentTest.a);
-    to_json_member(document, json, "b", componentTest.b);
-    to_json_member(document, json, "c", componentTest.c);
-}
+struct Type<ComponentTest2> : Class<ComponentTest2,
+    Member<"res", &ComponentTest2::res>,
+    Member<"b", &ComponentTest2::b>,
+    Member<"c", &ComponentTest2::c>> {
+};
 
 template<>
-inline void from_json<ComponentTest2>(const rapidjson::Value& json, ComponentTest2& componentTest) {
-    // from_json(json["res"], componentTest.res);
-    from_json_member(json, "res", componentTest.res);
-    from_json_member(json, "b", componentTest.b);
-    from_json_member(json, "c", componentTest.c);
-}
+struct Type<ComponentTest3> : Class<ComponentTest3,
+    Member<"a", &ComponentTest3::a>,
+    Member<"b", &ComponentTest3::b>,
+    Member<"c", &ComponentTest3::c>> {
+};
 
-template<>
-inline void to_json<ComponentTest2>(rapidjson::Document& document, rapidjson::Value& json, const ComponentTest2& componentTest) {
-    to_json_member(document, json, "res", componentTest.res);
-    to_json_member(document, json, "b", componentTest.b);
-    to_json_member(document, json, "c", componentTest.c);
-}
+} // namespace duk::type
 
-template<>
-inline void from_json<ComponentTest3>(const rapidjson::Value& json, ComponentTest3& componentTest) {
-    from_json_member(json, "a", componentTest.a);
-    from_json_member(json, "b", componentTest.b);
-    from_json_member(json, "c", componentTest.c);
-}
-
-template<>
-inline void to_json<ComponentTest3>(rapidjson::Document& document, rapidjson::Value& json, const ComponentTest3& componentTest) {
-    to_json_member(document, json, "a", componentTest.a);
-    to_json_member(document, json, "b", componentTest.b);
-    to_json_member(document, json, "c", componentTest.c);
-}
-
-}// namespace duk::serial
-
-int main() {
-    // register our component types
+TEST_CASE("Objects and Components Management", "[objects]") {
+    // Register component types
     duk::objects::register_component<ComponentTest>();
     duk::objects::register_component<ComponentTest2>();
     duk::objects::register_component<ComponentTest3>();
 
     duk::event::Listener listener;
+    duk::objects::ComponentEventDispatcher componentEventDispatcher;
+    duk::objects::Objects objects;
+
+    SECTION("Add and manage objects with components") {
+        auto obj0 = objects.add_object();
+        REQUIRE(obj0.valid());
+
+        auto cmp = obj0.add<ComponentTest>();
+        REQUIRE(cmp.valid());
+        cmp->a = 10;
+        cmp->b = 20;
+        cmp->c = 30;
+        CHECK(cmp->a == 10);
+        CHECK(cmp->b == 20);
+        CHECK(cmp->c == 30);
+    }
+
+    SECTION("Remove components from objects") {
+        auto obj0 = objects.add_object();
+        auto cmp_before = obj0.add<ComponentTest>();
+
+        CHECK(cmp_before.valid());
+
+        obj0.remove<ComponentTest>();
+
+        // components are still valid until the next update
+        CHECK(obj0.component<ComponentTest>().valid());
+
+        // process component removal
+        objects.update(componentEventDispatcher);
+
+        auto cmp_after = obj0.component<ComponentTest>();
+        CHECK(!cmp_after.valid());
+
+    }
+}
+
+TEST_CASE("Serialization and Deserialization", "[objects][serialization]") {
+    // Register component types
+    duk::objects::register_component<ComponentTest>();
+    duk::objects::register_component<ComponentTest2>();
+    duk::objects::register_component<ComponentTest3>();
 
     duk::objects::ComponentEventDispatcher componentEventDispatcher;
 
-    //The objects which is in use
-    duk::objects::Objects objects;
+    SECTION("Objects json roundtrip") {
+        duk::objects::Objects objects;
 
-    //Adding a new object to the objects
-    auto obj0 = objects.add_object();
+        {
+            auto obj = objects.add_object();
+            auto comp = obj.add<ComponentTest>();
+            comp->a = 42;
+            comp->b = 43;
+            comp->c = 44;
+        }
+        {
+            auto obj = objects.add_object();
+            auto comp = obj.add<ComponentTest2>();
+            comp->res = duk::resource::Id(123);
+            comp->b = 55;
+            comp->c = 56;
+        }
+        {
+            auto obj = objects.add_object();
+            auto comp0 = obj.add<ComponentTest>();
+            comp0->a = 7;
+            comp0->b = 8;
+            comp0->c = 9;
+            auto comp1 = obj.add<ComponentTest2>();
+            comp1->res = duk::resource::Id(320);
+            comp1->b = 15;
+            comp1->c = 16;
+            auto comp2 = obj.add<ComponentTest3>();
+            comp2->a = 21;
+            comp2->b = 22;
+            comp2->c = 23;
+        }
 
-    //Adding a new component to this object
-    obj0.add<ComponentTest>();
+        objects.add_object();
+        objects.add_object();
 
-    //Adding new objects to the objects with new components
-    auto obj1 = objects.add_object();
-    obj1.add<ComponentTest2>();
-    auto obj2 = objects.add_object();
-    obj2.add<ComponentTest>();
-    auto cmp2 = obj2.add<ComponentTest2>();
-    cmp2->res = duk::resource::Id(320);
-    obj2.add<ComponentTest3>();
+        // Serialize to JSON
+        std::ostringstream oss;
+        auto json = duk::serial::json_write(objects);
+        INFO("Objects json: " << json);
 
-    objects.add_object();
-    objects.add_object();
+        // Deserialize from JSON
+        duk::objects::Objects objects2;
+        duk::serial::json_read(json, objects2);
 
-    struct CollisionEvent {
-        duk::objects::Object object;
-        duk::objects::Object other;
-    };
+        // Serialize again to verify roundtrip
+        auto json2 = duk::serial::json_write(objects2);
 
-    CollisionEvent collisionEvent = {};
-    collisionEvent.object = obj1;
-    collisionEvent.other = obj2;
+        INFO("Objects json2: " << json2);
 
-    componentEventDispatcher.emit_object<CollisionEvent>(obj0, collisionEvent);
-
-    //Removing the Component from obj with id
-    obj0.remove<ComponentTest>();
-
-    //Destroying object from objects
-    obj1.destroy();
-
-    // updating destroys all objects marked for destruction (via destroy)
-    objects.update(componentEventDispatcher);
-
-    //Iterating through all the objects with specified components
-    //The objects that have any component type like: ComponentTest, ComponentTest2, ComponentTest3, will be listed below
-    for (auto object: objects.all_with<ComponentTest, ComponentTest2, ComponentTest3>()) {
-        std::cout << "Id: " << object.id().index() << std::endl;
-
-        auto [comp1, comp2, comp3] = object.components<ComponentTest, ComponentTest2, ComponentTest3>();
-        comp1->a = 1;
-        comp2->b = 2;
-        comp3->c = 3;
+        CHECK(json == json2);
+        CHECK(objects.count() == objects2.count());
     }
-
-    std::ostringstream oss;
-    duk::serial::write_json(oss, objects, true);
-
-    auto json = oss.str();
-
-    duk::log::debug("objects json: {}", json);
-
-    duk::objects::Objects objects2;
-
-    duk::serial::read_json(json, objects2);
-
-    std::ostringstream oss2;
-    duk::serial::write_json(oss2, objects2, true);
-
-    auto json2 = oss2.str();
-    duk::log::debug("objects json2: {}", json2).wait();
-    DUK_ASSERT(json == json2);
-
-    return 0;
 }
