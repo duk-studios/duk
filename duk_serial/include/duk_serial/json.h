@@ -70,6 +70,23 @@ struct JsonPrimitiveValue<std::string> {
     static void read(const rapidjson::Value& json, std::string& value);
 };
 
+template<typename T>
+struct JsonPrimitiveValue<std::shared_ptr<T>> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const std::shared_ptr<T>& value);
+
+    static void read(const rapidjson::Value& json, std::shared_ptr<T>& value);
+};
+
+template<typename T>
+struct JsonPrimitiveValue<std::unique_ptr<T>> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<T>& value);
+
+    static void read(const rapidjson::Value& json, std::unique_ptr<T>& value);
+};
+
+
 template<typename T, bool Pretty>
 std::string json_write(const T& value) {
     std::string json;
@@ -213,6 +230,28 @@ void JsonContainerValue<T>::read(const rapidjson::Value& json, T& value) {
         json_read_value(jsonElement, element);
         description.insert_back(value, std::move(element));
     }
+}
+
+template<typename T>
+void JsonPrimitiveValue<std::shared_ptr<T>>::write(rapidjson::Document& document, rapidjson::Value& json, const std::shared_ptr<T>& value) {
+    json_write_value(document, json, *value);
+}
+
+template<typename T>
+void JsonPrimitiveValue<std::shared_ptr<T>>::read(const rapidjson::Value& json, std::shared_ptr<T>& value) {
+    value = std::make_shared<T>();
+    json_read_value(json, *value);
+}
+
+template<typename T>
+void JsonPrimitiveValue<std::unique_ptr<T>>::write(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<T>& value) {
+    json_write_value(document, json, *value);
+}
+
+template<typename T>
+void JsonPrimitiveValue<std::unique_ptr<T>>::read(const rapidjson::Value& json, std::unique_ptr<T>& value) {
+    value = std::make_unique<T>();
+    json_read_value(json, *value);
 }
 
 inline void JsonPrimitiveValue<std::string>::write(rapidjson::Document& document, rapidjson::Value& json, const std::string& value) {
