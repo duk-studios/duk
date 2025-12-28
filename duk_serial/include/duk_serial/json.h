@@ -32,6 +32,12 @@ template<typename T>
 void json_read_value(const rapidjson::Value& json, T& value);
 
 template<typename T>
+void json_write_member_value(rapidjson::Document& document, rapidjson::Value& json, std::string_view name, const T& value);
+
+template<typename T>
+void json_read_member_value(const rapidjson::Value& json, std::string_view name, T& value);
+
+template<typename T>
 struct JsonPrimitiveValue {
 
     static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value);
@@ -128,6 +134,26 @@ void json_read_value(const rapidjson::Value& json, T& value) {
     else {
         JsonPrimitiveValue<T>::read(json, value);
     }
+}
+
+template<typename T>
+void json_write_member_value(rapidjson::Document& document, rapidjson::Value& json, std::string_view name, const T& value) {
+    DUK_ASSERT(json.IsObject());
+    rapidjson::Value jsonMemberValue;
+    json_write_value(document, jsonMemberValue, value);
+    rapidjson::Value jsonMemberName;
+    jsonMemberName.SetString(rapidjson::StringRef(name.data(), name.size()), document.GetAllocator());
+    json.AddMember(std::move(jsonMemberName), std::move(jsonMemberValue), document.GetAllocator());
+}
+
+template<typename T>
+void json_read_member_value(const rapidjson::Value& json, std::string_view name, T& value) {
+    DUK_ASSERT(json.IsObject());
+    const auto jsonMemberIt = json.FindMember(name.data());
+    if (jsonMemberIt == json.MemberEnd()) {
+        return;
+    }
+    json_read_value(jsonMemberIt->value, value);
 }
 
 template<typename T>
