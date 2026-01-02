@@ -132,6 +132,10 @@ target_link_libraries(duk.rhi
 
 set_target_properties(duk.rhi PROPERTIES EXPORT_NAME rhi)
 
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
+
 install(
         DIRECTORY include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
