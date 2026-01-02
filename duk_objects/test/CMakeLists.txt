@@ -1,6 +1,6 @@
 
 set(DUK_OBJECTS_TEST_SOURCES
-        main.cpp
+        objects.cc
         )
 
 add_executable(duk.objects.test ${DUK_OBJECTS_TEST_SOURCES})
