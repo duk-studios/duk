@@ -26,7 +26,7 @@ void SystemRegistry::from_json(Systems& systems, const rapidjson::Value& json, c
     }
     const auto index = it->second;
     auto& entry = m_systemEntries.at(index);
-    entry->from_json(systems, json);
+    entry->json_read(systems, json);
 }
 
 void SystemRegistry::to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json, const std::string& systemName) {
@@ -37,7 +37,7 @@ void SystemRegistry::to_json(const Systems& systems, rapidjson::Document& docume
     }
     const auto index = it->second;
     auto& entry = m_systemEntries.at(index);
-    entry->to_json(systems, document, json);
+    entry->json_write(systems, document, json);
 }
 
 const std::string& SystemRegistry::system_name(size_t systemIndex) const {
@@ -50,6 +50,7 @@ SystemEventDispatcher::SystemEventDispatcher(duk::objects::ComponentEventDispatc
 
 System::System()
     : m_globals(nullptr)
+    , m_objects(nullptr)
     , m_dispatcher(nullptr) {
 }
 
@@ -139,7 +140,7 @@ Systems::SystemIterator<true> Systems::begin() const {
 }
 
 Systems::SystemIterator<true> Systems::end() const {
-    return SystemIterator<true>(*this, 0);
+    return SystemIterator<true>(*this, m_systemGroup.size());
 }
 
 Systems::Systems() = default;
@@ -179,3 +180,33 @@ size_t Systems::system_index(size_t containerIndex) const {
 }
 
 }// namespace duk::system
+
+namespace duk::serial {
+
+using namespace duk::system;
+
+void JsonPrimitiveValue<Systems>::write(rapidjson::Document& document, rapidjson::Value& json, const Systems& systems) {
+    auto jsonSystemsArray = json.SetArray().GetArray();
+    for (auto it: systems) {
+        const auto& systemName = it.system_name();
+        rapidjson::Value systemJson;
+        systemJson.SetObject();
+
+        duk::system::SystemRegistry::instance()->to_json(systems, document, systemJson, systemName);
+
+        json_write_member_value(document, systemJson, "type", systemName);
+
+        jsonSystemsArray.PushBack(std::move(systemJson), document.GetAllocator());
+    }
+}
+
+void JsonPrimitiveValue<Systems>::read(const rapidjson::Value& json, Systems& systems) {
+    auto systemJsonArray = json.GetArray();
+    for (auto& systemJson: systemJsonArray) {
+        std::string systemName;
+        json_read_member_value(systemJson, "type", systemName);
+        duk::system::SystemRegistry::instance()->from_json(systems, systemJson, systemName);
+    }
+}
+
+}
