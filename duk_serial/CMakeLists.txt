@@ -4,18 +4,22 @@ set(DUK_SERIAL_HEADERS
         include/duk_serial/json.h
 )
 
-add_library(duk.serial INTERFACE ${DUK_SERIAL_HEADERS})
+set(DUK_SERIAL_SOURCES
+        src/duk_serial/json.cpp
+)
+
+add_library(duk.serial ${DUK_SERIAL_HEADERS} ${DUK_SERIAL_SOURCES})
 add_library(duk::serial ALIAS duk.serial)
 
 target_include_directories(duk.serial
-        INTERFACE
+        PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 
      )
 
 target_link_libraries(duk.serial
-        INTERFACE
+        PUBLIC
         duk::type
         rapidjson
         )

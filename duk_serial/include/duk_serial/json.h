@@ -37,14 +37,17 @@ void json_write_member_value(rapidjson::Document& document, rapidjson::Value& js
 template<typename T>
 void json_read_member_value(const rapidjson::Value& json, std::string_view name, T& value);
 
+// generic primitives have no implementation
+// specializations will provide the actual serialization
 template<typename T>
 struct JsonPrimitiveValue {
 
-    static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value);
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value) {}
 
-    static void read(const rapidjson::Value& json, T& value);
+    static void read(const rapidjson::Value& json, T& value) {}
 };
 
+// Used for classes/structs that specializes duk::type::Type<T> and inherit from duk::type::Class<T, ...>
 template<typename T>
 struct JsonObjectValue {
 
@@ -53,6 +56,7 @@ struct JsonObjectValue {
     static void read(const rapidjson::Value& json, T& value);
 };
 
+// Used for containers that specializes duk::type::Type<T> and inherit from duk::type::Container<T>
 template<typename T>
 struct JsonContainerValue {
 
@@ -62,6 +66,62 @@ struct JsonContainerValue {
 };
 
 // specializations
+template<>
+struct JsonPrimitiveValue<bool> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const bool& value);
+
+    static void read(const rapidjson::Value& json, bool& value);
+};
+
+template<>
+struct JsonPrimitiveValue<int32_t> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const int32_t& value);
+
+    static void read(const rapidjson::Value& json, int32_t& value);
+};
+
+template<>
+struct JsonPrimitiveValue<uint32_t> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const uint32_t& value);
+
+    static void read(const rapidjson::Value& json, uint32_t& value);
+};
+
+template<>
+struct JsonPrimitiveValue<int64_t> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const int64_t& value);
+
+    static void read(const rapidjson::Value& json, int64_t& value);
+};
+
+template<>
+struct JsonPrimitiveValue<uint64_t> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const uint64_t& value);
+
+    static void read(const rapidjson::Value& json, uint64_t& value);
+};
+
+template<>
+struct JsonPrimitiveValue<float> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const float& value);
+
+    static void read(const rapidjson::Value& json, float& value);
+};
+
+template<>
+struct JsonPrimitiveValue<double> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const double& value);
+
+    static void read(const rapidjson::Value& json, double& value);
+};
+
 template<>
 struct JsonPrimitiveValue<std::string> {
 
@@ -174,16 +234,6 @@ void json_read_member_value(const rapidjson::Value& json, std::string_view name,
 }
 
 template<typename T>
-void JsonPrimitiveValue<T>::write(rapidjson::Document& document, rapidjson::Value& json, const T& value) {
-    json.Set(value, document.GetAllocator());
-}
-
-template<typename T>
-void JsonPrimitiveValue<T>::read(const rapidjson::Value& json, T& value) {
-    value = json.Get<T>();
-}
-
-template<typename T>
 void JsonObjectValue<T>::write(rapidjson::Document& document, rapidjson::Value& json, const T& value) {
     constexpr auto description = duk::type::describe<T>();
     json.SetObject();
@@ -254,13 +304,6 @@ void JsonPrimitiveValue<std::unique_ptr<T>>::read(const rapidjson::Value& json, 
     json_read_value(json, *value);
 }
 
-inline void JsonPrimitiveValue<std::string>::write(rapidjson::Document& document, rapidjson::Value& json, const std::string& value) {
-    json.SetString(value, document.GetAllocator());
-}
-
-inline void JsonPrimitiveValue<std::string>::read(const rapidjson::Value& json, std::string& value) {
-    value = json.GetString();
-}
 
 }
 
