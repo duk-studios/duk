@@ -59,37 +59,23 @@ using SpriteResource = duk::resource::Handle<Sprite>;
 
 }// namespace duk::renderer
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json<duk::renderer::SpriteData>(const rapidjson::Value& json, duk::renderer::SpriteData& spriteData) {
-    from_json_member(json, "max", spriteData.max);
-    from_json_member(json, "min", spriteData.min);
-    from_json_member(json, "pivot", spriteData.pivot);
-}
+struct Type<duk::renderer::SpriteData> : Class<duk::renderer::SpriteData,
+    Member<"max", &duk::renderer::SpriteData::max>,
+    Member<"min", &duk::renderer::SpriteData::min>,
+    Member<"pivot", &duk::renderer::SpriteData::pivot>> {
+};
 
 template<>
-inline void to_json<duk::renderer::SpriteData>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::SpriteData& spriteData) {
-    to_json_member(document, json, "max", spriteData.max);
-    to_json_member(document, json, "min", spriteData.min);
-    to_json_member(document, json, "pivot", spriteData.pivot);
-}
+struct Type<duk::renderer::SpriteAtlasData> : Class<duk::renderer::SpriteAtlasData,
+    Member<"image", &duk::renderer::SpriteAtlasData::image>,
+    Member<"pixelsPerUnit", &duk::renderer::SpriteAtlasData::pixelsPerUnit>,
+    Member<"sprites", &duk::renderer::SpriteAtlasData::sprites>> {
+};
 
-template<>
-inline void from_json<duk::renderer::SpriteAtlasData>(const rapidjson::Value& json, duk::renderer::SpriteAtlasData& spriteAtlasData) {
-    from_json_member(json, "image", spriteAtlasData.image);
-    from_json_member(json, "pixelsPerUnit", spriteAtlasData.pixelsPerUnit);
-    from_json_member(json, "sprites", spriteAtlasData.sprites);
-}
-
-template<>
-inline void to_json<duk::renderer::SpriteAtlasData>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::SpriteAtlasData& spriteAtlasData) {
-    to_json_member(document, json, "image", spriteAtlasData.image);
-    to_json_member(document, json, "pixelsPerUnit", spriteAtlasData.pixelsPerUnit);
-    to_json_member(document, json, "sprites", spriteAtlasData.sprites);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 namespace duk::resource {
 

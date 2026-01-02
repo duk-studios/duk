@@ -5,7 +5,7 @@
 #include <duk_renderer/material/material_handler.h>
 #include <duk_renderer/renderer.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json.h>
 
 namespace duk::renderer {
 
@@ -18,7 +18,7 @@ bool MaterialHandler::accepts(const std::string& extension) const {
 }
 
 std::shared_ptr<Material> MaterialHandler::load_from_text(duk::tools::Globals* globals, const std::string_view& text) {
-    auto materialData = duk::serial::read_json<MaterialData>(text);
+    auto materialData = duk::serial::json_read<MaterialData>(text);
 
     const auto renderer = globals->get<Renderer>();
 

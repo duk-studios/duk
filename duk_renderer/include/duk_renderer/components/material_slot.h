@@ -15,19 +15,14 @@ struct MaterialSlot {
 
 }// namespace duk::renderer
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::renderer::MaterialSlot& slot) {
-    from_json_member(json, "material", slot.material);
-}
+struct Type<duk::renderer::MaterialSlot> : Class<duk::renderer::MaterialSlot,
+    Member<"material", &duk::renderer::MaterialSlot::material>> {
+};
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::MaterialSlot& slot) {
-    to_json_member(document, json, "material", slot.material);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 namespace duk::resource {
 

@@ -69,7 +69,7 @@ private:
     std::shared_ptr<duk::platform::Window> m_window;
     std::shared_ptr<duk::renderer::Renderer> m_renderer;
     duk::resource::Pools m_pools;
-    bool m_run;
+    volatile bool m_run;
 };
 
 int main() {

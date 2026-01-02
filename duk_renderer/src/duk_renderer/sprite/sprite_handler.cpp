@@ -4,9 +4,7 @@
 
 #include <duk_renderer/sprite/sprite_handler.h>
 
-#include <duk_serial/json/serializer.h>
-
-#include <duk_tools/file.h>
+#include <duk_serial/json.h>
 
 namespace duk::renderer {
 
@@ -19,7 +17,7 @@ bool SpriteHandler::accepts(const std::string& extension) const {
 }
 
 std::shared_ptr<Sprite> SpriteHandler::load_from_text(duk::tools::Globals* globals, const std::string_view& text) {
-    const auto spriteAtlasData = duk::serial::read_json<SpriteAtlasData>(text);
+    const auto spriteAtlasData = duk::serial::json_read<SpriteAtlasData>(text);
 
     SpriteAtlasCreateInfo spriteAtlasCreateInfo = {};
     spriteAtlasCreateInfo.spriteAtlasData = &spriteAtlasData;
