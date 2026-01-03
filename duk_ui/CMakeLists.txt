@@ -33,6 +33,7 @@ set(DUK_UI_SOURCES
         src/duk_ui/font/freetype/freetype_font_loader.h
         src/duk_ui/font/freetype/freetype_font_loader.cpp
         src/duk_ui/text/text_mesh_builder.cpp
+        src/duk_ui/text/text_alignment.cpp
         src/duk_ui/systems/text_system.cpp
         src/duk_ui/systems/image_system.cpp
         src/duk_ui/systems/canvas_system.cpp
@@ -56,6 +57,10 @@ target_link_libraries(duk.ui
         )
 
 set_target_properties(duk.ui PROPERTIES EXPORT_NAME ui)
+
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
 
 install(
         DIRECTORY include/

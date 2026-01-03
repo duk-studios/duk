@@ -40,36 +40,22 @@ struct CanvasTransform {
 
 }// namespace duk::ui
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json<duk::ui::Canvas>(const rapidjson::Value& json, duk::ui::Canvas& canvas) {
-    from_json_member(json, "size", canvas.size);
-}
+struct Type<duk::ui::Canvas> : Class<duk::ui::Canvas,
+    Member<"size", &duk::ui::Canvas::size>> {
+};
 
 template<>
-inline void to_json<duk::ui::Canvas>(rapidjson::Document& document, rapidjson::Value& json, const duk::ui::Canvas& canvas) {
-    to_json_member(document, json, "size", canvas.size);
-}
+struct Type<duk::ui::CanvasTransform> : Class<duk::ui::CanvasTransform,
+    Member<"anchor", &duk::ui::CanvasTransform::anchor>,
+    Member<"pivot", &duk::ui::CanvasTransform::pivot>,
+    Member<"position", &duk::ui::CanvasTransform::position>,
+    Member<"size", &duk::ui::CanvasTransform::size>,
+    Member<"scale", &duk::ui::CanvasTransform::scale>> {
+};
 
-template<>
-inline void from_json<duk::ui::CanvasTransform>(const rapidjson::Value& json, duk::ui::CanvasTransform& canvasTransform) {
-    from_json_member(json, "anchor", canvasTransform.anchor);
-    from_json_member(json, "pivot", canvasTransform.pivot);
-    from_json_member(json, "position", canvasTransform.position);
-    from_json_member(json, "size", canvasTransform.size);
-    from_json_member(json, "scale", canvasTransform.scale);
-}
-
-template<>
-inline void to_json<duk::ui::CanvasTransform>(rapidjson::Document& document, rapidjson::Value& json, const duk::ui::CanvasTransform& canvasTransform) {
-    to_json_member(document, json, "anchor", canvasTransform.anchor);
-    to_json_member(document, json, "pivot", canvasTransform.pivot);
-    to_json_member(document, json, "position", canvasTransform.position);
-    to_json_member(document, json, "size", canvasTransform.size);
-    to_json_member(document, json, "scale", canvasTransform.scale);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 #endif//DUK_UI_CANVAS_H
