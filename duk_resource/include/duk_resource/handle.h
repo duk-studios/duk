@@ -210,11 +210,11 @@ template<>
 struct JsonPrimitiveValue<duk::resource::Id> {
 
     static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Id& id) {
-        json.Set(id.value(), document.GetAllocator());
+        json.SetUint64(id.value());
     }
 
     static void read(const rapidjson::Value& json, duk::resource::Id& id) {
-        id = duk::resource::Id(json.Get<uint64_t>());
+        id = duk::resource::Id(json.GetUint64());
     }
 };
 
@@ -222,11 +222,11 @@ template<typename T>
 struct JsonPrimitiveValue<duk::resource::Handle<T>> {
 
     static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Handle<T>& resource) {
-        json.Set(resource.id().value(), document.GetAllocator());
+        json.SetUint64(resource.id().value());
     }
 
     static void read(const rapidjson::Value& json, duk::resource::Handle<T>& resource) {
-        resource.reset(duk::resource::Id(json.Get<uint64_t>()));
+        resource.reset(duk::resource::Id(json.GetUint64()));
     }
 };
 
