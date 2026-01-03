@@ -97,8 +97,7 @@ void JsonPrimitiveValue<BufferBinding::Member::Type>::read(const rapidjson::Valu
 }
 
 void JsonPrimitiveValue<BufferBinding::Member>::write(rapidjson::Document& document, rapidjson::Value& json, const BufferBinding::Member& value) {
-    json_write_member_value(document, json, "type", value.type);
-    json_write_member_value(document, json, "name", value.name);
+    json.SetObject();
     switch (value.type) {
         case BufferBinding::Member::Type::INT:
             json_write_member_value(document, json, "value", value.data.intValue);
@@ -124,6 +123,8 @@ void JsonPrimitiveValue<BufferBinding::Member>::write(rapidjson::Document& docum
         default:
             throw std::runtime_error("Unknown buffer member type");
     }
+    json_write_member_value(document, json, "type", value.type);
+    json_write_member_value(document, json, "name", value.name);
 }
 
 void JsonPrimitiveValue<BufferBinding::Member>::read(const rapidjson::Value& json, BufferBinding::Member& value) {
@@ -165,8 +166,7 @@ void JsonPrimitiveValue<BindingType>::read(const rapidjson::Value& json, Binding
 }
 
 void JsonPrimitiveValue<Binding>::write(rapidjson::Document& document, rapidjson::Value& json, const Binding& value) {
-    json_write_member_value(document, json, "type", value.type);
-    json_write_member_value(document, json, "name", value.name);
+    json.SetObject();
     switch (value.type) {
         case BindingType::UNIFORM:
         case BindingType::INSTANCE: {
@@ -187,6 +187,8 @@ void JsonPrimitiveValue<Binding>::write(rapidjson::Document& document, rapidjson
         default:
             throw std::runtime_error("Unknown material binding type");
     }
+    json_write_member_value(document, json, "type", value.type);
+    json_write_member_value(document, json, "name", value.name);
 }
 
 void JsonPrimitiveValue<Binding>::read(const rapidjson::Value& json, Binding& value) {
