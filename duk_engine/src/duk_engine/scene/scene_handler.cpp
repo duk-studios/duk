@@ -4,7 +4,7 @@
 
 #include <duk_engine/scene/scene_handler.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json.h>
 
 namespace duk::engine {
 
@@ -18,7 +18,7 @@ bool SceneHandler::accepts(const std::string& extension) const {
 
 std::shared_ptr<Scene> SceneHandler::load_from_text(duk::tools::Globals* globals, const std::string_view& text) {
     auto scene = std::make_shared<Scene>();
-    duk::serial::read_json(text, *scene);
+    duk::serial::json_read(text, *scene);
     return scene;
 }
 

@@ -4,7 +4,7 @@
 #include <duk_engine/settings.h>
 #include <duk_tools/file.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json.h>
 
 namespace duk::engine {
 
@@ -12,7 +12,7 @@ Settings load_settings(const std::string& path) {
     auto content = duk::tools::load_text(path);
 
     Settings settings = {};
-    duk::serial::read_json(content, settings);
+    duk::serial::json_read(content, settings);
 
     return settings;
 }
