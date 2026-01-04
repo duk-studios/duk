@@ -5,6 +5,7 @@
 #include <duk_type/describe.h>
 #include <duk_type/describe_class.h>
 #include <duk_type/describe_container.h>
+#include <duk_type/describe_enum.h>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -26,6 +27,12 @@ struct Complex {
     std::vector<Bar> bars;
     std::array<int, 5> numbers;
     std::set<std::string> names;
+};
+
+enum class DummyEnum {
+    VALUE_ONE,
+    VALUE_TWO,
+    VALUE_THREE
 };
 
 }
@@ -53,6 +60,14 @@ struct Type<Complex> : Class<Complex,
     Member<"names", &Complex::names>> {
 
 };
+
+template<>
+struct Type<DummyEnum> : Enum<DummyEnum,
+    Value<"VALUE_ONE", DummyEnum::VALUE_ONE>,
+    Value<"VALUE_TWO", DummyEnum::VALUE_TWO>,
+    Value<"VALUE_THREE", DummyEnum::VALUE_THREE>> {
+};
+
 
 }
 
@@ -137,5 +152,27 @@ TEST_CASE("Basic type information can be retrieved", "[type]") {
         CHECK(visitedElements[0] == "one");
         CHECK(visitedElements[1] == "two");
         CHECK(visitedElements[2] == "three");
+    }
+
+    SECTION("We can describe enums and query values and their names") {
+        using namespace foo;
+        constexpr auto enumDescription = duk::type::describe<DummyEnum>();
+        CHECK(enumDescription.name() == "foo::DummyEnum");
+        CHECK(enumDescription.value_count() == 3);
+        CHECK(enumDescription.name_of(DummyEnum::VALUE_ONE) == "VALUE_ONE");
+        CHECK(enumDescription.name_of(DummyEnum::VALUE_TWO) == "VALUE_TWO");
+        CHECK(enumDescription.name_of(DummyEnum::VALUE_THREE) == "VALUE_THREE");
+        CHECK(enumDescription.value_of("VALUE_ONE") == DummyEnum::VALUE_ONE);
+        CHECK(enumDescription.value_of("VALUE_TWO") == DummyEnum::VALUE_TWO);
+        CHECK(enumDescription.value_of("VALUE_THREE") == DummyEnum::VALUE_THREE);
+        CHECK_THROWS(enumDescription.value_of("unknown"));
+        CHECK_THROWS(enumDescription.name_of(static_cast<DummyEnum>(999)));
+
+        constexpr auto constexprValue = enumDescription.value_of("VALUE_THREE");
+        static_assert(constexprValue == DummyEnum::VALUE_THREE);
+
+        volatile auto valueName = "VALUE_TWO";
+        volatile auto runtimeValue = enumDescription.value_of(valueName);
+        CHECK(runtimeValue == DummyEnum::VALUE_TWO);
     }
 }

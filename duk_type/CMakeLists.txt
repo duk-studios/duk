@@ -1,5 +1,10 @@
 set(DUK_TYPE_HEADERS
         include/duk_type/describe.h
+        include/duk_type/describe_class.h
+        include/duk_type/describe_container.h
+        include/duk_type/describe_enum.h
+        include/duk_type/optional_const.h
+        include/duk_type/string_literal.h
         )
 
 set(DUK_TYPE_SOURCES
