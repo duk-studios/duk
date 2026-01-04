@@ -66,6 +66,7 @@ struct JsonContainerValue {
     static void read(const rapidjson::Value& json, T& value);
 };
 
+// Used for enums that specializes duk::type::Type<T> and inherit from duk::type::Enum<T, ...>
 template<typename T>
 struct JsonEnumValue {
 

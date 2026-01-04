@@ -23,22 +23,23 @@ enum class TextVertAlignment {
 
 }// namespace duk::ui
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-struct JsonPrimitiveValue<ui::TextVertAlignment> {
-    static void write(rapidjson::Document& document, rapidjson::Value& json, const ui::TextVertAlignment& value);
-
-    static void read(const rapidjson::Value& json, ui::TextVertAlignment& value);
+struct Type<duk::ui::TextVertAlignment> : Enum<duk::ui::TextVertAlignment,
+    Value<"top", duk::ui::TextVertAlignment::TOP>,
+    Value<"middle", duk::ui::TextVertAlignment::MIDDLE>,
+    Value<"bottom", duk::ui::TextVertAlignment::BOTTOM>> {
 };
 
 template<>
-struct JsonPrimitiveValue<ui::TextHoriAlignment> {
-    static void write(rapidjson::Document& document, rapidjson::Value& json, const ui::TextHoriAlignment& value);
+struct Type<duk::ui::TextHoriAlignment> : Enum<duk::ui::TextHoriAlignment,
+    Value<"left", duk::ui::TextHoriAlignment::LEFT>,
+    Value<"middle", duk::ui::TextHoriAlignment::MIDDLE>,
+    Value<"right", duk::ui::TextHoriAlignment::RIGHT>> {
 
-    static void read(const rapidjson::Value& json, ui::TextHoriAlignment& value);
 };
 
-}// namespace duk::serial
+}
 
 #endif//DUK_UI_TEXT_ALIGNMENT_H

@@ -48,25 +48,23 @@ struct hash<duk::rhi::Sampler> {
 
 }// namespace std
 
-namespace duk::serial {
-
-template<>
-struct JsonPrimitiveValue<duk::rhi::Sampler::WrapMode> {
-    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::rhi::Sampler::WrapMode& value);
-
-    static void read(const rapidjson::Value& json, duk::rhi::Sampler::WrapMode& value);
-};
-
-template<>
-struct JsonPrimitiveValue<duk::rhi::Sampler::Filter> {
-    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::rhi::Sampler::Filter& value);
-
-    static void read(const rapidjson::Value& json, duk::rhi::Sampler::Filter& value);
-};
-
-}// namespace duk::serial
-
 namespace duk::type {
+
+template<>
+struct Type<rhi::Sampler::Filter> : Enum<rhi::Sampler::Filter,
+    Value<"nearest", rhi::Sampler::Filter::NEAREST>,
+    Value<"linear", rhi::Sampler::Filter::LINEAR>,
+    Value<"cubic", rhi::Sampler::Filter::CUBIC>> {
+};
+
+template<>
+struct Type<rhi::Sampler::WrapMode> : Enum<rhi::Sampler::WrapMode,
+    Value<"repeat", rhi::Sampler::WrapMode::REPEAT>,
+    Value<"mirror-repeat", rhi::Sampler::WrapMode::MIRRORED_REPEAT>,
+    Value<"clamp-edge", rhi::Sampler::WrapMode::CLAMP_TO_EDGE>,
+    Value<"clamp-border", rhi::Sampler::WrapMode::CLAMP_TO_BORDER>,
+    Value<"mirror-clamp-edge", rhi::Sampler::WrapMode::MIRROR_CLAMP_TO_EDGE>> {
+};
 
 template<>
 struct Type<rhi::Sampler> : Class<rhi::Sampler,

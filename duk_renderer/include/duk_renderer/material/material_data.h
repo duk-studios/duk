@@ -86,8 +86,29 @@ struct MaterialData {
 namespace duk::type {
 
 template<>
+struct Type<duk::renderer::BindingType> : Enum<duk::renderer::BindingType,
+    Value<"undefined", duk::renderer::BindingType::UNDEFINED>,
+    Value<"uniform", duk::renderer::BindingType::UNIFORM>,
+    Value<"instance", duk::renderer::BindingType::INSTANCE>,
+    Value<"image-sampler", duk::renderer::BindingType::IMAGE_SAMPLER>,
+    Value<"image", duk::renderer::BindingType::IMAGE>> {
+};
+
+template<>
 struct Type<duk::renderer::BufferBinding> : Class<duk::renderer::BufferBinding,
     Member<"members", &duk::renderer::BufferBinding::members>> {
+};
+
+template<>
+struct Type<duk::renderer::BufferBinding::Member::Type> : Enum<duk::renderer::BufferBinding::Member::Type,
+    Value<"undefined", duk::renderer::BufferBinding::Member::Type::UNDEFINED>,
+    Value<"int", duk::renderer::BufferBinding::Member::Type::INT>,
+    Value<"uint", duk::renderer::BufferBinding::Member::Type::UINT>,
+    Value<"float", duk::renderer::BufferBinding::Member::Type::FLOAT>,
+    Value<"bool", duk::renderer::BufferBinding::Member::Type::BOOL>,
+    Value<"vec2", duk::renderer::BufferBinding::Member::Type::VEC2>,
+    Value<"vec3", duk::renderer::BufferBinding::Member::Type::VEC3>,
+    Value<"vec4", duk::renderer::BufferBinding::Member::Type::VEC4>> {
 };
 
 template<>
@@ -112,24 +133,10 @@ struct Type<duk::renderer::MaterialData> : Class<duk::renderer::MaterialData,
 namespace duk::serial {
 
 template<>
-struct JsonPrimitiveValue<renderer::BufferBinding::Member::Type> {
-    static void write(rapidjson::Document& document, rapidjson::Value& json, const renderer::BufferBinding::Member::Type& value);
-
-    static void read(const rapidjson::Value& json, renderer::BufferBinding::Member::Type& value);
-};
-
-template<>
 struct JsonPrimitiveValue<renderer::BufferBinding::Member> {
     static void write(rapidjson::Document& document, rapidjson::Value& json, const renderer::BufferBinding::Member& value);
 
     static void read(const rapidjson::Value& json, renderer::BufferBinding::Member& value);
-};
-
-template<>
-struct JsonPrimitiveValue<renderer::BindingType> {
-    static void write(rapidjson::Document& document, rapidjson::Value& json, const renderer::BindingType& value);
-
-    static void read(const rapidjson::Value& json, renderer::BindingType& value);
 };
 
 template<>
