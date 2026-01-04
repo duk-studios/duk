@@ -55,6 +55,10 @@ target_link_libraries(duk.animation
 
 set_target_properties(duk.animation PROPERTIES EXPORT_NAME animation)
 
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif()
+
 install(
         DIRECTORY include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
