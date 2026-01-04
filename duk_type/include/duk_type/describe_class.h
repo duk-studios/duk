@@ -39,7 +39,7 @@ template<typename T, typename ...Members>
 struct Class {
     static_assert((std::is_same_v<T, typename Members::class_type> && ...), "All Members must belong to the same Class");
 
-    static constexpr std::string_view name();
+    static constexpr const std::string& name();
 
     template<typename Visitor, typename ...Args>
     static constexpr void visit_members(Visitor&& visitor, T& instance, const Args& ...args);
@@ -110,7 +110,7 @@ constexpr std::string_view Member<Name, MemberPointer>::name() {
 }
 
 template<typename T, typename ... Members>
-constexpr std::string_view Class<T, Members...>::name() {
+constexpr const std::string& Class<T, Members...>::name() {
     return name_of<T>();
 }
 

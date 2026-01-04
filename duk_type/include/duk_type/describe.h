@@ -20,7 +20,7 @@ const std::string& name_of() {
 
 template<typename T>
 struct Type {
-    static constexpr std::string_view name() {
+    static constexpr const std::string& name() {
         return name_of<T>();
     }
 };
@@ -32,7 +32,7 @@ consteval Type<T> describe() {
 
 template<>
 struct Type<std::string> {
-    static constexpr std::string_view name() {
+    static constexpr std::string name() {
         return "std::string";
     }
 };

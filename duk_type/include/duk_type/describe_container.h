@@ -22,7 +22,7 @@ struct Container {
     using container_type = T;
     using value_type = typename T::value_type;
 
-    static constexpr std::string_view name() {
+    static constexpr const std::string& name() {
         return name_of<T>();
     }
 
@@ -64,7 +64,7 @@ struct Container {
 template<typename T>
 struct Type<std::vector<T>> : Container<std::vector<T>> {
 
-    static constexpr std::string_view name() {
+    static constexpr const std::string& name() {
         static std::string typeName = [] {
             constexpr auto valueDescription = describe<T>();
             return fmt::format("std::vector<{}>", valueDescription.name());
@@ -104,7 +104,7 @@ struct Type<std::array<T, N>> : Container<std::array<T, N>> {
 template<typename T>
 struct Type<std::set<T>> : Container<std::set<T>> {
 
-    static constexpr std::string_view name() {
+    static constexpr const std::string& name() {
         static std::string typeName = [] {
             constexpr auto valueDescription = describe<T>();
             return fmt::format("std::set<{}>", valueDescription.name());

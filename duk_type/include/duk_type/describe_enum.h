@@ -28,7 +28,7 @@ struct Enum {
     static_assert(std::is_enum_v<T>, "T must be an enum type");
     static_assert((std::is_same_v<T, typename Values::value_type> && ...), "All Values must belong to enum T");
 
-    static constexpr std::string_view name();
+    static constexpr const std::string& name();
 
     static constexpr T value_of(std::string_view name);
 
@@ -64,7 +64,7 @@ constexpr std::string_view Value<Name, TValue>::name() {
 }
 
 template<typename T, typename ... Values>
-constexpr std::string_view Enum<T, Values...>::name() {
+constexpr const std::string& Enum<T, Values...>::name() {
     return type::name_of<T>();
 }
 
