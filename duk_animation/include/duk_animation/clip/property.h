@@ -7,12 +7,10 @@
 
 #include <duk_objects/objects.h>
 
-#include <duk_serial/json/types.h>
+#include <duk_serial/json.h>
 
 #include <duk_resource/solver/dependency_solver.h>
 #include <duk_resource/solver/reference_solver.h>
-
-#include <duk_tools/types.h>
 
 #include <map>
 #include <string>
@@ -53,6 +51,8 @@ public:
 
     typename std::vector<ValueType>::iterator end();
 
+    friend struct duk::serial::JsonPrimitiveValue<PropertyT<TEvaluator>>;
+
 private:
     std::map<uint32_t, uint32_t> m_sampleToValueIndex;
     std::vector<ValueType> m_values;
@@ -64,7 +64,9 @@ private:
     public:
         virtual ~PropertyEntry() = default;
 
-        virtual void from_json(const rapidjson::Value& json, std::unique_ptr<Property>& property) const = 0;
+        virtual void json_write(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<Property>& property) const = 0;
+
+        virtual void json_read(const rapidjson::Value& json, std::unique_ptr<Property>& property) const = 0;
 
         virtual void solve_resources(duk::resource::DependencySolver* solver, Property& property) const = 0;
 
@@ -74,7 +76,9 @@ private:
     template<typename TEvaluator>
     class PropertyEntryT : public PropertyEntry {
     public:
-        void from_json(const rapidjson::Value& json, std::unique_ptr<Property>& property) const override;
+        void json_write(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<Property>& property) const override;
+
+        void json_read(const rapidjson::Value& json, std::unique_ptr<Property>& property) const override;
 
         void solve_resources(duk::resource::DependencySolver* solver, Property& property) const override;
 
@@ -84,7 +88,9 @@ private:
 public:
     static PropertyRegistry* instance();
 
-    void from_json(const rapidjson::Value& json, std::unique_ptr<Property>& property) const;
+    void json_write(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<Property>& property) const;
+
+    void json_read(const rapidjson::Value& json, std::unique_ptr<Property>& property) const;
 
     template<typename Solver>
     void solve_resources(Solver* solver, Property& property) const;
@@ -117,7 +123,7 @@ void PropertyT<TEvaluator>::evaluate(const duk::objects::Object& object, uint32_
 
 template<typename TEvaluator>
 const std::string& PropertyT<TEvaluator>::name() const {
-    return duk::tools::type_name_of<TEvaluator>();
+    return duk::type::name_of<TEvaluator>();
 }
 
 template<typename TEvaluator>
@@ -164,10 +170,16 @@ typename std::vector<typename PropertyT<TEvaluator>::ValueType>::iterator Proper
 }
 
 template<typename TEvaluator>
-void PropertyRegistry::PropertyEntryT<TEvaluator>::from_json(const rapidjson::Value& json, std::unique_ptr<Property>& property) const {
-    auto evaluatorProperty = std::make_unique<PropertyT<TEvaluator>>();
-    duk::serial::from_json_member(json, "values", *evaluatorProperty);
-    property = std::move(evaluatorProperty);
+void PropertyRegistry::PropertyEntryT<TEvaluator>::json_write(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<Property>& property) const {
+    auto derivedProperty = dynamic_cast<const PropertyT<TEvaluator>*>(property.get());
+    duk::serial::json_write_member_value(document, json, "values", *derivedProperty);
+}
+
+template<typename TEvaluator>
+void PropertyRegistry::PropertyEntryT<TEvaluator>::json_read(const rapidjson::Value& json, std::unique_ptr<Property>& property) const {
+    auto derivedProperty = std::make_unique<PropertyT<TEvaluator>>();
+    duk::serial::json_read_member_value(json, "values", *derivedProperty);
+    property = std::move(derivedProperty);
 }
 
 template<typename TEvaluator>
@@ -195,7 +207,7 @@ void PropertyRegistry::solve_resources(Solver* solver, Property& property) const
 
 template<typename TEvaluator>
 void PropertyRegistry::register_property() {
-    const auto& type = duk::tools::type_name_of<TEvaluator>();
+    const auto& type = duk::type::name_of<TEvaluator>();
     if (m_propertyEntries.contains(type)) {
         return;
     }
@@ -208,28 +220,52 @@ namespace duk::serial {
 
 // every property should be deserialized here, only their values need specific specializations
 template<typename TEvaluator>
-void from_json(const rapidjson::Value& json, duk::animation::PropertyT<TEvaluator>& property) {
-    using ValueType = typename TEvaluator::ValueType;
-    for (const auto& jsonValue: json.GetArray()) {
-        uint32_t sample;
-        from_json_member(jsonValue, "sample", sample);
+struct JsonPrimitiveValue<duk::animation::PropertyT<TEvaluator>> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::PropertyT<TEvaluator>& property);
+
+    static void read(const rapidjson::Value& json, duk::animation::PropertyT<TEvaluator>& property);
+};
+
+template<>
+struct JsonPrimitiveValue<std::unique_ptr<duk::animation::Property>> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<duk::animation::Property>& value);
+
+    static void read(const rapidjson::Value& json, std::unique_ptr<duk::animation::Property>& value);
+};
+
+
+template<typename TEvaluator>
+void JsonPrimitiveValue<animation::PropertyT<TEvaluator>>::write(rapidjson::Document& document, rapidjson::Value& json, const animation::PropertyT<TEvaluator>& property) {
+    auto jsonArray = json.SetArray().GetArray();
+    for (const auto& [sample, valueIndex]: property.m_sampleToValueIndex) {
+        rapidjson::Value jsonValue;
+        jsonValue.SetObject();
 
         // this should be specialized for each property type
-        ValueType value;
-        from_json(jsonValue, value);
+        const auto& value = property.m_values.at(valueIndex);
+        duk::serial::json_write_member_value(document, jsonValue, "value", value);
 
-        property.add_value(sample, value);
+        duk::serial::json_write_member_value(document, jsonValue, "sample", sample);
+
+        jsonArray.PushBack(std::move(jsonValue), document.GetAllocator());
     }
 }
 
-template<>
-inline void from_json(const rapidjson::Value& json, std::unique_ptr<duk::animation::Property>& property) {
-    animation::PropertyRegistry::instance()->from_json(json, property);
-}
+template<typename TEvaluator>
+void JsonPrimitiveValue<animation::PropertyT<TEvaluator>>::read(const rapidjson::Value& json, animation::PropertyT<TEvaluator>& property) {
+    DUK_ASSERT(json.IsArray());
+    for (const auto& jsonValue: json.GetArray()) {
+        uint32_t sample;
+        duk::serial::json_read_member_value(jsonValue, "sample", sample);
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<duk::animation::Property>& property) {
-    // not implemented yet
+        // this should be specialized for each property type
+        typename TEvaluator::ValueType value;
+        duk::serial::json_read_member_value(jsonValue, "value", value);
+
+        property.add_value(sample, value);
+    }
 }
 
 }// namespace duk::serial

@@ -16,19 +16,15 @@ struct Animator {
 
 }// namespace duk::animation
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::Animator& animator) {
-    from_json_member(json, "controller", animator.controller);
-}
+struct Type<duk::animation::Animator> : Class<duk::animation::Animator,
+    Member<"controller", &duk::animation::Animator::controller>,
+    Member<"state", &duk::animation::Animator::state>> {
+};
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::Animator& animator) {
-    to_json_member(document, json, "controller", animator.controller);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 namespace duk::resource {
 

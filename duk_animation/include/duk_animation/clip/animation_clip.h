@@ -29,9 +29,7 @@ public:
 
     std::vector<std::unique_ptr<Property>>::iterator end();
 
-    friend void serial::from_json<AnimationClip>(const rapidjson::Value& json, AnimationClip& animation);
-
-    friend void serial::to_json<AnimationClip>(rapidjson::Document& document, rapidjson::Value& json, const AnimationClip& animation);
+    friend struct duk::type::Type<AnimationClip>;
 
 private:
     float m_sampleRate;
@@ -42,38 +40,15 @@ using AnimationClipResource = duk::resource::Handle<AnimationClip>;
 
 }// namespace duk::animation
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json(const rapidjson::Value& json, std::vector<std::unique_ptr<duk::animation::Property>>& properties) {
-    for (const auto& propertyJson: json.GetArray()) {
-        from_json(propertyJson, properties.emplace_back());
-    }
-}
+struct Type<duk::animation::AnimationClip> : Class<duk::animation::AnimationClip,
+    Member<"sampleRate", &duk::animation::AnimationClip::m_sampleRate>,
+    Member<"properties", &duk::animation::AnimationClip::m_properties>> {
+};
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const std::vector<std::unique_ptr<duk::animation::Property>>& properties) {
-    auto array = json.SetArray().GetArray();
-    for (const auto& property: properties) {
-        rapidjson::Value propertyJson;
-        to_json(document, propertyJson, property);
-        array.PushBack(propertyJson, document.GetAllocator());
-    }
-}
-
-template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::AnimationClip& animation) {
-    from_json_member(json, "sampleRate", animation.m_sampleRate);
-    from_json_member(json, "properties", animation.m_properties);
-}
-
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::AnimationClip& animation) {
-    to_json_member(document, json, "sampleRate", animation.m_sampleRate);
-    to_json_member(document, json, "properties", animation.m_properties);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 namespace duk::resource {
 

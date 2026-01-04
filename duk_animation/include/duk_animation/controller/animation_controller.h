@@ -21,9 +21,7 @@ public:
 
     const AnimationSet& animations() const;
 
-    friend void serial::from_json<AnimationController>(const rapidjson::Value& json, AnimationController& animationController);
-
-    friend void serial::to_json<AnimationController>(rapidjson::Document& document, rapidjson::Value& json, const AnimationController& animationController);
+    friend struct duk::type::Type<AnimationController>;
 
 private:
     AnimationState build_state() const;
@@ -37,21 +35,15 @@ using AnimationControllerResource = duk::resource::Handle<AnimationController>;
 
 }// namespace duk::animation
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::AnimationController& animationController) {
-    from_json_member(json, "animations", animationController.m_animations);
-    from_json_member(json, "variables", animationController.m_variables);
-}
+struct Type<duk::animation::AnimationController> : Class<duk::animation::AnimationController,
+    Member<"animations", &duk::animation::AnimationController::m_animations>,
+    Member<"variables", &duk::animation::AnimationController::m_variables>> {
+};
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::AnimationController& animationController) {
-    to_json_member(document, json, "animations", animationController.m_animations);
-    to_json_member(document, json, "variables", animationController.m_variables);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 namespace duk::resource {
 

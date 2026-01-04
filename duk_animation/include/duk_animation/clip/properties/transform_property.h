@@ -6,6 +6,7 @@
 #define DUK_ANIMATION_TRANSFORM_PROPERTY_H
 
 #include <duk_animation/clip/property.h>
+#include <duk_math/glm.h>
 
 namespace duk::animation {
 
@@ -51,39 +52,23 @@ public:
 
 }// namespace duk::animation
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::PositionValue& value) {
-    from_json_member(json, "position", value.position);
-}
+struct Type<duk::animation::PositionValue> : Class<duk::animation::PositionValue,
+    Member<"position", &duk::animation::PositionValue::position>> {
+};
 
 template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::PositionValue& value) {
-    to_json_member(document, json, "position", value.position);
-}
+struct Type<duk::animation::RotationValue> : Class<duk::animation::RotationValue,
+    Member<"rotation", &duk::animation::RotationValue::rotation>> {
+};
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::RotationValue& value) {
-    from_json_member(json, "rotation", value.rotation);
-    value.rotation = glm::radians(value.rotation);
-}
+struct Type<duk::animation::ScaleValue> : Class<duk::animation::ScaleValue,
+    Member<"scale", &duk::animation::ScaleValue::scale>> {
+};
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::RotationValue& value) {
-    to_json_member(document, json, "rotation", glm::degrees(value.rotation));
-}
-
-template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::ScaleValue& value) {
-    from_json_member(json, "scale", value.scale);
-}
-
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::ScaleValue& value) {
-    to_json_member(document, json, "scale", value.scale);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 #endif//DUK_ANIMATION_TRANSFORM_PROPERTY_H

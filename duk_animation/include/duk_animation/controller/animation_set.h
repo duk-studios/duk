@@ -27,9 +27,7 @@ public:
 
     std::vector<AnimationEntry>::iterator end();
 
-    friend void serial::from_json<AnimationSet>(const rapidjson::Value& json, AnimationSet& animationSet);
-
-    friend void serial::to_json<AnimationSet>(rapidjson::Document& document, rapidjson::Value& json, const AnimationSet& animationSet);
+    friend struct duk::type::Type<AnimationSet>;
 
 private:
     std::vector<AnimationEntry> m_animations;
@@ -39,33 +37,21 @@ using AnimationSetResource = duk::resource::Handle<AnimationSet>;
 
 }// namespace duk::animation
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::AnimationEntry& animationEntry) {
-    from_json_member(json, "name", animationEntry.name);
-    from_json_member(json, "clip", animationEntry.clip);
-    from_json_member(json, "transitions", animationEntry.transitions);
-}
+struct Type<duk::animation::AnimationEntry> : Class<duk::animation::AnimationEntry,
+    Member<"name", &duk::animation::AnimationEntry::name>,
+    Member<"clip", &duk::animation::AnimationEntry::clip>,
+    Member<"transitions", &duk::animation::AnimationEntry::transitions>> {
+};
 
 template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::AnimationEntry& animationEntry) {
-    to_json_member(document, json, "name", animationEntry.name);
-    to_json_member(document, json, "clip", animationEntry.clip);
-    to_json_member(document, json, "transitions", animationEntry.transitions);
-}
+struct Type<duk::animation::AnimationSet> : Class<duk::animation::AnimationSet,
+    Member<"animations", &duk::animation::AnimationSet::m_animations>> {
+};
 
-template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::AnimationSet& animationSet) {
-    from_json(json, animationSet.m_animations);
-}
-
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::AnimationSet& animationSet) {
-    to_json(document, json, animationSet.m_animations);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 namespace duk::resource {
 

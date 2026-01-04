@@ -7,19 +7,8 @@
 
 namespace duk::animation {
 
-void Condition::execute(AnimationState& state) const {
-}
-
-ConditionType FinishedCondition::type() const {
-    return ConditionType::FINISHED;
-}
-
 bool FinishedCondition::evaluate(const AnimationState& state) const {
     return state.time >= state.animation->clip->duration();
-}
-
-ConditionType ComparisonCondition::type() const {
-    return ConditionType::COMPARISON;
 }
 
 bool ComparisonCondition::evaluate(const AnimationState& state) const {
@@ -43,13 +32,9 @@ bool ComparisonCondition::evaluate(const AnimationState& state) const {
     }
 }
 
-ConditionType TriggerCondition::type() const {
-    return ConditionType::TRIGGER;
-}
-
 bool TriggerCondition::evaluate(const AnimationState& state) const {
     auto& trigger = state.variables.at(m_variableName);
-    return trigger.bool_value();
+    return std::holds_alternative<bool>(trigger) && std::get<bool>(trigger);
 }
 
 void TriggerCondition::execute(AnimationState& state) const {
@@ -58,19 +43,27 @@ void TriggerCondition::execute(AnimationState& state) const {
 
 bool AnimationTransition::check(const AnimationState& state) const {
     return std::ranges::all_of(m_conditions, [&state](const auto& condition) {
-        return condition->evaluate(state);
+        return evaluate(condition, state);
     });
 }
 
 void AnimationTransition::execute(const duk::objects::Object& object, AnimationState& state, const AnimationSet& animations) const {
     // when a condition is met, it may need to alter some state (e.g. trigger)
     for (auto& condition: m_conditions) {
-        condition->execute(state);
+        if (const auto triggerCondition = std::get_if<TriggerCondition>(&condition)) {
+            triggerCondition->execute(state);
+        }
     }
     // sample at the end of the animation before transitioning
     state.animation->clip->evaluate(object, state.animation->clip->samples());
     state.animation = animations.at(m_target);
     state.time = 0.0f;
+}
+
+bool evaluate(const Condition& condition, const AnimationState& state) {
+    return std::visit([&state](const auto& condition) {
+        return condition.evaluate(state);
+    }, condition);
 }
 
 }// namespace duk::animation

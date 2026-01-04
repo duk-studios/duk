@@ -25,21 +25,15 @@ public:
 
 }// namespace duk::animation
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::animation::SpriteValue& value) {
-    from_json_member(json, "index", value.index);
-    from_json_member(json, "sprite", value.sprite);
-}
+struct Type<duk::animation::SpriteValue> : Class<duk::animation::SpriteValue,
+    Member<"index", &duk::animation::SpriteValue::index>,
+    Member<"sprite", &duk::animation::SpriteValue::sprite>> {
+};
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::SpriteValue& value) {
-    to_json_member(document, json, "index", value.index);
-    to_json_member(document, json, "sprite", value.sprite);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 namespace duk::resource {
 
