@@ -2,6 +2,7 @@
 // Created by rov on 10/4/2025.
 //
 
+#include <unordered_map>
 #include <duk_serial/json.h>
 #include <catch2/catch_test_macros.hpp>
 
@@ -132,6 +133,26 @@ TEST_CASE("Basic json serialization", "[json]") {
         const auto json = duk::serial::json_write(input);
         INFO("Json: " << json);
         const auto output = duk::serial::json_read<std::set<std::string>>(json);
+        CHECK(input == output);
+    }
+
+    SECTION("std::unordered_map support") {
+        auto input = std::unordered_map<std::string, int>{
+            {"one", 1},
+            {"two", 2},
+            {"three", 3}
+        };
+        const auto json = duk::serial::json_write(input);
+        INFO("Json: " << json);
+        const auto output = duk::serial::json_read<std::unordered_map<std::string, int>>(json);
+        CHECK(input == output);
+    }
+
+    SECTION("std::variant support") {
+        auto input = std::variant<int, std::string, Color>{Color::BLUE};
+        const auto json = duk::serial::json_write(input);
+        INFO("Json: " << json);
+        const auto output = duk::serial::json_read<std::variant<int, std::string, Color>>(json);
         CHECK(input == output);
     }
 

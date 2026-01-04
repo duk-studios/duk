@@ -12,6 +12,9 @@
 #include <duk_type/describe_container.h>
 #include <duk_type/describe_enum.h>
 
+#include <variant>
+#include <unordered_map>
+
 namespace duk::serial {
 
 template<typename T, bool Pretty = false>
@@ -156,6 +159,20 @@ struct JsonPrimitiveValue<std::unique_ptr<T>> {
     static void read(const rapidjson::Value& json, std::unique_ptr<T>& value);
 };
 
+template<typename K, typename V>
+struct JsonPrimitiveValue<std::unordered_map<K, V>> {
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const std::unordered_map<K, V>& value);
+
+    static void read(const rapidjson::Value& json, std::unordered_map<K, V>& value);
+};
+
+template<typename ...Ts>
+struct JsonPrimitiveValue<std::variant<Ts...>> {
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const std::variant<Ts...>& value);
+
+    static void read(const rapidjson::Value& json, std::variant<Ts...>& value);
+};
+
 
 template<typename T, bool Pretty>
 std::string json_write(const T& value) {
@@ -235,7 +252,7 @@ void json_write_member_value(rapidjson::Document& document, rapidjson::Value& js
     rapidjson::Value jsonMemberValue;
     json_write_value(document, jsonMemberValue, value);
     rapidjson::Value jsonMemberName;
-    jsonMemberName.SetString(rapidjson::StringRef(name.data(), name.size()), document.GetAllocator());
+    jsonMemberName.SetString(name.data(), name.size(), document.GetAllocator());
     json.AddMember(std::move(jsonMemberName), std::move(jsonMemberValue), document.GetAllocator());
 }
 
@@ -334,6 +351,64 @@ void JsonPrimitiveValue<std::unique_ptr<T>>::read(const rapidjson::Value& json, 
     json_read_value(json, *value);
 }
 
+template<typename K, typename V>
+void JsonPrimitiveValue<std::unordered_map<K, V>>::write(rapidjson::Document& document, rapidjson::Value& json, const std::unordered_map<K, V>& map) {
+    auto jsonArray = json.SetArray().GetArray();
+    for (const auto& [key, value]: map) {
+        rapidjson::Value elementJson;
+        elementJson.SetObject();
+        json_write_member_value(document, elementJson, "key", key);
+        json_write_member_value(document, elementJson, "value", value);
+        jsonArray.PushBack(std::move(elementJson), document.GetAllocator());
+    }
+}
+
+template<typename K, typename V>
+void JsonPrimitiveValue<std::unordered_map<K, V>>::read(const rapidjson::Value& json, std::unordered_map<K, V>& map) {
+    DUK_ASSERT(json.IsArray());
+    const auto jsonArray = json.GetArray();
+    map.clear();
+    for (const auto& jsonElement: jsonArray) {
+        K key;
+        json_read_member_value(jsonElement, "key", key);
+
+        V value;
+        json_read_member_value(jsonElement, "value", value);
+
+        map.emplace(std::move(key), std::move(value));
+    }
+}
+
+template<typename ... Ts>
+void JsonPrimitiveValue<std::variant<Ts...>>::write(rapidjson::Document& document, rapidjson::Value& json, const std::variant<Ts...>& value) {
+    json.SetObject();
+    std::visit([&document, &json](const auto& typedValue) {
+        using T = std::decay_t<decltype(typedValue)>;
+        constexpr auto description = duk::type::describe<T>();
+        json_write_member_value(document, json, "type", description.name());
+        json_write_member_value(document, json, "value", typedValue);
+    }, value);
+}
+
+template<typename ... Ts>
+void JsonPrimitiveValue<std::variant<Ts...>>::read(const rapidjson::Value& json, std::variant<Ts...>& value) {
+    DUK_ASSERT(json.IsObject());
+    std::string typeName;
+    json_read_member_value(json, "type", typeName);
+    bool matched = false;
+    auto tryMatch = [&]<typename T>() {
+        if (typeName == duk::type::describe<T>().name() && !matched) {
+            T typedValue;
+            json_read_member_value(json, "value", typedValue);
+            value = std::move(typedValue);
+            matched = true;
+        }
+    };
+    (tryMatch.template operator()<Ts>(), ...);
+    if (!matched) {
+        throw std::runtime_error(fmt::format("variant type '{}' not matched", typeName));
+    }
+}
 
 }
 
