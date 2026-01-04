@@ -5,6 +5,12 @@
 #include <duk_serial/json.h>
 #include <catch2/catch_test_macros.hpp>
 
+enum class Color {
+    NONE,
+    RED,
+    GREEN,
+    BLUE
+};
 
 struct Address {
     std::string city;
@@ -17,6 +23,7 @@ struct Person {
     int age{};
     std::string name;
     Address address;
+    Color favoriteColor{};
 
     bool operator==(const Person&) const = default;
 };
@@ -40,12 +47,21 @@ template<>
 struct Type<Person> : Class<Person,
     Member<"age", &Person::age>,
     Member<"name", &Person::name>,
-    Member<"address", &Person::address>> {
+    Member<"address", &Person::address>,
+    Member<"favoriteColor", &Person::favoriteColor>> {
 };
 
 template<>
 struct Type<FriendGroup> : Class<FriendGroup,
     Member<"friends", &FriendGroup::friends>> {
+};
+
+template<>
+struct Type<Color> : Enum<Color,
+    Value<"NONE", Color::NONE>,
+    Value<"RED", Color::RED>,
+    Value<"GREEN", Color::GREEN>,
+    Value<"BLUE", Color::BLUE>> {
 };
 
 }
@@ -60,8 +76,16 @@ TEST_CASE("Basic json serialization", "[json]") {
         CHECK(input == output);
     }
 
+    SECTION("Basic enum roundtrip") {
+        const auto input = Color::RED;
+        const auto json = duk::serial::json_write(input);
+        INFO("Json: " << json);
+        const auto output = duk::serial::json_read<Color>(json);
+        CHECK(input == output);
+    }
+
     SECTION("Nested type roundtrip") {
-        const auto input = Person{30, "Alice", {"Los Angeles", 90001}};
+        const auto input = Person{30, "Alice", {"Los Angeles", 90001}, Color::GREEN};
         const auto json = duk::serial::json_write(input);
         INFO("Json: " << json);
         const auto output = duk::serial::json_read<Person>(json);
@@ -71,8 +95,8 @@ TEST_CASE("Basic json serialization", "[json]") {
     SECTION("Type with array of structs") {
         const auto input = FriendGroup{
             {
-                {25, "Bob", {"Chicago", 60601}},
-                {28, "Charlie", {"Houston", 77001}}
+                {25, "Bob", {"Chicago", 60601}, Color::BLUE},
+                {28, "Charlie", {"Houston", 77001}, Color::RED}
             }
         };
         const auto json = duk::serial::json_write(input);
@@ -83,8 +107,8 @@ TEST_CASE("Basic json serialization", "[json]") {
 
     SECTION("Root array") {
         auto input = std::vector<Person>{
-            {22, "Dave", {"Phoenix", 85001}},
-            {35, "Eve", {"Philadelphia", 19019}}
+            {22, "Dave", {"Phoenix", 85001}, Color::NONE},
+            {35, "Eve", {"Philadelphia", 19019}, Color::GREEN}
         };
         const auto json = duk::serial::json_write(input);
         INFO("Json: " << json);

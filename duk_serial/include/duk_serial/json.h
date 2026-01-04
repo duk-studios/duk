@@ -10,6 +10,7 @@
 #include <duk_type/describe.h>
 #include <duk_type/describe_class.h>
 #include <duk_type/describe_container.h>
+#include <duk_type/describe_enum.h>
 
 namespace duk::serial {
 
@@ -59,6 +60,14 @@ struct JsonObjectValue {
 // Used for containers that specializes duk::type::Type<T> and inherit from duk::type::Container<T>
 template<typename T>
 struct JsonContainerValue {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value);
+
+    static void read(const rapidjson::Value& json, T& value);
+};
+
+template<typename T>
+struct JsonEnumValue {
 
     static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value);
 
@@ -195,6 +204,9 @@ void json_write_value(rapidjson::Document& document, rapidjson::Value& json, con
     else if constexpr (duk::type::is_container<T>()) {
         JsonContainerValue<T>::write(document, json, value);
     }
+    else if constexpr (duk::type::is_enum<T>()) {
+        JsonEnumValue<T>::write(document, json, value);
+    }
     else {
         JsonPrimitiveValue<T>::write(document, json, value);
     }
@@ -207,6 +219,9 @@ void json_read_value(const rapidjson::Value& json, T& value) {
     }
     else if constexpr (duk::type::is_container<T>()) {
         JsonContainerValue<T>::read(json, value);
+    }
+    else if constexpr (duk::type::is_enum<T>()) {
+        JsonEnumValue<T>::read(json, value);
     }
     else {
         JsonPrimitiveValue<T>::read(json, value);
@@ -280,6 +295,20 @@ void JsonContainerValue<T>::read(const rapidjson::Value& json, T& value) {
         json_read_value(jsonElement, element);
         description.insert_back(value, std::move(element));
     }
+}
+
+template<typename T>
+void JsonEnumValue<T>::write(rapidjson::Document& document, rapidjson::Value& json, const T& value) {
+    constexpr auto description = duk::type::describe<T>();
+    const auto name = description.name_of(value);
+    json.SetString(name.data(), name.size(), document.GetAllocator());
+}
+
+template<typename T>
+void JsonEnumValue<T>::read(const rapidjson::Value& json, T& value) {
+    constexpr auto description = duk::type::describe<T>();
+    const auto name = json.GetString();
+    value = description.value_of(name);
 }
 
 template<typename T>
