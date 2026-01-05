@@ -43,13 +43,14 @@ using SceneResource = duk::resource::Handle<Scene>;
 }// namespace duk::engine
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::engine::Scene> : Class<duk::engine::Scene,
     Member<"objects", &duk::engine::Scene::m_objects>,
     Member<"systems", &duk::engine::Scene::m_systems>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

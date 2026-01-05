@@ -61,9 +61,11 @@ void AnimationTransition::execute(const duk::objects::Object& object, AnimationS
 }
 
 bool evaluate(const Condition& condition, const AnimationState& state) {
-    return std::visit([&state](const auto& condition) {
-        return condition.evaluate(state);
-    }, condition);
+    return std::visit(
+            [&state](const auto& condition) {
+                return condition.evaluate(state);
+            },
+            condition);
 }
 
 }// namespace duk::animation

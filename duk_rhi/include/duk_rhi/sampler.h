@@ -11,7 +11,6 @@
 namespace duk::rhi {
 
 struct Sampler {
-
     enum class Filter {
         NEAREST,
         LINEAR,
@@ -49,7 +48,7 @@ struct hash<duk::rhi::Sampler> {
 }// namespace std
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<rhi::Sampler::Filter> : Enum<rhi::Sampler::Filter,
     Value<"nearest", rhi::Sampler::Filter::NEAREST>,
@@ -72,6 +71,7 @@ struct Type<rhi::Sampler> : Class<rhi::Sampler,
     Member<"wrap", &rhi::Sampler::wrapMode>> {
 };
 
-}
+// clang-format on
+}// namespace duk::type
 
 #endif// DUK_RHI_IMAGE_SAMPLER_H

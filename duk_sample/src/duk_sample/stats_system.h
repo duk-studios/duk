@@ -33,12 +33,14 @@ public:
 }// namespace duk::sample
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::sample::Stats> : Class<duk::sample::Stats,
     Member<"sampleCount", &duk::sample::Stats::sampleCount>,
     Member<"textObject", &duk::sample::Stats::textObject>> {
 };
+
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

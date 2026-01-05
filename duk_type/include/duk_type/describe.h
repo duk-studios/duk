@@ -37,6 +37,6 @@ struct Type<std::string> {
     }
 };
 
-}
+}// namespace duk::type
 
-#endif //DUK_TYPE_TYPE_H
+#endif//DUK_TYPE_TYPE_H

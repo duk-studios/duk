@@ -41,13 +41,14 @@ using AnimationClipResource = duk::resource::Handle<AnimationClip>;
 }// namespace duk::animation
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::animation::AnimationClip> : Class<duk::animation::AnimationClip,
     Member<"sampleRate", &duk::animation::AnimationClip::m_sampleRate>,
     Member<"properties", &duk::animation::AnimationClip::m_properties>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

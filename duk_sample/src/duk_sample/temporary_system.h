@@ -30,13 +30,14 @@ public:
 }// namespace duk::sample
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::sample::Temporary> : Class<duk::sample::Temporary,
     Member<"duration", &duk::sample::Temporary::duration>,
     Member<"startTime", &duk::sample::Temporary::startTime>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 #endif//DUK_SAMPLE_TEMPORARY_SYSTEM_H

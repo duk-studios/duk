@@ -49,7 +49,7 @@ struct ComponentTest3 {
 };
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<ComponentTest> : Class<ComponentTest,
     Member<"a", &ComponentTest::a>,
@@ -70,7 +70,7 @@ struct Type<ComponentTest3> : Class<ComponentTest3,
     Member<"b", &ComponentTest3::b>,
     Member<"c", &ComponentTest3::c>> {
 };
-
+// clang-format on
 } // namespace duk::type
 
 TEST_CASE("Objects and Components Management", "[objects]") {

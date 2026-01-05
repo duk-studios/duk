@@ -18,7 +18,6 @@ namespace duk::type {
 
 template<typename T>
 struct Container {
-
     using container_type = T;
     using value_type = typename T::value_type;
 
@@ -46,16 +45,16 @@ struct Container {
         return std::size(container);
     }
 
-    template<typename Visitor, typename ...Args>
-    static constexpr void visit_elements(Visitor&& visitor, T& container, const Args& ...args) {
-        for (auto& element : container) {
+    template<typename Visitor, typename... Args>
+    static constexpr void visit_elements(Visitor&& visitor, T& container, const Args&... args) {
+        for (auto& element: container) {
             std::invoke(std::forward<Visitor>(visitor), element, args...);
         }
     }
 
-    template<typename Visitor, typename ...Args>
-    static constexpr void visit_elements(Visitor&& visitor, const T& container, const Args& ...args) {
-        for (auto& element : container) {
+    template<typename Visitor, typename... Args>
+    static constexpr void visit_elements(Visitor&& visitor, const T& container, const Args&... args) {
+        for (auto& element: container) {
             std::invoke(std::forward<Visitor>(visitor), element, args...);
         }
     }
@@ -63,7 +62,6 @@ struct Container {
 
 template<typename T>
 struct Type<std::vector<T>> : Container<std::vector<T>> {
-
     static constexpr const std::string& name() {
         static std::string typeName = [] {
             constexpr auto valueDescription = describe<T>();
@@ -91,7 +89,6 @@ struct Type<std::vector<T>> : Container<std::vector<T>> {
 
 template<typename T, size_t N>
 struct Type<std::array<T, N>> : Container<std::array<T, N>> {
-
     static constexpr T& at(std::array<T, N>& container, size_t index) {
         return container.at(index);
     }
@@ -103,7 +100,6 @@ struct Type<std::array<T, N>> : Container<std::array<T, N>> {
 
 template<typename T>
 struct Type<std::set<T>> : Container<std::set<T>> {
-
     static constexpr const std::string& name() {
         static std::string typeName = [] {
             constexpr auto valueDescription = describe<T>();
@@ -148,6 +144,6 @@ constexpr bool is_container() {
     return is_container_description<decltype(type::describe<T>())>();
 }
 
-}
+}// namespace duk::type
 
-#endif //DUK_DESCRIBE_CONTAINER_H
+#endif//DUK_DESCRIBE_CONTAINER_H

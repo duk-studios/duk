@@ -35,22 +35,21 @@ struct Member {
     static constexpr std::string_view name();
 };
 
-template<typename T, typename ...Members>
+template<typename T, typename... Members>
 struct Class {
     static_assert((std::is_same_v<T, typename Members::class_type> && ...), "All Members must belong to the same Class");
 
     static constexpr const std::string& name();
 
-    template<typename Visitor, typename ...Args>
-    static constexpr void visit_members(Visitor&& visitor, T& instance, const Args& ...args);
+    template<typename Visitor, typename... Args>
+    static constexpr void visit_members(Visitor&& visitor, T& instance, const Args&... args);
 
-    template<typename Visitor, typename ...Args>
-    static constexpr void visit_members(Visitor&& visitor, const T& instance, const Args& ...args);
+    template<typename Visitor, typename... Args>
+    static constexpr void visit_members(Visitor&& visitor, const T& instance, const Args&... args);
 
     static constexpr uint32_t member_count();
 
 private:
-
     template<typename Member, bool IsConst>
     class MemberAccessor {
     public:
@@ -109,28 +108,28 @@ constexpr std::string_view Member<Name, MemberPointer>::name() {
     return Name.value;
 }
 
-template<typename T, typename ... Members>
+template<typename T, typename... Members>
 constexpr const std::string& Class<T, Members...>::name() {
     return name_of<T>();
 }
 
-template<typename T, typename ...Members>
-template<typename Visitor, typename ...Args>
-constexpr void Class<T, Members...>::visit_members(Visitor&& visitor, T& instance, const Args& ...args) {
+template<typename T, typename... Members>
+template<typename Visitor, typename... Args>
+constexpr void Class<T, Members...>::visit_members(Visitor&& visitor, T& instance, const Args&... args) {
     (std::invoke(std::forward<Visitor>(visitor), MemberAccessor<Members, false>(instance), args...), ...);
 }
 
-template<typename T, typename ...Members>
-template<typename Visitor, typename ...Args>
-constexpr void Class<T, Members...>::visit_members(Visitor&& visitor, const T& instance, const Args& ...args) {
+template<typename T, typename... Members>
+template<typename Visitor, typename... Args>
+constexpr void Class<T, Members...>::visit_members(Visitor&& visitor, const T& instance, const Args&... args) {
     (std::invoke(std::forward<Visitor>(visitor), MemberAccessor<Members, true>(instance), args...), ...);
 }
 
-template<typename T, typename ... Members>
+template<typename T, typename... Members>
 constexpr uint32_t Class<T, Members...>::member_count() {
     return sizeof...(Members);
 }
 
-}
+}// namespace duk::type
 
-#endif //DUK_TYPE_DESCRIBE_CLASS_H
+#endif//DUK_TYPE_DESCRIBE_CLASS_H

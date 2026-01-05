@@ -39,12 +39,11 @@ namespace duk::serial {
 
 template<>
 struct JsonPrimitiveValue<duk::animation::AnimationVariables> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::AnimationVariables& value);
 
     static void read(const rapidjson::Value& json, duk::animation::AnimationVariables& value);
 };
 
-}
+}// namespace duk::serial
 
 #endif//DUK_ANIMATION_ANIMATION_VARIABLES_H

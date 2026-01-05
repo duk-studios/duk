@@ -22,7 +22,7 @@ const Animation* find_animation(const std::vector<Animation>& animations, const 
 }// namespace duk::animation
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::animation::Animation> : Class<duk::animation::Animation,
     Member<"name", &duk::animation::Animation::name>,
@@ -30,6 +30,7 @@ struct Type<duk::animation::Animation> : Class<duk::animation::Animation,
     Member<"transitions", &duk::animation::Animation::transitions>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

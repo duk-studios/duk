@@ -23,12 +23,13 @@ public:
 }// namespace duk::sample
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::sample::SpriteAnimator> : Class<duk::sample::SpriteAnimator,
     Member<"animator", &duk::sample::SpriteAnimator::animator>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

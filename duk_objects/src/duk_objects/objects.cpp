@@ -390,4 +390,4 @@ void JsonPrimitiveValue<duk::objects::Objects>::read(const rapidjson::Value& jso
     objects::solve_object_references(objects);
 }
 
-}
+}// namespace duk::serial

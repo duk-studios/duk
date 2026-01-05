@@ -37,7 +37,7 @@ struct FriendGroup {
 
 // define types
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<Address> : Class<Address,
     Member<"city", &Address::city>,
@@ -64,7 +64,7 @@ struct Type<Color> : Enum<Color,
     Value<"GREEN", Color::GREEN>,
     Value<"BLUE", Color::BLUE>> {
 };
-
+// clang-format on
 }
 
 TEST_CASE("Basic json serialization", "[json]") {

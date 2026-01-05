@@ -28,7 +28,7 @@ public:
 }// namespace duk::sample
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::sample::CameraController> : Class<duk::sample::CameraController,
     Member<"speed", &duk::sample::CameraController::speed>,
@@ -37,6 +37,7 @@ struct Type<duk::sample::CameraController> : Class<duk::sample::CameraController
     Member<"sphere", &duk::sample::CameraController::sphere>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

@@ -26,13 +26,14 @@ public:
 }// namespace duk::animation
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::animation::SpriteValue> : Class<duk::animation::SpriteValue,
     Member<"index", &duk::animation::SpriteValue::index>,
     Member<"sprite", &duk::animation::SpriteValue::sprite>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

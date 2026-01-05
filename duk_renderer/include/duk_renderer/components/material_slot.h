@@ -16,12 +16,13 @@ struct MaterialSlot {
 }// namespace duk::renderer
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::renderer::MaterialSlot> : Class<duk::renderer::MaterialSlot,
     Member<"material", &duk::renderer::MaterialSlot::material>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

@@ -32,7 +32,7 @@ struct ShaderPipelineData {
 }// namespace duk::renderer
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::renderer::PipelineSettings> : Class<duk::renderer::PipelineSettings,
     Member<"blend", &duk::renderer::PipelineSettings::blend>,
@@ -54,6 +54,7 @@ struct Type<duk::renderer::ShaderPipelineData> : Class<duk::renderer::ShaderPipe
     Member<"settings", &duk::renderer::ShaderPipelineData::settings>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 #endif//DUK_RENDERER_SHADER_PIPELINE_DATA_H

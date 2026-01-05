@@ -5,7 +5,6 @@
 #ifndef DUK_SERIAL_DESCRIBE_ENUM_H
 #define DUK_SERIAL_DESCRIBE_ENUM_H
 
-
 #include <stdexcept>
 #include <duk_type/describe.h>
 #include <duk_type/optional_const.h>
@@ -15,7 +14,6 @@ namespace duk::type {
 
 template<string_literal Name, auto TValue>
 struct Value {
-
     using value_type = decltype(TValue);
 
     static constexpr value_type value();
@@ -23,7 +21,7 @@ struct Value {
     static constexpr std::string_view name();
 };
 
-template<typename T, typename ...Values>
+template<typename T, typename... Values>
 struct Enum {
     static_assert(std::is_enum_v<T>, "T must be an enum type");
     static_assert((std::is_same_v<T, typename Values::value_type> && ...), "All Values must belong to enum T");
@@ -63,12 +61,12 @@ constexpr std::string_view Value<Name, TValue>::name() {
     return Name.value;
 }
 
-template<typename T, typename ... Values>
+template<typename T, typename... Values>
 constexpr const std::string& Enum<T, Values...>::name() {
     return type::name_of<T>();
 }
 
-template<typename T, typename ... Values>
+template<typename T, typename... Values>
 constexpr T Enum<T, Values...>::value_of(std::string_view name) {
     constexpr auto names = std::array{Values::name()...};
     constexpr auto values = std::array{Values::value()...};
@@ -80,7 +78,7 @@ constexpr T Enum<T, Values...>::value_of(std::string_view name) {
     throw std::invalid_argument("Invalid enum name");
 }
 
-template<typename T, typename ... Values>
+template<typename T, typename... Values>
 constexpr std::string_view Enum<T, Values...>::name_of(T value) {
     constexpr auto names = std::array{Values::name()...};
     constexpr auto values = std::array{Values::value()...};
@@ -92,13 +90,11 @@ constexpr std::string_view Enum<T, Values...>::name_of(T value) {
     throw std::invalid_argument("Invalid enum value");
 }
 
-template<typename T, typename ... Values>
+template<typename T, typename... Values>
 constexpr uint32_t Enum<T, Values...>::value_count() {
     return sizeof...(Values);
 }
 
+}// namespace duk::type
 
-}
-
-
-#endif //DUK_SERIAL_DESCRIBE_ENUM_H
+#endif//DUK_SERIAL_DESCRIBE_ENUM_H

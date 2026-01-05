@@ -27,7 +27,7 @@ struct Text {
 }// namespace duk::ui
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::ui::Text> : Class<duk::ui::Text,
     Member<"font", &duk::ui::Text::font>,
@@ -40,6 +40,7 @@ struct Type<duk::ui::Text> : Class<duk::ui::Text,
     Member<"dynamic", &duk::ui::Text::dynamic>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

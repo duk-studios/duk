@@ -36,6 +36,7 @@ void update_cameras(duk::objects::Objects& objects, uint32_t width, uint32_t hei
 
 namespace duk::type {
 
+// clang-format off
 template<>
 struct Type<duk::renderer::PerspectiveCamera> : Class<duk::renderer::PerspectiveCamera,
     Member<"fov", &duk::renderer::PerspectiveCamera::fovDegrees>,
@@ -43,7 +44,8 @@ struct Type<duk::renderer::PerspectiveCamera> : Class<duk::renderer::Perspective
     Member<"far", &duk::renderer::PerspectiveCamera::zFar>> {
 };
 
+// clang-format on
 
-}// namespace duk::serial
+}// namespace duk::type
 
 #endif// DUK_RENDERER_CAMERA_H

@@ -30,7 +30,6 @@ public:
 
 class ComparisonCondition {
 public:
-
     bool evaluate(const AnimationState& state) const;
 
     friend struct duk::type::Type<ComparisonCondition>;
@@ -43,7 +42,6 @@ private:
 
 class TriggerCondition {
 public:
-
     bool evaluate(const AnimationState& state) const;
 
     void execute(AnimationState& state) const;
@@ -76,6 +74,8 @@ private:
 
 namespace duk::type {
 
+// clang-format off
+
 template<>
 struct Type<duk::animation::OperatorType> : Enum<duk::animation::OperatorType,
     Value<"undefined", duk::animation::OperatorType::UNDEFINED>,
@@ -105,6 +105,8 @@ struct Type<duk::animation::AnimationTransition> : Class<duk::animation::Animati
     Member<"conditions", &duk::animation::AnimationTransition::m_conditions>> {
 
 };
+
+// clang-format on
 
 }// namespace duk::type
 

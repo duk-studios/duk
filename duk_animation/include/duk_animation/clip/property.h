@@ -221,7 +221,6 @@ namespace duk::serial {
 // every property should be deserialized here, only their values need specific specializations
 template<typename TEvaluator>
 struct JsonPrimitiveValue<duk::animation::PropertyT<TEvaluator>> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::PropertyT<TEvaluator>& property);
 
     static void read(const rapidjson::Value& json, duk::animation::PropertyT<TEvaluator>& property);
@@ -229,12 +228,10 @@ struct JsonPrimitiveValue<duk::animation::PropertyT<TEvaluator>> {
 
 template<>
 struct JsonPrimitiveValue<std::unique_ptr<duk::animation::Property>> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<duk::animation::Property>& value);
 
     static void read(const rapidjson::Value& json, std::unique_ptr<duk::animation::Property>& value);
 };
-
 
 template<typename TEvaluator>
 void JsonPrimitiveValue<animation::PropertyT<TEvaluator>>::write(rapidjson::Document& document, rapidjson::Value& json, const animation::PropertyT<TEvaluator>& property) {

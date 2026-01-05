@@ -22,6 +22,7 @@ struct Settings {
 
 namespace duk::type {
 
+// clang-format off
 template<>
 struct Type<duk::engine::Settings> : Class<duk::engine::Settings,
     Member<"name", &duk::engine::Settings::name>,
@@ -29,6 +30,8 @@ struct Type<duk::engine::Settings> : Class<duk::engine::Settings,
     Member<"resolution", &duk::engine::Settings::resolution>,
     Member<"resourceExtensions", &duk::engine::Settings::resourceExtensions>> {
 };
+
+// clang-format on
 
 }// namespace duk::type
 

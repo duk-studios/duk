@@ -45,16 +45,16 @@ void json_read_member_value(const rapidjson::Value& json, std::string_view name,
 // specializations will provide the actual serialization
 template<typename T>
 struct JsonPrimitiveValue {
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value) {
+    }
 
-    static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value) {}
-
-    static void read(const rapidjson::Value& json, T& value) {}
+    static void read(const rapidjson::Value& json, T& value) {
+    }
 };
 
 // Used for classes/structs that specializes duk::type::Type<T> and inherit from duk::type::Class<T, ...>
 template<typename T>
 struct JsonObjectValue {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value);
 
     static void read(const rapidjson::Value& json, T& value);
@@ -63,7 +63,6 @@ struct JsonObjectValue {
 // Used for containers that specializes duk::type::Type<T> and inherit from duk::type::Container<T>
 template<typename T>
 struct JsonContainerValue {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value);
 
     static void read(const rapidjson::Value& json, T& value);
@@ -72,7 +71,6 @@ struct JsonContainerValue {
 // Used for enums that specializes duk::type::Type<T> and inherit from duk::type::Enum<T, ...>
 template<typename T>
 struct JsonEnumValue {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const T& value);
 
     static void read(const rapidjson::Value& json, T& value);
@@ -81,7 +79,6 @@ struct JsonEnumValue {
 // specializations
 template<>
 struct JsonPrimitiveValue<bool> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const bool& value);
 
     static void read(const rapidjson::Value& json, bool& value);
@@ -89,7 +86,6 @@ struct JsonPrimitiveValue<bool> {
 
 template<>
 struct JsonPrimitiveValue<int32_t> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const int32_t& value);
 
     static void read(const rapidjson::Value& json, int32_t& value);
@@ -97,7 +93,6 @@ struct JsonPrimitiveValue<int32_t> {
 
 template<>
 struct JsonPrimitiveValue<uint32_t> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const uint32_t& value);
 
     static void read(const rapidjson::Value& json, uint32_t& value);
@@ -105,7 +100,6 @@ struct JsonPrimitiveValue<uint32_t> {
 
 template<>
 struct JsonPrimitiveValue<int64_t> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const int64_t& value);
 
     static void read(const rapidjson::Value& json, int64_t& value);
@@ -113,7 +107,6 @@ struct JsonPrimitiveValue<int64_t> {
 
 template<>
 struct JsonPrimitiveValue<uint64_t> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const uint64_t& value);
 
     static void read(const rapidjson::Value& json, uint64_t& value);
@@ -121,7 +114,6 @@ struct JsonPrimitiveValue<uint64_t> {
 
 template<>
 struct JsonPrimitiveValue<float> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const float& value);
 
     static void read(const rapidjson::Value& json, float& value);
@@ -129,7 +121,6 @@ struct JsonPrimitiveValue<float> {
 
 template<>
 struct JsonPrimitiveValue<double> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const double& value);
 
     static void read(const rapidjson::Value& json, double& value);
@@ -137,7 +128,6 @@ struct JsonPrimitiveValue<double> {
 
 template<>
 struct JsonPrimitiveValue<std::string> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const std::string& value);
 
     static void read(const rapidjson::Value& json, std::string& value);
@@ -145,7 +135,6 @@ struct JsonPrimitiveValue<std::string> {
 
 template<typename T>
 struct JsonPrimitiveValue<std::shared_ptr<T>> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const std::shared_ptr<T>& value);
 
     static void read(const rapidjson::Value& json, std::shared_ptr<T>& value);
@@ -153,7 +142,6 @@ struct JsonPrimitiveValue<std::shared_ptr<T>> {
 
 template<typename T>
 struct JsonPrimitiveValue<std::unique_ptr<T>> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const std::unique_ptr<T>& value);
 
     static void read(const rapidjson::Value& json, std::unique_ptr<T>& value);
@@ -166,13 +154,12 @@ struct JsonPrimitiveValue<std::unordered_map<K, V>> {
     static void read(const rapidjson::Value& json, std::unordered_map<K, V>& value);
 };
 
-template<typename ...Ts>
+template<typename... Ts>
 struct JsonPrimitiveValue<std::variant<Ts...>> {
     static void write(rapidjson::Document& document, rapidjson::Value& json, const std::variant<Ts...>& value);
 
     static void read(const rapidjson::Value& json, std::variant<Ts...>& value);
 };
-
 
 template<typename T, bool Pretty>
 std::string json_write(const T& value) {
@@ -196,8 +183,7 @@ void json_write(std::string& json, const T& value) {
     if constexpr (Pretty) {
         rapidjson::PrettyWriter write(buffer);
         document.Accept(write);
-    }
-    else {
+    } else {
         rapidjson::Writer writer(buffer);
         document.Accept(writer);
     }
@@ -218,14 +204,11 @@ template<typename T>
 void json_write_value(rapidjson::Document& document, rapidjson::Value& json, const T& value) {
     if constexpr (duk::type::is_class<T>()) {
         JsonObjectValue<T>::write(document, json, value);
-    }
-    else if constexpr (duk::type::is_container<T>()) {
+    } else if constexpr (duk::type::is_container<T>()) {
         JsonContainerValue<T>::write(document, json, value);
-    }
-    else if constexpr (duk::type::is_enum<T>()) {
+    } else if constexpr (duk::type::is_enum<T>()) {
         JsonEnumValue<T>::write(document, json, value);
-    }
-    else {
+    } else {
         JsonPrimitiveValue<T>::write(document, json, value);
     }
 }
@@ -234,14 +217,11 @@ template<typename T>
 void json_read_value(const rapidjson::Value& json, T& value) {
     if constexpr (duk::type::is_class<T>()) {
         JsonObjectValue<T>::read(json, value);
-    }
-    else if constexpr (duk::type::is_container<T>()) {
+    } else if constexpr (duk::type::is_container<T>()) {
         JsonContainerValue<T>::read(json, value);
-    }
-    else if constexpr (duk::type::is_enum<T>()) {
+    } else if constexpr (duk::type::is_enum<T>()) {
         JsonEnumValue<T>::read(json, value);
-    }
-    else {
+    } else {
         JsonPrimitiveValue<T>::read(json, value);
     }
 }
@@ -270,44 +250,50 @@ template<typename T>
 void JsonObjectValue<T>::write(rapidjson::Document& document, rapidjson::Value& json, const T& value) {
     constexpr auto description = duk::type::describe<T>();
     json.SetObject();
-    description.visit_members([&](auto member) {
-        constexpr auto memberDescription = member.describe();
-        rapidjson::Value jsonMemberName;
-        jsonMemberName.SetString(member.name().data(), static_cast<rapidjson::SizeType>(member.name().size()), document.GetAllocator());
-        rapidjson::Value jsonMemberValue;
-        json_write_value(document, jsonMemberValue, member.value());
-        json.AddMember(std::move(jsonMemberName), std::move(jsonMemberValue), document.GetAllocator());
-    }, value);
+    description.visit_members(
+            [&](auto member) {
+                constexpr auto memberDescription = member.describe();
+                rapidjson::Value jsonMemberName;
+                jsonMemberName.SetString(member.name().data(), static_cast<rapidjson::SizeType>(member.name().size()), document.GetAllocator());
+                rapidjson::Value jsonMemberValue;
+                json_write_value(document, jsonMemberValue, member.value());
+                json.AddMember(std::move(jsonMemberName), std::move(jsonMemberValue), document.GetAllocator());
+            },
+            value);
 }
 
 template<typename T>
 void JsonObjectValue<T>::read(const rapidjson::Value& json, T& value) {
     constexpr auto description = duk::type::describe<T>();
-    description.visit_members([&](auto member) {
-        constexpr auto memberDescription = member.describe();
-        auto jsonMemberIt = json.FindMember(member.name().data());
-        if (jsonMemberIt == json.MemberEnd()) {
-            return;
-        }
-        json_read_value(jsonMemberIt->value, member.value());
-    }, value);
+    description.visit_members(
+            [&](auto member) {
+                constexpr auto memberDescription = member.describe();
+                auto jsonMemberIt = json.FindMember(member.name().data());
+                if (jsonMemberIt == json.MemberEnd()) {
+                    return;
+                }
+                json_read_value(jsonMemberIt->value, member.value());
+            },
+            value);
 }
 
 template<typename T>
 void JsonContainerValue<T>::write(rapidjson::Document& document, rapidjson::Value& json, const T& value) {
     constexpr auto description = duk::type::describe<T>();
     json.SetArray();
-    description.visit_elements([&](const auto& element) {
-        rapidjson::Value jsonElement;
-        json_write_value(document, jsonElement, element);
-        json.PushBack(std::move(jsonElement), document.GetAllocator());
-    }, value);
+    description.visit_elements(
+            [&](const auto& element) {
+                rapidjson::Value jsonElement;
+                json_write_value(document, jsonElement, element);
+                json.PushBack(std::move(jsonElement), document.GetAllocator());
+            },
+            value);
 }
 
 template<typename T>
 void JsonContainerValue<T>::read(const rapidjson::Value& json, T& value) {
     constexpr auto description = duk::type::describe<T>();
-    for (auto& jsonElement : json.GetArray()) {
+    for (auto& jsonElement: json.GetArray()) {
         using ElementT = decltype(description)::value_type;
         ElementT element;
         json_read_value(jsonElement, element);
@@ -379,18 +365,20 @@ void JsonPrimitiveValue<std::unordered_map<K, V>>::read(const rapidjson::Value& 
     }
 }
 
-template<typename ... Ts>
+template<typename... Ts>
 void JsonPrimitiveValue<std::variant<Ts...>>::write(rapidjson::Document& document, rapidjson::Value& json, const std::variant<Ts...>& value) {
     json.SetObject();
-    std::visit([&document, &json](const auto& typedValue) {
-        using T = std::decay_t<decltype(typedValue)>;
-        constexpr auto description = duk::type::describe<T>();
-        json_write_member_value(document, json, "type", description.name());
-        json_write_member_value(document, json, "value", typedValue);
-    }, value);
+    std::visit(
+            [&document, &json](const auto& typedValue) {
+                using T = std::decay_t<decltype(typedValue)>;
+                constexpr auto description = duk::type::describe<T>();
+                json_write_member_value(document, json, "type", description.name());
+                json_write_member_value(document, json, "value", typedValue);
+            },
+            value);
 }
 
-template<typename ... Ts>
+template<typename... Ts>
 void JsonPrimitiveValue<std::variant<Ts...>>::read(const rapidjson::Value& json, std::variant<Ts...>& value) {
     DUK_ASSERT(json.IsObject());
     std::string typeName;
@@ -410,6 +398,6 @@ void JsonPrimitiveValue<std::variant<Ts...>>::read(const rapidjson::Value& json,
     }
 }
 
-}
+}// namespace duk::serial
 
-#endif //DUK_SERIAL_JSON_H
+#endif//DUK_SERIAL_JSON_H

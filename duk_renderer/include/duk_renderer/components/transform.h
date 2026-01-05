@@ -29,13 +29,15 @@ glm::vec3 world_position(const duk::objects::Component<Transform>& transform);
 }// namespace duk::renderer
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::renderer::Transform> : Class<duk::renderer::Transform,
     Member<"position", &duk::renderer::Transform::position>,
     Member<"rotation", &duk::renderer::Transform::rotation>,
     Member<"scale", &duk::renderer::Transform::scale>> {
 };
+
+// clang-format on
 
 }// namespace duk::type
 

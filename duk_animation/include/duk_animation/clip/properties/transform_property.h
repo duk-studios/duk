@@ -53,7 +53,7 @@ public:
 }// namespace duk::animation
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::animation::PositionValue> : Class<duk::animation::PositionValue,
     Member<"position", &duk::animation::PositionValue::position>> {
@@ -69,6 +69,7 @@ struct Type<duk::animation::ScaleValue> : Class<duk::animation::ScaleValue,
     Member<"scale", &duk::animation::ScaleValue::scale>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 #endif//DUK_ANIMATION_TRANSFORM_PROPERTY_H

@@ -48,4 +48,4 @@ void JsonPrimitiveValue<std::unique_ptr<Property>>::read(const rapidjson::Value&
     PropertyRegistry::instance()->json_read(json, value);
 }
 
-}
+}// namespace duk::serial

@@ -23,6 +23,6 @@ struct optional_const<T, false> {
 template<typename T, bool isConst>
 using optional_const_t = typename optional_const<T, isConst>::type;
 
-}
+}// namespace duk::type
 
-#endif //DUK_OPTIONAL_CONST_H
+#endif//DUK_OPTIONAL_CONST_H

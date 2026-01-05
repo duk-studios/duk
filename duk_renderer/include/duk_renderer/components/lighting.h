@@ -27,6 +27,7 @@ struct PointLight {
 
 namespace duk::type {
 
+// clang-format off
 template<>
 struct Type<duk::renderer::LightValue> : Class<duk::renderer::LightValue,
     Member<"color", &duk::renderer::LightValue::color>,
@@ -43,6 +44,8 @@ struct Type<duk::renderer::PointLight> : Class<duk::renderer::PointLight,
     Member<"value", &duk::renderer::PointLight::value>,
     Member<"radius", &duk::renderer::PointLight::radius>> {
 };
+
+// clang-format on
 
 }// namespace duk::type
 

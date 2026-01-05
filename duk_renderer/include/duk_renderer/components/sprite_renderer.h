@@ -22,13 +22,14 @@ void update_sprite_renderer(duk::tools::Globals* globals, const duk::objects::Co
 }// namespace duk::renderer
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::renderer::SpriteRenderer> : Class<duk::renderer::SpriteRenderer,
     Member<"sprite", &duk::renderer::SpriteRenderer::sprite>,
     Member<"index", &duk::renderer::SpriteRenderer::index>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

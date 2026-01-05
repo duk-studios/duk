@@ -68,4 +68,4 @@ void JsonPrimitiveValue<std::string>::read(const rapidjson::Value& json, std::st
     value = json.GetString();
 }
 
-}
+}// namespace duk::serial

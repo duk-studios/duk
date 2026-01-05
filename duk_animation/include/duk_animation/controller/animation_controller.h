@@ -37,11 +37,14 @@ using AnimationControllerResource = duk::resource::Handle<AnimationController>;
 
 namespace duk::type {
 
+// clang-format off
 template<>
 struct Type<duk::animation::AnimationController> : Class<duk::animation::AnimationController,
     Member<"animations", &duk::animation::AnimationController::m_animations>,
     Member<"variables", &duk::animation::AnimationController::m_variables>> {
 };
+
+// clang-format on
 
 }// namespace duk::type
 

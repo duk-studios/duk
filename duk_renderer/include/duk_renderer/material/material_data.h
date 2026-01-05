@@ -84,7 +84,7 @@ struct MaterialData {
 }// namespace duk::renderer
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::renderer::BindingType> : Enum<duk::renderer::BindingType,
     Value<"undefined", duk::renderer::BindingType::UNDEFINED>,
@@ -128,7 +128,8 @@ struct Type<duk::renderer::MaterialData> : Class<duk::renderer::MaterialData,
     Member<"bindings", &duk::renderer::MaterialData::bindings>> {
 };
 
-}
+// clang-format on
+}// namespace duk::type
 
 namespace duk::serial {
 

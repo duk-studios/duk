@@ -42,6 +42,7 @@ struct CanvasTransform {
 
 namespace duk::type {
 
+// clang-format off
 template<>
 struct Type<duk::ui::Canvas> : Class<duk::ui::Canvas,
     Member<"size", &duk::ui::Canvas::size>> {
@@ -55,6 +56,8 @@ struct Type<duk::ui::CanvasTransform> : Class<duk::ui::CanvasTransform,
     Member<"size", &duk::ui::CanvasTransform::size>,
     Member<"scale", &duk::ui::CanvasTransform::scale>> {
 };
+
+// clang-format on
 
 }// namespace duk::type
 

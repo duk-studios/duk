@@ -60,7 +60,7 @@ using SpriteResource = duk::resource::Handle<Sprite>;
 }// namespace duk::renderer
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::renderer::SpriteData> : Class<duk::renderer::SpriteData,
     Member<"max", &duk::renderer::SpriteData::max>,
@@ -75,6 +75,7 @@ struct Type<duk::renderer::SpriteAtlasData> : Class<duk::renderer::SpriteAtlasDa
     Member<"sprites", &duk::renderer::SpriteAtlasData::sprites>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

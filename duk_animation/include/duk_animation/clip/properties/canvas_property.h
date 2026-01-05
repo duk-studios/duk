@@ -79,7 +79,7 @@ public:
 }// namespace duk::animation
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::animation::CanvasAnchorValue> : Class<duk::animation::CanvasAnchorValue,
     Member<"anchor", &duk::animation::CanvasAnchorValue::anchor>> {
@@ -105,6 +105,7 @@ struct Type<duk::animation::CanvasScaleValue> : Class<duk::animation::CanvasScal
     Member<"scale", &duk::animation::CanvasScaleValue::scale>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 #endif//DUK_ANIMATION_CANVAS_PROPERTY_H

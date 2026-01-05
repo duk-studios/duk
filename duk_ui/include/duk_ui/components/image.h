@@ -21,7 +21,7 @@ struct Image {
 }// namespace duk::ui
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::ui::Image> : Class<duk::ui::Image,
     Member<"image", &duk::ui::Image::image>,
@@ -30,6 +30,7 @@ struct Type<duk::ui::Image> : Class<duk::ui::Image,
     Member<"keepAspectRatio", &duk::ui::Image::keepAspectRatio>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

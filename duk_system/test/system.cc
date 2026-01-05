@@ -61,7 +61,7 @@ struct TestComponent {
 };
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<TestComponent> : Class<TestComponent,
     Member<"value", &TestComponent::value>,
@@ -72,7 +72,7 @@ template<>
 struct Type<AnotherTestSystem> : Class<AnotherTestSystem,
     Member<"serializedValue", &AnotherTestSystem::serializedValue>> {
 };
-
+// clang-format on
 } // namespace duk::type
 
 TEST_CASE("Basic System usage and management", "[system]") {

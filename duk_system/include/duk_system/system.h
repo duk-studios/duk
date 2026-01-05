@@ -560,7 +560,6 @@ namespace duk::serial {
 
 template<>
 struct JsonPrimitiveValue<duk::system::Systems> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::system::Systems& systems);
 
     static void read(const rapidjson::Value& json, duk::system::Systems& systems);

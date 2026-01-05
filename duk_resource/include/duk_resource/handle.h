@@ -208,7 +208,6 @@ namespace duk::serial {
 
 template<>
 struct JsonPrimitiveValue<duk::resource::Id> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Id& id) {
         json.SetUint64(id.value());
     }
@@ -220,7 +219,6 @@ struct JsonPrimitiveValue<duk::resource::Id> {
 
 template<typename T>
 struct JsonPrimitiveValue<duk::resource::Handle<T>> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::resource::Handle<T>& resource) {
         json.SetUint64(resource.id().value());
     }

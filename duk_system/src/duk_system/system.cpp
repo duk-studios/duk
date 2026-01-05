@@ -209,4 +209,4 @@ void JsonPrimitiveValue<Systems>::read(const rapidjson::Value& json, Systems& sy
     }
 }
 
-}
+}// namespace duk::serial

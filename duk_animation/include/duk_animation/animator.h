@@ -17,13 +17,14 @@ struct Animator {
 }// namespace duk::animation
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::animation::Animator> : Class<duk::animation::Animator,
     Member<"controller", &duk::animation::Animator::controller>,
     Member<"state", &duk::animation::Animator::state>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 namespace duk::resource {

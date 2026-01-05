@@ -24,7 +24,7 @@ enum class TextVertAlignment {
 }// namespace duk::ui
 
 namespace duk::type {
-
+// clang-format off
 template<>
 struct Type<duk::ui::TextVertAlignment> : Enum<duk::ui::TextVertAlignment,
     Value<"top", duk::ui::TextVertAlignment::TOP>,
@@ -40,6 +40,7 @@ struct Type<duk::ui::TextHoriAlignment> : Enum<duk::ui::TextHoriAlignment,
 
 };
 
-}
+// clang-format on
+}// namespace duk::type
 
 #endif//DUK_UI_TEXT_ALIGNMENT_H

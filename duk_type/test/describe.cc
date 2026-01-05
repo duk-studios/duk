@@ -40,7 +40,7 @@ enum class DummyEnum {
 namespace duk::type {
 
 using namespace foo;
-
+// clang-format off
 template<>
 struct Type<Bar> : Class<Bar,
     Member<"a", &Bar::a>,
@@ -68,7 +68,7 @@ struct Type<DummyEnum> : Enum<DummyEnum,
     Value<"VALUE_THREE", DummyEnum::VALUE_THREE>> {
 };
 
-
+// clang-format on
 }
 
 TEST_CASE("Basic type information can be retrieved", "[type]") {

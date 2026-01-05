@@ -45,4 +45,4 @@ void JsonPrimitiveValue<AnimationVariables>::read(const rapidjson::Value& json, 
     json_read_value(json, value.m_variables);
 }
 
-}
+}// namespace duk::serial

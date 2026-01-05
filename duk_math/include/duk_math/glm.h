@@ -21,7 +21,6 @@ namespace duk::serial {
 
 template<glm::length_t L, typename T, glm::qualifier Q>
 struct JsonPrimitiveValue<glm::vec<L, T, Q>> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const glm::vec<L, T, Q>& value);
 
     static void read(const rapidjson::Value& json, glm::vec<L, T, Q>& value);
@@ -86,6 +85,6 @@ void JsonPrimitiveValue<glm::qua<T, Q>>::read(const rapidjson::Value& json, glm:
     value = glm::quat(glm::radians(vec));
 }
 
-}
+}// namespace duk::serial
 
-#endif //DUK_MATH_GLM_IMPORT_H
+#endif//DUK_MATH_GLM_IMPORT_H

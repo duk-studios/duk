@@ -32,4 +32,4 @@ std::string name_of(const type_info& info) {
 }
 
 #endif
-}// namespace duk::tools
+}// namespace duk::type

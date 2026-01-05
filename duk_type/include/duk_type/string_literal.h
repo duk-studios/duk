@@ -9,7 +9,7 @@
 
 namespace duk::type {
 
-template <auto N>
+template<auto N>
 struct string_literal {
     consteval string_literal(const char (&str)[N]) {
         std::copy_n(str, N, value);
@@ -18,6 +18,6 @@ struct string_literal {
     char value[N];
 };
 
-}
+}// namespace duk::type
 
-#endif //DUK_TYPE_STRING_LITERAL_H
+#endif//DUK_TYPE_STRING_LITERAL_H

@@ -29,7 +29,7 @@ bool operator<(const ResourceFile& lhs, const ResourceFile& rhs);
 
 namespace duk::type {
 
-
+// clang-format off
 template<>
 struct Type<duk::resource::ResourceFile> : Class<duk::resource::ResourceFile,
     Member<"tag", &duk::resource::ResourceFile::tag>,
@@ -38,6 +38,7 @@ struct Type<duk::resource::ResourceFile> : Class<duk::resource::ResourceFile,
     Member<"aliases", &duk::resource::ResourceFile::aliases>> {
 };
 
+// clang-format on
 }// namespace duk::type
 
 #endif//DUK_RESOURCE_FILE_H

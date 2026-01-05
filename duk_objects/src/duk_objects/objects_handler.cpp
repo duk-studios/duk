@@ -19,9 +19,7 @@ struct ObjectsWrapper {
 }// namespace duk::objects
 
 template<>
-struct duk::type::Type<duk::objects::ObjectsWrapper> : Class<objects::ObjectsWrapper,
-            Member<"objects", &objects::ObjectsWrapper::objects>> {
-};// namespace duk::type
+struct duk::type::Type<duk::objects::ObjectsWrapper> : Class<objects::ObjectsWrapper, Member<"objects", &objects::ObjectsWrapper::objects>> {};// namespace duk::type
 
 namespace duk::objects {
 

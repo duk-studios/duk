@@ -1511,7 +1511,6 @@ struct JsonPrimitiveValue<duk::objects::Component<T>> {
 
 template<>
 struct JsonPrimitiveValue<duk::objects::Objects> {
-
     static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Objects& value);
 
     static void read(const rapidjson::Value& json, duk::objects::Objects& value);
