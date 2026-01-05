@@ -7,7 +7,7 @@
 #include <duk_resource/handler.h>
 #include <duk_tools/file.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json.h>
 
 #include <fstream>
 #include <random>
@@ -68,7 +68,7 @@ static void add_resource(Project* project, const duk::resource::Id& id, const st
 
 duk::resource::ResourceFile load_resource_file(const std::filesystem::path& path) {
     const auto json = duk::tools::load_text(path);
-    return duk::serial::read_json<duk::resource::ResourceFile>(json);
+    return duk::serial::json_read<duk::resource::ResourceFile>(json);
 }
 
 std::set<std::filesystem::path> resource_scan(Project* project) {
@@ -121,13 +121,13 @@ duk::resource::Id resource_track(Project* project, const std::filesystem::path& 
     resourceFile.tag = detail::resource_tag(extension);
     resourceFile.id = detail::resource_id_generate(project);
 
-    std::ostringstream oss;
-    duk::serial::write_json(oss, resourceFile, true);
+    const auto json = duk::serial::json_write<decltype(resourceFile), true>(resourceFile);
 
     auto trackFilePath = std::filesystem::path(resource).replace_extension(".res");
+
     std::ofstream file(trackFilePath);
 
-    file << oss.str();
+    file << json;
 
     detail::add_resource(project, resourceFile.id, resource, trackFilePath);
 
