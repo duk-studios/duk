@@ -3,6 +3,7 @@
 //
 
 #include <duk_animation/clip/property.h>
+#include <duk_animation/clip/properties/sprite_property.h>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -97,5 +98,60 @@ TEST_CASE("Properties can be serialized with json", "[animation][json]") {
         CHECK(outputProp->samples() == dynamic_cast<Property*>(input.get())->samples());
         CHECK(outputProp->sample_at(0) == dynamic_cast<Property*>(input.get())->sample_at(0));
         CHECK(outputProp->sample_at(8) == dynamic_cast<Property*>(input.get())->sample_at(8));
+    }
+
+    SECTION("Sprite property round trip") {
+        using SpritePropertyType = duk::animation::PropertyT<duk::animation::SpriteProperty>;
+
+        duk::animation::register_property<duk::animation::SpriteProperty>();
+        std::unique_ptr<duk::animation::Property> input = std::make_unique<SpritePropertyType>();
+
+        // Add sprite values with different indices and resource IDs
+        auto* inputSpriteProp = dynamic_cast<SpritePropertyType*>(input.get());
+        REQUIRE(inputSpriteProp != nullptr);
+
+        duk::animation::SpriteValue value1;
+        value1.index = 0;
+        value1.sprite = duk::renderer::SpriteResource(duk::resource::Id(100));
+        inputSpriteProp->add_value(0, value1);
+
+        duk::animation::SpriteValue value2;
+        value2.index = 2;
+        value2.sprite = duk::renderer::SpriteResource(duk::resource::Id(200));
+        inputSpriteProp->add_value(10, value2);
+
+        duk::animation::SpriteValue value3;
+        value3.index = 5;
+        value3.sprite = duk::renderer::SpriteResource(duk::resource::Id(300));
+        inputSpriteProp->add_value(20, value3);
+
+        const auto json = duk::serial::json_write(input);
+        INFO("Sprite property json: " << json);
+
+        std::unique_ptr<duk::animation::Property> output;
+        duk::serial::json_read(json, output);
+
+        auto* outputSpriteProp = dynamic_cast<SpritePropertyType*>(output.get());
+        REQUIRE(outputSpriteProp != nullptr);
+
+        CHECK(outputSpriteProp->samples() == inputSpriteProp->samples());
+
+        // Check first value
+        auto outValue1 = outputSpriteProp->sample_at(0);
+        auto inValue1 = inputSpriteProp->sample_at(0);
+        CHECK(outValue1.index == inValue1.index);
+        CHECK(outValue1.sprite.id() == inValue1.sprite.id());
+
+        // Check second value
+        auto outValue2 = outputSpriteProp->sample_at(10);
+        auto inValue2 = inputSpriteProp->sample_at(10);
+        CHECK(outValue2.index == inValue2.index);
+        CHECK(outValue2.sprite.id() == inValue2.sprite.id());
+
+        // Check third value
+        auto outValue3 = outputSpriteProp->sample_at(20);
+        auto inValue3 = inputSpriteProp->sample_at(20);
+        CHECK(outValue3.index == inValue3.index);
+        CHECK(outValue3.sprite.id() == inValue3.sprite.id());
     }
 }
