@@ -27,7 +27,7 @@ public:
 
     void set(const std::string& name, bool value);
 
-    friend struct duk::type::Type<AnimationVariables>;
+    friend struct serial::JsonPrimitiveValue<AnimationVariables>;
 
 private:
     std::unordered_map<std::string, Variable> m_variables;
@@ -35,11 +35,14 @@ private:
 
 }// namespace duk::animation
 
-namespace duk::type {
+namespace duk::serial {
 
 template<>
-struct Type<duk::animation::AnimationVariables> : Class<duk::animation::AnimationVariables,
-    Member<"variables", &duk::animation::AnimationVariables::m_variables>> {
+struct JsonPrimitiveValue<duk::animation::AnimationVariables> {
+
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::animation::AnimationVariables& value);
+
+    static void read(const rapidjson::Value& json, duk::animation::AnimationVariables& value);
 };
 
 }

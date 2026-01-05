@@ -31,3 +31,18 @@ void AnimationVariables::set(const std::string& name, bool value) {
 }
 
 }// namespace duk::animation
+
+namespace duk::serial {
+
+using namespace duk::animation;
+
+void JsonPrimitiveValue<AnimationVariables>::write(rapidjson::Document& document, rapidjson::Value& json, const AnimationVariables& value) {
+    // for historical reasons (and simpler json files), we serialize the internal map directly
+    json_write_value(document, json, value.m_variables);
+}
+
+void JsonPrimitiveValue<AnimationVariables>::read(const rapidjson::Value& json, AnimationVariables& value) {
+    json_read_value(json, value.m_variables);
+}
+
+}
