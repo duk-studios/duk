@@ -32,7 +32,7 @@ void RotationProperty::evaluate(const duk::objects::Object& object, const Proper
     }
 
     auto value = property->sample_interpolate(sample);
-    transform->rotation = value.rotation;
+    transform->rotation = glm::radians(value.rotation);
 }
 
 RotationProperty::ValueType RotationProperty::interpolate(const ValueType& from, const ValueType& to, float progress) {
