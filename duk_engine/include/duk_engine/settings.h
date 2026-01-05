@@ -18,8 +18,6 @@ struct Settings {
     std::vector<std::string> resourceExtensions;
 };
 
-Settings load_settings(const std::string& path);
-
 }// namespace duk::engine
 
 namespace duk::type {
