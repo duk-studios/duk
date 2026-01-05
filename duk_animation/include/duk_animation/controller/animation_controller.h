@@ -49,7 +49,9 @@ namespace duk::resource {
 
 template<typename Solver>
 void solve_resources(Solver* solver, duk::animation::AnimationController& animationController) {
-    solver->solve(animationController.animations());
+    for (auto& animation: animationController.animations()) {
+        solver->solve(animation);
+    }
 }
 
 }// namespace duk::resource
