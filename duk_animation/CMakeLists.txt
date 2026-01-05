@@ -14,7 +14,7 @@ set(DUK_ANIMATION_HEADERS
         include/duk_animation/clip/properties/transform_property.h
         include/duk_animation/controller/animation_controller.h
         include/duk_animation/controller/animation_controller_handler.h
-        include/duk_animation/controller/animation_set.h
+        include/duk_animation/controller/animation.h
         include/duk_animation/controller/animation_state.h
         include/duk_animation/controller/animation_transition.h
         include/duk_animation/controller/animation_variables.h
@@ -31,7 +31,7 @@ set(DUK_ANIMATION_SOURCES
         src/duk_animation/clip/properties/transform_property.cpp
         src/duk_animation/controller/animation_controller.cpp
         src/duk_animation/controller/animation_controller_handler.cpp
-        src/duk_animation/controller/animation_set.cpp
+        src/duk_animation/controller/animation.cpp
         src/duk_animation/controller/animation_state.cpp
         src/duk_animation/controller/animation_transition.cpp
         src/duk_animation/controller/animation_variables.cpp

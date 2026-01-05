@@ -10,12 +10,12 @@
 namespace duk::animation {
 
 class AnimationController;
-struct AnimationEntry;
+struct Animation;
 
 struct AnimationState {
     AnimationVariables variables;
     const AnimationController* controller = nullptr;
-    const AnimationEntry* animation = nullptr;
+    const Animation* animation = nullptr;
     float time = 0.0f;
 };
 }// namespace duk::animation

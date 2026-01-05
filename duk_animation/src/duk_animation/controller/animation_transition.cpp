@@ -3,7 +3,7 @@
 //
 
 #include <duk_animation/controller/animation_transition.h>
-#include <duk_animation/controller/animation_set.h>
+#include <duk_animation/controller/animation.h>
 
 namespace duk::animation {
 
@@ -47,7 +47,7 @@ bool AnimationTransition::check(const AnimationState& state) const {
     });
 }
 
-void AnimationTransition::execute(const duk::objects::Object& object, AnimationState& state, const AnimationSet& animations) const {
+void AnimationTransition::execute(const duk::objects::Object& object, AnimationState& state, const std::vector<Animation>& animations) const {
     // when a condition is met, it may need to alter some state (e.g. trigger)
     for (auto& condition: m_conditions) {
         if (const auto triggerCondition = std::get_if<TriggerCondition>(&condition)) {
@@ -56,7 +56,7 @@ void AnimationTransition::execute(const duk::objects::Object& object, AnimationS
     }
     // sample at the end of the animation before transitioning
     state.animation->clip->evaluate(object, state.animation->clip->samples());
-    state.animation = animations.at(m_target);
+    state.animation = find_animation(animations, m_target);
     state.time = 0.0f;
 }
 

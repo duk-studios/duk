@@ -13,8 +13,6 @@
 
 namespace duk::animation {
 
-class AnimationSet;
-
 enum class OperatorType {
     UNDEFINED,
     EQUAL,
@@ -65,7 +63,7 @@ public:
     // returns true if the transition condition is met
     bool check(const AnimationState& state) const;
 
-    void execute(const duk::objects::Object& object, AnimationState& state, const AnimationSet& animations) const;
+    void execute(const duk::objects::Object& object, AnimationState& state, const std::vector<Animation>& animations) const;
 
     friend struct duk::type::Type<AnimationTransition>;
 

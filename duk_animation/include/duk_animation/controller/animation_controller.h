@@ -5,7 +5,7 @@
 #ifndef DUK_ANIMATION_ANIMATION_CONTROLLER_H
 #define DUK_ANIMATION_ANIMATION_CONTROLLER_H
 
-#include <duk_animation/controller/animation_set.h>
+#include <duk_animation/controller/animation.h>
 #include <duk_animation/controller/animation_state.h>
 #include <duk_animation/controller/animation_transition.h>
 
@@ -17,9 +17,9 @@ class AnimationController {
 public:
     void evaluate(const duk::objects::Component<Animator>& animator, float deltaTime) const;
 
-    AnimationSet& animations();
+    std::vector<Animation>& animations();
 
-    const AnimationSet& animations() const;
+    const std::vector<Animation>& animations() const;
 
     friend struct duk::type::Type<AnimationController>;
 
@@ -27,7 +27,7 @@ private:
     AnimationState build_state() const;
 
 private:
-    AnimationSet m_animations;
+    std::vector<Animation> m_animations;
     AnimationVariables m_variables;
 };
 
