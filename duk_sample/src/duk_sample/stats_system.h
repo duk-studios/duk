@@ -32,21 +32,14 @@ public:
 
 }// namespace duk::sample
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json<duk::sample::Stats>(const rapidjson::Value& json, duk::sample::Stats& stats) {
-    from_json_member(json, "sampleCount", stats.sampleCount);
-    from_json_member(json, "textObject", stats.textObject);
-}
-
-template<>
-inline void to_json<duk::sample::Stats>(rapidjson::Document& document, rapidjson::Value& json, const duk::sample::Stats& stats) {
-    to_json_member(document, json, "sampleCount", stats.sampleCount);
-    to_json_member(document, json, "textObject", stats.textObject);
-}
-
-}// namespace duk::serial
+struct Type<duk::sample::Stats> : Class<duk::sample::Stats,
+    Member<"sampleCount", &duk::sample::Stats::sampleCount>,
+    Member<"textObject", &duk::sample::Stats::textObject>> {
+};
+}// namespace duk::type
 
 namespace duk::resource {
 

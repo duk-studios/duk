@@ -22,19 +22,14 @@ public:
 
 }// namespace duk::sample
 
-namespace duk::serial {
+namespace duk::type {
 
 template<>
-inline void from_json<duk::sample::SpriteAnimator>(const rapidjson::Value& value, duk::sample::SpriteAnimator& animator) {
-    from_json_member(value, "animator", animator.animator);
-}
+struct Type<duk::sample::SpriteAnimator> : Class<duk::sample::SpriteAnimator,
+    Member<"animator", &duk::sample::SpriteAnimator::animator>> {
+};
 
-template<>
-inline void to_json<duk::sample::SpriteAnimator>(rapidjson::Document& documnet, rapidjson::Value& value, const duk::sample::SpriteAnimator& animator) {
-    to_json_member(documnet, value, "animator", animator.animator);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 namespace duk::resource {
 
