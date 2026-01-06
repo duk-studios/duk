@@ -6,7 +6,7 @@
 
 #include <duk_tools/file.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json.h>
 
 #include <duk_log/log.h>
 
@@ -17,8 +17,7 @@ namespace detail {
 ResourceFile load_resource_file(const std::filesystem::path& path) {
     auto content = duk::tools::load_text(path);
 
-    ResourceFile resourceFile = {};
-    duk::serial::read_json(content, resourceFile);
+    auto resourceFile = duk::serial::json_read<ResourceFile>(content);
 
     // convert relative path into absolute path
     resourceFile.file = (path.parent_path() / resourceFile.file).string();
@@ -57,7 +56,7 @@ static std::vector<ResourceFile> load_compressed_resource_files(const std::files
 
     const auto json = duk::tools::load_compressed_text(compressedResources);
 
-    auto resourceFiles = duk::serial::read_json<std::vector<ResourceFile>>(json);
+    auto resourceFiles = duk::serial::json_read<std::vector<ResourceFile>>(json);
 
     for (auto& resourceFile: resourceFiles) {
         // convert relative path into absolute path

@@ -6,15 +6,21 @@
       "values": [
         {
           "sample": 0,
-          "scale": "1;1;1"
+          "value": {
+            "scale": "1;1;1"
+          }
         },
         {
           "sample": 40,
-          "scale": "8;4;1"
+          "value": {
+            "scale": "8;4;1"
+          }
         },
         {
           "sample": 180,
-          "scale": "1;1;1"
+          "value": {
+            "scale": "1;1;1"
+          }
         }
       ]
     }

@@ -29,7 +29,9 @@ target_link_libraries(duk.system
 
 set_target_properties(duk.system PROPERTIES EXPORT_NAME system)
 
-add_subdirectory(test)
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
 
 install(
         DIRECTORY include/

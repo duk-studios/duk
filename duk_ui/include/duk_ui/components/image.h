@@ -20,25 +20,18 @@ struct Image {
 
 }// namespace duk::ui
 
-namespace duk::serial {
-
+namespace duk::type {
+// clang-format off
 template<>
-inline void from_json(const rapidjson::Value& json, duk::ui::Image& image) {
-    from_json_member(json, "image", image.image);
-    from_json_member(json, "sampler", image.sampler);
-    from_json_member(json, "color", image.color);
-    from_json_member(json, "keepAspectRatio", image.keepAspectRatio);
-}
+struct Type<duk::ui::Image> : Class<duk::ui::Image,
+    Member<"image", &duk::ui::Image::image>,
+    Member<"sampler", &duk::ui::Image::sampler>,
+    Member<"color", &duk::ui::Image::color>,
+    Member<"keepAspectRatio", &duk::ui::Image::keepAspectRatio>> {
+};
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::ui::Image& image) {
-    to_json_member(document, json, "image", image.image);
-    to_json_member(document, json, "sampler", image.sampler);
-    to_json_member(document, json, "color", image.color);
-    to_json_member(document, json, "keepAspectRatio", image.keepAspectRatio);
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 namespace duk::resource {
 

@@ -6,7 +6,7 @@
 
 #include <duk_objects/objects.h>
 #include <duk_tools/globals.h>
-#include <duk_tools/types.h>
+#include <duk_type/describe.h>
 
 namespace duk::system {
 
@@ -146,9 +146,9 @@ private:
     public:
         virtual ~SystemEntry() = default;
 
-        virtual void from_json(Systems& systems, const rapidjson::Value& json) = 0;
+        virtual void json_read(Systems& systems, const rapidjson::Value& json) = 0;
 
-        virtual void to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) = 0;
+        virtual void json_write(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) = 0;
 
         virtual void solve(duk::resource::DependencySolver* dependencySolver, Systems& systems) = 0;
 
@@ -162,9 +162,9 @@ private:
     template<typename T>
     class SystemEntryT : public SystemEntry {
     public:
-        void from_json(Systems& systems, const rapidjson::Value& json) override;
+        void json_read(Systems& systems, const rapidjson::Value& json) override;
 
-        void to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) override;
+        void json_write(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) override;
 
         void solve(duk::resource::DependencySolver* solver, Systems& systems) override;
 
@@ -205,8 +205,8 @@ public:
     template<bool isConst>
     class SystemIterator {
     public:
-        using SystemsType = duk::tools::maybe_const_t<Systems, isConst>;
-        using SystemType = duk::tools::maybe_const_t<System, isConst>;
+        using SystemsType = duk::type::optional_const_t<Systems, isConst>;
+        using SystemType = duk::type::optional_const_t<System, isConst>;
 
         SystemIterator(SystemsType& systems, size_t i);
 
@@ -404,20 +404,22 @@ void System::listen_global(R* receiver) {
 }
 
 template<typename T>
-void SystemRegistry::SystemEntryT<T>::from_json(Systems& systems, const rapidjson::Value& json) {
+void SystemRegistry::SystemEntryT<T>::json_read(Systems& systems, const rapidjson::Value& json) {
     uint32_t group;
-    duk::serial::from_json_member(json, "group", group);
+    duk::serial::json_read_member_value(json, "group", group);
 
     auto system = systems.add<T>(group);
     if (!system) {
         return;
     }
-    duk::serial::from_json(json, *system);
+    duk::serial::json_read_value(json, *system);
 }
 
 template<typename T>
-void SystemRegistry::SystemEntryT<T>::to_json(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) {
-    duk::serial::to_json(document, json, *systems.get<T>());
+void SystemRegistry::SystemEntryT<T>::json_write(const Systems& systems, rapidjson::Document& document, rapidjson::Value& json) {
+    duk::serial::json_write_value(document, json, *systems.get<T>());
+
+    duk::serial::json_write_member_value(document, json, "group", systems.group<T>());
 }
 
 template<typename T>
@@ -432,18 +434,18 @@ void SystemRegistry::SystemEntryT<T>::solve(duk::resource::ReferenceSolver* solv
 
 template<typename T>
 const std::string& SystemRegistry::SystemEntryT<T>::name() {
-    return duk::tools::type_name_of<T>();
+    return duk::type::name_of<T>();
 }
 
 template<typename T>
 uint32_t SystemRegistry::index_of() {
-    static const auto index = index_of(duk::tools::type_name_of<T>());
+    static const auto index = index_of(duk::type::name_of<T>());
     return index;
 }
 
 template<typename T>
 void SystemRegistry::add() {
-    const auto& name = duk::tools::type_name_of<T>();
+    const auto& name = duk::type::name_of<T>();
     auto it = m_systemNameToIndex.find(name);
     if (it != m_systemNameToIndex.end()) {
         return;
@@ -557,26 +559,11 @@ uint32_t Systems::group() const {
 namespace duk::serial {
 
 template<>
-inline void from_json<duk::system::Systems>(const rapidjson::Value& json, duk::system::Systems& systems) {
-    auto systemJsonArray = json.GetArray();
-    for (auto& systemJson: systemJsonArray) {
-        std::string systemName;
-        from_json_member(systemJson, "type", systemName);
-        duk::system::SystemRegistry::instance()->from_json(systems, systemJson, systemName);
-    }
-}
+struct JsonPrimitiveValue<duk::system::Systems> {
+    static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::system::Systems& systems);
 
-template<>
-inline void to_json<duk::system::Systems>(rapidjson::Document& document, rapidjson::Value& json, const duk::system::Systems& systems) {
-    auto jsonSystemsArray = json.SetArray().GetArray();
-    for (auto it: systems) {
-        const auto& systemName = it.system_name();
-        rapidjson::Value systemJson;
-        to_json_member(document, systemJson, "type", systemName);
-
-        duk::system::SystemRegistry::instance()->to_json(systems, document, systemJson, systemName);
-    }
-}
+    static void read(const rapidjson::Value& json, duk::system::Systems& systems);
+};
 
 }// namespace duk::serial
 

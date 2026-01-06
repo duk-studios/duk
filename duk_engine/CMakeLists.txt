@@ -16,7 +16,6 @@ set(DUK_ENGINE_HEADERS
 set(DUK_ENGINE_SOURCES
         src/duk_engine/context.cpp
         src/duk_engine/input.cpp
-        src/duk_engine/settings.cpp
         src/duk_engine/director.cpp
         src/duk_engine/register_types.cpp
         src/duk_engine/scene/scene.cpp

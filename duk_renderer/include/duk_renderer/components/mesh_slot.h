@@ -15,19 +15,15 @@ struct MeshSlot {
 
 }// namespace duk::renderer
 
-namespace duk::serial {
-
+namespace duk::type {
+// clang-format off
 template<>
-inline void from_json(const rapidjson::Value& json, duk::renderer::MeshSlot& slot) {
-    from_json_member(json, "mesh", slot.mesh);
-}
+struct Type<duk::renderer::MeshSlot> : Class<duk::renderer::MeshSlot,
+    Member<"mesh", &duk::renderer::MeshSlot::mesh>> {
+};
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::MeshSlot& slot) {
-    to_json_member(document, json, "mesh", slot.mesh);
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 namespace duk::resource {
 

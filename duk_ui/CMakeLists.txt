@@ -57,6 +57,10 @@ target_link_libraries(duk.ui
 
 set_target_properties(duk.ui PROPERTIES EXPORT_NAME ui)
 
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
+
 install(
         DIRECTORY include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}

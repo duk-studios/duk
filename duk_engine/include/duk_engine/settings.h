@@ -18,28 +18,21 @@ struct Settings {
     std::vector<std::string> resourceExtensions;
 };
 
-Settings load_settings(const std::string& path);
-
 }// namespace duk::engine
 
-namespace duk::serial {
+namespace duk::type {
 
+// clang-format off
 template<>
-inline void from_json<duk::engine::Settings>(const rapidjson::Value& json, duk::engine::Settings& settings) {
-    from_json_member(json, "name", settings.name);
-    from_json_member(json, "scene", settings.scene);
-    from_json_member(json, "resolution", settings.resolution);
-    from_json_member(json, "resourceExtensions", settings.resourceExtensions, true);
-}
+struct Type<duk::engine::Settings> : Class<duk::engine::Settings,
+    Member<"name", &duk::engine::Settings::name>,
+    Member<"scene", &duk::engine::Settings::scene>,
+    Member<"resolution", &duk::engine::Settings::resolution>,
+    Member<"resourceExtensions", &duk::engine::Settings::resourceExtensions>> {
+};
 
-template<>
-inline void to_json<duk::engine::Settings>(rapidjson::Document& document, rapidjson::Value& json, const duk::engine::Settings& settings) {
-    to_json_member(document, json, "name", settings.name);
-    to_json_member(document, json, "scene", settings.scene);
-    to_json_member(document, json, "resolution", settings.resolution);
-    to_json_member(document, json, "resourceExtensions", settings.resourceExtensions);
-}
+// clang-format on
 
-}// namespace duk::serial
+}// namespace duk::type
 
 #endif// DUK_ENGINE_SETTINGS_H

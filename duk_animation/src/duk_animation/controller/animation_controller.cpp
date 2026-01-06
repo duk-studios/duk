@@ -28,11 +28,11 @@ void AnimationController::evaluate(const duk::objects::Component<Animator>& anim
     }
 }
 
-AnimationSet& AnimationController::animations() {
+std::vector<Animation>& AnimationController::animations() {
     return m_animations;
 }
 
-const AnimationSet& AnimationController::animations() const {
+const std::vector<Animation>& AnimationController::animations() const {
     return m_animations;
 }
 
@@ -40,7 +40,7 @@ AnimationState AnimationController::build_state() const {
     AnimationState state;
     state.controller = this;
     state.time = 0.0f;
-    state.animation = m_animations.front();
+    state.animation = &m_animations.front();
     state.variables.assign(m_variables);
     return state;
 }

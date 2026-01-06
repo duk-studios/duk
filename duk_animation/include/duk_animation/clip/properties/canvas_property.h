@@ -7,6 +7,8 @@
 
 #include <duk_animation/clip/property.h>
 
+#include <duk_math/glm.h>
+
 namespace duk::animation {
 
 struct CanvasAnchorValue {
@@ -76,58 +78,34 @@ public:
 
 }// namespace duk::animation
 
-namespace duk::serial {
+namespace duk::type {
+// clang-format off
+template<>
+struct Type<duk::animation::CanvasAnchorValue> : Class<duk::animation::CanvasAnchorValue,
+    Member<"anchor", &duk::animation::CanvasAnchorValue::anchor>> {
+};
 
 template<>
-inline void from_json(const rapidjson::Value& value, duk::animation::CanvasAnchorValue& canvas) {
-    from_json_member(value, "anchor", canvas.anchor);
-}
+struct Type<duk::animation::CanvasPivotValue> : Class<duk::animation::CanvasPivotValue,
+    Member<"pivot", &duk::animation::CanvasPivotValue::pivot>> {
+};
 
 template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& value, const duk::animation::CanvasAnchorValue& canvas) {
-    to_json_member(document, value, "anchor", canvas.anchor);
-}
+struct Type<duk::animation::CanvasPositionValue> : Class<duk::animation::CanvasPositionValue,
+    Member<"position", &duk::animation::CanvasPositionValue::position>> {
+};
 
 template<>
-inline void from_json(const rapidjson::Value& value, duk::animation::CanvasPivotValue& canvas) {
-    from_json_member(value, "pivot", canvas.pivot);
-}
+struct Type<duk::animation::CanvasSizeValue> : Class<duk::animation::CanvasSizeValue,
+    Member<"size", &duk::animation::CanvasSizeValue::size>> {
+};
 
 template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& value, const duk::animation::CanvasPivotValue& canvas) {
-    to_json_member(document, value, "pivot", canvas.pivot);
-}
+struct Type<duk::animation::CanvasScaleValue> : Class<duk::animation::CanvasScaleValue,
+    Member<"scale", &duk::animation::CanvasScaleValue::scale>> {
+};
 
-template<>
-inline void from_json(const rapidjson::Value& value, duk::animation::CanvasPositionValue& canvas) {
-    from_json_member(value, "position", canvas.position);
-}
-
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& value, const duk::animation::CanvasPositionValue& canvas) {
-    to_json_member(document, value, "position", canvas.position);
-}
-
-template<>
-inline void from_json(const rapidjson::Value& value, duk::animation::CanvasSizeValue& canvas) {
-    from_json_member(value, "size", canvas.size);
-}
-
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& value, const duk::animation::CanvasSizeValue& canvas) {
-    to_json_member(document, value, "size", canvas.size);
-}
-
-template<>
-inline void from_json(const rapidjson::Value& value, duk::animation::CanvasScaleValue& canvas) {
-    from_json_member(value, "scale", canvas.scale);
-}
-
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& value, const duk::animation::CanvasScaleValue& canvas) {
-    to_json_member(document, value, "scale", canvas.scale);
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 #endif//DUK_ANIMATION_CANVAS_PROPERTY_H

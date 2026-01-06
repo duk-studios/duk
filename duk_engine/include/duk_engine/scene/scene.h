@@ -29,6 +29,8 @@ public:
 
     void exit(uint32_t disabledGroupsMask);
 
+    friend struct duk::type::Type<Scene>;
+
 private:
     duk::objects::ComponentEventDispatcher m_componentDispatcher;
     duk::system::SystemEventDispatcher m_systemDispatcher;
@@ -40,21 +42,16 @@ using SceneResource = duk::resource::Handle<Scene>;
 
 }// namespace duk::engine
 
-namespace duk::serial {
-
+namespace duk::type {
+// clang-format off
 template<>
-inline void from_json<duk::engine::Scene>(const rapidjson::Value& json, duk::engine::Scene& scene) {
-    from_json_member(json, "objects", scene.objects());
-    from_json_member(json, "systems", scene.systems());
-}
+struct Type<duk::engine::Scene> : Class<duk::engine::Scene,
+    Member<"objects", &duk::engine::Scene::m_objects>,
+    Member<"systems", &duk::engine::Scene::m_systems>> {
+};
 
-template<>
-inline void to_json<duk::engine::Scene>(rapidjson::Document& document, rapidjson::Value& json, const duk::engine::Scene& scene) {
-    to_json_member(document, json, "objects", scene.objects());
-    to_json_member(document, json, "systems", scene.systems());
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 namespace duk::resource {
 

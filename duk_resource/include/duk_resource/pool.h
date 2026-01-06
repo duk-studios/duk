@@ -9,7 +9,7 @@
 
 #include <duk_log/log.h>
 
-#include <duk_tools/types.h>
+#include <duk_type/describe.h>
 
 #include <unordered_map>
 #include <vector>
@@ -104,7 +104,7 @@ template<typename T>
 size_t Pools::pool_index() const {
     static const auto index = [] {
         auto& typeNameToIndex = pool_type_name_to_index();
-        const auto& typeName = duk::tools::type_name_of<T>();
+        const auto& typeName = duk::type::name_of<T>();
         auto it = typeNameToIndex.find(typeName);
         if (it != typeNameToIndex.end()) {
             return it->second;

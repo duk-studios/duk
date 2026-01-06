@@ -23,7 +23,7 @@
         },
         {
           "type": "duk::sample::Temporary",
-          "duration": 1
+          "duration": 10
         }
       ]
     },

@@ -27,25 +27,18 @@ public:
 
 }// namespace duk::sample
 
-namespace duk::serial {
-
+namespace duk::type {
+// clang-format off
 template<>
-inline void from_json<duk::sample::CameraController>(const rapidjson::Value& json, duk::sample::CameraController& cameraController) {
-    from_json_member(json, "speed", cameraController.speed);
-    from_json_member(json, "rotationSpeed", cameraController.rotationSpeed);
-    from_json_member(json, "spawnClip", cameraController.spawnClip);
-    from_json_member(json, "sphere", cameraController.sphere);
-}
+struct Type<duk::sample::CameraController> : Class<duk::sample::CameraController,
+    Member<"speed", &duk::sample::CameraController::speed>,
+    Member<"rotationSpeed", &duk::sample::CameraController::rotationSpeed>,
+    Member<"spawnClip", &duk::sample::CameraController::spawnClip>,
+    Member<"sphere", &duk::sample::CameraController::sphere>> {
+};
 
-template<>
-inline void to_json<duk::sample::CameraController>(rapidjson::Document& document, rapidjson::Value& json, const duk::sample::CameraController& cameraController) {
-    to_json_member(document, json, "speed", cameraController.speed);
-    to_json_member(document, json, "rotationSpeed", cameraController.rotationSpeed);
-    to_json_member(document, json, "spawnClip", cameraController.spawnClip);
-    to_json_member(document, json, "sphere", cameraController.sphere);
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 namespace duk::resource {
 

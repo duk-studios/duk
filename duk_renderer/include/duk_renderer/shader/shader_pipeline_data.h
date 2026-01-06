@@ -7,7 +7,7 @@
 
 #include <duk_renderer/shader/shader_module.h>
 
-#include <duk_serial/json/types.h>
+#include <duk_serial/json.h>
 
 namespace duk::renderer {
 
@@ -31,50 +31,30 @@ struct ShaderPipelineData {
 
 }// namespace duk::renderer
 
-namespace duk::serial {
+namespace duk::type {
+// clang-format off
+template<>
+struct Type<duk::renderer::PipelineSettings> : Class<duk::renderer::PipelineSettings,
+    Member<"blend", &duk::renderer::PipelineSettings::blend>,
+    Member<"depth", &duk::renderer::PipelineSettings::depth>,
+    Member<"invertY", &duk::renderer::PipelineSettings::invertY>,
+    Member<"cullModeMask", &duk::renderer::PipelineSettings::cullModeMask>,
+    Member<"priority", &duk::renderer::PipelineSettings::priority>> {
+};
 
 template<>
-inline void from_json(const rapidjson::Value& json, duk::renderer::PipelineSettings& data) {
-    from_json_member(json, "blend", data.blend);
-    from_json_member(json, "depth", data.depth);
-    from_json_member(json, "invertY", data.invertY);
-    from_json_member(json, "cullModeMask", data.cullModeMask);
-    from_json_member(json, "priority", data.priority);
-}
+struct Type<duk::renderer::PipelineShaderModules> : Class<duk::renderer::PipelineShaderModules,
+    Member<"vert", &duk::renderer::PipelineShaderModules::vert>,
+    Member<"frag", &duk::renderer::PipelineShaderModules::frag>> {
+};
 
 template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::PipelineSettings& data) {
-    to_json_member(document, json, "blend", data.blend);
-    to_json_member(document, json, "depth", data.depth);
-    to_json_member(document, json, "invertY", data.invertY);
-    to_json_member(document, json, "cullModeMask", data.cullModeMask);
-    to_json_member(document, json, "priority", data.priority);
-}
+struct Type<duk::renderer::ShaderPipelineData> : Class<duk::renderer::ShaderPipelineData,
+    Member<"shaders", &duk::renderer::ShaderPipelineData::shaders>,
+    Member<"settings", &duk::renderer::ShaderPipelineData::settings>> {
+};
 
-template<>
-inline void from_json(const rapidjson::Value& json, duk::renderer::PipelineShaderModules& shaders) {
-    from_json_member(json, "vert", shaders.vert);
-    from_json_member(json, "frag", shaders.frag);
-}
-
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::PipelineShaderModules& shaders) {
-    to_json_member(document, json, "vert", shaders.vert);
-    to_json_member(document, json, "frag", shaders.frag);
-}
-
-template<>
-inline void from_json(const rapidjson::Value& json, duk::renderer::ShaderPipelineData& data) {
-    from_json_member(json, "shaders", data.shaders);
-    from_json_member(json, "settings", data.settings);
-}
-
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::ShaderPipelineData& data) {
-    to_json_member(document, json, "shaders", data.shaders);
-    to_json_member(document, json, "settings", data.settings);
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 #endif//DUK_RENDERER_SHADER_PIPELINE_DATA_H

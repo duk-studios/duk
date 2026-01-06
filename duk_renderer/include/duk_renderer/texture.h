@@ -33,6 +33,8 @@ public:
 
     DUK_NO_DISCARD duk::rhi::Descriptor descriptor();
 
+    friend struct duk::type::Type<Texture>;
+
 private:
     ImageResource m_image;
     duk::rhi::Sampler m_sampler;
@@ -54,21 +56,16 @@ struct hash<duk::renderer::Texture> {
 
 }// namespace std
 
-namespace duk::serial {
-
+namespace duk::type {
+// clang-format off
 template<>
-inline void from_json<duk::renderer::Texture>(const rapidjson::Value& json, duk::renderer::Texture& texture) {
-    from_json_member(json, "image", texture.image());
-    from_json_member(json, "sampler", texture.sampler());
-}
+struct Type<duk::renderer::Texture> : Class<duk::renderer::Texture,
+    Member<"image", &duk::renderer::Texture::m_image>,
+    Member<"sampler", &duk::renderer::Texture::m_sampler>> {
+};
 
-template<>
-inline void to_json<duk::renderer::Texture>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::Texture& texture) {
-    to_json_member(document, json, "image", texture.image());
-    to_json_member(document, json, "sampler", texture.sampler());
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 namespace duk::resource {
 

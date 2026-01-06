@@ -7,7 +7,7 @@
 #include <duk_api/register_types.h>
 #include <duk_api/api.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json.h>
 
 namespace duk::runtime {
 
@@ -40,7 +40,7 @@ static duk::engine::Settings load_settings() {
             settingsJson = duk::tools::load_compressed_text("settings.bin");
             break;
     }
-    auto settings = duk::serial::read_json<duk::engine::Settings>(settingsJson);
+    auto settings = duk::serial::json_read<duk::engine::Settings>(settingsJson);
     settings.loadMode = loadMode;
     return settings;
 }

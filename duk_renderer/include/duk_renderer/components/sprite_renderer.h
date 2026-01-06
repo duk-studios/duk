@@ -21,21 +21,16 @@ void update_sprite_renderer(duk::tools::Globals* globals, const duk::objects::Co
 
 }// namespace duk::renderer
 
-namespace duk::serial {
-
+namespace duk::type {
+// clang-format off
 template<>
-inline void from_json<duk::renderer::SpriteRenderer>(const rapidjson::Value& json, duk::renderer::SpriteRenderer& spriteRenderer) {
-    from_json_member(json, "sprite", spriteRenderer.sprite);
-    from_json_member(json, "index", spriteRenderer.index);
-}
+struct Type<duk::renderer::SpriteRenderer> : Class<duk::renderer::SpriteRenderer,
+    Member<"sprite", &duk::renderer::SpriteRenderer::sprite>,
+    Member<"index", &duk::renderer::SpriteRenderer::index>> {
+};
 
-template<>
-inline void to_json<duk::renderer::SpriteRenderer>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::SpriteRenderer& spriteRenderer) {
-    to_json_member(document, json, "sprite", spriteRenderer.sprite);
-    to_json_member(document, json, "index", spriteRenderer.index);
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 namespace duk::resource {
 

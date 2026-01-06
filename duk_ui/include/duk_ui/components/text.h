@@ -26,33 +26,22 @@ struct Text {
 
 }// namespace duk::ui
 
-namespace duk::serial {
-
+namespace duk::type {
+// clang-format off
 template<>
-inline void from_json<duk::ui::Text>(const rapidjson::Value& json, duk::ui::Text& textRenderer) {
-    from_json_member(json, "font", textRenderer.font);
-    from_json_member(json, "fontSize", textRenderer.fontSize);
-    from_json_member(json, "text", textRenderer.text);
-    from_json_member(json, "size", textRenderer.size);
-    from_json_member(json, "color", textRenderer.color, true);
-    from_json_member(json, "horiAlignment", textRenderer.horiAlignment);
-    from_json_member(json, "vertAlignment", textRenderer.vertAlignment);
-    from_json_member(json, "dynamic", textRenderer.dynamic);
-}
+struct Type<duk::ui::Text> : Class<duk::ui::Text,
+    Member<"font", &duk::ui::Text::font>,
+    Member<"fontSize", &duk::ui::Text::fontSize>,
+    Member<"text", &duk::ui::Text::text>,
+    Member<"size", &duk::ui::Text::size>,
+    Member<"color", &duk::ui::Text::color>,
+    Member<"horiAlignment", &duk::ui::Text::horiAlignment>,
+    Member<"vertAlignment", &duk::ui::Text::vertAlignment>,
+    Member<"dynamic", &duk::ui::Text::dynamic>> {
+};
 
-template<>
-inline void to_json<duk::ui::Text>(rapidjson::Document& document, rapidjson::Value& json, const duk::ui::Text& textRenderer) {
-    to_json_member(document, json, "font", textRenderer.font);
-    to_json_member(document, json, "fontSize", textRenderer.fontSize);
-    to_json_member(document, json, "text", textRenderer.text);
-    to_json_member(document, json, "size", textRenderer.size);
-    to_json_member(document, json, "color", textRenderer.color);
-    to_json_member(document, json, "horiAlignment", textRenderer.horiAlignment);
-    to_json_member(document, json, "vertAlignment", textRenderer.vertAlignment);
-    to_json_member(document, json, "dynamic", textRenderer.dynamic);
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 namespace duk::resource {
 

@@ -20,8 +20,6 @@
 #include <duk_objects/object_solver.h>
 #include <duk_system/system_solver.h>
 
-#include <duk_serial/json/serializer.h>
-
 namespace duk::renderer {
 
 void register_types() {

@@ -150,7 +150,9 @@ set_target_properties(duk.renderer PROPERTIES EXPORT_NAME renderer)
 # used for generating spv files
 add_subdirectory(src/duk_renderer/shader)
 
-add_subdirectory(test)
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif()
 
 install(
         DIRECTORY include/

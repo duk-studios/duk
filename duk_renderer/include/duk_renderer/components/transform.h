@@ -28,22 +28,17 @@ glm::vec3 world_position(const duk::objects::Component<Transform>& transform);
 
 }// namespace duk::renderer
 
-namespace duk::serial {
-
+namespace duk::type {
+// clang-format off
 template<>
-inline void from_json<duk::renderer::Transform>(const rapidjson::Value& json, duk::renderer::Transform& transform) {
-    from_json_member(json, "rotation", transform.rotation);
-    from_json_member(json, "position", transform.position);
-    from_json_member(json, "scale", transform.scale);
-}
+struct Type<duk::renderer::Transform> : Class<duk::renderer::Transform,
+    Member<"position", &duk::renderer::Transform::position>,
+    Member<"rotation", &duk::renderer::Transform::rotation>,
+    Member<"scale", &duk::renderer::Transform::scale>> {
+};
 
-template<>
-inline void to_json<duk::renderer::Transform>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::Transform& transform) {
-    to_json_member(document, json, "position", transform.position);
-    to_json_member(document, json, "rotation", transform.rotation);
-    to_json_member(document, json, "scale", transform.scale);
-}
+// clang-format on
 
-}// namespace duk::serial
+}// namespace duk::type
 
 #endif// DUK_RENDERER_TRANSFORM_H

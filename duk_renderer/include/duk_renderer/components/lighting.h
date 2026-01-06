@@ -25,42 +25,28 @@ struct PointLight {
 
 }// namespace duk::renderer
 
-namespace duk::serial {
+namespace duk::type {
+
+// clang-format off
+template<>
+struct Type<duk::renderer::LightValue> : Class<duk::renderer::LightValue,
+    Member<"color", &duk::renderer::LightValue::color>,
+    Member<"intensity", &duk::renderer::LightValue::intensity>> {
+};
 
 template<>
-inline void from_json<duk::renderer::LightValue>(const rapidjson::Value& json, duk::renderer::LightValue& light) {
-    from_json_member(json, "color", light.color);
-    from_json_member(json, "intensity", light.intensity);
-}
+struct Type<duk::renderer::DirectionalLight> : Class<duk::renderer::DirectionalLight,
+    Member<"value", &duk::renderer::DirectionalLight::value>> {
+};
 
 template<>
-inline void to_json<duk::renderer::LightValue>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::LightValue& light) {
-    to_json_member(document, json, "color", light.color);
-    to_json_member(document, json, "intensity", light.intensity);
-}
+struct Type<duk::renderer::PointLight> : Class<duk::renderer::PointLight,
+    Member<"value", &duk::renderer::PointLight::value>,
+    Member<"radius", &duk::renderer::PointLight::radius>> {
+};
 
-template<>
-inline void from_json<duk::renderer::DirectionalLight>(const rapidjson::Value& json, duk::renderer::DirectionalLight& light) {
-    from_json_member(json, "value", light.value);
-}
+// clang-format on
 
-template<>
-inline void to_json<duk::renderer::DirectionalLight>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::DirectionalLight& light) {
-    to_json_member(document, json, "value", light.value);
-}
-
-template<>
-inline void from_json<duk::renderer::PointLight>(const rapidjson::Value& json, duk::renderer::PointLight& light) {
-    from_json_member(json, "value", light.value);
-    from_json_member(json, "radius", light.radius);
-}
-
-template<>
-inline void to_json<duk::renderer::PointLight>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::PointLight& light) {
-    to_json_member(document, json, "value", light.value);
-    to_json_member(document, json, "radius", light.radius);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 #endif// DUK_RENDERER_LIGHTING_H

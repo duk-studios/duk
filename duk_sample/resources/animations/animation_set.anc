@@ -8,24 +8,28 @@
           "target": "idle",
           "conditions": [
             {
-              "type": "finished"
+              "type": "duk::animation::FinishedCondition"
             },
             {
-              "type": "comparison",
-              "variable": "scaling",
-              "operator": "==",
+              "type": "duk::animation::ComparisonCondition",
               "value": {
-                "type": "bool",
-                "value": false
+                "variable": "scaling",
+                "operator": "==",
+                "value": {
+                  "type": "bool",
+                  "value": false
+                }
               }
             },
             {
-              "type": "comparison",
-              "variable": "rotating",
-              "operator": "==",
+              "type": "duk::animation::ComparisonCondition",
               "value": {
-                "type": "bool",
-                "value": false
+                "variable": "rotating",
+                "operator": "==",
+                "value": {
+                  "type": "bool",
+                  "value": false
+                }
               }
             }
           ]
@@ -34,11 +38,13 @@
           "target": "scale",
           "conditions": [
             {
-              "type": "trigger",
-              "variable": "scaling"
+              "type": "duk::animation::TriggerCondition",
+              "value": {
+                "variable": "scaling"
+              }
             },
             {
-              "type": "finished"
+              "type": "duk::animation::FinishedCondition"
             }
           ]
         },
@@ -46,11 +52,13 @@
           "target": "rotate",
           "conditions": [
             {
-              "type": "trigger",
-              "variable": "rotating"
+              "type": "duk::animation::TriggerCondition",
+              "value": {
+                "variable": "rotating"
+              }
             },
             {
-              "type": "finished"
+              "type": "duk::animation::FinishedCondition"
             }
           ]
         }
@@ -64,7 +72,7 @@
           "target": "idle",
           "conditions": [
             {
-              "type": "finished"
+              "type": "duk::animation::FinishedCondition"
             }
           ]
         }
@@ -78,7 +86,7 @@
           "target": "idle",
           "conditions": [
             {
-              "type": "finished"
+              "type": "duk::animation::FinishedCondition"
             }
           ]
         }
@@ -87,14 +95,18 @@
   ],
   "variables": [
     {
-      "name": "scaling",
-      "type": "bool",
-      "value": false
+      "key": "scaling",
+      "value": {
+        "type": "bool",
+        "value": false
+      }
     },
     {
-      "name": "rotating",
-      "type": "bool",
-      "value": false
+      "key": "rotating",
+      "value": {
+        "type": "bool",
+        "value": false
+      }
     }
   ]
 }

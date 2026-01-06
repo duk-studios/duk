@@ -5,8 +5,8 @@
 
 namespace duk::rhi {
 
-bool Sampler::operator==(const Sampler& rhs) const noexcept {
-    return wrapMode == rhs.wrapMode && filter == rhs.filter;
+bool operator==(const Sampler& lhs, const Sampler& rhs) noexcept {
+    return lhs.wrapMode == rhs.wrapMode && lhs.filter == rhs.filter;
 }
 
 }// namespace duk::rhi

@@ -36,3 +36,6 @@ jobs:
 
     - name: Build
       run: cmake --build --preset visual-studio-release
+
+    - name: Run tests
+      run: ctest --preset visual-studio

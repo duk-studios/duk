@@ -187,6 +187,10 @@ bool Objects::valid_object(const Id& id) const {
     return m_versions.size() > index && m_versions[index] == id.version();
 }
 
+uint32_t Objects::count() const {
+    return static_cast<uint32_t>(m_versions.size() - m_freeList.size());
+}
+
 Objects::ObjectView<false> Objects::all(bool includeInactive) {
     return ObjectView<false>(this, {}, includeInactive);
 }
@@ -271,16 +275,6 @@ void Objects::remove_component(uint32_t index, uint32_t componentIndex) {
     m_dirty = true;
 }
 
-void Objects::solve_references() {
-    ObjectSolver solver(*this);
-    for (auto object: all(true)) {
-        auto componentMask = object.component_mask();
-        for (auto componentIndex: componentMask.bits<true>()) {
-            ComponentRegistry::instance()->solve(&solver, object, componentIndex);
-        }
-    }
-}
-
 void Objects::add_node(uint32_t nodeIndex) {
     auto& node = m_nodes[nodeIndex];
     auto& parent = parent_node(nodeIndex);
@@ -339,4 +333,61 @@ void ComponentEventListener::attach(ComponentEventDispatcher* dispatcher) {
     m_dispatcher = dispatcher;
 }
 
+void solve_object_references(Objects& objects) {
+    duk::objects::ObjectSolver solver(objects);
+    for (auto object: objects.all(true)) {
+        auto componentMask = object.component_mask();
+        for (auto componentIndex: componentMask.bits<true>()) {
+            objects::ComponentRegistry::instance()->solve(&solver, object, componentIndex);
+        }
+    }
+}
+
 }// namespace duk::objects
+
+namespace duk::serial {
+
+void JsonPrimitiveValue<duk::objects::Objects>::write(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Objects& objects) {
+    auto jsonArray = json.SetArray().GetArray();
+    auto componentRegistry = objects::ComponentRegistry::instance();
+    for (auto object: objects.all(true)) {
+        rapidjson::Value jsonElement;
+        jsonElement.SetObject();
+
+        json_write_member_value(document, jsonElement, "parent", object.parent().id());
+        {
+            rapidjson::Value jsonComponents;
+            auto jsonComponentsArray = jsonComponents.SetArray().GetArray();
+            auto mask = object.component_mask();
+            for (auto componentIndex: mask.bits<true>()) {
+                rapidjson::Value jsonComponent;
+                componentRegistry->json_write(document, jsonComponent, object, componentIndex);
+                jsonComponentsArray.PushBack(jsonComponent, document.GetAllocator());
+            }
+            jsonElement.AddMember("components", std::move(jsonComponents), document.GetAllocator());
+        }
+        jsonArray.PushBack(std::move(jsonElement), document.GetAllocator());
+    }
+}
+
+void JsonPrimitiveValue<duk::objects::Objects>::read(const rapidjson::Value& json, duk::objects::Objects& objects) {
+    DUK_ASSERT(json.IsArray());
+    auto componentRegistry = objects::ComponentRegistry::instance();
+    auto jsonArray = json.GetArray();
+    for (auto& jsonElement: jsonArray) {
+        DUK_ASSERT(jsonElement.IsObject());
+
+        duk::objects::Id parentId;
+        json_read_member_value(jsonElement, "parent", parentId);
+
+        auto object = objects.add_object(parentId);
+        auto jsonComponentsArray = jsonElement["components"].GetArray();
+        for (auto& jsonComponent: jsonComponentsArray) {
+            componentRegistry->json_read(jsonComponent, object);
+        }
+    }
+
+    objects::solve_object_references(objects);
+}
+
+}// namespace duk::serial

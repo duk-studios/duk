@@ -29,18 +29,15 @@ public:
 
 }// namespace duk::sample
 
-namespace duk::serial {
-
+namespace duk::type {
+// clang-format off
 template<>
-inline void from_json(const rapidjson::Value& json, duk::sample::Temporary& temporary) {
-    from_json_member(json, "duration", temporary.duration);
-}
+struct Type<duk::sample::Temporary> : Class<duk::sample::Temporary,
+    Member<"duration", &duk::sample::Temporary::duration>,
+    Member<"startTime", &duk::sample::Temporary::startTime>> {
+};
 
-template<>
-inline void to_json(rapidjson::Document& document, rapidjson::Value& json, const duk::sample::Temporary& temporary) {
-    to_json_member(document, json, "duration", temporary.duration);
-}
-
-}// namespace duk::serial
+// clang-format on
+}// namespace duk::type
 
 #endif//DUK_SAMPLE_TEMPORARY_SYSTEM_H

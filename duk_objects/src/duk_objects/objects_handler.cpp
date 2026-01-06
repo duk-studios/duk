@@ -4,7 +4,9 @@
 
 #include <duk_objects/objects_handler.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_type/describe_class.h>
+
+#include <duk_serial/json.h>
 
 namespace duk::objects {
 
@@ -16,19 +18,8 @@ struct ObjectsWrapper {
 
 }// namespace duk::objects
 
-namespace duk::serial {
-
 template<>
-inline void from_json<duk::objects::ObjectsWrapper>(const rapidjson::Value& json, duk::objects::ObjectsWrapper& objectsWrapper) {
-    from_json_member(json, "objects", *objectsWrapper.objects);
-}
-
-template<>
-inline void to_json<duk::objects::ObjectsWrapper>(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::ObjectsWrapper& objectsWrapper) {
-    to_json_member(document, json, "objects", *objectsWrapper.objects);
-}
-
-}// namespace duk::serial
+struct duk::type::Type<duk::objects::ObjectsWrapper> : Class<objects::ObjectsWrapper, Member<"objects", &objects::ObjectsWrapper::objects>> {};// namespace duk::type
 
 namespace duk::objects {
 
@@ -42,9 +33,8 @@ bool ObjectsHandler::accepts(const std::string& extension) const {
 
 std::shared_ptr<Objects> ObjectsHandler::load_from_text(duk::tools::Globals* globals, const std::string_view& text) {
     ObjectsWrapper objectsWrapper = {};
-    objectsWrapper.objects = std::make_shared<Objects>();
 
-    duk::serial::read_json(text, objectsWrapper);
+    duk::serial::json_read(text, objectsWrapper);
     return objectsWrapper.objects;
 }
 

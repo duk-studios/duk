@@ -6,7 +6,7 @@
 #include <duk_log/log.h>
 #include <duk_tools/file.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json.h>
 
 #include <fstream>
 
@@ -38,10 +38,9 @@ static std::filesystem::path find_project_root(std::filesystem::path path) {
 static void write_project_settings(const Project* project) {
     duk::engine::Settings settings = project->settings;
 
-    std::ostringstream oss;
-    duk::serial::write_json(oss, settings, true);
+    const auto json = duk::serial::json_write<duk::engine::Settings, true>(settings);
 
-    duk::tools::save_text(project->root / "settings.json", oss.str());
+    duk::tools::save_text(project->root / "settings.json", json);
 }
 
 static void read_project_settings(Project* project) {
@@ -51,7 +50,7 @@ static void read_project_settings(Project* project) {
     }
 
     auto settingsJson = duk::tools::load_text(settingsPath);
-    duk::serial::read_json(settingsJson, project->settings);
+    duk::serial::json_read(settingsJson, project->settings);
 }
 
 static void pack_files(const std::vector<std::string>& packFiles, const std::filesystem::path& packDirectory) {
@@ -95,10 +94,7 @@ static void pack_resources(Project* project, const std::filesystem::path& packPa
         duk::tools::save_compressed_bytes(resourcesPath / resourceFile.file, resourceData.data(), resourceData.size());
     }
 
-    std::ostringstream oss;
-    duk::serial::write_json(oss, resourceFiles);
-
-    auto json = oss.str();
+    auto json = duk::serial::json_write(resourceFiles);
 
     auto resourcesBinPath = resourcesPath / "resources.bin";
 
@@ -107,12 +103,9 @@ static void pack_resources(Project* project, const std::filesystem::path& packPa
 
 static void pack_settings(const Project* project, const std::filesystem::path& packPath) {
     duk::engine::Settings settings = project->settings;
-
-    std::ostringstream oss;
-    duk::serial::write_json(oss, settings, false);
-
+    const auto json = duk::serial::json_write(settings);
     const auto settingsPath = packPath / "settings.bin";
-    duk::tools::save_compressed_text(settingsPath, oss.str());
+    duk::tools::save_compressed_text(settingsPath, json);
 }
 
 }// namespace detail

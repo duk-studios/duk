@@ -4,7 +4,7 @@
 
 #include <duk_animation/controller/animation_controller_handler.h>
 
-#include <duk_serial/json/serializer.h>
+#include <duk_serial/json.h>
 
 namespace duk::animation {
 
@@ -18,7 +18,7 @@ bool AnimationControllerHandler::accepts(const std::string& extension) const {
 
 std::shared_ptr<AnimationController> AnimationControllerHandler::load_from_text(duk::tools::Globals* globals, const std::string_view& text) {
     auto controller = std::make_shared<AnimationController>();
-    duk::serial::read_json(text, *controller);
+    duk::serial::json_read(text, *controller);
     return controller;
 }
 

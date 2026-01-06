@@ -34,30 +34,18 @@ void update_cameras(duk::objects::Objects& objects, uint32_t width, uint32_t hei
 
 }// namespace duk::renderer
 
-namespace duk::serial {
+namespace duk::type {
 
+// clang-format off
 template<>
-inline void from_json<duk::renderer::Camera>(const rapidjson::Value& json, duk::renderer::Camera& camera) {
-}
+struct Type<duk::renderer::PerspectiveCamera> : Class<duk::renderer::PerspectiveCamera,
+    Member<"fov", &duk::renderer::PerspectiveCamera::fovDegrees>,
+    Member<"near", &duk::renderer::PerspectiveCamera::zNear>,
+    Member<"far", &duk::renderer::PerspectiveCamera::zFar>> {
+};
 
-template<>
-inline void to_json<duk::renderer::Camera>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::Camera& camera) {
-}
+// clang-format on
 
-template<>
-inline void from_json<duk::renderer::PerspectiveCamera>(const rapidjson::Value& json, duk::renderer::PerspectiveCamera& camera) {
-    from_json_member(json, "fov", camera.fovDegrees);
-    from_json_member(json, "near", camera.zNear);
-    from_json_member(json, "far", camera.zFar);
-}
-
-template<>
-inline void to_json<duk::renderer::PerspectiveCamera>(rapidjson::Document& document, rapidjson::Value& json, const duk::renderer::PerspectiveCamera& camera) {
-    to_json_member(document, json, "fov", camera.fovDegrees);
-    to_json_member(document, json, "near", camera.zNear);
-    to_json_member(document, json, "far", camera.zFar);
-}
-
-}// namespace duk::serial
+}// namespace duk::type
 
 #endif// DUK_RENDERER_CAMERA_H

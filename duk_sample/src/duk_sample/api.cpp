@@ -10,7 +10,6 @@
 #include <duk_sample/temporary_system.h>
 #include <duk_objects/object_solver.h>
 #include <duk_system/system_solver.h>
-#include <duk_serial/json/serializer.h>
 
 void duk_api_register_types() {
     duk::objects::register_component<duk::sample::CameraController>();

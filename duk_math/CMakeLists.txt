@@ -1,6 +1,7 @@
 
 set(DUK_MATH_HEADERS
         include/duk_math/math.h
+        include/duk_math/glm.h
         include/duk_math/aabb.h
         )
 
@@ -20,10 +21,13 @@ target_include_directories(duk.math
 
 target_link_libraries(duk.math
         PUBLIC
-        duk::macros
+        duk::serial
         glm::glm
         )
 
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
 
 set_target_properties(duk.math PROPERTIES
         EXPORT_NAME math
