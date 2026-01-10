@@ -1,5 +1,6 @@
 set(DUK_RESOURCE_TEST_SOURCES
         handle.cc
+        solver.cc
 )
 
 add_executable(duk.resource.test ${DUK_RESOURCE_TEST_SOURCES})
