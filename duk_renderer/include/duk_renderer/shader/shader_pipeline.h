@@ -78,9 +78,11 @@ using ShaderPipelineResource = duk::resource::Handle<ShaderPipeline>;
 namespace duk::resource {
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::renderer::ShaderPipeline& shaderPipeline) {
-    shaderPipeline.solve_resources(solver);
-}
+struct PrimitiveResourceSolver<Solver, duk::renderer::ShaderPipeline> {
+    static void solve(Solver* solver, duk::renderer::ShaderPipeline& shaderPipeline) {
+        shaderPipeline.solve_resources(solver);
+    }
+};
 
 }// namespace duk::resource
 

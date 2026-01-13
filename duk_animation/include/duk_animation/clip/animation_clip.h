@@ -51,15 +51,4 @@ struct Type<duk::animation::AnimationClip> : Class<duk::animation::AnimationClip
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::animation::AnimationClip& animation) {
-    for (auto& property: animation) {
-        solver->solve(*property);
-    }
-}
-
-}// namespace duk::resource
-
 #endif//DUK_ANIMATION_ANIMATION_CLIP_H

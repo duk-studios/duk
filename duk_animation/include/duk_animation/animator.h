@@ -27,13 +27,4 @@ struct Type<duk::animation::Animator> : Class<duk::animation::Animator,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::animation::Animator& animator) {
-    solver->solve(animator.controller);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_ANIMATION_ANIMATOR_H

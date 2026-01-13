@@ -262,40 +262,21 @@ private:
     template<typename T>
     class ComponentEntryT : public ComponentEntry {
     public:
-        void copy(const ObjectHandle<true>& src, ObjectHandle<false>& dst) override {
-            auto dstComponent = dst.component_or_add<T>();
-            const auto srcComponent = src.component<T>();
-            *dstComponent = *srcComponent;
-        }
+        void copy(const ObjectHandle<true>& src, ObjectHandle<false>& dst) override;
 
-        void solve(duk::resource::ReferenceSolver* solver, ObjectHandle<false>& object) override {
-            auto component = ComponentHandle<T, false>(object);
-            solver->solve(*component);
-        }
+        void solve(duk::resource::ReferenceSolver* solver, ObjectHandle<false>& object) override;
 
-        void solve(duk::resource::DependencySolver* solver, ObjectHandle<false>& object) override {
-            auto component = ComponentHandle<T, false>(object);
-            solver->solve(*component);
-        }
+        void solve(duk::resource::DependencySolver* solver, ObjectHandle<false>& object) override;
 
-        // has to be implemented on a different file, otherwise our entire hacky-template stuff would break
         void solve(ObjectSolver* solver, ObjectHandle<false>& object) override;
 
-        void json_read(const rapidjson::Value& json, ObjectHandle<false>& object) override {
-            duk::serial::json_read_value(json, *object.component_or_add<T>());
-        }
+        void json_read(const rapidjson::Value& json, ObjectHandle<false>& object) override;
 
-        void json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) override {
-            duk::serial::json_write_value(document, json, *object.component<T>());
-        }
+        void json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) override;
 
-        const std::string& name() const override {
-            return duk::type::name_of<T>();
-        }
+        const std::string& name() const override;
 
-        std::unique_ptr<detail::ComponentPool> create_pool() const override {
-            return std::make_unique<detail::ComponentPoolT<T>>(detail::kComponentsPerChunk);
-        }
+        std::unique_ptr<detail::ComponentPool> create_pool() const override;
     };
 
 public:
@@ -305,65 +286,27 @@ public:
         : m_componentIndexCounter(0) {
     }
 
-    void copy_component(const ObjectHandle<true>& src, ObjectHandle<false>& dst, uint32_t componentId) {
-        auto& entry = m_componentEntries.at(componentId);
-        entry->copy(src, dst);
-    }
+    void copy_component(const ObjectHandle<true>& src, ObjectHandle<false>& dst, uint32_t componentId);
 
     template<typename Solver>
-    void solve(Solver* solver, ObjectHandle<false>& object, uint32_t componentId) {
-        auto& entry = m_componentEntries.at(componentId);
-        entry->solve(solver, object);
-    }
+    void solve(Solver* solver, ObjectHandle<false>& object, uint32_t componentId);
 
-    void json_read(const rapidjson::Value& json, ObjectHandle<false>& object, uint32_t componentId) {
-        auto& entry = m_componentEntries.at(componentId);
-        entry->json_read(json, object);
-    }
+    void json_read(const rapidjson::Value& json, ObjectHandle<false>& object, uint32_t componentId);
 
-    void json_read(const rapidjson::Value& json, ObjectHandle<false>& object, const std::string& componentName) {
-        const auto it = m_componentNameToIndex.find(componentName);
-        if (it == m_componentNameToIndex.end()) {
-            duk::log::warn("Unregistered Component type: \"{}\"", componentName);
-            return;
-        }
-        const auto index = it->second;
-        json_read(json, object, index);
-    }
+    void json_read(const rapidjson::Value& json, ObjectHandle<false>& object, const std::string& componentName);
 
-    void json_read(const rapidjson::Value& json, ObjectHandle<false>& object) {
-        std::string type;
-        duk::serial::json_read_member_value(json, "type", type);
-        json_read(json, object, type);
-    }
+    void json_read(const rapidjson::Value& json, ObjectHandle<false>& object);
 
-    void json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object, uint32_t componentIndex) {
-        const auto& type = name_of(componentIndex);
-        m_componentEntries.at(componentIndex)->json_write(document, json, object);
-        // write last to make sure SetObject is called before adding members
-        // This should be removed after refactoring object serialization
-        duk::serial::json_write_member_value(document, json, "type", type);
-    }
+    void json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object, uint32_t componentIndex);
 
-    template<typename T>
-    void add() {
-        const auto& name = duk::type::name_of<T>();
-        auto it = m_componentNameToIndex.find(name);
-        if (it != m_componentNameToIndex.end()) {
-            return;
-        }
-        const auto index = m_componentIndexCounter++;
-        m_componentEntries.at(index) = std::make_unique<ComponentEntryT<T>>();
-        m_componentNameToIndex.emplace(name, index);
-    }
-
-    std::unique_ptr<detail::ComponentPool> create_pool(uint32_t index) const {
-        return m_componentEntries.at(index)->create_pool();
-    }
+    std::unique_ptr<detail::ComponentPool> create_pool(uint32_t index) const;
 
     const std::string& name_of(uint32_t index) const;
 
     uint32_t index_of(const std::string& componentTypeName) const;
+
+    template<typename T>
+    void add();
 
     template<typename T>
     uint32_t index_of() const;
@@ -375,15 +318,33 @@ private:
 };
 
 template<typename T>
-uint32_t ComponentRegistry::index_of() const {
-    static const uint32_t index = index_of(duk::type::name_of<T>());
-    return index;
-}
-
-template<typename T>
 void register_component() {
     ComponentRegistry::instance()->add<T>();
 }
+
+class ObjectSolver {
+public:
+    explicit ObjectSolver(Objects& objects);
+
+    ObjectSolver(Objects& objects, const std::unordered_map<Id, Id>& runtimeIds);
+
+    void solve(Id& id);
+
+    template<bool isConst>
+    void solve(ObjectHandle<isConst>& object);
+
+    template<typename T, bool isConst>
+    void solve(ComponentHandle<T, isConst>& component);
+
+    template<typename T>
+    void solve(T& object);
+
+private:
+    Id find_runtime_id(Id originalId) const;
+
+    Objects& m_objects;
+    const std::unordered_map<Id, Id>* m_runtimeIds;
+};
 
 class ComponentEventDispatcher;
 
@@ -1019,6 +980,94 @@ typename ComponentHandle<T, isConst>::Type* ComponentHandle<T, isConst>::fetch()
     return m_objects->template component<T>(m_ownerId);
 }
 
+template<typename T>
+void ComponentRegistry::ComponentEntryT<T>::copy(const ObjectHandle<true>& src, ObjectHandle<false>& dst) {
+    auto dstComponent = dst.component_or_add<T>();
+    const auto srcComponent = src.component<T>();
+    *dstComponent = *srcComponent;
+}
+
+template<typename T>
+void ComponentRegistry::ComponentEntryT<T>::solve(duk::resource::ReferenceSolver* solver, ObjectHandle<false>& object) {
+    auto component = ComponentHandle<T, false>(object);
+    solver->solve(*component);
+}
+
+template<typename T>
+void ComponentRegistry::ComponentEntryT<T>::solve(duk::resource::DependencySolver* solver, ObjectHandle<false>& object) {
+    auto component = ComponentHandle<T, false>(object);
+    solver->solve(*component);
+}
+
+template<typename T>
+void ComponentRegistry::ComponentEntryT<T>::solve(ObjectSolver* solver, ObjectHandle<false>& object) {
+    auto component = ComponentHandle<T, false>(object);
+    solver->solve(*component);
+}
+
+template<typename T>
+void ComponentRegistry::ComponentEntryT<T>::json_read(const rapidjson::Value& json, ObjectHandle<false>& object) {
+    duk::serial::json_read_value(json, *object.component_or_add<T>());
+}
+
+template<typename T>
+void ComponentRegistry::ComponentEntryT<T>::json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object) {
+    duk::serial::json_write_value(document, json, *object.component<T>());
+}
+
+template<typename T>
+const std::string& ComponentRegistry::ComponentEntryT<T>::name() const {
+    return duk::type::name_of<T>();
+}
+
+template<typename T>
+std::unique_ptr<detail::ComponentPool> ComponentRegistry::ComponentEntryT<T>::create_pool() const {
+    return std::make_unique<detail::ComponentPoolT<T>>(detail::kComponentsPerChunk);
+}
+
+template<typename Solver>
+void ComponentRegistry::solve(Solver* solver, ObjectHandle<false>& object, uint32_t componentId) {
+    auto& entry = m_componentEntries.at(componentId);
+    entry->solve(solver, object);
+}
+
+template<typename T>
+void ComponentRegistry::add() {
+    const auto& name = duk::type::name_of<T>();
+    auto it = m_componentNameToIndex.find(name);
+    if (it != m_componentNameToIndex.end()) {
+        return;
+    }
+    const auto index = m_componentIndexCounter++;
+    m_componentEntries.at(index) = std::make_unique<ComponentEntryT<T>>();
+    m_componentNameToIndex.emplace(name, index);
+}
+
+template<typename T>
+uint32_t ComponentRegistry::index_of() const {
+    static const uint32_t index = index_of(duk::type::name_of<T>());
+    return index;
+}
+
+// ObjectSolver Implementation //
+
+template<bool isConst>
+void ObjectSolver::solve(ObjectHandle<isConst>& object) {
+    auto id = find_runtime_id(object.id());
+    object = m_objects.object(id);
+}
+
+template<typename T, bool isConst>
+void ObjectSolver::solve(ComponentHandle<T, isConst>& component) {
+    auto id = find_runtime_id(component.id());
+    component = ComponentHandle<T, isConst>(m_objects.object(id));
+}
+
+template<typename T>
+void ObjectSolver::solve(T& object) {
+    duk::resource::solve_resources(this, object);
+}
+
 // Objects Implementation //
 
 template<bool IsConst>
@@ -1547,16 +1596,18 @@ void JsonPrimitiveValue<objects::Component<T>>::read(const rapidjson::Value& jso
 namespace duk::resource {
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::objects::Objects& objects) {
-    auto componentRegistry = duk::objects::ComponentRegistry::instance();
-    for (auto object: objects.all(true)) {
-        const auto& componentMask = object.component_mask();
+struct PrimitiveResourceSolver<Solver, duk::objects::Objects> {
+    static void solve(Solver* solver, duk::objects::Objects& objects) {
+        const auto componentRegistry = duk::objects::ComponentRegistry::instance();
+        for (auto object: objects.all(true)) {
+            const auto& componentMask = object.component_mask();
 
-        for (auto componentId: componentMask.bits<true>()) {
-            componentRegistry->solve(solver, object, componentId);
+            for (auto componentId: componentMask.bits<true>()) {
+                componentRegistry->solve(solver, object, componentId);
+            }
         }
     }
-}
+};
 
 }// namespace duk::resource
 

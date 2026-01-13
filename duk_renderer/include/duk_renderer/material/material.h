@@ -180,9 +180,11 @@ void Material::solve_resources(Solver* solver) {
 namespace duk::resource {
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::renderer::Material& material) {
-    material.solve_resources(solver);
-}
+struct PrimitiveResourceSolver<Solver, duk::renderer::Material> {
+    static void solve(Solver* solver, duk::renderer::Material& obj) {
+        obj.solve_resources(solver);
+    }
+};
 
 }// namespace duk::resource
 

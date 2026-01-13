@@ -3,7 +3,6 @@
 
 #include <duk_objects/objects.h>
 #include <duk_objects/events.h>
-#include <duk_objects/object_solver.h>
 #include <ranges>
 
 namespace duk::objects {
@@ -14,6 +13,44 @@ ComponentRegistry* ComponentRegistry::instance() {
     return &g_componentRegistry;
 }
 
+void ComponentRegistry::copy_component(const ObjectHandle<true>& src, ObjectHandle<false>& dst, uint32_t componentId) {
+    auto& entry = m_componentEntries.at(componentId);
+    entry->copy(src, dst);
+}
+
+void ComponentRegistry::json_read(const rapidjson::Value& json, ObjectHandle<false>& object, uint32_t componentId) {
+    auto& entry = m_componentEntries.at(componentId);
+    entry->json_read(json, object);
+}
+
+void ComponentRegistry::json_read(const rapidjson::Value& json, ObjectHandle<false>& object, const std::string& componentName) {
+    const auto it = m_componentNameToIndex.find(componentName);
+    if (it == m_componentNameToIndex.end()) {
+        duk::log::warn("Unregistered Component type: \"{}\"", componentName);
+        return;
+    }
+    const auto index = it->second;
+    json_read(json, object, index);
+}
+
+void ComponentRegistry::json_read(const rapidjson::Value& json, ObjectHandle<false>& object) {
+    std::string type;
+    duk::serial::json_read_member_value(json, "type", type);
+    json_read(json, object, type);
+}
+
+void ComponentRegistry::json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object, uint32_t componentIndex) {
+    const auto& type = name_of(componentIndex);
+    m_componentEntries.at(componentIndex)->json_write(document, json, object);
+    // write last to make sure SetObject is called before adding members
+    // This should be removed after refactoring object serialization
+    duk::serial::json_write_member_value(document, json, "type", type);
+}
+
+std::unique_ptr<detail::ComponentPool> ComponentRegistry::create_pool(uint32_t index) const {
+    return m_componentEntries.at(index)->create_pool();
+}
+
 const std::string& ComponentRegistry::name_of(uint32_t index) const {
     DUK_ASSERT(m_componentEntries[index] != nullptr);
     return m_componentEntries[index]->name();
@@ -21,6 +58,29 @@ const std::string& ComponentRegistry::name_of(uint32_t index) const {
 
 uint32_t ComponentRegistry::index_of(const std::string& componentTypeName) const {
     return m_componentNameToIndex.at(componentTypeName);
+}
+
+ObjectSolver::ObjectSolver(Objects& objects)
+    : m_objects(objects)
+    , m_runtimeIds(nullptr) {
+}
+
+ObjectSolver::ObjectSolver(Objects& objects, const std::unordered_map<Id, Id>& runtimeIds)
+    : m_objects(objects)
+    , m_runtimeIds(&runtimeIds) {
+}
+
+void ObjectSolver::solve(Id& id) {
+    id = find_runtime_id(id);
+}
+
+Id ObjectSolver::find_runtime_id(Id originalId) const {
+    if (m_runtimeIds) {
+        if (const auto it = m_runtimeIds->find(originalId); it != m_runtimeIds->end()) {
+            originalId = it->second;
+        }
+    }
+    return originalId;
 }
 
 Objects::Objects()

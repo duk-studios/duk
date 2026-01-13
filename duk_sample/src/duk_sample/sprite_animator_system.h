@@ -32,13 +32,4 @@ struct Type<duk::sample::SpriteAnimator> : Class<duk::sample::SpriteAnimator,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::sample::SpriteAnimator& spriteAnimator) {
-    solver->solve(spriteAnimator.animator);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_SAMPLE_SPRITE_ANIMATOR_SYSTEM_H

@@ -3,8 +3,6 @@
 
 #include <duk_engine/scene/scene.h>
 
-#include <duk_objects/object_solver.h>
-
 namespace duk::engine {
 
 Scene::Scene()

@@ -5,7 +5,7 @@
 #include <duk_resource/handle.h>
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("Resource handle serialization", "[json]") {
+TEST_CASE("Resource handle serialization", "[resource][json]") {
     using namespace duk::resource;
     SECTION("resource id roundtrip") {
         auto input = Id(12345);

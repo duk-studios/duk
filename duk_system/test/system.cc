@@ -4,8 +4,6 @@
 
 #include <duk_system/system.h>
 #include <duk_objects/objects.h>
-#include <duk_objects/object_solver.h>
-#include <duk_system/system_solver.h>
 #include <duk_tools/globals.h>
 #include <duk_serial/json.h>
 #include <catch2/catch_test_macros.hpp>
@@ -38,6 +36,10 @@ public:
     }
 };
 
+struct TestResource {
+    int data = 0;
+};
+
 // Another test system
 class AnotherTestSystem : public duk::system::System {
 public:
@@ -48,6 +50,7 @@ public:
     }
 
     int serializedValue;
+    duk::resource::Handle<TestResource> resource;
 };
 
 // Test component for system interaction
@@ -70,7 +73,8 @@ struct Type<TestComponent> : Class<TestComponent,
 
 template<>
 struct Type<AnotherTestSystem> : Class<AnotherTestSystem,
-    Member<"serializedValue", &AnotherTestSystem::serializedValue>> {
+    Member<"serializedValue", &AnotherTestSystem::serializedValue>,
+    Member<"resource", &AnotherTestSystem::resource>> {
 };
 // clang-format on
 } // namespace duk::type
@@ -215,6 +219,7 @@ TEST_CASE("System serialization and deserialization", "[system][json]") {
     {
         auto testSys = input.add<AnotherTestSystem>(2);
         testSys->serializedValue = 42;
+        testSys->resource = duk::resource::Handle<TestResource>(duk::resource::Id(7));
     }
     auto json = duk::serial::json_write(input);
     INFO("Json:" << json);
@@ -229,5 +234,28 @@ TEST_CASE("System serialization and deserialization", "[system][json]") {
         REQUIRE(anotherSys != nullptr);
         CHECK(output.group<AnotherTestSystem>() == 2);
         CHECK(anotherSys->serializedValue == 42);
+        CHECK(anotherSys->resource.id() == duk::resource::Id(7));
     }
+}
+
+TEST_CASE("System resource solving", "[system][resource]") {
+    using namespace duk::system;
+    using namespace duk::resource;
+
+    duk::system::register_system<AnotherTestSystem>();
+
+    Systems systems;
+    auto anotherSys = systems.add<AnotherTestSystem>(0);
+    anotherSys->resource = Handle<TestResource>(Id(3));
+
+    Pools pools;
+    auto testRes = std::make_shared<TestResource>();
+    testRes->data = 123;
+    pools.insert<TestResource>(Id(3), testRes);
+
+    ReferenceSolver referenceSolver(pools);
+    referenceSolver.solve(systems);
+
+    REQUIRE(anotherSys->resource.valid());
+    CHECK(anotherSys->resource->data == 123);
 }

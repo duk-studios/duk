@@ -36,13 +36,4 @@ struct Type<duk::animation::SpriteValue> : Class<duk::animation::SpriteValue,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::animation::SpriteValue& value) {
-    solver->solve(value.sprite);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_ANIMATION_SPRITE_PROPERTY_H

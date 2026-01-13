@@ -49,6 +49,8 @@ public:
 
     SpriteMetrics compute_metrics(uint32_t spriteIndex) const;
 
+    friend struct duk::type::Type<Sprite>;
+
 private:
     ImageResource m_image;
     float m_pixelsPerUnit;
@@ -75,16 +77,14 @@ struct Type<duk::renderer::SpriteAtlasData> : Class<duk::renderer::SpriteAtlasDa
     Member<"sprites", &duk::renderer::SpriteAtlasData::sprites>> {
 };
 
+template<>
+struct Type<duk::renderer::Sprite> : Class<duk::renderer::Sprite,
+    Member<"image", &duk::renderer::Sprite::m_image>,
+    Member<"pixelsPerUnit", &duk::renderer::Sprite::m_pixelsPerUnit>,
+    Member<"sprites", &duk::renderer::Sprite::m_sprites>> {
+};
+
 // clang-format on
 }// namespace duk::type
-
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::renderer::Sprite& sprite) {
-    solver->solve(sprite.image());
-}
-
-}// namespace duk::resource
 
 #endif//DUK_RENDERER_SPRITE_H

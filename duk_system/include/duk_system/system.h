@@ -433,6 +433,11 @@ void SystemRegistry::SystemEntryT<T>::solve(duk::resource::ReferenceSolver* solv
 }
 
 template<typename T>
+void SystemRegistry::SystemEntryT<T>::solve(duk::objects::ObjectSolver* solver, Systems& systems) {
+    solver->solve(*systems.get<T>());
+}
+
+template<typename T>
 const std::string& SystemRegistry::SystemEntryT<T>::name() {
     return duk::type::name_of<T>();
 }
@@ -570,7 +575,12 @@ struct JsonPrimitiveValue<duk::system::Systems> {
 namespace duk::resource {
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::system::Systems& systems) {
+struct PrimitiveResourceSolver<Solver, duk::system::Systems> {
+    static void solve(Solver* solver, duk::system::Systems& systems);
+};
+
+template<typename Solver>
+void PrimitiveResourceSolver<Solver, system::Systems>::solve(Solver* solver, duk::system::Systems& systems) {
     for (auto it: systems) {
         const auto& systemName = it.system_name();
         duk::system::SystemRegistry::instance()->solve_resources(solver, systems, systemName);

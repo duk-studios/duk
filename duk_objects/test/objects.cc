@@ -4,7 +4,6 @@
 
 #include <duk_resource/handle.h>
 #include <duk_objects/objects.h>
-#include <duk_objects/object_solver.h>
 #include <duk_objects/events.h>
 #include <duk_serial/json.h>
 #include <catch2/catch_test_macros.hpp>
@@ -113,7 +112,58 @@ TEST_CASE("Objects and Components Management", "[objects]") {
 
         auto cmp_after = obj0.component<ComponentTest>();
         CHECK(!cmp_after.valid());
+    }
 
+    SECTION("Copying groups of objects into another") {
+        duk::objects::Objects srcObjects;
+        {
+            auto obj0 = srcObjects.add_object();
+            auto cmp0 = obj0.add<ComponentTest>();
+            cmp0->a = 1;
+            cmp0->b = 2;
+            cmp0->c = 3;
+
+            // hierarchy should be preserved after copy
+            auto obj1 = srcObjects.add_object(obj0.id());
+            auto cmp1 = obj1.add<ComponentTest2>();
+            cmp1->b = 4;
+            cmp1->c = 5;
+        }
+
+        // add some objects to destination
+        {
+            auto obj0 = objects.add_object();
+            auto cmp0 = obj0.add<ComponentTest3>();
+            cmp0->a = 6;
+            cmp0->b = 7;
+            cmp0->c = 8;
+        }
+
+        // copy srcObjects into objects
+        objects.copy_objects(srcObjects);
+
+        // update so the copied objects are available for search
+        objects.update(componentEventDispatcher);
+
+        REQUIRE(objects.count() == 3);
+        auto [cmp0] = objects.first_of<ComponentTest>();
+        REQUIRE(cmp0.valid());
+        CHECK(cmp0->a == 1);
+        CHECK(cmp0->b == 2);
+        CHECK(cmp0->c == 3);
+        auto [cmp1] = objects.first_of<ComponentTest2>();
+        REQUIRE(cmp1.valid());
+        CHECK(cmp1->b == 4);
+        CHECK(cmp1->c == 5);
+        auto cmp1Parent = cmp1.parent();
+        CHECK(cmp1Parent.valid());
+        CHECK(cmp1Parent.id() == cmp0.object().id());
+
+        auto [cmp3] = objects.first_of<ComponentTest3>();
+        REQUIRE(cmp3.valid());
+        CHECK(cmp3->a == 6);
+        CHECK(cmp3->b == 7);
+        CHECK(cmp3->c == 8);
     }
 }
 
@@ -178,4 +228,30 @@ TEST_CASE("Serialization and Deserialization", "[objects][serialization]") {
         CHECK(json == json2);
         CHECK(objects.count() == objects2.count());
     }
+}
+
+TEST_CASE("Component resources can be solved", "[objects][resource]") {
+    // Register component types
+    duk::objects::register_component<ComponentTest2>();
+
+    duk::resource::Pools pools;
+    duk::objects::ComponentEventDispatcher componentEventDispatcher;
+    duk::objects::Objects objects;
+
+    pools.insert(duk::resource::Id(1), std::make_shared<TestData>(TestData{ 99 }));
+
+    // Create an object with a ComponentTest2 that has a resource handle with id 1
+    auto obj = objects.add_object();
+    auto comp = obj.add<ComponentTest2>();
+    comp->res = duk::resource::Handle<TestData>(duk::resource::Id(1));
+    comp->b = 10;
+    comp->c = 20;
+
+    // Solve resource references
+    duk::resource::ReferenceSolver referenceSolver(pools);
+    referenceSolver.solve(objects);
+
+    // Verify that the resource handle in the component is correctly resolved
+    REQUIRE(comp->res.valid());
+    CHECK(comp->res->b == 99);
 }
