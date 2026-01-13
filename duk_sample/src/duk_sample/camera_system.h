@@ -40,14 +40,4 @@ struct Type<duk::sample::CameraController> : Class<duk::sample::CameraController
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::sample::CameraController& cameraController) {
-    solver->solve(cameraController.spawnClip);
-    solver->solve(cameraController.sphere);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_SAMPLE_CAMERA_SYSTEM_H

@@ -270,9 +270,11 @@ void JsonPrimitiveValue<animation::PropertyT<TEvaluator>>::read(const rapidjson:
 namespace duk::resource {
 
 template<typename Solver>
-void solve_resources(Solver* solver, duk::animation::Property& property) {
-    animation::PropertyRegistry::instance()->solve_resources(solver, property);
-}
+struct PrimitiveResourceSolver<Solver, duk::animation::Property> {
+    static void solve(Solver* solver, duk::animation::Property& property) {
+        animation::PropertyRegistry::instance()->solve_resources(solver, property);
+    }
+};
 
 }// namespace duk::resource
 

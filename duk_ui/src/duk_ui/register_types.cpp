@@ -10,9 +10,6 @@
 #include <duk_ui/systems/text_system.h>
 #include <duk_renderer/register_types.h>
 
-#include <duk_objects/object_solver.h>
-#include <duk_system/system_solver.h>
-
 namespace duk::ui {
 
 void register_types() {

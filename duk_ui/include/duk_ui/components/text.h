@@ -43,13 +43,4 @@ struct Type<duk::ui::Text> : Class<duk::ui::Text,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::ui::Text& textRenderer) {
-    solver->solve(textRenderer.font);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_UI_TEXT_H

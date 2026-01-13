@@ -1,8 +1,6 @@
 /// 21/02/2024
 /// system.cpp
 
-#include <duk_objects/object_solver.h>
-#include <duk_system/system_solver.h>
 #include <duk_system/system.h>
 
 namespace duk::system {

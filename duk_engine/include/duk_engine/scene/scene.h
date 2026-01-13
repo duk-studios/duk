@@ -53,14 +53,4 @@ struct Type<duk::engine::Scene> : Class<duk::engine::Scene,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::engine::Scene& scene) {
-    solver->solve(scene.systems());
-    solver->solve(scene.objects());
-}
-
-}// namespace duk::resource
-
 #endif// DUK_ENGINE_SCENE_H

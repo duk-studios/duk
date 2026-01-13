@@ -32,13 +32,4 @@ struct Type<duk::renderer::SpriteRenderer> : Class<duk::renderer::SpriteRenderer
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::renderer::SpriteRenderer& spriteRenderer) {
-    solver->solve(spriteRenderer.sprite);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_RENDERER_SPRITE_RENDERER_H

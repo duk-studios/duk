@@ -48,15 +48,4 @@ struct Type<duk::animation::AnimationController> : Class<duk::animation::Animati
 
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::animation::AnimationController& animationController) {
-    for (auto& animation: animationController.animations()) {
-        solver->solve(animation);
-    }
-}
-
-}// namespace duk::resource
-
 #endif//DUK_ANIMATION_ANIMATION_CONTROLLER_H

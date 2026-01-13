@@ -43,13 +43,4 @@ struct Type<duk::sample::Stats> : Class<duk::sample::Stats,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::sample::Stats& stats) {
-    solver->solve(stats.textObject);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_STATS_SYSTEM_H

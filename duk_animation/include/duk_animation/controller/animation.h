@@ -33,13 +33,4 @@ struct Type<duk::animation::Animation> : Class<duk::animation::Animation,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::animation::Animation& animation) {
-    solver->solve(animation.clip);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_ANIMATION_ANIMATION_SET_H

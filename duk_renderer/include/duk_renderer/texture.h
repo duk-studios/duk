@@ -67,13 +67,4 @@ struct Type<duk::renderer::Texture> : Class<duk::renderer::Texture,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::renderer::Texture& texture) {
-    solver->solve(texture.image());
-}
-
-}// namespace duk::resource
-
 #endif// DUK_RENDERER_TEXTURE_H

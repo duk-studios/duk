@@ -25,13 +25,4 @@ struct Type<duk::renderer::MaterialSlot> : Class<duk::renderer::MaterialSlot,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::renderer::MaterialSlot& slot) {
-    solver->solve(slot.material);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_RENDERER_MATERIAL_SLOT_H

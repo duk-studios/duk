@@ -25,13 +25,4 @@ struct Type<duk::renderer::MeshSlot> : Class<duk::renderer::MeshSlot,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::renderer::MeshSlot& slot) {
-    solver->solve(slot.mesh);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_RENDERER_MESH_SLOT_H

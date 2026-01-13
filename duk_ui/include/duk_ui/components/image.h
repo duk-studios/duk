@@ -33,14 +33,4 @@ struct Type<duk::ui::Image> : Class<duk::ui::Image,
 // clang-format on
 }// namespace duk::type
 
-namespace duk::resource {
-
-template<typename Solver>
-void solve_resources(Solver* solver, duk::ui::Image& image) {
-    solver->solve(image.image);
-    solver->solve(image.color);
-}
-
-}// namespace duk::resource
-
 #endif//DUK_UI_IMAGE_H
