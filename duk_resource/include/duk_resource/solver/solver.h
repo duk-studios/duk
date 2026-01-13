@@ -47,11 +47,9 @@ template<typename Solver, typename T>
 void solve_resources(Solver* solver, T& obj) {
     if constexpr (duk::type::is_class<T>()) {
         ObjectResourceSolver<Solver, T>::solve(solver, obj);
-    }
-    else if constexpr (duk::type::is_container<T>()) {
+    } else if constexpr (duk::type::is_container<T>()) {
         ContainerResourceSolver<Solver, T>::solve(solver, obj);
-    }
-    else {
+    } else {
         PrimitiveResourceSolver<Solver, T>::solve(solver, obj);
     }
 }
@@ -59,17 +57,21 @@ void solve_resources(Solver* solver, T& obj) {
 template<typename Solver, typename T>
 void ObjectResourceSolver<Solver, T>::solve(Solver* solver, T& obj) {
     constexpr auto description = duk::type::describe<T>();
-    description.visit_members([&](const auto& member) {
-        solver->solve(member.value());
-    }, obj);
+    description.visit_members(
+            [&](const auto& member) {
+                solver->solve(member.value());
+            },
+            obj);
 }
 
 template<typename Solver, typename T>
 void ContainerResourceSolver<Solver, T>::solve(Solver* solver, T& container) {
     constexpr auto description = duk::type::describe<T>();
-    description.visit_elements([&](auto& element) {
-        solver->solve(element);
-    }, container);
+    description.visit_elements(
+            [&](auto& element) {
+                solver->solve(element);
+            },
+            container);
 }
 
 template<typename Solver, typename T>

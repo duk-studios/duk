@@ -579,7 +579,6 @@ struct PrimitiveResourceSolver<Solver, duk::system::Systems> {
     static void solve(Solver* solver, duk::system::Systems& systems);
 };
 
-
 template<typename Solver>
 void PrimitiveResourceSolver<Solver, system::Systems>::solve(Solver* solver, duk::system::Systems& systems) {
     for (auto it: systems) {
