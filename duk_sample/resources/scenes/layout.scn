@@ -1,5 +1,5 @@
 {
-  "systems":[
+  "systems": [
     {
       "type": "duk::renderer::TransformUpdateSystem",
       "group": 0
@@ -21,54 +21,69 @@
       "group": 0
     }
   ],
-  "objects":[
+  "objects": [
     {
-      "components":[
+      "id": 5872014431971485656,
+      "parent": 0,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position":"0;0;30",
-          "rotation": "0;0;0",
-          "scale": "1;1;1"
+          "data": {
+            "position": "0;0;30",
+            "rotation": "0;0;0",
+            "scale": "1;1;1"
+          }
         },
         {
-          "type":"duk::renderer::Camera"
+          "type": "duk::renderer::Camera"
         },
         {
-          "type":"duk::renderer::PerspectiveCamera",
-          "fov": 45.0,
-          "near": 0.1,
-          "far": 110.0
+          "type": "duk::renderer::PerspectiveCamera",
+          "data": {
+            "fov": 45.0,
+            "near": 0.1,
+            "far": 110.0
+          }
         }
       ]
     },
     {
-      "components":[
+      "id": 3334429301401000024,
+      "parent": 0,
+      "components": [
         {
           "type": "duk::ui::Canvas",
-          "size": "1920;1080"
+          "data": {
+            "size": "1920;1080"
+          }
         }
       ]
     },
     {
-      "parent": 1,
+      "id": 2113964309209329490,
+      "parent": 3334429301401000024,
       "components": [
         {
           "type": "duk::ui::CanvasTransform",
-          "anchor": "0.5;0.5",
-          "position": "0;0",
-          "size": "600;600",
-          "pivot": "0.5;0.5",
-          "scale": "1;1"
+          "data": {
+            "anchor": "0.5;0.5",
+            "position": "0;0",
+            "size": "600;600",
+            "pivot": "0.5;0.5",
+            "scale": "1;1"
+          }
         },
         {
           "type": "duk::ui::Image",
-          "image": 11733428921602145386,
-          "sampler": {
-            "filter": "linear",
-            "wrap": "repeat"
-          },
-          "color": "1;1;1;1",
-          "keepAspectRatio": true
+          "data": {
+            "image": 11733428921602145386,
+            "sampler": {
+              "filter": "linear",
+              "wrap": "repeat"
+            },
+            "color": "1;1;1;1",
+            "keepAspectRatio": true
+          }
         }
       ]
     }

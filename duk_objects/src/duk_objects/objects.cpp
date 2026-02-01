@@ -7,10 +7,23 @@
 
 namespace duk::objects {
 
+namespace detail {
+
+static bool json_component_has_data(const rapidjson::Value& json) {
+    return json.IsObject() && !json.ObjectEmpty();
+}
+
+}// namespace detail
+
 ComponentRegistry g_componentRegistry;
 
 ComponentRegistry* ComponentRegistry::instance() {
     return &g_componentRegistry;
+}
+
+void ComponentRegistry::add_component(const ObjectHandle<false>& object, uint32_t componentId) {
+    auto& entry = m_componentEntries.at(componentId);
+    entry->add(object);
 }
 
 void ComponentRegistry::copy_component(const ObjectHandle<true>& src, ObjectHandle<false>& dst, uint32_t componentId) {
@@ -23,28 +36,39 @@ void ComponentRegistry::json_read(const rapidjson::Value& json, ObjectHandle<fal
     entry->json_read(json, object);
 }
 
-void ComponentRegistry::json_read(const rapidjson::Value& json, ObjectHandle<false>& object, const std::string& componentName) {
-    const auto it = m_componentNameToIndex.find(componentName);
+void ComponentRegistry::json_read(const rapidjson::Value& json, ObjectHandle<false>& object) {
+    // read component type
+    std::string type;
+    duk::serial::json_read_member_value(json, "type", type);
+
+    // read component data
+    const auto it = m_componentNameToIndex.find(type);
     if (it == m_componentNameToIndex.end()) {
-        duk::log::warn("Unregistered Component type: \"{}\"", componentName);
+        duk::log::warn("Unregistered Component type: \"{}\"", type);
         return;
     }
     const auto index = it->second;
-    json_read(json, object, index);
-}
-
-void ComponentRegistry::json_read(const rapidjson::Value& json, ObjectHandle<false>& object) {
-    std::string type;
-    duk::serial::json_read_member_value(json, "type", type);
-    json_read(json, object, type);
+    if (const auto componentDataJsonIt = json.FindMember("data"); componentDataJsonIt != json.MemberEnd()) {
+        const auto& componentDataJson = componentDataJsonIt->value;
+        json_read(componentDataJson, object, index);
+    } else {
+        // no data, just add the component
+        add_component(object, index);
+    }
 }
 
 void ComponentRegistry::json_write(rapidjson::Document& document, rapidjson::Value& json, const ObjectHandle<true>& object, uint32_t componentIndex) {
+    json.SetObject();
+    // write component type
     const auto& type = name_of(componentIndex);
-    m_componentEntries.at(componentIndex)->json_write(document, json, object);
-    // write last to make sure SetObject is called before adding members
-    // This should be removed after refactoring object serialization
     duk::serial::json_write_member_value(document, json, "type", type);
+
+    // write component data
+    rapidjson::Value componentDataJson;
+    m_componentEntries.at(componentIndex)->json_write(document, componentDataJson, object);
+    if (detail::json_component_has_data(componentDataJson)) {
+        json.AddMember("data", std::move(componentDataJson), document.GetAllocator());
+    }
 }
 
 std::unique_ptr<detail::ComponentPool> ComponentRegistry::create_pool(uint32_t index) const {
@@ -75,7 +99,9 @@ void ObjectSolver::solve(Id& id) {
 }
 
 Id ObjectSolver::find_runtime_id(Id originalId) const {
-    if (m_runtimeIds) {
+    if (originalId.m_resourceId != resource::kInvalidId) {
+        originalId = m_objects.find_object_id(originalId.m_resourceId);
+    } else if (m_runtimeIds) {
         if (const auto it = m_runtimeIds->find(originalId); it != m_runtimeIds->end()) {
             originalId = it->second;
         }
@@ -110,12 +136,13 @@ ObjectHandle<false> Objects::add_object() {
         m_enterComponentMasks[freeIndex].reset();
         m_activeComponentMasks[freeIndex].reset();
         m_exitComponentMasks[freeIndex].reset();
+        m_ids[freeIndex] = duk::resource::Id();
         m_parentIndices[freeIndex] = kInvalidObjectIndex;
         m_nodes[freeIndex] = {.self = freeIndex};
         m_enterIndices[freeIndex] = true;
         return {freeIndex, version, this};
     }
-    auto index = (uint32_t)m_versions.size();
+    auto index = static_cast<uint32_t>(m_versions.size());
     m_versions.resize(m_versions.size() + 1);
     m_enterComponentMasks.resize(m_versions.size());
     m_activeComponentMasks.resize(m_versions.size());
@@ -124,6 +151,7 @@ ObjectHandle<false> Objects::add_object() {
     m_exitIndices.resize(m_versions.size());
     m_parentIndices.resize(m_versions.size());
     m_parentIndices[index] = kInvalidObjectIndex;
+    m_ids.resize(m_versions.size());
     m_nodes.resize(m_versions.size());
     m_nodes[index].self = index;
     m_versions[index] = 0;
@@ -132,10 +160,9 @@ ObjectHandle<false> Objects::add_object() {
 }
 
 ObjectHandle<false> Objects::add_object(const Id& parent) {
-    auto object = add_object();
-    auto index = object.id().index();
+    const auto object = add_object();
     // only connect this object to it's parent, the rest of the hierarchy will be resolved on update
-    m_parentIndices[index] = parent.index();
+    m_parentIndices[object.id().index()] = parent.index();
     return object;
 }
 
@@ -227,6 +254,13 @@ ObjectHandle<true> Objects::parent(const Id& id) const {
         return {kInvalidObjectIndex, 0, this};
     }
     return {parentIndex, m_versions[parentIndex], this};
+}
+
+resource::Id Objects::resource_id(const Id& id) const {
+    if (!valid_object(id)) {
+        return resource::kInvalidId;
+    }
+    return m_ids[id.index()];
 }
 
 void Objects::reparent(const Id& id, const Id& parent) {
@@ -381,6 +415,23 @@ Objects::Node& Objects::parent_node(uint32_t nodeIndex) {
     return m_parentIndices[nodeIndex] != kInvalidObjectIndex ? m_nodes[m_parentIndices[nodeIndex]] : m_root;
 }
 
+ObjectHandle<false> Objects::add_object_with_id(const duk::resource::Id& id) {
+    const auto object = add_object();
+    m_ids[object.id().index()] = id;
+    return object;
+}
+
+Id Objects::find_object_id(const resource::Id& resourceId) const {
+    Id result;
+    for (uint32_t i = 0; i < m_ids.size(); ++i) {
+        if (m_ids[i] == resourceId) {
+            result = Id(i, m_versions[i]);
+            break;
+        }
+    }
+    return result;
+}
+
 ComponentEventListener::ComponentEventListener()
     : m_dispatcher(nullptr) {
 }
@@ -393,28 +444,46 @@ void ComponentEventListener::attach(ComponentEventDispatcher* dispatcher) {
     m_dispatcher = dispatcher;
 }
 
-void solve_object_references(Objects& objects) {
-    duk::objects::ObjectSolver solver(objects);
-    for (auto object: objects.all(true)) {
-        auto componentMask = object.component_mask();
-        for (auto componentIndex: componentMask.bits<true>()) {
-            objects::ComponentRegistry::instance()->solve(&solver, object, componentIndex);
-        }
-    }
-}
-
 }// namespace duk::objects
 
 namespace duk::serial {
 
+static duk::resource::Id generate_unique_id(const std::vector<duk::resource::Id>& existingIds) {
+    duk::resource::Id newId;
+    do {
+        newId = resource::generate_id();
+    } while (std::ranges::find(existingIds, newId) != existingIds.end());
+    return newId;
+}
+
+static void generate_ids(const duk::objects::Objects& objects, std::vector<duk::resource::Id>& ids) {
+    for (auto object: objects.all(true)) {
+        auto index = object.id().index();
+        if (ids[index] != resource::kInvalidId) {
+            continue;
+        }
+        ids[index] = generate_unique_id(ids);
+    }
+}
+
 void JsonPrimitiveValue<duk::objects::Objects>::write(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Objects& objects) {
     auto jsonArray = json.SetArray().GetArray();
     auto componentRegistry = objects::ComponentRegistry::instance();
+
+    auto& ids = objects.m_ids;
+    // generate unique ids for all objects
+    generate_ids(objects, ids);
+
     for (auto object: objects.all(true)) {
         rapidjson::Value jsonElement;
         jsonElement.SetObject();
 
-        json_write_member_value(document, jsonElement, "parent", object.parent().id());
+        const auto index = object.id().index();
+        json_write_member_value(document, jsonElement, "id", ids[index]);
+
+        const auto parentIndex = objects.m_parentIndices[index];
+        const auto parentId = parentIndex != objects::kInvalidObjectIndex ? ids[parentIndex] : resource::kInvalidId;
+        json_write_member_value(document, jsonElement, "parent", parentId);
         {
             rapidjson::Value jsonComponents;
             auto jsonComponentsArray = jsonComponents.SetArray().GetArray();
@@ -434,20 +503,37 @@ void JsonPrimitiveValue<duk::objects::Objects>::read(const rapidjson::Value& jso
     DUK_ASSERT(json.IsArray());
     auto componentRegistry = objects::ComponentRegistry::instance();
     auto jsonArray = json.GetArray();
+    std::unordered_map<duk::objects::Id, duk::resource::Id> objectToParent;
     for (auto& jsonElement: jsonArray) {
         DUK_ASSERT(jsonElement.IsObject());
 
-        duk::objects::Id parentId;
+        duk::resource::Id id;
+        json_read_member_value(jsonElement, "id", id);
+
+        duk::resource::Id parentId;
         json_read_member_value(jsonElement, "parent", parentId);
 
-        auto object = objects.add_object(parentId);
+        auto object = objects.add_object_with_id(id);
+
+        objectToParent[object.id()] = parentId;
+
         auto jsonComponentsArray = jsonElement["components"].GetArray();
         for (auto& jsonComponent: jsonComponentsArray) {
             componentRegistry->json_read(jsonComponent, object);
         }
     }
 
-    objects::solve_object_references(objects);
+    duk::objects::ObjectSolver solver(objects);
+    for (auto object: objects.all(true)) {
+        // fix up parent ids to the correct runtime id
+        const auto parentResourceId = objectToParent[object.id()];
+        const auto parentId = objects.find_object_id(parentResourceId);
+        objects.m_parentIndices[object.id().index()] = parentId.index();
+        auto componentMask = object.component_mask();
+        for (auto componentIndex: componentMask.bits<true>()) {
+            objects::ComponentRegistry::instance()->solve(&solver, object, componentIndex);
+        }
+    }
 }
 
 }// namespace duk::serial

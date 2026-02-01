@@ -1,117 +1,151 @@
 {
   "objects": [
     {
+      "id": 5046730314528415758,
+      "parent": 0,
       "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "0;0;0",
-          "rotation": "0;0;0",
-          "scale": "1;1;1"
+          "data": {
+            "position": "0;0;0",
+            "rotation": "0;0;0",
+            "scale": "1;1;1"
+          }
         },
         {
           "type": "duk::renderer::SpriteRenderer",
-          "sprite": 6401408628342139833,
-          "index": 2
+          "data": {
+            "sprite": 6401408628342139833,
+            "index": 2
+          }
         },
         {
           "type": "duk::animation::Animator",
-          "controller": 11638404355231501488
+          "data": {
+            "controller": 11638404355231501488
+          }
         },
         {
           "type": "duk::sample::SpriteAnimator",
-          "animator": 0
+          "data": {
+            "animator": 5046730314528415758
+          }
         },
         {
           "type": "duk::sample::Temporary",
-          "duration": 10
+          "data": {
+            "duration": 10
+          }
         }
       ]
     },
     {
-      "parent": 0,
-      "components":[
+      "id": 18113148514674061563,
+      "parent": 5046730314528415758,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "-5;5;0",
-          "rotation": "0;0;0",
-          "scale": "5;5;5"
+          "data": {
+            "position": "-5;5;0",
+            "rotation": "0;0;0",
+            "scale": "5;5;5"
+          }
         },
         {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":11,
-          "size": "600;600",
-          "horiAlignment": "middle",
-          "vertAlignment": "middle",
-          "text": "Child 1",
-          "dynamic": false
+          "type": "duk::ui::Text",
+          "data": {
+            "font": 11859234415737620434,
+            "fontSize": 11,
+            "size": "600;600",
+            "horiAlignment": "middle",
+            "vertAlignment": "middle",
+            "text": "Child 1",
+            "dynamic": false
+          }
         }
       ]
     },
     {
-      "parent": 0,
-      "components":[
+      "id": 8116886556659499087,
+      "parent": 5046730314528415758,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "5;5;0",
-          "rotation": "0;0;0",
-          "scale": "5;5;5"
+          "data": {
+            "position": "5;5;0",
+            "rotation": "0;0;0",
+            "scale": "5;5;5"
+          }
         },
         {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":11,
-          "size": "600;600",
-          "horiAlignment": "middle",
-          "vertAlignment": "middle",
-          "text": "Child 2",
-          "dynamic": false
+          "type": "duk::ui::Text",
+          "data": {
+            "font": 11859234415737620434,
+            "fontSize": 11,
+            "size": "600;600",
+            "horiAlignment": "middle",
+            "vertAlignment": "middle",
+            "text": "Child 2",
+            "dynamic": false
+          }
         },
         {
           "type": "duk::sample::Temporary",
-          "duration": 0.5
+          "data": {
+            "duration": 0.5
+          }
         }
       ]
     },
     {
-      "parent": 1,
-      "components":[
+      "id": 14590157750479320721,
+      "parent": 18113148514674061563,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "0;1;0",
-          "rotation": "0;0;0",
-          "scale": "1;1;1"
+          "data": {
+            "position": "0;1;0",
+            "rotation": "0;0;0",
+            "scale": "1;1;1"
+          }
         },
         {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":11,
-          "size": "600;600",
-          "horiAlignment": "middle",
-          "vertAlignment": "middle",
-          "text": "Child of child 1",
-          "dynamic": false
+          "type": "duk::ui::Text",
+          "data": {
+            "font": 11859234415737620434,
+            "fontSize": 11,
+            "size": "600;600",
+            "horiAlignment": "middle",
+            "vertAlignment": "middle",
+            "text": "Child of child 1",
+            "dynamic": false
+          }
         }
       ]
     },
     {
-      "parent": 2,
-      "components":[
+      "id": 7769417398335887923,
+      "parent": 8116886556659499087,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "0;1;0",
-          "rotation": "0;0;0",
-          "scale": "1;1;1"
+          "data": {
+            "position": "0;1;0",
+            "rotation": "0;0;0",
+            "scale": "1;1;1"
+          }
         },
         {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":11,
-          "size": "600;600",
-          "horiAlignment": "middle",
-          "vertAlignment": "middle",
-          "text": "Child of child 2",
-          "dynamic": false
+          "type": "duk::ui::Text",
+          "data": {
+            "font": 11859234415737620434,
+            "fontSize": 11,
+            "size": "600;600",
+            "horiAlignment": "middle",
+            "vertAlignment": "middle",
+            "text": "Child of child 2",
+            "dynamic": false
+          }
         }
       ]
     }
