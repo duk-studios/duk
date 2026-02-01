@@ -47,6 +47,14 @@ struct ComponentTest3 {
     }
 };
 
+struct ComponentTest4 {
+    duk::objects::Component<ComponentTest> comp1Ref;
+};
+
+struct EmptyComponent {
+    // empty
+};
+
 namespace duk::type {
 // clang-format off
 template<>
@@ -69,6 +77,12 @@ struct Type<ComponentTest3> : Class<ComponentTest3,
     Member<"b", &ComponentTest3::b>,
     Member<"c", &ComponentTest3::c>> {
 };
+
+template<>
+struct Type<ComponentTest4> : Class<ComponentTest4,
+    Member<"comp1Ref", &ComponentTest4::comp1Ref>> {
+};
+
 // clang-format on
 } // namespace duk::type
 
@@ -359,11 +373,13 @@ TEST_CASE("Objects and Components Management", "[objects]") {
     }
 }
 
-TEST_CASE("Serialization and Deserialization", "[objects][serialization]") {
+TEST_CASE("Objects serialization", "[objects][json]") {
     // Register component types
     duk::objects::register_component<ComponentTest>();
     duk::objects::register_component<ComponentTest2>();
     duk::objects::register_component<ComponentTest3>();
+    duk::objects::register_component<ComponentTest4>();
+    duk::objects::register_component<EmptyComponent>();
 
     duk::objects::ComponentEventDispatcher componentEventDispatcher;
 
@@ -376,33 +392,18 @@ TEST_CASE("Serialization and Deserialization", "[objects][serialization]") {
             comp->a = 42;
             comp->b = 43;
             comp->c = 44;
-        }
-        {
-            auto obj = objects.add_object();
-            auto comp = obj.add<ComponentTest2>();
-            comp->res = duk::resource::Id(123);
-            comp->b = 55;
-            comp->c = 56;
-        }
-        {
-            auto obj = objects.add_object();
-            auto comp0 = obj.add<ComponentTest>();
-            comp0->a = 7;
-            comp0->b = 8;
-            comp0->c = 9;
-            auto comp1 = obj.add<ComponentTest2>();
-            comp1->res = duk::resource::Id(320);
-            comp1->b = 15;
-            comp1->c = 16;
-            auto comp2 = obj.add<ComponentTest3>();
-            comp2->a = 21;
-            comp2->b = 22;
-            comp2->c = 23;
-        }
+            [[maybe_unused]] auto a = obj.add<EmptyComponent>();
 
-        objects.add_object();
-        objects.add_object();
+            auto obj2 = objects.add_object();
+            auto comp2 = obj2.add<ComponentTest4>();
+            comp2->comp1Ref = comp; // reference object 1 component
 
+            auto obj3 = objects.add_object(obj.id()); // child of obj
+            auto comp3 = obj3.add<ComponentTest2>();
+            comp3->res = duk::resource::Id(123);
+            comp3->b = 55;
+            comp3->c = 56;
+        }
         // Serialize to JSON
         std::ostringstream oss;
         auto json = duk::serial::json_write(objects);
@@ -417,8 +418,30 @@ TEST_CASE("Serialization and Deserialization", "[objects][serialization]") {
 
         INFO("Objects json2: " << json2);
 
+        objects2.update(componentEventDispatcher); // update so we can iterate and search objects
+
         CHECK(json == json2);
         CHECK(objects.count() == objects2.count());
+        auto[comp4] = objects2.first_of<ComponentTest4>();
+        REQUIRE(comp4.valid());
+        auto comp1Ref = comp4->comp1Ref;
+        REQUIRE(comp1Ref.valid());
+        CHECK(comp1Ref->a == 42);
+        CHECK(comp1Ref->b == 43);
+        CHECK(comp1Ref->c == 44);
+
+        auto[comp1] = objects2.first_of<ComponentTest>();
+        REQUIRE(comp1.valid());
+        CHECK(comp1.component<EmptyComponent>().valid());
+        CHECK(comp1->a == 42);
+        CHECK(comp1->b == 43);
+        CHECK(comp1->c == 44);
+        auto[comp2] = objects2.first_of<ComponentTest2>();
+        REQUIRE(comp2.valid());
+        CHECK(comp2->res.id().value() == 123);
+        CHECK(comp2->b == 55);
+        CHECK(comp2->c == 56);
+        CHECK(comp2.parent().id() == comp1.object().id());
     }
 }
 
