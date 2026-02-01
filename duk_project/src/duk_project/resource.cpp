@@ -43,15 +43,11 @@ static bool has_resource_id(const Project* project, const duk::resource::Id& id)
 }
 
 static duk::resource::Id resource_id_generate(const Project* project) {
-    static std::random_device rd;
-    static std::mt19937 gen(rd());// mersenne_twister_engine seeded with rd()
-    static std::uniform_int_distribution<uint64_t> distrib(duk::resource::kMaxBuiltInResourceId.value() + 1, std::numeric_limits<uint64_t>::max());
-
-    auto id = duk::resource::Id(distrib(gen));
+    auto id = duk::resource::generate_id();
     while (has_resource_id(project, id)) {
         // is it possible that we will loop forever?
         // naahhh, we're fine
-        id = duk::resource::Id(distrib(gen));
+        id = duk::resource::generate_id();
     }
 
     return id;
