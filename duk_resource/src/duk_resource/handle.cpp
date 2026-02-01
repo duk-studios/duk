@@ -6,18 +6,6 @@
 
 namespace duk::resource {
 
-bool Id::operator==(const Id& rhs) const {
-    return m_id == rhs.m_id;
-}
-
-bool Id::operator!=(const Id& rhs) const {
-    return m_id != rhs.m_id;
-}
-
-bool Id::operator<(const Id& rhs) const {
-    return m_id < rhs.m_id;
-}
-
 uint64_t Id::value() const {
     return m_id;
 }

@@ -24,11 +24,7 @@ public:
         : m_id(id) {
     }
 
-    DUK_NO_DISCARD bool operator==(const Id& rhs) const;
-
-    DUK_NO_DISCARD bool operator!=(const Id& rhs) const;
-
-    DUK_NO_DISCARD bool operator<(const Id& rhs) const;
+    DUK_NO_DISCARD auto operator<=>(const Id& lhs) const = default;
 
     DUK_NO_DISCARD uint64_t value() const;
 
