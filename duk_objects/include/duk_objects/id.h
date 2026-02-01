@@ -9,7 +9,8 @@
 
 #include <duk_serial/json.h>
 
-#include <cstdint>
+#include <duk_resource/resources.h>
+
 #include <limits>
 
 namespace duk::objects {
@@ -22,15 +23,21 @@ public:
 
     explicit Id(uint32_t index, uint32_t version);
 
+    explicit Id(duk::resource::Id resourceId);
+
     DUK_NO_DISCARD uint32_t index() const;
 
     DUK_NO_DISCARD uint32_t version() const;
 
-    auto operator<=>(const Id& other) const = default;
+    DUK_NO_DISCARD auto operator<=>(const Id& other) const = default;
 
 private:
+    friend struct serial::JsonPrimitiveValue<Id>;
+    friend class ObjectSolver;
+
     uint32_t m_index;
     uint32_t m_version;
+    duk::resource::Id m_resourceId;
 };
 
 }// namespace duk::objects
@@ -40,11 +47,11 @@ namespace duk::serial {
 template<>
 struct JsonPrimitiveValue<duk::objects::Id> {
     static void write(rapidjson::Document& document, rapidjson::Value& json, const duk::objects::Id& id) {
-        json.SetUint(id.index());
+        JsonPrimitiveValue<duk::resource::Id>::write(document, json, id.m_resourceId);
     }
 
     static void read(const rapidjson::Value& json, duk::objects::Id& id) {
-        id = duk::objects::Id(json.GetUint(), 0);
+        JsonPrimitiveValue<duk::resource::Id>::read(json, id.m_resourceId);
     }
 };
 

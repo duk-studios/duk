@@ -15,6 +15,12 @@ Id::Id(uint32_t index, uint32_t version)
     , m_version(version) {
 }
 
+Id::Id(duk::resource::Id resourceId)
+    : m_index(kInvalidObjectIndex)
+    , m_version(0)
+    , m_resourceId(resourceId) {
+}
+
 uint32_t Id::index() const {
     return m_index;
 }
