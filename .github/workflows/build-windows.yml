@@ -32,10 +32,10 @@ jobs:
       with: { committish: 74e6536215718009aae747d86d84b78376bf9e09 }
 
     - name: Configure CMake
-      run: cmake --preset ninja
+      run: cmake --preset visual-studio
 
     - name: Build
-      run: cmake --build --preset ninja-release
+      run: cmake --build --preset visual-studio-release
 
     - name: Run tests
-      run: ctest --preset ninja
+      run: ctest --preset visual-studio
