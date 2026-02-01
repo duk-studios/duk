@@ -1,5 +1,5 @@
 {
-  "systems":[
+  "systems": [
     {
       "type": "duk::sample::CameraSystem",
       "group": 0
@@ -42,188 +42,263 @@
       "group": 0
     }
   ],
-  "objects":[
+  "objects": [
     {
-      "components":[
+      "id": 3172142776324347877,
+      "parent": 0,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position":"0;0;30",
-          "rotation": "0;0;0",
-          "scale": "1;1;1"
+          "data": {
+            "position": "0;0;30",
+            "rotation": "0;0;0",
+            "scale": "1;1;1"
+          }
         },
         {
-          "type":"duk::renderer::Camera"
+          "type": "duk::renderer::Camera"
         },
         {
           "type": "duk::ui::Canvas",
-          "size": "1920;1080"
+          "data": {
+            "size": "1920;1080"
+          }
         },
         {
-          "type":"duk::renderer::PerspectiveCamera",
-          "fov": 45.0,
-          "near": 0.1,
-          "far": 110.0
+          "type": "duk::renderer::PerspectiveCamera",
+          "data": {
+            "fov": 45.0,
+            "near": 0.1,
+            "far": 110.0
+          }
         },
         {
-          "type":"duk::sample::CameraController",
-          "speed": 10,
-          "rotationSpeed": 50,
-          "spawnClip": 13314676106729818186,
-          "sphere": 15239267644433745541,
-          "font": 11859234415737620434
+          "type": "duk::sample::CameraController",
+          "data": {
+            "speed": 10,
+            "rotationSpeed": 50,
+            "spawnClip": 13314676106729818186,
+            "sphere": 15239267644433745541,
+            "font": 11859234415737620434
+          }
         }
       ]
     },
     {
-      "components":[
-        {
-          "type": "duk::renderer::Transform",
-          "position": "5;0;0",
-          "rotation": "0;0;-90",
-          "scale": "3;3;3"
-        },
-        {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10004
-        },
-        {
-          "type": "duk::renderer::MaterialSlot",
-          "material": 1000009
-        }
-      ]
-    },
-    {
-      "components":[
-        {
-          "type": "duk::renderer::Transform",
-          "position": "0;5;0",
-          "rotation": "0;0;0",
-          "scale": "3;3;3"
-        },
-        {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10004
-        },
-        {
-          "type": "duk::renderer::MaterialSlot",
-          "material": 1000007
-        }
-      ]
-    },
-    {
-      "components":[
-        {
-          "type": "duk::renderer::Transform",
-          "position": "0;0;5",
-          "rotation": "90;0;0",
-          "scale": "3;3;3"
-        },
-        {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10003
-        },
-        {
-          "type": "duk::renderer::MaterialSlot",
-          "material": 1000005
-        }
-      ]
-    },
-    {
-      "components":[
-        {
-          "type": "duk::renderer::Transform",
-          "position": "-5;0;0",
-          "rotation": "0;0;90",
-          "scale": "3;3;3"
-        },
-        {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10002
-        },
-        {
-          "type": "duk::renderer::MaterialSlot",
-          "material": 1000010
-        }
-      ]
-    },
-    {
-      "components":[
-        {
-          "type": "duk::renderer::Transform",
-          "position": "0;-5;0",
-          "rotation": "0;0;180",
-          "scale": "3;3;3"
-        },
-        {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10001
-        },
-        {
-          "type": "duk::renderer::MaterialSlot",
-          "material": 1000006
-        }
-      ]
-    },
-    {
-      "components":[
-        {
-          "type": "duk::renderer::Transform",
-          "position": "0;0;-5",
-          "rotation": "-90;0;0",
-          "scale": "3;3;3"
-        },
-        {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10004
-        },
-        {
-          "type": "duk::renderer::MaterialSlot",
-          "material": 1000008
-        }
-      ]
-    },
-    {
-      "components":[
-        {
-          "type": "duk::renderer::Transform",
-          "position": "0;0;-20",
-          "rotation": "0;0;0",
-          "scale": "20;20;20"
-        },
-        {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10001
-        },
-        {
-          "type": "duk::renderer::MaterialSlot",
-          "material": 1000013
-        }
-      ]
-    },
-    {
+      "id": 9864744290908523543,
       "parent": 0,
-      "components":[
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "0;0;-10",
-          "rotation": "0;0;0",
-          "scale": "0.3;0.3;0.3"
+          "data": {
+            "position": "5;0;0",
+            "rotation": "0;0;-90",
+            "scale": "3;3;3"
+          }
         },
         {
-          "type":"duk::renderer::PointLight",
-          "value":{
-            "color":"1;1;1",
-            "intensity":1
-          },
-          "radius":4000
-        },
-        {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10003
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10004
+          }
         },
         {
           "type": "duk::renderer::MaterialSlot",
-          "material": 1000012
+          "data": {
+            "material": 1000009
+          }
+        }
+      ]
+    },
+    {
+      "id": 7535631185517581101,
+      "parent": 0,
+      "components": [
+        {
+          "type": "duk::renderer::Transform",
+          "data": {
+            "position": "0;5;0",
+            "rotation": "0;0;0",
+            "scale": "3;3;3"
+          }
+        },
+        {
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10004
+          }
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "data": {
+            "material": 1000007
+          }
+        }
+      ]
+    },
+    {
+      "id": 5968908249522854142,
+      "parent": 0,
+      "components": [
+        {
+          "type": "duk::renderer::Transform",
+          "data": {
+            "position": "0;0;5",
+            "rotation": "90;0;0",
+            "scale": "3;3;3"
+          }
+        },
+        {
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10003
+          }
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "data": {
+            "material": 1000005
+          }
+        }
+      ]
+    },
+    {
+      "id": 4022486769122179937,
+      "parent": 0,
+      "components": [
+        {
+          "type": "duk::renderer::Transform",
+          "data": {
+            "position": "-5;0;0",
+            "rotation": "0;0;90",
+            "scale": "3;3;3"
+          }
+        },
+        {
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10002
+          }
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "data": {
+            "material": 1000010
+          }
+        }
+      ]
+    },
+    {
+      "id": 7671757557322990130,
+      "parent": 0,
+      "components": [
+        {
+          "type": "duk::renderer::Transform",
+          "data": {
+            "position": "0;-5;0",
+            "rotation": "0;0;180",
+            "scale": "3;3;3"
+          }
+        },
+        {
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10001
+          }
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "data": {
+            "material": 1000006
+          }
+        }
+      ]
+    },
+    {
+      "id": 8369284178508443064,
+      "parent": 0,
+      "components": [
+        {
+          "type": "duk::renderer::Transform",
+          "data": {
+            "position": "0;0;-5",
+            "rotation": "-90;0;0",
+            "scale": "3;3;3"
+          }
+        },
+        {
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10004
+          }
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "data": {
+            "material": 1000008
+          }
+        }
+      ]
+    },
+    {
+      "id": 17190207386236761740,
+      "parent": 0,
+      "components": [
+        {
+          "type": "duk::renderer::Transform",
+          "data": {
+            "position": "0;0;-20",
+            "rotation": "0;0;0",
+            "scale": "20;20;20"
+          }
+        },
+        {
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10001
+          }
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "data": {
+            "material": 1000013
+          }
+        }
+      ]
+    },
+    {
+      "id": 16950612496690447152,
+      "parent": 3172142776324347877,
+      "components": [
+        {
+          "type": "duk::renderer::Transform",
+          "data": {
+            "position": "0;0;-10",
+            "rotation": "0;0;0",
+            "scale": "0.3;0.3;0.3"
+          }
+        },
+        {
+          "type": "duk::renderer::PointLight",
+          "data": {
+            "value": {
+              "color": "1;1;1",
+              "intensity": 1
+            },
+            "radius": 4000
+          }
+        },
+        {
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10003
+          }
+        },
+        {
+          "type": "duk::renderer::MaterialSlot",
+          "data": {
+            "material": 1000012
+          }
         }
       ]
     }

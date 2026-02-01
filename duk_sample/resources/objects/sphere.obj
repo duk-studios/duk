@@ -1,20 +1,28 @@
 {
   "objects": [
     {
+      "id": 6167398973538709912,
+      "parent": 0,
       "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "0;0;0",
-          "rotation": "0;0;0",
-          "scale": "1;1;1"
+          "data": {
+            "position": "0;0;0",
+            "rotation": "0;0;0",
+            "scale": "1;1;1"
+          }
         },
         {
           "type": "duk::renderer::MeshSlot",
-          "mesh": 10003
+          "data": {
+            "mesh": 10003
+          }
         },
         {
           "type": "duk::renderer::MaterialSlot",
-          "material": 1000013
+          "data": {
+            "material": 1000013
+          }
         }
       ]
     }

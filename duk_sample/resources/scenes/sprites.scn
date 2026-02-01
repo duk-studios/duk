@@ -1,5 +1,5 @@
 {
-  "systems":[
+  "systems": [
     "duk::sample::CameraSystem",
     "duk::sample::StatsSystem",
     "duk::animation::AnimationSystem",
@@ -10,125 +10,167 @@
     "duk::engine::TextUpdateSystem",
     "duk::engine::CanvasUpdateSystem"
   ],
-  "objects":[
+  "objects": [
     {
-      "components":[
+      "id": 231321099293905339,
+      "parent": 0,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position":"0;0;30",
-          "rotation": "0;0;0",
-          "scale": "1;1;1"
+          "data": {
+            "position": "0;0;30",
+            "rotation": "0;0;0",
+            "scale": "1;1;1"
+          }
         },
         {
-          "type":"duk::renderer::Camera"
+          "type": "duk::renderer::Camera"
         },
         {
           "type": "duk::ui::Canvas",
-          "size": "1920;1080"
+          "data": {
+            "size": "1920;1080"
+          }
         },
         {
-          "type":"duk::renderer::PerspectiveCamera",
-          "fov": 45.0,
-          "near": 0.1,
-          "far": 110.0
+          "type": "duk::renderer::PerspectiveCamera",
+          "data": {
+            "fov": 45.0,
+            "near": 0.1,
+            "far": 110.0
+          }
         },
         {
-          "type":"duk::sample::CameraController",
-          "speed": 10,
-          "rotationSpeed": 50,
-          "spawnClip": 13314676106729818186,
-          "sphere": 15239267644433745541,
-          "font": 11859234415737620434
+          "type": "duk::sample::CameraController",
+          "data": {
+            "speed": 10,
+            "rotationSpeed": 50,
+            "spawnClip": 13314676106729818186,
+            "sphere": 15239267644433745541,
+            "font": 11859234415737620434
+          }
         }
       ]
     },
     {
-      "components":[
+      "id": 7884021773909669928,
+      "parent": 0,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "0;0;-20",
-          "rotation": "0;0;0",
-          "scale": "20;20;20"
+          "data": {
+            "position": "0;0;-20",
+            "rotation": "0;0;0",
+            "scale": "20;20;20"
+          }
         },
         {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10001
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10001
+          }
         },
         {
           "type": "duk::renderer::MaterialSlot",
-          "material": 1000013
+          "data": {
+            "material": 1000013
+          }
         }
       ]
     },
     {
-      "components":[
+      "id": 13116721593362993185,
+      "parent": 0,
+      "components": [
         {
           "type": "duk::ui::CanvasTransform",
-          "anchor": "0.0;0.0",
-          "position": "6;6",
-          "size": "200;50",
-          "pivot": "0.0;0.0",
-          "scale": "1;1"
+          "data": {
+            "anchor": "0.0;0.0",
+            "position": "6;6",
+            "size": "200;50",
+            "pivot": "0.0;0.0",
+            "scale": "1;1"
+          }
         },
         {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":16,
-          "size": "200;50",
-          "horiAlignment": "left",
-          "vertAlignment": "bottom",
-          "text": "FPS",
-          "dynamic": true
+          "type": "duk::ui::Text",
+          "data": {
+            "font": 11859234415737620434,
+            "fontSize": 16,
+            "size": "200;50",
+            "horiAlignment": "left",
+            "vertAlignment": "bottom",
+            "text": "FPS",
+            "dynamic": true
+          }
         },
         {
           "type": "duk::sample::Stats",
-          "sampleCount": 140
+          "data": {
+            "sampleCount": 140
+          }
         }
       ]
     },
     {
-      "components":[
+      "id": 9203912471545603264,
+      "parent": 0,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "0;10;5",
-          "rotation": "0.0;0.0",
-          "scale": "1;1"
+          "data": {
+            "position": "0;10;5",
+            "rotation": "0.0;0.0",
+            "scale": "1;1"
+          }
         },
         {
-          "type":"duk::ui::Text",
-          "font":11859234415737620434,
-          "fontSize":24,
-          "size": "200;50",
-          "horiAlignment": "left",
-          "vertAlignment": "bottom",
-          "text": "Test test",
-          "dynamic": false
+          "type": "duk::ui::Text",
+          "data": {
+            "font": 11859234415737620434,
+            "fontSize": 24,
+            "size": "200;50",
+            "horiAlignment": "left",
+            "vertAlignment": "bottom",
+            "text": "Test test",
+            "dynamic": false
+          }
         }
       ]
     },
     {
-      "components":[
+      "id": 5543841907748389790,
+      "parent": 0,
+      "components": [
         {
           "type": "duk::renderer::Transform",
-          "position": "0;0;0",
-          "rotation": "0;0;0",
-          "scale": "0.3;0.3;0.3"
+          "data": {
+            "position": "0;0;0",
+            "rotation": "0;0;0",
+            "scale": "0.3;0.3;0.3"
+          }
         },
         {
-          "type":"duk::renderer::PointLight",
-          "value":{
-            "color":"1;1;1",
-            "intensity":2
-          },
-          "radius":4000
+          "type": "duk::renderer::PointLight",
+          "data": {
+            "value": {
+              "color": "1;1;1",
+              "intensity": 2
+            },
+            "radius": 4000
+          }
         },
         {
-          "type":"duk::renderer::MeshSlot",
-          "mesh":10003
+          "type": "duk::renderer::MeshSlot",
+          "data": {
+            "mesh": 10003
+          }
         },
         {
           "type": "duk::renderer::MaterialSlot",
-          "material": 1000012
+          "data": {
+            "material": 1000012
+          }
         }
       ]
     }
