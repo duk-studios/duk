@@ -8,6 +8,7 @@ option(DUK_BUILD_TESTS "Enables building of tests" OFF)
 if (NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 23)
 endif ()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(duk VERSION 0.17.1)
 

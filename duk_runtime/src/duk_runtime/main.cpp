@@ -8,7 +8,7 @@
 #include <duk_log/sinks/file_sink.h>
 #include <duk_log/sinks/term_color_sink.h>
 
-#ifdef DUK_PLATFORM_IS_WINDOWS
+#if DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/platform_win_32.h>
 #endif
 

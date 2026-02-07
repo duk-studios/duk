@@ -9,6 +9,8 @@
 #include <duk_type/optional_const.h>
 #include <duk_type/string_literal.h>
 
+#include <functional>
+
 namespace duk::type {
 
 template<string_literal Name, auto MemberPointer>

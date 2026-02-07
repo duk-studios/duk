@@ -8,6 +8,8 @@
 #include <duk_platform/cursor.h>
 #include <map>
 
+#include <windows.h>
+
 namespace duk::platform {
 
 class CursorWin32 : public Cursor {

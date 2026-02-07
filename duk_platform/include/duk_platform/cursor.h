@@ -5,8 +5,6 @@
 #ifndef DUK_PLATFORM_CURSOR_H
 #define DUK_PLATFORM_CURSOR_H
 
-#include <windows.h>
-
 namespace duk::platform {
 
 struct CursorType {

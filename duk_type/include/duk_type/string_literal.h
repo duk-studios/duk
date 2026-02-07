@@ -5,6 +5,7 @@
 #ifndef DUK_TYPE_STRING_LITERAL_H
 #define DUK_TYPE_STRING_LITERAL_H
 
+#include <algorithm>
 #include <string>
 
 namespace duk::type {

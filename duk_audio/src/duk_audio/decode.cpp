@@ -43,7 +43,7 @@ void decode(Encoding encoding, const void* encodedData, size_t encodedSize, Audi
         throw std::runtime_error("failed to initialize decoder");
     }
 
-    uint64_t frameCount;
+    ma_uint64 frameCount;
     result = ma_decoder_get_length_in_pcm_frames(&decoder, &frameCount);
     if (result != MA_SUCCESS) {
         throw std::runtime_error("failed to get decoder length");

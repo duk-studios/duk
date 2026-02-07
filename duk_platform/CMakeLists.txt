@@ -1,3 +1,16 @@
+set(DUK_PLATFORM_HEADERS_WIN32
+        include/duk_platform/win32/console_win_32.h
+        include/duk_platform/win32/cursor_win_32.h
+        include/duk_platform/win32/platform_win_32.h
+        include/duk_platform/win32/window_win_32.h
+)
+
+set(DUK_PLATFORM_SOURCES_WIN32
+        src/duk_platform/win32/console_win_32.cpp
+        src/duk_platform/win32/cursor_win_32.cpp
+        src/duk_platform/win32/window_win_32.cpp
+        src/duk_platform/win32/platform_win_32.cpp
+)
 
 set(DUK_PLATFORM_HEADERS
         include/duk_platform/console.h
@@ -6,10 +19,7 @@ set(DUK_PLATFORM_HEADERS
         include/duk_platform/platform.h
         include/duk_platform/window.h
         include/duk_platform/window_error.h
-        include/duk_platform/win32/console_win_32.h
-        include/duk_platform/win32/cursor_win_32.h
-        include/duk_platform/win32/platform_win_32.h
-        include/duk_platform/win32/window_win_32.h
+        $<$<PLATFORM_ID:Windows>:${DUK_PLATFORM_HEADERS_WIN32}>
 )
 
 set(DUK_PLATFORM_SOURCES
@@ -18,10 +28,8 @@ set(DUK_PLATFORM_SOURCES
         src/duk_platform/platform.cpp
         src/duk_platform/window.cpp
         src/duk_platform/window_error.cpp
-        src/duk_platform/win32/console_win_32.cpp
-        src/duk_platform/win32/cursor_win_32.cpp
-        src/duk_platform/win32/window_win_32.cpp
-        src/duk_platform/win32/platform_win_32.cpp
+        $<$<PLATFORM_ID:Windows>:${DUK_PLATFORM_SOURCES_WIN32}>
+
 )
 
 add_library(duk.platform ${DUK_PLATFORM_SOURCES} ${DUK_PLATFORM_HEADERS})
