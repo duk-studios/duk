@@ -21,6 +21,7 @@
         "error-strings"
       ]
     },
-    "catch2"
+    "catch2",
+    "boost-type-index",
   ]
 }
