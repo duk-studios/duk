@@ -15,7 +15,7 @@
       }
     },
     {
-      "name": "visual-studio",
+      "name": "win-vs",
       "inherits": "common",
       "displayName": "Visual Studio 17 2022",
       "generator": "Visual Studio 17 2022",
@@ -32,7 +32,7 @@
       }
     },
     {
-      "name": "ninja",
+      "name": "win-ninja",
       "inherits": "common",
       "displayName": "Ninja Multi-Config",
       "generator": "Ninja Multi-Config",
@@ -49,12 +49,44 @@
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       }
+    },
+    {
+      "name": "linux-base",
+      "inherits": "common",
+      "hidden": true,
+      "generator": "Ninja Multi-Config",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "linux-gcc",
+      "inherits": "linux-base",
+      "displayName": "Linux (GCC, Ninja Multi-Config)",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
+      }
+    },
+    {
+      "name": "linux-clang",
+      "inherits": "linux-base",
+      "displayName": "Linux (Clang, Ninja Multi-Config)",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
     }
   ],
   "buildPresets": [
     {
-      "name": "visual-studio-debug",
-      "configurePreset": "visual-studio",
+      "name": "win-vs-debug",
+      "configurePreset": "win-vs",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -63,8 +95,8 @@
       }
     },
     {
-      "name": "visual-studio-release",
-      "configurePreset": "visual-studio",
+      "name": "win-vs-release",
+      "configurePreset": "win-vs",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -73,8 +105,8 @@
       }
     },
     {
-      "name": "ninja-debug",
-      "configurePreset": "ninja",
+      "name": "win-ninja-debug",
+      "configurePreset": "win-ninja",
       "configuration": "Debug",
       "condition": {
         "type": "equals",
@@ -83,20 +115,40 @@
       }
     },
     {
-      "name": "ninja-release",
-      "configurePreset": "ninja",
+      "name": "win-ninja-release",
+      "configurePreset": "win-ninja",
       "configuration": "Release",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       }
+    },
+    {
+      "name": "linux-gcc-debug",
+      "configurePreset": "linux-gcc",
+      "configuration": "Debug"
+    },
+    {
+      "name": "linux-gcc-release",
+      "configurePreset": "linux-gcc",
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-clang-debug",
+      "configurePreset": "linux-clang",
+      "configuration": "Debug"
+    },
+    {
+      "name": "linux-clang-release",
+      "configurePreset": "linux-clang",
+      "configuration": "Release"
     }
   ],
   "testPresets": [
     {
-      "name": "visual-studio",
-      "configurePreset": "visual-studio",
+      "name": "win-vs",
+      "configurePreset": "win-vs",
       "output": {
         "outputOnFailure": true
       },
@@ -107,8 +159,8 @@
       }
     },
     {
-      "name": "ninja",
-      "configurePreset": "ninja",
+      "name": "win-ninja",
+      "configurePreset": "win-ninja",
       "output": {
         "outputOnFailure": true
       },
