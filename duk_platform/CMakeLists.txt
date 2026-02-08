@@ -12,6 +12,16 @@ set(DUK_PLATFORM_SOURCES_WIN32
         src/duk_platform/win32/platform_win_32.cpp
 )
 
+set(DUK_PLATFORM_HEADERS_LINUX
+        include/duk_platform/linux/platform_xcb.h
+        include/duk_platform/linux/window_xcb.h
+)
+
+set(DUK_PLATFORM_SOURCES_LINUX
+        src/duk_platform/linux/platform_xcb.cpp
+        src/duk_platform/linux/window_xcb.cpp
+)
+
 set(DUK_PLATFORM_HEADERS
         include/duk_platform/console.h
         include/duk_platform/cursor.h
@@ -20,6 +30,7 @@ set(DUK_PLATFORM_HEADERS
         include/duk_platform/window.h
         include/duk_platform/window_error.h
         $<$<PLATFORM_ID:Windows>:${DUK_PLATFORM_HEADERS_WIN32}>
+        $<$<PLATFORM_ID:Linux>:${DUK_PLATFORM_HEADERS_LINUX}>
 )
 
 set(DUK_PLATFORM_SOURCES
@@ -29,7 +40,7 @@ set(DUK_PLATFORM_SOURCES
         src/duk_platform/window.cpp
         src/duk_platform/window_error.cpp
         $<$<PLATFORM_ID:Windows>:${DUK_PLATFORM_SOURCES_WIN32}>
-
+        $<$<PLATFORM_ID:Linux>:${DUK_PLATFORM_SOURCES_LINUX}>
 )
 
 add_library(duk.platform ${DUK_PLATFORM_SOURCES} ${DUK_PLATFORM_HEADERS})
@@ -39,6 +50,7 @@ target_include_directories(duk.platform
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<$<PLATFORM_ID:Linux>:${XCB_INCLUDE_DIRS}>
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
@@ -49,7 +61,7 @@ target_link_libraries(duk.platform
         duk::hash
         duk::event
         glm::glm
-
+        $<$<PLATFORM_ID:Linux>:${XCB_LIBRARIES}>
         )
 
 set_target_properties(duk.platform PROPERTIES EXPORT_NAME platform)

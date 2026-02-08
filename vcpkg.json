@@ -23,5 +23,6 @@
     },
     "catch2",
     "boost-type-index",
+    "xcb"
   ]
 }

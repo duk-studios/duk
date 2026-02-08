@@ -3,7 +3,7 @@
 #include <iostream>
 
 int main() {
-    bool run = false;
+    volatile bool run = false;
 
     auto platform = duk::platform::create_default_platform();
 
@@ -31,11 +31,19 @@ int main() {
     });
 
     listener.listen(window->window_resize_event, [](uint32_t width, uint32_t height) {
-        std::cout << "My window height: " << height << ", my window width: " << width << std::endl;
+        std::cout << "Window resize width: " << width << ", height: " << height << std::endl;
     });
 
-    listener.listen(window->mouse_movement_event, [](uint32_t width, uint32_t height) {
-        std::cout << "My mouse x: " << height << ", my mouse y: " << width << std::endl;
+    listener.listen(window->mouse_movement_event, [](int32_t width, int32_t height) {
+        std::cout << "Mouse move x: " << height << ", y: " << width << std::endl;
+    });
+
+    listener.listen(window->mouse_enter_event, [](int32_t width, int32_t height) {
+        std::cout << "Mouse enter x: " << height << ", y: " << width << std::endl;
+    });
+
+    listener.listen(window->mouse_leave_event, [](int32_t width, int32_t height) {
+        std::cout << "Mouse leave x: " << height << ", y: " << width << std::endl;
     });
 
     listener.listen(window->mouse_button_event, [](duk::platform::MouseButton mouseButton, duk::platform::KeyAction action) {
@@ -43,18 +51,18 @@ int main() {
 
         switch (mouseButton) {
             case duk::platform::MouseButton::LEFT:
-                isPressAction ? std::cout << "Left click was pressed!" << std::endl : std::cout << "Left click was released!" << std::endl;
+                isPressAction ? std::cout << "Left was pressed!" << std::endl : std::cout << "Left was released!" << std::endl;
                 break;
             case duk::platform::MouseButton::RIGHT:
-                isPressAction ? std::cout << "Right click was pressed!" << std::endl : std::cout << "Right click was released!" << std::endl;
+                isPressAction ? std::cout << "Right was pressed!" << std::endl : std::cout << "Right was released!" << std::endl;
                 break;
             case duk::platform::MouseButton::MIDDLE:
-                isPressAction ? std::cout << "Middle click was pressed!" << std::endl : std::cout << "Middle click was released!" << std::endl;
+                isPressAction ? std::cout << "Middle was pressed!" << std::endl : std::cout << "Middle was released!" << std::endl;
                 break;
         }
     });
 
-    listener.listen(window->mouse_wheel_movement_event, [](uint32_t fwKeys, uint32_t zDelta) {
+    listener.listen(window->mouse_wheel_movement_event, [](uint32_t fwKeys, int16_t zDelta) {
         std::cout << "My mouse wheel fwKeys: " << fwKeys << ", my mouse wheel zDelta: " << zDelta << std::endl;
     });
 
