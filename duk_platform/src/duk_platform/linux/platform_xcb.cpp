@@ -37,6 +37,9 @@ PlatformXCB::PlatformXCB(const PlatformXCBCreateInfo& platformXCBCreateInfo)
 }
 
 PlatformXCB::~PlatformXCB() {
+    if (m_keySymbols) {
+        xcb_key_symbols_free(m_keySymbols);
+    }
     if (m_connection) {
         xcb_disconnect(m_connection);
     }
