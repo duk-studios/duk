@@ -30,30 +30,30 @@ New features must have a corresponding open issue
 
 Branch name must be in the following format:
 ```
-(new|chg|fix)/#(issue_number)-(short-message)
+(new|chg|fix)/(short-message)
 ```
 e.g. 
 ```
-new/#0-add-new-things
-fix/#1-fix-broken-things
-chg/#2-change-existing-things
+new/add-new-things
+fix/fix-broken-things
+chg/change-existing-things
 ```
 Please keep the description short and with wording that explains what the commit _does_ (as opposed to what you did).
 
 e.g.
 ```
-new/#4-add-feature // good
-new/#5-added-some-things-somewhere-that-do-stuff // not very good
+new: add specific thing // good
+new: added some things somewhere that do stuff // not very good
 ```
 
 Commit messages follow a similar format:
 ```
-(new|chg|fix): #(issue_number): (short message)
+(new|chg|fix): (short message)
 ```
 
 e.g.
 ```
-new: #0: add specific thing
-chg: #0: remove old obsolete thing
-fix: #0: fix thing that was not working
+new: add specific thing
+chg: remove old obsolete thing
+fix: fix thing that was not working
 ```
