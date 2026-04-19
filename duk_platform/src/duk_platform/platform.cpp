@@ -14,7 +14,7 @@ namespace duk::platform {
 
 Platform::~Platform() = default;
 
-std::unique_ptr<Platform> create_default_platform() {
+std::unique_ptr<Platform> create_platform() {
 #if DUK_PLATFORM_IS_WINDOWS
     PlatformWin32CreateInfo platformWin32CreateInfo = {};
     platformWin32CreateInfo.instance = nullptr;

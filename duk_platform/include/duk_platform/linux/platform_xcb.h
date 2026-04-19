@@ -14,7 +14,6 @@ namespace duk::platform {
 
 class WindowXCB;
 class ConsoleXCB;
-class CursorXCB;
 
 struct PlatformXCBCreateInfo {
     const char* displayName = nullptr;// Optional display name (e.g., ":0")
@@ -26,8 +25,6 @@ public:
     PlatformXCB(const PlatformXCBCreateInfo& platformXCBCreateInfo = {});
 
     ~PlatformXCB() override;
-
-    Cursor* cursor() override;
 
     Console* console() override;
 

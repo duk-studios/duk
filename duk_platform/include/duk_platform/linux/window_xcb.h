@@ -8,10 +8,13 @@
 #include <duk_platform/window.h>
 #include <duk_macros/macros.h>
 
+#include <memory>
 #include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
 
 namespace duk::platform {
+
+class CursorXCB;
 
 struct WindowXCBCreateInfo {
     WindowCreateInfo windowCreateInfo;
@@ -32,6 +35,8 @@ public:
     explicit WindowXCB(const WindowXCBOpenInfo& windowXCBOpenInfo);
 
     ~WindowXCB() override;
+
+    Cursor* cursor() override;
 
     // Window interface overrides
     DUK_NO_DISCARD uint32_t width() const override;
@@ -89,6 +94,7 @@ private:
     bool m_minimized;
     bool m_destroyRequired;
     bool m_mapped;
+    std::unique_ptr<CursorXCB> m_cursor;
 
     void setup_wm_protocols();
 };

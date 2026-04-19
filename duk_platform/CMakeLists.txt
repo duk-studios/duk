@@ -15,11 +15,13 @@ set(DUK_PLATFORM_SOURCES_WIN32
 set(DUK_PLATFORM_HEADERS_LINUX
         include/duk_platform/linux/platform_xcb.h
         include/duk_platform/linux/window_xcb.h
+        include/duk_platform/linux/cursor_xcb.h
 )
 
 set(DUK_PLATFORM_SOURCES_LINUX
         src/duk_platform/linux/platform_xcb.cpp
         src/duk_platform/linux/window_xcb.cpp
+        src/duk_platform/linux/cursor_xcb.cpp
 )
 
 set(DUK_PLATFORM_HEADERS
@@ -49,6 +51,7 @@ target_include_directories(duk.platform
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<$<PLATFORM_ID:Linux>:${XCB_INCLUDE_DIRS}>
+        $<$<PLATFORM_ID:Linux>:${XCB_CURSOR_INCLUDE_DIRS}>
         PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
@@ -60,6 +63,7 @@ target_link_libraries(duk.platform
         duk::event
         glm::glm
         $<$<PLATFORM_ID:Linux>:${XCB_LIBRARIES}>
+        $<$<PLATFORM_ID:Linux>:${XCB_CURSOR_LIBRARIES}>
         )
 
 set_target_properties(duk.platform PROPERTIES EXPORT_NAME platform)
@@ -77,7 +81,10 @@ if (MSVC)
             )
 endif ()
 
-add_subdirectory(test)
+
+if (DUK_BUILD_SAMPLES)
+    add_subdirectory(samples)
+endif ()
 
 install(
         DIRECTORY include/

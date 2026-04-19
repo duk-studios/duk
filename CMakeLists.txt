@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 
 set(DUK_AS_SOURCE TRUE)
 
-option(DUK_BUILD_SAMPLE "Enables building of duk_sample" OFF)
+option(DUK_BUILD_SAMPLES "Enables building of interactive samples (duk_*/samples)" OFF)
 option(DUK_BUILD_TESTS "Enables building of tests" OFF)
 
 if (NOT CMAKE_CXX_STANDARD)
@@ -28,7 +28,7 @@ find_package(Freetype REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Boost REQUIRED COMPONENTS type_index)
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(XCB REQUIRED xcb xcb-keysyms)
+pkg_check_modules(XCB REQUIRED xcb xcb-keysyms xcb-icccm xcb-cursor xcb-render xcb-renderutil xcb-image xcb-shm xcb-util)
 if (DUK_BUILD_TESTS)
     find_package(Catch2 CONFIG REQUIRED)
     include(CTest)
@@ -62,7 +62,7 @@ add_subdirectory(duk_cli)
 add_subdirectory(duk_api)
 add_subdirectory(duk_runtime)
 
-if (DUK_BUILD_SAMPLE)
+if (DUK_BUILD_SAMPLES)
     include(duk-pack)
     add_subdirectory(duk_sample)
 

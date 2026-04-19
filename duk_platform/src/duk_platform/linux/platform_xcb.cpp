@@ -45,10 +45,6 @@ PlatformXCB::~PlatformXCB() {
     }
 }
 
-Cursor* PlatformXCB::cursor() {
-    return nullptr;
-}
-
 Console* PlatformXCB::console() {
     return nullptr;
 }

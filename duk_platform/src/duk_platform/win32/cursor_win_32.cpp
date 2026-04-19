@@ -18,14 +18,28 @@ CursorWin32::CursorWin32() {
 }
 
 void CursorWin32::show(bool visible) {
-    ShowCursor(visible);
+    m_visible = visible;
+    SetCursor(current_handle());
 }
 
-void CursorWin32::set_cursor(CursorType::Type cursorType) {
-    if (m_currentCursorType != cursorType) {
-        SetCursor(m_cursorTypes[cursorType]);
-        m_currentCursorType = cursorType;
+void CursorWin32::set_type(CursorType type) {
+    if (m_currentCursorType != type) {
+        m_currentCursorType = type;
+        if (m_visible) {
+            SetCursor(m_cursorTypes[type]);
+        }
     }
+}
+
+HCURSOR CursorWin32::current_handle() const {
+    if (!m_visible) {
+        return nullptr;
+    }
+    auto it = m_cursorTypes.find(m_currentCursorType);
+    if (it != m_cursorTypes.end()) {
+        return it->second;
+    }
+    return nullptr;
 }
 
 }// namespace duk::platform

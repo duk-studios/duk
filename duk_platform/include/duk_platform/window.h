@@ -11,6 +11,8 @@
 
 namespace duk::platform {
 
+class Cursor;
+
 enum class WindowStyle {
     STANDARD = 0,
     FULLSCREEN = 1
@@ -37,6 +39,8 @@ public:
 
 public:
     virtual ~Window();
+
+    virtual Cursor* cursor() = 0;
 
     DUK_NO_DISCARD virtual uint32_t width() const = 0;
 

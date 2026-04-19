@@ -6,6 +6,7 @@
 #define DUK_PLATFORM_WINDOW_WIN_32_H
 
 #include <duk_platform/window.h>
+#include <duk_platform/win32/cursor_win_32.h>
 
 #include <windows.h>
 
@@ -37,6 +38,8 @@ public:
 
     ~WindowWin32() override;
 
+    Cursor* cursor() override;
+
     LRESULT window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
     DUK_NO_DISCARD HWND win32_window_handle() const;
@@ -67,6 +70,7 @@ private:
     uint32_t m_height;
     HWND m_hwnd;
     bool m_destroyRequired;
+    CursorWin32 m_cursor;
 };
 
 }// namespace duk::platform

@@ -433,7 +433,11 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
             return 0;
         }
         case WM_SETCURSOR: {
-            return true;
+            if (LOWORD(lParam) == HTCLIENT) {
+                SetCursor(m_cursor.current_handle());
+                return TRUE;
+            }
+            return DefWindowProc(hwnd, uMsg, wParam, lParam);
         }
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -446,6 +450,10 @@ HWND WindowWin32::win32_window_handle() const {
 
 HINSTANCE WindowWin32::win32_instance_handle() const {
     return m_windowClassEntry->instance;
+}
+
+Cursor* WindowWin32::cursor() {
+    return &m_cursor;
 }
 
 uint32_t WindowWin32::width() const {

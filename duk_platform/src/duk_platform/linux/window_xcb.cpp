@@ -3,6 +3,7 @@
 //
 
 #include <duk_platform/linux/window_xcb.h>
+#include <duk_platform/linux/cursor_xcb.h>
 
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -297,6 +298,13 @@ WindowXCB::WindowXCB(const WindowXCBCreateInfo& windowXCBCreateInfo)
     if (m_style == WindowStyle::FULLSCREEN) {
         xcb_change_property(m_connection, XCB_PROP_MODE_REPLACE, m_window, m_stateAtom, XCB_ATOM_ATOM, 32, 1, &m_fullscreenAtom);
     }
+
+    CursorXCBCreateInfo cursorCreateInfo = {};
+    cursorCreateInfo.connection = m_connection;
+    cursorCreateInfo.screen = m_screen;
+    cursorCreateInfo.window = m_window;
+    m_cursor = std::make_unique<CursorXCB>(cursorCreateInfo);
+
     xcb_flush(m_connection);
 }
 
@@ -325,6 +333,19 @@ WindowXCB::WindowXCB(const WindowXCBOpenInfo& windowXCBOpenInfo)
 
     // Setup WM protocols for the externally created window
     setup_wm_protocols();
+
+    // Create cursor for the externally opened window
+    if (m_connection && m_window != XCB_WINDOW_NONE) {
+        // We need the screen to create a cursor context; query it from the connection
+        auto screenIter = xcb_setup_roots_iterator(xcb_get_setup(m_connection));
+        if (screenIter.data) {
+            CursorXCBCreateInfo cursorCreateInfo = {};
+            cursorCreateInfo.connection = m_connection;
+            cursorCreateInfo.screen = screenIter.data;
+            cursorCreateInfo.window = m_window;
+            m_cursor = std::make_unique<CursorXCB>(cursorCreateInfo);
+        }
+    }
 }
 
 WindowXCB::~WindowXCB() {
@@ -333,6 +354,10 @@ WindowXCB::~WindowXCB() {
         xcb_destroy_window(m_connection, m_window);
         xcb_flush(m_connection);
     }
+}
+
+Cursor* WindowXCB::cursor() {
+    return m_cursor.get();
 }
 
 void WindowXCB::setup_wm_protocols() {
