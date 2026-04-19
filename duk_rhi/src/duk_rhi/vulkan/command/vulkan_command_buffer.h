@@ -18,7 +18,7 @@ class VulkanComputePipeline;
 struct VulkanCommandBufferCreateInfo {
     VkDevice device;
     VulkanCommandQueue* commandQueue;
-    uint32_t frameCount;
+    uint32_t imageCount;
     const uint32_t* currentFramePtr;
     const uint32_t* currentImagePtr;
 };

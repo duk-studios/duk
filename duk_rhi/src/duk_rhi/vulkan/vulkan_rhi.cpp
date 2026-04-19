@@ -16,6 +16,8 @@
 
 #if DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/window_win_32.h>
+#elif DUK_PLATFORM_IS_LINUX
+#include <duk_platform/linux/window_xcb.h>
 #endif
 
 namespace duk::rhi {
@@ -57,6 +59,7 @@ static std::vector<const char*> query_instance_extensions(bool hasValidationLaye
 #if DUK_PLATFORM_IS_WINDOWS
     extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 #elif DUK_PLATFORM_IS_LINUX
+    extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
 #endif
     return extensions;
 }
@@ -140,8 +143,8 @@ VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& vulkanRendererCreateInfo)
     volkInitialize();
 
     create_vk_instance(vulkanRendererCreateInfo);
-    if (vulkanRendererCreateInfo.renderHardwareInterfaceCreateInfo.window) {
-        create_vk_surface(vulkanRendererCreateInfo);
+    if (auto window = vulkanRendererCreateInfo.renderHardwareInterfaceCreateInfo.window) {
+        create_vk_surface(window);
     }
     select_vk_physical_device(vulkanRendererCreateInfo.renderHardwareInterfaceCreateInfo.deviceIndex);
     create_vk_device(vulkanRendererCreateInfo);
@@ -394,12 +397,9 @@ void VulkanRHI::select_vk_physical_device(uint32_t deviceIndex) {
     m_rendererCapabilities = std::make_unique<VulkanRendererCapabilities>(rendererCapabilitiesCreateInfo);
 }
 
-void VulkanRHI::create_vk_surface(const VulkanRHICreateInfo& vulkanRendererCreateInfo) {
-    auto window = vulkanRendererCreateInfo.renderHardwareInterfaceCreateInfo.window;
+void VulkanRHI::create_vk_surface(duk::platform::Window* window) {
     DUK_ASSERT(window);
-
 #if DUK_PLATFORM_IS_WINDOWS
-
     auto windowWin32 = dynamic_cast<platform::WindowWin32*>(window);
     DUK_ASSERT(windowWin32);
 
@@ -411,6 +411,17 @@ void VulkanRHI::create_vk_surface(const VulkanRHICreateInfo& vulkanRendererCreat
     auto result = vkCreateWin32SurfaceKHR(m_instance, &win32SurfaceCreateInfo, nullptr, &m_surface);
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkSurfaceKHR with vkCreateWin32SurfaceKHR");
+    }
+#elif DUK_PLATFORM_IS_LINUX
+    auto windowXCB = dynamic_cast<platform::WindowXCB*>(window);
+    DUK_ASSERT(windowXCB);
+    VkXcbSurfaceCreateInfoKHR xcbSurfaceCreateInfo = {};
+    xcbSurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+    xcbSurfaceCreateInfo.connection = windowXCB->xcb_connection();
+    xcbSurfaceCreateInfo.window = windowXCB->xcb_window_handle();
+    auto result = vkCreateXcbSurfaceKHR(m_instance, &xcbSurfaceCreateInfo, nullptr, &m_surface);
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create VkSurfaceKHR with vkCreateXcbSurfaceKHR");
     }
 #endif
 }

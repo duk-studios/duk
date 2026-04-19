@@ -68,7 +68,7 @@ private:
 
     void select_vk_physical_device(uint32_t deviceIndex);
 
-    void create_vk_surface(const VulkanRHICreateInfo& vulkanRendererCreateInfo);
+    void create_vk_surface(duk::platform::Window* window);
 
     void create_vk_device(const VulkanRHICreateInfo& vulkanRendererCreateInfo);
 
