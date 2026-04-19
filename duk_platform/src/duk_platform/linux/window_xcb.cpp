@@ -4,6 +4,7 @@
 
 #include <duk_platform/linux/window_xcb.h>
 #include <duk_platform/linux/cursor_xcb.h>
+#include <duk_platform/linux/platform_xcb.h>
 
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
@@ -278,7 +279,23 @@ WindowXCB::WindowXCB(const WindowXCBCreateInfo& windowXCBCreateInfo)
                                                             // keyboard events
                                                             XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE};
 
-    xcb_create_window(m_connection, XCB_COPY_FROM_PARENT, m_window, m_screen->root, 0, 0, m_width, m_height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, m_screen->root_visual, value_mask, value_list);
+    // Determine window position
+    const auto& createInfo = windowXCBCreateInfo.windowCreateInfo;
+    int16_t posX = 0;
+    int16_t posY = 0;
+    if (createInfo.x != kDefaultWindowPosition && createInfo.y != kDefaultWindowPosition) {
+        posX = static_cast<int16_t>(createInfo.x);
+        posY = static_cast<int16_t>(createInfo.y);
+    } else if (m_style != WindowStyle::FULLSCREEN) {
+        // Center the window on the primary monitor
+        if (windowXCBCreateInfo.primaryMonitor) {
+            const auto& monitor = *windowXCBCreateInfo.primaryMonitor;
+            posX = static_cast<int16_t>(monitor.x + (monitor.width - m_width) / 2);
+            posY = static_cast<int16_t>(monitor.y + (monitor.height - m_height) / 2);
+        }
+    }
+
+    xcb_create_window(m_connection, XCB_COPY_FROM_PARENT, m_window, m_screen->root, posX, posY, m_width, m_height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, m_screen->root_visual, value_mask, value_list);
 
     // Set window properties
     detail::set_string_property(m_connection, m_window, XCB_ATOM_WM_NAME, m_title.c_str());

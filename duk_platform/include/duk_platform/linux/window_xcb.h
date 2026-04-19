@@ -16,11 +16,14 @@ namespace duk::platform {
 
 class CursorXCB;
 
+struct MonitorGeometry;
+
 struct WindowXCBCreateInfo {
     WindowCreateInfo windowCreateInfo;
     xcb_connection_t* connection;
     xcb_screen_t* screen;
     xcb_key_symbols_t* keySymbols;
+    const MonitorGeometry* primaryMonitor;
 };
 
 struct WindowXCBOpenInfo {

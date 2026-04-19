@@ -7,8 +7,66 @@
 
 #include <stdexcept>
 #include <xcb/xcb.h>
+#include <xcb/randr.h>
 
 namespace duk::platform {
+
+namespace detail {
+
+static MonitorGeometry query_primary_monitor(xcb_connection_t* connection, xcb_screen_t* screen) {
+    MonitorGeometry fallback = {0, 0, screen->width_in_pixels, screen->height_in_pixels};
+
+    auto screenResReply = xcb_randr_get_screen_resources_current_reply(connection, xcb_randr_get_screen_resources_current(connection, screen->root), nullptr);
+    if (!screenResReply) {
+        return fallback;
+    }
+
+    auto primaryReply = xcb_randr_get_output_primary_reply(connection, xcb_randr_get_output_primary(connection, screen->root), nullptr);
+    xcb_randr_output_t primaryOutput = (primaryReply && primaryReply->output != XCB_NONE) ? primaryReply->output : XCB_NONE;
+    free(primaryReply);
+
+    int outputCount = xcb_randr_get_screen_resources_current_outputs_length(screenResReply);
+    auto* outputs = xcb_randr_get_screen_resources_current_outputs(screenResReply);
+
+    xcb_randr_crtc_t targetCrtc = XCB_NONE;
+
+    if (primaryOutput != XCB_NONE) {
+        auto outputInfoReply = xcb_randr_get_output_info_reply(connection, xcb_randr_get_output_info(connection, primaryOutput, XCB_CURRENT_TIME), nullptr);
+        if (outputInfoReply && outputInfoReply->crtc != XCB_NONE && outputInfoReply->connection == XCB_RANDR_CONNECTION_CONNECTED) {
+            targetCrtc = outputInfoReply->crtc;
+        }
+        free(outputInfoReply);
+    }
+
+    if (targetCrtc == XCB_NONE) {
+        for (int i = 0; i < outputCount; i++) {
+            auto outputInfoReply = xcb_randr_get_output_info_reply(connection, xcb_randr_get_output_info(connection, outputs[i], XCB_CURRENT_TIME), nullptr);
+            if (outputInfoReply && outputInfoReply->crtc != XCB_NONE && outputInfoReply->connection == XCB_RANDR_CONNECTION_CONNECTED) {
+                targetCrtc = outputInfoReply->crtc;
+                free(outputInfoReply);
+                break;
+            }
+            free(outputInfoReply);
+        }
+    }
+
+    free(screenResReply);
+
+    if (targetCrtc == XCB_NONE) {
+        return fallback;
+    }
+
+    auto crtcInfoReply = xcb_randr_get_crtc_info_reply(connection, xcb_randr_get_crtc_info(connection, targetCrtc, XCB_CURRENT_TIME), nullptr);
+    if (!crtcInfoReply) {
+        return fallback;
+    }
+
+    MonitorGeometry result = {crtcInfoReply->x, crtcInfoReply->y, crtcInfoReply->width, crtcInfoReply->height};
+    free(crtcInfoReply);
+    return result;
+}
+
+}// namespace detail
 
 PlatformXCB::PlatformXCB(const PlatformXCBCreateInfo& platformXCBCreateInfo)
     : m_connection(nullptr)
@@ -34,6 +92,8 @@ PlatformXCB::PlatformXCB(const PlatformXCBCreateInfo& platformXCBCreateInfo)
         m_windowPtrAtom = reply->atom;
         free(reply);
     }
+
+    m_primaryMonitor = detail::query_primary_monitor(m_connection, m_screen);
 }
 
 PlatformXCB::~PlatformXCB() {
@@ -55,6 +115,7 @@ std::shared_ptr<Window> PlatformXCB::create_window(const WindowCreateInfo& windo
     windowXCBCreateInfo.connection = m_connection;
     windowXCBCreateInfo.screen = m_screen;
     windowXCBCreateInfo.keySymbols = m_keySymbols;
+    windowXCBCreateInfo.primaryMonitor = &m_primaryMonitor;
     auto window = std::make_shared<WindowXCB>(windowXCBCreateInfo);
     set_window_ptr(window->xcb_window_handle(), window.get());
     return window;
@@ -178,6 +239,10 @@ void PlatformXCB::process_event(xcb_generic_event_t* event) {
 
 xcb_screen_t* PlatformXCB::xcb_screen() const {
     return m_screen;
+}
+
+const MonitorGeometry& PlatformXCB::primary_monitor() const {
+    return m_primaryMonitor;
 }
 
 }// namespace duk::platform

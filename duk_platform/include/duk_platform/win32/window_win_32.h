@@ -69,6 +69,7 @@ private:
     uint32_t m_width;
     uint32_t m_height;
     HWND m_hwnd;
+    WindowStyle m_style;
     bool m_destroyRequired;
     CursorWin32 m_cursor;
 };

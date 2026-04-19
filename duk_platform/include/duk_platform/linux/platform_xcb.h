@@ -15,6 +15,13 @@ namespace duk::platform {
 class WindowXCB;
 class ConsoleXCB;
 
+struct MonitorGeometry {
+    int16_t x = 0;
+    int16_t y = 0;
+    uint16_t width = 0;
+    uint16_t height = 0;
+};
+
 struct PlatformXCBCreateInfo {
     const char* displayName = nullptr;// Optional display name (e.g., ":0")
     int screenNumber = 0;             // Optional screen number (default is 0)
@@ -38,11 +45,14 @@ public:
 
     DUK_NO_DISCARD xcb_connection_t* xcb_connection() const;
 
+    DUK_NO_DISCARD const MonitorGeometry& primary_monitor() const;
+
 private:
     xcb_connection_t* m_connection;
     xcb_screen_t* m_screen;
     xcb_key_symbols_t* m_keySymbols;
     xcb_atom_t m_windowPtrAtom;
+    MonitorGeometry m_primaryMonitor;
 
     WindowXCB* get_window_ptr(xcb_window_t handle);
 

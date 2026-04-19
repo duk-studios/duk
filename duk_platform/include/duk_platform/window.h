@@ -5,6 +5,7 @@
 #ifndef DUK_PLATFORM_WINDOW_H
 #define DUK_PLATFORM_WINDOW_H
 
+#include <climits>
 #include <duk_event/event.h>
 #include <duk_platform/key_codes.h>
 #include <duk_math/math.h>
@@ -18,11 +19,16 @@ enum class WindowStyle {
     FULLSCREEN = 1
 };
 
+/// Sentinel value meaning "let the platform choose a default position".
+static constexpr int32_t kDefaultWindowPosition = INT32_MIN;
+
 struct WindowCreateInfo {
     const char* title;
     uint32_t width;
     uint32_t height;
     WindowStyle style;
+    int32_t x = kDefaultWindowPosition;
+    int32_t y = kDefaultWindowPosition;
 };
 
 class Window {

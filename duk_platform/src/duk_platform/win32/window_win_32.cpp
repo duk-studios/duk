@@ -308,44 +308,63 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo)
     : m_hwnd(nullptr)
     , m_width(0)
     , m_height(0)
+    , m_style(windowWin32CreateInfo.windowCreateInfo.style)
     , m_destroyRequired(true) {
     m_windowClassEntry = detail::build_window_class(windowWin32CreateInfo);
 
-    // Create the window.
-
-    DWORD style = 0;
+    const auto& createInfo = windowWin32CreateInfo.windowCreateInfo;
+    const bool isFullscreen = createInfo.style == WindowStyle::FULLSCREEN;
 
     int screenWidth = GetSystemMetrics(SM_CXSCREEN);
     int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-    m_hwnd = CreateWindowEx(0,                                           // Optional window styles.
-                            m_windowClassEntry->className.c_str(),       // Window class
-                            windowWin32CreateInfo.windowCreateInfo.title,// Window text
-                            style,                                       // Window style
+    // Determine window style
+    DWORD style = WS_OVERLAPPEDWINDOW;
+    if (isFullscreen) {
+        style = WS_POPUP;
+    }
 
-                            // Size and position
-                            CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+    // Determine position and size
+    int posX, posY, winWidth, winHeight;
+    if (isFullscreen) {
+        posX = 0;
+        posY = 0;
+        winWidth = screenWidth;
+        winHeight = screenHeight;
+    } else {
+        winWidth = static_cast<int>(createInfo.width);
+        winHeight = static_cast<int>(createInfo.height);
 
-                            NULL,                          // Parent window
-                            NULL,                          // Menu
-                            windowWin32CreateInfo.instance,// Instance handle
-                            this                           // Additional application data
+        // Adjust window rect to account for borders/title bar so the client area matches the requested size
+        RECT rect = {0, 0, winWidth, winHeight};
+        AdjustWindowRect(&rect, style, FALSE);
+        winWidth = rect.right - rect.left;
+        winHeight = rect.bottom - rect.top;
+
+        if (createInfo.x != WINDOW_POSITION_DEFAULT && createInfo.y != WINDOW_POSITION_DEFAULT) {
+            posX = createInfo.x;
+            posY = createInfo.y;
+        } else {
+            // Center on screen
+            posX = (screenWidth - winWidth) / 2;
+            posY = (screenHeight - winHeight) / 2;
+        }
+    }
+
+    m_hwnd = CreateWindowEx(0,                                    // Optional window styles.
+                            m_windowClassEntry->className.c_str(),// Window class
+                            createInfo.title,                     // Window text
+                            style,                                // Window style
+                            posX, posY, winWidth, winHeight,      // Position and size
+                            NULL,                                 // Parent window
+                            NULL,                                 // Menu
+                            windowWin32CreateInfo.instance,       // Instance handle
+                            this                                  // Additional application data
     );
 
     if (!m_hwnd) {
         throw std::runtime_error("failed to create WindowWin32");
     }
-
-    // Remove window borders and title bar
-    style = GetWindowLong(m_hwnd, GWL_STYLE);
-    style &= ~(WS_CAPTION | WS_THICKFRAME);
-    SetWindowLong(m_hwnd, GWL_STYLE, style);
-
-    LONG exStyle = GetWindowLong(m_hwnd, GWL_EXSTYLE);
-    exStyle &= ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE);
-    SetWindowLong(m_hwnd, GWL_EXSTYLE, exStyle);
-
-    SetWindowPos(m_hwnd, HWND_TOP, 0, 0, screenWidth, screenHeight, SWP_NOZORDER | SWP_FRAMECHANGED);
 
     detail::query_window_size(m_hwnd, m_width, m_height);
 }
@@ -354,6 +373,7 @@ WindowWin32::WindowWin32(const WindowWin32OpenInfo& windowWin32OpenInfo)
     : m_width(0)
     , m_height(0)
     , m_hwnd(windowWin32OpenInfo.hwnd)
+    , m_style(WindowStyle::STANDARD)
     , m_destroyRequired(false) {
     detail::query_window_size(m_hwnd, m_width, m_height);
 }
@@ -477,7 +497,7 @@ bool WindowWin32::valid() const {
 }
 
 void WindowWin32::show() {
-    ShowWindow(m_hwnd, SW_MAXIMIZE);
+    ShowWindow(m_hwnd, m_style == WindowStyle::FULLSCREEN ? SW_MAXIMIZE : SW_SHOW);
 }
 
 void WindowWin32::hide() {
