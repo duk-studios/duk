@@ -10,6 +10,8 @@
 
 #if DUK_PLATFORM_IS_WINDOWS
 #include <duk_platform/win32/platform_win_32.h>
+#elif DUK_PLATFORM_IS_LINUX
+#include <duk_platform/linux/platform_xcb.h>
 #endif
 
 #include <cxxopts.hpp>
@@ -56,8 +58,7 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
         auto result = options.parse(argc, argv);
 
         // init console output
-        {
-            auto console = platform->console();
+        if (auto console = platform->console()) {
             if (result.count("console")) {
                 // forces a new console window to be opened
                 console->close();
@@ -98,7 +99,7 @@ int duk_main(duk::platform::Platform* platform, int argc, const char* const* arg
     return 0;
 }
 
-#ifdef DUK_PLATFORM_IS_WINDOWS
+#if DUK_PLATFORM_IS_WINDOWS
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     duk::platform::PlatformWin32CreateInfo platformWin32CreateInfo = {};
     platformWin32CreateInfo.instance = hInstance;
@@ -109,7 +110,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 }
 #else
 int main(int argc, const char* const* argv) {
-    duk::platform::PlatformLinux platformLinux;
+    duk::platform::PlatformXCBCreateInfo platformXCBCreateInfo = {};
+    duk::platform::PlatformXCB platformLinux(platformXCBCreateInfo);
     return duk_main(&platformLinux, argc, argv);
 }
 #endif

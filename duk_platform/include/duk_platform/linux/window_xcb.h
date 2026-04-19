@@ -77,19 +77,22 @@ private:
     xcb_connection_t* m_connection;
     xcb_screen_t* m_screen;
     xcb_key_symbols_t* m_keySymbols;
+    std::string m_title;
+    WindowStyle m_style;
     xcb_window_t m_window;
     xcb_atom_t m_deleteAtom;
+    xcb_atom_t m_stateAtom;
+    xcb_atom_t m_changeStateAtom;
+    xcb_atom_t m_fullscreenAtom;
     uint32_t m_width;
     uint32_t m_height;
     bool m_minimized;
     bool m_destroyRequired;
+    bool m_mapped;
 
     void setup_wm_protocols();
-
-    void setup_properties();
 };
 
 }// namespace duk::platform
 
 #endif//DUK_PLATFORM_WINDOW_XCB_H
-

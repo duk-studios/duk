@@ -6,13 +6,75 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
-#include <X11/keysym.h> // for XK_* constants
+#include <xcb/xcb_icccm.h>
+#include <X11/keysym.h>// for XK_* constants
 
 namespace duk::platform {
 
 namespace detail {
 
-KeyModifiers::Mask convert_modifiers(uint16_t state) {
+static void set_string_property(xcb_connection_t* connection, xcb_window_t window, xcb_atom_t property, const char* value) {
+    xcb_change_property(connection, XCB_PROP_MODE_REPLACE, window, property, XCB_ATOM_STRING, 8, strlen(value), value);
+}
+
+static xcb_atom_t intern_atom(xcb_connection_t* connection, const char* name, unsigned char onlyIfExists = 0) {
+    xcb_intern_atom_cookie_t cookie = xcb_intern_atom(connection, onlyIfExists, strlen(name), name);
+    xcb_intern_atom_reply_t* reply = xcb_intern_atom_reply(connection, cookie, nullptr);
+    if (!reply) {
+        throw std::runtime_error(std::string("Failed to intern atom: ") + name);
+    }
+    xcb_atom_t atom = reply->atom;
+    free(reply);
+    return atom;
+}
+
+static void set_initial_state_iconic(xcb_connection_t* connection, xcb_window_t win) {
+    xcb_icccm_wm_hints_t hints;
+    xcb_icccm_wm_hints_set_none(&hints);
+    hints.flags |= XCB_ICCCM_WM_HINT_STATE;
+    hints.initial_state = XCB_ICCCM_WM_STATE_ICONIC;// IconicState
+    xcb_icccm_set_wm_hints(connection, win, &hints);
+}
+
+// wm_change_state: xcb_atom_t from get_atom(connection, "WM_CHANGE_STATE")
+// root: screen->root
+// state: 1 for NormalState, 3 for IconicState
+static void request_change_state(xcb_connection_t* connection, xcb_window_t window, xcb_window_t root, xcb_atom_t wm_change_state, uint32_t state) {
+    xcb_client_message_event_t ev = {};
+    ev.response_type = XCB_CLIENT_MESSAGE;
+    ev.format = 32;
+    ev.window = window;
+    ev.type = wm_change_state;
+
+    ev.data.data32[0] = state;
+
+    xcb_send_event(connection, 0, root, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT, reinterpret_cast<char*>(&ev));
+}
+
+// atom_net_active: get_atom(connection, "_NET_ACTIVE_WINDOW")
+// source_time: use current time or 0 (0 = unspecified)
+
+static void request_activate(xcb_connection_t* connection, xcb_window_t window, xcb_window_t root, xcb_atom_t atom_net_active) {
+    xcb_client_message_event_t ev = {};
+    ev.response_type = XCB_CLIENT_MESSAGE;
+    ev.format = 32;
+    ev.window = window;
+    ev.type = atom_net_active;
+
+    // _NET_ACTIVE_WINDOW message fields:
+    // data32[0] = source indication (0 = normal)
+    // data32[1] = timestamp (or 0)
+    // data32[2] = currently unused (0)
+    ev.data.data32[0] = 1;// 1 = application request (some WMs accept 1)
+    ev.data.data32[1] = 0;
+    ev.data.data32[2] = 0;
+    ev.data.data32[3] = 0;
+    ev.data.data32[4] = 0;
+
+    xcb_send_event(connection, 0, root, XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT, reinterpret_cast<char*>(&ev));
+}
+
+static KeyModifiers::Mask convert_modifiers(uint16_t state) {
     KeyModifiers::Mask mods = 0;
     if (state & XCB_MOD_MASK_CONTROL) {
         mods |= KeyModifiers::CTRL;
@@ -20,13 +82,13 @@ KeyModifiers::Mask convert_modifiers(uint16_t state) {
     if (state & XCB_MOD_MASK_SHIFT) {
         mods |= KeyModifiers::SHIFT;
     }
-    if (state & XCB_MOD_MASK_1) { // Alt is usually Mod1
+    if (state & XCB_MOD_MASK_1) {// Alt is usually Mod1
         mods |= KeyModifiers::ALT;
     }
     return mods;
 }
 
-Keys convert_key(xcb_keysym_t keysym) {
+static Keys convert_key(xcb_keysym_t keysym) {
     switch (keysym) {
         case XK_a:
         case XK_A:
@@ -182,19 +244,21 @@ Keys convert_key(xcb_keysym_t keysym) {
     }
 }
 
-}
+}// namespace detail
 
-WindowXCB::WindowXCB(const WindowXCBCreateInfo& windowXCBCreateInfo) :
-    m_connection(windowXCBCreateInfo.connection),
-    m_screen(windowXCBCreateInfo.screen),
-    m_keySymbols(windowXCBCreateInfo.keySymbols),
-    m_window(XCB_WINDOW_NONE),
-    m_deleteAtom(0),
-    m_width(windowXCBCreateInfo.windowCreateInfo.width),
-    m_height(windowXCBCreateInfo.windowCreateInfo.height),
-    m_minimized(false),
-    m_destroyRequired(true) {
-
+WindowXCB::WindowXCB(const WindowXCBCreateInfo& windowXCBCreateInfo)
+    : m_connection(windowXCBCreateInfo.connection)
+    , m_screen(windowXCBCreateInfo.screen)
+    , m_keySymbols(windowXCBCreateInfo.keySymbols)
+    , m_title(windowXCBCreateInfo.windowCreateInfo.title ? windowXCBCreateInfo.windowCreateInfo.title : "")
+    , m_style(windowXCBCreateInfo.windowCreateInfo.style)
+    , m_window(XCB_WINDOW_NONE)
+    , m_deleteAtom(0)
+    , m_width(windowXCBCreateInfo.windowCreateInfo.width)
+    , m_height(windowXCBCreateInfo.windowCreateInfo.height)
+    , m_minimized(false)
+    , m_destroyRequired(true)
+    , m_mapped(false) {
     if (!m_connection) {
         throw std::runtime_error("Invalid XCB connection provided to WindowXCB.");
     }
@@ -205,57 +269,58 @@ WindowXCB::WindowXCB(const WindowXCBCreateInfo& windowXCBCreateInfo) :
     // Create the XCB window
     m_window = xcb_generate_id(m_connection);
     uint32_t value_mask = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK;
-    uint32_t value_list[] = {
-        m_screen->black_pixel,
-        XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+    uint32_t value_list[] = {m_screen->black_pixel, XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_STRUCTURE_NOTIFY |
 
-        // mouse events
-        XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW |
+                                                            // mouse events
+                                                            XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_ENTER_WINDOW | XCB_EVENT_MASK_LEAVE_WINDOW |
 
-        // keyboard events
-        XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE
-    };
+                                                            // keyboard events
+                                                            XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_KEY_RELEASE};
 
-    xcb_create_window(
-        m_connection,
-        XCB_COPY_FROM_PARENT,
-        m_window,
-        m_screen->root,
-        0, 0, m_width, m_height,
-        0,
-        XCB_WINDOW_CLASS_INPUT_OUTPUT,
-        m_screen->root_visual,
-        value_mask,
-        value_list
-    );
+    xcb_create_window(m_connection, XCB_COPY_FROM_PARENT, m_window, m_screen->root, 0, 0, m_width, m_height, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT, m_screen->root_visual, value_mask, value_list);
 
     // Set window properties
-    setup_properties();
+    detail::set_string_property(m_connection, m_window, XCB_ATOM_WM_NAME, m_title.c_str());
+
+    detail::set_string_property(m_connection, m_window, XCB_ATOM_WM_CLASS, "WindowXCB\0duk-window");
 
     // Setup WM protocols
     setup_wm_protocols();
+
+    m_stateAtom = detail::intern_atom(m_connection, "_NET_WM_STATE");
+    m_fullscreenAtom = detail::intern_atom(m_connection, "_NET_WM_STATE_FULLSCREEN");
+    m_changeStateAtom = detail::intern_atom(m_connection, "WM_CHANGE_STATE");
+
+    // Set initial state to Iconic (minimized) BEFORE mapping
+    detail::set_initial_state_iconic(m_connection, m_window);
+
+    if (m_style == WindowStyle::FULLSCREEN) {
+        xcb_change_property(m_connection, XCB_PROP_MODE_REPLACE, m_window, m_stateAtom, XCB_ATOM_ATOM, 32, 1, &m_fullscreenAtom);
+    }
+    xcb_flush(m_connection);
 }
 
 WindowXCB::WindowXCB(const WindowXCBOpenInfo& windowXCBOpenInfo)
-    : m_connection(windowXCBOpenInfo.connection),
-      m_window(windowXCBOpenInfo.window),
-      m_deleteAtom(0),
-      m_width(0),
-      m_height(0),
-      m_minimized(false),
-      m_destroyRequired(false) {
+    : m_connection(windowXCBOpenInfo.connection)
+    , m_window(windowXCBOpenInfo.window)
+    , m_deleteAtom(0)
+    , m_width(0)
+    , m_height(0)
+    , m_minimized(false)
+    , m_destroyRequired(false)
+    , m_mapped(false) {
     if (!m_connection || m_window == XCB_WINDOW_NONE) {
-        return;
+        throw std::runtime_error("Invalid XCB connection or window handle provided to WindowXCB.");
     }
 
     // Query the geometry of the externally created window
-    xcb_get_geometry_cookie_t geometry_cookie = xcb_get_geometry(m_connection, m_window);
-    xcb_get_geometry_reply_t* geometry_reply = xcb_get_geometry_reply(m_connection, geometry_cookie, nullptr);
+    xcb_get_geometry_cookie_t geometryCookie = xcb_get_geometry(m_connection, m_window);
+    xcb_get_geometry_reply_t* geometryReply = xcb_get_geometry_reply(m_connection, geometryCookie, nullptr);
 
-    if (geometry_reply) {
-        m_width = geometry_reply->width;
-        m_height = geometry_reply->height;
-        free(geometry_reply);
+    if (geometryReply) {
+        m_width = geometryReply->width;
+        m_height = geometryReply->height;
+        free(geometryReply);
     }
 
     // Setup WM protocols for the externally created window
@@ -264,6 +329,7 @@ WindowXCB::WindowXCB(const WindowXCBOpenInfo& windowXCBOpenInfo)
 
 WindowXCB::~WindowXCB() {
     if (m_window != XCB_WINDOW_NONE && m_destroyRequired && m_connection) {
+        xcb_unmap_window(m_connection, m_window);
         xcb_destroy_window(m_connection, m_window);
         xcb_flush(m_connection);
     }
@@ -274,78 +340,14 @@ void WindowXCB::setup_wm_protocols() {
         return;
     }
 
-    // Query the WM_DELETE_WINDOW atom
-    xcb_intern_atom_cookie_t delete_cookie = xcb_intern_atom(
-        m_connection,
-        0,
-        strlen("WM_DELETE_WINDOW"),
-        "WM_DELETE_WINDOW"
-    );
-
-    xcb_intern_atom_cookie_t protocols_cookie = xcb_intern_atom(
-            m_connection,
-            1,
-            strlen("WM_PROTOCOLS"),
-            "WM_PROTOCOLS"
-        );
-
-    xcb_intern_atom_reply_t* delete_reply = xcb_intern_atom_reply(m_connection, delete_cookie, nullptr);
-
-    xcb_intern_atom_reply_t* protocols_reply = xcb_intern_atom_reply(m_connection, protocols_cookie, nullptr);
-
-    if (delete_reply) {
-        m_deleteAtom = delete_reply->atom;
-
-        // Set the WM_PROTOCOLS property to include WM_DELETE_WINDOW
-
-        if (protocols_reply) {
-            xcb_change_property(
-                m_connection,
-                XCB_PROP_MODE_REPLACE,
-                m_window,
-                protocols_reply->atom,
-                XCB_ATOM_ATOM,
-                32,
-                1,
-                &m_deleteAtom
-            );
-            free(protocols_reply);
-        }
-
-        free(delete_reply);
+    m_deleteAtom = detail::intern_atom(m_connection, "WM_DELETE_WINDOW");
+    try {
+        const auto protocolAtom = detail::intern_atom(m_connection, "WM_PROTOCOLS", 1);
+        xcb_change_property(m_connection, XCB_PROP_MODE_REPLACE, m_window, protocolAtom, XCB_ATOM_ATOM, 32, 1, &m_deleteAtom);
+    } catch (const std::runtime_error&) {
+        // If WM_PROTOCOLS is not supported, we can't set up the delete protocol
+        m_deleteAtom = 0;
     }
-}
-
-void WindowXCB::setup_properties() {
-    if (!m_connection || m_window == XCB_WINDOW_NONE) {
-        return;
-    }
-
-    // Set the window title
-    const char* title = "WindowXCB";
-    xcb_change_property(
-        m_connection,
-        XCB_PROP_MODE_REPLACE,
-        m_window,
-        XCB_ATOM_WM_NAME,
-        XCB_ATOM_STRING,
-        8,
-        strlen(title),
-        title
-    );
-
-    // Set the window class
-    const char* window_class = "WindowXCB\0duk-window";
-    xcb_change_property(
-        m_connection,
-        XCB_PROP_MODE_REPLACE,
-        m_window,
-        XCB_ATOM_WM_CLASS,
-        XCB_ATOM_STRING,
-        8,
-        strlen(window_class),
-        window_class
-    );
 }
 
 uint32_t WindowXCB::width() const {
@@ -370,23 +372,28 @@ bool WindowXCB::valid() const {
 
 void WindowXCB::show() {
     if (m_window != XCB_WINDOW_NONE && m_connection) {
-        xcb_map_window(m_connection, m_window);
+        if (!m_mapped) {
+            xcb_map_window(m_connection, m_window);
+            m_mapped = true;
+        }
+        detail::request_change_state(m_connection, m_window, m_screen->root, m_changeStateAtom, 1);// NormalState
+        detail::request_activate(m_connection, m_window, m_screen->root, detail::intern_atom(m_connection, "_NET_ACTIVE_WINDOW"));
         xcb_flush(m_connection);
     }
 }
 
 void WindowXCB::hide() {
     if (m_window != XCB_WINDOW_NONE && m_connection) {
-        xcb_unmap_window(m_connection, m_window);
+        detail::request_change_state(m_connection, m_window, m_screen->root, m_changeStateAtom, 3);// IconicState
         xcb_flush(m_connection);
     }
 }
 
 void WindowXCB::close() {
     if (m_window != XCB_WINDOW_NONE && m_connection) {
-         window_destroy_event();
-         xcb_destroy_window(m_connection, m_window);
-         xcb_flush(m_connection);
+        window_destroy_event();
+        xcb_destroy_window(m_connection, m_window);
+        xcb_flush(m_connection);
     }
 }
 
@@ -423,8 +430,9 @@ void WindowXCB::handle_motion_notify(const xcb_motion_notify_event_t* event) {
 
 void WindowXCB::handle_enter_notify(const xcb_enter_notify_event_t* event) {
     // Ignore enters caused by grabs or pointer warps
-    if (event->mode != XCB_NOTIFY_MODE_NORMAL)
+    if (event->mode != XCB_NOTIFY_MODE_NORMAL) {
         return;
+    }
     // Ignore transitions from child → parent
     if (event->detail == XCB_NOTIFY_DETAIL_INFERIOR) {
         return;
@@ -434,8 +442,9 @@ void WindowXCB::handle_enter_notify(const xcb_enter_notify_event_t* event) {
 
 void WindowXCB::handle_leave_notify(const xcb_leave_notify_event_t* event) {
     // Ignore leaves caused by grabs or pointer warps
-    if (event->mode != XCB_NOTIFY_MODE_NORMAL)
+    if (event->mode != XCB_NOTIFY_MODE_NORMAL) {
         return;
+    }
     // Ignore transitions from child → parent
     if (event->detail == XCB_NOTIFY_DETAIL_INFERIOR) {
         return;
@@ -455,10 +464,10 @@ void WindowXCB::handle_button_press(const xcb_button_press_event_t* event) {
             mouse_button_event(MouseButton::RIGHT, KeyAction::PRESS);
             break;
         case 4:
-            mouse_wheel_movement_event(detail::convert_modifiers(event->state), 1); // Scroll up
+            mouse_wheel_movement_event(detail::convert_modifiers(event->state), 1);// Scroll up
             break;
         case 5:
-            mouse_wheel_movement_event(detail::convert_modifiers(event->state), -1); // Scroll down
+            mouse_wheel_movement_event(detail::convert_modifiers(event->state), -1);// Scroll down
             break;
         default:
             break;
@@ -499,8 +508,6 @@ void WindowXCB::handle_key_release(const xcb_key_release_event_t* event) {
     const auto mods = detail::convert_modifiers(event->state);
     const auto key = detail::convert_key(sym);
     key_event(key, mods, KeyAction::RELEASE);
-
 }
 
 }// namespace duk::platform
-

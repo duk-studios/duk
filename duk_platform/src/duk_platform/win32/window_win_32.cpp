@@ -318,10 +318,10 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo)
     int screenWidth = GetSystemMetrics(SM_CXSCREEN);
     int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-    m_hwnd = CreateWindowEx(0,                                                 // Optional window styles.
-                            m_windowClassEntry->className.c_str(),             // Window class
-                            windowWin32CreateInfo.windowCreateInfo.windowTitle,// Window text
-                            style,                                             // Window style
+    m_hwnd = CreateWindowEx(0,                                           // Optional window styles.
+                            m_windowClassEntry->className.c_str(),       // Window class
+                            windowWin32CreateInfo.windowCreateInfo.title,// Window text
+                            style,                                       // Window style
 
                             // Size and position
                             CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,

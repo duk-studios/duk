@@ -7,16 +7,20 @@
 
 #include <duk_event/event.h>
 #include <duk_platform/key_codes.h>
-#include <duk_platform/window_error.h>
-#include <cstdint>
 #include <duk_math/math.h>
 
 namespace duk::platform {
 
+enum class WindowStyle {
+    STANDARD = 0,
+    FULLSCREEN = 1
+};
+
 struct WindowCreateInfo {
-    const char* windowTitle;
+    const char* title;
     uint32_t width;
     uint32_t height;
+    WindowStyle style;
 };
 
 class Window {

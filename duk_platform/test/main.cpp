@@ -10,6 +10,7 @@ int main() {
     duk::event::Listener listener;
 
     duk::platform::WindowCreateInfo windowCreateInfo = {"MyWindow", 640, 720};
+    windowCreateInfo.style = duk::platform::WindowStyle::FULLSCREEN;
 
     std::cout << "Creating window" << std::endl;
 
@@ -66,8 +67,14 @@ int main() {
         std::cout << "My mouse wheel fwKeys: " << fwKeys << ", my mouse wheel zDelta: " << zDelta << std::endl;
     });
 
-    listener.listen(window->key_event, [](duk::platform::Keys key, duk::platform::KeyModifiers::Mask mods, duk::platform::KeyAction action) {
+    listener.listen(window->key_event, [window](duk::platform::Keys key, duk::platform::KeyModifiers::Mask mods, duk::platform::KeyAction action) {
         std::cout << "I pressed the key: " << static_cast<uint32_t>(key) << std::endl;
+        if (key == duk::platform::Keys::H) {
+            window->hide();
+        }
+        if (key == duk::platform::Keys::ESC) {
+            window->close();
+        }
     });
 
     window->show();

@@ -15,6 +15,7 @@ struct Settings {
     duk::resource::Id scene;
     duk::resource::LoadMode loadMode;
     glm::ivec2 resolution;
+    bool fullscreen;
     std::vector<std::string> resourceExtensions;
 };
 
@@ -28,7 +29,8 @@ struct Type<duk::engine::Settings> : Class<duk::engine::Settings,
     Member<"name", &duk::engine::Settings::name>,
     Member<"scene", &duk::engine::Settings::scene>,
     Member<"resolution", &duk::engine::Settings::resolution>,
-    Member<"resourceExtensions", &duk::engine::Settings::resourceExtensions>> {
+    Member<"resourceExtensions", &duk::engine::Settings::resourceExtensions>,
+    Member<"fullscreen", &duk::engine::Settings::fullscreen>> {
 };
 
 // clang-format on

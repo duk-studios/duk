@@ -17,13 +17,12 @@ class ConsoleXCB;
 class CursorXCB;
 
 struct PlatformXCBCreateInfo {
-    const char* displayName = nullptr; // Optional display name (e.g., ":0")
-    int screenNumber = 0; // Optional screen number (default is 0)
+    const char* displayName = nullptr;// Optional display name (e.g., ":0")
+    int screenNumber = 0;             // Optional screen number (default is 0)
 };
 
 class PlatformXCB : public Platform {
 public:
-
     PlatformXCB(const PlatformXCBCreateInfo& platformXCBCreateInfo = {});
 
     ~PlatformXCB() override;
@@ -54,7 +53,6 @@ private:
 
     void process_event(xcb_generic_event_t* event);
 };
-
 
 }// namespace duk::platform
 

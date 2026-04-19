@@ -86,14 +86,8 @@ xcb_connection_t* PlatformXCB::xcb_connection() const {
 }
 
 WindowXCB* PlatformXCB::get_window_ptr(xcb_window_t handle) {
-    auto cookie = xcb_get_property(
-        m_connection,
-        0,
-        handle,
-        m_windowPtrAtom,
-        XCB_ATOM_CARDINAL,
-        0,
-        2 // We stored the pointer as two 32-bit values (64 bits total)
+    auto cookie = xcb_get_property(m_connection, 0, handle, m_windowPtrAtom, XCB_ATOM_CARDINAL, 0,
+                                   2// We stored the pointer as two 32-bit values (64 bits total)
     );
     auto reply = xcb_get_property_reply(m_connection, cookie, nullptr);
     if (!reply || reply->format == 0) {
@@ -107,20 +101,14 @@ WindowXCB* PlatformXCB::get_window_ptr(xcb_window_t handle) {
 
 void PlatformXCB::set_window_ptr(xcb_window_t handle, WindowXCB* window) {
     uint64_t data = reinterpret_cast<uint64_t>(window);
-    xcb_change_property(
-        m_connection,
-        XCB_PROP_MODE_REPLACE,
-        handle,
-        m_windowPtrAtom,
-        XCB_ATOM_CARDINAL,
-        32, // Store as 32-bit chunks
-        2,  // Two 32-bit values (64 bits total)
-        &data
-        );
+    xcb_change_property(m_connection, XCB_PROP_MODE_REPLACE, handle, m_windowPtrAtom, XCB_ATOM_CARDINAL,
+                        32,// Store as 32-bit chunks
+                        2, // Two 32-bit values (64 bits total)
+                        &data);
 }
 
 void PlatformXCB::process_event(xcb_generic_event_t* event) {
-    const uint8_t event_type = event->response_type & ~0x80; // Mask out the highest bit
+    const uint8_t event_type = event->response_type & ~0x80;// Mask out the highest bit
 
     switch (event_type) {
         case XCB_CLIENT_MESSAGE: {
@@ -197,4 +185,3 @@ xcb_screen_t* PlatformXCB::xcb_screen() const {
 }
 
 }// namespace duk::platform
-

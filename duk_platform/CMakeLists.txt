@@ -28,7 +28,6 @@ set(DUK_PLATFORM_HEADERS
         include/duk_platform/key_codes.h
         include/duk_platform/platform.h
         include/duk_platform/window.h
-        include/duk_platform/window_error.h
         $<$<PLATFORM_ID:Windows>:${DUK_PLATFORM_HEADERS_WIN32}>
         $<$<PLATFORM_ID:Linux>:${DUK_PLATFORM_HEADERS_LINUX}>
 )
@@ -38,7 +37,6 @@ set(DUK_PLATFORM_SOURCES
         src/duk_platform/cursor.cpp
         src/duk_platform/platform.cpp
         src/duk_platform/window.cpp
-        src/duk_platform/window_error.cpp
         $<$<PLATFORM_ID:Windows>:${DUK_PLATFORM_SOURCES_WIN32}>
         $<$<PLATFORM_ID:Linux>:${DUK_PLATFORM_SOURCES_LINUX}>
 )
