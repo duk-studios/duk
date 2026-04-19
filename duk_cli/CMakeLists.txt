@@ -1,9 +1,3 @@
-
-if (NOT MSVC)
-        set(CMAKE_EXE_LINKER_FLAGS "-static")
-endif ()
-
-
 set(DUK_CLI_HEADERS
         include/duk_cli/command_line.h
         include/duk_cli/file_generator.h
