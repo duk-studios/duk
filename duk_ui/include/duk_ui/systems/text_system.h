@@ -16,7 +16,7 @@ class TextUpdateSystem : public duk::system::System {
 public:
     using TextRendererEnterEvent = objects::ComponentEnterEventT<Text>;
 
-    void attach();
+    void attach() override;
 
     void update() override;
 

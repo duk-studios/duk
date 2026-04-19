@@ -52,12 +52,12 @@ public:
         }
     }
 
-    void construct(uint32_t index) {
+    void construct(uint32_t index) override {
         auto ptr = get(index);
         ::new (ptr) T();
     }
 
-    void destruct(uint32_t index) {
+    void destruct(uint32_t index) override {
         auto ptr = get(index);
         ptr->~T();
     }
