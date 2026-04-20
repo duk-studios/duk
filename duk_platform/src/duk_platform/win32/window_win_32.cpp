@@ -295,6 +295,7 @@ WindowClassEntry::WindowClassEntry(const WindowWin32CreateInfo& windowWin32Creat
     windowClass.hInstance = windowWin32CreateInfo.instance;
     windowClass.lpszClassName = className.c_str();
     windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+    windowClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     RegisterClass(&windowClass);
 }
 
