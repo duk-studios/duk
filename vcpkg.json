@@ -1,9 +1,9 @@
 {
-  "name" : "duk",
-  "version" : "0.17.1",
+  "name": "duk",
+  "version": "0.18.0",
   "description": "Duk is a 3D game engine written in C++",
   "license": "MIT",
-  "dependencies" : [
+  "dependencies": [
     "miniaudio",
     "fmt",
     "volk",
