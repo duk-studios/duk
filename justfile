@@ -2,6 +2,8 @@ python := if os() == "windows" { "python" } else { "python3" }
 
 format:
   {{python}} scripts/format.py
+release:
+  {{python}} scripts/release.py
 convert_animation input output:
   {{python}} scripts/convert_animation.py {{input}} {{output}}
 convert_objects input:
