@@ -8,6 +8,8 @@
 #include <duk_platform/platform.h>
 #include <memory>
 
+#include <Windows.h>
+
 namespace duk::platform {
 
 class ConsoleWin32;

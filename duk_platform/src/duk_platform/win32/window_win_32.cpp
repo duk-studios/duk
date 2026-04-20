@@ -341,7 +341,7 @@ WindowWin32::WindowWin32(const WindowWin32CreateInfo& windowWin32CreateInfo)
         winWidth = rect.right - rect.left;
         winHeight = rect.bottom - rect.top;
 
-        if (createInfo.x != WINDOW_POSITION_DEFAULT && createInfo.y != WINDOW_POSITION_DEFAULT) {
+        if (createInfo.x != kDefaultWindowPosition && createInfo.y != kDefaultWindowPosition) {
             posX = createInfo.x;
             posY = createInfo.y;
         } else {
