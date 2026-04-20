@@ -6,7 +6,23 @@ on:
   pull_request:
     branches: [ "develop" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install clang-format 16.0.6
+      run: pip install clang-format==16.0.6
+
+    - name: Check formatting
+      run: python3 scripts/format.py --check --verbose
+
   build:
     runs-on: ${{ matrix.os }}
 
@@ -29,17 +45,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Install LLVM & clang-format 16.0.6
-      uses: KyleMayes/install-llvm-action@v2
-      with:
-        version: "16.0.6"
-
     - name: Install Ninja (Linux)
       if: runner.os == 'Linux'
       run: sudo apt-get install -y ninja-build
-
-    - name: Check formatting
-      run: ${{ matrix.python }} scripts/format.py --check --verbose
 
     - name: Setup vcpkg
       uses: friendlyanon/setup-vcpkg@v1
@@ -53,4 +61,3 @@ jobs:
 
     - name: Run tests
       run: ctest --preset ${{ matrix.test-preset }}
-
