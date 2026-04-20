@@ -21,9 +21,9 @@ VulkanCommandBuffer::VulkanCommandBuffer(const VulkanCommandBufferCreateInfo& co
               [this](const auto& params) {
                   submit(params);
               },
-              true, true, commandBufferCreateInfo.frameCount, commandBufferCreateInfo.currentFramePtr, commandBufferCreateInfo.device)
+              true, true, commandBufferCreateInfo.imageCount, commandBufferCreateInfo.currentFramePtr, commandBufferCreateInfo.device)
     , m_currentPipelineLayout(VK_NULL_HANDLE) {
-    m_commandBuffers.resize(commandBufferCreateInfo.frameCount);
+    m_commandBuffers.resize(commandBufferCreateInfo.imageCount);
     for (auto& commandBuffer: m_commandBuffers) {
         commandBuffer = m_commandQueue->allocate_command_buffer();
     }

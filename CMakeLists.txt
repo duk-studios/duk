@@ -2,12 +2,13 @@ cmake_minimum_required(VERSION 3.24)
 
 set(DUK_AS_SOURCE TRUE)
 
-option(DUK_BUILD_SAMPLE "Enables building of duk_sample" OFF)
+option(DUK_BUILD_SAMPLES "Enables building of interactive samples (duk_*/samples)" OFF)
 option(DUK_BUILD_TESTS "Enables building of tests" OFF)
 
 if (NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 23)
 endif ()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(duk VERSION 0.17.1)
 
@@ -25,6 +26,13 @@ find_package(grapphs CONFIG REQUIRED)
 find_package(spirv-reflect CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(Boost REQUIRED COMPONENTS type_index)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(XCB REQUIRED xcb xcb-keysyms xcb-icccm xcb-cursor xcb-render xcb-renderutil xcb-image xcb-shm xcb-util xcb-randr)
+endif ()
+
 if (DUK_BUILD_TESTS)
     find_package(Catch2 CONFIG REQUIRED)
     include(CTest)
@@ -58,7 +66,7 @@ add_subdirectory(duk_cli)
 add_subdirectory(duk_api)
 add_subdirectory(duk_runtime)
 
-if (DUK_BUILD_SAMPLE)
+if (DUK_BUILD_SAMPLES)
     include(duk-pack)
     add_subdirectory(duk_sample)
 

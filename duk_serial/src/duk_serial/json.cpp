@@ -28,19 +28,19 @@ void JsonPrimitiveValue<unsigned>::read(const rapidjson::Value& json, uint32_t& 
     value = json.GetUint();
 }
 
-void JsonPrimitiveValue<long long>::write(rapidjson::Document& document, rapidjson::Value& json, const int64_t& value) {
+void JsonPrimitiveValue<int64_t>::write(rapidjson::Document& document, rapidjson::Value& json, const int64_t& value) {
     json.SetInt64(value);
 }
 
-void JsonPrimitiveValue<long long>::read(const rapidjson::Value& json, int64_t& value) {
+void JsonPrimitiveValue<int64_t>::read(const rapidjson::Value& json, int64_t& value) {
     value = json.GetInt64();
 }
 
-void JsonPrimitiveValue<unsigned long long>::write(rapidjson::Document& document, rapidjson::Value& json, const uint64_t& value) {
+void JsonPrimitiveValue<uint64_t>::write(rapidjson::Document& document, rapidjson::Value& json, const uint64_t& value) {
     json.SetUint64(value);
 }
 
-void JsonPrimitiveValue<unsigned long long>::read(const rapidjson::Value& json, uint64_t& value) {
+void JsonPrimitiveValue<uint64_t>::read(const rapidjson::Value& json, uint64_t& value) {
     value = json.GetUint64();
 }
 

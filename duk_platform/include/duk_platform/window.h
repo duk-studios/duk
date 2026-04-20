@@ -5,18 +5,30 @@
 #ifndef DUK_PLATFORM_WINDOW_H
 #define DUK_PLATFORM_WINDOW_H
 
+#include <climits>
 #include <duk_event/event.h>
 #include <duk_platform/key_codes.h>
-#include <duk_platform/window_error.h>
-#include <cstdint>
 #include <duk_math/math.h>
 
 namespace duk::platform {
 
+class Cursor;
+
+enum class WindowStyle {
+    STANDARD = 0,
+    FULLSCREEN = 1
+};
+
+/// Sentinel value meaning "let the platform choose a default position".
+static constexpr int32_t kDefaultWindowPosition = INT32_MIN;
+
 struct WindowCreateInfo {
-    const char* windowTitle;
+    const char* title;
     uint32_t width;
     uint32_t height;
+    WindowStyle style;
+    int32_t x = kDefaultWindowPosition;
+    int32_t y = kDefaultWindowPosition;
 };
 
 class Window {
@@ -24,13 +36,17 @@ public:
     using CloseEvent = duk::event::EventVoid;
     using DestroyEvent = duk::event::EventVoid;
     using ResizeEvent = duk::event::EventT<uint32_t, uint32_t>;
-    using MouseMovement = duk::event::EventT<uint32_t, uint32_t>;
+    using MouseMovement = duk::event::EventT<int32_t, int32_t>;
+    using MouseEnterEvent = duk::event::EventT<int32_t, int32_t>;
+    using MouseLeaveEvent = duk::event::EventT<int32_t, int32_t>;
     using MouseWheelMovementEvent = duk::event::EventT<KeyModifiers::Mask, int16_t>;
     using MouseButtonEvent = duk::event::EventT<MouseButton, KeyAction>;
     using KeyEvent = duk::event::EventT<Keys, KeyModifiers::Mask, KeyAction>;
 
 public:
     virtual ~Window();
+
+    virtual Cursor* cursor() = 0;
 
     DUK_NO_DISCARD virtual uint32_t width() const = 0;
 
@@ -48,7 +64,6 @@ public:
 
     virtual void close() = 0;
 
-public:
     CloseEvent window_close_event;
 
     DestroyEvent window_destroy_event;
@@ -56,6 +71,10 @@ public:
     ResizeEvent window_resize_event;
 
     MouseMovement mouse_movement_event;
+
+    MouseEnterEvent mouse_enter_event;
+
+    MouseLeaveEvent mouse_leave_event;
 
     MouseButtonEvent mouse_button_event;
 

@@ -154,6 +154,31 @@ TEST_CASE("Basic type information can be retrieved", "[type]") {
         CHECK(visitedElements[2] == "three");
     }
 
+    SECTION("Type names do not carry MSVC-style class/struct/enum prefixes") {
+        using namespace foo;
+
+        // Struct type: must not start with "struct"
+        auto barDescription = duk::type::describe<Bar>();
+        CHECK(barDescription.name() == "foo::Bar");
+        CHECK(barDescription.name().find("struct") == std::string_view::npos);
+
+        // Enum type: must not start with "enum"
+        auto enumDescription = duk::type::describe<DummyEnum>();
+        CHECK(enumDescription.name() == "foo::DummyEnum");
+        CHECK(enumDescription.name().find("enum") == std::string_view::npos);
+
+        // STL container type: must not contain "class" prefix
+        auto vecDescription = duk::type::describe<std::vector<int>>();
+        CHECK(vecDescription.name() == "std::vector<int>");
+        CHECK(vecDescription.name().find("class") == std::string_view::npos);
+
+        // Nested template: must not contain any type-kind prefix
+        auto vecBarDescription = duk::type::describe<std::vector<Bar>>();
+        CHECK(vecBarDescription.name() == "std::vector<foo::Bar>");
+        CHECK(vecBarDescription.name().find("class") == std::string_view::npos);
+        CHECK(vecBarDescription.name().find("struct") == std::string_view::npos);
+    }
+
     SECTION("We can describe enums and query values and their names") {
         using namespace foo;
         constexpr auto enumDescription = duk::type::describe<DummyEnum>();

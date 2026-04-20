@@ -1,5 +1,6 @@
 {
     "name": "Duk Sample",
     "scene": 1000014,
-    "resolution": "1280;720"
+    "resolution": "2560;1440",
+    "fullscreen": true
 }

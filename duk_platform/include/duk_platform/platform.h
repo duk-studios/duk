@@ -5,7 +5,6 @@
 #ifndef DUK_PLATFORM_PLATFORM_H
 #define DUK_PLATFORM_PLATFORM_H
 
-#include <duk_platform/cursor.h>
 #include <duk_platform/console.h>
 #include <duk_platform/window.h>
 
@@ -14,8 +13,6 @@ namespace duk::platform {
 class Platform {
 public:
     virtual ~Platform();
-
-    virtual Cursor* cursor() = 0;
 
     virtual Console* console() = 0;
 
@@ -27,7 +24,7 @@ public:
 };
 
 // creates the default platform object for this platform
-extern std::unique_ptr<Platform> create_default_platform();
+extern std::unique_ptr<Platform> create_platform();
 
 }// namespace duk::platform
 

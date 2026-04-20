@@ -41,6 +41,7 @@
       <file path="$PROJECT_DIR$/scripts" />
     </sourceRoots>
     <excludeRoots>
+      <file path="$PROJECT_DIR$/.duk/builds" />
       <file path="$PROJECT_DIR$/install" />
       <file path="$PROJECT_DIR$/venv" />
     </excludeRoots>

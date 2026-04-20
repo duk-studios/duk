@@ -7,14 +7,15 @@
 
 #include <string>
 #include <memory>
+#include <boost/type_index.hpp>
 
 namespace duk::type {
 
-std::string name_of(const std::type_info& info);
+std::string name_of(const boost::typeindex::type_index& info);
 
 template<typename T>
 const std::string& name_of() {
-    static const std::string typeName = name_of(typeid(T));
+    static const std::string typeName = name_of(boost::typeindex::type_id<T>());
     return typeName;
 }
 

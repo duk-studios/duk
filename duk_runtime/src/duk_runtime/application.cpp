@@ -56,9 +56,12 @@ Application::Application(const ApplicationCreateInfo& applicationCreateInfo)
     const auto settings = detail::load_settings();
 
     duk::platform::WindowCreateInfo windowCreateInfo = {};
-    windowCreateInfo.windowTitle = settings.name.c_str();
+    windowCreateInfo.title = settings.name.c_str();
     windowCreateInfo.width = settings.resolution.x;
     windowCreateInfo.height = settings.resolution.y;
+    if (settings.fullscreen) {
+        windowCreateInfo.style = duk::platform::WindowStyle::FULLSCREEN;
+    }
 
     m_window = m_platform->create_window(windowCreateInfo);
 

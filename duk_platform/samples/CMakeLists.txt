@@ -1,0 +1,2 @@
+add_subdirectory(multi_window)
+add_subdirectory(fullscreen)

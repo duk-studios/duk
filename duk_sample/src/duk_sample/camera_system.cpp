@@ -3,7 +3,8 @@
 //
 
 #include <duk_engine/context.h>
-#include <duk_platform/platform.h>
+#include <duk_platform/cursor.h>
+#include <duk_platform/window.h>
 #include <duk_renderer/components/camera.h>
 #include <duk_renderer/components/transform.h>
 #include <duk_sample/camera_system.h>
@@ -17,10 +18,10 @@ namespace detail {
 static glm::vec3 input_rotation_direction(const duk::engine::Input* input, duk::platform::Cursor* cursor) {
     glm::vec3 direction(0);
     if (input->mouse(duk::platform::MouseButton::LEFT)) {
-        cursor->set_cursor(duk::platform::CursorType::DRAG);
+        cursor->set_type(duk::platform::CursorType::DRAG);
         direction = glm::vec3(-input->delta_mouse().y, -input->delta_mouse().x, 0);
     } else {
-        cursor->set_cursor(duk::platform::CursorType::ARROW);
+        cursor->set_type(duk::platform::CursorType::ARROW);
         if (input->key(duk::platform::Keys::UP_ARROW)) {
             direction = glm::vec3(-1, 0, 0);
         }
@@ -72,10 +73,10 @@ void CameraSystem::update() {
     auto input = global<duk::engine::Input>();
     auto timer = global<duk::tools::Timer>();
     auto audio = global<duk::audio::Audio>();
-    auto platform = global<duk::platform::Platform>();
+    auto window = global<duk::platform::Window>();
 
     const auto deltaTime = timer->delta_time();
-    auto cursor = platform->cursor();
+    auto cursor = window->cursor();
 
     auto transform = controller.component<duk::renderer::Transform>();
     if (!transform) {

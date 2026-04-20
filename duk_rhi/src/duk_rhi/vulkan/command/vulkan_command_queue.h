@@ -100,7 +100,7 @@ private:
     uint32_t m_index;
     const uint32_t* m_currentFramePtr;
     const uint32_t* m_currentImagePtr;
-    uint32_t m_frameCount;
+    uint32_t m_imageCount;
     VkQueue m_queue;
     VkCommandPool m_commandPool;
     std::unique_ptr<VulkanCommandBufferPool> m_commandBufferPool;

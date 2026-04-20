@@ -5,19 +5,15 @@
 #ifndef DUK_PLATFORM_CURSOR_H
 #define DUK_PLATFORM_CURSOR_H
 
-#include <windows.h>
-
 namespace duk::platform {
 
-struct CursorType {
-    enum Type {
-        ARROW,
-        DRAG,
-        TEXT,
-        BUSY,
-        WORKING_BACKGROUND,
-        UNAVAILABLE,
-    };
+enum class CursorType {
+    ARROW,
+    DRAG,
+    TEXT,
+    BUSY,
+    WORKING_BACKGROUND,
+    UNAVAILABLE,
 };
 
 class Cursor {
@@ -26,7 +22,7 @@ public:
 
     virtual void show(bool visible) = 0;
 
-    virtual void set_cursor(CursorType::Type cursorType) = 0;
+    virtual void set_type(CursorType type) = 0;
 };
 
 }// namespace duk::platform

@@ -16,7 +16,7 @@ set(DUK_SAMPLE_SOURCES
 if (WIN32)
     add_executable(duk.sample WIN32 ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
 else ()
-    add_executable(duk.sample {DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
+    add_executable(duk.sample ${DUK_SAMPLE_HEADERS} ${DUK_SAMPLE_SOURCES})
 endif ()
 
 target_include_directories(duk.sample

@@ -8,9 +8,10 @@
 #include <duk_platform/platform.h>
 #include <memory>
 
+#include <Windows.h>
+
 namespace duk::platform {
 
-class CursorWin32;
 class ConsoleWin32;
 
 struct PlatformWin32CreateInfo {
@@ -23,8 +24,6 @@ public:
 
     ~PlatformWin32() override;
 
-    Cursor* cursor() override;
-
     Console* console() override;
 
     std::shared_ptr<Window> create_window(const WindowCreateInfo& windowCreateInfo) override;
@@ -35,7 +34,6 @@ public:
 
 private:
     HINSTANCE m_instance;
-    std::unique_ptr<CursorWin32> m_cursor;
     std::unique_ptr<ConsoleWin32> m_console;
 };
 

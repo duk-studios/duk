@@ -6,7 +6,10 @@
 #define DUK_PLATFORM_CURSOR_WIN_32_H
 
 #include <duk_platform/cursor.h>
+#include <duk_macros/macros.h>
 #include <map>
+
+#include <windows.h>
 
 namespace duk::platform {
 
@@ -16,11 +19,14 @@ public:
 
     void show(bool visible) override;
 
-    void set_cursor(CursorType::Type cursorType) override;
+    void set_type(CursorType type) override;
+
+    DUK_NO_DISCARD HCURSOR current_handle() const;
 
 private:
-    std::map<CursorType::Type, HCURSOR> m_cursorTypes;
-    CursorType::Type m_currentCursorType = CursorType::ARROW;
+    std::map<CursorType, HCURSOR> m_cursorTypes;
+    CursorType m_currentCursorType = CursorType::ARROW;
+    bool m_visible = true;
 };
 
 }// namespace duk::platform
