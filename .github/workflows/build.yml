@@ -1,0 +1,56 @@
+name: Build
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            configure-preset: win-vs
+            build-preset: win-vs-release
+            test-preset: win-vs
+            python: python
+          - os: ubuntu-latest
+            configure-preset: linux-gcc
+            build-preset: linux-gcc-release
+            test-preset: linux-gcc
+            python: python3
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install LLVM & clang-format 16.0.6
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "16.0.6"
+
+    - name: Install Ninja (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt-get install -y ninja-build
+
+    - name: Check formatting
+      run: ${{ matrix.python }} scripts/format.py --check --verbose
+
+    - name: Setup vcpkg
+      uses: friendlyanon/setup-vcpkg@v1
+      with: { committish: 74e6536215718009aae747d86d84b78376bf9e09 }
+
+    - name: Configure CMake
+      run: cmake --preset ${{ matrix.configure-preset }}
+
+    - name: Build
+      run: cmake --build --preset ${{ matrix.build-preset }}
+
+    - name: Run tests
+      run: ctest --preset ${{ matrix.test-preset }}
+
