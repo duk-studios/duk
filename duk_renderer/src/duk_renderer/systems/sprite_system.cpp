@@ -12,11 +12,11 @@ void SpriteUpdateSystem::attach() {
 
 void SpriteUpdateSystem::update() {
     for (auto object: all_objects_with<duk::renderer::SpriteRenderer>()) {
-        duk::renderer::update_sprite_renderer(globals(), object.component<duk::renderer::SpriteRenderer>());
+        duk::renderer::update_sprite_renderer(*globals(), object.component<duk::renderer::SpriteRenderer>());
     }
 }
 
 void SpriteUpdateSystem::receive(const SpriteRendererEnterEvent& event) {
-    duk::renderer::update_sprite_renderer(globals(), event.component);
+    duk::renderer::update_sprite_renderer(*globals(), event.component);
 }
 }// namespace duk::renderer

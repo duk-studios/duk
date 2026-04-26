@@ -16,9 +16,9 @@ class SpriteMesh;
 
 class SpriteCache {
 public:
-    std::shared_ptr<Material> material_for(duk::tools::Globals* globals, Sprite* atlas);
+    std::shared_ptr<Material> material_for(const duk::tools::Globals& globals, const Sprite& sprite);
 
-    std::shared_ptr<SpriteMesh> mesh_for(duk::tools::Globals* globals, Sprite* atlas, uint32_t index);
+    std::shared_ptr<SpriteMesh> mesh_for(const duk::tools::Globals& globals, const Sprite& sprite, uint32_t index);
 
     void clear();
 
