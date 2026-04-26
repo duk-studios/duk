@@ -48,6 +48,30 @@ def convert_variable(variable):
 
     return new_variable
 
+def convert_value(value):
+    new_value = {
+        "sample": value.get("sample")
+    }
+
+    fields = {k: v for k, v in value.items() if k != "sample"}
+
+    if fields:
+        new_value["value"] = fields
+
+    return new_value
+
+def convert_property(property):
+    new_property = {
+        "type": property.get("type")
+    }
+    # Convert values
+    if "values" in property:
+        new_property["values"] = [
+            convert_value(val)
+            for val in property["values"]
+        ]
+
+    return new_property
 
 def convert_animation_json(input_file, output_file):
     """Convert animation JSON from old format to new format."""
@@ -74,22 +98,42 @@ def convert_animation_json(input_file, output_file):
             for var in data["variables"]
         ]
 
+    # Convert properties
+    if "properties" in data:
+        data["properties"] = [
+            convert_property(prop)
+            for prop in data["properties"]
+        ]
+
     # Write the new JSON
     with open(output_file, 'w') as f:
         json.dump(data, f, indent=2)
 
-    print(f"Conversion complete!")
-    print(f"Input: {input_file}")
-    print(f"Output: {output_file}")
+    print(f"Conversion complete: {input_file}")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print("Usage: python convert_animation.py <input_file> <output_file>")
+        print("       python convert_animation.py <directory>")
         sys.exit(1)
 
-    input_file = sys.argv[1]
-    output_file = sys.argv[2]
+    input_path = Path(sys.argv[1])
 
-    convert_animation_json(input_file, output_file)
+    if input_path.is_dir():
+        files = []
+        for pattern in ["**/*.ani", "**/*.anc"]:
+            files.extend(input_path.glob(pattern))
 
+        if not files:
+            print(f"No .ani or .anc files found in {input_path}", file=sys.stderr)
+            sys.exit(1)
+        print(f"Found {len(files)} file(s) to process")
+        for f in files:
+            convert_animation_json(f, f)
+        print(f"Successfully converted {len(files)} file(s)")
+    else:
+        if len(sys.argv) < 3:
+            print("Usage: python convert_animation.py <input_file> <output_file>")
+            sys.exit(1)
+        convert_animation_json(sys.argv[1], sys.argv[2])

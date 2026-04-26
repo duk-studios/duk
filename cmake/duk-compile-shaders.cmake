@@ -10,7 +10,7 @@ endif()
 
 set(DUK_GLSL_INCLUDE_DIRS)
 if (DUK_AS_SOURCE)
-    set(DUK_GLSL_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/duk_renderer/src/duk_renderer/shader/glsl/include")
+    set(DUK_GLSL_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/../duk_renderer/src/duk_renderer/shader/glsl/include")
     message(STATUS "GLSL include dir: ${DUK_GLSL_INCLUDE_DIRS} - using source duk (DUK_AS_SOURCE is defined)")
 else ()
     set(DUK_GLSL_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/glsl/include")

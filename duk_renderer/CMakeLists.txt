@@ -17,6 +17,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/components/sprite_renderer.h
         include/duk_renderer/components/transform.h
         include/duk_renderer/sprite/sprite.h
+        include/duk_renderer/sprite/sprite_builtins.h
         include/duk_renderer/sprite/sprite_cache.h
         include/duk_renderer/sprite/sprite_handler.h
         include/duk_renderer/sprite/sprite_mesh.h
@@ -75,6 +76,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/components/sprite_renderer.cpp
         src/duk_renderer/components/transform.cpp
         src/duk_renderer/sprite/sprite.cpp
+        src/duk_renderer/sprite/sprite_builtins.cpp
         src/duk_renderer/sprite/sprite_cache.cpp
         src/duk_renderer/sprite/sprite_handler.cpp
         src/duk_renderer/sprite/sprite_mesh.cpp

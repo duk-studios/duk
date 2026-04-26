@@ -36,6 +36,12 @@ ImageBuiltins::ImageBuiltins(const ImageBuiltinsCreateInfo& imageBuiltinsCreateI
         blackImageDataSource.update_hash();
         m_black = pools->insert(kBlackImageId, detail::create_image(rhi, commandQueue, &blackImageDataSource));
     }
+    {
+        duk::rhi::ImageDataSourceRGBA8U magentaImageDataSource(1, 1);
+        magentaImageDataSource.at(0, 0) = {255, 0, 255, 255};
+        magentaImageDataSource.update_hash();
+        m_magenta = pools->insert(kMagentaImageId, detail::create_image(rhi, commandQueue, &magentaImageDataSource));
+    }
 }
 
 duk::resource::Handle<Image> ImageBuiltins::white() const {
@@ -44,6 +50,10 @@ duk::resource::Handle<Image> ImageBuiltins::white() const {
 
 duk::resource::Handle<Image> ImageBuiltins::black() const {
     return m_black;
+}
+
+duk::resource::Handle<Image> ImageBuiltins::magenta() const {
+    return m_magenta;
 }
 
 }// namespace duk::renderer

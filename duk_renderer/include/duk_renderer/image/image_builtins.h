@@ -13,6 +13,7 @@ namespace duk::renderer {
 // 1 - 10,000 - reserved for built-in images
 static constexpr duk::resource::Id kWhiteImageId(1);
 static constexpr duk::resource::Id kBlackImageId(2);
+static constexpr duk::resource::Id kMagentaImageId(3);
 
 class Renderer;
 
@@ -30,9 +31,12 @@ public:
 
     DUK_NO_DISCARD duk::resource::Handle<Image> black() const;
 
+    DUK_NO_DISCARD duk::resource::Handle<Image> magenta() const;
+
 private:
     duk::resource::Handle<Image> m_white;
     duk::resource::Handle<Image> m_black;
+    duk::resource::Handle<Image> m_magenta;
 };
 
 }// namespace duk::renderer
