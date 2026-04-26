@@ -9,6 +9,7 @@
 #include <duk_renderer/shader/shader_pipeline_builtins.h>
 #include <duk_renderer/image/image_builtins.h>
 #include <duk_renderer/mesh/mesh_builtins.h>
+#include <duk_renderer/sprite/sprite_builtins.h>
 
 namespace duk::renderer {
 
@@ -31,11 +32,14 @@ public:
 
     MeshBuiltins* meshes() const;
 
+    SpriteBuiltins* sprites() const;
+
 private:
     std::unique_ptr<ShaderModuleBuiltins> m_shaderModules;
     std::unique_ptr<ShaderPipelineBuiltins> m_shaderPipelines;
     std::unique_ptr<ImageBuiltins> m_images;
     std::unique_ptr<MeshBuiltins> m_meshes;
+    std::unique_ptr<SpriteBuiltins> m_sprites;
 };
 
 }// namespace duk::renderer

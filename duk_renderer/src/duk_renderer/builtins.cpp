@@ -41,6 +41,13 @@ Builtins::Builtins(const BuiltinsCreateInfo& builtinsCreateInfo) {
 
         m_meshes = std::make_unique<MeshBuiltins>(meshBuiltinsCreateInfo);
     }
+    {
+        SpriteBuiltinsCreateInfo spriteBuiltinsCreateInfo = {};
+        spriteBuiltinsCreateInfo.pools = pools;
+        spriteBuiltinsCreateInfo.imageBuiltins = m_images.get();
+
+        m_sprites = std::make_unique<SpriteBuiltins>(spriteBuiltinsCreateInfo);
+    }
 }
 
 ShaderModuleBuiltins* Builtins::shader_modules() const {
@@ -57,6 +64,10 @@ ImageBuiltins* Builtins::images() const {
 
 MeshBuiltins* Builtins::meshes() const {
     return m_meshes.get();
+}
+
+SpriteBuiltins* Builtins::sprites() const {
+    return m_sprites.get();
 }
 
 }// namespace duk::renderer
