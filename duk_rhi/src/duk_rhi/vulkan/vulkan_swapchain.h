@@ -4,13 +4,12 @@
 #ifndef DUK_RHI_VULKAN_SWAPCHAIN_H
 #define DUK_RHI_VULKAN_SWAPCHAIN_H
 
-#include <duk_rhi/vulkan/command/vulkan_command.h>
 #include <duk_rhi/vulkan/vulkan_events.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
 
 #include <memory>
-#include <set>
+#include <vector>
 
 namespace duk {
 
@@ -20,61 +19,23 @@ class Window;
 
 namespace rhi {
 
+class Image;
 class VulkanSwapchainImage;
 
-struct VulkanImageAcquireCommandCreateInfo {
-    VkDevice device;
-    uint32_t frameCount;
-    const uint32_t* currentFramePtr;
-};
-
-class VulkanImageAcquireCommand : public Command {
-public:
-    explicit VulkanImageAcquireCommand(const VulkanImageAcquireCommandCreateInfo& commandCreateInfo);
-
-    void submit(const VulkanCommandParams& commandParams);
-
-    Submitter* submitter_ptr() override;
-
-private:
-    VulkanSubmitter m_submitter;
-};
-
-struct VulkanPresentCommandCreateInfo {
-    VkQueue presentQueue;
-    uint32_t* currentImagePtr;
-    bool* requiresRecreationPtr;
-    bool* ableToPresentPtr;
-    VulkanSwapchainCreateEvent* swapchainCreateEvent;
-};
-
-class VulkanPresentCommand : public Command {
-public:
-    explicit VulkanPresentCommand(const VulkanPresentCommandCreateInfo& commandCreateInfo);
-
-    void submit(const VulkanCommandParams& commandParams);
-
-    DUK_NO_DISCARD Submitter* submitter_ptr() override;
-
-private:
-    VkSwapchainKHR m_swapchain;
-    VkQueue m_presentQueue;
-    uint32_t* m_currentImagePtr;
-    bool* m_requiresRecreationPtr;
-    bool* m_ableToPresentPtr;
-    VulkanSubmitter m_submitter;
-    event::Listener m_listener;
+/// Per-frame binary semaphores owned by the swapchain for acquire/present.
+/// Fences for CPU-GPU synchronisation live in VulkanCommandContext.
+struct VulkanFrameSync {
+    VkSemaphore imageAvailableSemaphore{VK_NULL_HANDLE};
+    VkSemaphore renderFinishedSemaphore{VK_NULL_HANDLE};
 };
 
 struct VulkanSwapchainCreateInfo {
+    VkInstance instance;
     VkDevice device;
-    VkSurfaceKHR surface;
-    platform::Window* window;
     VulkanPhysicalDevice* physicalDevice;
+    platform::Window* window;
     VkQueue presentQueue;
-    VulkanPrepareFrameEvent* prepareFrameEvent;
-    uint32_t frameCount;
-    const uint32_t* currentFramePtr;
+    uint32_t framesInFlight;
 };
 
 class VulkanSwapchain {
@@ -83,51 +44,66 @@ public:
 
     ~VulkanSwapchain();
 
-    void create();
+    void recreate();
 
-    void clean();
+    // -----------------------------------------------------------------------
+    // Frame operations
+    // -----------------------------------------------------------------------
 
-    VulkanImageAcquireCommand* acquire_image_command();
+    /// Waits for the in-flight fence, acquires the next swapchain image, and
+    /// signals imageAvailableSemaphore. Returns the acquired image index.
+    uint32_t acquire_next_image(uint32_t frameIndex);
 
-    VulkanPresentCommand* present_command();
+    /// Submits vkQueuePresentKHR, waiting on renderFinishedSemaphore.
+    void present(uint32_t imageIndex, uint32_t frameIndex);
 
+    DUK_NO_DISCARD VulkanFrameSync& frame_sync(uint32_t frameIndex);
+
+    // -----------------------------------------------------------------------
+    // Accessors
+    // -----------------------------------------------------------------------
     DUK_NO_DISCARD const uint32_t* current_image_ptr() const;
-
     DUK_NO_DISCARD uint32_t image_count() const;
-
     DUK_NO_DISCARD VkExtent2D extent() const;
-
-    DUK_NO_DISCARD VulkanSwapchainImage* image() const;
+    DUK_NO_DISCARD VkSwapchainKHR handle() const;
+    DUK_NO_DISCARD Image* image() const;
+    DUK_NO_DISCARD VkSurfaceKHR vk_surface() const;
 
     DUK_NO_DISCARD VulkanSwapchainCreateEvent* create_event();
-
     DUK_NO_DISCARD VulkanSwapchainCleanEvent* clean_event();
 
 private:
-    void recreate_swapchain();
+    void create_platform_surface();
+    void create();
+    void clean();
+    void create_frame_sync();
+    void destroy_frame_sync();
 
 private:
-    VkDevice m_device;
-    VulkanPhysicalDevice* m_physicalDevice;
-    VkSurfaceKHR m_surface;
-    platform::Window* m_window;
-    VkQueue m_presentQueue;
-    VkSwapchainKHR m_swapchain;
+    VkInstance m_instance{VK_NULL_HANDLE};
+    VkDevice m_device{VK_NULL_HANDLE};
+    VulkanPhysicalDevice* m_physicalDevice{nullptr};
+    platform::Window* m_window{nullptr};
+    VkQueue m_presentQueue{VK_NULL_HANDLE};
+    uint32_t m_framesInFlight{0};
 
-    VkSurfaceFormatKHR m_surfaceFormat;
-    VkPresentModeKHR m_presentMode;
-    VkExtent2D m_extent;
+    VkSurfaceKHR m_surface{VK_NULL_HANDLE};
+    VkSwapchainKHR m_swapchain{VK_NULL_HANDLE};
 
-    duk::event::Listener m_listener;
+    VkSurfaceFormatKHR m_surfaceFormat{};
+    VkPresentModeKHR m_presentMode{};
+    VkExtent2D m_extent{};
 
     uint32_t m_currentImage{};
+    bool m_requiresRecreation{false};
+    bool m_ableToPresent{false};
+
     std::unique_ptr<VulkanSwapchainImage> m_image;
-    std::unique_ptr<VulkanImageAcquireCommand> m_acquireImageCommand;
-    std::unique_ptr<VulkanPresentCommand> m_presentCommand;
+    std::vector<VulkanFrameSync> m_frameSync;
+    duk::event::Listener m_listener;
+
     VulkanSwapchainCreateEvent m_swapchainCreateEvent;
     VulkanSwapchainCleanEvent m_swapchainCleanEvent;
-    bool m_requiresRecreation;
-    bool m_ableToPresent;
 };
 
 }// namespace rhi

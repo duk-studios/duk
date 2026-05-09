@@ -8,7 +8,16 @@
 
 #include <duk_platform/window.h>
 
+#if DUK_PLATFORM_IS_WINDOWS
+#include <duk_platform/win32/window_win_32.h>
+#elif DUK_PLATFORM_IS_LINUX
+#include <duk_platform/linux/window_xcb.h>
+#endif
+
 #include <duk_rhi/rhi_exception.h>
+
+#include <duk_macros/macros.h>
+
 #include <limits>
 #include <stdexcept>
 
@@ -49,135 +58,35 @@ VkExtent2D choose_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities, cons
 
     VkExtent2D actualExtent = {};
     actualExtent.width = std::clamp<uint32_t>(windowExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-
     actualExtent.height = std::clamp<uint32_t>(windowExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
     return actualExtent;
 }
+
 }// namespace detail
 
-VulkanImageAcquireCommand::VulkanImageAcquireCommand(const VulkanImageAcquireCommandCreateInfo& commandCreateInfo)
-    : m_submitter(
-              [](const auto&) {
-              },
-              true, false, commandCreateInfo.frameCount, commandCreateInfo.currentFramePtr, commandCreateInfo.device) {
-}
-
-void VulkanImageAcquireCommand::submit(const VulkanCommandParams& commandParams) {
-    // do nothing, as the image was already acquired at the start of the frame
-}
-
-Submitter* VulkanImageAcquireCommand::submitter_ptr() {
-    return &m_submitter;
-}
-
-VulkanPresentCommand::VulkanPresentCommand(const VulkanPresentCommandCreateInfo& commandCreateInfo)
-    : m_currentImagePtr(commandCreateInfo.currentImagePtr)
-    , m_presentQueue(commandCreateInfo.presentQueue)
-    , m_requiresRecreationPtr(commandCreateInfo.requiresRecreationPtr)
-    , m_ableToPresentPtr(commandCreateInfo.ableToPresentPtr)
-    , m_submitter(
-              [this](const auto& params) {
-                  submit(params);
-              },
-              false, false, 0, nullptr, VK_NULL_HANDLE) {
-    m_listener.listen(*commandCreateInfo.swapchainCreateEvent, [this](const auto& swapchainInfo) {
-        m_swapchain = swapchainInfo.swapchain;
-    });
-}
-
-void VulkanPresentCommand::submit(const VulkanCommandParams& commandParams) {
-    if (!(*m_ableToPresentPtr)) {
-        return;
-    }
-
-    auto waitDependency = commandParams.waitDependency;
-
-    VkPresentInfoKHR presentInfo = {};
-    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = &m_swapchain;
-    presentInfo.pImageIndices = m_currentImagePtr;
-    if (waitDependency.semaphoreCount > 0) {
-        presentInfo.pWaitSemaphores = waitDependency.semaphores;
-        presentInfo.waitSemaphoreCount = waitDependency.semaphoreCount;
-    }
-
-    auto result = vkQueuePresentKHR(m_presentQueue, &presentInfo);
-
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-        *m_requiresRecreationPtr = true;
-    } else if (result != VK_SUCCESS) {
-        throw std::runtime_error("failed to present swapchain image!");
-    }
-}
-
-Submitter* VulkanPresentCommand::submitter_ptr() {
-    return &m_submitter;
-}
-
 VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreateInfo)
-    : m_device(swapchainCreateInfo.device)
+    : m_instance(swapchainCreateInfo.instance)
+    , m_device(swapchainCreateInfo.device)
     , m_physicalDevice(swapchainCreateInfo.physicalDevice)
-    , m_surface(swapchainCreateInfo.surface)
     , m_window(swapchainCreateInfo.window)
     , m_presentQueue(swapchainCreateInfo.presentQueue)
-    , m_swapchain(VK_NULL_HANDLE)
-    , m_requiresRecreation(false) {
-    m_listener.listen(*swapchainCreateInfo.prepareFrameEvent, [this](uint32_t currentFrame) {
-        if (m_requiresRecreation) {
-            recreate_swapchain();
-        }
-
-        // we need to signal the semaphore of the acquire image command
-        // other commands might want to wait on this semaphore, but we need to get the current image index
-        // at the start of the frame, otherwise we will not be able to use the correct resources for this frame
-        auto submitter = m_acquireImageCommand->submitter<VulkanSubmitter>();
-
-        auto result = vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), submitter->semaphore(), VK_NULL_HANDLE, &m_currentImage);
-
-        // VK_ERROR_OUT_OF_DATE_KHR means that this swapchain can no longer be used to present
-        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            m_requiresRecreation = true;
-
-            // if we are not able to present, skip present on VulkanPresentCommand
-            m_ableToPresent = false;
-            return;
-        }
-
-        // VK_SUBOPTIMAL_KHR means that this swapchain can still be used to present, so we allow it for now
-        // and recreate the swapchain on the next frame
-        if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-            throw std::runtime_error("failed to acquire swapchain image");
-        }
-
-        m_ableToPresent = true;
-    });
+    , m_framesInFlight(swapchainCreateInfo.framesInFlight) {
+    create_platform_surface();
+    create_frame_sync();
+    create();
 
     m_listener.listen(m_window->window_resize_event, [this](auto, auto) {
         m_requiresRecreation = true;
     });
-
-    VulkanImageAcquireCommandCreateInfo imageAcquireCommandCreateInfo = {};
-    imageAcquireCommandCreateInfo.device = m_device;
-    imageAcquireCommandCreateInfo.frameCount = swapchainCreateInfo.frameCount;
-    imageAcquireCommandCreateInfo.currentFramePtr = swapchainCreateInfo.currentFramePtr;
-
-    m_acquireImageCommand = std::make_unique<VulkanImageAcquireCommand>(imageAcquireCommandCreateInfo);
-
-    VulkanPresentCommandCreateInfo presentCommandCreateInfo = {};
-    presentCommandCreateInfo.currentImagePtr = &m_currentImage;
-    presentCommandCreateInfo.presentQueue = m_presentQueue;
-    presentCommandCreateInfo.swapchainCreateEvent = &m_swapchainCreateEvent;
-    presentCommandCreateInfo.requiresRecreationPtr = &m_requiresRecreation;
-    presentCommandCreateInfo.ableToPresentPtr = &m_ableToPresent;
-
-    m_presentCommand = std::make_unique<VulkanPresentCommand>(presentCommandCreateInfo);
-
-    create();
 }
 
 VulkanSwapchain::~VulkanSwapchain() {
     clean();
+    destroy_frame_sync();
+    if (m_surface != VK_NULL_HANDLE) {
+        vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+        m_surface = VK_NULL_HANDLE;
+    }
 }
 
 void VulkanSwapchain::create() {
@@ -196,7 +105,6 @@ void VulkanSwapchain::create() {
 
     m_extent = detail::choose_swap_extent(surfaceDetails.capabilities, {m_window->width(), m_window->height()});
 
-    //Old code, should check if this is right
     auto imageCount = surfaceDetails.capabilities.minImageCount + 1;
     if (surfaceDetails.capabilities.maxImageCount > 0 && imageCount > surfaceDetails.capabilities.maxImageCount) {
         imageCount = surfaceDetails.capabilities.maxImageCount;
@@ -211,12 +119,9 @@ void VulkanSwapchain::create() {
     swapchainCreateInfo.imageExtent = m_extent;
     swapchainCreateInfo.imageArrayLayers = 1;
     swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-    //TODO: share images?
     swapchainCreateInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     swapchainCreateInfo.queueFamilyIndexCount = 0;
     swapchainCreateInfo.pQueueFamilyIndices = nullptr;
-
     swapchainCreateInfo.preTransform = surfaceDetails.capabilities.currentTransform;
     swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     swapchainCreateInfo.presentMode = m_presentMode;
@@ -258,12 +163,120 @@ void VulkanSwapchain::clean() {
     }
 }
 
-VulkanImageAcquireCommand* VulkanSwapchain::acquire_image_command() {
-    return m_acquireImageCommand.get();
+void VulkanSwapchain::recreate() {
+    vkDeviceWaitIdle(m_device);
+    clean();
+    create();
 }
 
-VulkanPresentCommand* VulkanSwapchain::present_command() {
-    return m_presentCommand.get();
+uint32_t VulkanSwapchain::acquire_next_image(uint32_t frameIndex) {
+    auto& sync = m_frameSync[frameIndex];
+
+
+    if (m_requiresRecreation && !m_window->minimized()) {
+        vkDeviceWaitIdle(m_device);
+        recreate();
+        m_requiresRecreation = false;
+    }
+
+    auto result = vkAcquireNextImageKHR(
+            m_device,
+            m_swapchain,
+            std::numeric_limits<uint64_t>::max(),
+            sync.imageAvailableSemaphore,
+            VK_NULL_HANDLE,
+            &m_currentImage);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        m_requiresRecreation = true;
+        m_ableToPresent = false;
+        return m_currentImage;
+    }
+
+    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        throw std::runtime_error("failed to acquire swapchain image");
+    }
+
+    m_ableToPresent = true;
+    return m_currentImage;
+}
+
+void VulkanSwapchain::present(uint32_t imageIndex, uint32_t frameIndex) {
+    if (!m_ableToPresent) {
+        return;
+    }
+
+    auto& sync = m_frameSync[frameIndex];
+
+    VkPresentInfoKHR presentInfo = {};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = &sync.renderFinishedSemaphore;
+    presentInfo.swapchainCount = 1;
+    auto swapchainHandle = m_swapchain;
+    presentInfo.pSwapchains = &swapchainHandle;
+    presentInfo.pImageIndices = &imageIndex;
+
+    auto result = vkQueuePresentKHR(m_presentQueue, &presentInfo);
+
+    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+        m_requiresRecreation = true;
+    } else if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to present swapchain image");
+    }
+}
+
+VulkanFrameSync& VulkanSwapchain::frame_sync(uint32_t frameIndex) {
+    return m_frameSync[frameIndex];
+}
+
+void VulkanSwapchain::create_platform_surface() {
+    DUK_ASSERT(m_window);
+#if DUK_PLATFORM_IS_WINDOWS
+    auto windowWin32 = dynamic_cast<platform::WindowWin32*>(m_window);
+    DUK_ASSERT(windowWin32);
+
+    VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo = {};
+    win32SurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+    win32SurfaceCreateInfo.hwnd = windowWin32->win32_window_handle();
+    win32SurfaceCreateInfo.hinstance = windowWin32->win32_instance_handle();
+
+    auto result = vkCreateWin32SurfaceKHR(m_instance, &win32SurfaceCreateInfo, nullptr, &m_surface);
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create VkSurfaceKHR with vkCreateWin32SurfaceKHR");
+    }
+#elif DUK_PLATFORM_IS_LINUX
+    auto windowXCB = dynamic_cast<platform::WindowXCB*>(m_window);
+    DUK_ASSERT(windowXCB);
+    VkXcbSurfaceCreateInfoKHR xcbSurfaceCreateInfo = {};
+    xcbSurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
+    xcbSurfaceCreateInfo.connection = windowXCB->xcb_connection();
+    xcbSurfaceCreateInfo.window = windowXCB->xcb_window_handle();
+    auto result = vkCreateXcbSurfaceKHR(m_instance, &xcbSurfaceCreateInfo, nullptr, &m_surface);
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create VkSurfaceKHR with vkCreateXcbSurfaceKHR");
+    }
+#endif
+}
+
+void VulkanSwapchain::create_frame_sync() {
+    m_frameSync.resize(m_framesInFlight);
+
+    VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+    semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    for (auto& sync: m_frameSync) {
+        vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &sync.imageAvailableSemaphore);
+        vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &sync.renderFinishedSemaphore);
+    }
+}
+
+void VulkanSwapchain::destroy_frame_sync() {
+    for (auto& sync: m_frameSync) {
+        vkDestroySemaphore(m_device, sync.imageAvailableSemaphore, nullptr);
+        vkDestroySemaphore(m_device, sync.renderFinishedSemaphore, nullptr);
+    }
+    m_frameSync.clear();
 }
 
 const uint32_t* VulkanSwapchain::current_image_ptr() const {
@@ -278,18 +291,16 @@ VkExtent2D VulkanSwapchain::extent() const {
     return m_extent;
 }
 
-VulkanSwapchainImage* VulkanSwapchain::image() const {
+VkSwapchainKHR VulkanSwapchain::handle() const {
+    return m_swapchain;
+}
+
+Image* VulkanSwapchain::image() const {
     return m_image.get();
 }
 
-void VulkanSwapchain::recreate_swapchain() {
-    if (m_window->minimized()) {
-        return;
-    }
-    vkDeviceWaitIdle(m_device);
-    clean();
-    create();
-    m_requiresRecreation = false;
+VkSurfaceKHR VulkanSwapchain::vk_surface() const {
+    return m_surface;
 }
 
 VulkanSwapchainCreateEvent* VulkanSwapchain::create_event() {
