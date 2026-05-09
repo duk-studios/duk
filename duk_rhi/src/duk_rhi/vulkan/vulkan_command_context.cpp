@@ -11,11 +11,13 @@
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
+#include <duk_rhi/image_data_source.h>
 
 #include <duk_tools/fixed_vector.h>
 
 #include <limits>
 #include <stdexcept>
+#include <vector>
 
 namespace duk::rhi {
 
@@ -47,6 +49,32 @@ static VkIndexType buffer_index_type(Buffer::Type type) {
         case Buffer::Type::INDEX_16: return VK_INDEX_TYPE_UINT16;
         case Buffer::Type::INDEX_32: return VK_INDEX_TYPE_UINT32;
         default:                     return VK_INDEX_TYPE_MAX_ENUM;
+    }
+}
+
+static VkImageUsageFlags image_usage_flags(Image::Usage usage) {
+    // Always include TRANSFER_DST so write_image() can be called on any image.
+    return convert_usage(usage) | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+}
+
+static VkImageAspectFlags image_aspect_flags(Image::Usage usage, PixelFormat format) {
+    switch (usage) {
+        case Image::Usage::COLOR_ATTACHMENT:
+            return VK_IMAGE_ASPECT_COLOR_BIT;
+        case Image::Usage::SAMPLED:
+        case Image::Usage::STORAGE:
+        case Image::Usage::SAMPLED_STORAGE:
+        case Image::Usage::DEPTH_STENCIL_ATTACHMENT:
+            if (format.is_depth()) {
+                VkImageAspectFlags flags = VK_IMAGE_ASPECT_DEPTH_BIT;
+                if (format.is_stencil()) {
+                    flags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+                }
+                return flags;
+            }
+            return VK_IMAGE_ASPECT_COLOR_BIT;
+        default:
+            throw std::invalid_argument("unhandled Image::Usage for aspect flags");
     }
 }
 
@@ -363,11 +391,9 @@ void VulkanCommandContext::pipeline_barrier(const PipelineBarrier& barrier) {
         auto vulkanImage = static_cast<VulkanImage*>(b.image);
         VkImageMemoryBarrier vkBarrier = {};
         vkBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        // Use m_currentImage so swapchain images are indexed correctly;
-        // VulkanMemoryImage ignores the index.
-        vkBarrier.image = vulkanImage->image(m_currentImage);
-        vkBarrier.oldLayout = convert_layout(b.oldLayout);
-        vkBarrier.newLayout = convert_layout(b.newLayout);
+        vkBarrier.image = vulkanImage->image();
+        vkBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        vkBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
         vkBarrier.subresourceRange.aspectMask = vulkanImage->image_aspect();
         vkBarrier.subresourceRange.baseArrayLayer = b.subresourceRange.baseArrayLayer;
         vkBarrier.subresourceRange.layerCount = b.subresourceRange.layerCount;
@@ -479,16 +505,55 @@ void VulkanCommandContext::read_buffer(Buffer* buffer, void* dst, size_t size, s
 }
 
 std::shared_ptr<Image> VulkanCommandContext::create_image(const ImageCreateInfo& imageCreateInfo) {
-    VulkanMemoryImageCreateInfo memoryImageCreateInfo = {};
-    memoryImageCreateInfo.device = m_device;
-    memoryImageCreateInfo.physicalDevice = m_physicalDevice;
-    memoryImageCreateInfo.commandQueue = static_cast<VulkanCommandQueue*>(imageCreateInfo.commandQueue);
-    memoryImageCreateInfo.imageDataSource = imageCreateInfo.imageDataSource;
-    memoryImageCreateInfo.initialLayout = imageCreateInfo.initialLayout;
-    memoryImageCreateInfo.usage = imageCreateInfo.usage;
-    memoryImageCreateInfo.updateFrequency = imageCreateInfo.updateFrequency;
-    memoryImageCreateInfo.dstStages = imageCreateInfo.dstStages;
-    return make_managed(new VulkanMemoryImage(memoryImageCreateInfo));
+    VulkanMemoryImageCreateInfo vulkanMemoryImageCreateInfo = {};
+    vulkanMemoryImageCreateInfo.device = m_device;
+    vulkanMemoryImageCreateInfo.physicalDevice = m_physicalDevice;
+    vulkanMemoryImageCreateInfo.format = convert_pixel_format(imageCreateInfo.format);
+    vulkanMemoryImageCreateInfo.width = imageCreateInfo.width;
+    vulkanMemoryImageCreateInfo.height = imageCreateInfo.height;
+    vulkanMemoryImageCreateInfo.usageFlags = detail::image_usage_flags(imageCreateInfo.usage);
+    vulkanMemoryImageCreateInfo.memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    vulkanMemoryImageCreateInfo.aspectFlags = detail::image_aspect_flags(imageCreateInfo.usage, imageCreateInfo.format);
+    return make_managed(new VulkanImage(vulkanMemoryImageCreateInfo));
+}
+
+void VulkanCommandContext::write_image(Image* image, const void* src, size_t size) {
+    auto* vulkanImage = static_cast<VulkanImage*>(image);
+
+    VulkanBufferCreateInfo stagingCi = {};
+    stagingCi.device = m_device;
+    stagingCi.physicalDevice = m_physicalDevice;
+    stagingCi.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    stagingCi.memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    stagingCi.size = size;
+
+    auto* staging = new VulkanBuffer(stagingCi);
+    staging->write(src, size, 0);
+
+    VkImageSubresourceRange subresource = {};
+    subresource.aspectMask = vulkanImage->image_aspect();
+    subresource.baseMipLevel = 0;
+    subresource.levelCount = 1;
+    subresource.baseArrayLayer = 0;
+    subresource.layerCount = 1;
+
+    VulkanImage::CopyBufferToImageInfo copyInfo = {};
+    copyInfo.buffer = staging->handle();
+    copyInfo.image = vulkanImage->image();
+    copyInfo.width = vulkanImage->width();
+    copyInfo.height = vulkanImage->height();
+    copyInfo.subresourceRange = subresource;
+
+    VulkanImage::copy_buffer_to_image(current_command_buffer(), copyInfo);
+
+    m_deletionQueue->push(staging);
+}
+
+void VulkanCommandContext::write_image(Image* image, const ImageDataSource* dataSource) {
+    const size_t dataSize = dataSource->byte_count();
+    std::vector<uint8_t> pixels(dataSize);
+    dataSource->read_bytes(pixels.data(), dataSize, 0);
+    write_image(image, pixels.data(), dataSize);
 }
 
 std::shared_ptr<DescriptorSet> VulkanCommandContext::create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) {

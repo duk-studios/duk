@@ -5,14 +5,10 @@
 #define DUK_RHI_VULKAN_IMAGE_H
 
 #include <duk_rhi/image.h>
-#include <duk_rhi/image_data_source.h>
-#include <duk_rhi/vulkan/vulkan_events.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
 
 #include <duk_macros/macros.h>
-
-#include <vector>
 
 namespace duk::rhi {
 
@@ -20,21 +16,66 @@ VkFormat convert_pixel_format(PixelFormat format);
 
 PixelFormat convert_pixel_format(VkFormat format);
 
-VkImageLayout convert_layout(Image::Layout layout);
-
 VkImageUsageFlags convert_usage(Image::Usage usage);
 
 VkFormatFeatureFlags usage_format_features(Image::Usage usage);
 
+/// For images whose VkImage + VkDeviceMemory are owned by this instance.
+/// All members are native Vulkan types; the command context converts
+/// public API enums before filling this struct.
+struct VulkanMemoryImageCreateInfo {
+    VkDevice device;
+    VulkanPhysicalDevice* physicalDevice;
+    VkFormat format;
+    uint32_t width;
+    uint32_t height;
+    VkImageUsageFlags usageFlags;
+    VkMemoryPropertyFlags memoryFlags;
+    VkImageAspectFlags aspectFlags;
+};
+
+/// For externally-owned images (e.g. swapchain images).
+/// VulkanImage creates a VkImageView but does NOT free the VkImage.
+struct VulkanExternalImageCreateInfo {
+    VkDevice device;
+    VkImage image;   ///< Externally managed — not freed by VulkanImage.
+    VkFormat format;
+    uint32_t width;
+    uint32_t height;
+    VkImageAspectFlags aspectFlags;
+};
+
 class VulkanImage : public Image {
 public:
-    DUK_NO_DISCARD virtual VkImage image(uint32_t imageIndex) const = 0;
+    explicit VulkanImage(const VulkanMemoryImageCreateInfo& ci);
 
-    DUK_NO_DISCARD virtual VkImageView image_view(uint32_t imageIndex) const = 0;
+    explicit VulkanImage(const VulkanExternalImageCreateInfo& ci);
 
-    DUK_NO_DISCARD virtual uint32_t image_count() const = 0;
+    ~VulkanImage() override;
 
-    DUK_NO_DISCARD virtual VkImageAspectFlags image_aspect() const = 0;
+    // -----------------------------------------------------------------------
+    // Image public interface (read-only metadata)
+    // -----------------------------------------------------------------------
+
+    DUK_NO_DISCARD PixelFormat format() const override;
+
+    DUK_NO_DISCARD uint32_t width() const override;
+
+    DUK_NO_DISCARD uint32_t height() const override;
+
+    // -----------------------------------------------------------------------
+    // Internal Vulkan accessors
+    // -----------------------------------------------------------------------
+
+    DUK_NO_DISCARD VkImage image() const;
+
+    DUK_NO_DISCARD VkImageView image_view() const;
+
+    DUK_NO_DISCARD VkImageAspectFlags image_aspect() const;
+
+    // -----------------------------------------------------------------------
+    // Static utility methods
+    // -----------------------------------------------------------------------
 
     struct TransitionImageLayoutInfo {
         VkImageLayout oldLayout;
@@ -45,113 +86,28 @@ public:
         VkImage image;
     };
 
-    static void transition_image_layout(VkCommandBuffer commandBuffer, const TransitionImageLayoutInfo& transitionImageLayoutInfo);
+    static void transition_image_layout(VkCommandBuffer commandBuffer, const TransitionImageLayoutInfo& info);
 
     struct CopyBufferToImageInfo {
         VkBuffer buffer;
         VkImage image;
         uint32_t width;
         uint32_t height;
-        VkImageLayout finalLayout;
-        VkPipelineStageFlags dstStageMask;
         VkImageSubresourceRange subresourceRange;
     };
 
-    static void copy_buffer_to_image(VkCommandBuffer commandBuffer, const CopyBufferToImageInfo& copyBufferToImageInfo);
-};
-
-struct VulkanMemoryImageCreateInfo {
-    VkDevice device;
-    VulkanPhysicalDevice* physicalDevice;
-    Image::Usage usage;
-    Image::UpdateFrequency updateFrequency;
-    Image::Layout initialLayout;
-    PipelineStage::Mask dstStages;
-    VulkanCommandQueue* commandQueue;
-    const ImageDataSource* imageDataSource;
-};
-
-class VulkanMemoryImage : public VulkanImage {
-public:
-    explicit VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanImageCreateInfo);
-
-    ~VulkanMemoryImage() override;
-
-    DUK_NO_DISCARD PixelFormat format() const override;
-
-    DUK_NO_DISCARD VkImage image(uint32_t imageIndex) const override;
-
-    DUK_NO_DISCARD VkImageView image_view(uint32_t imageIndex) const override;
-
-    DUK_NO_DISCARD uint32_t image_count() const override;
-
-    DUK_NO_DISCARD VkImageAspectFlags image_aspect() const override;
-
-    DUK_NO_DISCARD uint32_t width() const override;
-
-    DUK_NO_DISCARD uint32_t height() const override;
-
-    void clean();
-
-private:
-    void create();
-
-    /// Immediately uploads m_data to the GPU via a staging buffer + command submit.
-    void upload_data();
-
-private:
-    VkDevice m_device;
-    VulkanPhysicalDevice* m_physicalDevice;
-    Usage m_usage;
-    UpdateFrequency m_updateFrequency;
-    Layout m_layout;
-    PixelFormat m_format;
-    PipelineStage::Mask m_dstStage;
-    uint32_t m_width;
-    uint32_t m_height;
-    std::vector<uint8_t> m_data;
-    VulkanCommandQueue* m_commandQueue;
-    VkImageAspectFlags m_aspectFlags;
-    VkDeviceMemory m_memory{VK_NULL_HANDLE};
-    VkImage m_image{VK_NULL_HANDLE};
-    VkImageView m_imageView{VK_NULL_HANDLE};
-};
-
-struct VulkanSwapchainImageCreateInfo {
-    VkDevice device;
-    VkFormat format;
-    uint32_t width;
-    uint32_t height;
-    VkSwapchainKHR swapchain;
-};
-
-class VulkanSwapchainImage : public VulkanImage {
-public:
-    explicit VulkanSwapchainImage(const VulkanSwapchainImageCreateInfo& vulkanSwapchainImageCreateInfo);
-
-    ~VulkanSwapchainImage() override;
-
-    DUK_NO_DISCARD PixelFormat format() const override;
-
-    DUK_NO_DISCARD uint32_t width() const override;
-
-    DUK_NO_DISCARD uint32_t height() const override;
-
-    DUK_NO_DISCARD VkImage image(uint32_t frameIndex) const override;
-
-    DUK_NO_DISCARD VkImageView image_view(uint32_t frameIndex) const override;
-
-    DUK_NO_DISCARD uint32_t image_count() const override;
-
-    DUK_NO_DISCARD VkImageAspectFlags image_aspect() const override;
+    static void copy_buffer_to_image(VkCommandBuffer commandBuffer, const CopyBufferToImageInfo& info);
 
 private:
     VkDevice m_device;
     VkFormat m_format;
     uint32_t m_width;
     uint32_t m_height;
-    std::vector<VkImage> m_images;
-    std::vector<VkImageView> m_imageViews;
+    VkImageAspectFlags m_aspectFlags;
+    bool m_ownsImage{false}; ///< True when VkImage + VkDeviceMemory were allocated here.
+    VkImage m_image{VK_NULL_HANDLE};
+    VkImageView m_imageView{VK_NULL_HANDLE};
+    VkDeviceMemory m_memory{VK_NULL_HANDLE}; ///< VK_NULL_HANDLE for external images.
 };
 
 }// namespace duk::rhi

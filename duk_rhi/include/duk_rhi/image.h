@@ -16,15 +16,6 @@ class ImageDataSource;
 
 class Image {
 public:
-    enum class Layout {
-        UNDEFINED = 0,
-        GENERAL,
-        COLOR_ATTACHMENT,
-        DEPTH_ATTACHMENT,
-        DEPTH_STENCIL_ATTACHMENT,
-        SHADER_READ_ONLY,
-        PRESENT_SRC
-    };
 
     enum class Usage {
         SAMPLED,
@@ -32,12 +23,6 @@ public:
         SAMPLED_STORAGE,
         COLOR_ATTACHMENT,
         DEPTH_STENCIL_ATTACHMENT
-    };
-
-    enum class UpdateFrequency {
-        STATIC,
-        HOST_DYNAMIC,
-        DEVICE_DYNAMIC
     };
 
     struct SubresourceRange {

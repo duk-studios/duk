@@ -67,6 +67,8 @@ public:
     void write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) override;
     void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) override;
     DUK_NO_DISCARD std::shared_ptr<Image> create_image(const ImageCreateInfo& imageCreateInfo) override;
+    void write_image(Image* image, const void* src, size_t size) override;
+    void write_image(Image* image, const ImageDataSource* dataSource) override;
     DUK_NO_DISCARD std::shared_ptr<DescriptorSet> create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) override;
     DUK_NO_DISCARD std::shared_ptr<FrameBuffer> create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) override;
 

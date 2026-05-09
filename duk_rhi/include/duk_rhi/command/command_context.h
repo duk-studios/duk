@@ -7,6 +7,7 @@
 #include <duk_rhi/descriptor_set.h>
 #include <duk_rhi/frame_buffer.h>
 #include <duk_rhi/image.h>
+#include <duk_rhi/image_data_source.h>
 #include <duk_rhi/pipeline/compute_pipeline.h>
 #include <duk_rhi/pipeline/graphics_pipeline.h>
 #include <duk_rhi/pipeline/pipeline_flags.h>
@@ -88,8 +89,6 @@ public:
         CommandQueue* srcCommandQueue;
         CommandQueue* dstCommandQueue;
         Image* image;
-        Image::Layout oldLayout;
-        Image::Layout newLayout;
         Image::SubresourceRange subresourceRange;
     };
 
@@ -158,15 +157,19 @@ public:
     virtual void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) = 0;
 
     struct ImageCreateInfo {
-        const ImageDataSource* imageDataSource;
-        Image::Layout initialLayout;
+        PixelFormat format;
+        uint32_t width;
+        uint32_t height;
         Image::Usage usage;
-        Image::UpdateFrequency updateFrequency;
-        PipelineStage::Mask dstStages;
-        CommandQueue* commandQueue;
     };
 
     DUK_NO_DISCARD virtual std::shared_ptr<Image> create_image(const ImageCreateInfo& imageCreateInfo) = 0;
+
+    /// Upload raw pixel data into an image, recording a staging copy into the current command buffer.
+    virtual void write_image(Image* image, const void* src, size_t size) = 0;
+
+    /// Convenience overload — reads all bytes from the data source and delegates to the raw overload.
+    virtual void write_image(Image* image, const ImageDataSource* dataSource) = 0;
 
     struct DescriptorSetCreateInfo {
         DescriptorSetDescription description;
