@@ -2,15 +2,21 @@
 /// command_queue.cpp
 
 #include <duk_rhi/command/command_queue.h>
+#include <duk_rhi/command/command_context.h>
 
 namespace duk::rhi {
 
-CommandQueue::CommandQueue() {
+CommandQueue::CommandQueue(std::unique_ptr<CommandContext> context)
+    : m_context(std::move(context)) {
     m_taskQueue.start();
 }
 
 CommandQueue::~CommandQueue() {
     m_taskQueue.stop();
+}
+
+CommandContext* CommandQueue::context() const {
+    return m_context.get();
 }
 
 }// namespace duk::rhi
