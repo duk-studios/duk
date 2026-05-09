@@ -10,7 +10,6 @@
 namespace duk::rhi {
 
 Descriptor Descriptor::uniform_buffer(Buffer* buffer) {
-    DUK_ASSERT(buffer->type() == Buffer::Type::UNIFORM);
     Descriptor descriptor;
     descriptor.m_data.bufferDescriptor.buffer = buffer;
     descriptor.m_type = DescriptorType::UNIFORM_BUFFER;
@@ -18,7 +17,6 @@ Descriptor Descriptor::uniform_buffer(Buffer* buffer) {
 }
 
 Descriptor Descriptor::storage_buffer(Buffer* buffer) {
-    DUK_ASSERT(buffer->type() == Buffer::Type::STORAGE);
     Descriptor descriptor;
     descriptor.m_data.bufferDescriptor.buffer = buffer;
     descriptor.m_type = DescriptorType::STORAGE_BUFFER;

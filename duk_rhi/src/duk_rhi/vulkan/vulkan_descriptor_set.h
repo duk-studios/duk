@@ -13,8 +13,6 @@
 
 namespace duk::rhi {
 
-class VulkanResourceManager;
-
 VkDescriptorType convert_descriptor_type(DescriptorType descriptorType);
 
 struct VulkanDescriptorSetLayoutCacheCreateInfo {
@@ -51,8 +49,6 @@ struct VulkanDescriptorSetCreateInfo {
     VkDevice device;
     VulkanDescriptorSetLayoutCache* descriptorSetLayoutCache;
     VulkanSamplerCache* samplerCache;
-    VulkanResourceManager* resourceManager;
-    uint32_t imageCount;
     DescriptorSetDescription descriptorSetDescription;
 };
 
@@ -62,15 +58,8 @@ public:
 
     ~VulkanDescriptorSet() override;
 
-    void create(uint32_t imageCount);
-
-    void clean();
-
-    void clean(uint32_t imageIndex);
-
-    void update(uint32_t imageIndex);
-
-    DUK_NO_DISCARD VkDescriptorSet handle(uint32_t imageIndex);
+    /// Returns the single VkDescriptorSet handle.
+    DUK_NO_DISCARD VkDescriptorSet handle();
 
     void set(uint32_t binding, const Descriptor& descriptor) override;
 
@@ -91,15 +80,17 @@ public:
     void flush() override;
 
 private:
+    void clean();
+
+private:
     VkDevice m_device;
     VulkanSamplerCache* m_samplerCache;
-    VulkanResourceManager* m_resourceManager;
     DescriptorSetDescription m_descriptorSetDescription;
     VkDescriptorSetLayout m_descriptorSetLayout;
     std::vector<VkDescriptorSetLayoutBinding> m_descriptorBindings;
     std::vector<Descriptor> m_descriptors;
-    VkDescriptorPool m_descriptorPool;
-    std::vector<VkDescriptorSet> m_descriptorSets;
+    VkDescriptorPool m_descriptorPool{VK_NULL_HANDLE};
+    VkDescriptorSet m_descriptorSet{VK_NULL_HANDLE};
 };
 
 }// namespace duk::rhi

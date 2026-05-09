@@ -21,24 +21,17 @@ public:
 
     ~VulkanComputePipeline() override;
 
-    void create(uint32_t imageCount);
-
-    void clean(uint32_t imageIndex);
-
-    void clean();
-
-    void update(uint32_t imageIndex);
-
-    DUK_NO_DISCARD VkPipeline handle(uint32_t imageIndex) const;
+    DUK_NO_DISCARD VkPipeline handle() const;
 
     DUK_NO_DISCARD VkPipelineLayout pipeline_layout() const;
 
 private:
+    void destroy();
+
+private:
     VkDevice m_device;
     VulkanShader* m_shader;
-    VkPipeline m_pipeline;
-    duk::hash::Hash m_hash;
-    duk::hash::Hash m_pipelineHash;
+    VkPipeline m_pipeline{VK_NULL_HANDLE};
 };
 
 }// namespace duk::rhi

@@ -4,22 +4,17 @@
 #ifndef DUK_RHI_BUFFER_H
 #define DUK_RHI_BUFFER_H
 
-#include <duk_hash/hash.h>
 #include <duk_macros/macros.h>
 
 #include <cstdint>
-#include <duk_macros/assert.h>
-#include <ranges>
 
 namespace duk::rhi {
-
-class CommandQueue;
 
 class Buffer {
 public:
     enum class UpdateFrequency {
-        STATIC,
-        DYNAMIC
+        STATIC,  ///< Device-local; written via staging through the command context.
+        DYNAMIC  ///< Host-visible; written directly by the CPU through the command context.
     };
 
     enum class Type {
@@ -34,62 +29,7 @@ public:
 public:
     virtual ~Buffer();
 
-    DUK_NO_DISCARD virtual const uint8_t* read_ptr(size_t offset) const = 0;
-
-    DUK_NO_DISCARD const uint8_t* read_ptr() const;
-
-    virtual void read(void* dst, size_t size, size_t offset) = 0;
-
-    template<std::ranges::contiguous_range T>
-    void read(T& dst, size_t startElement = 0) {
-        constexpr size_t elementSize = sizeof(std::ranges::range_value_t<T>);
-        DUK_ASSERT(elementSize == element_size());
-        read(static_cast<void*>(std::data(dst)), std::size(dst) * elementSize, startElement * elementSize);
-    }
-
-    template<typename T>
-    void read(T& dst, size_t elementIndex = 0) {
-        constexpr size_t elementSize = sizeof(T);
-        DUK_ASSERT(elementSize == element_size());
-        read(static_cast<void*>(&dst), elementSize, elementIndex * elementSize);
-    }
-
-    DUK_NO_DISCARD virtual uint8_t* write_ptr(size_t offset) = 0;
-
-    DUK_NO_DISCARD uint8_t* write_ptr();
-
-    virtual void write(const void* src, size_t size, size_t offset) = 0;
-
-    template<std::ranges::contiguous_range T>
-    void write(const T& src, size_t startElement = 0) {
-        constexpr size_t elementSize = sizeof(std::ranges::range_value_t<T>);
-        DUK_ASSERT(elementSize == element_size());
-        write(static_cast<const void*>(std::data(src)), std::size(src) * elementSize, startElement * elementSize);
-    }
-
-    template<typename T>
-    void write(const T& src, size_t elementIndex = 0) {
-        constexpr size_t elementSize = sizeof(T);
-        DUK_ASSERT(elementSize == element_size());
-        write(static_cast<const void*>(&src), elementSize, elementIndex * elementSize);
-    }
-
-    virtual void copy_from(Buffer* srcBuffer, size_t size, size_t srcOffset, size_t dstOffset) = 0;
-
-    /// flushes data to the GPU
-    virtual void flush() = 0;
-
-    DUK_NO_DISCARD virtual size_t element_count() const = 0;
-
-    DUK_NO_DISCARD virtual size_t element_size() const = 0;
-
-    DUK_NO_DISCARD virtual size_t byte_size() const = 0;
-
-    DUK_NO_DISCARD virtual Type type() const = 0;
-
-    DUK_NO_DISCARD virtual UpdateFrequency update_frequency() const = 0;
-
-    DUK_NO_DISCARD virtual CommandQueue* command_queue() const = 0;
+    DUK_NO_DISCARD virtual size_t size() const = 0;
 };
 
 }// namespace duk::rhi

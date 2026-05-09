@@ -30,7 +30,7 @@ public:
     virtual ~CommandContext() = default;
 
     //-------------------------------------------------------------------------
-    // Frame management / surface operations
+    // Frame management
     //-------------------------------------------------------------------------
 
     /// Called once per frame, waits for the previous frame submission and resets
@@ -143,12 +143,19 @@ public:
     struct BufferCreateInfo {
         Buffer::Type type;
         Buffer::UpdateFrequency updateFrequency;
-        size_t elementCount;
-        size_t elementSize;
-        CommandQueue* commandQueue;
+        size_t size;
     };
 
     DUK_NO_DISCARD virtual std::shared_ptr<Buffer> create_buffer(const BufferCreateInfo& bufferCreateInfo) = 0;
+
+    /// Write CPU data into a buffer.
+    /// For DYNAMIC buffers: maps host-visible memory and copies directly.
+    /// For STATIC buffers: records a staging upload into the current command buffer.
+    virtual void write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) = 0;
+
+    /// Read buffer data back to CPU.
+    /// For DYNAMIC buffers only: maps host-visible memory and copies directly.
+    virtual void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) = 0;
 
     struct ImageCreateInfo {
         const ImageDataSource* imageDataSource;

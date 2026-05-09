@@ -71,8 +71,6 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_flags.h
         src/duk_rhi/vulkan/vulkan_vertex.h
         src/duk_rhi/vulkan/vulkan_vertex.cpp
-        src/duk_rhi/vulkan/vulkan_resource_manager.h
-        src/duk_rhi/vulkan/vulkan_resource_manager.cpp
         src/duk_rhi/vulkan/vulkan_command_context.h
         src/duk_rhi/vulkan/vulkan_command_context.cpp
         src/duk_rhi/vulkan/vulkan_buffer.h

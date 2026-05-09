@@ -6,7 +6,6 @@
 
 #include <duk_rhi/image.h>
 #include <duk_rhi/image_data_source.h>
-#include <duk_rhi/vulkan/vulkan_buffer.h>
 #include <duk_rhi/vulkan/vulkan_events.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
@@ -16,8 +15,6 @@
 #include <vector>
 
 namespace duk::rhi {
-
-class VulkanResourceManager;
 
 VkFormat convert_pixel_format(PixelFormat format);
 
@@ -51,7 +48,7 @@ public:
     static void transition_image_layout(VkCommandBuffer commandBuffer, const TransitionImageLayoutInfo& transitionImageLayoutInfo);
 
     struct CopyBufferToImageInfo {
-        VulkanBufferMemory* buffer;
+        VkBuffer buffer;
         VkImage image;
         uint32_t width;
         uint32_t height;
@@ -66,8 +63,6 @@ public:
 struct VulkanMemoryImageCreateInfo {
     VkDevice device;
     VulkanPhysicalDevice* physicalDevice;
-    VulkanResourceManager* resourceManager;
-    uint32_t imageCount;
     Image::Usage usage;
     Image::UpdateFrequency updateFrequency;
     Image::Layout initialLayout;
@@ -81,10 +76,6 @@ public:
     explicit VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanImageCreateInfo);
 
     ~VulkanMemoryImage() override;
-
-    void create(uint32_t imageCount);
-
-    void update(uint32_t imageIndex);
 
     DUK_NO_DISCARD PixelFormat format() const override;
 
@@ -102,12 +93,15 @@ public:
 
     void clean();
 
-    void clean(uint32_t imageIndex);
+private:
+    void create();
+
+    /// Immediately uploads m_data to the GPU via a staging buffer + command submit.
+    void upload_data();
 
 private:
     VkDevice m_device;
     VulkanPhysicalDevice* m_physicalDevice;
-    VulkanResourceManager* m_resourceManager;
     Usage m_usage;
     UpdateFrequency m_updateFrequency;
     Layout m_layout;
@@ -118,9 +112,9 @@ private:
     std::vector<uint8_t> m_data;
     VulkanCommandQueue* m_commandQueue;
     VkImageAspectFlags m_aspectFlags;
-    std::vector<VkDeviceMemory> m_memories;
-    std::vector<VkImage> m_images;
-    std::vector<VkImageView> m_imageViews;
+    VkDeviceMemory m_memory{VK_NULL_HANDLE};
+    VkImage m_image{VK_NULL_HANDLE};
+    VkImageView m_imageView{VK_NULL_HANDLE};
 };
 
 struct VulkanSwapchainImageCreateInfo {

@@ -1,5 +1,7 @@
 /// vulkan_command_context.cpp
 
+#include <duk_macros/assert.h>
+
 #include <duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.h>
@@ -17,20 +19,50 @@
 
 namespace duk::rhi {
 
+namespace detail {
+
+static VkBufferUsageFlags buffer_usage_flags(Buffer::Type type) {
+    VkBufferUsageFlags flags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    switch (type) {
+        case Buffer::Type::INDEX_16:
+        case Buffer::Type::INDEX_32:  flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;   break;
+        case Buffer::Type::VERTEX:    flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;  break;
+        case Buffer::Type::UNIFORM:   flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT; break;
+        case Buffer::Type::STORAGE:   flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT; break;
+        case Buffer::Type::INDIRECT:  flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT; break;
+        default: throw std::invalid_argument("unhandled Buffer::Type");
+    }
+    return flags;
+}
+
+static VkMemoryPropertyFlags buffer_memory_flags(Buffer::UpdateFrequency freq) {
+    if (freq == Buffer::UpdateFrequency::STATIC) {
+        return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    }
+    return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+}
+
+static VkIndexType buffer_index_type(Buffer::Type type) {
+    switch (type) {
+        case Buffer::Type::INDEX_16: return VK_INDEX_TYPE_UINT16;
+        case Buffer::Type::INDEX_32: return VK_INDEX_TYPE_UINT32;
+        default:                     return VK_INDEX_TYPE_MAX_ENUM;
+    }
+}
+
+}// namespace detail
+
 VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo& createInfo, std::unique_ptr<VulkanSwapchain> swapchain)
     : m_device(createInfo.device)
     , m_physicalDevice(createInfo.physicalDevice)
     , m_queue(createInfo.queue)
     , m_framesInFlight(createInfo.framesInFlight)
-    , m_swapchain(std::move(swapchain)) {
+    , m_swapchain(std::move(swapchain))
+    , m_deletionQueue(std::make_shared<VulkanDeletionQueue>()) {
 
     // -----------------------------------------------------------------------
-    // Resource manager, descriptor layout cache, sampler cache
+    // Descriptor layout cache and sampler cache
     // -----------------------------------------------------------------------
-    VulkanResourceManagerCreateInfo resourceManagerCreateInfo = {};
-    resourceManagerCreateInfo.imageCount = m_framesInFlight;
-    m_resourceManager = std::make_unique<VulkanResourceManager>(resourceManagerCreateInfo);
-
     VulkanDescriptorSetLayoutCacheCreateInfo descriptorSetLayoutCacheCreateInfo = {};
     descriptorSetLayoutCacheCreateInfo.device = m_device;
     m_descriptorSetLayoutCache = std::make_unique<VulkanDescriptorSetLayoutCache>(descriptorSetLayoutCacheCreateInfo);
@@ -106,12 +138,14 @@ VulkanCommandContext::~VulkanCommandContext() {
 }
 
 void VulkanCommandContext::update() {
-    m_resourceManager->update(m_currentImage);
-
     m_currentFrame = (m_currentFrame + 1) % m_framesInFlight;
 
     // CPU-GPU sync: wait for the GPU to finish with this frame slot's previous work
     vkWaitForFences(m_device, 1, &m_fences[m_currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+
+    // The GPU has finished with resources submitted in this frame slot.
+    // It is now safe to destroy anything that was queued for deletion.
+    m_deletionQueue->flush();
 
     if (m_swapchain != nullptr) {
         m_currentImage = m_swapchain->acquire_next_image(m_currentFrame);
@@ -120,8 +154,6 @@ void VulkanCommandContext::update() {
         m_renderFinishedSemaphore = frameSync.renderFinishedSemaphore;
         m_swapchainImageAcquired = true;
     }
-
-    m_resourceManager->advance(m_currentImage);
 }
 
 void VulkanCommandContext::flush() {
@@ -133,9 +165,6 @@ void VulkanCommandContext::flush() {
 
     // -----------------------------------------------------------------------
     // Build wait/signal semaphore lists.
-    // We always signal the timeline semaphore.
-    // Binary acquire/present semaphores are only included when a swapchain
-    // image was acquired this frame.
     // -----------------------------------------------------------------------
     duk::tools::FixedVector<VkSemaphore, 2> waitSemaphores;
     duk::tools::FixedVector<VkPipelineStageFlags, 2> waitStages;
@@ -217,7 +246,7 @@ void VulkanCommandContext::begin_render_pass(RenderPass* renderPass, FrameBuffer
     VkRenderPassBeginInfo renderPassInfo = {};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = vulkanRenderPass->handle();
-    renderPassInfo.framebuffer = vulkanFramebuffer->handle(m_currentImage);
+    renderPassInfo.framebuffer = vulkanFramebuffer->handle();
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = {vulkanFramebuffer->width(), vulkanFramebuffer->height()};
 
@@ -236,7 +265,7 @@ void VulkanCommandContext::end_render_pass() {
 void VulkanCommandContext::bind_graphics_pipeline(GraphicsPipeline* pipeline) {
     auto commandBuffer = current_command_buffer();
     auto vulkanPipeline = static_cast<VulkanGraphicsPipeline*>(pipeline);
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->handle(m_currentImage));
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->handle());
     m_currentPipelineLayout = vulkanPipeline->pipeline_layout();
     m_currentPipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 }
@@ -244,7 +273,7 @@ void VulkanCommandContext::bind_graphics_pipeline(GraphicsPipeline* pipeline) {
 void VulkanCommandContext::bind_compute_pipeline(ComputePipeline* pipeline) {
     auto commandBuffer = current_command_buffer();
     auto vulkanPipeline = static_cast<VulkanComputePipeline*>(pipeline);
-    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->handle(m_currentImage));
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, vulkanPipeline->handle());
     m_currentPipelineLayout = vulkanPipeline->pipeline_layout();
     m_currentPipelineBindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
 }
@@ -259,7 +288,7 @@ void VulkanCommandContext::bind_vertex_buffer(const Buffer** buffers, uint32_t b
 
     for (uint32_t i = 0; i < bufferCount; i++) {
         auto vulkanBuffer = static_cast<const VulkanBuffer*>(buffers[i]);
-        bufferHandles.push_back(vulkanBuffer ? vulkanBuffer->handle(m_currentImage) : VK_NULL_HANDLE);
+        bufferHandles.push_back(vulkanBuffer ? vulkanBuffer->handle() : VK_NULL_HANDLE);
     }
 
     vkCmdBindVertexBuffers(commandBuffer, firstBinding, bufferHandles.size(), bufferHandles.data(), offsets.data());
@@ -267,17 +296,16 @@ void VulkanCommandContext::bind_vertex_buffer(const Buffer** buffers, uint32_t b
 
 void VulkanCommandContext::bind_index_buffer(const Buffer* buffer) {
     auto commandBuffer = current_command_buffer();
-    DUK_ASSERT(buffer->type() == Buffer::Type::INDEX_16 || buffer->type() == Buffer::Type::INDEX_32);
-    auto indexType = buffer->type() == Buffer::Type::INDEX_16 ? VK_INDEX_TYPE_UINT16 : VK_INDEX_TYPE_UINT32;
     auto vulkanBuffer = static_cast<const VulkanBuffer*>(buffer);
-    vkCmdBindIndexBuffer(commandBuffer, vulkanBuffer->handle(m_currentImage), 0, indexType);
+    DUK_ASSERT(vulkanBuffer->index_type() != VK_INDEX_TYPE_MAX_ENUM);
+    vkCmdBindIndexBuffer(commandBuffer, vulkanBuffer->handle(), 0, vulkanBuffer->index_type());
 }
 
 void VulkanCommandContext::bind_descriptor_set(DescriptorSet* descriptorSet, uint32_t setIndex) {
     auto commandBuffer = current_command_buffer();
     DUK_ASSERT(m_currentPipelineLayout != VK_NULL_HANDLE);
     auto vulkanDescriptorSet = static_cast<VulkanDescriptorSet*>(descriptorSet);
-    auto handle = vulkanDescriptorSet->handle(m_currentImage);
+    auto handle = vulkanDescriptorSet->handle();
     vkCmdBindDescriptorSets(commandBuffer, m_currentPipelineBindPoint, m_currentPipelineLayout, setIndex, 1, &handle, 0, nullptr);
 }
 
@@ -290,12 +318,12 @@ void VulkanCommandContext::draw_indexed(uint32_t indexCount, uint32_t instanceCo
 }
 
 void VulkanCommandContext::draw_indirect(const Buffer* buffer, size_t offset, uint32_t drawCount) {
-    auto bufferHandle = static_cast<const VulkanBuffer*>(buffer)->handle(m_currentImage);
+    auto bufferHandle = static_cast<const VulkanBuffer*>(buffer)->handle();
     vkCmdDrawIndirect(current_command_buffer(), bufferHandle, offset, drawCount, sizeof(VkDrawIndirectCommand));
 }
 
 void VulkanCommandContext::draw_indirect_indexed(const Buffer* buffer, size_t offset, uint32_t drawCount) {
-    auto bufferHandle = static_cast<const VulkanBuffer*>(buffer)->handle(m_currentImage);
+    auto bufferHandle = static_cast<const VulkanBuffer*>(buffer)->handle();
     vkCmdDrawIndexedIndirect(current_command_buffer(), bufferHandle, offset, drawCount, sizeof(VkDrawIndexedIndirectCommand));
 }
 
@@ -312,7 +340,7 @@ void VulkanCommandContext::pipeline_barrier(const PipelineBarrier& barrier) {
         vkBarrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
         vkBarrier.size = b.size;
         vkBarrier.offset = b.offset;
-        vkBarrier.buffer = static_cast<VulkanBuffer*>(b.buffer)->handle(m_currentImage);
+        vkBarrier.buffer = static_cast<VulkanBuffer*>(b.buffer)->handle();
         vkBarrier.srcAccessMask = convert_access_mask(b.srcAccessMask);
         vkBarrier.dstAccessMask = convert_access_mask(b.dstAccessMask);
         vkBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -335,6 +363,8 @@ void VulkanCommandContext::pipeline_barrier(const PipelineBarrier& barrier) {
         auto vulkanImage = static_cast<VulkanImage*>(b.image);
         VkImageMemoryBarrier vkBarrier = {};
         vkBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        // Use m_currentImage so swapchain images are indexed correctly;
+        // VulkanMemoryImage ignores the index.
         vkBarrier.image = vulkanImage->image(m_currentImage);
         vkBarrier.oldLayout = convert_layout(b.oldLayout);
         vkBarrier.newLayout = convert_layout(b.newLayout);
@@ -366,13 +396,12 @@ std::shared_ptr<Shader> VulkanCommandContext::create_shader(const ShaderCreateIn
     vulkanShaderCreateInfo.shaderDataSource = shaderCreateInfo.shaderDataSource;
     vulkanShaderCreateInfo.device = m_device;
     vulkanShaderCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
-    return std::make_shared<VulkanShader>(vulkanShaderCreateInfo);
+    return make_managed(new VulkanShader(vulkanShaderCreateInfo));
 }
 
 std::shared_ptr<GraphicsPipeline> VulkanCommandContext::create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) {
     VulkanGraphicsPipelineCreateInfo vulkanPipelineCreateInfo = {};
     vulkanPipelineCreateInfo.device = m_device;
-    vulkanPipelineCreateInfo.imageCount = m_framesInFlight;
     vulkanPipelineCreateInfo.shader = static_cast<VulkanShader*>(pipelineCreateInfo.shader);
     vulkanPipelineCreateInfo.renderPass = static_cast<VulkanRenderPass*>(pipelineCreateInfo.renderPass);
     vulkanPipelineCreateInfo.viewport = pipelineCreateInfo.viewport;
@@ -382,15 +411,14 @@ std::shared_ptr<GraphicsPipeline> VulkanCommandContext::create_graphics_pipeline
     vulkanPipelineCreateInfo.depthTesting = pipelineCreateInfo.depthTesting;
     vulkanPipelineCreateInfo.topology = pipelineCreateInfo.topology;
     vulkanPipelineCreateInfo.fillMode = pipelineCreateInfo.fillMode;
-    vulkanPipelineCreateInfo.resourceManager = m_resourceManager.get();
-    return m_resourceManager->create(vulkanPipelineCreateInfo);
+    return make_managed(new VulkanGraphicsPipeline(vulkanPipelineCreateInfo));
 }
 
 std::shared_ptr<ComputePipeline> VulkanCommandContext::create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) {
     VulkanComputePipelineCreateInfo vulkanPipelineCreateInfo = {};
     vulkanPipelineCreateInfo.device = m_device;
     vulkanPipelineCreateInfo.shader = static_cast<VulkanShader*>(pipelineCreateInfo.shader);
-    return m_resourceManager->create(vulkanPipelineCreateInfo);
+    return make_managed(new VulkanComputePipeline(vulkanPipelineCreateInfo));
 }
 
 std::shared_ptr<RenderPass> VulkanCommandContext::create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) {
@@ -399,36 +427,68 @@ std::shared_ptr<RenderPass> VulkanCommandContext::create_render_pass(const Rende
     vulkanRenderPassCreateInfo.colorAttachments = renderPassCreateInfo.colorAttachments;
     vulkanRenderPassCreateInfo.colorAttachmentCount = renderPassCreateInfo.colorAttachmentCount;
     vulkanRenderPassCreateInfo.depthAttachment = renderPassCreateInfo.depthAttachment;
-    return m_resourceManager->create(vulkanRenderPassCreateInfo);
+    return make_managed(new VulkanRenderPass(vulkanRenderPassCreateInfo));
 }
 
 std::shared_ptr<Buffer> VulkanCommandContext::create_buffer(const BufferCreateInfo& bufferCreateInfo) {
     VulkanBufferCreateInfo vulkanBufferCreateInfo = {};
-    vulkanBufferCreateInfo.updateFrequency = bufferCreateInfo.updateFrequency;
-    vulkanBufferCreateInfo.type = bufferCreateInfo.type;
-    vulkanBufferCreateInfo.elementCount = bufferCreateInfo.elementCount;
-    vulkanBufferCreateInfo.elementSize = bufferCreateInfo.elementSize;
+    vulkanBufferCreateInfo.usageFlags = detail::buffer_usage_flags(bufferCreateInfo.type);
+    vulkanBufferCreateInfo.memoryFlags = detail::buffer_memory_flags(bufferCreateInfo.updateFrequency);
+    vulkanBufferCreateInfo.indexType = detail::buffer_index_type(bufferCreateInfo.type);
     vulkanBufferCreateInfo.device = m_device;
     vulkanBufferCreateInfo.physicalDevice = m_physicalDevice;
-    vulkanBufferCreateInfo.commandQueue = static_cast<VulkanCommandQueue*>(bufferCreateInfo.commandQueue);
-    vulkanBufferCreateInfo.imageCount = m_framesInFlight;
-    vulkanBufferCreateInfo.resourceManager = m_resourceManager.get();
-    return m_resourceManager->create(vulkanBufferCreateInfo);
+    return make_managed(new VulkanBuffer(vulkanBufferCreateInfo));
+}
+
+void VulkanCommandContext::write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) {
+    auto* vulkanBuffer = static_cast<VulkanBuffer*>(buffer);
+
+    if (vulkanBuffer->memory_flags() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+        // DYNAMIC buffer: direct CPU map + copy, no command buffer needed.
+        vulkanBuffer->write(src, size, offset);
+    } else {
+        // STATIC (device-local) buffer: upload via a temporary host-visible VulkanBuffer
+        // recorded into the current command buffer as a transfer source.
+        VulkanBufferCreateInfo stagingCreateInfo = {};
+        stagingCreateInfo.device = m_device;
+        stagingCreateInfo.physicalDevice = m_physicalDevice;
+        stagingCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        stagingCreateInfo.memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        stagingCreateInfo.size = size;
+
+        auto* staging = new VulkanBuffer(stagingCreateInfo);
+        staging->write(src, size, 0);
+
+        VkBufferCopy region = {};
+        region.srcOffset = 0;
+        region.dstOffset = offset;
+        region.size = size;
+        vkCmdCopyBuffer(current_command_buffer(), staging->handle(), vulkanBuffer->handle(), 1, &region);
+
+        // Keep the staging buffer alive until the GPU has finished using it.
+        m_deletionQueue->push(staging);
+    }
+}
+
+void VulkanCommandContext::read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) {
+    auto* vulkanBuffer = static_cast<VulkanBuffer*>(buffer);
+    // Only host-visible (DYNAMIC) buffers support direct CPU reads.
+    // STATIC (device-local) reads would require a read-back staging pass — not yet implemented.
+    DUK_ASSERT(vulkanBuffer->memory_flags() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+    vulkanBuffer->read(dst, size, offset);
 }
 
 std::shared_ptr<Image> VulkanCommandContext::create_image(const ImageCreateInfo& imageCreateInfo) {
     VulkanMemoryImageCreateInfo memoryImageCreateInfo = {};
     memoryImageCreateInfo.device = m_device;
     memoryImageCreateInfo.physicalDevice = m_physicalDevice;
-    memoryImageCreateInfo.imageCount = m_framesInFlight;
     memoryImageCreateInfo.commandQueue = static_cast<VulkanCommandQueue*>(imageCreateInfo.commandQueue);
     memoryImageCreateInfo.imageDataSource = imageCreateInfo.imageDataSource;
     memoryImageCreateInfo.initialLayout = imageCreateInfo.initialLayout;
     memoryImageCreateInfo.usage = imageCreateInfo.usage;
     memoryImageCreateInfo.updateFrequency = imageCreateInfo.updateFrequency;
     memoryImageCreateInfo.dstStages = imageCreateInfo.dstStages;
-    memoryImageCreateInfo.resourceManager = m_resourceManager.get();
-    return m_resourceManager->create(memoryImageCreateInfo);
+    return make_managed(new VulkanMemoryImage(memoryImageCreateInfo));
 }
 
 std::shared_ptr<DescriptorSet> VulkanCommandContext::create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) {
@@ -437,20 +497,17 @@ std::shared_ptr<DescriptorSet> VulkanCommandContext::create_descriptor_set(const
     vulkanDescriptorSetCreateInfo.descriptorSetDescription = descriptorSetCreateInfo.description;
     vulkanDescriptorSetCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
     vulkanDescriptorSetCreateInfo.samplerCache = m_samplerCache.get();
-    vulkanDescriptorSetCreateInfo.imageCount = m_framesInFlight;
-    vulkanDescriptorSetCreateInfo.resourceManager = m_resourceManager.get();
-    return m_resourceManager->create(vulkanDescriptorSetCreateInfo);
+    return make_managed(new VulkanDescriptorSet(vulkanDescriptorSetCreateInfo));
 }
 
 std::shared_ptr<FrameBuffer> VulkanCommandContext::create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) {
     VulkanFrameBufferCreateInfo vulkanFrameBufferCreateInfo = {};
     vulkanFrameBufferCreateInfo.device = m_device;
-    vulkanFrameBufferCreateInfo.imageCount = m_framesInFlight;
     vulkanFrameBufferCreateInfo.renderPass = static_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
     vulkanFrameBufferCreateInfo.attachments = reinterpret_cast<VulkanImage**>(frameBufferCreateInfo.attachments);
     vulkanFrameBufferCreateInfo.attachmentCount = frameBufferCreateInfo.attachmentCount;
-    vulkanFrameBufferCreateInfo.resourceManager = m_resourceManager.get();
-    return m_resourceManager->create(vulkanFrameBufferCreateInfo);
+    vulkanFrameBufferCreateInfo.imageIndex = m_currentImage;
+    return make_managed(new VulkanFrameBuffer(vulkanFrameBufferCreateInfo));
 }
 
 uint32_t VulkanCommandContext::current_frame() const {
@@ -469,20 +526,12 @@ const uint32_t* VulkanCommandContext::current_image_ptr() const {
     return &m_currentImage;
 }
 
-uint32_t VulkanCommandContext::image_count() const {
-    return m_framesInFlight;
-}
-
 VkDevice VulkanCommandContext::device() const {
     return m_device;
 }
 
 VulkanPhysicalDevice* VulkanCommandContext::physical_device() const {
     return m_physicalDevice;
-}
-
-VulkanResourceManager* VulkanCommandContext::resource_manager() const {
-    return m_resourceManager.get();
 }
 
 VulkanDescriptorSetLayoutCache* VulkanCommandContext::descriptor_set_layout_cache() const {

@@ -118,10 +118,6 @@ void VulkanRenderPass::clean() {
     vkDestroyRenderPass(m_device, m_renderPass, nullptr);
 }
 
-void VulkanRenderPass::clean(uint32_t imageIndex) {
-    // do nothing, it's only here so that we can avoid deleting it while at use at VulkanResourceManager
-}
-
 const std::vector<VkClearValue>& VulkanRenderPass::clear_values() const {
     return m_clearValues;
 }

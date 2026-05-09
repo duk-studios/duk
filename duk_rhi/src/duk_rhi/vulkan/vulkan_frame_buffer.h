@@ -12,17 +12,17 @@
 
 namespace duk::rhi {
 
-class VulkanSwapchain;
 class VulkanRenderPass;
-class VulkanResourceManager;
 
 struct VulkanFrameBufferCreateInfo {
-    uint32_t imageCount;
     VkDevice device;
     VulkanRenderPass* renderPass;
     VulkanImage** attachments;
     uint32_t attachmentCount;
-    VulkanResourceManager* resourceManager;
+    /// imageIndex passed when sampling image views from VulkanImage attachments.
+    /// For VulkanMemoryImage this is ignored; use the swapchain image index here
+    /// when building a framebuffer for a specific swapchain image.
+    uint32_t imageIndex;
 };
 
 class VulkanFrameBuffer : public FrameBuffer {
@@ -30,8 +30,6 @@ public:
     explicit VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFrameBufferCreateInfo);
 
     ~VulkanFrameBuffer() override;
-
-    void update(uint32_t imageIndex);
 
     DUK_NO_DISCARD uint32_t width() const override;
 
@@ -41,13 +39,9 @@ public:
 
     DUK_NO_DISCARD Image* at(uint32_t attachment) const override;
 
-    void create(uint32_t imageCount);
-
     void clean();
 
-    void clean(uint32_t imageIndex);
-
-    DUK_NO_DISCARD VkFramebuffer handle(uint32_t frameIndex) const;
+    DUK_NO_DISCARD VkFramebuffer handle() const;
 
 private:
     void update_extent();
@@ -57,9 +51,8 @@ private:
     uint32_t m_height;
     VkDevice m_device;
     VulkanRenderPass* m_renderPass;
-    VulkanResourceManager* m_resourceManager;
     std::vector<VulkanImage*> m_attachments;
-    std::vector<VkFramebuffer> m_frameBuffers;
+    VkFramebuffer m_frameBuffer{VK_NULL_HANDLE};
 };
 
 }// namespace duk::rhi

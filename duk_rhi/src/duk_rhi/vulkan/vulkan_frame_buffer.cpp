@@ -3,69 +3,51 @@
 
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
-#include <duk_rhi/vulkan/vulkan_resource_manager.h>
-#include <duk_rhi/vulkan/vulkan_swapchain.h>
 
+#include <limits>
 #include <span>
+#include <stdexcept>
 
 namespace duk::rhi {
 
 VulkanFrameBuffer::VulkanFrameBuffer(const VulkanFrameBufferCreateInfo& vulkanFrameBufferCreateInfo)
     : m_device(vulkanFrameBufferCreateInfo.device)
     , m_renderPass(vulkanFrameBufferCreateInfo.renderPass)
-    , m_resourceManager(vulkanFrameBufferCreateInfo.resourceManager)
     , m_attachments(vulkanFrameBufferCreateInfo.attachments, vulkanFrameBufferCreateInfo.attachments + vulkanFrameBufferCreateInfo.attachmentCount) {
-    create(vulkanFrameBufferCreateInfo.imageCount);
     update_extent();
-}
 
-VulkanFrameBuffer::~VulkanFrameBuffer() {
-    clean();
-}
+    std::vector<VkImageView> attachmentViews(m_attachments.size());
+    for (size_t i = 0; i < m_attachments.size(); i++) {
+        attachmentViews[i] = m_attachments[i]->image_view(vulkanFrameBufferCreateInfo.imageIndex);
+    }
 
-void VulkanFrameBuffer::update(uint32_t imageIndex) {
     VkFramebufferCreateInfo framebufferCreateInfo = {};
     framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
     framebufferCreateInfo.renderPass = m_renderPass->handle();
     framebufferCreateInfo.width = m_width;
     framebufferCreateInfo.height = m_height;
     framebufferCreateInfo.layers = 1;
+    framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachmentViews.size());
+    framebufferCreateInfo.pAttachments = attachmentViews.data();
 
-    std::vector<VkImageView> attachments(m_attachments.size());
-    for (int attachmentIndex = 0; attachmentIndex < attachments.size(); attachmentIndex++) {
-        auto attachment = m_attachments[attachmentIndex];
-
-        attachments[attachmentIndex] = attachment->image_view(imageIndex);
+    if (vkCreateFramebuffer(m_device, &framebufferCreateInfo, nullptr, &m_frameBuffer) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create VkFramebuffer");
     }
-
-    framebufferCreateInfo.attachmentCount = attachments.size();
-    framebufferCreateInfo.pAttachments = attachments.data();
-
-    vkCreateFramebuffer(m_device, &framebufferCreateInfo, nullptr, &m_frameBuffers[imageIndex]);
 }
 
-void VulkanFrameBuffer::create(uint32_t imageCount) {
-    m_frameBuffers.resize(imageCount);
-    m_resourceManager->schedule_for_update(this);
+VulkanFrameBuffer::~VulkanFrameBuffer() {
+    clean();
 }
 
 void VulkanFrameBuffer::clean() {
-    for (auto i = 0; i < m_frameBuffers.size(); i++) {
-        clean(i);
-    }
-    m_frameBuffers.clear();
-}
-
-void VulkanFrameBuffer::clean(uint32_t imageIndex) {
-    auto& frameBuffer = m_frameBuffers[imageIndex];
-    if (frameBuffer != VK_NULL_HANDLE) {
-        vkDestroyFramebuffer(m_device, frameBuffer, nullptr);
-        frameBuffer = VK_NULL_HANDLE;
+    if (m_frameBuffer != VK_NULL_HANDLE) {
+        vkDestroyFramebuffer(m_device, m_frameBuffer, nullptr);
+        m_frameBuffer = VK_NULL_HANDLE;
     }
 }
 
-VkFramebuffer VulkanFrameBuffer::handle(uint32_t frameIndex) const {
-    return m_frameBuffers[frameIndex];
+VkFramebuffer VulkanFrameBuffer::handle() const {
+    return m_frameBuffer;
 }
 
 uint32_t VulkanFrameBuffer::width() const {
@@ -94,3 +76,4 @@ void VulkanFrameBuffer::update_extent() {
 }
 
 }// namespace duk::rhi
+

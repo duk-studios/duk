@@ -9,8 +9,6 @@
 
 #include <duk_macros/macros.h>
 
-#include <vector>
-
 namespace duk::rhi {
 
 VkCullModeFlagBits convert_cull_mode(GraphicsPipeline::CullMode::Bits cullModeBit);
@@ -27,14 +25,11 @@ VkPolygonMode convert_fill_mode(GraphicsPipeline::FillMode fillMode);
 
 class VulkanShader;
 class VulkanRenderPass;
-class VulkanResourceManager;
 
 struct VulkanGraphicsPipelineCreateInfo {
     VkDevice device;
-    uint32_t imageCount;
     VulkanShader* shader;
     VulkanRenderPass* renderPass;
-    VulkanResourceManager* resourceManager;
     GraphicsPipeline::Viewport viewport;
     GraphicsPipeline::Scissor scissor;
     GraphicsPipeline::CullMode::Mask cullModeMask;
@@ -50,15 +45,8 @@ public:
 
     ~VulkanGraphicsPipeline() override;
 
-    void create(uint32_t imageCount);
-
-    void clean(uint32_t imageIndex);
-
-    void clean();
-
-    void update(uint32_t imageIndex);
-
-    DUK_NO_DISCARD const VkPipeline& handle(uint32_t imageIndex) const;
+    /// Returns the single VkPipeline handle.
+    DUK_NO_DISCARD VkPipeline handle() const;
 
     DUK_NO_DISCARD VkPipelineLayout pipeline_layout() const;
 
@@ -87,21 +75,27 @@ public:
 
     DUK_NO_DISCARD FillMode fill_mode() const override;
 
+    /// Immediately destroys and recreates the VkPipeline with current settings.
+    /// Caller must ensure the GPU is not using the pipeline before calling.
     void flush() override;
+
+private:
+    void recreate();
+
+    void destroy();
 
 private:
     VkDevice m_device;
     VulkanShader* m_shader;
     VulkanRenderPass* m_renderPass;
-    VulkanResourceManager* m_resourceManager;
-    GraphicsPipeline::Viewport m_viewport;
-    GraphicsPipeline::Scissor m_scissor;
-    GraphicsPipeline::CullMode::Mask m_cullModeMask;
-    GraphicsPipeline::Blend m_blend;
-    GraphicsPipeline::Topology m_topology;
-    GraphicsPipeline::FillMode m_fillMode;
+    Viewport m_viewport;
+    Scissor m_scissor;
+    CullMode::Mask m_cullModeMask;
+    Blend m_blend;
+    Topology m_topology;
+    FillMode m_fillMode;
     bool m_depthTesting;
-    std::vector<VkPipeline> m_pipelines;
+    VkPipeline m_pipeline{VK_NULL_HANDLE};
 };
 
 }// namespace duk::rhi

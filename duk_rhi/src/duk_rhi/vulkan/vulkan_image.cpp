@@ -4,7 +4,6 @@
 #include <duk_rhi/vulkan/command/vulkan_command_queue.h>
 #include <duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
-#include <duk_rhi/vulkan/vulkan_resource_manager.h>
 
 #include <stdexcept>
 
@@ -391,7 +390,7 @@ void VulkanImage::copy_buffer_to_image(VkCommandBuffer commandBuffer, const Copy
     bufferImageCopyRegion.imageOffset = {0, 0, 0};
     bufferImageCopyRegion.imageExtent = {copyBufferToImageInfo.width, copyBufferToImageInfo.height, 1};
 
-    vkCmdCopyBufferToImage(commandBuffer, copyBufferToImageInfo.buffer->handle(), copyBufferToImageInfo.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferImageCopyRegion);
+    vkCmdCopyBufferToImage(commandBuffer, copyBufferToImageInfo.buffer, copyBufferToImageInfo.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferImageCopyRegion);
 
     transitionImageLayoutInfo.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
     transitionImageLayoutInfo.newLayout = copyBufferToImageInfo.finalLayout;
@@ -406,7 +405,6 @@ void VulkanImage::copy_buffer_to_image(VkCommandBuffer commandBuffer, const Copy
 VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanImageCreateInfo)
     : m_device(vulkanImageCreateInfo.device)
     , m_physicalDevice(vulkanImageCreateInfo.physicalDevice)
-    , m_resourceManager(vulkanImageCreateInfo.resourceManager)
     , m_usage(vulkanImageCreateInfo.usage)
     , m_updateFrequency(vulkanImageCreateInfo.updateFrequency)
     , m_layout(vulkanImageCreateInfo.initialLayout)
@@ -421,26 +419,28 @@ VulkanMemoryImage::VulkanMemoryImage(const VulkanMemoryImageCreateInfo& vulkanIm
         vulkanImageCreateInfo.imageDataSource->read_bytes(m_data.data(), m_data.size(), 0);
     }
 
-    create(vulkanImageCreateInfo.imageCount);
+    create();
+
+    if (!m_data.empty()) {
+        upload_data();
+    }
 }
 
 VulkanMemoryImage::~VulkanMemoryImage() {
     clean();
 }
 
-void VulkanMemoryImage::update(uint32_t imageIndex) {
-    VulkanBufferMemoryCreateInfo bufferMemoryCreateInfo = {};
-    bufferMemoryCreateInfo.commandQueue = m_commandQueue;
-    bufferMemoryCreateInfo.device = m_device;
-    bufferMemoryCreateInfo.physicalDevice = m_physicalDevice;
-    bufferMemoryCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    bufferMemoryCreateInfo.size = m_width * m_height * m_format.size();
+void VulkanMemoryImage::upload_data() {
+    VulkanStagingBufferCreateInfo stagingCreateInfo = {};
+    stagingCreateInfo.device = m_device;
+    stagingCreateInfo.physicalDevice = m_physicalDevice;
+    stagingCreateInfo.size = m_width * m_height * m_format.size();
 
-    VulkanBufferHostMemory bufferHostMemory(bufferMemoryCreateInfo);
-    bufferHostMemory.write(m_data.data(), m_data.size(), 0);
+    VulkanStagingBuffer stagingBuffer(stagingCreateInfo);
+    stagingBuffer.write(m_data.data(), m_data.size(), 0);
 
     CopyBufferToImageInfo copyBufferToImageInfo = {};
-    copyBufferToImageInfo.buffer = &bufferHostMemory;
+    copyBufferToImageInfo.buffer = stagingBuffer.handle();
     copyBufferToImageInfo.subresourceRange.layerCount = 1;
     copyBufferToImageInfo.subresourceRange.baseArrayLayer = 0;
     copyBufferToImageInfo.subresourceRange.levelCount = 1;
@@ -450,7 +450,7 @@ void VulkanMemoryImage::update(uint32_t imageIndex) {
     copyBufferToImageInfo.width = m_width;
     copyBufferToImageInfo.height = m_height;
     copyBufferToImageInfo.dstStageMask = convert_pipeline_stage_mask(m_dstStage);
-    copyBufferToImageInfo.image = m_images[imageIndex];
+    copyBufferToImageInfo.image = m_image;
 
     m_commandQueue->submit([&](VkCommandBuffer commandBuffer) {
         copy_buffer_to_image(commandBuffer, copyBufferToImageInfo);
@@ -469,23 +469,23 @@ uint32_t VulkanMemoryImage::height() const {
     return m_height;
 }
 
-VkImage VulkanMemoryImage::image(uint32_t imageIndex) const {
-    return m_images[imageIndex];
+VkImage VulkanMemoryImage::image(uint32_t /*imageIndex*/) const {
+    return m_image;
 }
 
-VkImageView VulkanMemoryImage::image_view(uint32_t imageIndex) const {
-    return m_imageViews[imageIndex];
+VkImageView VulkanMemoryImage::image_view(uint32_t /*imageIndex*/) const {
+    return m_imageView;
 }
 
 uint32_t VulkanMemoryImage::image_count() const {
-    return m_images.size();
+    return 1;
 }
 
 VkImageAspectFlags VulkanMemoryImage::image_aspect() const {
     return m_aspectFlags;
 }
 
-void VulkanMemoryImage::create(uint32_t imageCount) {
+void VulkanMemoryImage::create() {
     auto format = convert_pixel_format(m_format);
 
     if (!m_physicalDevice->is_format_supported(format, VK_IMAGE_TILING_OPTIMAL, usage_format_features(m_usage))) {
@@ -507,16 +507,13 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    m_images.resize(imageCount);
-    for (auto& image: m_images) {
-        auto result = vkCreateImage(m_device, &imageCreateInfo, nullptr, &image);
-        if (result != VK_SUCCESS) {
-            throw std::runtime_error("failed to create VkImage");
-        }
+    auto result = vkCreateImage(m_device, &imageCreateInfo, nullptr, &m_image);
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to create VkImage");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(m_device, m_images.front(), &memRequirements);
+    vkGetImageMemoryRequirements(m_device, m_image, &memRequirements);
 
     auto memoryProperties = detail::memory_properties_from_update_frequency(m_updateFrequency);
 
@@ -525,14 +522,11 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = m_physicalDevice->find_memory_type(memRequirements.memoryTypeBits, memoryProperties);
 
-    m_memories.resize(m_images.size());
-    for (int i = 0; i < m_memories.size(); i++) {
-        auto result = vkAllocateMemory(m_device, &allocInfo, nullptr, &m_memories[i]);
-        if (result != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate VkDeviceMemory for VkImage");
-        }
-        vkBindImageMemory(m_device, m_images[i], m_memories[i], 0);
+    result = vkAllocateMemory(m_device, &allocInfo, nullptr, &m_memory);
+    if (result != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate VkDeviceMemory for VkImage");
     }
+    vkBindImageMemory(m_device, m_image, m_memory, 0);
 
     VkImageSubresourceRange subresourceRange = {};
     subresourceRange.layerCount = 1;
@@ -546,46 +540,27 @@ void VulkanMemoryImage::create(uint32_t imageCount) {
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = convert_pixel_format(m_format);
     viewInfo.subresourceRange = subresourceRange;
+    viewInfo.image = m_image;
 
-    m_imageViews.resize(imageCount);
-    for (int i = 0; i < imageCount; i++) {
-        auto& imageView = m_imageViews[i];
-        viewInfo.image = m_images[i];
-
-        if (vkCreateImageView(m_device, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create texture image view!");
-        }
+    if (vkCreateImageView(m_device, &viewInfo, nullptr, &m_imageView) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create texture image view!");
     }
-
-    m_resourceManager->schedule_for_update(this);
 }
 
 void VulkanMemoryImage::clean() {
-    for (int i = 0; i < m_images.size(); i++) {
-        clean(i);
-    }
-    m_images.clear();
-    m_imageViews.clear();
-    m_memories.clear();
-}
-
-void VulkanMemoryImage::clean(uint32_t imageIndex) {
-    auto& imageView = m_imageViews[imageIndex];
-    if (imageView) {
-        vkDestroyImageView(m_device, imageView, nullptr);
-        imageView = VK_NULL_HANDLE;
+    if (m_imageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(m_device, m_imageView, nullptr);
+        m_imageView = VK_NULL_HANDLE;
     }
 
-    auto& image = m_images[imageIndex];
-    if (image) {
-        vkDestroyImage(m_device, image, nullptr);
-        image = VK_NULL_HANDLE;
+    if (m_image != VK_NULL_HANDLE) {
+        vkDestroyImage(m_device, m_image, nullptr);
+        m_image = VK_NULL_HANDLE;
     }
 
-    auto& memory = m_memories[imageIndex];
-    if (memory) {
-        vkFreeMemory(m_device, memory, nullptr);
-        memory = VK_NULL_HANDLE;
+    if (m_memory != VK_NULL_HANDLE) {
+        vkFreeMemory(m_device, m_memory, nullptr);
+        m_memory = VK_NULL_HANDLE;
     }
 }
 

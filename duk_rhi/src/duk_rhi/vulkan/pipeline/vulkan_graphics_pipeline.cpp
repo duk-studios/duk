@@ -5,7 +5,6 @@
 #include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
 #include <duk_rhi/vulkan/vulkan_flags.h>
 #include <duk_rhi/vulkan/vulkan_render_pass.h>
-#include <duk_rhi/vulkan/vulkan_resource_manager.h>
 
 #include <stdexcept>
 
@@ -187,7 +186,6 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreat
     : m_device(pipelineCreateInfo.device)
     , m_shader(pipelineCreateInfo.shader)
     , m_renderPass(pipelineCreateInfo.renderPass)
-    , m_resourceManager(pipelineCreateInfo.resourceManager)
     , m_viewport(pipelineCreateInfo.viewport)
     , m_scissor(pipelineCreateInfo.scissor)
     , m_cullModeMask(pipelineCreateInfo.cullModeMask)
@@ -198,34 +196,21 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(const VulkanGraphicsPipelineCreat
     if (!m_shader->is_graphics_shader()) {
         throw std::invalid_argument("invalid shader type for GraphicsPipeline");
     }
-    create(pipelineCreateInfo.imageCount);
+    recreate();
 }
 
 VulkanGraphicsPipeline::~VulkanGraphicsPipeline() {
-    clean();
+    destroy();
 }
 
-void VulkanGraphicsPipeline::create(uint32_t imageCount) {
-    m_pipelines.resize(imageCount);
-    m_resourceManager->schedule_for_update(this);
-}
-
-void VulkanGraphicsPipeline::clean(uint32_t imageIndex) {
-    auto& pipeline = m_pipelines[imageIndex];
-    if (pipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(m_device, pipeline, nullptr);
-        pipeline = VK_NULL_HANDLE;
+void VulkanGraphicsPipeline::destroy() {
+    if (m_pipeline != VK_NULL_HANDLE) {
+        vkDestroyPipeline(m_device, m_pipeline, nullptr);
+        m_pipeline = VK_NULL_HANDLE;
     }
 }
 
-void VulkanGraphicsPipeline::clean() {
-    for (int i = 0; i < m_pipelines.size(); i++) {
-        clean(i);
-    }
-    m_pipelines.clear();
-}
-
-void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
+void VulkanGraphicsPipeline::recreate() {
     std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
     {
         auto& shaderModules = m_shader->shader_modules();
@@ -347,16 +332,16 @@ void VulkanGraphicsPipeline::update(uint32_t imageIndex) {
     graphicsPipelineCreateInfo.pColorBlendState = &colorBlending;
     graphicsPipelineCreateInfo.pDepthStencilState = &depthStencil;
 
-    auto& pipeline = m_pipelines[imageIndex];
+    destroy();
 
-    auto result = vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline);
+    auto result = vkCreateGraphicsPipelines(m_device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_pipeline);
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create VkPipeline");
     }
 }
 
-const VkPipeline& VulkanGraphicsPipeline::handle(uint32_t imageIndex) const {
-    return m_pipelines[imageIndex];
+VkPipeline VulkanGraphicsPipeline::handle() const {
+    return m_pipeline;
 }
 
 VkPipelineLayout VulkanGraphicsPipeline::pipeline_layout() const {
@@ -412,7 +397,7 @@ GraphicsPipeline::FillMode VulkanGraphicsPipeline::fill_mode() const {
 }
 
 void VulkanGraphicsPipeline::flush() {
-    m_resourceManager->schedule_for_update(this);
+    recreate();
 }
 
 }// namespace duk::rhi

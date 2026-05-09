@@ -34,8 +34,6 @@ public:
 
     void clean();
 
-    void clean(uint32_t imageIndex);
-
     DUK_NO_DISCARD const std::vector<VkClearValue>& clear_values() const;
 
     DUK_NO_DISCARD VkRenderPass handle() const;

@@ -4,10 +4,10 @@
 #define DUK_RHI_VULKAN_COMMAND_CONTEXT_H
 
 #include <duk_rhi/command/command_context.h>
+#include <duk_rhi/vulkan/vulkan_deletion_queue.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
 #include <duk_rhi/vulkan/vulkan_queue.h>
-#include <duk_rhi/vulkan/vulkan_resource_manager.h>
 #include <duk_rhi/vulkan/vulkan_sampler.h>
 #include <duk_rhi/vulkan/vulkan_swapchain.h>
 
@@ -64,6 +64,8 @@ public:
     DUK_NO_DISCARD std::shared_ptr<ComputePipeline> create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) override;
     DUK_NO_DISCARD std::shared_ptr<RenderPass> create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) override;
     DUK_NO_DISCARD std::shared_ptr<Buffer> create_buffer(const BufferCreateInfo& bufferCreateInfo) override;
+    void write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) override;
+    void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) override;
     DUK_NO_DISCARD std::shared_ptr<Image> create_image(const ImageCreateInfo& imageCreateInfo) override;
     DUK_NO_DISCARD std::shared_ptr<DescriptorSet> create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) override;
     DUK_NO_DISCARD std::shared_ptr<FrameBuffer> create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) override;
@@ -75,24 +77,33 @@ public:
     DUK_NO_DISCARD const uint32_t* current_frame_ptr() const;
     DUK_NO_DISCARD uint32_t current_image() const;
     DUK_NO_DISCARD const uint32_t* current_image_ptr() const;
-    DUK_NO_DISCARD uint32_t image_count() const;
 
     DUK_NO_DISCARD VkDevice device() const;
     DUK_NO_DISCARD VulkanPhysicalDevice* physical_device() const;
-    DUK_NO_DISCARD VulkanResourceManager* resource_manager() const;
     DUK_NO_DISCARD VulkanDescriptorSetLayoutCache* descriptor_set_layout_cache() const;
     DUK_NO_DISCARD VulkanSamplerCache* sampler_cache() const;
 
-    /// Returns the current value of the timeline semaphore counter. Each flush()
-    /// increments this by one. Callers can wait on m_timelineSemaphore reaching
-    /// a specific value to order GPU work across queues.
+    /// Returns the current value of the timeline semaphore counter.
     DUK_NO_DISCARD VkSemaphore timeline_semaphore() const;
     DUK_NO_DISCARD uint64_t timeline_value() const;
 
 private:
     /// Lazily acquires and begins the per-frame command buffer on first recording call.
-    /// Returns the active VkCommandBuffer ready for recording.
     DUK_NO_DISCARD VkCommandBuffer current_command_buffer();
+
+    /// Wraps a heap-allocated resource in a shared_ptr whose custom deleter pushes
+    /// the raw pointer into the deletion queue instead of destroying it immediately.
+    /// This guarantees the object is only freed after the next fence wait.
+    ///
+    /// The deletion queue is captured as a shared_ptr so it safely outlives both
+    /// the context and any lingering shared_ptr<T> the caller may hold.
+    template<typename T>
+    DUK_NO_DISCARD std::shared_ptr<T> make_managed(T* rawPtr) {
+        auto queue = m_deletionQueue;
+        return std::shared_ptr<T>(rawPtr, [queue](T* ptr) {
+            queue->push(ptr);
+        });
+    }
 
 private:
     VkDevice m_device;
@@ -124,9 +135,13 @@ private:
     VkPipelineBindPoint m_currentPipelineBindPoint{VK_PIPELINE_BIND_POINT_GRAPHICS};
 
     std::unique_ptr<VulkanSwapchain> m_swapchain;
-    std::unique_ptr<VulkanResourceManager> m_resourceManager;
     std::unique_ptr<VulkanDescriptorSetLayoutCache> m_descriptorSetLayoutCache;
     std::unique_ptr<VulkanSamplerCache> m_samplerCache;
+
+    /// Deferred-deletion queue — destroyed after each frame's fence wait so the
+    /// GPU is guaranteed to have finished using the resources before they vanish.
+    /// Stored as shared_ptr so custom deleters can capture it safely.
+    std::shared_ptr<VulkanDeletionQueue> m_deletionQueue;
 };
 
 }// namespace duk::rhi
