@@ -87,7 +87,7 @@ private:
     std::mutex m_taskQueueMutex;
     std::condition_variable m_awakeCondition;
     std::condition_variable m_idleCondition;
-    bool m_running;
+    std::atomic_bool m_running;
 };
 
 }// namespace duk::task

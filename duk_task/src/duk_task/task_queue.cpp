@@ -25,10 +25,7 @@ void TaskQueue::start() {
         return;
     }
 
-    {
-        std::unique_lock<std::mutex> lock(m_taskQueueMutex);
-        m_running = true;
-    }
+    m_running = true;
 
     int index = 0;
     for (auto& thread: m_threads) {
@@ -67,10 +64,7 @@ void TaskQueue::start() {
 }
 
 void TaskQueue::stop() {
-    {
-        std::unique_lock<std::mutex> lock(m_taskQueueMutex);
-        m_running = false;
-    }
+    m_running = false;
     m_awakeCondition.notify_all();
 
     for (auto& thread: m_threads) {
@@ -87,7 +81,7 @@ void TaskQueue::wait() {
             return false;
         }
 
-        const bool hasWorkingThread = std::any_of(m_workingThreads.begin(), m_workingThreads.end(), [](bool working) -> bool {
+        const bool hasWorkingThread = std::ranges::any_of(m_workingThreads, [](bool working) -> bool {
             return working;
         });
 
@@ -103,7 +97,7 @@ bool TaskQueue::owns_current_thread() const {
     auto predicate = [](const std::thread& thread) {
         return thread.get_id() == std::this_thread::get_id();
     };
-    return std::any_of(m_threads.begin(), m_threads.end(), predicate);
+    return std::ranges::any_of(m_threads, predicate);
 }
 
 }// namespace duk::task
