@@ -21,6 +21,7 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/pipeline/compute_pipeline.h
         include/duk_rhi/pipeline/pipeline_flags.h
         include/duk_rhi/command/command_queue.h
+        include/duk_rhi/command/command_context.h
         )
 
 set(DUK_RHI_SOURCES
@@ -54,6 +55,8 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_physical_device.h
         src/duk_rhi/vulkan/vulkan_physical_device.cpp
         src/duk_rhi/vulkan/vulkan_query_error.h
+        src/duk_rhi/vulkan/vulkan_queue.h
+        src/duk_rhi/vulkan/vulkan_queue.cpp
         src/duk_rhi/vulkan/vulkan_rhi.h
         src/duk_rhi/vulkan/vulkan_rhi.cpp
         src/duk_rhi/vulkan/vulkan_swapchain.h
@@ -70,6 +73,8 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_vertex.cpp
         src/duk_rhi/vulkan/vulkan_resource_manager.h
         src/duk_rhi/vulkan/vulkan_resource_manager.cpp
+        src/duk_rhi/vulkan/vulkan_command_context.h
+        src/duk_rhi/vulkan/vulkan_command_context.cpp
         src/duk_rhi/vulkan/vulkan_buffer.h
         src/duk_rhi/vulkan/vulkan_buffer.cpp
         src/duk_rhi/vulkan/vulkan_descriptor_set.cpp
