@@ -21,9 +21,6 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/pipeline/compute_pipeline.h
         include/duk_rhi/pipeline/pipeline_flags.h
         include/duk_rhi/command/command_queue.h
-        include/duk_rhi/command/command_buffer.h
-        include/duk_rhi/command/command_scheduler.h
-        include/duk_rhi/command/command.h
         )
 
 set(DUK_RHI_SOURCES
@@ -48,7 +45,6 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/pipeline/shader_reflection.cpp
         src/duk_rhi/pipeline/compute_pipeline.cpp
         src/duk_rhi/command/command_queue.cpp
-        src/duk_rhi/command/command_scheduler.cpp
         src/duk_rhi/vulkan/vulkan_image.h
         src/duk_rhi/vulkan/vulkan_image.cpp
         src/duk_rhi/vulkan/vulkan_sampler.h
@@ -82,12 +78,6 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_rhi_capabilities.cpp
         src/duk_rhi/vulkan/command/vulkan_command_queue.h
         src/duk_rhi/vulkan/command/vulkan_command_queue.cpp
-        src/duk_rhi/vulkan/command/vulkan_command_buffer.h
-        src/duk_rhi/vulkan/command/vulkan_command_buffer.cpp
-        src/duk_rhi/vulkan/command/vulkan_command_scheduler.h
-        src/duk_rhi/vulkan/command/vulkan_command_scheduler.cpp
-        src/duk_rhi/vulkan/command/vulkan_command.h
-        src/duk_rhi/vulkan/command/vulkan_command.cpp
         src/duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h
         src/duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.cpp
         src/duk_rhi/vulkan/pipeline/vulkan_shader.h
@@ -122,7 +112,6 @@ target_link_libraries(duk.rhi
         # external
         glm::glm
 
-        grapphs::grapphs
 
         volk::volk_headers
 
