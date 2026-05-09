@@ -68,9 +68,9 @@ public:
     void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) override;
     DUK_NO_DISCARD std::shared_ptr<Image> create_image(const ImageCreateInfo& imageCreateInfo) override;
     void write_image(Image* image, const void* src, size_t size) override;
-    void write_image(Image* image, const ImageDataSource* dataSource) override;
     DUK_NO_DISCARD std::shared_ptr<DescriptorSet> create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) override;
-    DUK_NO_DISCARD std::shared_ptr<FrameBuffer> create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<FrameBuffer> create_frame_buffer() override;
+    void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) override;
 
     // -----------------------------------------------------------------------
     // Internal accessors
@@ -112,7 +112,8 @@ private:
     VulkanPhysicalDevice* m_physicalDevice;
     VulkanQueue* m_queue;
     uint32_t m_framesInFlight;
-    uint32_t m_currentFrame{0};
+    uint32_t m_frameCounter{0};
+    uint32_t m_frameIndex{0};
     uint32_t m_currentImage{0};
 
     // Per-frame CPU-GPU fences (owned here, not in the swapchain)
@@ -140,10 +141,7 @@ private:
     std::unique_ptr<VulkanDescriptorSetLayoutCache> m_descriptorSetLayoutCache;
     std::unique_ptr<VulkanSamplerCache> m_samplerCache;
 
-    /// Deferred-deletion queue — destroyed after each frame's fence wait so the
-    /// GPU is guaranteed to have finished using the resources before they vanish.
-    /// Stored as shared_ptr so custom deleters can capture it safely.
-    std::shared_ptr<VulkanDeletionQueue> m_deletionQueue;
+    VulkanDeletionQueue m_deletionQueue;
 };
 
 }// namespace duk::rhi

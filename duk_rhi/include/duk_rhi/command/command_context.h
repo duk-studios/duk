@@ -168,22 +168,20 @@ public:
     /// Upload raw pixel data into an image, recording a staging copy into the current command buffer.
     virtual void write_image(Image* image, const void* src, size_t size) = 0;
 
-    /// Convenience overload — reads all bytes from the data source and delegates to the raw overload.
-    virtual void write_image(Image* image, const ImageDataSource* dataSource) = 0;
-
     struct DescriptorSetCreateInfo {
         DescriptorSetDescription description;
     };
 
     DUK_NO_DISCARD virtual std::shared_ptr<DescriptorSet> create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) = 0;
 
-    struct FrameBufferCreateInfo {
-        RenderPass* renderPass;
-        Image** attachments;
-        uint32_t attachmentCount;
-    };
+    /// Creates an empty FrameBuffer object. No VkFramebuffer is allocated until
+    /// write_frame_buffer() is called.
+    DUK_NO_DISCARD virtual std::shared_ptr<FrameBuffer> create_frame_buffer() = 0;
 
-    DUK_NO_DISCARD virtual std::shared_ptr<FrameBuffer> create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) = 0;
+    /// Builds or rebuilds the underlying GPU framebuffer for the given attachments.
+    /// If the framebuffer was previously written its old GPU handle is deferred for
+    /// destruction until the current frame's GPU fence is signalled.
+    virtual void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) = 0;
 };
 
 }// namespace duk::rhi

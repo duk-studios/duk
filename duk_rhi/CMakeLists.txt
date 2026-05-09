@@ -73,14 +73,14 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_vertex.cpp
         src/duk_rhi/vulkan/vulkan_command_context.h
         src/duk_rhi/vulkan/vulkan_command_context.cpp
+        src/duk_rhi/vulkan/vulkan_deletion_queue.h
+        src/duk_rhi/vulkan/vulkan_deletion_queue.cpp
         src/duk_rhi/vulkan/vulkan_buffer.h
         src/duk_rhi/vulkan/vulkan_buffer.cpp
         src/duk_rhi/vulkan/vulkan_descriptor_set.cpp
         src/duk_rhi/vulkan/vulkan_descriptor_set.h
         src/duk_rhi/vulkan/vulkan_rhi_capabilities.h
         src/duk_rhi/vulkan/vulkan_rhi_capabilities.cpp
-        src/duk_rhi/vulkan/command/vulkan_command_queue.h
-        src/duk_rhi/vulkan/command/vulkan_command_queue.cpp
         src/duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h
         src/duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.cpp
         src/duk_rhi/vulkan/pipeline/vulkan_shader.h

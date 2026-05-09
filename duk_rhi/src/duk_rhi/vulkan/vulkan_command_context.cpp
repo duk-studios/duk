@@ -86,7 +86,7 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
     , m_queue(createInfo.queue)
     , m_framesInFlight(createInfo.framesInFlight)
     , m_swapchain(std::move(swapchain))
-    , m_deletionQueue(std::make_shared<VulkanDeletionQueue>()) {
+    , m_deletionQueue(m_framesInFlight) {
 
     // -----------------------------------------------------------------------
     // Descriptor layout cache and sampler cache
@@ -166,18 +166,18 @@ VulkanCommandContext::~VulkanCommandContext() {
 }
 
 void VulkanCommandContext::update() {
-    m_currentFrame = (m_currentFrame + 1) % m_framesInFlight;
+    m_frameIndex = (++m_frameCounter) % m_framesInFlight;
 
     // CPU-GPU sync: wait for the GPU to finish with this frame slot's previous work
-    vkWaitForFences(m_device, 1, &m_fences[m_currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+    vkWaitForFences(m_device, 1, &m_fences[m_frameIndex], VK_TRUE, std::numeric_limits<uint64_t>::max());
 
     // The GPU has finished with resources submitted in this frame slot.
     // It is now safe to destroy anything that was queued for deletion.
-    m_deletionQueue->flush();
+    m_deletionQueue.flush(m_frameCounter);
 
     if (m_swapchain != nullptr) {
-        m_currentImage = m_swapchain->acquire_next_image(m_currentFrame);
-        auto& frameSync = m_swapchain->frame_sync(m_currentFrame);
+        m_currentImage = m_swapchain->acquire_next_image(m_frameIndex);
+        auto& frameSync = m_swapchain->frame_sync(m_frameIndex);
         m_imageAvailableSemaphore = frameSync.imageAvailableSemaphore;
         m_renderFinishedSemaphore = frameSync.renderFinishedSemaphore;
         m_swapchainImageAcquired = true;
@@ -236,11 +236,11 @@ void VulkanCommandContext::flush() {
     submitInfo.pSignalSemaphores = signalSemaphores.data();
 
     // Reset the fence so it can be signalled by this submit
-    vkResetFences(m_device, 1, &m_fences[m_currentFrame]);
-    m_queue->submit(1, &submitInfo, m_fences[m_currentFrame]);
+    vkResetFences(m_device, 1, &m_fences[m_frameIndex]);
+    m_queue->submit(1, &submitInfo, m_fences[m_frameIndex]);
 
     if (m_swapchain != nullptr) {
-        m_swapchain->present(m_currentImage, m_currentFrame);
+        m_swapchain->present(m_currentImage, m_frameIndex);
     }
 
     m_timelineValue = nextTimelineValue;
@@ -251,7 +251,7 @@ void VulkanCommandContext::flush() {
 
 VkCommandBuffer VulkanCommandContext::current_command_buffer() {
     if (m_activeCommandBuffer == VK_NULL_HANDLE) {
-        m_activeCommandBuffer = m_commandBuffers[m_currentFrame];
+        m_activeCommandBuffer = m_commandBuffers[m_frameIndex];
         m_currentPipelineLayout = VK_NULL_HANDLE;
         m_currentPipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 
@@ -492,7 +492,7 @@ void VulkanCommandContext::write_buffer(Buffer* buffer, const void* src, size_t 
         vkCmdCopyBuffer(current_command_buffer(), staging->handle(), vulkanBuffer->handle(), 1, &region);
 
         // Keep the staging buffer alive until the GPU has finished using it.
-        m_deletionQueue->push(staging);
+        m_deletionQueue.push(staging);
     }
 }
 
@@ -546,14 +546,7 @@ void VulkanCommandContext::write_image(Image* image, const void* src, size_t siz
 
     VulkanImage::copy_buffer_to_image(current_command_buffer(), copyInfo);
 
-    m_deletionQueue->push(staging);
-}
-
-void VulkanCommandContext::write_image(Image* image, const ImageDataSource* dataSource) {
-    const size_t dataSize = dataSource->byte_count();
-    std::vector<uint8_t> pixels(dataSize);
-    dataSource->read_bytes(pixels.data(), dataSize, 0);
-    write_image(image, pixels.data(), dataSize);
+    m_deletionQueue.push(staging);
 }
 
 std::shared_ptr<DescriptorSet> VulkanCommandContext::create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) {
@@ -565,22 +558,25 @@ std::shared_ptr<DescriptorSet> VulkanCommandContext::create_descriptor_set(const
     return make_managed(new VulkanDescriptorSet(vulkanDescriptorSetCreateInfo));
 }
 
-std::shared_ptr<FrameBuffer> VulkanCommandContext::create_frame_buffer(const FrameBufferCreateInfo& frameBufferCreateInfo) {
-    VulkanFrameBufferCreateInfo vulkanFrameBufferCreateInfo = {};
-    vulkanFrameBufferCreateInfo.device = m_device;
-    vulkanFrameBufferCreateInfo.renderPass = static_cast<VulkanRenderPass*>(frameBufferCreateInfo.renderPass);
-    vulkanFrameBufferCreateInfo.attachments = reinterpret_cast<VulkanImage**>(frameBufferCreateInfo.attachments);
-    vulkanFrameBufferCreateInfo.attachmentCount = frameBufferCreateInfo.attachmentCount;
-    vulkanFrameBufferCreateInfo.imageIndex = m_currentImage;
-    return make_managed(new VulkanFrameBuffer(vulkanFrameBufferCreateInfo));
+std::shared_ptr<FrameBuffer> VulkanCommandContext::create_frame_buffer() {
+    return make_managed(new VulkanFrameBuffer());
+}
+
+void VulkanCommandContext::write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) {
+    auto* vulkanFrameBuffer = static_cast<VulkanFrameBuffer*>(frameBuffer);
+
+    vulkanFrameBuffer->write(
+        reinterpret_cast<const VulkanImage* const*>(attachments),
+        attachmentCount
+    );
 }
 
 uint32_t VulkanCommandContext::current_frame() const {
-    return m_currentFrame;
+    return m_frameIndex;
 }
 
 const uint32_t* VulkanCommandContext::current_frame_ptr() const {
-    return &m_currentFrame;
+    return &m_frameIndex;
 }
 
 uint32_t VulkanCommandContext::current_image() const {

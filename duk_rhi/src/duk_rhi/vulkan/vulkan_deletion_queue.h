@@ -19,11 +19,9 @@ namespace duk::rhi {
 /// VulkanDeletionQueue is intentionally NOT copyable and NOT thread-safe.
 class VulkanDeletionQueue {
 public:
-    VulkanDeletionQueue() = default;
+    explicit VulkanDeletionQueue(uint32_t framesInFlight);
 
-    ~VulkanDeletionQueue() {
-        flush();
-    }
+    ~VulkanDeletionQueue();
 
     VulkanDeletionQueue(const VulkanDeletionQueue&) = delete;
     VulkanDeletionQueue& operator=(const VulkanDeletionQueue&) = delete;
@@ -34,31 +32,28 @@ public:
     /// Enqueue a heap-allocated resource for deferred destruction.
     /// The queue takes ownership of ptr; flush() will call `delete ptr`.
     template<typename T>
-    void push(T* ptr) {
-        m_pending.emplace_back([ptr] {
+    void push(T* ptr, uint32_t currentFrame) {
+        m_entries.emplace_back(currentFrame + m_framesInFlight, [ptr] {
             delete ptr;
         });
     }
 
     /// Destroy all pending resources by calling their typed deleters.
     /// Safe to call at any time; typically called after a per-frame fence wait.
-    void flush() {
-        for (auto& deleter : m_pending) {
-            deleter();
-        }
-        m_pending.clear();
-    }
+    void flush(uint32_t frameCounter);
 
-    DUK_NO_DISCARD bool empty() const {
-        return m_pending.empty();
-    }
+    DUK_NO_DISCARD bool empty() const;
 
-    DUK_NO_DISCARD std::size_t size() const {
-        return m_pending.size();
-    }
+    DUK_NO_DISCARD std::size_t size() const;
 
 private:
-    std::vector<std::function<void()>> m_pending;
+    struct DeletionEntry {
+        uint32_t deletionFrame{0};
+        std::function<void()> deleter;
+    };
+
+    uint32_t m_framesInFlight;
+    std::vector<DeletionEntry> m_entries;
 };
 
 }// namespace duk::rhi

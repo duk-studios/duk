@@ -23,7 +23,7 @@ public:
 
     DUK_NO_DISCARD virtual glm::uvec2 size() const = 0;
 
-    DUK_NO_DISCARD virtual Image* at(uint32_t attachment) const = 0;
+    DUK_NO_DISCARD virtual const Image* at(uint32_t attachment) const = 0;
 };
 
 }// namespace duk::rhi
