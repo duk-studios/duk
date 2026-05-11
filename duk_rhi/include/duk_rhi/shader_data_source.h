@@ -5,7 +5,7 @@
 #define DUK_RHI_SHADER_DATA_SOURCE_H
 
 #include <duk_rhi/descriptor.h>
-#include <duk_rhi/pipeline/shader.h>
+#include <../shader.h>
 #include <duk_rhi/vertex_layout.h>
 
 #include <duk_hash/data_source.h>

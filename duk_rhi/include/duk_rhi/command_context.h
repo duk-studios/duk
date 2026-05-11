@@ -5,15 +5,14 @@
 
 #include <duk_rhi/buffer.h>
 #include <duk_rhi/descriptor_set.h>
-#include <duk_rhi/frame_buffer.h>
 #include <duk_rhi/image.h>
 #include <duk_rhi/image_data_source.h>
 #include <duk_rhi/pipeline/compute_pipeline.h>
-#include <duk_rhi/pipeline/graphics_pipeline.h>
 #include <duk_rhi/pipeline/pipeline_flags.h>
+#include <duk_rhi/pipeline/pipeline_state.h>
 #include <duk_rhi/pipeline/shader.h>
 #include <duk_rhi/pipeline/shader_data_source.h>
-#include <duk_rhi/render_pass.h>
+#include <duk_rhi/command/pipeline_state_stack.h>
 
 #include <duk_macros/macros.h>
 
@@ -28,28 +27,30 @@ class CommandQueue;
 /// logical device and drives all GPU work
 class CommandContext {
 public:
-    virtual ~CommandContext() = default;
+    virtual ~CommandContext();
+
+    //-------------------------------------------------------------------------
+    // Pipeline state
+    //-------------------------------------------------------------------------
+
+    /// Returns the pipeline state stack for this context.
+    /// Use push()/pop() to save/restore state; modify top() to set rendering state.
+    PipelineStateStack& pipeline_state_stack();
 
     //-------------------------------------------------------------------------
     // Frame management
     //-------------------------------------------------------------------------
 
     /// Called once per frame, waits for the previous frame submission and resets
-    /// state for a new fresh frame
+    /// state for a new fresh frame.
     virtual void update() = 0;
 
-    /// Submits all recorded commands to the GPU, presents to screen if applicable
+    /// Submits all recorded commands to the GPU, presents to screen if applicable.
     virtual void flush() = 0;
 
     //-------------------------------------------------------------------------
     // Command recording
     //-------------------------------------------------------------------------
-
-    virtual void begin_render_pass(RenderPass* renderPass, FrameBuffer* frameBuffer) = 0;
-
-    virtual void end_render_pass() = 0;
-
-    virtual void bind_graphics_pipeline(GraphicsPipeline* pipeline) = 0;
 
     virtual void bind_compute_pipeline(ComputePipeline* pipeline) = 0;
 
@@ -111,33 +112,11 @@ public:
 
     DUK_NO_DISCARD virtual std::shared_ptr<Shader> create_shader(const ShaderCreateInfo& shaderCreateInfo) = 0;
 
-    struct GraphicsPipelineCreateInfo {
-        Shader* shader;
-        RenderPass* renderPass;
-        GraphicsPipeline::Viewport viewport;
-        GraphicsPipeline::Scissor scissor;
-        GraphicsPipeline::CullMode::Mask cullModeMask;
-        GraphicsPipeline::Blend blend;
-        GraphicsPipeline::Topology topology;
-        GraphicsPipeline::FillMode fillMode;
-        bool depthTesting;
-    };
-
-    DUK_NO_DISCARD virtual std::shared_ptr<GraphicsPipeline> create_graphics_pipeline(const GraphicsPipelineCreateInfo& pipelineCreateInfo) = 0;
-
     struct ComputePipelineCreateInfo {
         Shader* shader;
     };
 
     DUK_NO_DISCARD virtual std::shared_ptr<ComputePipeline> create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) = 0;
-
-    struct RenderPassCreateInfo {
-        AttachmentDescription* colorAttachments;
-        uint32_t colorAttachmentCount;
-        AttachmentDescription* depthAttachment;
-    };
-
-    DUK_NO_DISCARD virtual std::shared_ptr<RenderPass> create_render_pass(const RenderPassCreateInfo& renderPassCreateInfo) = 0;
 
     struct BufferCreateInfo {
         Buffer::Type type;
@@ -174,14 +153,8 @@ public:
 
     DUK_NO_DISCARD virtual std::shared_ptr<DescriptorSet> create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) = 0;
 
-    /// Creates an empty FrameBuffer object. No VkFramebuffer is allocated until
-    /// write_frame_buffer() is called.
-    DUK_NO_DISCARD virtual std::shared_ptr<FrameBuffer> create_frame_buffer() = 0;
-
-    /// Builds or rebuilds the underlying GPU framebuffer for the given attachments.
-    /// If the framebuffer was previously written its old GPU handle is deferred for
-    /// destruction until the current frame's GPU fence is signalled.
-    virtual void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) = 0;
+private:
+    PipelineStateStack m_pipelineStateStack;
 };
 
 }// namespace duk::rhi

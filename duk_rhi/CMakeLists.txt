@@ -2,50 +2,43 @@
 set(DUK_RHI_HEADERS
         include/duk_rhi/rhi.h
         include/duk_rhi/rhi_exception.h
-        include/duk_rhi/render_pass.h
         include/duk_rhi/frame_buffer.h
         include/duk_rhi/image.h
         include/duk_rhi/pixel.h
         include/duk_rhi/sampler.h
         include/duk_rhi/vertex_layout.h
-        include/duk_rhi/descriptor.h
         include/duk_rhi/buffer.h
-        include/duk_rhi/descriptor_set.h
         include/duk_rhi/image_data_source.h
         include/duk_rhi/rhi_capabilities.h
         include/duk_rhi/index_types.h
-        include/duk_rhi/pipeline/graphics_pipeline.h
-        include/duk_rhi/pipeline/shader.h
-        include/duk_rhi/pipeline/shader_data_source.h
-        include/duk_rhi/pipeline/std_shader_data_source.h
-        include/duk_rhi/pipeline/compute_pipeline.h
-        include/duk_rhi/pipeline/pipeline_flags.h
-        include/duk_rhi/command/command_queue.h
-        include/duk_rhi/command/command_context.h
+        include/duk_rhi/pipeline_state.h
+        include/duk_rhi/shader.h
+        include/duk_rhi/shader_data_source.h
+        include/duk_rhi/std_shader_data_source.h
+        include/duk_rhi/pipeline_flags.h
+        include/duk_rhi/command_queue.h
+        include/duk_rhi/command_context.h
+        include/duk_rhi/pipeline_state_stack.h
         )
 
 set(DUK_RHI_SOURCES
         src/duk_rhi/rhi.cpp
         src/duk_rhi/rhi_exception.cpp
         src/duk_rhi/vertex_layout.cpp
-        src/duk_rhi/render_pass.cpp
         src/duk_rhi/frame_buffer.cpp
         src/duk_rhi/image.cpp
         src/duk_rhi/pixel.cpp
         src/duk_rhi/sampler.cpp
-        src/duk_rhi/descriptor.cpp
-        src/duk_rhi/buffer.cpp
-        src/duk_rhi/descriptor_set.cpp
         src/duk_rhi/index_types.cpp
-        src/duk_rhi/pipeline/graphics_pipeline.cpp
-        src/duk_rhi/pipeline/shader.cpp
-        src/duk_rhi/pipeline/shader.cpp
-        src/duk_rhi/pipeline/shader_data_source.cpp
-        src/duk_rhi/pipeline/std_shader_data_source.cpp
-        src/duk_rhi/pipeline/shader_reflection.h
-        src/duk_rhi/pipeline/shader_reflection.cpp
-        src/duk_rhi/pipeline/compute_pipeline.cpp
-        src/duk_rhi/command/command_queue.cpp
+        src/duk_rhi/shader.cpp
+        src/duk_rhi/shader.cpp
+        src/duk_rhi/shader_data_source.cpp
+        src/duk_rhi/std_shader_data_source.cpp
+        src/duk_rhi/shader_reflection.h
+        src/duk_rhi/shader_reflection.cpp
+        src/duk_rhi/command_queue.cpp
+        src/duk_rhi/command_context.cpp
+        src/duk_rhi/pipeline_state_stack.cpp
         src/duk_rhi/vulkan/vulkan_image.h
         src/duk_rhi/vulkan/vulkan_image.cpp
         src/duk_rhi/vulkan/vulkan_sampler.h
@@ -54,7 +47,6 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_import.cpp
         src/duk_rhi/vulkan/vulkan_physical_device.h
         src/duk_rhi/vulkan/vulkan_physical_device.cpp
-        src/duk_rhi/vulkan/vulkan_query_error.h
         src/duk_rhi/vulkan/vulkan_queue.h
         src/duk_rhi/vulkan/vulkan_queue.cpp
         src/duk_rhi/vulkan/vulkan_rhi.h
@@ -63,8 +55,6 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_swapchain.cpp
         src/duk_rhi/vulkan/vulkan_frame_buffer.h
         src/duk_rhi/vulkan/vulkan_frame_buffer.cpp
-        src/duk_rhi/vulkan/vulkan_render_pass.h
-        src/duk_rhi/vulkan/vulkan_render_pass.cpp
         src/duk_rhi/vulkan/vulkan_handle_pool.h
         src/duk_rhi/vulkan/vulkan_handle_pool.cpp
         src/duk_rhi/vulkan/vulkan_events.h
@@ -81,14 +71,6 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_descriptor_set.h
         src/duk_rhi/vulkan/vulkan_rhi_capabilities.h
         src/duk_rhi/vulkan/vulkan_rhi_capabilities.cpp
-        src/duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.h
-        src/duk_rhi/vulkan/pipeline/vulkan_graphics_pipeline.cpp
-        src/duk_rhi/vulkan/pipeline/vulkan_shader.h
-        src/duk_rhi/vulkan/pipeline/vulkan_shader.cpp
-        src/duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.h
-        src/duk_rhi/vulkan/pipeline/vulkan_compute_pipeline.cpp
-        src/duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.h
-        src/duk_rhi/vulkan/pipeline/vulkan_pipeline_flags.cpp
         )
 
 add_library(duk.rhi ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})
