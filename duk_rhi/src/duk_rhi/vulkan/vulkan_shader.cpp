@@ -1,13 +1,13 @@
 /// 17/05/2023
 /// vulkan_shader.cpp
 
-#include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
+#include <duk_rhi/vulkan/vulkan_shader.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_flags.h>
 #include <duk_rhi/vulkan/vulkan_vertex.h>
+#include <duk_rhi/shader_reflection.h>
 
 #include <stdexcept>
-#include <duk_rhi/pipeline/shader_reflection.h>
 
 namespace duk::rhi {
 

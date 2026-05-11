@@ -3,8 +3,8 @@
 
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
-#include <duk_rhi/vulkan/vulkan_render_pass.h>
 #include <duk_rhi/vulkan/vulkan_swapchain.h>
+#include <duk_rhi/vulkan/vulkan_queue.h>
 
 #include <duk_platform/window.h>
 
@@ -68,21 +68,13 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
     : m_instance(swapchainCreateInfo.instance)
     , m_device(swapchainCreateInfo.device)
     , m_physicalDevice(swapchainCreateInfo.physicalDevice)
-    , m_window(swapchainCreateInfo.window)
-    , m_presentQueue(swapchainCreateInfo.presentQueue)
-    , m_framesInFlight(swapchainCreateInfo.framesInFlight) {
-    create_platform_surface();
-    create_frame_sync();
+    , m_window(swapchainCreateInfo.window) {
+    create_surface();
     create();
-
-    m_listener.listen(m_window->window_resize_event, [this](auto, auto) {
-        m_requiresRecreation = true;
-    });
 }
 
 VulkanSwapchain::~VulkanSwapchain() {
     clean();
-    destroy_frame_sync();
     if (m_surface != VK_NULL_HANDLE) {
         vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
         m_surface = VK_NULL_HANDLE;
@@ -134,29 +126,29 @@ void VulkanSwapchain::create() {
         throw std::runtime_error("failed to create swapchain");
     }
 
-    VulkanSwapchainImageCreateInfo swapchainImageCreateInfo = {};
-    swapchainImageCreateInfo.device = m_device;
-    swapchainImageCreateInfo.format = m_surfaceFormat.format;
-    swapchainImageCreateInfo.width = m_extent.width;
-    swapchainImageCreateInfo.height = m_extent.height;
-    swapchainImageCreateInfo.swapchain = m_swapchain;
+    // extract images from swapchain
+    vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, nullptr);
 
-    m_image = std::make_unique<VulkanSwapchainImage>(swapchainImageCreateInfo);
+    std::vector<VkImage> swapchainImages;
+    swapchainImages.resize(imageCount);
+    vkGetSwapchainImagesKHR(m_device, m_swapchain, &imageCount, swapchainImages.data());
 
-    VulkanSwapchainCreateEventInfo swapchainInfo = {};
-    swapchainInfo.format = m_surfaceFormat.format;
-    swapchainInfo.extent = m_extent;
-    swapchainInfo.imageCount = m_image->image_count();
-    swapchainInfo.swapchain = m_swapchain;
+    m_images.resize(imageCount);
 
-    m_swapchainCreateEvent(swapchainInfo);
+    VulkanExternalImageCreateInfo externalImageCreateInfo = {};
+    externalImageCreateInfo.device = m_device;
+    externalImageCreateInfo.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+    externalImageCreateInfo.format = m_surfaceFormat.format;
+    externalImageCreateInfo.width = m_extent.width;
+    externalImageCreateInfo.height = m_extent.height;
+    for (auto i = 0; i < imageCount; i++) {
+        externalImageCreateInfo.image = swapchainImages[i];
+        m_images[i] = std::make_unique<VulkanImage>(externalImageCreateInfo);
+    }
 }
 
 void VulkanSwapchain::clean() {
-    m_swapchainCleanEvent();
-
-    m_image.reset();
-
+    m_images.clear();
     if (m_swapchain) {
         vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
         m_swapchain = VK_NULL_HANDLE;
@@ -164,76 +156,56 @@ void VulkanSwapchain::clean() {
 }
 
 void VulkanSwapchain::recreate() {
-    vkDeviceWaitIdle(m_device);
+    if (m_window->minimized() || !m_window->valid()) {
+        return;
+    }
     clean();
     create();
 }
 
-uint32_t VulkanSwapchain::acquire_next_image(uint32_t frameIndex) {
-    auto& sync = m_frameSync[frameIndex];
-
-
-    if (m_requiresRecreation && !m_window->minimized()) {
-        vkDeviceWaitIdle(m_device);
-        recreate();
-        m_requiresRecreation = false;
-    }
-
-    auto result = vkAcquireNextImageKHR(
+VkResult VulkanSwapchain::acquire_next_image(const VkSemaphore signalSemaphore) {
+    return vkAcquireNextImageKHR(
             m_device,
             m_swapchain,
             std::numeric_limits<uint64_t>::max(),
-            sync.imageAvailableSemaphore,
+            signalSemaphore,
             VK_NULL_HANDLE,
-            &m_currentImage);
-
-    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        m_requiresRecreation = true;
-        m_ableToPresent = false;
-        return m_currentImage;
-    }
-
-    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-        throw std::runtime_error("failed to acquire swapchain image");
-    }
-
-    m_ableToPresent = true;
-    return m_currentImage;
+            &m_imageIndex);
 }
 
-void VulkanSwapchain::present(uint32_t imageIndex, uint32_t frameIndex) {
-    if (!m_ableToPresent) {
-        return;
-    }
-
-    auto& sync = m_frameSync[frameIndex];
+VkResult VulkanSwapchain::present(VulkanQueue& queue, VkSemaphore waitSemaphore) const {
 
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &sync.renderFinishedSemaphore;
+    presentInfo.pWaitSemaphores = &waitSemaphore;
     presentInfo.swapchainCount = 1;
-    auto swapchainHandle = m_swapchain;
-    presentInfo.pSwapchains = &swapchainHandle;
-    presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pSwapchains = &m_swapchain;
+    presentInfo.pImageIndices = &m_imageIndex;
 
-    auto result = vkQueuePresentKHR(m_presentQueue, &presentInfo);
-
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
-        m_requiresRecreation = true;
-    } else if (result != VK_SUCCESS) {
-        throw std::runtime_error("failed to present swapchain image");
-    }
+    return queue.present(presentInfo);
 }
 
-VulkanFrameSync& VulkanSwapchain::frame_sync(uint32_t frameIndex) {
-    return m_frameSync[frameIndex];
+uint32_t VulkanSwapchain::image_index() const {
+    return m_imageIndex;
 }
 
-void VulkanSwapchain::create_platform_surface() {
+uint32_t VulkanSwapchain::image_count() const {
+    return m_images.size();
+}
+
+VkExtent2D VulkanSwapchain::extent() const {
+    return m_extent;
+}
+
+VulkanImage* VulkanSwapchain::image(uint32_t imageIndex) const {
+    return m_images.at(imageIndex).get();
+}
+
+void VulkanSwapchain::create_surface() {
     DUK_ASSERT(m_window);
 #if DUK_PLATFORM_IS_WINDOWS
-    auto windowWin32 = dynamic_cast<platform::WindowWin32*>(m_window);
+    auto windowWin32 = dynamic_cast<const platform::WindowWin32*>(m_window);
     DUK_ASSERT(windowWin32);
 
     VkWin32SurfaceCreateInfoKHR win32SurfaceCreateInfo = {};
@@ -246,7 +218,7 @@ void VulkanSwapchain::create_platform_surface() {
         throw std::runtime_error("failed to create VkSurfaceKHR with vkCreateWin32SurfaceKHR");
     }
 #elif DUK_PLATFORM_IS_LINUX
-    auto windowXCB = dynamic_cast<platform::WindowXCB*>(m_window);
+    auto windowXCB = dynamic_cast<const platform::WindowXCB*>(m_window);
     DUK_ASSERT(windowXCB);
     VkXcbSurfaceCreateInfoKHR xcbSurfaceCreateInfo = {};
     xcbSurfaceCreateInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
@@ -257,58 +229,6 @@ void VulkanSwapchain::create_platform_surface() {
         throw std::runtime_error("failed to create VkSurfaceKHR with vkCreateXcbSurfaceKHR");
     }
 #endif
-}
-
-void VulkanSwapchain::create_frame_sync() {
-    m_frameSync.resize(m_framesInFlight);
-
-    VkSemaphoreCreateInfo semaphoreCreateInfo = {};
-    semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    for (auto& sync: m_frameSync) {
-        vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &sync.imageAvailableSemaphore);
-        vkCreateSemaphore(m_device, &semaphoreCreateInfo, nullptr, &sync.renderFinishedSemaphore);
-    }
-}
-
-void VulkanSwapchain::destroy_frame_sync() {
-    for (auto& sync: m_frameSync) {
-        vkDestroySemaphore(m_device, sync.imageAvailableSemaphore, nullptr);
-        vkDestroySemaphore(m_device, sync.renderFinishedSemaphore, nullptr);
-    }
-    m_frameSync.clear();
-}
-
-const uint32_t* VulkanSwapchain::current_image_ptr() const {
-    return &m_currentImage;
-}
-
-uint32_t VulkanSwapchain::image_count() const {
-    return m_image->image_count();
-}
-
-VkExtent2D VulkanSwapchain::extent() const {
-    return m_extent;
-}
-
-VkSwapchainKHR VulkanSwapchain::handle() const {
-    return m_swapchain;
-}
-
-Image* VulkanSwapchain::image() const {
-    return m_image.get();
-}
-
-VkSurfaceKHR VulkanSwapchain::vk_surface() const {
-    return m_surface;
-}
-
-VulkanSwapchainCreateEvent* VulkanSwapchain::create_event() {
-    return &m_swapchainCreateEvent;
-}
-
-VulkanSwapchainCleanEvent* VulkanSwapchain::clean_event() {
-    return &m_swapchainCleanEvent;
 }
 
 }// namespace duk::rhi

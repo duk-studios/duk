@@ -8,19 +8,17 @@
 #include <duk_macros/macros.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 
-#include <memory>
-#include <mutex>
+#include <shared_mutex>
 
 namespace duk::rhi {
 
+class VulkanRHI;
 
 struct VulkanQueueCreateInfo {
-    VkDevice device;
+    VulkanRHI* instance;
     VkQueueFlags flags;
     uint32_t familyIndex;
     uint32_t queueIndex;
-    /// Shared mutex for all VulkanQueue objects that wrap the same physical VkQueue.
-    std::shared_ptr<std::mutex> mutex;
 };
 
 /// Thin wrapper around a single VkQueue. Thread-safe: concurrent submit calls
@@ -29,10 +27,11 @@ class VulkanQueue {
 public:
     explicit VulkanQueue(const VulkanQueueCreateInfo& createInfo);
 
-    ~VulkanQueue() = default;
-
-    /// Submits command buffers to the queue, guarded by the shared mutex.
     VkResult submit(uint32_t submitCount, const VkSubmitInfo* submitInfos, VkFence fence);
+
+    VkResult present(const VkPresentInfoKHR& presentInfo);
+
+    void wait();
 
     DUK_NO_DISCARD VkQueue handle() const;
     DUK_NO_DISCARD uint32_t family_index() const;
@@ -40,11 +39,12 @@ public:
     DUK_NO_DISCARD VkQueueFlags flags() const;
 
 private:
+    VulkanRHI& m_instance;
     VkQueue m_handle;
     VkQueueFlags m_flags;
     uint32_t m_familyIndex;
     uint32_t m_queueIndex;
-    std::shared_ptr<std::mutex> m_mutex;
+    std::shared_mutex m_mutex;
 };
 
 }// namespace duk::rhi

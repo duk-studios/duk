@@ -8,13 +8,12 @@
 
 namespace duk::rhi {
 
-VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& ci)
-    : m_device(ci.device)
-    , m_physicalDevice(ci.physicalDevice)
-    , m_size(ci.size)
-    , m_usageFlags(ci.usageFlags)
-    , m_memoryFlags(ci.memoryFlags)
-    , m_indexType(ci.indexType) {
+VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& createInfo)
+    : m_device(createInfo.device)
+    , m_size(createInfo.size)
+    , m_usageFlags(createInfo.usageFlags)
+    , m_memoryFlags(createInfo.memoryFlags)
+    , m_indexType(createInfo.indexType) {
 
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -32,7 +31,7 @@ VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& ci)
     VkMemoryAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memReqs.size;
-    allocInfo.memoryTypeIndex = m_physicalDevice->find_memory_type(memReqs.memoryTypeBits, m_memoryFlags);
+    allocInfo.memoryTypeIndex = createInfo.physicalDevice->find_memory_type(memReqs.memoryTypeBits, m_memoryFlags);
 
     if (vkAllocateMemory(m_device, &allocInfo, nullptr, &m_memory) != VK_SUCCESS) {
         throw std::runtime_error("VulkanBuffer: failed to allocate VkDeviceMemory");

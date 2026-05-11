@@ -4,7 +4,7 @@
 #ifndef DUK_RHI_COMMAND_QUEUE_H
 #define DUK_RHI_COMMAND_QUEUE_H
 
-#include <../command_context.h>
+#include <duk_rhi/command_context.h>
 
 #include <duk_task/task_queue.h>
 

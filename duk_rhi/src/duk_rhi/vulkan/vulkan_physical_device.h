@@ -7,9 +7,7 @@
 
 #include <duk_macros/macros.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
-#include <duk_rhi/vulkan/vulkan_query_error.h>
 
-#include <memory>
 #include <span>
 #include <vector>
 

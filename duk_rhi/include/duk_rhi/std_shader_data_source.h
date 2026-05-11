@@ -4,7 +4,7 @@
 #ifndef DUK_RHI_STD_SHADER_DATA_SOURCE_H
 #define DUK_RHI_STD_SHADER_DATA_SOURCE_H
 
-#include <../shader_data_source.h>
+#include <duk_rhi/shader_data_source.h>
 
 namespace duk::rhi {
 

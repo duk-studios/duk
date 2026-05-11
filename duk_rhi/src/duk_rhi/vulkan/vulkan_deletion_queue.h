@@ -3,6 +3,8 @@
 #ifndef DUK_RHI_VULKAN_DELETION_QUEUE_H
 #define DUK_RHI_VULKAN_DELETION_QUEUE_H
 
+#include <duk_rhi/vulkan/vulkan_import.h>
+
 #include <duk_macros/macros.h>
 
 #include <functional>
@@ -30,13 +32,8 @@ public:
     VulkanDeletionQueue& operator=(VulkanDeletionQueue&&) = default;
 
     /// Enqueue a heap-allocated resource for deferred destruction.
-    /// The queue takes ownership of ptr; flush() will call `delete ptr`.
     template<typename T>
-    void push(T* ptr, uint32_t currentFrame) {
-        m_entries.emplace_back(currentFrame + m_framesInFlight, [ptr] {
-            delete ptr;
-        });
-    }
+    void push(T* ptr, uint32_t currentFrame);
 
     /// Destroy all pending resources by calling their typed deleters.
     /// Safe to call at any time; typically called after a per-frame fence wait.
@@ -55,6 +52,13 @@ private:
     uint32_t m_framesInFlight;
     std::vector<DeletionEntry> m_entries;
 };
+
+template<typename T>
+void VulkanDeletionQueue::push(T* ptr, uint32_t currentFrame) {
+    m_entries.emplace_back(currentFrame + m_framesInFlight, [ptr] {
+        delete ptr;
+    });
+}
 
 }// namespace duk::rhi
 

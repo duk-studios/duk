@@ -1,8 +1,8 @@
 /// 21/04/2023
 /// command_queue.cpp
 
-#include <duk_rhi/command/command_queue.h>
-#include <duk_rhi/command/command_context.h>
+#include <duk_rhi/command_queue.h>
+#include <duk_rhi/command_context.h>
 
 namespace duk::rhi {
 

@@ -79,7 +79,7 @@ static VkBool32 debug_callback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSev
 }
 
 static std::vector<const char*> query_device_extensions() {
-    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_ROBUSTNESS_2_EXTENSION_NAME, VK_KHR_TIMELINE_SEMAPHORE_EXTENSION_NAME};
+    return {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_EXT_ROBUSTNESS_2_EXTENSION_NAME};
 }
 
 struct ResolvedQueue {
@@ -164,24 +164,15 @@ static VulkanQueue* find_queue(VkPhysicalDevice physicalDevice, const std::vecto
     return nullptr;
 }
 
-static std::vector<std::shared_ptr<VulkanQueue>> create_vulkan_queues(VkDevice device, const ResolvedQueues& resolved) {
-    std::unordered_map<uint64_t, std::shared_ptr<std::mutex>> queueMutexes;
+static std::vector<std::shared_ptr<VulkanQueue>> create_vulkan_queues(VulkanRHI& instance, const ResolvedQueues& resolved) {
     std::vector<std::shared_ptr<VulkanQueue>> queues;
 
     for (const auto& r : resolved.queues) {
-        auto key = (static_cast<uint64_t>(r.familyIndex) << 32) | r.queueIndex;
-        auto& mutex = queueMutexes[key];
-        if (!mutex) {
-            mutex = std::make_shared<std::mutex>();
-        }
-
         VulkanQueueCreateInfo queueCreateInfo = {};
-        queueCreateInfo.device = device;
+        queueCreateInfo.instance = &instance;
         queueCreateInfo.flags = r.flags;
         queueCreateInfo.familyIndex = r.familyIndex;
         queueCreateInfo.queueIndex = r.queueIndex;
-        queueCreateInfo.mutex = mutex;
-
         queues.push_back(std::make_shared<VulkanQueue>(queueCreateInfo));
     }
 
@@ -250,7 +241,7 @@ VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& createInfo)
 
     auto resolved = detail::resolve_queues(m_physicalDevice.get());
     m_device = detail::create_vk_device(m_physicalDevice.get(), resolved.createInfos, createInfo.hasValidationLayers);
-    m_queues = detail::create_vulkan_queues(m_device, resolved);
+    m_queues = detail::create_vulkan_queues(*this, resolved);
 }
 
 VulkanRHI::~VulkanRHI() {
@@ -279,19 +270,37 @@ std::shared_ptr<CommandQueue> VulkanRHI::create_command_queue(const CommandQueue
         swapchainCreateInfo.instance = m_instance;
         swapchainCreateInfo.device = m_device;
         swapchainCreateInfo.physicalDevice = m_physicalDevice.get();
-        swapchainCreateInfo.window = const_cast<platform::Window*>(commandQueueCreateInfo.window);
-        swapchainCreateInfo.presentQueue = queue->handle();
-        swapchainCreateInfo.framesInFlight = m_framesInFlight;
+        swapchainCreateInfo.window = commandQueueCreateInfo.window;
         swapchain = std::make_unique<VulkanSwapchain>(swapchainCreateInfo);
     }
 
     VulkanCommandContextCreateInfo commandContextInfo = {};
-    commandContextInfo.device = m_device;
+    commandContextInfo.instance = this;
     commandContextInfo.physicalDevice = m_physicalDevice.get();
     commandContextInfo.queue = queue;
     commandContextInfo.framesInFlight = m_framesInFlight;
 
     return std::make_shared<CommandQueue>(std::make_unique<VulkanCommandContext>(commandContextInfo, std::move(swapchain)));
+}
+
+std::unique_lock<std::shared_mutex> VulkanRHI::unique_device_lock() {
+    return std::unique_lock(m_deviceMutex);
+}
+
+std::shared_lock<std::shared_mutex> VulkanRHI::shared_device_lock() {
+    return std::shared_lock(m_deviceMutex);
+}
+
+VkResult VulkanRHI::wait_idle() const {
+    return vkDeviceWaitIdle(m_device);
+}
+
+VkInstance VulkanRHI::handle() const {
+    return m_instance;
+}
+
+VkDevice VulkanRHI::device() const {
+    return m_device;
 }
 
 void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& createInfo) {

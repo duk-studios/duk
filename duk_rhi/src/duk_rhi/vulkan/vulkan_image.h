@@ -10,6 +10,8 @@
 
 #include <duk_macros/macros.h>
 
+#include <span>
+
 namespace duk::rhi {
 
 VkFormat convert_pixel_format(PixelFormat format);
@@ -25,7 +27,7 @@ VkFormatFeatureFlags usage_format_features(Image::Usage usage);
 /// public API enums before filling this struct.
 struct VulkanMemoryImageCreateInfo {
     VkDevice device;
-    VulkanPhysicalDevice* physicalDevice;
+    const VulkanPhysicalDevice* physicalDevice;
     VkFormat format;
     uint32_t width;
     uint32_t height;
@@ -47,7 +49,7 @@ struct VulkanExternalImageCreateInfo {
 
 class VulkanImage : public Image {
 public:
-    explicit VulkanImage(const VulkanMemoryImageCreateInfo& ci);
+    explicit VulkanImage(const VulkanMemoryImageCreateInfo& createInfo);
 
     explicit VulkanImage(const VulkanExternalImageCreateInfo& ci);
 
@@ -73,30 +75,40 @@ public:
 
     DUK_NO_DISCARD VkImageAspectFlags image_aspect() const;
 
+    DUK_NO_DISCARD VkImageLayout current_layout() const;
+
+    /// Updates the tracked layout without emitting a barrier.
+    /// Use this when a render pass or other implicit Vulkan mechanism already
+    /// performs the transition (e.g. after vkCmdBeginRenderPass).
+    void set_layout(VkImageLayout layout) const;
+
+    // -----------------------------------------------------------------------
+    // Instance layout transition
+    // -----------------------------------------------------------------------
+
+    /// Transitions this image to \p newLayout, recording a pipeline barrier into
+    /// \p commandBuffer. No-op if the image is already in \p newLayout.
+    void transition_to(VkCommandBuffer commandBuffer,
+                       VkImageLayout newLayout,
+                       VkPipelineStageFlags srcStageMask,
+                       VkPipelineStageFlags dstStageMask);
+
     // -----------------------------------------------------------------------
     // Static utility methods
     // -----------------------------------------------------------------------
 
-    struct TransitionImageLayoutInfo {
-        VkImageLayout oldLayout;
+    /// Entry for batch layout transitions via transition_images_to().
+    struct BulkTransitionEntry {
+        VulkanImage* image;
         VkImageLayout newLayout;
-        VkImageSubresourceRange subresourceRange;
         VkPipelineStageFlags srcStageMask;
         VkPipelineStageFlags dstStageMask;
-        VkImage image;
     };
 
-    static void transition_image_layout(VkCommandBuffer commandBuffer, const TransitionImageLayoutInfo& info);
-
-    struct CopyBufferToImageInfo {
-        VkBuffer buffer;
-        VkImage image;
-        uint32_t width;
-        uint32_t height;
-        VkImageSubresourceRange subresourceRange;
-    };
-
-    static void copy_buffer_to_image(VkCommandBuffer commandBuffer, const CopyBufferToImageInfo& info);
+    /// Transitions every entry in \p entries to its requested layout in a single
+    /// vkCmdPipelineBarrier call. Entries whose image is already in the target
+    /// layout are silently skipped.
+    static void transition_images_to(VkCommandBuffer commandBuffer, std::span<BulkTransitionEntry> entries);
 
 private:
     VkDevice m_device;
@@ -108,6 +120,7 @@ private:
     VkImage m_image{VK_NULL_HANDLE};
     VkImageView m_imageView{VK_NULL_HANDLE};
     VkDeviceMemory m_memory{VK_NULL_HANDLE}; ///< VK_NULL_HANDLE for external images.
+    mutable VkImageLayout m_layout{VK_IMAGE_LAYOUT_UNDEFINED}; ///< Tracked current layout (mutable: updated by render passes and barriers).
 };
 
 }// namespace duk::rhi

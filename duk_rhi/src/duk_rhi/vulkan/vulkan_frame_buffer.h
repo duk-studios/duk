@@ -18,6 +18,8 @@ public:
 
     void write(const VulkanImage* const* attachments, uint32_t attachmentCount);
 
+    DUK_NO_DISCARD uint32_t attachment_count() const;
+
     DUK_NO_DISCARD uint32_t width() const override;
 
     DUK_NO_DISCARD uint32_t height() const override;

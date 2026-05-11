@@ -32,6 +32,16 @@ public:
 
     DUK_NO_DISCARD std::shared_ptr<CommandQueue> create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
 
+    DUK_NO_DISCARD std::unique_lock<std::shared_mutex> unique_device_lock();
+
+    DUK_NO_DISCARD std::shared_lock<std::shared_mutex> shared_device_lock();
+
+    VkResult wait_idle() const;
+
+    VkInstance handle() const;
+
+    VkDevice device() const;
+
 private:
     void create_vk_instance(const VulkanRHICreateInfo& createInfo);
 
@@ -45,6 +55,7 @@ private:
     std::unique_ptr<VulkanRendererCapabilities> m_rendererCapabilities;
     VkDevice m_device;
     std::vector<std::shared_ptr<VulkanQueue>> m_queues;
+    std::shared_mutex m_deviceMutex;
 };
 
 }// namespace duk::rhi

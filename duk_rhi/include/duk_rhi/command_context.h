@@ -4,15 +4,16 @@
 #define DUK_RHI_COMMAND_CONTEXT_H
 
 #include <duk_rhi/buffer.h>
-#include <duk_rhi/descriptor_set.h>
 #include <duk_rhi/image.h>
-#include <duk_rhi/image_data_source.h>
-#include <duk_rhi/pipeline/compute_pipeline.h>
-#include <duk_rhi/pipeline/pipeline_flags.h>
-#include <duk_rhi/pipeline/pipeline_state.h>
-#include <duk_rhi/pipeline/shader.h>
-#include <duk_rhi/pipeline/shader_data_source.h>
-#include <duk_rhi/command/pipeline_state_stack.h>
+#include <duk_rhi/sampler.h>
+#include <duk_rhi/frame_buffer.h>
+#include <duk_rhi/pipeline_flags.h>
+#include <duk_rhi/pipeline_state.h>
+#include <duk_rhi/shader.h>
+#include <duk_rhi/shader_data_source.h>
+#include <duk_rhi/pipeline_state_stack.h>
+
+#include <array>
 
 #include <duk_macros/macros.h>
 
@@ -49,58 +50,66 @@ public:
     virtual void flush() = 0;
 
     //-------------------------------------------------------------------------
-    // Command recording
+    // Render commands
     //-------------------------------------------------------------------------
 
-    virtual void bind_compute_pipeline(ComputePipeline* pipeline) = 0;
-
-    virtual void bind_vertex_buffer(const Buffer** buffers, uint32_t bufferCount, uint32_t firstBinding) = 0;
-
-    virtual void bind_index_buffer(const Buffer* buffer) = 0;
-
-    virtual void bind_descriptor_set(DescriptorSet* descriptorSet, uint32_t setIndex) = 0;
-
-    virtual void draw(uint32_t vertexCount, uint32_t instanceCount, uint32_t firstVertex, uint32_t firstInstance) = 0;
-
-    virtual void draw_indexed(uint32_t indexCount, uint32_t instanceCount, uint32_t firstIndex, int32_t vertexOffset, uint32_t firstInstance) = 0;
-
-    virtual void draw_indirect(const Buffer* buffer, size_t offset, uint32_t drawCount) = 0;
-
-    virtual void draw_indirect_indexed(const Buffer* buffer, size_t offset, uint32_t drawCount) = 0;
-
-    virtual void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) = 0;
-
-    struct BufferMemoryBarrier {
-        PipelineStage::Mask srcStageMask;
-        Access::Mask srcAccessMask;
-        PipelineStage::Mask dstStageMask;
-        Access::Mask dstAccessMask;
-        CommandQueue* srcCommandQueue;
-        CommandQueue* dstCommandQueue;
-        Buffer* buffer;
-        size_t offset;
-        size_t size;
+    struct ShaderResources {
+        std::array<Sampler, 16> samplers;
+        std::array<const Image*, 16> sampledImages;
+        std::array<const Image*, 16> storageImages;
+        std::array<const Buffer*, 16> storageBuffers;
+        std::array<const Buffer*, 16> uniformBuffers;
     };
 
-    struct ImageMemoryBarrier {
-        PipelineStage::Mask srcStageMask;
-        Access::Mask srcAccessMask;
-        PipelineStage::Mask dstStageMask;
-        Access::Mask dstAccessMask;
-        CommandQueue* srcCommandQueue;
-        CommandQueue* dstCommandQueue;
-        Image* image;
-        Image::SubresourceRange subresourceRange;
+    // used for both render and compute shaders
+    struct BindShaderParams {
+        const Shader* shader{nullptr};
+        const ShaderResources* resources{nullptr};
     };
 
-    struct PipelineBarrier {
-        uint32_t bufferMemoryBarrierCount;
-        const BufferMemoryBarrier* bufferMemoryBarriers;
-        uint32_t imageMemoryBarrierCount;
-        const ImageMemoryBarrier* imageMemoryBarriers;
+    struct RenderBeginParams {
+        const FrameBuffer* frameBuffer{nullptr};
+        LoadOp loadOp{LoadOp::LOAD};
+        StoreOp storeOp{StoreOp::STORE};
+        glm::vec4 clearColor{0.0f, 0.0f, 0.0f, 1.0f};
     };
 
-    virtual void pipeline_barrier(const PipelineBarrier& barrier) = 0;
+    virtual void render_begin(const RenderBeginParams& params) = 0;
+
+    virtual void bind_render_shader(const BindShaderParams& params, const PipelineState& pipelineState) = 0;
+
+    virtual void bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) = 0;
+
+    virtual void bind_index_buffer(const Buffer* indexBuffer) = 0;
+
+    struct RenderParams {
+        uint32_t vertexCount{0};
+        uint32_t firstVertex{0};
+        uint32_t instanceCount{1};
+        uint32_t firstInstance{0};
+    };
+
+    virtual void render(const RenderParams& params) = 0;
+
+    virtual void render_indirect(const std::span<const RenderParams>& indirectParams) = 0;
+
+    struct RenderIndexedParams {
+        uint32_t indexCount{0};
+        uint32_t firstIndex{0};
+        uint32_t instanceCount{1};
+        uint32_t firstInstance{0};
+        int32_t vertexOffset{0};
+    };
+
+    virtual void render_indexed(const RenderIndexedParams& params) = 0;
+
+    virtual void render_indexed_indirect(const std::span<const RenderIndexedParams>& indexedIndirectParams) = 0;
+
+    virtual void render_end() = 0;
+
+    virtual void bind_compute_shader(const BindShaderParams& params) = 0;
+
+    virtual void compute(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) = 0;
 
     //-------------------------------------------------------------------------
     // Resource creation
@@ -111,12 +120,6 @@ public:
     };
 
     DUK_NO_DISCARD virtual std::shared_ptr<Shader> create_shader(const ShaderCreateInfo& shaderCreateInfo) = 0;
-
-    struct ComputePipelineCreateInfo {
-        Shader* shader;
-    };
-
-    DUK_NO_DISCARD virtual std::shared_ptr<ComputePipeline> create_compute_pipeline(const ComputePipelineCreateInfo& pipelineCreateInfo) = 0;
 
     struct BufferCreateInfo {
         Buffer::Type type;
@@ -147,11 +150,14 @@ public:
     /// Upload raw pixel data into an image, recording a staging copy into the current command buffer.
     virtual void write_image(Image* image, const void* src, size_t size) = 0;
 
-    struct DescriptorSetCreateInfo {
-        DescriptorSetDescription description;
-    };
+    /// Creates an empty FrameBuffer object. No VkFramebuffer is allocated until
+    /// write_frame_buffer() is called.
+    DUK_NO_DISCARD virtual std::shared_ptr<FrameBuffer> create_frame_buffer() = 0;
 
-    DUK_NO_DISCARD virtual std::shared_ptr<DescriptorSet> create_descriptor_set(const DescriptorSetCreateInfo& descriptorSetCreateInfo) = 0;
+    /// Builds or rebuilds the underlying GPU framebuffer for the given attachments.
+    /// If the framebuffer was previously written its old GPU handle is deferred for
+    /// destruction until the current frame's GPU fence is signalled.
+    virtual void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) = 0;
 
 private:
     PipelineStateStack m_pipelineStateStack;

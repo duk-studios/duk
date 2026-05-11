@@ -5,10 +5,9 @@
 #ifndef DUK_RHI_RENDERER_H
 #define DUK_RHI_RENDERER_H
 
-#include <duk_rhi/command/command_context.h>
-#include <duk_rhi/command/command_queue.h>
+#include <duk_rhi/command_context.h>
+#include <duk_rhi/command_queue.h>
 #include <duk_rhi/rhi_capabilities.h>
-#include <duk_rhi/surface.h>
 
 #include <duk_log/logger.h>
 

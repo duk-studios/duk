@@ -18,12 +18,12 @@ struct VulkanBufferCreateInfo {
     VkMemoryPropertyFlags memoryFlags;
     VkIndexType indexType{VK_INDEX_TYPE_MAX_ENUM}; ///< Only meaningful for index buffers.
     VkDevice device;
-    VulkanPhysicalDevice* physicalDevice;
+    const VulkanPhysicalDevice* physicalDevice;
 };
 
 class VulkanBuffer : public Buffer {
 public:
-    explicit VulkanBuffer(const VulkanBufferCreateInfo& ci);
+    explicit VulkanBuffer(const VulkanBufferCreateInfo& createInfo);
 
     ~VulkanBuffer() override;
 
@@ -52,7 +52,6 @@ public:
 
 private:
     VkDevice m_device;
-    VulkanPhysicalDevice* m_physicalDevice;
     size_t m_size;
     VkBufferUsageFlags m_usageFlags{0};
     VkMemoryPropertyFlags m_memoryFlags{0};

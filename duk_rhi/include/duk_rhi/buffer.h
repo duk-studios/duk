@@ -26,8 +26,7 @@ public:
         INDIRECT
     };
 
-public:
-    virtual ~Buffer();
+    virtual ~Buffer() = default;
 
     DUK_NO_DISCARD virtual size_t size() const = 0;
 };

@@ -1,7 +1,7 @@
 /// 16/05/2023
 /// std_shader_data_source.cpp
 
-#include <duk_rhi/pipeline/std_shader_data_source.h>
+#include <duk_rhi/std_shader_data_source.h>
 
 #include <duk_macros/assert.h>
 

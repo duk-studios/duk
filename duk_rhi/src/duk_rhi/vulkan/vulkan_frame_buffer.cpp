@@ -21,6 +21,10 @@ void VulkanFrameBuffer::write(const VulkanImage* const* attachments, uint32_t at
     }
 }
 
+uint32_t VulkanFrameBuffer::attachment_count() const {
+    return static_cast<uint32_t>(m_attachments.size());
+}
+
 uint32_t VulkanFrameBuffer::width() const {
     return m_width;
 }

@@ -71,7 +71,13 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_descriptor_set.h
         src/duk_rhi/vulkan/vulkan_rhi_capabilities.h
         src/duk_rhi/vulkan/vulkan_rhi_capabilities.cpp
-        )
+        src/duk_rhi/vulkan/vulkan_render_state.h
+        src/duk_rhi/vulkan/vulkan_render_state.cpp
+        src/duk_rhi/vulkan/vulkan_static_render_state.h
+        src/duk_rhi/vulkan/vulkan_static_render_state.cpp
+        src/duk_rhi/vulkan/vulkan_shader.h
+        src/duk_rhi/vulkan/vulkan_shader.cpp
+)
 
 add_library(duk.rhi ${DUK_RHI_SOURCES} ${DUK_RHI_HEADERS})
 add_library(duk::rhi ALIAS duk.rhi)

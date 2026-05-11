@@ -4,8 +4,8 @@
 #ifndef DUK_RHI_VULKAN_SHADER_H
 #define DUK_RHI_VULKAN_SHADER_H
 
-#include <duk_rhi/pipeline/shader.h>
-#include <duk_rhi/pipeline/shader_data_source.h>
+#include <duk_rhi/shader.h>
+#include <duk_rhi/shader_data_source.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 

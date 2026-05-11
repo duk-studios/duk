@@ -1,7 +1,7 @@
 /// 15/05/2023
 /// shader_data_source.cpp
 
-#include <duk_rhi/pipeline/shader_data_source.h>
+#include <duk_rhi/shader_data_source.h>
 
 namespace duk::rhi {
 

@@ -2,7 +2,7 @@
 // Created by Ricardo on 05/05/2024.
 //
 
-#include <duk_rhi/pipeline/shader_reflection.h>
+#include <duk_rhi/shader_reflection.h>
 
 #define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
 #include <spirv_reflect.h>

@@ -5,7 +5,7 @@
 #ifndef DUK_RHI_SHADER_REFLECTION_H
 #define DUK_RHI_SHADER_REFLECTION_H
 
-#include <duk_rhi/descriptor_set.h>
+#include <duk_rhi/shader.h>
 #include <duk_rhi/vertex_layout.h>
 
 namespace duk::rhi {

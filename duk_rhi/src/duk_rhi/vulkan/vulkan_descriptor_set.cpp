@@ -1,7 +1,7 @@
 /// 01/06/2023
 /// vulkan_descriptor_set.cpp
 
-#include <duk_rhi/vulkan/pipeline/vulkan_shader.h>
+#include <duk_rhi/vulkan/vulkan_shader.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
@@ -10,59 +10,6 @@
 #include <stdexcept>
 
 namespace duk::rhi {
-
-namespace detail {
-
-template<typename InputIterator, typename BufferPredicate, typename ImagePredicate, typename UndefinedPredicate>
-void iterate_descriptors(const InputIterator& begin, const InputIterator& end, BufferPredicate bufferPredicate, ImagePredicate imagePredicate, UndefinedPredicate undefinedPredicate) {
-    for (auto it = begin; it != end; it++) {
-        uint32_t index = std::distance(begin, it);
-        auto& descriptor = *it;
-
-        auto descriptorType = descriptor.type();
-        switch (descriptorType) {
-            case DescriptorType::UNDEFINED: {
-                if (!undefinedPredicate(index)) {
-                    return;
-                }
-                break;
-            }
-            case DescriptorType::UNIFORM_BUFFER:
-            case DescriptorType::STORAGE_BUFFER: {
-                auto buffer = descriptor.buffer();
-                if (!buffer) {
-                    if (undefinedPredicate(index)) {
-                        continue;
-                    }
-                    return;
-                }
-                if (!bufferPredicate(static_cast<VulkanBuffer*>(buffer), index, descriptor)) {
-                    return;
-                }
-                break;
-            }
-            case DescriptorType::IMAGE:
-            case DescriptorType::STORAGE_IMAGE:
-            case DescriptorType::IMAGE_SAMPLER: {
-                auto image = descriptor.image();
-                if (!image) {
-                    if (undefinedPredicate(index)) {
-                        continue;
-                    }
-                    return;
-                }
-                if (!imagePredicate(static_cast<VulkanImage*>(image), index, descriptor)) {
-                    return;
-                }
-                break;
-            }
-            default:
-                throw std::logic_error("unhandled DescriptorType");
-        }
-    }
-}
-
-}// namespace detail
 
 VkDescriptorType convert_descriptor_type(DescriptorType descriptorType) {
     VkDescriptorType converted;
@@ -122,7 +69,7 @@ const std::vector<VkDescriptorSetLayoutBinding>& VulkanDescriptorSetLayoutCache:
 
 duk::hash::Hash VulkanDescriptorSetLayoutCache::calculate_hash(const DescriptorSetDescription& descriptorSetDescription) {
     duk::hash::Hash hash = 0;
-    duk::hash::hash_combine(hash, descriptorSetDescription);
+    // duk::hash::hash_combine(hash, descriptorSetDescription);
     return hash;
 }
 
@@ -162,159 +109,6 @@ const VulkanDescriptorSetLayoutCache::CacheEntry& VulkanDescriptorSetLayoutCache
     }
 
     return it->second;
-}
-
-VulkanDescriptorSet::VulkanDescriptorSet(const VulkanDescriptorSetCreateInfo& descriptorSetCreateInfo)
-    : m_device(descriptorSetCreateInfo.device)
-    , m_samplerCache(descriptorSetCreateInfo.samplerCache)
-    , m_descriptorSetDescription(descriptorSetCreateInfo.descriptorSetDescription)
-    , m_descriptorSetLayout(descriptorSetCreateInfo.descriptorSetLayoutCache->get_layout(m_descriptorSetDescription))
-    , m_descriptorBindings(descriptorSetCreateInfo.descriptorSetLayoutCache->get_bindings(m_descriptorSetDescription))
-    , m_descriptors(m_descriptorBindings.size()) {
-
-    std::vector<VkDescriptorPoolSize> poolSizes(m_descriptorBindings.size());
-    for (size_t i = 0; i < m_descriptorBindings.size(); i++) {
-        poolSizes[i].type = m_descriptorBindings[i].descriptorType;
-        poolSizes[i].descriptorCount = 1;
-    }
-
-    VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {};
-    descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    descriptorPoolCreateInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
-    descriptorPoolCreateInfo.pPoolSizes = poolSizes.data();
-    descriptorPoolCreateInfo.maxSets = 1;
-    descriptorPoolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-
-    auto result = vkCreateDescriptorPool(m_device, &descriptorPoolCreateInfo, nullptr, &m_descriptorPool);
-    if (result != VK_SUCCESS) {
-        throw std::runtime_error("failed to create VkDescriptorPool");
-    }
-
-    VkDescriptorSetAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = m_descriptorPool;
-    allocInfo.descriptorSetCount = 1;
-    allocInfo.pSetLayouts = &m_descriptorSetLayout;
-
-    result = vkAllocateDescriptorSets(m_device, &allocInfo, &m_descriptorSet);
-    if (result != VK_SUCCESS) {
-        throw std::runtime_error("failed to allocate VkDescriptorSet");
-    }
-}
-
-VulkanDescriptorSet::~VulkanDescriptorSet() {
-    clean();
-}
-
-void VulkanDescriptorSet::clean() {
-    if (m_descriptorSet != VK_NULL_HANDLE) {
-        vkFreeDescriptorSets(m_device, m_descriptorPool, 1, &m_descriptorSet);
-        m_descriptorSet = VK_NULL_HANDLE;
-    }
-    if (m_descriptorPool != VK_NULL_HANDLE) {
-        vkDestroyDescriptorPool(m_device, m_descriptorPool, nullptr);
-        m_descriptorPool = VK_NULL_HANDLE;
-    }
-}
-
-VkDescriptorSet VulkanDescriptorSet::handle() {
-    return m_descriptorSet;
-}
-
-void VulkanDescriptorSet::set(uint32_t binding, const Descriptor& descriptor) {
-    DUK_ASSERT(m_descriptorSetDescription.bindings[binding].type == descriptor.type());
-    m_descriptors[binding] = descriptor;
-}
-
-uint32_t VulkanDescriptorSet::size() const noexcept {
-    return static_cast<uint32_t>(m_descriptors.size());
-}
-
-Descriptor& VulkanDescriptorSet::at(uint32_t binding) {
-    return m_descriptors.at(binding);
-}
-
-const Descriptor& VulkanDescriptorSet::at(uint32_t binding) const {
-    return m_descriptors.at(binding);
-}
-
-Image* VulkanDescriptorSet::image(uint32_t binding) {
-    return m_descriptors[binding].image();
-}
-
-const Image* VulkanDescriptorSet::image(uint32_t binding) const {
-    return m_descriptors[binding].image();
-}
-
-Buffer* VulkanDescriptorSet::buffer(uint32_t binding) {
-    return m_descriptors[binding].buffer();
-}
-
-const Buffer* VulkanDescriptorSet::buffer(uint32_t binding) const {
-    return m_descriptors[binding].buffer();
-}
-
-void VulkanDescriptorSet::flush() {
-    // we need to use lists here, because we do not want to invalidate references to its elements while adding new elements
-    std::list<VkDescriptorBufferInfo> bufferInfos;
-    std::list<VkDescriptorImageInfo> imageInfos;
-    std::vector<VkWriteDescriptorSet> writeDescriptors;
-
-    bool hasUndefinedDescriptor = false;
-
-    detail::iterate_descriptors(
-            m_descriptors.begin(), m_descriptors.end(),
-            [&](VulkanBuffer* buffer, uint32_t bindingIndex, const Descriptor& descriptor) {
-                VkWriteDescriptorSet writeDescriptor = {};
-                writeDescriptor.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                writeDescriptor.dstBinding = static_cast<uint32_t>(writeDescriptors.size());
-                writeDescriptor.descriptorType = convert_descriptor_type(descriptor.type());
-                writeDescriptor.descriptorCount = 1;
-                writeDescriptor.dstArrayElement = 0;
-                writeDescriptor.dstSet = m_descriptorSet;
-
-                VkDescriptorBufferInfo bufferInfo = {};
-                bufferInfo.buffer = buffer->handle();
-                bufferInfo.offset = 0;
-                bufferInfo.range = buffer->byte_size();
-                bufferInfos.push_back(bufferInfo);
-                writeDescriptor.pBufferInfo = &bufferInfos.back();
-                writeDescriptors.push_back(writeDescriptor);
-                return true;
-            },
-            [&](VulkanImage* image, uint32_t bindingIndex, const Descriptor& descriptor) {
-                VkWriteDescriptorSet writeDescriptor = {};
-                writeDescriptor.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                writeDescriptor.dstBinding = static_cast<uint32_t>(writeDescriptors.size());
-                writeDescriptor.descriptorType = convert_descriptor_type(descriptor.type());
-                writeDescriptor.descriptorCount = 1;
-                writeDescriptor.dstArrayElement = 0;
-                writeDescriptor.dstSet = m_descriptorSet;
-
-                VkDescriptorImageInfo imageInfo = {};
-                // For VulkanMemoryImage, imageIndex is ignored and the single view is returned.
-                // For VulkanSwapchainImage, callers managing per-swapchain-image descriptors should
-                // create separate VulkanDescriptorSet objects per swapchain image.
-                imageInfo.imageView = image->image_view(0);
-                imageInfo.imageLayout = convert_layout(descriptor.image_layout());
-                if (descriptor.type() == DescriptorType::IMAGE_SAMPLER) {
-                    imageInfo.sampler = m_samplerCache->get(descriptor.sampler());
-                }
-                imageInfos.push_back(imageInfo);
-                writeDescriptor.pImageInfo = &imageInfos.back();
-                writeDescriptors.push_back(writeDescriptor);
-                return true;
-            },
-            [&](uint32_t undefinedBindingIndex) {
-                hasUndefinedDescriptor = true;
-                return false;
-            });
-
-    if (hasUndefinedDescriptor) {
-        return;
-    }
-
-    vkUpdateDescriptorSets(m_device, static_cast<uint32_t>(writeDescriptors.size()), writeDescriptors.data(), 0, nullptr);
 }
 
 }// namespace duk::rhi

@@ -3,21 +3,34 @@
 //
 
 #include <duk_rhi/vulkan/vulkan_queue.h>
+#include <duk_rhi/vulkan/vulkan_rhi.h>
 
 namespace duk::rhi {
 
 VulkanQueue::VulkanQueue(const VulkanQueueCreateInfo& createInfo)
-    : m_handle(VK_NULL_HANDLE)
+    : m_instance(*createInfo.instance)
+    , m_handle(VK_NULL_HANDLE)
     , m_flags(createInfo.flags)
     , m_familyIndex(createInfo.familyIndex)
-    , m_queueIndex(createInfo.queueIndex)
-    , m_mutex(createInfo.mutex) {
-    vkGetDeviceQueue(createInfo.device, createInfo.familyIndex, createInfo.queueIndex, &m_handle);
+    , m_queueIndex(createInfo.queueIndex) {
+    vkGetDeviceQueue(m_instance.device(), createInfo.familyIndex, createInfo.queueIndex, &m_handle);
 }
 
 VkResult VulkanQueue::submit(uint32_t submitCount, const VkSubmitInfo* submitInfos, VkFence fence) {
-    std::lock_guard<std::mutex> lock(*m_mutex);
+    std::unique_lock lock(m_mutex);
+    auto deviceLock = m_instance.shared_device_lock();
     return vkQueueSubmit(m_handle, submitCount, submitInfos, fence);
+}
+
+VkResult VulkanQueue::present(const VkPresentInfoKHR& presentInfo) {
+    std::unique_lock lock(m_mutex);
+    auto deviceLock = m_instance.shared_device_lock();
+    return vkQueuePresentKHR(m_handle, &presentInfo);
+}
+
+void VulkanQueue::wait() {
+    std::shared_lock lock(m_mutex);
+    vkQueueWaitIdle(m_handle);
 }
 
 VkQueue VulkanQueue::handle() const {
