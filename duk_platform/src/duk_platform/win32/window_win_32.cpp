@@ -400,6 +400,7 @@ LRESULT WindowWin32::window_proc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         case WM_DESTROY: {
             window_destroy_event();
             PostQuitMessage(0);
+            m_hwnd = nullptr;
             return 0;
         }
         case WM_SIZE: {
