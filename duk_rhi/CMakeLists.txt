@@ -116,6 +116,10 @@ if (DUK_BUILD_TESTS)
     add_subdirectory(test)
 endif ()
 
+if (DUK_BUILD_SAMPLES)
+    add_subdirectory(samples)
+endif ()
+
 install(
         DIRECTORY include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
