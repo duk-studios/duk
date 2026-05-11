@@ -14,7 +14,7 @@
 #include <duk_platform/linux/window_xcb.h>
 #endif
 
-#include <duk_rhi/rhi_exception.h>
+#include <duk_rhi/exception.h>
 
 #include <duk_macros/macros.h>
 
@@ -88,7 +88,7 @@ void VulkanSwapchain::create() {
 
     VulkanSurfaceDetails surfaceDetails = {};
     if (!m_physicalDevice->query_surface_details(m_surface, surfaceDetails)) {
-        throw RHIException(RHIException::INTERNAL_ERROR, "Could not query surface details for swapchain");
+        throw Exception(Exception::INTERNAL_ERROR, "Could not query surface details for swapchain");
     }
 
     m_surfaceFormat = detail::choose_swap_surface_format(surfaceDetails.formats);

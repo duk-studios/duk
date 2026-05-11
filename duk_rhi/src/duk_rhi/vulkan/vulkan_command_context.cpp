@@ -7,7 +7,7 @@
 #include <duk_rhi/vulkan/vulkan_command_context.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
-#include <duk_rhi/vulkan/vulkan_rhi.h>
+#include <duk_rhi/vulkan/vulkan_instance.h>
 #include <duk_rhi/vulkan/vulkan_static_render_state.h>
 
 #include <duk_tools/fixed_vector.h>

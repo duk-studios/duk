@@ -3,7 +3,7 @@
 //
 
 #include <duk_rhi/vulkan/vulkan_queue.h>
-#include <duk_rhi/vulkan/vulkan_rhi.h>
+#include <duk_rhi/vulkan/vulkan_instance.h>
 
 namespace duk::rhi {
 

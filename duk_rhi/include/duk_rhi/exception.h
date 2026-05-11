@@ -11,7 +11,7 @@
 
 namespace duk::rhi {
 
-class RHIException {
+class Exception {
 public:
     enum Type {
         INTERNAL_ERROR = 0,
@@ -19,7 +19,7 @@ public:
         NOT_IMPLEMENTED = 2
     };
 
-    RHIException(Type type, const std::string& description);
+    Exception(Type type, const std::string& description);
 
     DUK_NO_DISCARD Type type() const;
 

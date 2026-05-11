@@ -21,7 +21,7 @@ namespace duk::rhi {
 class VulkanDescriptorSetLayoutCache;
 
 struct VulkanCommandContextCreateInfo {
-    VulkanRHI* instance;
+    VulkanInstance* instance;
     const VulkanPhysicalDevice* physicalDevice;
     VulkanQueue* queue;
     uint32_t framesInFlight;
@@ -78,7 +78,7 @@ private:
     }
 
 private:
-    VulkanRHI& m_instance;
+    VulkanInstance& m_instance;
     VkDevice m_device;
     const VulkanPhysicalDevice& m_physicalDevice;
     VulkanQueue* m_queue;

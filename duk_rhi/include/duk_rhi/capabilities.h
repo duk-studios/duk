@@ -1,16 +1,16 @@
 /// 08/06/2023
-/// renderer_capabilities.h
+/// capabilities.h
 
-#ifndef DUK_RHI_RENDERER_CAPABILITIES_H
-#define DUK_RHI_RENDERER_CAPABILITIES_H
+#ifndef DUK_RHI_CAPABILITIES_H
+#define DUK_RHI_CAPABILITIES_H
 
 #include <duk_rhi/image.h>
 
 namespace duk::rhi {
 
-class RHICapabilities {
+class Capabilities {
 public:
-    virtual ~RHICapabilities() = default;
+    virtual ~Capabilities() = default;
 
     DUK_NO_DISCARD virtual PixelFormat depth_format() const = 0;
 
@@ -21,4 +21,4 @@ public:
 
 }// namespace duk::rhi
 
-#endif// DUK_RHI_RENDERER_CAPABILITIES_H
+#endif// DUK_RHI_CAPABILITIES_H

@@ -13,7 +13,7 @@
 
 #include <duk_platform/platform.h>
 
-#include <duk_rhi/rhi.h>
+#include <duk_rhi/instance.h>
 #include <duk_log/log.h>
 #include <duk_log/sinks/term_color_sink.h>
 
@@ -49,7 +49,7 @@ int main() {
     // -----------------------------------------------------------------------
     // RHI device (no window attached)
     // -----------------------------------------------------------------------
-    duk::rhi::RHICreateInfo rhiCreateInfo = {};
+    duk::rhi::InstanceCreateInfo rhiCreateInfo = {};
     rhiCreateInfo.applicationName = "clear_screen_sample";
     rhiCreateInfo.applicationVersion = 1;
     rhiCreateInfo.engineName = "duk";
@@ -60,12 +60,12 @@ int main() {
     rhiCreateInfo.framesInFlight = 2;
     rhiCreateInfo.logger = duk::log::instance()->default_logger();
 
-    auto rhi = duk::rhi::RHI::create_rhi(rhiCreateInfo);
+    auto rhi = duk::rhi::Instance::create(rhiCreateInfo);
 
     // -----------------------------------------------------------------------
     // Command queue and shared context
     // -----------------------------------------------------------------------
-    duk::rhi::RHI::CommandQueueCreateInfo queueCreateInfo = {};
+    duk::rhi::Instance::CommandQueueCreateInfo queueCreateInfo = {};
     queueCreateInfo.type = duk::rhi::CommandQueue::Type::GRAPHICS;
     queueCreateInfo.window = window.get();
     auto queue = rhi->create_command_queue(queueCreateInfo);

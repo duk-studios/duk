@@ -12,10 +12,10 @@
 
 namespace duk::rhi {
 
-class VulkanRHI;
+class VulkanInstance;
 
 struct VulkanQueueCreateInfo {
-    VulkanRHI* instance;
+    VulkanInstance* instance;
     VkQueueFlags flags;
     uint32_t familyIndex;
     uint32_t queueIndex;
@@ -39,7 +39,7 @@ public:
     DUK_NO_DISCARD VkQueueFlags flags() const;
 
 private:
-    VulkanRHI& m_instance;
+    VulkanInstance& m_instance;
     VkQueue m_handle;
     VkQueueFlags m_flags;
     uint32_t m_familyIndex;

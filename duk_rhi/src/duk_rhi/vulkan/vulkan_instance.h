@@ -2,14 +2,14 @@
 // Created by Ricardo on 04/02/2023.
 //
 
-#ifndef DUK_RHI_VULKAN_RENDERER_H
-#define DUK_RHI_VULKAN_RENDERER_H
+#ifndef DUK_RHI_VULKAN_INSTANCE_H
+#define DUK_RHI_VULKAN_INSTANCE_H
 
-#include <duk_rhi/rhi.h>
+#include <duk_rhi/instance.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
 #include <duk_rhi/vulkan/vulkan_queue.h>
-#include <duk_rhi/vulkan/vulkan_rhi_capabilities.h>
+#include <duk_rhi/vulkan/vulkan_capabilities.h>
 
 namespace duk::platform {
 class Window;
@@ -18,17 +18,17 @@ class Window;
 namespace duk::rhi {
 
 struct VulkanRHICreateInfo {
-    RHICreateInfo rhiCreateInfo;
+    InstanceCreateInfo rhiCreateInfo;
     bool hasValidationLayers;
 };
 
-class VulkanRHI : public RHI {
+class VulkanInstance : public Instance {
 public:
-    explicit VulkanRHI(const VulkanRHICreateInfo& createInfo);
+    explicit VulkanInstance(const VulkanRHICreateInfo& createInfo);
 
-    ~VulkanRHI() override;
+    ~VulkanInstance() override;
 
-    DUK_NO_DISCARD RHICapabilities* capabilities() const override;
+    DUK_NO_DISCARD Capabilities* capabilities() const override;
 
     DUK_NO_DISCARD std::shared_ptr<CommandQueue> create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
 
@@ -52,7 +52,7 @@ private:
     VkInstance m_instance;
     VkDebugUtilsMessengerEXT m_debugMessenger;
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;
-    std::unique_ptr<VulkanRendererCapabilities> m_rendererCapabilities;
+    std::unique_ptr<VulkanCapabilities> m_rendererCapabilities;
     VkDevice m_device;
     std::vector<std::shared_ptr<VulkanQueue>> m_queues;
     std::shared_mutex m_deviceMutex;
@@ -60,4 +60,4 @@ private:
 
 }// namespace duk::rhi
 
-#endif//DUK_RHI_VULKAN_RENDERER_H
+#endif//DUK_RHI_VULKAN_INSTANCE_H

@@ -1,7 +1,7 @@
 
 set(DUK_RHI_HEADERS
-        include/duk_rhi/rhi.h
-        include/duk_rhi/rhi_exception.h
+        include/duk_rhi/instance.h
+        include/duk_rhi/exception.h
         include/duk_rhi/frame_buffer.h
         include/duk_rhi/image.h
         include/duk_rhi/pixel.h
@@ -9,7 +9,7 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/vertex_layout.h
         include/duk_rhi/buffer.h
         include/duk_rhi/image_data_source.h
-        include/duk_rhi/rhi_capabilities.h
+        include/duk_rhi/capabilities.h
         include/duk_rhi/index_types.h
         include/duk_rhi/pipeline_state.h
         include/duk_rhi/shader.h
@@ -22,8 +22,8 @@ set(DUK_RHI_HEADERS
         )
 
 set(DUK_RHI_SOURCES
-        src/duk_rhi/rhi.cpp
-        src/duk_rhi/rhi_exception.cpp
+        src/duk_rhi/instance.cpp
+        src/duk_rhi/exception.cpp
         src/duk_rhi/vertex_layout.cpp
         src/duk_rhi/frame_buffer.cpp
         src/duk_rhi/image.cpp
@@ -49,8 +49,8 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_physical_device.cpp
         src/duk_rhi/vulkan/vulkan_queue.h
         src/duk_rhi/vulkan/vulkan_queue.cpp
-        src/duk_rhi/vulkan/vulkan_rhi.h
-        src/duk_rhi/vulkan/vulkan_rhi.cpp
+        src/duk_rhi/vulkan/vulkan_instance.h
+        src/duk_rhi/vulkan/vulkan_instance.cpp
         src/duk_rhi/vulkan/vulkan_swapchain.h
         src/duk_rhi/vulkan/vulkan_swapchain.cpp
         src/duk_rhi/vulkan/vulkan_frame_buffer.h
@@ -69,8 +69,8 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_buffer.cpp
         src/duk_rhi/vulkan/vulkan_descriptor_set.cpp
         src/duk_rhi/vulkan/vulkan_descriptor_set.h
-        src/duk_rhi/vulkan/vulkan_rhi_capabilities.h
-        src/duk_rhi/vulkan/vulkan_rhi_capabilities.cpp
+        src/duk_rhi/vulkan/vulkan_capabilities.h
+        src/duk_rhi/vulkan/vulkan_capabilities.cpp
         src/duk_rhi/vulkan/vulkan_render_state.h
         src/duk_rhi/vulkan/vulkan_render_state.cpp
         src/duk_rhi/vulkan/vulkan_static_render_state.h

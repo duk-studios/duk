@@ -2,12 +2,12 @@
 // Created by Ricardo on 04/02/2023.
 //
 
-#ifndef DUK_RHI_RENDERER_H
-#define DUK_RHI_RENDERER_H
+#ifndef DUK_RHI_INSTANCE_H
+#define DUK_RHI_INSTANCE_H
 
 #include <duk_rhi/command_context.h>
 #include <duk_rhi/command_queue.h>
-#include <duk_rhi/rhi_capabilities.h>
+#include <duk_rhi/capabilities.h>
 
 #include <duk_log/logger.h>
 
@@ -28,7 +28,7 @@ enum class API {
     DX12
 };
 
-struct RHICreateInfo {
+struct InstanceCreateInfo {
     duk::log::Logger* logger;
     const char* applicationName;
     uint32_t applicationVersion;
@@ -40,14 +40,14 @@ struct RHICreateInfo {
     uint32_t framesInFlight;
 };
 
-class RHI {
+class Instance {
 public:
-    static std::shared_ptr<RHI> create_rhi(const RHICreateInfo& rhiCreateInfo);
+    static std::shared_ptr<Instance> create(const InstanceCreateInfo& instanceCreateInfo);
 
-    virtual ~RHI() = default;
+    virtual ~Instance() = default;
 
     /// Returns an object that can be used to check the limits and capabilities of this device.
-    DUK_NO_DISCARD virtual RHICapabilities* capabilities() const = 0;
+    DUK_NO_DISCARD virtual Capabilities* capabilities() const = 0;
 
     struct CommandQueueCreateInfo {
         CommandQueue::Type::Mask type;
@@ -59,4 +59,4 @@ public:
 
 }// namespace duk::rhi
 
-#endif//DUK_RHI_RENDERER_H
+#endif//DUK_RHI_INSTANCE_H

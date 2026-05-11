@@ -1,10 +1,10 @@
 /// 08/06/2023
-/// vulkan_renderer_capabilities.h
+/// vulkan_capabilities.h
 
-#ifndef DUK_RHI_VULKAN_RENDERER_CAPABILITIES_H
-#define DUK_RHI_VULKAN_RENDERER_CAPABILITIES_H
+#ifndef DUK_RHI_VULKAN_CAPABILITIES_H
+#define DUK_RHI_VULKAN_CAPABILITIES_H
 
-#include <duk_rhi/rhi_capabilities.h>
+#include <duk_rhi/capabilities.h>
 
 namespace duk::rhi {
 
@@ -14,11 +14,11 @@ struct VulkanRendererCapabilitiesCreateInfo {
     VulkanPhysicalDevice* physicalDevice;
 };
 
-class VulkanRendererCapabilities : public RHICapabilities {
+class VulkanCapabilities : public Capabilities {
 public:
-    explicit VulkanRendererCapabilities(const VulkanRendererCapabilitiesCreateInfo& rendererCapabilitiesCreateInfo);
+    explicit VulkanCapabilities(const VulkanRendererCapabilitiesCreateInfo& rendererCapabilitiesCreateInfo);
 
-    ~VulkanRendererCapabilities() override;
+    ~VulkanCapabilities() override;
 
     DUK_NO_DISCARD PixelFormat depth_format() const override;
 
@@ -32,4 +32,4 @@ private:
 
 }// namespace duk::rhi
 
-#endif// DUK_RHI_VULKAN_RENDERER_CAPABILITIES_H
+#endif// DUK_RHI_VULKAN_CAPABILITIES_H

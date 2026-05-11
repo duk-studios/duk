@@ -2,8 +2,8 @@
 // Created by Ricardo on 04/02/2023.
 //
 
-#include <duk_rhi/rhi_exception.h>
-#include <duk_rhi/vulkan/vulkan_rhi.h>
+#include <duk_rhi/exception.h>
+#include <duk_rhi/vulkan/vulkan_instance.h>
 #include <duk_rhi/vulkan/vulkan_command_context.h>
 
 #include <duk_log/log.h>
@@ -164,7 +164,7 @@ static VulkanQueue* find_queue(VkPhysicalDevice physicalDevice, const std::vecto
     return nullptr;
 }
 
-static std::vector<std::shared_ptr<VulkanQueue>> create_vulkan_queues(VulkanRHI& instance, const ResolvedQueues& resolved) {
+static std::vector<std::shared_ptr<VulkanQueue>> create_vulkan_queues(VulkanInstance& instance, const ResolvedQueues& resolved) {
     std::vector<std::shared_ptr<VulkanQueue>> queues;
 
     for (const auto& r : resolved.queues) {
@@ -229,7 +229,7 @@ static VkDevice create_vk_device(VulkanPhysicalDevice* physicalDevice, const std
 }
 }
 
-VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& createInfo)
+VulkanInstance::VulkanInstance(const VulkanRHICreateInfo& createInfo)
     : m_framesInFlight(createInfo.rhiCreateInfo.framesInFlight)
     , m_instance(VK_NULL_HANDLE)
     , m_debugMessenger(VK_NULL_HANDLE)
@@ -244,7 +244,7 @@ VulkanRHI::VulkanRHI(const VulkanRHICreateInfo& createInfo)
     m_queues = detail::create_vulkan_queues(*this, resolved);
 }
 
-VulkanRHI::~VulkanRHI() {
+VulkanInstance::~VulkanInstance() {
     vkDeviceWaitIdle(m_device);
     vkDestroyDevice(m_device, nullptr);
     if (m_debugMessenger) {
@@ -254,11 +254,11 @@ VulkanRHI::~VulkanRHI() {
     volkFinalize();
 }
 
-RHICapabilities* VulkanRHI::capabilities() const {
+Capabilities* VulkanInstance::capabilities() const {
     return m_rendererCapabilities.get();
 }
 
-std::shared_ptr<CommandQueue> VulkanRHI::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
+std::shared_ptr<CommandQueue> VulkanInstance::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
     auto* queue = detail::find_queue(m_physicalDevice->handle(), m_queues, commandQueueCreateInfo.type, commandQueueCreateInfo.window);
     if (!queue) {
         throw std::runtime_error("failed to find a VulkanQueue matching the requested capabilities");
@@ -283,27 +283,27 @@ std::shared_ptr<CommandQueue> VulkanRHI::create_command_queue(const CommandQueue
     return std::make_shared<CommandQueue>(std::make_unique<VulkanCommandContext>(commandContextInfo, std::move(swapchain)));
 }
 
-std::unique_lock<std::shared_mutex> VulkanRHI::unique_device_lock() {
+std::unique_lock<std::shared_mutex> VulkanInstance::unique_device_lock() {
     return std::unique_lock(m_deviceMutex);
 }
 
-std::shared_lock<std::shared_mutex> VulkanRHI::shared_device_lock() {
+std::shared_lock<std::shared_mutex> VulkanInstance::shared_device_lock() {
     return std::shared_lock(m_deviceMutex);
 }
 
-VkResult VulkanRHI::wait_idle() const {
+VkResult VulkanInstance::wait_idle() const {
     return vkDeviceWaitIdle(m_device);
 }
 
-VkInstance VulkanRHI::handle() const {
+VkInstance VulkanInstance::handle() const {
     return m_instance;
 }
 
-VkDevice VulkanRHI::device() const {
+VkDevice VulkanInstance::device() const {
     return m_device;
 }
 
-void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& createInfo) {
+void VulkanInstance::create_vk_instance(const VulkanRHICreateInfo& createInfo) {
     auto& rhiInfo = createInfo.rhiCreateInfo;
 
     VkApplicationInfo applicationInfo = {};
@@ -355,7 +355,7 @@ void VulkanRHI::create_vk_instance(const VulkanRHICreateInfo& createInfo) {
     }
 }
 
-void VulkanRHI::select_vk_physical_device(uint32_t deviceIndex) {
+void VulkanInstance::select_vk_physical_device(uint32_t deviceIndex) {
     VulkanPhysicalDeviceCreateInfo physicalDeviceCreateInfo = {};
     physicalDeviceCreateInfo.instance = m_instance;
     physicalDeviceCreateInfo.deviceIndex = deviceIndex;
@@ -365,7 +365,7 @@ void VulkanRHI::select_vk_physical_device(uint32_t deviceIndex) {
     VulkanRendererCapabilitiesCreateInfo rendererCapabilitiesCreateInfo = {};
     rendererCapabilitiesCreateInfo.physicalDevice = m_physicalDevice.get();
 
-    m_rendererCapabilities = std::make_unique<VulkanRendererCapabilities>(rendererCapabilitiesCreateInfo);
+    m_rendererCapabilities = std::make_unique<VulkanCapabilities>(rendererCapabilitiesCreateInfo);
 }
 
 }// namespace duk::rhi
