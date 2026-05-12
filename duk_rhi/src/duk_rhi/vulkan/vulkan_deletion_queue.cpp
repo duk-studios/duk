@@ -9,6 +9,7 @@ VulkanDeletionQueue::VulkanDeletionQueue(uint32_t framesInFlight)
 }
 
 VulkanDeletionQueue::~VulkanDeletionQueue() {
+    flush_all();
 }
 
 void VulkanDeletionQueue::flush(uint32_t frameCounter) {
@@ -23,6 +24,13 @@ void VulkanDeletionQueue::flush(uint32_t frameCounter) {
         }
     }
     std::swap(m_entries, pendingEntries);
+}
+
+void VulkanDeletionQueue::flush_all() {
+    for (auto entry : m_entries) {
+        entry.deleter();
+    }
+    m_entries.clear();
 }
 
 bool VulkanDeletionQueue::empty() const {

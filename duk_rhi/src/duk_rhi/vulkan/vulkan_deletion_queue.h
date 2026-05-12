@@ -39,6 +39,8 @@ public:
     /// Safe to call at any time; typically called after a per-frame fence wait.
     void flush(uint32_t frameCounter);
 
+    void flush_all();
+
     DUK_NO_DISCARD bool empty() const;
 
     DUK_NO_DISCARD std::size_t size() const;
