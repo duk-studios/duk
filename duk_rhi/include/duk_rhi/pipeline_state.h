@@ -24,15 +24,15 @@ enum class LoadOp {
 struct PipelineState {
 
     struct Viewport {
-        glm::vec2 extent;
-        glm::vec2 offset;
-        float minDepth;
-        float maxDepth;
+        glm::vec2 extent{0.0f, 0.0f};
+        glm::vec2 offset{0.0f, 0.0f};
+        float minDepth{0.0f};
+        float maxDepth{1.0f};
     };
 
     struct Scissor {
-        glm::u32vec2 extent;
-        glm::ivec2 offset;
+        glm::u32vec2 extent{0, 0};
+        glm::ivec2 offset{0, 0};
     };
 
     struct CullMode {
@@ -77,13 +77,13 @@ struct PipelineState {
             MAX = 4,
         };
 
-        Factor srcColorBlendFactor;
-        Factor dstColorBlendFactor;
-        Operator colorBlendOp;
-        Factor srcAlphaBlendFactor;
-        Factor dstAlphaBlendFactor;
-        Operator alphaBlendOp;
-        bool enabled;
+        Factor srcColorBlendFactor{Factor::ONE};
+        Factor dstColorBlendFactor{Factor::ZERO};
+        Operator colorBlendOp{Operator::ADD};
+        Factor srcAlphaBlendFactor{Factor::ONE};
+        Factor dstAlphaBlendFactor{Factor::ZERO};
+        Operator alphaBlendOp{Operator::ADD};
+        bool enabled{false};
     };
 
     enum class Topology {
