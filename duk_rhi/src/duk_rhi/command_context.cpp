@@ -98,10 +98,6 @@ void TransferCommands::read_buffer(Buffer* buffer, void* dst, size_t size, size_
 
 CommandContext::~CommandContext() = default;
 
-PipelineStateStack& CommandContext::pipeline_state_stack() {
-    return m_pipelineStateStack;
-}
-
 RenderCommands CommandContext::render(const RenderBeginParams& params) {
     return RenderCommands(*this, params);
 }

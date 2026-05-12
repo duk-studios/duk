@@ -56,7 +56,7 @@ struct BindShaderParams {
 
 struct RenderBeginParams {
     const FrameBuffer* frameBuffer{nullptr};
-    LoadOp loadOp{LoadOp::LOAD};
+    LoadOp loadOp{LoadOp::CLEAR};
     StoreOp storeOp{StoreOp::STORE};
     glm::vec4 clearColor{0.0f, 0.0f, 0.0f, 1.0f};
 };
@@ -140,12 +140,8 @@ public:
     virtual ~CommandContext();
 
     //-------------------------------------------------------------------------
-    // Pipeline state
+    // Scoped command objects
     //-------------------------------------------------------------------------
-
-    /// Returns the pipeline state stack for this context.
-    /// Use push()/pop() to save/restore state; modify top() to set rendering state.
-    PipelineStateStack& pipeline_state_stack();
 
     RenderCommands render(const RenderBeginParams& params);
 
@@ -220,7 +216,6 @@ public:
 private:
     friend ScopedCommands;
     uint64_t m_commandCounter{0};
-    PipelineStateStack m_pipelineStateStack;
 };
 
 }// namespace duk::rhi
