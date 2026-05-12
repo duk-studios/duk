@@ -63,13 +63,13 @@ int main() {
     auto rhi = duk::rhi::Instance::create(rhiCreateInfo);
 
     // -----------------------------------------------------------------------
-    // Command queue and shared context
+    // Command context
     // -----------------------------------------------------------------------
     duk::rhi::CommandContextCreateInfo contextCreateInfo = {};
     contextCreateInfo.type = duk::rhi::CommandQueue::Type::GRAPHICS;
     contextCreateInfo.window = window.get();
     contextCreateInfo.framesInFlight = 2;
-    auto queue = rhi->create_command_queue(contextCreateInfo);
+    auto ctx = rhi->create_command_context(contextCreateInfo);
 
     // -----------------------------------------------------------------------
     // Main loop
@@ -84,18 +84,16 @@ int main() {
         }
 
         // Record and submit render commands.
-        queue->submit([&](duk::rhi::CommandContext* ctx) {
-            ctx->prepare();
+        ctx->prepare();
 
-            duk::rhi::RenderBeginParams renderBeginParams;
-            renderBeginParams.clearColor = glm::vec4(0.1f, 0.2f, 0.3f, 1.0f);
-            renderBeginParams.loadOp = duk::rhi::LoadOp::CLEAR;
-            renderBeginParams.storeOp = duk::rhi::StoreOp::STORE;
+        duk::rhi::RenderBeginParams renderBeginParams;
+        renderBeginParams.clearColor = glm::vec4(0.1f, 0.2f, 0.3f, 1.0f);
+        renderBeginParams.loadOp = duk::rhi::LoadOp::CLEAR;
+        renderBeginParams.storeOp = duk::rhi::StoreOp::STORE;
 
-            auto render = ctx->render(renderBeginParams);
+        auto render = ctx->render(renderBeginParams);
 
-            ctx->flush();
-        }).wait();
+        ctx->flush();
     }
 
     return 0;
