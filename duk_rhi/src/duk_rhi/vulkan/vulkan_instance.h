@@ -30,7 +30,9 @@ public:
 
     DUK_NO_DISCARD Capabilities* capabilities() const override;
 
-    DUK_NO_DISCARD std::shared_ptr<CommandQueue> create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) override;
+    DUK_NO_DISCARD std::unique_ptr<CommandContext> create_command_context(const CommandContextCreateInfo& commandContextCreateInfo) override;
+
+    DUK_NO_DISCARD std::unique_ptr<CommandQueue> create_command_queue(const CommandContextCreateInfo& commandContextCreateInfo) override;
 
     DUK_NO_DISCARD std::unique_lock<std::shared_mutex> unique_device_lock();
 
@@ -48,7 +50,6 @@ private:
     void select_vk_physical_device(uint32_t deviceIndex);
 
 private:
-    uint32_t m_framesInFlight;
     VkInstance m_instance;
     VkDebugUtilsMessengerEXT m_debugMessenger;
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;

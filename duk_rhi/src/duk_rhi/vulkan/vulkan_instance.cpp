@@ -230,8 +230,7 @@ static VkDevice create_vk_device(VulkanPhysicalDevice* physicalDevice, const std
 }
 
 VulkanInstance::VulkanInstance(const VulkanRHICreateInfo& createInfo)
-    : m_framesInFlight(createInfo.rhiCreateInfo.framesInFlight)
-    , m_instance(VK_NULL_HANDLE)
+    : m_instance(VK_NULL_HANDLE)
     , m_debugMessenger(VK_NULL_HANDLE)
     , m_device(VK_NULL_HANDLE) {
     volkInitialize();
@@ -258,29 +257,32 @@ Capabilities* VulkanInstance::capabilities() const {
     return m_rendererCapabilities.get();
 }
 
-std::shared_ptr<CommandQueue> VulkanInstance::create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) {
-    auto* queue = detail::find_queue(m_physicalDevice->handle(), m_queues, commandQueueCreateInfo.type, commandQueueCreateInfo.window);
+std::unique_ptr<CommandContext> VulkanInstance::create_command_context(const CommandContextCreateInfo& commandContextCreateInfo) {
+    auto* queue = detail::find_queue(m_physicalDevice->handle(), m_queues, commandContextCreateInfo.type, commandContextCreateInfo.window);
     if (!queue) {
         throw std::runtime_error("failed to find a VulkanQueue matching the requested capabilities");
     }
 
     std::unique_ptr<VulkanSwapchain> swapchain;
-    if (commandQueueCreateInfo.window) {
+    if (commandContextCreateInfo.window) {
         VulkanSwapchainCreateInfo swapchainCreateInfo = {};
         swapchainCreateInfo.instance = m_instance;
         swapchainCreateInfo.device = m_device;
         swapchainCreateInfo.physicalDevice = m_physicalDevice.get();
-        swapchainCreateInfo.window = commandQueueCreateInfo.window;
+        swapchainCreateInfo.window = commandContextCreateInfo.window;
         swapchain = std::make_unique<VulkanSwapchain>(swapchainCreateInfo);
     }
 
-    VulkanCommandContextCreateInfo commandContextInfo = {};
-    commandContextInfo.instance = this;
-    commandContextInfo.physicalDevice = m_physicalDevice.get();
-    commandContextInfo.queue = queue;
-    commandContextInfo.framesInFlight = m_framesInFlight;
+    VulkanCommandContextCreateInfo vulkanCommandContextInfo = {};
+    vulkanCommandContextInfo.instance = this;
+    vulkanCommandContextInfo.physicalDevice = m_physicalDevice.get();
+    vulkanCommandContextInfo.queue = queue;
+    vulkanCommandContextInfo.framesInFlight = commandContextCreateInfo.framesInFlight;
+    return std::make_unique<VulkanCommandContext>(vulkanCommandContextInfo, std::move(swapchain));
+}
 
-    return std::make_shared<CommandQueue>(std::make_unique<VulkanCommandContext>(commandContextInfo, std::move(swapchain)));
+std::unique_ptr<CommandQueue> VulkanInstance::create_command_queue(const CommandContextCreateInfo& commandContextCreateInfo) {
+    return std::make_unique<CommandQueue>(create_command_context(commandContextCreateInfo));
 }
 
 std::unique_lock<std::shared_mutex> VulkanInstance::unique_device_lock() {

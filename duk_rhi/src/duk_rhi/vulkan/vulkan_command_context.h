@@ -36,8 +36,16 @@ public:
     // -----------------------------------------------------------------------
     // Frame management
     // -----------------------------------------------------------------------
-    void update() override;
+    void prepare() override;
     void flush() override;
+
+    // -----------------------------------------------------------------------
+    // Resource creation (CommandContext interface)
+    // -----------------------------------------------------------------------
+    DUK_NO_DISCARD std::shared_ptr<Shader> create_shader(const ShaderCreateInfo& shaderCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<Buffer> create_buffer(const BufferCreateInfo& bufferCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<Image> create_image(const ImageCreateInfo& imageCreateInfo) override;
+    DUK_NO_DISCARD std::shared_ptr<FrameBuffer> create_frame_buffer() override;
 
     // -----------------------------------------------------------------------
     // Command recording (CommandContext interface)
@@ -52,23 +60,13 @@ public:
     void render_indexed_indirect(const std::span<const RenderIndexedParams>& indexedIndirectParams) override;
     void render_end() override;
     void bind_compute_shader(const BindShaderParams& params) override;
-    void compute(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
-
-    // -----------------------------------------------------------------------
-    // Resource creation (CommandContext interface)
-    // -----------------------------------------------------------------------
-    DUK_NO_DISCARD std::shared_ptr<Shader> create_shader(const ShaderCreateInfo& shaderCreateInfo) override;
-    DUK_NO_DISCARD std::shared_ptr<Buffer> create_buffer(const BufferCreateInfo& bufferCreateInfo) override;
+    void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
+    void write_image(Image* image, const void* src, size_t size) override;
+    void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) override;
     void write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) override;
     void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) override;
-    DUK_NO_DISCARD std::shared_ptr<Image> create_image(const ImageCreateInfo& imageCreateInfo) override;
-    void write_image(Image* image, const void* src, size_t size) override;
-    DUK_NO_DISCARD std::shared_ptr<FrameBuffer> create_frame_buffer() override;
-    void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) override;
 
 private:
-    /// Lazily acquires and begins the per-frame command buffer on first recording call.
-    DUK_NO_DISCARD VkCommandBuffer current_command_buffer();
 
     template<typename T, typename ...Args>
     DUK_NO_DISCARD std::shared_ptr<T> make_managed(Args&&... args) {

@@ -37,6 +37,11 @@ struct InstanceCreateInfo {
     API api;
     bool validationLayers;
     size_t deviceIndex;
+};
+
+struct CommandContextCreateInfo {
+    CommandQueue::Type::Mask type;
+    const platform::Window* window;
     uint32_t framesInFlight;
 };
 
@@ -49,12 +54,9 @@ public:
     /// Returns an object that can be used to check the limits and capabilities of this device.
     DUK_NO_DISCARD virtual Capabilities* capabilities() const = 0;
 
-    struct CommandQueueCreateInfo {
-        CommandQueue::Type::Mask type;
-        const platform::Window* window;
-    };
+    DUK_NO_DISCARD virtual std::unique_ptr<CommandContext> create_command_context(const CommandContextCreateInfo& commandContextCreateInfo) = 0;
 
-    DUK_NO_DISCARD virtual std::shared_ptr<CommandQueue> create_command_queue(const CommandQueueCreateInfo& commandQueueCreateInfo) = 0;
+    DUK_NO_DISCARD virtual std::unique_ptr<CommandQueue> create_command_queue(const CommandContextCreateInfo& commandContextCreateInfo) = 0;
 };
 
 }// namespace duk::rhi

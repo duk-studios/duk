@@ -4,10 +4,114 @@
 
 namespace duk::rhi {
 
+bool ScopedCommands::valid() const {
+    return m_commandId == m_context.m_commandCounter;
+}
+
+ScopedCommands::ScopedCommands(CommandContext& context)
+    : m_context(context)
+    , m_commandId(++m_context.m_commandCounter) {
+}
+
+RenderCommands::RenderCommands(CommandContext& context, const RenderBeginParams& params)
+    : ScopedCommands(context) {
+    m_context.render_begin(params);
+}
+
+RenderCommands::~RenderCommands() {
+    DUK_ASSERT(valid());
+    m_context.render_end();
+}
+
+void RenderCommands::bind_shader(const BindShaderParams& params, const PipelineState& pipelineState) const {
+    DUK_ASSERT(valid());
+    m_context.bind_render_shader(params, pipelineState);
+}
+
+void RenderCommands::bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) const {
+    DUK_ASSERT(valid());
+    m_context.bind_vertex_buffers(vertexBuffers, count);
+}
+
+void RenderCommands::bind_index_buffer(const Buffer* indexBuffer) const {
+    DUK_ASSERT(valid());
+    m_context.bind_index_buffer(indexBuffer);
+}
+
+void RenderCommands::render(const RenderParams& params) const {
+    DUK_ASSERT(valid());
+    m_context.render(params);
+}
+
+void RenderCommands::render_indirect(const std::span<const RenderParams>& indirectParams) const {
+    DUK_ASSERT(valid());
+    m_context.render_indirect(indirectParams);
+}
+
+void RenderCommands::render_indexed(const RenderIndexedParams& params) const {
+    DUK_ASSERT(valid());
+    m_context.render_indexed(params);
+}
+
+void RenderCommands::render_indexed_indirect(const std::span<const RenderIndexedParams>& indexedIndirectParams) const {
+    DUK_ASSERT(valid());
+    m_context.render_indexed_indirect(indexedIndirectParams);
+}
+
+ComputeCommands::ComputeCommands(CommandContext& context)
+    : ScopedCommands(context) {
+}
+
+void ComputeCommands::bind_shader(const BindShaderParams& params) const {
+    DUK_ASSERT(valid());
+    m_context.bind_compute_shader(params);
+}
+
+void ComputeCommands::dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) const {
+    DUK_ASSERT(valid());
+    m_context.dispatch(groupCountX, groupCountY, groupCountZ);
+}
+
+TransferCommands::TransferCommands(CommandContext& context)
+    : ScopedCommands(context) {
+}
+
+void TransferCommands::write_image(Image* image, const void* src, size_t size) const {
+    DUK_ASSERT(valid());
+    m_context.write_image(image, src, size);
+}
+
+void TransferCommands::write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) const {
+    DUK_ASSERT(valid());
+    m_context.write_frame_buffer(frameBuffer, attachments, attachmentCount);
+}
+
+void TransferCommands::write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) const {
+    DUK_ASSERT(valid());
+    m_context.write_buffer(buffer, src, size, offset);
+}
+
+void TransferCommands::read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) const {
+    DUK_ASSERT(valid());
+    m_context.read_buffer(buffer, dst, size, offset);
+}
+
 CommandContext::~CommandContext() = default;
 
 PipelineStateStack& CommandContext::pipeline_state_stack() {
     return m_pipelineStateStack;
+}
+
+RenderCommands CommandContext::render(const RenderBeginParams& params) {
+    return RenderCommands(*this, params);
+}
+
+ComputeCommands CommandContext::compute() {
+    return ComputeCommands(*this);
+}
+
+TransferCommands CommandContext::transfer() {
+    return TransferCommands(*this);
 }
 
 }// namespace duk::rhi

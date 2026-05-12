@@ -57,7 +57,7 @@ int main() {
     rhiCreateInfo.api = duk::rhi::API::VULKAN;
     rhiCreateInfo.validationLayers = true;
     rhiCreateInfo.deviceIndex = 0;
-    rhiCreateInfo.framesInFlight = 2;
+
     rhiCreateInfo.logger = duk::log::instance()->default_logger();
 
     auto rhi = duk::rhi::Instance::create(rhiCreateInfo);
@@ -65,10 +65,11 @@ int main() {
     // -----------------------------------------------------------------------
     // Command queue and shared context
     // -----------------------------------------------------------------------
-    duk::rhi::Instance::CommandQueueCreateInfo queueCreateInfo = {};
-    queueCreateInfo.type = duk::rhi::CommandQueue::Type::GRAPHICS;
-    queueCreateInfo.window = window.get();
-    auto queue = rhi->create_command_queue(queueCreateInfo);
+    duk::rhi::CommandContextCreateInfo contextCreateInfo = {};
+    contextCreateInfo.type = duk::rhi::CommandQueue::Type::GRAPHICS;
+    contextCreateInfo.window = window.get();
+    contextCreateInfo.framesInFlight = 2;
+    auto queue = rhi->create_command_queue(contextCreateInfo);
 
     // -----------------------------------------------------------------------
     // Main loop
@@ -78,22 +79,20 @@ int main() {
     while (running) {
         platform->pool_events();
 
-        if (window->minimized()) {
+        if (window->minimized() || !window->valid()) {
             continue;
         }
 
         // Record and submit render commands.
         queue->submit([&](duk::rhi::CommandContext* ctx) {
-            ctx->update();
+            ctx->prepare();
 
-            duk::rhi::CommandContext::RenderBeginParams renderBeginParams;
+            duk::rhi::RenderBeginParams renderBeginParams;
             renderBeginParams.clearColor = glm::vec4(0.1f, 0.2f, 0.3f, 1.0f);
             renderBeginParams.loadOp = duk::rhi::LoadOp::CLEAR;
             renderBeginParams.storeOp = duk::rhi::StoreOp::STORE;
 
-            ctx->render_begin(renderBeginParams);
-
-            ctx->render_end();
+            auto render = ctx->render(renderBeginParams);
 
             ctx->flush();
         }).wait();
