@@ -27,6 +27,7 @@ find_package(spirv-reflect CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(Boost REQUIRED COMPONENTS type_index)
+find_package(unofficial-shaderc REQUIRED)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(PkgConfig REQUIRED)
