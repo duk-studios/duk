@@ -33,11 +33,9 @@ public:
 
     /// Submits a task to this queue. The task will be executed on the queue's thread, and
     /// the associated CommandContext will be passed as a parameter
-    template<typename F, std::enable_if_t<std::is_void_v<std::invoke_result_t<F, CommandContext*>>, int> = 0>
+    template<typename F>
     auto submit(F&& func) {
-        return m_taskQueue.enqueue([this, taskFunc = std::forward<F>(func)]() {
-            taskFunc(context());
-        });
+        return m_taskQueue.enqueue(std::forward<F>(func), context());
     }
 
 protected:
