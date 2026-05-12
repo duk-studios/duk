@@ -24,6 +24,9 @@
     "shaderc",
     "catch2",
     "boost-type-index",
-    "xcb"
+    {
+      "name": "xcb",
+      "platform": "linux"
+    }
   ]
 }
