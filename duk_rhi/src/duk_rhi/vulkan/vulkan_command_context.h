@@ -53,10 +53,10 @@ public:
     void bind_render_shader(const BindShaderParams& params, const PipelineState& pipelineState) override;
     void bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) override;
     void bind_index_buffer(const Buffer* indexBuffer) override;
-    void render(const RenderParams& params) override;
-    void render_indirect(const std::span<const RenderParams>& indirectParams) override;
-    void render_indexed(const RenderIndexedParams& params) override;
-    void render_indexed_indirect(const std::span<const RenderIndexedParams>& indexedIndirectParams) override;
+    void draw(const DrawParams& params) override;
+    void draw_indirect(const std::span<const DrawParams>& indirectParams) override;
+    void draw_indexed(const DrawIndexedParams& params) override;
+    void draw_indexed_indirect(const std::span<const DrawIndexedParams>& indexedIndirectParams) override;
     void render_end() override;
     void bind_compute_shader(const BindShaderParams& params) override;
     void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;

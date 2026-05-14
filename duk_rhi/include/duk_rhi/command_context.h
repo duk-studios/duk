@@ -77,14 +77,14 @@ struct RenderBeginParams {
     glm::vec4 clearColor{0.0f, 0.0f, 0.0f, 1.0f};
 };
 
-struct RenderParams {
+struct DrawParams {
     uint32_t vertexCount{0};
     uint32_t firstVertex{0};
     uint32_t instanceCount{1};
     uint32_t firstInstance{0};
 };
 
-struct RenderIndexedParams {
+struct DrawIndexedParams {
     uint32_t indexCount{0};
     uint32_t firstIndex{0};
     uint32_t instanceCount{1};
@@ -117,13 +117,13 @@ public:
 
     void bind_index_buffer(const Buffer* indexBuffer) const;
 
-    void render(const RenderParams& params) const;
+    void draw(const DrawParams& params) const;
 
-    void render_indirect(const std::span<const RenderParams>& indirectParams) const;
+    void draw_indirect(const std::span<const DrawParams>& indirectParams) const;
 
-    void render_indexed(const RenderIndexedParams& params) const;
+    void draw_indexed(const DrawIndexedParams& params) const;
 
-    void render_indexed_indirect(const std::span<const RenderIndexedParams>& indexedIndirectParams) const;
+    void draw_indexed_indirect(const std::span<const DrawIndexedParams>& indexedIndirectParams) const;
 };
 
 class ComputeCommands : public ScopedCommands {
@@ -199,13 +199,13 @@ public:
 
     virtual void bind_index_buffer(const Buffer* indexBuffer) = 0;
 
-    virtual void render(const RenderParams& params) = 0;
+    virtual void draw(const DrawParams& params) = 0;
 
-    virtual void render_indirect(const std::span<const RenderParams>& indirectParams) = 0;
+    virtual void draw_indirect(const std::span<const DrawParams>& indirectParams) = 0;
 
-    virtual void render_indexed(const RenderIndexedParams& params) = 0;
+    virtual void draw_indexed(const DrawIndexedParams& params) = 0;
 
-    virtual void render_indexed_indirect(const std::span<const RenderIndexedParams>& indexedIndirectParams) = 0;
+    virtual void draw_indexed_indirect(const std::span<const DrawIndexedParams>& indexedIndirectParams) = 0;
 
     virtual void render_end() = 0;
 

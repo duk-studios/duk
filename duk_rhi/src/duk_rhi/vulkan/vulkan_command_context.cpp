@@ -396,25 +396,25 @@ void VulkanCommandContext::bind_index_buffer(const Buffer* buffer) {
     vkCmdBindIndexBuffer(m_activeCommandBuffer, vulkanBuffer->handle(), 0, vulkanBuffer->index_type());
 }
 
-void VulkanCommandContext::render(const RenderParams& params) {
+void VulkanCommandContext::draw(const DrawParams& params) {
     if (m_activeCommandBuffer == VK_NULL_HANDLE) {
         return;
     }
     vkCmdDraw(m_activeCommandBuffer, params.vertexCount, params.instanceCount, params.firstVertex, params.firstInstance);
 }
 
-void VulkanCommandContext::render_indirect(const std::span<const RenderParams>& indirectParams) {
+void VulkanCommandContext::draw_indirect(const std::span<const DrawParams>& indirectParams) {
 
 }
 
-void VulkanCommandContext::render_indexed(const RenderIndexedParams& params) {
+void VulkanCommandContext::draw_indexed(const DrawIndexedParams& params) {
     if (m_activeCommandBuffer == VK_NULL_HANDLE) {
         return;
     }
     vkCmdDrawIndexed(m_activeCommandBuffer, params.indexCount, params.instanceCount, params.firstIndex, params.vertexOffset, params.firstInstance);
 }
 
-void VulkanCommandContext::render_indexed_indirect(const std::span<const RenderIndexedParams>& indexedIndirectParams) {
+void VulkanCommandContext::draw_indexed_indirect(const std::span<const DrawIndexedParams>& indexedIndirectParams) {
 }
 
 void VulkanCommandContext::render_end() {

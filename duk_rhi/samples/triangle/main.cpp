@@ -189,13 +189,13 @@ int main() {
 
             render.bind_shader(bindShaderParams, pipelineState);
 
-            duk::rhi::RenderParams renderParams;
+            duk::rhi::DrawParams renderParams;
             renderParams.vertexCount   = 3;
             renderParams.firstVertex   = 0;
             renderParams.instanceCount = 1;
             renderParams.firstInstance = 0;
 
-            render.render(renderParams);
+            render.draw(renderParams);
         }
 
         ctx->flush();

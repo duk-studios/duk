@@ -38,24 +38,24 @@ void RenderCommands::bind_index_buffer(const Buffer* indexBuffer) const {
     m_context.bind_index_buffer(indexBuffer);
 }
 
-void RenderCommands::render(const RenderParams& params) const {
+void RenderCommands::draw(const DrawParams& params) const {
     DUK_ASSERT(valid());
-    m_context.render(params);
+    m_context.draw(params);
 }
 
-void RenderCommands::render_indirect(const std::span<const RenderParams>& indirectParams) const {
+void RenderCommands::draw_indirect(const std::span<const DrawParams>& indirectParams) const {
     DUK_ASSERT(valid());
-    m_context.render_indirect(indirectParams);
+    m_context.draw_indirect(indirectParams);
 }
 
-void RenderCommands::render_indexed(const RenderIndexedParams& params) const {
+void RenderCommands::draw_indexed(const DrawIndexedParams& params) const {
     DUK_ASSERT(valid());
-    m_context.render_indexed(params);
+    m_context.draw_indexed(params);
 }
 
-void RenderCommands::render_indexed_indirect(const std::span<const RenderIndexedParams>& indexedIndirectParams) const {
+void RenderCommands::draw_indexed_indirect(const std::span<const DrawIndexedParams>& indexedIndirectParams) const {
     DUK_ASSERT(valid());
-    m_context.render_indexed_indirect(indexedIndirectParams);
+    m_context.draw_indexed_indirect(indexedIndirectParams);
 }
 
 ComputeCommands::ComputeCommands(CommandContext& context)

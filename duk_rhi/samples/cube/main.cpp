@@ -347,14 +347,14 @@ int main() {
             render.bind_vertex_buffers(vertexBuffers, 2);
             render.bind_index_buffer(indexBuffer.get());
 
-            duk::rhi::RenderIndexedParams drawParams;
+            duk::rhi::DrawIndexedParams drawParams;
             drawParams.indexCount    = kIndexCount;
             drawParams.firstIndex    = 0;
             drawParams.instanceCount = 1;
             drawParams.firstInstance = 0;
             drawParams.vertexOffset  = 0;
 
-            render.render_indexed(drawParams);
+            render.draw_indexed(drawParams);
         }
 
         ctx->flush();
