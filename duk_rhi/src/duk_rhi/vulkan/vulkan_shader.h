@@ -6,8 +6,8 @@
 
 #include <duk_rhi/shader.h>
 #include <duk_rhi/shader_data_source.h>
-#include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
+#include <duk_rhi/vulkan/vulkan_resource_binder.h>
 
 namespace duk::rhi {
 
@@ -18,7 +18,13 @@ VkShaderStageFlags convert_module_mask(ShaderModule::Mask moduleMask);
 struct VulkanShaderCreateInfo {
     VkDevice device;
     const ShaderDataSource* shaderDataSource;
-    VulkanDescriptorSetLayoutCache* descriptorSetLayoutCache;
+    VulkanResourceState* resourceBinder;
+};
+
+/// Stores the resolved Vulkan (set, binding) for a logical descriptor slot.
+struct BindingLocation {
+    uint32_t set;
+    uint32_t binding;
 };
 
 class VulkanShader : public Shader {
@@ -33,32 +39,32 @@ public:
 
     DUK_NO_DISCARD const std::unordered_map<ShaderModule::Bits, VkShaderModule>& shader_modules() const;
 
-    DUK_NO_DISCARD const std::vector<VkDescriptorSetLayout>& descriptor_set_layouts() const;
+    /// Returns the Vulkan (set, binding) for the given logical binding slot.
+    DUK_NO_DISCARD const BindingLocation& binding_location(uint32_t logicalIndex) const;
 
-    DUK_NO_DISCARD const VkPipelineLayout& pipeline_layout() const;
+    DUK_NO_DISCARD VkPipelineLayout pipeline_layout() const;
 
-    DUK_NO_DISCARD const DescriptorSetDescription& descriptor_set_description(uint32_t set) const override;
-
+    // Shader interface
+    DUK_NO_DISCARD const ShaderBindingLayout& binding_layout() const override;
     DUK_NO_DISCARD const VertexLayout& vertex_layout() const override;
-
     DUK_NO_DISCARD bool is_graphics_shader() const override;
-
     DUK_NO_DISCARD bool is_compute_shader() const override;
-
     DUK_NO_DISCARD hash::Hash hash() const override;
-
-private:
-    bool create_shader_module(ShaderModule::Bits type, const ShaderDataSource* shaderDataSource);
 
 private:
     VkDevice m_device;
     duk::hash::Hash m_hash;
     ShaderModule::Mask m_moduleMask;
-    std::vector<DescriptorSetDescription> m_descriptorSetDescriptions;
+    VkPipelineLayout m_pipelineLayout{VK_NULL_HANDLE};
+
+    /// Flat backend-agnostic binding layout sourced from the ShaderDataSource.
+    ShaderBindingLayout m_bindingLayout;
+
+    /// Maps logical binding index → Vulkan (set, binding).
+    std::vector<BindingLocation> m_bindingRemapTable;
+
     VertexLayout m_vertexLayout;
     std::unordered_map<ShaderModule::Bits, VkShaderModule> m_shaderModules;
-    std::vector<VkDescriptorSetLayout> m_descriptorSetLayouts;
-    VkPipelineLayout m_pipelineLayout;
     std::vector<VkVertexInputBindingDescription> m_inputBindings;
     std::vector<VkVertexInputAttributeDescription> m_inputAttributes;
 };

@@ -9,6 +9,8 @@
 
 #include <cstdint>
 #include <string>
+#include <variant>
+#include <vector>
 
 namespace duk::rhi {
 
@@ -28,16 +30,12 @@ struct ShaderModule {
     using Mask = uint32_t;
 };
 
-enum class DescriptorType {
-    UNDEFINED = 0,
+enum class BufferBindingType {
     UNIFORM_BUFFER,
-    STORAGE_BUFFER,
-    IMAGE,
-    IMAGE_SAMPLER,
-    STORAGE_IMAGE
+    STORAGE_BUFFER
 };
 
-struct DescriptorMemberDescription {
+struct BufferMemberDescription {
     uint32_t offset;
     uint32_t size;
     uint32_t padding;
@@ -48,23 +46,38 @@ struct DescriptorMemberDescription {
     }
 };
 
-struct DescriptorDescription {
-    DescriptorType type;
-    ShaderModule::Mask moduleMask;
-    std::string name;
+struct BufferBindingDescription {
+    BufferBindingType type;
     uint32_t stride;
-    std::vector<DescriptorMemberDescription> members;
+    std::vector<BufferMemberDescription> members;
 };
 
-struct DescriptorSetDescription {
-    std::vector<DescriptorDescription> bindings;
+enum class ImageBindingType {
+    IMAGE,
+    IMAGE_SAMPLER,
+    STORAGE_IMAGE
 };
+
+struct ImageBindingDescription {
+    ImageBindingType type;
+};
+
+struct BindingDescription {
+    std::variant<ImageBindingDescription, BufferBindingDescription> binding;
+    ShaderModule::Mask moduleMask;
+    std::string name;
+};
+
+/// Flat ordered list of all descriptors in a shader, indexed by logical binding slot.
+/// Position in the vector IS the logical index exposed to the user (e.g. via a generated enum).
+/// Backend implementations decide the concrete (set, binding) numbers internally.
+using ShaderBindingLayout = std::vector<BindingDescription>;
 
 class Shader {
 public:
     virtual ~Shader();
 
-    DUK_NO_DISCARD virtual const DescriptorSetDescription& descriptor_set_description(uint32_t set = 0) const = 0;
+    DUK_NO_DISCARD virtual const ShaderBindingLayout& binding_layout() const = 0;
 
     DUK_NO_DISCARD virtual const VertexLayout& vertex_layout() const = 0;
 

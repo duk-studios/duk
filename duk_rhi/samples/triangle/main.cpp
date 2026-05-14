@@ -16,7 +16,7 @@
 #include <duk_platform/platform.h>
 
 #include <duk_rhi/instance.h>
-#include <duk_rhi/std_shader_data_source.h>
+#include <duk_rhi/runtime_shader_data_source.h>
 #include <duk_rhi/pipeline_state.h>
 
 #include <shaderc/shaderc.hpp>
@@ -140,7 +140,7 @@ int main() {
     // -----------------------------------------------------------------------
     // Shader
     // -----------------------------------------------------------------------
-    auto shaderDataSource = std::make_shared<duk::rhi::StdShaderDataSource>();
+    auto shaderDataSource = std::make_shared<duk::rhi::RuntimeShaderDataSource>();
     shaderDataSource->insert_spir_v_code(
         duk::rhi::ShaderModule::VERTEX,
         compile_glsl(kVertexGlsl, shaderc_vertex_shader, "triangle.vert"));

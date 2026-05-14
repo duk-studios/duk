@@ -14,7 +14,7 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/pipeline_state.h
         include/duk_rhi/shader.h
         include/duk_rhi/shader_data_source.h
-        include/duk_rhi/std_shader_data_source.h
+        include/duk_rhi/runtime_shader_data_source.h
         include/duk_rhi/pipeline_flags.h
         include/duk_rhi/command_queue.h
         include/duk_rhi/command_context.h
@@ -33,7 +33,7 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/shader.cpp
         src/duk_rhi/shader.cpp
         src/duk_rhi/shader_data_source.cpp
-        src/duk_rhi/std_shader_data_source.cpp
+        src/duk_rhi/runtime_shader_data_source.cpp
         src/duk_rhi/shader_reflection.h
         src/duk_rhi/shader_reflection.cpp
         src/duk_rhi/command_queue.cpp
@@ -69,12 +69,17 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_buffer.cpp
         src/duk_rhi/vulkan/vulkan_descriptor_set.cpp
         src/duk_rhi/vulkan/vulkan_descriptor_set.h
+        src/duk_rhi/vulkan/vulkan_descriptor_set_allocator.h
+        src/duk_rhi/vulkan/vulkan_descriptor_set_allocator.cpp
         src/duk_rhi/vulkan/vulkan_capabilities.h
         src/duk_rhi/vulkan/vulkan_capabilities.cpp
         src/duk_rhi/vulkan/vulkan_render_state.h
         src/duk_rhi/vulkan/vulkan_render_state.cpp
         src/duk_rhi/vulkan/vulkan_static_render_state.h
         src/duk_rhi/vulkan/vulkan_static_render_state.cpp
+        src/duk_rhi/vulkan/vulkan_resource_binder.h
+        src/duk_rhi/vulkan/vulkan_single_set_resource_state.h
+        src/duk_rhi/vulkan/vulkan_single_set_resource_state.cpp
         src/duk_rhi/vulkan/vulkan_shader.h
         src/duk_rhi/vulkan/vulkan_shader.cpp
 )

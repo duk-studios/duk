@@ -5,10 +5,10 @@
 #include <duk_rhi/vulkan/vulkan_shader.h>
 #include <duk_rhi/vulkan/vulkan_buffer.h>
 #include <duk_rhi/vulkan/vulkan_command_context.h>
-#include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_frame_buffer.h>
 #include <duk_rhi/vulkan/vulkan_instance.h>
 #include <duk_rhi/vulkan/vulkan_static_render_state.h>
+#include <duk_rhi/vulkan/vulkan_single_set_resource_state.h>
 
 #include <duk_tools/fixed_vector.h>
 
@@ -109,9 +109,6 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
     // -----------------------------------------------------------------------
     // Descriptor layout cache and sampler cache
     // -----------------------------------------------------------------------
-    VulkanDescriptorSetLayoutCacheCreateInfo descriptorSetLayoutCacheCreateInfo = {};
-    descriptorSetLayoutCacheCreateInfo.device = m_device;
-    m_descriptorSetLayoutCache = std::make_unique<VulkanDescriptorSetLayoutCache>(descriptorSetLayoutCacheCreateInfo);
 
     VulkanSamplerCacheCreateInfo samplerCacheCreateInfo = {};
     samplerCacheCreateInfo.device = m_device;
@@ -121,6 +118,11 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
     renderStateCreateInfo.device = m_device;
     renderStateCreateInfo.deletionQueue = &m_deletionQueue;
     m_renderState = std::make_unique<VulkanStaticRenderState>(renderStateCreateInfo);
+
+    VulkanSingleSetResourceBinderCreateInfo resourceBinderCreateInfo = {};
+    resourceBinderCreateInfo.device = m_device;
+    resourceBinderCreateInfo.samplerCache = m_samplerCache.get();
+    m_resourceBinder = std::make_unique<VulkanSingleSetResourceState>(resourceBinderCreateInfo);
 
     // -----------------------------------------------------------------------
     // Per-frame fences
@@ -149,8 +151,8 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
             }
         }
 
-        m_renderSemaphores.resize(m_swapchain->image_count());
-        for (auto& semaphore : m_renderSemaphores) {
+        m_commandSemaphore.resize(m_swapchain->image_count());
+        for (auto& semaphore : m_commandSemaphore) {
             if (vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
                 throw std::runtime_error("VulkanCommandContext: failed to create render semaphore");
             }
@@ -158,8 +160,8 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
         m_defaultFrameBuffer = std::make_unique<VulkanFrameBuffer>();
     }
     else {
-        m_renderSemaphores.resize(m_framesInFlight);
-        for (auto& semaphore : m_renderSemaphores) {
+        m_commandSemaphore.resize(m_framesInFlight);
+        for (auto& semaphore : m_commandSemaphore) {
             if (vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
                 throw std::runtime_error("VulkanCommandContext: failed to create render semaphore");
             }
@@ -199,7 +201,7 @@ VulkanCommandContext::~VulkanCommandContext() {
     for (auto semaphore : m_imageSemaphores) {
         vkDestroySemaphore(m_device, semaphore, nullptr);
     }
-    for (auto semaphore : m_renderSemaphores) {
+    for (auto semaphore : m_commandSemaphore) {
         vkDestroySemaphore(m_device, semaphore, nullptr);
     }
     for (auto fence : m_fences) {
@@ -249,7 +251,7 @@ void VulkanCommandContext::flush() {
         waitStages.push_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
 
         // if rendering to the swapchain, use the swapchain indexed semaphore
-        signalSemaphores.push_back(m_renderSemaphores[m_swapchainImageIndex]);
+        signalSemaphores.push_back(m_commandSemaphore[m_swapchainImageIndex]);
 
         // Transition current swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.
         // No-op if it is already there (e.g. compute-only or empty frame).
@@ -261,7 +263,7 @@ void VulkanCommandContext::flush() {
     }
     else {
         // if not rendering to swapchain, just use a regular frame protected semaphore
-        signalSemaphores.push_back(m_renderSemaphores[m_frameIndex]);
+        signalSemaphores.push_back(m_commandSemaphore[m_frameIndex]);
     }
 
     // end command buffer after layout transition, if any
@@ -304,12 +306,13 @@ std::shared_ptr<Shader> VulkanCommandContext::create_shader(const ShaderCreateIn
     VulkanShaderCreateInfo vulkanShaderCreateInfo = {};
     vulkanShaderCreateInfo.shaderDataSource = shaderCreateInfo.shaderDataSource;
     vulkanShaderCreateInfo.device = m_device;
-    vulkanShaderCreateInfo.descriptorSetLayoutCache = m_descriptorSetLayoutCache.get();
+    vulkanShaderCreateInfo.resourceBinder = m_resourceBinder.get();
     return make_managed<VulkanShader>(vulkanShaderCreateInfo);
 }
 
 std::shared_ptr<Buffer> VulkanCommandContext::create_buffer(const BufferCreateInfo& bufferCreateInfo) {
     VulkanBufferCreateInfo vulkanBufferCreateInfo = {};
+    vulkanBufferCreateInfo.size = bufferCreateInfo.size;
     vulkanBufferCreateInfo.usageFlags = detail::buffer_usage_flags(bufferCreateInfo.type);
     vulkanBufferCreateInfo.memoryFlags = detail::buffer_memory_flags(bufferCreateInfo.updateFrequency);
     vulkanBufferCreateInfo.indexType = detail::buffer_index_type(bufferCreateInfo.type);
@@ -357,6 +360,11 @@ void VulkanCommandContext::bind_render_shader(const BindShaderParams& params, co
     }
     const auto shader = static_cast<const VulkanShader*>(params.shader);
     m_renderState->bind_pipeline(m_activeCommandBuffer, *shader, pipelineState);
+    if (params.resources) {
+        m_resourceBinder->bind_resources(m_activeCommandBuffer,
+                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                         *shader, *params.resources, m_frameIndex);
+    }
 }
 
 void VulkanCommandContext::bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) {
@@ -417,6 +425,15 @@ void VulkanCommandContext::render_end() {
 }
 
 void VulkanCommandContext::bind_compute_shader(const BindShaderParams& params) {
+    if (m_activeCommandBuffer == VK_NULL_HANDLE) {
+        return;
+    }
+    const auto shader = static_cast<const VulkanShader*>(params.shader);
+    if (params.resources) {
+        m_resourceBinder->bind_resources(m_activeCommandBuffer,
+                                         VK_PIPELINE_BIND_POINT_COMPUTE,
+                                         *shader, *params.resources, m_frameIndex);
+    }
 }
 
 void VulkanCommandContext::dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) {

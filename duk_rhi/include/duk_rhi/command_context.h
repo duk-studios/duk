@@ -13,6 +13,7 @@
 #include <duk_rhi/pipeline_state_stack.h>
 
 #include <array>
+#include <variant>
 
 #include <duk_macros/macros.h>
 
@@ -41,12 +42,27 @@ struct ImageCreateInfo {
     Image::Usage usage;
 };
 
+/// Binds a sampled image (texture + sampler pair) to a logical descriptor slot.
+struct ImageBinding {
+    const Image* image{nullptr};
+    Sampler sampler{};
+};
+
+/// Binds a buffer (uniform or storage) to a logical descriptor slot.
+struct BufferBinding {
+    const Buffer* buffer{nullptr};
+};
+
+/// A single resource bound to one logical descriptor slot.
+/// std::monostate means the slot is unused.
+using ShaderResource = std::variant<std::monostate, ImageBinding, BufferBinding>;
+
+static constexpr uint32_t kMaxShaderBindings = 32;
+
+/// Flat array of resources indexed by logical binding slot.
+/// Each slot index corresponds to the generated enum value for the named descriptor.
 struct ShaderResources {
-    std::array<Sampler, 16> samplers;
-    std::array<const Image*, 16> sampledImages;
-    std::array<const Image*, 16> storageImages;
-    std::array<const Buffer*, 16> storageBuffers;
-    std::array<const Buffer*, 16> uniformBuffers;
+    std::array<ShaderResource, kMaxShaderBindings> bindings{};
 };
 
 struct BindShaderParams {

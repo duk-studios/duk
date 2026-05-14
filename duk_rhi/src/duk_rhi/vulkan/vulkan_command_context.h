@@ -11,14 +11,13 @@
 #include <duk_rhi/vulkan/vulkan_sampler.h>
 #include <duk_rhi/vulkan/vulkan_swapchain.h>
 #include <duk_rhi/vulkan/vulkan_render_state.h>
+#include <duk_rhi/vulkan/vulkan_resource_binder.h>
 
 #include <memory>
 #include <vector>
 
 
 namespace duk::rhi {
-
-class VulkanDescriptorSetLayoutCache;
 
 struct VulkanCommandContextCreateInfo {
     VulkanInstance* instance;
@@ -88,7 +87,7 @@ private:
     // Sync
     std::vector<VkFence> m_fences;
     std::vector<VkSemaphore> m_imageSemaphores;
-    std::vector<VkSemaphore> m_renderSemaphores;
+    std::vector<VkSemaphore> m_commandSemaphore;
 
     // Lazy command buffer cache
     VkCommandPool m_commandPool{VK_NULL_HANDLE};
@@ -96,9 +95,9 @@ private:
     VkCommandBuffer m_activeCommandBuffer{VK_NULL_HANDLE};
 
     std::unique_ptr<VulkanSwapchain> m_swapchain;
-    std::unique_ptr<VulkanDescriptorSetLayoutCache> m_descriptorSetLayoutCache;
     std::unique_ptr<VulkanSamplerCache> m_samplerCache;
     std::unique_ptr<VulkanRenderState> m_renderState;
+    std::unique_ptr<VulkanResourceState> m_resourceBinder;
     std::unique_ptr<VulkanFrameBuffer> m_defaultFrameBuffer;
 
     VulkanDeletionQueue m_deletionQueue;
