@@ -1,4 +1,4 @@
-# Duk Engine - AI Agent Guidelines
+# Duk Engine - Copilot Instructions
 
 ## Architecture Overview
 
@@ -45,23 +45,6 @@ Data flows from high-level objects/components through renderer pools to RHI comm
 - Applies to `.cpp`/`.h` files in `duk_*` directories
 - Check formatting: `python scripts/format.py --check`
 
-### Branching & Commits
-Follow strict naming conventions:
-- Branches: `(new|chg|fix)/(short-message)`
-- Commits: `(new|chg|fix): (short message)`
-
-Examples:
-```
-new/add-new-things
-fix/fix-broken-things
-new: add specific thing
-```
-
-### Testing
-- Tests use Catch2 framework
-- Run via `ctest` after building with `DUK_BUILD_TESTS=ON`
-- Each module has `test/` subdirectory with CMakeLists.txt
-
 ## Code Patterns & Conventions
 
 ### Namespaces & Includes
@@ -69,51 +52,12 @@ new: add specific thing
 - Includes: `<duk_module/header.h>` (e.g., `<duk_renderer/renderer.h>`)
 - Headers use include guards: `DUK_MODULE_HEADER_H`
 - Methods/functions use snake_case for signatures, camelCase for variables
-- Use auto and const when appropriate
+- Use `auto` and `const` when appropriate
 - Always separate declaration and implementation:
   - Do not implement logic in headers, not even small getters
   - Templates are an exception, but should be placed at the end of the file
-
-### ECS Usage
-Objects are ID-based with attached components:
-```cpp
-auto obj = objects->add_object();
-obj.add<duk::renderer::Position3D>()->value = glm::vec3(0,0,0);
-obj.add<duk::renderer::MeshDrawing>()->mesh = renderer->mesh_pool()->cube();
-```
-
-Iterate with component filters:
-```cpp
-for (auto object : objects->all_with<Position3D, MeshDrawing>()) {
-    auto [pos, mesh] = object.components<Position3D, MeshDrawing>();
-    // use components
-}
-```
-
-### Resource Management
-Resources use pools with IDs:
-```cpp
-auto material = renderer->material_pool()->create_phong(duk::pool::Id(666));
-auto mesh = renderer->mesh_pool()->cube();
-```
-
-### Events
-Event-driven communication:
-```cpp
-duk::event::Listener listener;
-duk::event::EventT<int> myEvent;
-listener.listen(myEvent, [](int value) { /* handle */ });
-myEvent.emit(42);
-```
-
-### Rendering Pipeline
-Materials bind shaders and descriptors:
-```cpp
-MaterialCreateInfo info = { /* shader, bindings */ };
-auto material = std::make_shared<Material>(info);
-material->set("uColor", glm::vec4(1.0f));
-renderer->render(objects);
-```
+- Avoid over-commenting; code should be self-explanatory. Use comments for non-obvious logic or decisions.
+- Again about comments: DO NOT COMMENT THE OBVIOUS. If you find yourself writing a comment to explain what a line of code does, consider if the code can be rewritten to be clearer instead.
 
 ### Error Handling
 - Use `duk::log::fatal()` for critical errors
@@ -125,11 +69,3 @@ renderer->render(objects);
 - `DUK_PLATFORM_IS_WINDOWS`: Platform detection
 - Utilities in `duk_tools`: `Singleton`, `FixedVector`, `BitBlock`
 
-## Key Directories & Files
-
-- `duk_renderer/src/duk_renderer/material/material.cpp`: Material system implementation with binding management
-- `duk_objects/include/duk_objects/objects.h`: ECS core with component pools
-- `CMakeLists.txt`: Root build configuration with module subdirs
-- `CMakePresets.json`: Build presets for VS/Ninja with vcpkg
-- `justfile`: Development tasks (format, convert scripts)
-- `scripts/format.py`: Clang-format automation for C++ files
