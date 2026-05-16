@@ -76,12 +76,8 @@ static std::vector<uint8_t> compile_glsl(const char* source, shaderc_shader_kind
         duk::log::fatal("Shader compilation failed ({}): {}", debugName, result.GetErrorMessage());
     }
 
-    // result iterates over uint32_t SPIR-V words; reinterpret as bytes for StdShaderDataSource
-    const uint32_t* wordBegin = result.cbegin();
-    const uint32_t* wordEnd   = result.cend();
-    const auto* byteBegin = reinterpret_cast<const uint8_t*>(wordBegin);
-    const auto* byteEnd   = reinterpret_cast<const uint8_t*>(wordEnd);
-
+    const auto* byteBegin = reinterpret_cast<const uint8_t*>(result.cbegin());
+    const auto* byteEnd   = reinterpret_cast<const uint8_t*>(result.cend());
     return {byteBegin, byteEnd};
 }
 
@@ -140,18 +136,13 @@ int main() {
     // -----------------------------------------------------------------------
     // Shader
     // -----------------------------------------------------------------------
-    auto shaderDataSource = std::make_shared<duk::rhi::RuntimeShaderDataSource>();
-    shaderDataSource->insert_spir_v_code(
-        duk::rhi::ShaderModule::VERTEX,
-        compile_glsl(kVertexGlsl, shaderc_vertex_shader, "triangle.vert"));
-    shaderDataSource->insert_spir_v_code(
-        duk::rhi::ShaderModule::FRAGMENT,
-        compile_glsl(kFragmentGlsl, shaderc_fragment_shader, "triangle.frag"));
-    shaderDataSource->update_hash();
+    duk::rhi::RuntimeShaderDataSourceCreateInfo shaderSourceCreateInfo = {};
+    shaderSourceCreateInfo.vertexShaderCode   = compile_glsl(kVertexGlsl,   shaderc_vertex_shader,   "triangle.vert");
+    shaderSourceCreateInfo.fragmentShaderCode = compile_glsl(kFragmentGlsl, shaderc_fragment_shader, "triangle.frag");
+    auto shaderDataSource = duk::rhi::RuntimeShaderDataSource(shaderSourceCreateInfo);
 
     duk::rhi::ShaderCreateInfo shaderCreateInfo = {};
-    shaderCreateInfo.shaderDataSource = shaderDataSource.get();
-
+    shaderCreateInfo.shaderDataSource = &shaderDataSource;
     auto shader = ctx->create_shader(shaderCreateInfo);
 
     // -----------------------------------------------------------------------
@@ -183,11 +174,7 @@ int main() {
 
             auto render = ctx->render(renderBeginParams);
 
-            duk::rhi::BindShaderParams bindShaderParams;
-            bindShaderParams.shader    = shader.get();
-            bindShaderParams.resources = nullptr;
-
-            render.bind_shader(bindShaderParams, pipelineState);
+            render.bind_shader(shader.get(), pipelineState);
 
             duk::rhi::DrawParams renderParams;
             renderParams.vertexCount   = 3;

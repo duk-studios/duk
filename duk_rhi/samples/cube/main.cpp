@@ -337,11 +337,8 @@ int main() {
             resources.bindings[matricesSlot]   = duk::rhi::BufferBinding{matricesUBO.get()};
             resources.bindings[colorSlot] = duk::rhi::BufferBinding{colorUBO.get()};
 
-            duk::rhi::BindShaderParams bindShaderParams;
-            bindShaderParams.shader    = shader.get();
-            bindShaderParams.resources = &resources;
-
-            render.bind_shader(bindShaderParams, pipelineState);
+            render.bind_shader(shader.get(), pipelineState);
+            render.bind_resources(resources);
 
             const duk::rhi::Buffer* vertexBuffers[] = {positionBuffer.get(), colorBuffer.get()};
             render.bind_vertex_buffers(vertexBuffers, 2);
