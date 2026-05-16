@@ -10,7 +10,6 @@
 #include <duk_rhi/pipeline_state.h>
 #include <duk_rhi/shader.h>
 #include <duk_rhi/shader_data_source.h>
-#include <duk_rhi/pipeline_state_stack.h>
 
 #include <array>
 #include <variant>
@@ -49,10 +48,6 @@ struct ImageBinding {
 };
 
 /// Binds a buffer (uniform or storage) to a logical descriptor slot.
-/// The offset is always applied as a Vulkan dynamic offset at bind time,
-/// so it is never baked into the descriptor set — the same set is reused
-/// for all offset values referencing the same buffer.
-/// Use DynamicBuffer::alloc() to obtain a correctly aligned offset.
 struct BufferBinding {
     const Buffer* buffer{nullptr};
     uint32_t offset{0};
