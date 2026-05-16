@@ -25,6 +25,7 @@ static void fill_buffer_members(SpvReflectDescriptorBinding* spvBinding, BufferB
         const auto& spvMember = spvBinding->block.members[memberIndex];
         if (spvMember.type_description->op == SpvOpTypeRuntimeArray) {
             bufferDesc.stride = spvMember.type_description->traits.array.stride;
+            bufferDesc.size = bufferDesc.stride;
             for (auto i = 0u; i < spvMember.member_count; i++) {
                 const auto& inst = spvMember.members[i];
                 BufferMemberDescription member;
@@ -43,6 +44,7 @@ static void fill_buffer_members(SpvReflectDescriptorBinding* spvBinding, BufferB
         member.padding = spvMember.padded_size - spvMember.size;
         bufferDesc.members.push_back(member);
     }
+    bufferDesc.size = spvBinding->block.size;
     bufferDesc.stride = spvBinding->block.padded_size;
 }
 

@@ -48,7 +48,8 @@ struct BufferMemberDescription {
 
 struct BufferBindingDescription {
     BufferBindingType type;
-    uint32_t stride;
+    uint32_t size;   ///< Actual (unpadded) data size of the block in bytes.
+    uint32_t stride; ///< Aligned/padded stride used for dynamic offset calculations.
     std::vector<BufferMemberDescription> members;
 };
 
