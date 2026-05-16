@@ -28,6 +28,14 @@ PixelFormat PixelFormat::operator|(uint32_t mask) const {
     return m_mask | mask;
 }
 
+bool PixelFormat::operator==(PixelFormat other) const {
+    return m_mask == other.m_mask;
+}
+
+bool PixelFormat::operator!=(PixelFormat other) const {
+    return m_mask != other.m_mask;
+}
+
 PixelFormat::operator uint32_t() const {
     return m_mask;
 }

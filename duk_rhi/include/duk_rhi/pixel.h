@@ -90,6 +90,10 @@ public:
 
     DUK_NO_DISCARD PixelFormat operator|(uint32_t mask) const;
 
+    DUK_NO_DISCARD bool operator==(PixelFormat other) const;
+
+    DUK_NO_DISCARD bool operator!=(PixelFormat other) const;
+
     DUK_NO_DISCARD operator uint32_t() const;
 
     DUK_NO_DISCARD uint32_t channel_count() const;
@@ -202,7 +206,7 @@ inline PixelFormat pixel_format_of<PixelRGBA32F>() {
 namespace std {
 template<>
 struct hash<duk::rhi::PixelFormat> {
-    size_t operator()(const duk::rhi::PixelFormat& pixelFormat) {
+    size_t operator()(const duk::rhi::PixelFormat& pixelFormat) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, pixelFormat.mask());
         return hash;
