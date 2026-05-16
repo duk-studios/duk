@@ -4,19 +4,19 @@
 #ifndef DUK_RHI_CAPABILITIES_H
 #define DUK_RHI_CAPABILITIES_H
 
-#include <duk_rhi/image.h>
+#include <cstddef>
 
 namespace duk::rhi {
 
-class Capabilities {
-public:
-    virtual ~Capabilities() = default;
+struct Capabilities {
+    /// True when the device supports multi-draw-indirect commands.
+    bool multiDrawIndirectSupported;
 
-    DUK_NO_DISCARD virtual PixelFormat depth_format() const = 0;
+    /// Minimum required alignment (in bytes) for the offset of a uniform buffer binding.
+    size_t minUniformBufferOffsetAlignment;
 
-    DUK_NO_DISCARD virtual bool is_format_supported(PixelFormat format, Image::Usage usage) const = 0;
-
-    DUK_NO_DISCARD virtual bool is_multi_draw_indirect_supported() const = 0;
+    /// Minimum required alignment (in bytes) for the offset of a storage buffer binding.
+    size_t minStorageBufferOffsetAlignment;
 };
 
 }// namespace duk::rhi

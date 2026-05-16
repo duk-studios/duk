@@ -5,6 +5,7 @@
 #include <duk_rhi/exception.h>
 #include <duk_rhi/vulkan/vulkan_instance.h>
 #include <duk_rhi/vulkan/vulkan_command_context.h>
+#include <duk_rhi/vulkan/vulkan_image.h>
 
 #include <duk_log/log.h>
 
@@ -227,7 +228,20 @@ static VkDevice create_vk_device(VulkanPhysicalDevice* physicalDevice, const std
 
     return device;
 }
+
+static Capabilities populate_capabilities(VulkanPhysicalDevice* physicalDevice) {
+    Capabilities caps = {};
+    // Multi-draw indirect support.
+    caps.multiDrawIndirectSupported = physicalDevice->features().multiDrawIndirect;
+
+    // Buffer alignment requirements.
+    const auto& limits = physicalDevice->properties().limits;
+    caps.minUniformBufferOffsetAlignment = static_cast<size_t>(limits.minUniformBufferOffsetAlignment);
+    caps.minStorageBufferOffsetAlignment = static_cast<size_t>(limits.minStorageBufferOffsetAlignment);
+
+    return caps;
 }
+} // namespace detail
 
 VulkanInstance::VulkanInstance(const VulkanRHICreateInfo& createInfo)
     : m_instance(VK_NULL_HANDLE)
@@ -253,8 +267,8 @@ VulkanInstance::~VulkanInstance() {
     volkFinalize();
 }
 
-Capabilities* VulkanInstance::capabilities() const {
-    return m_rendererCapabilities.get();
+const Capabilities& VulkanInstance::capabilities() const {
+    return m_capabilities;
 }
 
 std::unique_ptr<CommandContext> VulkanInstance::create_command_context(const CommandContextCreateInfo& commandContextCreateInfo) {
@@ -363,11 +377,7 @@ void VulkanInstance::select_vk_physical_device(uint32_t deviceIndex) {
     physicalDeviceCreateInfo.deviceIndex = deviceIndex;
 
     m_physicalDevice = std::make_unique<VulkanPhysicalDevice>(physicalDeviceCreateInfo);
-
-    VulkanRendererCapabilitiesCreateInfo rendererCapabilitiesCreateInfo = {};
-    rendererCapabilitiesCreateInfo.physicalDevice = m_physicalDevice.get();
-
-    m_rendererCapabilities = std::make_unique<VulkanCapabilities>(rendererCapabilitiesCreateInfo);
+    m_capabilities = detail::populate_capabilities(m_physicalDevice.get());
 }
 
 }// namespace duk::rhi

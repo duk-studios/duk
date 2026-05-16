@@ -5,11 +5,11 @@
 #ifndef DUK_RHI_VULKAN_INSTANCE_H
 #define DUK_RHI_VULKAN_INSTANCE_H
 
+#include <duk_rhi/capabilities.h>
 #include <duk_rhi/instance.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
 #include <duk_rhi/vulkan/vulkan_queue.h>
-#include <duk_rhi/vulkan/vulkan_capabilities.h>
 
 namespace duk::platform {
 class Window;
@@ -28,7 +28,7 @@ public:
 
     ~VulkanInstance() override;
 
-    DUK_NO_DISCARD Capabilities* capabilities() const override;
+    DUK_NO_DISCARD const Capabilities& capabilities() const override;
 
     DUK_NO_DISCARD std::unique_ptr<CommandContext> create_command_context(const CommandContextCreateInfo& commandContextCreateInfo) override;
 
@@ -53,7 +53,7 @@ private:
     VkInstance m_instance;
     VkDebugUtilsMessengerEXT m_debugMessenger;
     std::unique_ptr<VulkanPhysicalDevice> m_physicalDevice;
-    std::unique_ptr<VulkanCapabilities> m_rendererCapabilities;
+    Capabilities m_capabilities;
     VkDevice m_device;
     std::vector<std::shared_ptr<VulkanQueue>> m_queues;
     std::shared_mutex m_deviceMutex;

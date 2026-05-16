@@ -51,11 +51,14 @@ public:
 
     DUK_NO_DISCARD const VkPhysicalDeviceFeatures& features() const;
 
+    DUK_NO_DISCARD const VkPhysicalDeviceProperties& properties() const;
+
 private:
     VkPhysicalDevice m_physicalDevice;
     std::vector<VkQueueFamilyProperties> m_queueFamilyProperties;
     VkPhysicalDeviceMemoryProperties m_memoryProperties;
     VkPhysicalDeviceFeatures m_features;
+    VkPhysicalDeviceProperties m_properties;
 };
 
 }// namespace duk::rhi

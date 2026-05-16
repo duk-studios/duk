@@ -71,8 +71,6 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_descriptor_set.h
         src/duk_rhi/vulkan/vulkan_descriptor_set_allocator.h
         src/duk_rhi/vulkan/vulkan_descriptor_set_allocator.cpp
-        src/duk_rhi/vulkan/vulkan_capabilities.h
-        src/duk_rhi/vulkan/vulkan_capabilities.cpp
         src/duk_rhi/vulkan/vulkan_render_state.h
         src/duk_rhi/vulkan/vulkan_render_state.cpp
         src/duk_rhi/vulkan/vulkan_static_render_state.h

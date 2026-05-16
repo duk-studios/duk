@@ -63,6 +63,8 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(const VulkanPhysicalDeviceCreateInfo&
     vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &m_memoryProperties);
 
     vkGetPhysicalDeviceFeatures(m_physicalDevice, &m_features);
+
+    vkGetPhysicalDeviceProperties(m_physicalDevice, &m_properties);
 }
 
 VulkanPhysicalDevice::~VulkanPhysicalDevice() = default;
@@ -148,6 +150,10 @@ VkFormat VulkanPhysicalDevice::select_depth_format(std::span<VkFormat> formats) 
 
 const VkPhysicalDeviceFeatures& VulkanPhysicalDevice::features() const {
     return m_features;
+}
+
+const VkPhysicalDeviceProperties& VulkanPhysicalDevice::properties() const {
+    return m_properties;
 }
 
 }// namespace duk::rhi

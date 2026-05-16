@@ -51,8 +51,8 @@ public:
 
     virtual ~Instance() = default;
 
-    /// Returns an object that can be used to check the limits and capabilities of this device.
-    DUK_NO_DISCARD virtual Capabilities* capabilities() const = 0;
+    /// Returns the capabilities of this device, populated at creation time.
+    DUK_NO_DISCARD virtual const Capabilities& capabilities() const = 0;
 
     DUK_NO_DISCARD virtual std::unique_ptr<CommandContext> create_command_context(const CommandContextCreateInfo& commandContextCreateInfo) = 0;
 
