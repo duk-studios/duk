@@ -8,6 +8,7 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/sampler.h
         include/duk_rhi/vertex_layout.h
         include/duk_rhi/buffer.h
+        include/duk_rhi/buffer_allocator.h
         include/duk_rhi/image_data_source.h
         include/duk_rhi/capabilities.h
         include/duk_rhi/index_types.h
@@ -38,6 +39,7 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/shader_reflection.cpp
         src/duk_rhi/command_queue.cpp
         src/duk_rhi/command_context.cpp
+        src/duk_rhi/buffer_allocator.cpp
         src/duk_rhi/pipeline_state_stack.cpp
         src/duk_rhi/vulkan/vulkan_image.h
         src/duk_rhi/vulkan/vulkan_image.cpp
@@ -75,7 +77,7 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/vulkan/vulkan_render_state.cpp
         src/duk_rhi/vulkan/vulkan_static_render_state.h
         src/duk_rhi/vulkan/vulkan_static_render_state.cpp
-        src/duk_rhi/vulkan/vulkan_resource_binder.h
+        src/duk_rhi/vulkan/vulkan_resource_state.h
         src/duk_rhi/vulkan/vulkan_single_set_resource_state.h
         src/duk_rhi/vulkan/vulkan_single_set_resource_state.cpp
         src/duk_rhi/vulkan/vulkan_shader.h

@@ -23,9 +23,14 @@ RenderCommands::~RenderCommands() {
     m_context.render_end();
 }
 
-void RenderCommands::bind_shader(const BindShaderParams& params, const PipelineState& pipelineState) const {
+void RenderCommands::bind_shader(const Shader* shader, const PipelineState& pipelineState) const {
     DUK_ASSERT(valid());
-    m_context.bind_render_shader(params, pipelineState);
+    m_context.bind_render_shader(shader, pipelineState);
+}
+
+void RenderCommands::bind_resources(const ShaderResources& resources) const {
+    DUK_ASSERT(valid());
+    m_context.bind_resources(resources);
 }
 
 void RenderCommands::bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) const {
@@ -62,9 +67,14 @@ ComputeCommands::ComputeCommands(CommandContext& context)
     : ScopedCommands(context) {
 }
 
-void ComputeCommands::bind_shader(const BindShaderParams& params) const {
+void ComputeCommands::bind_shader(const Shader* shader) const {
     DUK_ASSERT(valid());
-    m_context.bind_compute_shader(params);
+    m_context.bind_compute_shader(shader);
+}
+
+void ComputeCommands::bind_resources(const ShaderResources& resources) const {
+    DUK_ASSERT(valid());
+    m_context.bind_resources(resources);
 }
 
 void ComputeCommands::dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) const {

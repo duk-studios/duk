@@ -10,6 +10,8 @@
 #include <duk_rhi/vulkan/vulkan_static_render_state.h>
 #include <duk_rhi/vulkan/vulkan_single_set_resource_state.h>
 
+#include <duk_rhi/buffer_allocator.h>
+
 #include <duk_tools/fixed_vector.h>
 
 #include <limits>
@@ -122,6 +124,7 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
     VulkanSingleSetResourceBinderCreateInfo resourceBinderCreateInfo = {};
     resourceBinderCreateInfo.device = m_device;
     resourceBinderCreateInfo.samplerCache = m_samplerCache.get();
+    resourceBinderCreateInfo.physicalDevice = createInfo.physicalDevice;
     m_resourceBinder = std::make_unique<VulkanSingleSetResourceState>(resourceBinderCreateInfo);
 
     // -----------------------------------------------------------------------
@@ -306,7 +309,6 @@ std::shared_ptr<Shader> VulkanCommandContext::create_shader(const ShaderCreateIn
     VulkanShaderCreateInfo vulkanShaderCreateInfo = {};
     vulkanShaderCreateInfo.shaderDataSource = shaderCreateInfo.shaderDataSource;
     vulkanShaderCreateInfo.device = m_device;
-    vulkanShaderCreateInfo.resourceBinder = m_resourceBinder.get();
     return make_managed<VulkanShader>(vulkanShaderCreateInfo);
 }
 
@@ -318,7 +320,12 @@ std::shared_ptr<Buffer> VulkanCommandContext::create_buffer(const BufferCreateIn
     vulkanBufferCreateInfo.indexType = detail::buffer_index_type(bufferCreateInfo.type);
     vulkanBufferCreateInfo.device = m_device;
     vulkanBufferCreateInfo.physicalDevice = &m_physicalDevice;
-    return make_managed<VulkanBuffer>(vulkanBufferCreateInfo);
+    auto buffer = make_managed<VulkanBuffer>(vulkanBufferCreateInfo);
+    if (bufferCreateInfo.updateFrequency == Buffer::UpdateFrequency::DYNAMIC) {
+        // keep dynamic buffers mapped for now
+        buffer->map();
+    }
+    return buffer;
 }
 
 std::shared_ptr<Image> VulkanCommandContext::create_image(const ImageCreateInfo& imageCreateInfo) {
@@ -354,17 +361,24 @@ void VulkanCommandContext::render_begin(const RenderBeginParams& params) {
     m_renderState->begin(m_activeCommandBuffer, *frameBuffer, convert_load_op(params.loadOp), convert_store_op(params.storeOp), params.clearColor);
 }
 
-void VulkanCommandContext::bind_render_shader(const BindShaderParams& params, const PipelineState& pipelineState) {
+void VulkanCommandContext::bind_render_shader(const Shader* shader, const PipelineState& pipelineState) {
     if (m_activeCommandBuffer == VK_NULL_HANDLE) {
         return;
     }
-    const auto shader = static_cast<const VulkanShader*>(params.shader);
-    m_renderState->bind_pipeline(m_activeCommandBuffer, *shader, pipelineState);
-    if (params.resources) {
-        m_resourceBinder->bind_resources(m_activeCommandBuffer,
-                                         VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                         *shader, *params.resources, m_frameIndex);
+    const auto vulkanShader = static_cast<const VulkanShader*>(shader);
+    const auto pipelineLayout = m_resourceBinder->pipeline_layout(vulkanShader->binding_layout());
+    m_renderState->bind_pipeline(m_activeCommandBuffer, *vulkanShader, pipelineState, pipelineLayout);
+    m_lastBoundShader = vulkanShader;
+    m_lastBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+}
+
+void VulkanCommandContext::bind_resources(const ShaderResources& resources) {
+    if (m_activeCommandBuffer == VK_NULL_HANDLE || !m_lastBoundShader) {
+        return;
     }
+    m_resourceBinder->bind_resources(m_activeCommandBuffer,
+                                     m_lastBindPoint,
+                                     *m_lastBoundShader, resources, m_frameIndex);
 }
 
 void VulkanCommandContext::bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) {
@@ -424,16 +438,12 @@ void VulkanCommandContext::render_end() {
     m_renderState->end(m_activeCommandBuffer);
 }
 
-void VulkanCommandContext::bind_compute_shader(const BindShaderParams& params) {
+void VulkanCommandContext::bind_compute_shader(const Shader* shader) {
     if (m_activeCommandBuffer == VK_NULL_HANDLE) {
         return;
     }
-    const auto shader = static_cast<const VulkanShader*>(params.shader);
-    if (params.resources) {
-        m_resourceBinder->bind_resources(m_activeCommandBuffer,
-                                         VK_PIPELINE_BIND_POINT_COMPUTE,
-                                         *shader, *params.resources, m_frameIndex);
-    }
+    m_lastBoundShader = static_cast<const VulkanShader*>(shader);
+    m_lastBindPoint = VK_PIPELINE_BIND_POINT_COMPUTE;
 }
 
 void VulkanCommandContext::dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) {
@@ -453,7 +463,9 @@ void VulkanCommandContext::write_image(Image* image, const void* src, size_t siz
     stagingCi.size = size;
 
     auto staging = std::make_unique<VulkanBuffer>(stagingCi);
+    staging->map();
     staging->write(src, size, 0);
+    staging->unmap();
 
     auto commandBuffer = m_activeCommandBuffer;
 
@@ -495,7 +507,6 @@ void VulkanCommandContext::write_buffer(Buffer* buffer, const void* src, size_t 
     auto* vulkanBuffer = static_cast<VulkanBuffer*>(buffer);
 
     if (vulkanBuffer->memory_flags() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-        // DYNAMIC buffer: direct CPU map + copy, no command buffer needed.
         vulkanBuffer->write(src, size, offset);
     } else {
         // STATIC (device-local) buffer: upload via a temporary host-visible VulkanBuffer
@@ -508,7 +519,9 @@ void VulkanCommandContext::write_buffer(Buffer* buffer, const void* src, size_t 
         stagingCreateInfo.size = size;
 
         auto staging = std::make_unique<VulkanBuffer>(stagingCreateInfo);
+        staging->map();
         staging->write(src, size, 0);
+        staging->unmap();
 
         VkBufferCopy region = {};
         region.srcOffset = 0;
@@ -530,6 +543,18 @@ void VulkanCommandContext::read_buffer(Buffer* buffer, void* dst, size_t size, s
     // STATIC (device-local) reads would require a read-back staging pass — not yet implemented.
     DUK_ASSERT(vulkanBuffer->memory_flags() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
     vulkanBuffer->read(dst, size, offset);
+}
+
+void VulkanCommandContext::map_buffer(Buffer* buffer) {
+    static_cast<VulkanBuffer*>(buffer)->map();
+}
+
+void VulkanCommandContext::unmap_buffer(Buffer* buffer) {
+    static_cast<VulkanBuffer*>(buffer)->unmap();
+}
+
+void VulkanCommandContext::flush_buffer(Buffer* buffer, size_t offset, size_t size) {
+    static_cast<VulkanBuffer*>(buffer)->flush(offset, size);
 }
 
 }// namespace duk::rhi

@@ -18,8 +18,8 @@ VkDescriptorType convert_descriptor_type(const BindingDescription& binding) {
         using T = std::decay_t<decltype(b)>;
         if constexpr (std::is_same_v<T, BufferBindingDescription>) {
             switch (b.type) {
-                case BufferBindingType::UNIFORM_BUFFER: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                case BufferBindingType::STORAGE_BUFFER: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                case BufferBindingType::UNIFORM_BUFFER: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                case BufferBindingType::STORAGE_BUFFER: return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
                 default: throw std::logic_error("unsupported BufferBindingType for VkDescriptorType conversion");
             }
         } else {

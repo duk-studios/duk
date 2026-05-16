@@ -49,8 +49,13 @@ struct ImageBinding {
 };
 
 /// Binds a buffer (uniform or storage) to a logical descriptor slot.
+/// The offset is always applied as a Vulkan dynamic offset at bind time,
+/// so it is never baked into the descriptor set — the same set is reused
+/// for all offset values referencing the same buffer.
+/// Use DynamicBuffer::alloc() to obtain a correctly aligned offset.
 struct BufferBinding {
     const Buffer* buffer{nullptr};
+    uint32_t offset{0};
 };
 
 /// A single resource bound to one logical descriptor slot.
@@ -63,11 +68,6 @@ static constexpr uint32_t kMaxShaderBindings = 32;
 /// Each slot index corresponds to the generated enum value for the named descriptor.
 struct ShaderResources {
     std::array<ShaderResource, kMaxShaderBindings> bindings{};
-};
-
-struct BindShaderParams {
-    const Shader* shader{nullptr};
-    const ShaderResources* resources{nullptr};
 };
 
 struct RenderBeginParams {
@@ -111,7 +111,9 @@ public:
     explicit RenderCommands(CommandContext& context, const RenderBeginParams& params);
     ~RenderCommands();
 
-    void bind_shader(const BindShaderParams& params, const PipelineState& pipelineState) const;
+    void bind_shader(const Shader* shader, const PipelineState& pipelineState) const;
+
+    void bind_resources(const ShaderResources& resources) const;
 
     void bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) const;
 
@@ -130,7 +132,9 @@ class ComputeCommands : public ScopedCommands {
 public:
     explicit ComputeCommands(CommandContext& context);
 
-    void bind_shader(const BindShaderParams& params) const;
+    void bind_shader(const Shader* shader) const;
+
+    void bind_resources(const ShaderResources& resources) const;
 
     void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) const;
 };
@@ -193,7 +197,9 @@ public:
 
     virtual void render_begin(const RenderBeginParams& params) = 0;
 
-    virtual void bind_render_shader(const BindShaderParams& params, const PipelineState& pipelineState) = 0;
+    virtual void bind_render_shader(const Shader* shader, const PipelineState& pipelineState) = 0;
+
+    virtual void bind_resources(const ShaderResources& resources) = 0;
 
     virtual void bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) = 0;
 
@@ -213,7 +219,7 @@ public:
     // Compute commands
     //-------------------------------------------------------------------------
 
-    virtual void bind_compute_shader(const BindShaderParams& params) = 0;
+    virtual void bind_compute_shader(const Shader* shader) = 0;
 
     virtual void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) = 0;
 
@@ -228,6 +234,12 @@ public:
     virtual void write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) = 0;
 
     virtual void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) = 0;
+
+    virtual void map_buffer(Buffer* buffer) = 0;
+
+    virtual void unmap_buffer(Buffer* buffer) = 0;
+
+    virtual void flush_buffer(Buffer* buffer, size_t offset, size_t size) = 0;
 
 private:
     friend ScopedCommands;

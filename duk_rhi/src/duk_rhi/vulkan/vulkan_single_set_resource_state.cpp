@@ -8,6 +8,7 @@
 #include <duk_rhi/vulkan/vulkan_shader.h>
 
 #include <duk_hash/hash_combine.h>
+#include <duk_macros/assert.h>
 
 #include <stdexcept>
 #include <vector>
@@ -22,6 +23,9 @@ static duk::hash::Hash hash_resources(const ShaderBindingLayout& layout, const S
         std::visit([&h](auto&& res) {
             using T = std::decay_t<decltype(res)>;
             if constexpr (std::is_same_v<T, BufferBinding>) {
+                // All buffers are dynamic: offset is supplied at bind time via the
+                // dynamic offset array and must NOT be in the hash — the same
+                // descriptor set is reused for every offset into the same buffer.
                 duk::hash::hash_combine(h, reinterpret_cast<uintptr_t>(res.buffer));
             } else if constexpr (std::is_same_v<T, ImageBinding>) {
                 duk::hash::hash_combine(h, reinterpret_cast<uintptr_t>(res.image));
@@ -37,7 +41,9 @@ static duk::hash::Hash hash_resources(const ShaderBindingLayout& layout, const S
 VulkanSingleSetResourceState::VulkanSingleSetResourceState(
     const VulkanSingleSetResourceBinderCreateInfo& createInfo)
     : m_device(createInfo.device)
-    , m_samplerCache(createInfo.samplerCache) {
+    , m_samplerCache(createInfo.samplerCache)
+    , m_uniformBufferOffsetAlignment(createInfo.physicalDevice->properties().limits.minUniformBufferOffsetAlignment)
+    , m_storageBufferOffsetAlignment(createInfo.physicalDevice->properties().limits.minStorageBufferOffsetAlignment) {
 
     VulkanDescriptorSetLayoutCacheCreateInfo layoutCacheCreateInfo = {};
     layoutCacheCreateInfo.device = m_device;
@@ -63,7 +69,7 @@ void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer,
         return;
     }
 
-    auto layout = m_descriptorSetLayoutCache->get_layout(bindingLayout);
+    auto layout         = m_descriptorSetLayoutCache->get_layout(bindingLayout);
     auto pipelineLayout = m_descriptorSetLayoutCache->get_pipeline_layout(bindingLayout);
 
     auto resourceHash = detail::hash_resources(bindingLayout, resources);
@@ -100,8 +106,14 @@ void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer,
                     }
                     auto& info  = bufferInfos.emplace_back();
                     info.buffer = static_cast<const VulkanBuffer*>(res.buffer)->handle();
+                    // offset is always 0: the actual byte offset is supplied at bind
+                    // time via the dynamic offset array (see below).
                     info.offset = 0;
-                    info.range  = VK_WHOLE_SIZE;
+                    // Clamp the range to the actual buffer size so that validation passes
+                    // when the buffer was allocated smaller than the reflection-reported size
+                    // (which may still be padded by the driver/compiler).
+                    const auto bufferBinding = std::get<BufferBindingDescription>(bindingDesc.binding);
+                    info.range = std::min<VkDeviceSize>(bufferBinding.size, res.buffer->size());
                     write.pBufferInfo = &info;
                     return true;
                 } else if constexpr (std::is_same_v<T, ImageBinding>) {
@@ -132,8 +144,34 @@ void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer,
         }
     }
 
+    // Collect dynamic offsets in binding-index order.
+    // Every buffer slot uses a *_DYNAMIC descriptor type, so Vulkan requires
+    // exactly one dynamic offset entry per buffer binding.
+    // The offset must satisfy the physical device's minimum alignment requirement.
+    std::vector<uint32_t> dynamicOffsets;
+    for (uint32_t i = 0; i < static_cast<uint32_t>(bindingLayout.size()); i++) {
+        if (!std::holds_alternative<BufferBindingDescription>(bindingLayout[i].binding)) {
+            continue;
+        }
+
+        const bool isUniform = std::get<BufferBindingDescription>(bindingLayout[i].binding).type
+                               == BufferBindingType::UNIFORM_BUFFER;
+        const VkDeviceSize alignment = isUniform ? m_uniformBufferOffsetAlignment
+                                                 : m_storageBufferOffsetAlignment;
+
+        uint32_t offset = 0;
+        if (const auto* bb = std::get_if<BufferBinding>(&resources.bindings[i])) {
+            // Assert device alignment requirements in debug builds.
+            DUK_ASSERT(alignment == 0 || (bb->offset % alignment) == 0);
+            offset = bb->offset;
+        }
+        dynamicOffsets.push_back(offset);
+    }
+
     vkCmdBindDescriptorSets(commandBuffer, bindPoint, pipelineLayout,
-                            0, 1, &descriptorSet, 0, nullptr);
+                            0, 1, &descriptorSet,
+                            static_cast<uint32_t>(dynamicOffsets.size()),
+                            dynamicOffsets.empty() ? nullptr : dynamicOffsets.data());
 }
 
 }// namespace duk::rhi

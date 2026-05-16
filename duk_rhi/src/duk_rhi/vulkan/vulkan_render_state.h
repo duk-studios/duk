@@ -23,7 +23,10 @@ public:
                        VkAttachmentStoreOp storeOp,
                        const glm::vec4& clearColor) = 0;
 
-    virtual void bind_pipeline(VkCommandBuffer commandBuffer, const VulkanShader& shader, const PipelineState& state) = 0;
+    virtual void bind_pipeline(VkCommandBuffer commandBuffer,
+                               const VulkanShader& shader,
+                               const PipelineState& state,
+                               VkPipelineLayout pipelineLayout) = 0;
 
     virtual void end(VkCommandBuffer commandBuffer) = 0;
 };

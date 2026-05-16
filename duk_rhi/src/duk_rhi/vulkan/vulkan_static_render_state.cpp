@@ -171,12 +171,15 @@ void VulkanStaticRenderState::begin(VkCommandBuffer commandBuffer,
     }
 }
 
-void VulkanStaticRenderState::bind_pipeline(VkCommandBuffer commandBuffer, const VulkanShader& shader, const PipelineState& state) {
+void VulkanStaticRenderState::bind_pipeline(VkCommandBuffer commandBuffer,
+                                             const VulkanShader& shader,
+                                             const PipelineState& state,
+                                             VkPipelineLayout pipelineLayout) {
     if (!m_activeRenderPass || !m_activeFramebuffer) {
         throw std::logic_error("No active render pass when binding pipeline in VulkanStaticRenderState");
     }
 
-    const auto pipeline = get_or_create_pipeline(m_activeRenderPass, m_activeColorAttachmentCount, shader, state);
+    const auto pipeline = get_or_create_pipeline(m_activeRenderPass, m_activeColorAttachmentCount, shader, state, pipelineLayout);
     if (!pipeline) {
         throw std::runtime_error("Failed to create pipeline in VulkanStaticRenderState");
     }
@@ -332,12 +335,14 @@ VkFramebuffer VulkanStaticRenderState::get_or_create_framebuffer(VkRenderPass re
 }
 
 VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPass,
-                                                        uint32_t colorAttachmentCount,
-                                                        const VulkanShader& shader,
-                                                        const PipelineState& state) {
+                                                         uint32_t colorAttachmentCount,
+                                                         const VulkanShader& shader,
+                                                         const PipelineState& state,
+                                                         VkPipelineLayout pipelineLayout) {
     size_t key = std::hash<PipelineState>{}(state);
     duk::hash::hash_combine(key, shader.hash());
     duk::hash::hash_combine(key, reinterpret_cast<uintptr_t>(renderPass));
+    duk::hash::hash_combine(key, reinterpret_cast<uintptr_t>(pipelineLayout));
 
     auto it = m_pipelineCache.find(key);
     if (it != m_pipelineCache.end()) {
@@ -461,7 +466,7 @@ VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPa
     // ---- Assemble ----
     VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
     pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipelineCreateInfo.layout = shader.pipeline_layout();
+    pipelineCreateInfo.layout = pipelineLayout;
     pipelineCreateInfo.renderPass = renderPass;
     pipelineCreateInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
     pipelineCreateInfo.pStages = shaderStages.data();

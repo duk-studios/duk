@@ -43,8 +43,6 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo)
     m_bindingLayout = shaderDataSource->binding_layout();
     m_vertexLayout  = shaderDataSource->vertex_layout();
 
-    m_pipelineLayout = shaderCreateInfo.resourceBinder->pipeline_layout(m_bindingLayout);
-
     // Remap bindings to a single descriptor set
     m_bindingRemapTable.reserve(m_bindingLayout.size());
     for (uint32_t i = 0; i < static_cast<uint32_t>(m_bindingLayout.size()); i++) {
@@ -116,10 +114,6 @@ const std::unordered_map<ShaderModule::Bits, VkShaderModule>& VulkanShader::shad
 
 const BindingLocation& VulkanShader::binding_location(uint32_t logicalIndex) const {
     return m_bindingRemapTable.at(logicalIndex);
-}
-
-VkPipelineLayout VulkanShader::pipeline_layout() const {
-    return m_pipelineLayout;
 }
 
 const ShaderBindingLayout& VulkanShader::binding_layout() const {

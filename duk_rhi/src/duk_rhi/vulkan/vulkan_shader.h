@@ -7,7 +7,6 @@
 #include <duk_rhi/shader.h>
 #include <duk_rhi/shader_data_source.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
-#include <duk_rhi/vulkan/vulkan_resource_binder.h>
 
 namespace duk::rhi {
 
@@ -18,7 +17,6 @@ VkShaderStageFlags convert_module_mask(ShaderModule::Mask moduleMask);
 struct VulkanShaderCreateInfo {
     VkDevice device;
     const ShaderDataSource* shaderDataSource;
-    VulkanResourceState* resourceBinder;
 };
 
 /// Stores the resolved Vulkan (set, binding) for a logical descriptor slot.
@@ -42,8 +40,6 @@ public:
     /// Returns the Vulkan (set, binding) for the given logical binding slot.
     DUK_NO_DISCARD const BindingLocation& binding_location(uint32_t logicalIndex) const;
 
-    DUK_NO_DISCARD VkPipelineLayout pipeline_layout() const;
-
     // Shader interface
     DUK_NO_DISCARD const ShaderBindingLayout& binding_layout() const override;
     DUK_NO_DISCARD const VertexLayout& vertex_layout() const override;
@@ -55,7 +51,6 @@ private:
     VkDevice m_device;
     duk::hash::Hash m_hash;
     ShaderModule::Mask m_moduleMask;
-    VkPipelineLayout m_pipelineLayout{VK_NULL_HANDLE};
 
     /// Flat backend-agnostic binding layout sourced from the ShaderDataSource.
     ShaderBindingLayout m_bindingLayout;

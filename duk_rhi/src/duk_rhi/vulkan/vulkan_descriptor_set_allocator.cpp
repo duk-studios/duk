@@ -11,8 +11,8 @@ VulkanDescriptorSetCache::VulkanDescriptorSetCache(const VulkanDescriptorSetCach
     : m_device(createInfo.device) {
 
     const VkDescriptorPoolSize poolSizes[] = {
-        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,         createInfo.maxSets},
-        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,         createInfo.maxSets},
+        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, createInfo.maxSets},
+        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, createInfo.maxSets},
         {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, createInfo.maxSets},
         {VK_DESCRIPTOR_TYPE_SAMPLER,                createInfo.maxSets},
         {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          createInfo.maxSets},

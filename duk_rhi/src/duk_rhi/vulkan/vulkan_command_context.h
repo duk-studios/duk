@@ -11,7 +11,7 @@
 #include <duk_rhi/vulkan/vulkan_sampler.h>
 #include <duk_rhi/vulkan/vulkan_swapchain.h>
 #include <duk_rhi/vulkan/vulkan_render_state.h>
-#include <duk_rhi/vulkan/vulkan_resource_binder.h>
+#include <duk_rhi/vulkan/vulkan_resource_state.h>
 
 #include <memory>
 #include <vector>
@@ -50,7 +50,8 @@ public:
     // Command recording (CommandContext interface)
     // -----------------------------------------------------------------------
     void render_begin(const RenderBeginParams& params) override;
-    void bind_render_shader(const BindShaderParams& params, const PipelineState& pipelineState) override;
+    void bind_render_shader(const Shader* shader, const PipelineState& pipelineState) override;
+    void bind_resources(const ShaderResources& resources) override;
     void bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) override;
     void bind_index_buffer(const Buffer* indexBuffer) override;
     void draw(const DrawParams& params) override;
@@ -58,12 +59,15 @@ public:
     void draw_indexed(const DrawIndexedParams& params) override;
     void draw_indexed_indirect(const std::span<const DrawIndexedParams>& indexedIndirectParams) override;
     void render_end() override;
-    void bind_compute_shader(const BindShaderParams& params) override;
+    void bind_compute_shader(const Shader* shader) override;
     void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
     void write_image(Image* image, const void* src, size_t size) override;
     void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) override;
     void write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) override;
     void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) override;
+    void map_buffer(Buffer* buffer) override;
+    void unmap_buffer(Buffer* buffer) override;
+    void flush_buffer(Buffer* buffer, size_t offset, size_t size) override;
 
 private:
 
@@ -101,6 +105,10 @@ private:
     std::unique_ptr<VulkanFrameBuffer> m_defaultFrameBuffer;
 
     VulkanDeletionQueue m_deletionQueue;
+
+    // Cached state for bind_resources
+    const VulkanShader* m_lastBoundShader{nullptr};
+    VkPipelineBindPoint m_lastBindPoint{VK_PIPELINE_BIND_POINT_GRAPHICS};
 };
 
 }// namespace duk::rhi

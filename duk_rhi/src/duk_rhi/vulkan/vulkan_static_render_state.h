@@ -42,7 +42,10 @@ public:
                VkAttachmentStoreOp storeOp,
                const glm::vec4& clearColor) override;
 
-    void bind_pipeline(VkCommandBuffer commandBuffer, const VulkanShader& shader, const PipelineState& state) override;
+    void bind_pipeline(VkCommandBuffer commandBuffer,
+                       const VulkanShader& shader,
+                       const PipelineState& state,
+                       VkPipelineLayout pipelineLayout) override;
 
     void end(VkCommandBuffer commandBuffer) override;
 
@@ -62,7 +65,8 @@ private:
     VkPipeline get_or_create_pipeline(VkRenderPass renderPass,
                                       uint32_t colorAttachmentCount,
                                       const VulkanShader& shader,
-                                      const PipelineState& state);
+                                      const PipelineState& state,
+                                      VkPipelineLayout pipelineLayout);
 
 private:
     VkDevice m_device;

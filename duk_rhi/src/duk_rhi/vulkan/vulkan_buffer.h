@@ -45,6 +45,20 @@ public:
     /// Caller must ensure memory_flags() includes VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT.
     void read(void* dst, size_t size, size_t offset) const;
 
+    /// Maps the entire buffer into CPU address space persistently and returns the base pointer.
+    /// Caller must ensure memory_flags() includes VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT.
+    void* map();
+
+    /// Unmaps a previously mapped buffer.  No-op if not currently mapped.
+    void unmap();
+
+    /// Flushes the given byte range of mapped memory to make CPU writes visible to the GPU.
+    /// No-op when the memory is HOST_COHERENT (which is the common case for dynamic buffers).
+    void flush(size_t offset, size_t size);
+
+    /// Returns the currently mapped base pointer, or nullptr if not mapped.
+    DUK_NO_DISCARD void* mapped_ptr() const;
+
     // -----------------------------------------------------------------------
     // Buffer public interface (read-only metadata)
     // -----------------------------------------------------------------------
@@ -58,6 +72,7 @@ private:
     VkIndexType m_indexType{VK_INDEX_TYPE_MAX_ENUM};
     VkBuffer m_buffer{VK_NULL_HANDLE};
     VkDeviceMemory m_memory{VK_NULL_HANDLE};
+    void* m_mapped{nullptr};
 };
 
 }// namespace duk::rhi

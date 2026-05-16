@@ -5,7 +5,8 @@
 
 #include <duk_rhi/vulkan/vulkan_descriptor_set.h>
 #include <duk_rhi/vulkan/vulkan_descriptor_set_allocator.h>
-#include <duk_rhi/vulkan/vulkan_resource_binder.h>
+#include <duk_rhi/vulkan/vulkan_physical_device.h>
+#include <duk_rhi/vulkan/vulkan_resource_state.h>
 
 #include <memory>
 
@@ -16,6 +17,7 @@ class VulkanSamplerCache;
 struct VulkanSingleSetResourceBinderCreateInfo {
     VkDevice device;
     VulkanSamplerCache* samplerCache;
+    const VulkanPhysicalDevice* physicalDevice;
     uint32_t maxDescriptorSets{1024};
 };
 
@@ -37,6 +39,8 @@ public:
 private:
     VkDevice m_device;
     VulkanSamplerCache* m_samplerCache;
+    VkDeviceSize m_uniformBufferOffsetAlignment;
+    VkDeviceSize m_storageBufferOffsetAlignment;
     std::unique_ptr<VulkanDescriptorSetLayoutCache> m_descriptorSetLayoutCache;
     std::unique_ptr<VulkanDescriptorSetCache> m_descriptorSetCache;
 };
