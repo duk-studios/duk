@@ -25,6 +25,11 @@ target_link_libraries(duk.math
         glm::glm
         )
 
+target_compile_definitions(duk.math
+        PUBLIC
+        GLM_FORCE_DEPTH_ZERO_TO_ONE
+        )
+
 if (DUK_BUILD_TESTS)
     add_subdirectory(test)
 endif ()
