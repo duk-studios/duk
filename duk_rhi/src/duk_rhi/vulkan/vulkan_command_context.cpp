@@ -77,26 +77,6 @@ static VkImageAspectFlags image_aspect_flags(Image::Usage usage, PixelFormat for
     }
 }
 
-static uint32_t acquire_swapchain_image(VulkanInstance& instance, VulkanSwapchain& swapchain, VkSemaphore imageAvailableSemaphore) {
-    auto result = swapchain.acquire_next_image(imageAvailableSemaphore);
-    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        auto deviceLock = instance.unique_device_lock();
-        result = instance.wait_idle();
-        if (result != VK_SUCCESS) {
-            throw std::runtime_error("VulkanCommandContext: failed to wait for device idle on swapchain recreation");
-        }
-        swapchain.recreate();
-        result = swapchain.acquire_next_image(imageAvailableSemaphore);
-        if (result != VK_SUCCESS) {
-            throw std::runtime_error("VulkanCommandContext: failed to acquire next image");
-        }
-    }
-    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-        throw std::runtime_error("VulkanCommandContext: failed to acquire next swapchain image");
-    }
-    return swapchain.image_index();
-}
-
 }// namespace detail
 
 VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo& createInfo, std::unique_ptr<VulkanSwapchain> swapchain)
@@ -140,35 +120,8 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Semaphore creation, if a swapchain is present we create one render semaphore per swapchain image
-    // otherwise we have only one per frame in flight
-    // -----------------------------------------------------------------------
-    VkSemaphoreCreateInfo semaphoreInfo = {};
-    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     if (m_swapchain) {
-        m_imageSemaphores.resize(m_framesInFlight);
-        for (auto& semaphore : m_imageSemaphores) {
-            if (vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
-                throw std::runtime_error("VulkanCommandContext: failed to create image semaphore");
-            }
-        }
-
-        m_commandSemaphore.resize(m_swapchain->image_count());
-        for (auto& semaphore : m_commandSemaphore) {
-            if (vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
-                throw std::runtime_error("VulkanCommandContext: failed to create render semaphore");
-            }
-        }
         m_defaultFrameBuffer = std::make_unique<VulkanFrameBuffer>();
-    }
-    else {
-        m_commandSemaphore.resize(m_framesInFlight);
-        for (auto& semaphore : m_commandSemaphore) {
-            if (vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
-                throw std::runtime_error("VulkanCommandContext: failed to create render semaphore");
-            }
-        }
     }
 
     // -----------------------------------------------------------------------
@@ -201,12 +154,6 @@ VulkanCommandContext::~VulkanCommandContext() {
         vkFreeCommandBuffers(m_device, m_commandPool, static_cast<uint32_t>(m_commandBuffers.size()), m_commandBuffers.data());
         vkDestroyCommandPool(m_device, m_commandPool, nullptr);
     }
-    for (auto semaphore : m_imageSemaphores) {
-        vkDestroySemaphore(m_device, semaphore, nullptr);
-    }
-    for (auto semaphore : m_commandSemaphore) {
-        vkDestroySemaphore(m_device, semaphore, nullptr);
-    }
     for (auto fence : m_fences) {
         vkDestroyFence(m_device, fence, nullptr);
     }
@@ -220,10 +167,6 @@ void VulkanCommandContext::prepare() {
     // It is now safe to destroy anything that was queued for deletion.
     m_deletionQueue.flush(m_frameCounter);
 
-    if (m_swapchain != nullptr) {
-        m_swapchainImageIndex = detail::acquire_swapchain_image(m_instance, *m_swapchain, m_imageSemaphores[m_frameIndex]);
-    }
-
     m_activeCommandBuffer = m_commandBuffers[m_frameIndex];
 
     vkResetCommandBuffer(m_activeCommandBuffer, 0);
@@ -234,7 +177,36 @@ void VulkanCommandContext::prepare() {
     vkBeginCommandBuffer(m_activeCommandBuffer, &beginInfo);
 }
 
-void VulkanCommandContext::flush() {
+void VulkanCommandContext::prepare_present() {
+    if (!m_swapchain) {
+        throw std::logic_error("VulkanCommandContext: swapchain is not available");
+    }
+    if (m_shouldPresent) {
+        throw std::logic_error("VulkanCommandContext: prepare_present() called but previous frame is still pending presentation");
+    }
+    if (!m_activeCommandBuffer) {
+        prepare();
+    }
+    auto result = m_swapchain->acquire_next_image(m_frameIndex);
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        auto deviceLock = m_instance.unique_device_lock();
+        result = m_instance.wait_idle();
+        if (result != VK_SUCCESS) {
+            throw std::runtime_error("VulkanCommandContext: failed to wait for device idle on swapchain recreation");
+        }
+        m_swapchain->recreate();
+        result = m_swapchain->acquire_next_image(m_frameIndex);
+        if (result != VK_SUCCESS) {
+            throw std::runtime_error("VulkanCommandContext: failed to acquire next image");
+        }
+    }
+    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+        throw std::runtime_error("VulkanCommandContext: failed to acquire next swapchain image");
+    }
+    m_shouldPresent = true;
+}
+
+void VulkanCommandContext::submit() {
     if (m_activeCommandBuffer == VK_NULL_HANDLE) {
         return;
     }
@@ -248,25 +220,21 @@ void VulkanCommandContext::flush() {
     tools::FixedVector<VkPipelineStageFlags, 1> waitStages;
     tools::FixedVector<VkSemaphore, 1> signalSemaphores;
 
-    if (m_swapchain) {
+    if (m_shouldPresent) {
         // wait for swapchain image
-        waitSemaphores.push_back(m_imageSemaphores[m_frameIndex]);
+        waitSemaphores.push_back(m_swapchain->image_acquired_semaphore(m_frameIndex));
         waitStages.push_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
 
         // if rendering to the swapchain, use the swapchain indexed semaphore
-        signalSemaphores.push_back(m_commandSemaphore[m_swapchainImageIndex]);
+        signalSemaphores.push_back(m_swapchain->image_rendered_semaphore());
 
         // Transition current swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.
         // No-op if it is already there (e.g. compute-only or empty frame).
-        m_swapchain->image(m_swapchainImageIndex)->transition_to(
+        m_swapchain->image()->transition_to(
             m_activeCommandBuffer,
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
             VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
-    }
-    else {
-        // if not rendering to swapchain, just use a regular frame protected semaphore
-        signalSemaphores.push_back(m_commandSemaphore[m_frameIndex]);
     }
 
     // end command buffer after layout transition, if any
@@ -282,12 +250,12 @@ void VulkanCommandContext::flush() {
     submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signalSemaphores.size());
     submitInfo.pSignalSemaphores = signalSemaphores.data();
 
-    // Reset the fence so it can be signalled by this submit
+    // Reset the fence so it can be signaled by this submit
     vkResetFences(m_device, 1, &m_fences[m_frameIndex]);
     m_queue->submit(1, &submitInfo, m_fences[m_frameIndex]);
 
-    if (m_swapchain != nullptr) {
-        auto result = m_swapchain->present(*m_queue, signalSemaphores[0]);
+    if (m_shouldPresent) {
+        auto result = m_swapchain->present(*m_queue);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
             auto deviceLock = m_instance.unique_device_lock();
             result = m_instance.wait_idle();
@@ -302,6 +270,7 @@ void VulkanCommandContext::flush() {
     }
     // preparation for the next frame
     m_activeCommandBuffer = VK_NULL_HANDLE;
+    m_shouldPresent = false;
     m_frameIndex = (++m_frameCounter) % m_framesInFlight;
 }
 
@@ -351,10 +320,10 @@ void VulkanCommandContext::render_begin(const RenderBeginParams& params) {
     }
     auto frameBuffer = static_cast<const VulkanFrameBuffer*>(params.frameBuffer);
     if (!frameBuffer) {
-        if (!m_swapchain) {
+        if (!m_shouldPresent) {
             throw std::runtime_error("VulkanCommandContext: no framebuffer provided to offscreen context");
         }
-        const VulkanImage* attachments[1] = {m_swapchain->image(m_swapchainImageIndex)};
+        const VulkanImage* attachments[1] = {m_swapchain->image()};
         m_defaultFrameBuffer->write(attachments, 1);
         frameBuffer = m_defaultFrameBuffer.get();
     }

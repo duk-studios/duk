@@ -168,11 +168,15 @@ public:
     // Frame management
     //-------------------------------------------------------------------------
 
-    /// enables the recording of commands
+    /// Enables the recording of commands
     virtual void prepare() = 0;
 
+    /// Enables the recording of commands and prepares an image for presentation.
+    /// The next submit call will also present to the attached window (requires a window in this context)
+    virtual void prepare_present() = 0;
+
     /// Submits all recorded commands to the GPU, presents to screen if applicable.
-    virtual void flush() = 0;
+    virtual void submit() = 0;
 
     //-------------------------------------------------------------------------
     // Resource creation

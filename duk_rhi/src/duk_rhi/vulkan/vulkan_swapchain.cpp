@@ -68,7 +68,8 @@ VulkanSwapchain::VulkanSwapchain(const VulkanSwapchainCreateInfo& swapchainCreat
     : m_instance(swapchainCreateInfo.instance)
     , m_device(swapchainCreateInfo.device)
     , m_physicalDevice(swapchainCreateInfo.physicalDevice)
-    , m_window(swapchainCreateInfo.window) {
+    , m_window(swapchainCreateInfo.window)
+    , m_framesInFlight(swapchainCreateInfo.framesInFlight) {
     create_surface();
     create();
 }
@@ -145,6 +146,22 @@ void VulkanSwapchain::create() {
         externalImageCreateInfo.image = swapchainImages[i];
         m_images[i] = std::make_unique<VulkanImage>(externalImageCreateInfo);
     }
+
+    VkSemaphoreCreateInfo semaphoreInfo = {};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    m_imageAcquiredSemaphores.resize(m_framesInFlight);
+    for (auto& semaphore : m_imageAcquiredSemaphores) {
+        if (vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
+            throw std::runtime_error("VulkanSwapchain: failed to create image semaphore");
+        }
+    }
+
+    m_imageRenderedSemaphores.resize(m_images.size());
+    for (auto& semaphore : m_imageRenderedSemaphores) {
+        if (vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
+            throw std::runtime_error("VulkanSwapchain: failed to create render semaphore");
+        }
+    }
 }
 
 void VulkanSwapchain::clean() {
@@ -153,6 +170,14 @@ void VulkanSwapchain::clean() {
         vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
         m_swapchain = VK_NULL_HANDLE;
     }
+    for (auto semaphore : m_imageAcquiredSemaphores) {
+        vkDestroySemaphore(m_device, semaphore, nullptr);
+    }
+    m_imageAcquiredSemaphores.clear();
+    for (auto semaphore : m_imageRenderedSemaphores) {
+        vkDestroySemaphore(m_device, semaphore, nullptr);
+    }
+    m_imageRenderedSemaphores.clear();
 }
 
 void VulkanSwapchain::recreate() {
@@ -163,31 +188,37 @@ void VulkanSwapchain::recreate() {
     create();
 }
 
-VkResult VulkanSwapchain::acquire_next_image(const VkSemaphore signalSemaphore) {
-    return vkAcquireNextImageKHR(
+VkResult VulkanSwapchain::acquire_next_image(uint32_t frameIndex) {
+    uint32_t imageIndex;
+    const auto result = vkAcquireNextImageKHR(
             m_device,
             m_swapchain,
             std::numeric_limits<uint64_t>::max(),
-            signalSemaphore,
+            m_imageAcquiredSemaphores[frameIndex],
             VK_NULL_HANDLE,
-            &m_imageIndex);
+            &imageIndex);
+    if (result == VK_SUCCESS)  {
+        m_imageIndex = imageIndex;
+    }
+    return result;
 }
 
-VkResult VulkanSwapchain::present(VulkanQueue& queue, VkSemaphore waitSemaphore) const {
-
+VkResult VulkanSwapchain::present(VulkanQueue& queue) {
+    if (!m_imageIndex) {
+        throw std::logic_error("tried to present a swapchain image before acquiring one");
+    }
+    const auto imageIndex = m_imageIndex.value();
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &waitSemaphore;
+    presentInfo.pWaitSemaphores = &m_imageRenderedSemaphores[imageIndex];
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &m_swapchain;
-    presentInfo.pImageIndices = &m_imageIndex;
+    presentInfo.pImageIndices = &imageIndex;
+
+    m_imageIndex = std::nullopt;
 
     return queue.present(presentInfo);
-}
-
-uint32_t VulkanSwapchain::image_index() const {
-    return m_imageIndex;
 }
 
 uint32_t VulkanSwapchain::image_count() const {
@@ -198,8 +229,22 @@ VkExtent2D VulkanSwapchain::extent() const {
     return m_extent;
 }
 
-VulkanImage* VulkanSwapchain::image(uint32_t imageIndex) const {
-    return m_images.at(imageIndex).get();
+VulkanImage* VulkanSwapchain::image() const {
+    if (m_imageIndex) {
+        return m_images.at(m_imageIndex.value()).get();
+    }
+    return nullptr;
+}
+
+VkSemaphore VulkanSwapchain::image_acquired_semaphore(uint32_t frameIndex) const {
+    return m_imageAcquiredSemaphores[frameIndex];
+}
+
+VkSemaphore VulkanSwapchain::image_rendered_semaphore() const {
+    if (m_imageIndex) {
+        return m_imageRenderedSemaphores[m_imageIndex.value()];
+    }
+    return VK_NULL_HANDLE;
 }
 
 void VulkanSwapchain::create_surface() {

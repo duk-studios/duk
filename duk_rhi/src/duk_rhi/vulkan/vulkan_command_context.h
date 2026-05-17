@@ -36,7 +36,10 @@ public:
     // Frame management
     // -----------------------------------------------------------------------
     void prepare() override;
-    void flush() override;
+
+    void prepare_present() override;
+
+    void submit() override;
 
     // -----------------------------------------------------------------------
     // Resource creation (CommandContext interface)
@@ -86,12 +89,10 @@ private:
     uint32_t m_framesInFlight;
     uint32_t m_frameCounter{0};
     uint32_t m_frameIndex{0};
-    uint32_t m_swapchainImageIndex{0};
+    bool m_shouldPresent{false};
 
     // Sync
     std::vector<VkFence> m_fences;
-    std::vector<VkSemaphore> m_imageSemaphores;
-    std::vector<VkSemaphore> m_commandSemaphore;
 
     // Lazy command buffer cache
     VkCommandPool m_commandPool{VK_NULL_HANDLE};

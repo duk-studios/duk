@@ -284,6 +284,7 @@ std::unique_ptr<CommandContext> VulkanInstance::create_command_context(const Com
         swapchainCreateInfo.device = m_device;
         swapchainCreateInfo.physicalDevice = m_physicalDevice.get();
         swapchainCreateInfo.window = commandContextCreateInfo.window;
+        swapchainCreateInfo.framesInFlight = commandContextCreateInfo.framesInFlight;
         swapchain = std::make_unique<VulkanSwapchain>(swapchainCreateInfo);
     }
 
