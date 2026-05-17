@@ -14,17 +14,17 @@ namespace duk::rhi {
 
 namespace detail {
 
-static VkCullModeFlagBits convert_cull_mode(PipelineState::CullMode::Bits bit) {
+static VkCullModeFlagBits convert_cull_mode(PipelineState::Rasterizer::CullMode::Bits bit) {
     switch (bit) {
-        case PipelineState::CullMode::NONE:  return VK_CULL_MODE_NONE;
-        case PipelineState::CullMode::FRONT: return VK_CULL_MODE_FRONT_BIT;
-        case PipelineState::CullMode::BACK:  return VK_CULL_MODE_BACK_BIT;
-        default: throw std::invalid_argument("unhandled PipelineState::CullMode::Bits for Vulkan");
+        case PipelineState::Rasterizer::CullMode::NONE:  return VK_CULL_MODE_NONE;
+        case PipelineState::Rasterizer::CullMode::FRONT: return VK_CULL_MODE_FRONT_BIT;
+        case PipelineState::Rasterizer::CullMode::BACK:  return VK_CULL_MODE_BACK_BIT;
+        default: throw std::invalid_argument("unhandled PipelineState::Rasterizer::CullMode::Bits for Vulkan");
     }
 }
 
-static VkCullModeFlags convert_cull_mode_mask(PipelineState::CullMode::Mask mask) {
-    return convert_flags<PipelineState::CullMode>(mask, convert_cull_mode);
+static VkCullModeFlags convert_cull_mode_mask(PipelineState::Rasterizer::CullMode::Mask mask) {
+    return convert_flags<PipelineState::Rasterizer::CullMode>(mask, convert_cull_mode);
 }
 
 static VkBlendOp convert_blend_op(PipelineState::Blend::Operator op) {
@@ -63,29 +63,29 @@ static VkBlendFactor convert_blend_factor(PipelineState::Blend::Factor factor) {
     }
 }
 
-static VkPrimitiveTopology convert_topology(PipelineState::Topology topology) {
+static VkPrimitiveTopology convert_topology(PipelineState::Rasterizer::Topology topology) {
     switch (topology) {
-        case PipelineState::Topology::POINT_LIST:                    return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-        case PipelineState::Topology::LINE_LIST:                     return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-        case PipelineState::Topology::LINE_STRIP:                    return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-        case PipelineState::Topology::TRIANGLE_LIST:                 return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        case PipelineState::Topology::TRIANGLE_STRIP:                return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-        case PipelineState::Topology::TRIANGLE_FAN:                  return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
-        case PipelineState::Topology::LINE_LIST_WITH_ADJACENCY:      return VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY;
-        case PipelineState::Topology::LINE_STRIP_WITH_ADJACENCY:     return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY;
-        case PipelineState::Topology::TRIANGLE_LIST_WITH_ADJACENCY:  return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY;
-        case PipelineState::Topology::TRIANGLE_STRIP_WITH_ADJACENCY: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY;
-        case PipelineState::Topology::PATCH_LIST:                    return VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
-        default: throw std::invalid_argument("unhandled PipelineState::Topology for Vulkan");
+        case PipelineState::Rasterizer::Topology::POINT_LIST:                    return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        case PipelineState::Rasterizer::Topology::LINE_LIST:                     return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        case PipelineState::Rasterizer::Topology::LINE_STRIP:                    return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_LIST:                 return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_STRIP:                return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_FAN:                  return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+        case PipelineState::Rasterizer::Topology::LINE_LIST_WITH_ADJACENCY:      return VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY;
+        case PipelineState::Rasterizer::Topology::LINE_STRIP_WITH_ADJACENCY:     return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_LIST_WITH_ADJACENCY:  return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_STRIP_WITH_ADJACENCY: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY;
+        case PipelineState::Rasterizer::Topology::PATCH_LIST:                    return VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
+        default: throw std::invalid_argument("unhandled PipelineState::Rasterizer::Topology for Vulkan");
     }
 }
 
-static VkPolygonMode convert_fill_mode(PipelineState::FillMode fillMode) {
+static VkPolygonMode convert_fill_mode(PipelineState::Rasterizer::FillMode fillMode) {
     switch (fillMode) {
-        case PipelineState::FillMode::FILL:  return VK_POLYGON_MODE_FILL;
-        case PipelineState::FillMode::LINE:  return VK_POLYGON_MODE_LINE;
-        case PipelineState::FillMode::POINT: return VK_POLYGON_MODE_POINT;
-        default: throw std::invalid_argument("unhandled PipelineState::FillMode for Vulkan");
+        case PipelineState::Rasterizer::FillMode::FILL:  return VK_POLYGON_MODE_FILL;
+        case PipelineState::Rasterizer::FillMode::LINE:  return VK_POLYGON_MODE_LINE;
+        case PipelineState::Rasterizer::FillMode::POINT: return VK_POLYGON_MODE_POINT;
+        default: throw std::invalid_argument("unhandled PipelineState::Rasterizer::FillMode for Vulkan");
     }
 }
 
@@ -379,17 +379,26 @@ VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPa
     // ---- Input assembly ----
     VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = detail::convert_topology(state.topology);
+    inputAssembly.topology = detail::convert_topology(state.rasterizer.topology);
     inputAssembly.primitiveRestartEnable = VK_FALSE;
 
     // ---- Viewport / scissor ----
     VkViewport viewport = {};
-    viewport.x = state.viewport.offset.x;
-    viewport.y = state.viewport.offset.y;
-    viewport.width = state.viewport.extent.x;
-    viewport.height = state.viewport.extent.y;
+    viewport.x        = state.viewport.offset.x;
+    viewport.width    = state.viewport.extent.x;
     viewport.minDepth = state.viewport.minDepth;
     viewport.maxDepth = state.viewport.maxDepth;
+
+    if (state.rasterizer.origin == PipelineState::Rasterizer::Origin::BOTTOM_LEFT) {
+        // Flip Y: move origin to bottom-left by offsetting y by the full height
+        // and using a negative height. This is core Vulkan 1.1 behaviour.
+        viewport.y      = state.viewport.offset.y + state.viewport.extent.y;
+        viewport.height = -state.viewport.extent.y;
+    } else {
+        // DEFAULT and UPPER_LEFT both map to Vulkan's native upper-left origin.
+        viewport.y      = state.viewport.offset.y;
+        viewport.height = state.viewport.extent.y;
+    }
 
     VkRect2D scissor = {};
     scissor.offset = {state.scissor.offset.x, state.scissor.offset.y};
@@ -407,10 +416,12 @@ VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPa
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = detail::convert_fill_mode(state.fillMode);
+    rasterizer.polygonMode = detail::convert_fill_mode(state.rasterizer.fillMode);
     rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode = detail::convert_cull_mode_mask(state.cullMode);
-    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    rasterizer.cullMode  = detail::convert_cull_mode_mask(state.rasterizer.cullMode);
+    rasterizer.frontFace = (state.rasterizer.origin == PipelineState::Rasterizer::Origin::BOTTOM_LEFT)
+                               ? VK_FRONT_FACE_CLOCKWISE
+                               : VK_FRONT_FACE_COUNTER_CLOCKWISE; // DEFAULT and UPPER_LEFT are both native for Vulkan
     rasterizer.depthBiasEnable = VK_FALSE;
 
     // ---- Multisampling ----
@@ -453,7 +464,7 @@ VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPa
     // ---- Depth / stencil ----
     VkPipelineDepthStencilStateCreateInfo depthStencil = {};
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    if (state.depthTesting) {
+    if (state.rasterizer.depthTesting) {
         depthStencil.depthTestEnable = VK_TRUE;
         depthStencil.depthWriteEnable = state.blend.enabled ? VK_FALSE : VK_TRUE;
         depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;

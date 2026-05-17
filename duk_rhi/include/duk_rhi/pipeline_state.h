@@ -35,17 +35,6 @@ struct PipelineState {
         glm::ivec2 offset{0, 0};
     };
 
-    struct CullMode {
-        enum Bits : uint32_t {
-            NONE = 0,
-            FRONT = 1 << 0,
-            BACK = 1 << 1,
-        };
-
-        static constexpr uint32_t kCount = 3;
-        using Mask = uint32_t;
-    };
-
     struct Blend {
         enum class Factor {
             ZERO = 0,
@@ -86,33 +75,55 @@ struct PipelineState {
         bool enabled{false};
     };
 
-    enum class Topology {
-        TRIANGLE_LIST = 0,
-        TRIANGLE_STRIP = 1,
-        TRIANGLE_FAN = 2,
-        TRIANGLE_LIST_WITH_ADJACENCY = 3,
-        TRIANGLE_STRIP_WITH_ADJACENCY = 4,
-        POINT_LIST = 5,
-        LINE_LIST = 6,
-        LINE_STRIP = 7,
-        LINE_LIST_WITH_ADJACENCY = 8,
-        LINE_STRIP_WITH_ADJACENCY = 9,
-        PATCH_LIST = 10,
-    };
+    struct Rasterizer {
+        struct CullMode {
+            enum Bits : uint32_t {
+                NONE = 0,
+                FRONT = 1 << 0,
+                BACK = 1 << 1,
+            };
 
-    enum class FillMode {
-        FILL = 0,
-        LINE = 1,
-        POINT = 2,
+            static constexpr uint32_t kCount = 3;
+            using Mask = uint32_t;
+        };
+
+        enum class Topology {
+            TRIANGLE_LIST = 0,
+            TRIANGLE_STRIP = 1,
+            TRIANGLE_FAN = 2,
+            TRIANGLE_LIST_WITH_ADJACENCY = 3,
+            TRIANGLE_STRIP_WITH_ADJACENCY = 4,
+            POINT_LIST = 5,
+            LINE_LIST = 6,
+            LINE_STRIP = 7,
+            LINE_LIST_WITH_ADJACENCY = 8,
+            LINE_STRIP_WITH_ADJACENCY = 9,
+            PATCH_LIST = 10,
+        };
+
+        enum class FillMode {
+            FILL = 0,
+            LINE = 1,
+            POINT = 2,
+        };
+
+        enum class Origin {
+            DEFAULT     = 0, // no transformation; renders in the native coordinate origin of the underlying API
+            UPPER_LEFT  = 1, // force Y-down, origin at top-left  (native Vulkan / D3D)
+            BOTTOM_LEFT = 2, // force Y-up,   origin at bottom-left (OpenGL convention)
+        };
+
+        CullMode::Mask cullMode{CullMode::NONE};
+        Topology topology{Topology::TRIANGLE_LIST};
+        FillMode fillMode{FillMode::FILL};
+        Origin origin{Origin::DEFAULT};
+        bool depthTesting{false};
     };
 
     Viewport viewport{};
     Scissor scissor{};
-    CullMode::Mask cullMode{CullMode::NONE};
     Blend blend{};
-    Topology topology{Topology::TRIANGLE_LIST};
-    FillMode fillMode{FillMode::FILL};
-    bool depthTesting{false};
+    Rasterizer rasterizer{};
 };
 
 }// namespace duk::rhi
@@ -155,16 +166,26 @@ struct std::hash<duk::rhi::PipelineState::Blend> {
 };
 
 template<>
+struct std::hash<duk::rhi::PipelineState::Rasterizer> {
+    size_t operator()(const duk::rhi::PipelineState::Rasterizer& rasterizer) const noexcept {
+        size_t hash = 0;
+        duk::hash::hash_combine(hash, rasterizer.cullMode);
+        duk::hash::hash_combine(hash, static_cast<uint32_t>(rasterizer.topology));
+        duk::hash::hash_combine(hash, static_cast<uint32_t>(rasterizer.fillMode));
+        duk::hash::hash_combine(hash, static_cast<uint32_t>(rasterizer.origin));
+        duk::hash::hash_combine(hash, rasterizer.depthTesting);
+        return hash;
+    }
+};
+
+template<>
 struct std::hash<duk::rhi::PipelineState> {
     size_t operator()(const duk::rhi::PipelineState& state) const noexcept {
         size_t hash = 0;
         duk::hash::hash_combine(hash, state.viewport);
         duk::hash::hash_combine(hash, state.scissor);
-        duk::hash::hash_combine(hash, state.cullMode);
         duk::hash::hash_combine(hash, state.blend);
-        duk::hash::hash_combine(hash, static_cast<uint32_t>(state.topology));
-        duk::hash::hash_combine(hash, static_cast<uint32_t>(state.fillMode));
-        duk::hash::hash_combine(hash, state.depthTesting);
+        duk::hash::hash_combine(hash, state.rasterizer);
         return hash;
     }
 };
