@@ -148,14 +148,14 @@ static QuadAllocation upload_quad(
 
 static void draw_quad(
     const duk::rhi::RenderCommands& render,
-    duk::rhi::BufferAllocator& dynBuf,
+    const duk::rhi::Buffer& buffer,
     uint32_t matricesSlot,
     uint32_t colorSlot,
     const QuadAllocation& alloc)
 {
     duk::rhi::ShaderResources resources{};
-    resources.bindings[matricesSlot] = duk::rhi::BufferBinding{dynBuf.buffer(), static_cast<uint32_t>(alloc.matrices.offset)};
-    resources.bindings[colorSlot]    = duk::rhi::BufferBinding{dynBuf.buffer(), static_cast<uint32_t>(alloc.color.offset)};
+    resources.bindings[matricesSlot] = duk::rhi::BufferBinding{&buffer, static_cast<uint32_t>(alloc.matrices.offset)};
+    resources.bindings[colorSlot]    = duk::rhi::BufferBinding{&buffer, static_cast<uint32_t>(alloc.color.offset)};
     render.bind_resources(resources);
 
     duk::rhi::DrawIndexedParams drawParams;
@@ -261,7 +261,7 @@ int main() {
         transfer.write_buffer(positionBuffer.get(), kPositions, sizeof(kPositions), 0);
         transfer.write_buffer(indexBuffer.get(),    kIndices,   sizeof(kIndices),   0);
     }
-    ctx->flush();
+    ctx->submit();
 
     // -------------------------------------------------------------------
     // Single BufferAllocator shared by all uniform bindings every frame.
@@ -286,8 +286,8 @@ int main() {
     // Per-frame state
     // -------------------------------------------------------------------
     duk::rhi::PipelineState pipelineState{};
-    pipelineState.topology = duk::rhi::PipelineState::Topology::TRIANGLE_LIST;
-    pipelineState.cullMode = duk::rhi::PipelineState::CullMode::NONE;
+    pipelineState.rasterizer.topology = duk::rhi::PipelineState::Rasterizer::Topology::TRIANGLE_LIST;
+    pipelineState.rasterizer.cullMode = duk::rhi::PipelineState::Rasterizer::CullMode::NONE;
 
     const auto matricesSlot = shaderDataSource.binding_index("matrices");
     const auto colorSlot    = shaderDataSource.binding_index("tint");
@@ -328,9 +328,8 @@ int main() {
             glm::radians(45.0f),
             static_cast<float>(width) / static_cast<float>(height),
             0.1f, 100.0f);
-        proj[1][1] *= -1.0f;  // Vulkan Y-flip
 
-        ctx->prepare();
+        ctx->prepare_present();
 
         // Reset the allocator at the start of every frame.
         allocator->reset();
@@ -381,13 +380,13 @@ int main() {
             render.bind_index_buffer(indexBuffer.get());
 
             // Quad 0: left, red, rotates counter-clockwise
-            draw_quad(render, *allocator, matricesSlot, colorSlot, quad0Alloc);
+            draw_quad(render, *allocator->buffer(), matricesSlot, colorSlot, quad0Alloc);
 
             // Quad 1: right, blue, rotates clockwise
-            draw_quad(render, *allocator, matricesSlot, colorSlot, quad1Alloc);
+            draw_quad(render, *allocator->buffer(), matricesSlot, colorSlot, quad1Alloc);
         }
 
-        ctx->flush();
+        ctx->submit();
     }
 
     return 0;

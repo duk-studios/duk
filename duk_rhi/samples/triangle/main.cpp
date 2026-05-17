@@ -160,7 +160,7 @@ int main() {
             continue;
         }
 
-        ctx->prepare();
+        ctx->prepare_present();
 
         const auto width = window->width();
         const auto height = window->height();
@@ -185,7 +185,7 @@ int main() {
             render.draw(renderParams);
         }
 
-        ctx->flush();
+        ctx->submit();
     }
 
     return 0;

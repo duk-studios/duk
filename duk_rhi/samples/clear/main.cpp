@@ -84,7 +84,7 @@ int main() {
         }
 
         // Record and submit render commands.
-        ctx->prepare();
+        ctx->prepare_present();
 
         duk::rhi::RenderBeginParams renderBeginParams;
         renderBeginParams.clearColor = glm::vec4(0.1f, 0.2f, 0.3f, 1.0f);
@@ -93,7 +93,7 @@ int main() {
 
         auto render = ctx->render(renderBeginParams);
 
-        ctx->flush();
+        ctx->submit();
     }
 
     return 0;
