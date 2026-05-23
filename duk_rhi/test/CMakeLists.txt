@@ -1,6 +1,8 @@
 
 set(DUK_RHI_TEST_SOURCES
         sampler.cc
+        shader_cache.cc
+        shader_compiler.cc
         )
 
 add_executable(duk.rhi.test ${DUK_RHI_TEST_SOURCES})
