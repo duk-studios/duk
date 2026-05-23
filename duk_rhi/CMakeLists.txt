@@ -20,6 +20,8 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/command_queue.h
         include/duk_rhi/command_context.h
         include/duk_rhi/pipeline_state_stack.h
+        include/duk_rhi/shader_compiler.h
+        include/duk_rhi/shader_cache.h
         )
 
 set(DUK_RHI_SOURCES
@@ -41,6 +43,8 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/command_context.cpp
         src/duk_rhi/buffer_allocator.cpp
         src/duk_rhi/pipeline_state_stack.cpp
+        src/duk_rhi/shader_compiler.cpp
+        src/duk_rhi/shader_cache.cpp
         src/duk_rhi/vulkan/vulkan_image.h
         src/duk_rhi/vulkan/vulkan_image.cpp
         src/duk_rhi/vulkan/vulkan_sampler.h
@@ -107,12 +111,9 @@ target_link_libraries(duk.rhi
 
         # external
         glm::glm
-
-
         volk::volk_headers
-
-        PRIVATE
         spirv-reflect::spirv-reflect-static
+        unofficial::shaderc::shaderc
         )
 
 set_target_properties(duk.rhi PROPERTIES EXPORT_NAME rhi)
