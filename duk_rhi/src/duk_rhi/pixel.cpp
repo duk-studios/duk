@@ -21,11 +21,11 @@ PixelFormat& PixelFormat::operator=(uint32_t mask) {
 }
 
 PixelFormat PixelFormat::operator&(uint32_t mask) const {
-    return m_mask & mask;
+    return PixelFormat(m_mask & mask);
 }
 
 PixelFormat PixelFormat::operator|(uint32_t mask) const {
-    return m_mask | mask;
+    return PixelFormat(m_mask | mask);
 }
 
 bool PixelFormat::operator==(PixelFormat other) const {

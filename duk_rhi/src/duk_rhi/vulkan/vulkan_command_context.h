@@ -5,6 +5,7 @@
 
 #include <duk_rhi/command_context.h>
 #include <duk_rhi/vulkan/vulkan_deletion_queue.h>
+#include <duk_rhi/vulkan/vulkan_image.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_physical_device.h>
 #include <duk_rhi/vulkan/vulkan_queue.h>
@@ -23,6 +24,7 @@ struct VulkanCommandContextCreateInfo {
     const VulkanPhysicalDevice* physicalDevice;
     VulkanQueue* queue;
     uint32_t framesInFlight;
+    PixelFormat depthFormat{PixelFormat::UNDEFINED};
 };
 
 class VulkanCommandContext : public CommandContext {
@@ -102,6 +104,8 @@ private:
     std::unique_ptr<VulkanRenderState> m_renderState;
     std::unique_ptr<VulkanResourceState> m_resourceBinder;
     std::unique_ptr<VulkanFrameBuffer> m_defaultFrameBuffer;
+    PixelFormat m_defaultDepthFormat{PixelFormat::UNDEFINED};
+    std::unique_ptr<VulkanImage> m_defaultDepthImage;
 
     VulkanDeletionQueue m_deletionQueue;
 

@@ -293,6 +293,7 @@ std::unique_ptr<CommandContext> VulkanInstance::create_command_context(const Com
     vulkanCommandContextInfo.physicalDevice = m_physicalDevice.get();
     vulkanCommandContextInfo.queue = queue;
     vulkanCommandContextInfo.framesInFlight = commandContextCreateInfo.framesInFlight;
+    vulkanCommandContextInfo.depthFormat = commandContextCreateInfo.depthFormat;
     return std::make_unique<VulkanCommandContext>(vulkanCommandContextInfo, std::move(swapchain));
 }
 

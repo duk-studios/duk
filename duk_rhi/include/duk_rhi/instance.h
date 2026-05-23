@@ -8,6 +8,7 @@
 #include <duk_rhi/command_context.h>
 #include <duk_rhi/command_queue.h>
 #include <duk_rhi/capabilities.h>
+#include <duk_rhi/pixel.h>
 
 #include <duk_log/logger.h>
 
@@ -40,9 +41,10 @@ struct InstanceCreateInfo {
 };
 
 struct CommandContextCreateInfo {
-    CommandQueue::Type::Mask type;
-    const platform::Window* window;
-    uint32_t framesInFlight;
+    CommandQueue::Type::Mask type{CommandQueue::Type::GRAPHICS};
+    const platform::Window* window{nullptr};
+    uint32_t framesInFlight{2};
+    PixelFormat depthFormat{PixelFormat::UNDEFINED};
 };
 
 class Instance {

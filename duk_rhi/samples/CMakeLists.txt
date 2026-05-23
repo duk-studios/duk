@@ -3,4 +3,4 @@ add_subdirectory(triangle)
 add_subdirectory(cube)
 add_subdirectory(dynamic)
 add_subdirectory(axes)
-
+add_subdirectory(depth)

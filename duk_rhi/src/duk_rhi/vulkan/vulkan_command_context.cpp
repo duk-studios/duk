@@ -91,6 +91,23 @@ static VkImageAspectFlags image_aspect_flags(Image::Usage usage, PixelFormat for
     }
 }
 
+static std::unique_ptr<VulkanImage> create_depth_image(VkDevice device, const VulkanPhysicalDevice& physicalDevice, PixelFormat format, VkExtent2D extent) {
+    VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_DEPTH_BIT;
+    if (format.is_stencil()) {
+        aspectFlags |= VK_IMAGE_ASPECT_STENCIL_BIT;
+    }
+    VulkanMemoryImageCreateInfo createInfo = {};
+    createInfo.device = device;
+    createInfo.physicalDevice = &physicalDevice;
+    createInfo.format = convert_pixel_format(format);
+    createInfo.width = extent.width;
+    createInfo.height = extent.height;
+    createInfo.usageFlags = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+    createInfo.memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    createInfo.aspectFlags = aspectFlags;
+    return std::make_unique<VulkanImage>(createInfo);
+}
+
 }// namespace detail
 
 VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo& createInfo, std::unique_ptr<VulkanSwapchain> swapchain)
@@ -100,6 +117,7 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
     , m_queue(createInfo.queue)
     , m_framesInFlight(createInfo.framesInFlight)
     , m_swapchain(std::move(swapchain))
+    , m_defaultDepthFormat(createInfo.depthFormat)
     , m_deletionQueue(m_framesInFlight) {
     // -----------------------------------------------------------------------
     // Descriptor layout cache and sampler cache
@@ -135,6 +153,9 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
 
     if (m_swapchain) {
         m_defaultFrameBuffer = std::make_unique<VulkanFrameBuffer>();
+        if (m_defaultDepthFormat != PixelFormat::UNDEFINED) {
+            m_defaultDepthImage = detail::create_depth_image(m_device, m_physicalDevice, m_defaultDepthFormat, m_swapchain->extent());
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -208,6 +229,9 @@ void VulkanCommandContext::prepare_present() {
             throw std::runtime_error("VulkanCommandContext: failed to wait for device idle on swapchain recreation");
         }
         m_swapchain->recreate();
+        if (m_defaultDepthImage) {
+            m_defaultDepthImage = detail::create_depth_image(m_device, m_physicalDevice, m_defaultDepthFormat, m_swapchain->extent());
+        }
         result = m_swapchain->acquire_next_image(m_frameIndex);
         if (result != VK_SUCCESS) {
             throw std::runtime_error("VulkanCommandContext: failed to acquire next image");
@@ -271,6 +295,9 @@ void VulkanCommandContext::submit() {
                 throw std::runtime_error("VulkanCommandContext: failed to wait for device idle on swapchain recreation after present");
             }
             m_swapchain->recreate();
+            if (m_defaultDepthImage) {
+                m_defaultDepthImage = detail::create_depth_image(m_device, m_physicalDevice, m_defaultDepthFormat, m_swapchain->extent());
+            }
         } else if (result != VK_SUCCESS) {
             throw std::runtime_error("VulkanCommandContext: failed to present swapchain image");
         }
@@ -330,8 +357,13 @@ void VulkanCommandContext::render_begin(const RenderBeginParams& params) {
         if (!m_shouldPresent) {
             throw std::runtime_error("VulkanCommandContext: no framebuffer provided to offscreen context");
         }
-        const VulkanImage* attachments[1] = {m_swapchain->image()};
-        m_defaultFrameBuffer->write(attachments, 1);
+        if (m_defaultDepthImage) {
+            const VulkanImage* attachments[2] = {m_swapchain->image(), m_defaultDepthImage.get()};
+            m_defaultFrameBuffer->write(attachments, 2);
+        } else {
+            const VulkanImage* attachments[1] = {m_swapchain->image()};
+            m_defaultFrameBuffer->write(attachments, 1);
+        }
         frameBuffer = m_defaultFrameBuffer.get();
     }
     m_renderState->begin(m_activeCommandBuffer, *frameBuffer, convert_load_op(params.loadOp), convert_store_op(params.storeOp), params.clearColor);
