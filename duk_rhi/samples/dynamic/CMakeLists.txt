@@ -5,8 +5,4 @@ target_link_libraries(duk.rhi.sample.dynamic
         duk::rhi
         duk::platform
         duk::log
-        unofficial::shaderc::shaderc
         )
-
-
-

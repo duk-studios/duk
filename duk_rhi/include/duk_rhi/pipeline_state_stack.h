@@ -37,4 +37,3 @@ private:
 }// namespace duk::rhi
 
 #endif// DUK_RHI_PIPELINE_STATE_STACK_H
-

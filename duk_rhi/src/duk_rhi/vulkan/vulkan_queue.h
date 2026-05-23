@@ -50,4 +50,3 @@ private:
 }// namespace duk::rhi
 
 #endif//DUK_RHI_VULKAN_QUEUE_H
-

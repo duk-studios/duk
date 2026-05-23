@@ -16,7 +16,6 @@
 #include <memory>
 #include <vector>
 
-
 namespace duk::rhi {
 
 struct VulkanCommandContextCreateInfo {
@@ -73,8 +72,7 @@ public:
     void flush_buffer(Buffer* buffer, size_t offset, size_t size) override;
 
 private:
-
-    template<typename T, typename ...Args>
+    template<typename T, typename... Args>
     DUK_NO_DISCARD std::shared_ptr<T> make_managed(Args&&... args) {
         return std::shared_ptr<T>(new T(std::forward<Args>(args)...), [this](T* ptr) {
             m_deletionQueue.push(ptr, m_frameCounter);
@@ -115,4 +113,3 @@ private:
 }// namespace duk::rhi
 
 #endif// DUK_RHI_VULKAN_COMMAND_CONTEXT_H
-

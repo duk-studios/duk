@@ -57,4 +57,3 @@ public:
 }// namespace duk::rhi
 
 #endif// DUK_RHI_SHADER_DATA_SOURCE_H
-

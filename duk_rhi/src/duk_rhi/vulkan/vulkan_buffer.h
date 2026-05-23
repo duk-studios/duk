@@ -16,7 +16,7 @@ struct VulkanBufferCreateInfo {
     size_t size;
     VkBufferUsageFlags usageFlags;
     VkMemoryPropertyFlags memoryFlags;
-    VkIndexType indexType{VK_INDEX_TYPE_MAX_ENUM}; ///< Only meaningful for index buffers.
+    VkIndexType indexType{VK_INDEX_TYPE_MAX_ENUM};///< Only meaningful for index buffers.
     VkDevice device;
     const VulkanPhysicalDevice* physicalDevice;
 };

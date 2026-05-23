@@ -13,12 +13,24 @@ namespace duk::rhi {
 VkShaderStageFlagBits convert_module(ShaderModule::Bits module) {
     VkShaderStageFlagBits stage;
     switch (module) {
-        case ShaderModule::VERTEX:                  stage = VK_SHADER_STAGE_VERTEX_BIT;                  break;
-        case ShaderModule::TESSELLATION_CONTROL:    stage = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;    break;
-        case ShaderModule::TESSELLATION_EVALUATION: stage = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT; break;
-        case ShaderModule::GEOMETRY:                stage = VK_SHADER_STAGE_GEOMETRY_BIT;                break;
-        case ShaderModule::FRAGMENT:                stage = VK_SHADER_STAGE_FRAGMENT_BIT;                break;
-        case ShaderModule::COMPUTE:                 stage = VK_SHADER_STAGE_COMPUTE_BIT;                 break;
+        case ShaderModule::VERTEX:
+            stage = VK_SHADER_STAGE_VERTEX_BIT;
+            break;
+        case ShaderModule::TESSELLATION_CONTROL:
+            stage = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT;
+            break;
+        case ShaderModule::TESSELLATION_EVALUATION:
+            stage = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+            break;
+        case ShaderModule::GEOMETRY:
+            stage = VK_SHADER_STAGE_GEOMETRY_BIT;
+            break;
+        case ShaderModule::FRAGMENT:
+            stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+            break;
+        case ShaderModule::COMPUTE:
+            stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            break;
         default:
             throw std::runtime_error("tried to convert unsupported ShaderModule");
     }
@@ -33,7 +45,6 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo)
     : m_device(shaderCreateInfo.device)
     , m_hash(shaderCreateInfo.shaderDataSource->hash())
     , m_moduleMask(shaderCreateInfo.shaderDataSource->module_mask()) {
-
     auto* shaderDataSource = shaderCreateInfo.shaderDataSource;
 
     if (shaderDataSource->module_mask() == 0) {
@@ -41,7 +52,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo)
     }
 
     m_bindingLayout = shaderDataSource->binding_layout();
-    m_vertexLayout  = shaderDataSource->vertex_layout();
+    m_vertexLayout = shaderDataSource->vertex_layout();
 
     // Remap bindings to a single descriptor set
     m_bindingRemapTable.reserve(m_bindingLayout.size());
@@ -55,7 +66,7 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo)
     // -------------------------------------------------------------------------
     // Create VkShaderModule objects from the patched bytecodes.
     // -------------------------------------------------------------------------
-    for (auto& [stage, patchedCode] : patchedModules) {
+    for (auto& [stage, patchedCode]: patchedModules) {
         VkShaderModuleCreateInfo shaderModuleCreateInfo = {};
         shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         shaderModuleCreateInfo.codeSize = patchedCode.size();
@@ -78,24 +89,24 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo)
     m_inputAttributes.reserve(m_vertexLayout.size());
     m_inputBindings.reserve(m_vertexLayout.size());
 
-    for (auto& format : m_vertexLayout) {
+    for (auto& format: m_vertexLayout) {
         VkVertexInputAttributeDescription inputAttributeDescription = {};
-        inputAttributeDescription.binding  = static_cast<uint32_t>(m_inputAttributes.size());
+        inputAttributeDescription.binding = static_cast<uint32_t>(m_inputAttributes.size());
         inputAttributeDescription.location = inputAttributeDescription.binding;
-        inputAttributeDescription.offset   = 0;
-        inputAttributeDescription.format   = convert_vertex_attribute_format(format);
+        inputAttributeDescription.offset = 0;
+        inputAttributeDescription.format = convert_vertex_attribute_format(format);
         m_inputAttributes.push_back(inputAttributeDescription);
 
         VkVertexInputBindingDescription inputBindingDescription = {};
-        inputBindingDescription.binding   = inputAttributeDescription.binding;
+        inputBindingDescription.binding = inputAttributeDescription.binding;
         inputBindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        inputBindingDescription.stride    = VertexInput::size_of(format);
+        inputBindingDescription.stride = VertexInput::size_of(format);
         m_inputBindings.push_back(inputBindingDescription);
     }
 }
 
 VulkanShader::~VulkanShader() {
-    for (auto& [moduleType, module] : m_shaderModules) {
+    for (auto& [moduleType, module]: m_shaderModules) {
         vkDestroyShaderModule(m_device, module, nullptr);
     }
 }
@@ -137,4 +148,3 @@ bool VulkanShader::is_compute_shader() const {
 }
 
 }// namespace duk::rhi
-

@@ -17,9 +17,7 @@
 #include <duk_log/log.h>
 #include <duk_log/sinks/term_color_sink.h>
 
-
 int main() {
-
     // -----------------------------------------------------------------------
     // Window
     // -----------------------------------------------------------------------
@@ -38,8 +36,12 @@ int main() {
     volatile bool running = true;
 
     duk::event::Listener listener;
-    listener.listen(window->window_close_event, [&window] { window->close(); });
-    listener.listen(window->window_destroy_event, [&running] { running = false; });
+    listener.listen(window->window_close_event, [&window] {
+        window->close();
+    });
+    listener.listen(window->window_destroy_event, [&running] {
+        running = false;
+    });
     listener.listen(window->key_event, [&window](duk::platform::Keys key, duk::platform::KeyModifiers::Mask, duk::platform::KeyAction action) {
         if (key == duk::platform::Keys::ESC && action == duk::platform::KeyAction::PRESS) {
             window->close();
@@ -98,4 +100,3 @@ int main() {
 
     return 0;
 }
-

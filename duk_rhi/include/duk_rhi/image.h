@@ -16,7 +16,6 @@ class ImageDataSource;
 
 class Image {
 public:
-
     enum class Usage {
         SAMPLED,
         STORAGE,

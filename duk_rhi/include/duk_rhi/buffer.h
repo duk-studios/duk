@@ -13,8 +13,8 @@ namespace duk::rhi {
 class Buffer {
 public:
     enum class UpdateFrequency {
-        STATIC,  ///< Device-local; written via staging through the command context.
-        DYNAMIC  ///< Host-visible; written directly by the CPU through the command context.
+        STATIC,///< Device-local; written via staging through the command context.
+        DYNAMIC///< Host-visible; written directly by the CPU through the command context.
     };
 
     enum class Type {

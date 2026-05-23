@@ -6,17 +6,12 @@
 
 namespace duk::rhi {
 
-
 VulkanDescriptorSetCache::VulkanDescriptorSetCache(const VulkanDescriptorSetCacheCreateInfo& createInfo)
     : m_device(createInfo.device) {
-
     const VkDescriptorPoolSize poolSizes[] = {
-        {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, createInfo.maxSets},
-        {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, createInfo.maxSets},
-        {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, createInfo.maxSets},
-        {VK_DESCRIPTOR_TYPE_SAMPLER,                createInfo.maxSets},
-        {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,          createInfo.maxSets},
-        {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,          createInfo.maxSets},
+            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, createInfo.maxSets}, {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, createInfo.maxSets},
+            {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, createInfo.maxSets}, {VK_DESCRIPTOR_TYPE_SAMPLER, createInfo.maxSets},
+            {VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, createInfo.maxSets},          {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, createInfo.maxSets},
     };
 
     VkDescriptorPoolCreateInfo poolInfo = {};
@@ -36,9 +31,7 @@ VulkanDescriptorSetCache::~VulkanDescriptorSetCache() {
     }
 }
 
-VulkanDescriptorSetCache::Result VulkanDescriptorSetCache::get_or_allocate(
-    VkDescriptorSetLayout layout, duk::hash::Hash hash) {
-
+VulkanDescriptorSetCache::Result VulkanDescriptorSetCache::get_or_allocate(VkDescriptorSetLayout layout, duk::hash::Hash hash) {
     auto it = m_cache.find(hash);
     if (it != m_cache.end()) {
         return {it->second, false};
@@ -60,4 +53,3 @@ VulkanDescriptorSetCache::Result VulkanDescriptorSetCache::get_or_allocate(
 }
 
 }// namespace duk::rhi
-

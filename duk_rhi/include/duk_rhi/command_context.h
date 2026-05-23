@@ -23,7 +23,6 @@ namespace duk::rhi {
 class CommandQueue;
 class CommandContext;
 
-
 struct ShaderCreateInfo {
     const ShaderDataSource* shaderDataSource;
 };
@@ -90,6 +89,7 @@ struct DrawIndexedParams {
 class ScopedCommands {
 public:
     bool valid() const;
+
 protected:
     explicit ScopedCommands(CommandContext& context);
     ScopedCommands(const ScopedCommands&) = delete;
@@ -248,4 +248,3 @@ private:
 }// namespace duk::rhi
 
 #endif// DUK_RHI_COMMAND_CONTEXT_H
-

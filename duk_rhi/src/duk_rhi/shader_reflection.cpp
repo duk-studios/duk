@@ -57,9 +57,7 @@ static BindingDescription make_binding_description(SpvReflectDescriptorBinding* 
         case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
         case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER: {
             BufferBindingDescription bufferDesc;
-            bufferDesc.type = spvBinding->descriptor_type == SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER
-                ? BufferBindingType::UNIFORM_BUFFER
-                : BufferBindingType::STORAGE_BUFFER;
+            bufferDesc.type = spvBinding->descriptor_type == SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER ? BufferBindingType::UNIFORM_BUFFER : BufferBindingType::STORAGE_BUFFER;
             fill_buffer_members(spvBinding, bufferDesc);
             desc.binding = std::move(bufferDesc);
             break;
@@ -86,14 +84,22 @@ static BindingDescription make_binding_description(SpvReflectDescriptorBinding* 
 
 static VertexInput::Format vertex_attribute_format(SpvReflectFormat format) {
     switch (format) {
-        case SPV_REFLECT_FORMAT_R16_UINT:                return VertexInput::Format::UINT16;
-        case SPV_REFLECT_FORMAT_R16_SINT:                return VertexInput::Format::INT16;
-        case SPV_REFLECT_FORMAT_R32_UINT:                return VertexInput::Format::UINT32;
-        case SPV_REFLECT_FORMAT_R32_SINT:                return VertexInput::Format::INT32;
-        case SPV_REFLECT_FORMAT_R32_SFLOAT:              return VertexInput::Format::FLOAT32;
-        case SPV_REFLECT_FORMAT_R32G32_SFLOAT:           return VertexInput::Format::VEC2;
-        case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT:        return VertexInput::Format::VEC3;
-        case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT:     return VertexInput::Format::VEC4;
+        case SPV_REFLECT_FORMAT_R16_UINT:
+            return VertexInput::Format::UINT16;
+        case SPV_REFLECT_FORMAT_R16_SINT:
+            return VertexInput::Format::INT16;
+        case SPV_REFLECT_FORMAT_R32_UINT:
+            return VertexInput::Format::UINT32;
+        case SPV_REFLECT_FORMAT_R32_SINT:
+            return VertexInput::Format::INT32;
+        case SPV_REFLECT_FORMAT_R32_SFLOAT:
+            return VertexInput::Format::FLOAT32;
+        case SPV_REFLECT_FORMAT_R32G32_SFLOAT:
+            return VertexInput::Format::VEC2;
+        case SPV_REFLECT_FORMAT_R32G32B32_SFLOAT:
+            return VertexInput::Format::VEC3;
+        case SPV_REFLECT_FORMAT_R32G32B32A32_SFLOAT:
+            return VertexInput::Format::VEC4;
         default:
             throw std::runtime_error("unsupported vertex attribute format");
     }
@@ -109,18 +115,11 @@ static void remove_unsupported_attributes(std::vector<SpvReflectInterfaceVariabl
 
 // Canonical stage iteration order for deterministic layout merging.
 static constexpr ShaderModule::Bits kStageOrder[] = {
-    ShaderModule::VERTEX,
-    ShaderModule::TESSELLATION_CONTROL,
-    ShaderModule::TESSELLATION_EVALUATION,
-    ShaderModule::GEOMETRY,
-    ShaderModule::FRAGMENT,
-    ShaderModule::COMPUTE,
+        ShaderModule::VERTEX, ShaderModule::TESSELLATION_CONTROL, ShaderModule::TESSELLATION_EVALUATION, ShaderModule::GEOMETRY, ShaderModule::FRAGMENT, ShaderModule::COMPUTE,
 };
 
-ShaderReflection::ShaderReflection(
-    const std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>>& stageSpirV) {
-
-    for (auto stage : kStageOrder) {
+ShaderReflection::ShaderReflection(const std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>>& stageSpirV) {
+    for (auto stage: kStageOrder) {
         auto it = stageSpirV.find(stage);
         if (it == stageSpirV.end()) {
             continue;
@@ -142,7 +141,7 @@ ShaderBindingLayout ShaderReflection::binding_layout() {
     ShaderBindingLayout bindingLayout;
     std::unordered_map<std::string, uint32_t> nameToIndex;
 
-    for (auto stage : kStageOrder) {
+    for (auto stage: kStageOrder) {
         auto it = m_stageModules.find(stage);
         if (it == m_stageModules.end()) {
             continue;
@@ -156,12 +155,11 @@ ShaderBindingLayout ShaderReflection::binding_layout() {
         detail::check_result(spvReflectEnumerateDescriptorBindings(mod.get(), &bindingCount, bindings.data()));
 
         // Sort by (set, binding) for a stable per-stage slot assignment.
-        std::sort(bindings.begin(), bindings.end(),
-                  [](const SpvReflectDescriptorBinding* a, const SpvReflectDescriptorBinding* b) {
+        std::sort(bindings.begin(), bindings.end(), [](const SpvReflectDescriptorBinding* a, const SpvReflectDescriptorBinding* b) {
             return a->set != b->set ? a->set < b->set : a->binding < b->binding;
         });
 
-        for (auto* spvBinding : bindings) {
+        for (auto* spvBinding: bindings) {
             const std::string name = spvBinding->name;
             auto found = nameToIndex.find(name);
             if (found == nameToIndex.end()) {
@@ -188,19 +186,16 @@ VertexLayout ShaderReflection::vertex_layout() {
     auto& mod = it->second;
 
     uint32_t inputVariableCount = 0;
-    detail::check_result(spvReflectEnumerateEntryPointInputVariables(
-        mod.get(), "main", &inputVariableCount, nullptr));
+    detail::check_result(spvReflectEnumerateEntryPointInputVariables(mod.get(), "main", &inputVariableCount, nullptr));
 
     std::vector<SpvReflectInterfaceVariable*> inputVariables(inputVariableCount);
-    detail::check_result(spvReflectEnumerateEntryPointInputVariables(
-        mod.get(), "main", &inputVariableCount, inputVariables.data()));
+    detail::check_result(spvReflectEnumerateEntryPointInputVariables(mod.get(), "main", &inputVariableCount, inputVariables.data()));
 
     detail::remove_unsupported_attributes(inputVariables);
 
     std::vector<VertexInput::Format> attributes(inputVariables.size());
-    for (auto* inputVariable : inputVariables) {
-        attributes.at(inputVariable->location) =
-            detail::vertex_attribute_format(inputVariable->format);
+    for (auto* inputVariable: inputVariables) {
+        attributes.at(inputVariable->location) = detail::vertex_attribute_format(inputVariable->format);
     }
     vertexLayout.insert(attributes);
 
@@ -217,7 +212,7 @@ std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>> ShaderReflection::r
 
     std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>> patchedModules;
 
-    for (auto stage : kStageOrder) {
+    for (auto stage: kStageOrder) {
         auto it = m_stageModules.find(stage);
         if (it == m_stageModules.end()) {
             continue;
@@ -231,15 +226,14 @@ std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>> ShaderReflection::r
         std::vector<SpvReflectDescriptorBinding*> bindings(bindingCount);
         detail::check_result(spvReflectEnumerateDescriptorBindings(mod.get(), &bindingCount, bindings.data()));
 
-        for (auto* spvBinding : bindings) {
+        for (auto* spvBinding: bindings) {
             const uint32_t canonicalBinding = nameToIndex.at(spvBinding->name);
             constexpr uint32_t canonicalSet = 0;
-            detail::check_result(spvReflectChangeDescriptorBindingNumbers(
-                mod.get(), spvBinding, canonicalBinding, canonicalSet));
+            detail::check_result(spvReflectChangeDescriptorBindingNumbers(mod.get(), spvBinding, canonicalBinding, canonicalSet));
         }
 
         // Copy the patched SPIR-V words (size is unchanged — only decorations moved).
-        const size_t codeSize   = spvReflectGetCodeSize(mod.get());
+        const size_t codeSize = spvReflectGetCodeSize(mod.get());
         const uint32_t* codePtr = spvReflectGetCode(mod.get());
         auto& patched = patchedModules[stage];
         patched.resize(codeSize);

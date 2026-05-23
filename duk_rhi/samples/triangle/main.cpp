@@ -18,8 +18,7 @@
 #include <duk_rhi/instance.h>
 #include <duk_rhi/runtime_shader_data_source.h>
 #include <duk_rhi/pipeline_state.h>
-
-#include <shaderc/shaderc.hpp>
+#include <duk_rhi/shader_compiler.h>
 
 // -----------------------------------------------------------------------
 // Hardcoded GLSL shaders
@@ -61,28 +60,7 @@ void main() {
 }
 )glsl";
 
-// -----------------------------------------------------------------------
-// Helper: compile GLSL source to a packed SPIR-V byte vector
-// -----------------------------------------------------------------------
-
-static std::vector<uint8_t> compile_glsl(const char* source, shaderc_shader_kind kind, const char* debugName) {
-    shaderc::Compiler compiler;
-    shaderc::CompileOptions options;
-    options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_0);
-    options.SetOptimizationLevel(shaderc_optimization_level_zero);
-
-    auto result = compiler.CompileGlslToSpv(source, kind, debugName, options);
-    if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-        duk::log::fatal("Shader compilation failed ({}): {}", debugName, result.GetErrorMessage());
-    }
-
-    const auto* byteBegin = reinterpret_cast<const uint8_t*>(result.cbegin());
-    const auto* byteEnd   = reinterpret_cast<const uint8_t*>(result.cend());
-    return {byteBegin, byteEnd};
-}
-
 int main() {
-
     // -----------------------------------------------------------------------
     // Window
     // -----------------------------------------------------------------------
@@ -91,18 +69,22 @@ int main() {
     duk::log::instance()->add_sink(std::make_unique<duk::log::TermColorSink>("duk", duk::log::Level::INFO));
 
     duk::platform::WindowCreateInfo windowCreateInfo = {};
-    windowCreateInfo.title  = "duk_rhi - triangle";
-    windowCreateInfo.width  = 1280;
+    windowCreateInfo.title = "duk_rhi - triangle";
+    windowCreateInfo.width = 1280;
     windowCreateInfo.height = 720;
-    windowCreateInfo.style  = duk::platform::WindowStyle::STANDARD;
+    windowCreateInfo.style = duk::platform::WindowStyle::STANDARD;
 
     auto window = platform->create_window(windowCreateInfo);
 
     volatile bool running = true;
 
     duk::event::Listener listener;
-    listener.listen(window->window_close_event,   [&window]          { window->close(); });
-    listener.listen(window->window_destroy_event, [&running]         { running = false; });
+    listener.listen(window->window_close_event, [&window] {
+        window->close();
+    });
+    listener.listen(window->window_destroy_event, [&running] {
+        running = false;
+    });
     listener.listen(window->key_event, [&window](duk::platform::Keys key, duk::platform::KeyModifiers::Mask, duk::platform::KeyAction action) {
         if (key == duk::platform::Keys::ESC && action == duk::platform::KeyAction::PRESS) {
             window->close();
@@ -113,14 +95,14 @@ int main() {
     // RHI device
     // -----------------------------------------------------------------------
     duk::rhi::InstanceCreateInfo rhiCreateInfo = {};
-    rhiCreateInfo.applicationName    = "triangle_sample";
+    rhiCreateInfo.applicationName = "triangle_sample";
     rhiCreateInfo.applicationVersion = 1;
-    rhiCreateInfo.engineName         = "duk";
-    rhiCreateInfo.engineVersion      = 1;
-    rhiCreateInfo.api                = duk::rhi::API::VULKAN;
-    rhiCreateInfo.validationLayers   = true;
-    rhiCreateInfo.deviceIndex        = 0;
-    rhiCreateInfo.logger             = duk::log::instance()->default_logger();
+    rhiCreateInfo.engineName = "duk";
+    rhiCreateInfo.engineVersion = 1;
+    rhiCreateInfo.api = duk::rhi::API::VULKAN;
+    rhiCreateInfo.validationLayers = true;
+    rhiCreateInfo.deviceIndex = 0;
+    rhiCreateInfo.logger = duk::log::instance()->default_logger();
 
     auto rhi = duk::rhi::Instance::create(rhiCreateInfo);
 
@@ -128,17 +110,21 @@ int main() {
     // Command context
     // -----------------------------------------------------------------------
     duk::rhi::CommandContextCreateInfo contextCreateInfo = {};
-    contextCreateInfo.type           = duk::rhi::CommandQueue::Type::GRAPHICS;
-    contextCreateInfo.window         = window.get();
+    contextCreateInfo.type = duk::rhi::CommandQueue::Type::GRAPHICS;
+    contextCreateInfo.window = window.get();
     contextCreateInfo.framesInFlight = 2;
     auto ctx = rhi->create_command_context(contextCreateInfo);
 
     // -----------------------------------------------------------------------
     // Shader
     // -----------------------------------------------------------------------
+    duk::rhi::ShaderCompilerCreateInfo compilerCreateInfo{};
+    compilerCreateInfo.api = rhiCreateInfo.api;
+    duk::rhi::ShaderCompiler shaderCompiler(compilerCreateInfo);
+
     duk::rhi::RuntimeShaderDataSourceCreateInfo shaderSourceCreateInfo = {};
-    shaderSourceCreateInfo.vertexShaderCode   = compile_glsl(kVertexGlsl,   shaderc_vertex_shader,   "triangle.vert");
-    shaderSourceCreateInfo.fragmentShaderCode = compile_glsl(kFragmentGlsl, shaderc_fragment_shader, "triangle.frag");
+    shaderSourceCreateInfo.vertexShaderCode = shaderCompiler.compile(kVertexGlsl, duk::rhi::ShaderModule::VERTEX, "triangle.vert").value();
+    shaderSourceCreateInfo.fragmentShaderCode = shaderCompiler.compile(kFragmentGlsl, duk::rhi::ShaderModule::FRAGMENT, "triangle.frag").value();
     auto shaderDataSource = duk::rhi::RuntimeShaderDataSource(shaderSourceCreateInfo);
 
     duk::rhi::ShaderCreateInfo shaderCreateInfo = {};
@@ -166,7 +152,7 @@ int main() {
         const auto height = window->height();
 
         pipelineState.viewport.extent = {width, height};
-        pipelineState.scissor.extent  = {width, height};
+        pipelineState.scissor.extent = {width, height};
 
         {
             duk::rhi::RenderBeginParams renderBeginParams;
@@ -177,8 +163,8 @@ int main() {
             render.bind_shader(shader.get(), pipelineState);
 
             duk::rhi::DrawParams renderParams;
-            renderParams.vertexCount   = 3;
-            renderParams.firstVertex   = 0;
+            renderParams.vertexCount = 3;
+            renderParams.firstVertex = 0;
             renderParams.instanceCount = 1;
             renderParams.firstInstance = 0;
 
@@ -190,4 +176,3 @@ int main() {
 
     return 0;
 }
-

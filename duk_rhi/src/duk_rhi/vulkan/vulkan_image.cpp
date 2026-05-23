@@ -18,11 +18,7 @@ static constexpr uint32_t kTransitionBatchSize = 32;
 
 /// Fills one VkImageMemoryBarrier. The subresource range always covers the
 /// full mip/layer extent of the image; aspect is derived from the caller.
-static VkImageMemoryBarrier fill_image_memory_barrier(
-        VkImage image,
-        VkImageLayout oldLayout,
-        VkImageLayout newLayout,
-        VkImageAspectFlags aspectMask) {
+static VkImageMemoryBarrier fill_image_memory_barrier(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkImageAspectFlags aspectMask) {
     VkImageMemoryBarrier barrier = {};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.oldLayout = oldLayout;
@@ -95,7 +91,7 @@ static VkImageMemoryBarrier fill_image_memory_barrier(
     return barrier;
 }
 
-}
+}// namespace detail
 
 VkFormat convert_pixel_format(PixelFormat format) {
     VkFormat converted;
@@ -291,25 +287,18 @@ void VulkanImage::transition_images_to(VkCommandBuffer commandBuffer, std::span<
         if (count == 0) {
             return;
         }
-        vkCmdPipelineBarrier(commandBuffer,
-                             srcStages, dstStages,
-                             0, 0, nullptr, 0, nullptr,
-                             count, barriers.data());
+        vkCmdPipelineBarrier(commandBuffer, srcStages, dstStages, 0, 0, nullptr, 0, nullptr, count, barriers.data());
         count = 0;
         srcStages = 0;
         dstStages = 0;
     };
 
-    for (auto& entry : entries) {
+    for (auto& entry: entries) {
         if (entry.image->m_layout == entry.newLayout) {
             continue;
         }
 
-        barriers[count++] = detail::fill_image_memory_barrier(
-                entry.image->m_image,
-                entry.image->m_layout,
-                entry.newLayout,
-                entry.image->m_aspectFlags);
+        barriers[count++] = detail::fill_image_memory_barrier(entry.image->m_image, entry.image->m_layout, entry.newLayout, entry.image->m_aspectFlags);
 
         // Update immediately — no second pass needed.
         entry.image->m_layout = entry.newLayout;
@@ -335,7 +324,6 @@ VulkanImage::VulkanImage(const VulkanMemoryImageCreateInfo& createInfo)
     , m_height(createInfo.height)
     , m_aspectFlags(createInfo.aspectFlags)
     , m_ownsImage(true) {
-
     VkImageCreateInfo imageCreateInfo = {};
     imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -394,7 +382,6 @@ VulkanImage::VulkanImage(const VulkanExternalImageCreateInfo& ci)
     , m_aspectFlags(ci.aspectFlags)
     , m_ownsImage(false)
     , m_image(ci.image) {
-
     VkImageViewCreateInfo viewInfo = {};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = m_image;
@@ -457,10 +444,7 @@ void VulkanImage::set_layout(VkImageLayout layout) const {
     m_layout = layout;
 }
 
-void VulkanImage::transition_to(VkCommandBuffer commandBuffer,
-                                 VkImageLayout newLayout,
-                                 VkPipelineStageFlags srcStageMask,
-                                 VkPipelineStageFlags dstStageMask) {
+void VulkanImage::transition_to(VkCommandBuffer commandBuffer, VkImageLayout newLayout, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask) {
     if (m_layout == newLayout) {
         return;
     }

@@ -150,14 +150,14 @@ void VulkanSwapchain::create() {
     VkSemaphoreCreateInfo semaphoreInfo = {};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
     m_imageAcquiredSemaphores.resize(m_framesInFlight);
-    for (auto& semaphore : m_imageAcquiredSemaphores) {
+    for (auto& semaphore: m_imageAcquiredSemaphores) {
         if (vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
             throw std::runtime_error("VulkanSwapchain: failed to create image semaphore");
         }
     }
 
     m_imageRenderedSemaphores.resize(m_images.size());
-    for (auto& semaphore : m_imageRenderedSemaphores) {
+    for (auto& semaphore: m_imageRenderedSemaphores) {
         if (vkCreateSemaphore(m_device, &semaphoreInfo, nullptr, &semaphore) != VK_SUCCESS) {
             throw std::runtime_error("VulkanSwapchain: failed to create render semaphore");
         }
@@ -170,11 +170,11 @@ void VulkanSwapchain::clean() {
         vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
         m_swapchain = VK_NULL_HANDLE;
     }
-    for (auto semaphore : m_imageAcquiredSemaphores) {
+    for (auto semaphore: m_imageAcquiredSemaphores) {
         vkDestroySemaphore(m_device, semaphore, nullptr);
     }
     m_imageAcquiredSemaphores.clear();
-    for (auto semaphore : m_imageRenderedSemaphores) {
+    for (auto semaphore: m_imageRenderedSemaphores) {
         vkDestroySemaphore(m_device, semaphore, nullptr);
     }
     m_imageRenderedSemaphores.clear();
@@ -190,14 +190,8 @@ void VulkanSwapchain::recreate() {
 
 VkResult VulkanSwapchain::acquire_next_image(uint32_t frameIndex) {
     uint32_t imageIndex;
-    const auto result = vkAcquireNextImageKHR(
-            m_device,
-            m_swapchain,
-            std::numeric_limits<uint64_t>::max(),
-            m_imageAcquiredSemaphores[frameIndex],
-            VK_NULL_HANDLE,
-            &imageIndex);
-    if (result == VK_SUCCESS)  {
+    const auto result = vkAcquireNextImageKHR(m_device, m_swapchain, std::numeric_limits<uint64_t>::max(), m_imageAcquiredSemaphores[frameIndex], VK_NULL_HANDLE, &imageIndex);
+    if (result == VK_SUCCESS) {
         m_imageIndex = imageIndex;
     }
     return result;

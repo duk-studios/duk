@@ -13,7 +13,6 @@ namespace duk::rhi {
 
 RuntimeShaderDataSource::RuntimeShaderDataSource(const RuntimeShaderDataSourceCreateInfo& createInfo)
     : m_moduleMask(0) {
-
     // Registers one stage if the provided bytecode is non-empty.
     auto addStage = [&](ShaderModule::Bits stage, std::vector<uint8_t> code) {
         if (code.empty()) {
@@ -23,18 +22,18 @@ RuntimeShaderDataSource::RuntimeShaderDataSource(const RuntimeShaderDataSourceCr
         m_shaderModules[stage] = std::move(code);
     };
 
-    addStage(ShaderModule::VERTEX,                  createInfo.vertexShaderCode);
-    addStage(ShaderModule::TESSELLATION_CONTROL,    createInfo.tessellationControlShaderCode);
+    addStage(ShaderModule::VERTEX, createInfo.vertexShaderCode);
+    addStage(ShaderModule::TESSELLATION_CONTROL, createInfo.tessellationControlShaderCode);
     addStage(ShaderModule::TESSELLATION_EVALUATION, createInfo.tessellationEvaluationShaderCode);
-    addStage(ShaderModule::GEOMETRY,                createInfo.geometryShaderCode);
-    addStage(ShaderModule::FRAGMENT,                createInfo.fragmentShaderCode);
-    addStage(ShaderModule::COMPUTE,                 createInfo.computeShaderCode);
+    addStage(ShaderModule::GEOMETRY, createInfo.geometryShaderCode);
+    addStage(ShaderModule::FRAGMENT, createInfo.fragmentShaderCode);
+    addStage(ShaderModule::COMPUTE, createInfo.computeShaderCode);
 
     DUK_ASSERT(m_moduleMask != 0 && "StdShaderDataSource: no shader stages provided");
 
     ShaderReflection reflection(m_shaderModules);
     m_bindingLayout = reflection.binding_layout();
-    m_vertexLayout  = reflection.vertex_layout();
+    m_vertexLayout = reflection.vertex_layout();
 
     update_hash();
 }
@@ -74,7 +73,7 @@ uint32_t RuntimeShaderDataSource::binding_index(std::string_view name) const {
 duk::hash::Hash RuntimeShaderDataSource::calculate_hash() const {
     duk::hash::Hash hash = 0;
     duk::hash::hash_combine(hash, m_moduleMask);
-    for (auto& [type, code] : m_shaderModules) {
+    for (auto& [type, code]: m_shaderModules) {
         duk::hash::hash_combine(hash, type);
         duk::hash::hash_combine(hash, code.data(), code.size());
     }

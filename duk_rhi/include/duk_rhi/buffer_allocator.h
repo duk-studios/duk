@@ -43,8 +43,8 @@ private:
     size_t m_alignment{1};
     uint32_t m_framesInFlight{1};
     uint32_t m_frameIndex{0};
-    size_t m_sectionSize{0};  ///< Per-frame capacity = buffer->size() / framesInFlight.
-    size_t m_cursor{0};       ///< Current write position within the active section.
+    size_t m_sectionSize{0};///< Per-frame capacity = buffer->size() / framesInFlight.
+    size_t m_cursor{0};     ///< Current write position within the active section.
 };
 
 /// Convenience factory that handles the boilerplate of sizing, creating, and
@@ -54,4 +54,3 @@ DUK_NO_DISCARD std::shared_ptr<BufferAllocator> create_buffer_allocator(CommandC
 }// namespace duk::rhi
 
 #endif// DUK_RHI_BUFFER_ALLOCATOR_H
-

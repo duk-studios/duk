@@ -40,7 +40,7 @@ struct VulkanMemoryImageCreateInfo {
 /// VulkanImage creates a VkImageView but does NOT free the VkImage.
 struct VulkanExternalImageCreateInfo {
     VkDevice device;
-    VkImage image;   ///< Externally managed — not freed by VulkanImage.
+    VkImage image;///< Externally managed — not freed by VulkanImage.
     VkFormat format;
     uint32_t width;
     uint32_t height;
@@ -88,10 +88,7 @@ public:
 
     /// Transitions this image to \p newLayout, recording a pipeline barrier into
     /// \p commandBuffer. No-op if the image is already in \p newLayout.
-    void transition_to(VkCommandBuffer commandBuffer,
-                       VkImageLayout newLayout,
-                       VkPipelineStageFlags srcStageMask,
-                       VkPipelineStageFlags dstStageMask);
+    void transition_to(VkCommandBuffer commandBuffer, VkImageLayout newLayout, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
 
     // -----------------------------------------------------------------------
     // Static utility methods
@@ -116,11 +113,11 @@ private:
     uint32_t m_width;
     uint32_t m_height;
     VkImageAspectFlags m_aspectFlags;
-    bool m_ownsImage{false}; ///< True when VkImage + VkDeviceMemory were allocated here.
+    bool m_ownsImage{false};///< True when VkImage + VkDeviceMemory were allocated here.
     VkImage m_image{VK_NULL_HANDLE};
     VkImageView m_imageView{VK_NULL_HANDLE};
-    VkDeviceMemory m_memory{VK_NULL_HANDLE}; ///< VK_NULL_HANDLE for external images.
-    mutable VkImageLayout m_layout{VK_IMAGE_LAYOUT_UNDEFINED}; ///< Tracked current layout (mutable: updated by render passes and barriers).
+    VkDeviceMemory m_memory{VK_NULL_HANDLE};                  ///< VK_NULL_HANDLE for external images.
+    mutable VkImageLayout m_layout{VK_IMAGE_LAYOUT_UNDEFINED};///< Tracked current layout (mutable: updated by render passes and barriers).
 };
 
 }// namespace duk::rhi

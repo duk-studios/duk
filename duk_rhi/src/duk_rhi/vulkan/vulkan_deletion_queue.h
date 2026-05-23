@@ -65,4 +65,3 @@ void VulkanDeletionQueue::push(T* ptr, uint32_t currentFrame) {
 }// namespace duk::rhi
 
 #endif// DUK_RHI_VULKAN_DELETION_QUEUE_H
-

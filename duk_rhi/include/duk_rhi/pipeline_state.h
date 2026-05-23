@@ -22,7 +22,6 @@ enum class LoadOp {
 };
 
 struct PipelineState {
-
     struct Viewport {
         glm::vec2 extent{0.0f, 0.0f};
         glm::vec2 offset{0.0f, 0.0f};
@@ -108,9 +107,9 @@ struct PipelineState {
         };
 
         enum class Origin {
-            DEFAULT     = 0, // no transformation; renders in the native coordinate origin of the underlying API
-            UPPER_LEFT  = 1, // force Y-down, origin at top-left  (native Vulkan / D3D)
-            BOTTOM_LEFT = 2, // force Y-up,   origin at bottom-left (OpenGL convention)
+            DEFAULT = 0,    // no transformation; renders in the native coordinate origin of the underlying API
+            UPPER_LEFT = 1, // force Y-down, origin at top-left  (native Vulkan / D3D)
+            BOTTOM_LEFT = 2,// force Y-up,   origin at bottom-left (OpenGL convention)
         };
 
         CullMode::Mask cullMode{CullMode::NONE};
@@ -191,4 +190,3 @@ struct std::hash<duk::rhi::PipelineState> {
 };
 
 #endif// DUK_RHI_PIPELINE_STATE_H
-

@@ -121,4 +121,3 @@ TransferCommands CommandContext::transfer() {
 }
 
 }// namespace duk::rhi
-

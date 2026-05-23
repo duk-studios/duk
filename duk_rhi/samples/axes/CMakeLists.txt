@@ -5,6 +5,5 @@ target_link_libraries(duk.rhi.sample.axes
         duk::rhi
         duk::platform
         duk::log
-        unofficial::shaderc::shaderc
         )
 

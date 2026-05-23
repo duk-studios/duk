@@ -26,12 +26,23 @@ static VkBufferUsageFlags buffer_usage_flags(Buffer::Type type) {
     VkBufferUsageFlags flags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     switch (type) {
         case Buffer::Type::INDEX_16:
-        case Buffer::Type::INDEX_32:  flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;   break;
-        case Buffer::Type::VERTEX:    flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;  break;
-        case Buffer::Type::UNIFORM:   flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT; break;
-        case Buffer::Type::STORAGE:   flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT; break;
-        case Buffer::Type::INDIRECT:  flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT; break;
-        default: throw std::invalid_argument("unhandled Buffer::Type");
+        case Buffer::Type::INDEX_32:
+            flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+            break;
+        case Buffer::Type::VERTEX:
+            flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+            break;
+        case Buffer::Type::UNIFORM:
+            flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+            break;
+        case Buffer::Type::STORAGE:
+            flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+            break;
+        case Buffer::Type::INDIRECT:
+            flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+            break;
+        default:
+            throw std::invalid_argument("unhandled Buffer::Type");
     }
     return flags;
 }
@@ -45,9 +56,12 @@ static VkMemoryPropertyFlags buffer_memory_flags(Buffer::UpdateFrequency freq) {
 
 static VkIndexType buffer_index_type(Buffer::Type type) {
     switch (type) {
-        case Buffer::Type::INDEX_16: return VK_INDEX_TYPE_UINT16;
-        case Buffer::Type::INDEX_32: return VK_INDEX_TYPE_UINT32;
-        default:                     return VK_INDEX_TYPE_MAX_ENUM;
+        case Buffer::Type::INDEX_16:
+            return VK_INDEX_TYPE_UINT16;
+        case Buffer::Type::INDEX_32:
+            return VK_INDEX_TYPE_UINT32;
+        default:
+            return VK_INDEX_TYPE_MAX_ENUM;
     }
 }
 
@@ -87,7 +101,6 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
     , m_framesInFlight(createInfo.framesInFlight)
     , m_swapchain(std::move(swapchain))
     , m_deletionQueue(m_framesInFlight) {
-
     // -----------------------------------------------------------------------
     // Descriptor layout cache and sampler cache
     // -----------------------------------------------------------------------
@@ -114,7 +127,7 @@ VulkanCommandContext::VulkanCommandContext(const VulkanCommandContextCreateInfo&
     VkFenceCreateInfo fenceInfo = {};
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-    for (auto& fence : m_fences) {
+    for (auto& fence: m_fences) {
         if (vkCreateFence(m_device, &fenceInfo, nullptr, &fence) != VK_SUCCESS) {
             throw std::runtime_error("VulkanCommandContext: failed to create per-frame fence");
         }
@@ -154,7 +167,7 @@ VulkanCommandContext::~VulkanCommandContext() {
         vkFreeCommandBuffers(m_device, m_commandPool, static_cast<uint32_t>(m_commandBuffers.size()), m_commandBuffers.data());
         vkDestroyCommandPool(m_device, m_commandPool, nullptr);
     }
-    for (auto fence : m_fences) {
+    for (auto fence: m_fences) {
         vkDestroyFence(m_device, fence, nullptr);
     }
 }
@@ -199,8 +212,7 @@ void VulkanCommandContext::prepare_present() {
         if (result != VK_SUCCESS) {
             throw std::runtime_error("VulkanCommandContext: failed to acquire next image");
         }
-    }
-    else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
         throw std::runtime_error("VulkanCommandContext: failed to acquire next swapchain image");
     }
     m_shouldPresent = true;
@@ -230,11 +242,7 @@ void VulkanCommandContext::submit() {
 
         // Transition current swapchain image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR.
         // No-op if it is already there (e.g. compute-only or empty frame).
-        m_swapchain->image()->transition_to(
-            m_activeCommandBuffer,
-            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
+        m_swapchain->image()->transition_to(m_activeCommandBuffer, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT);
     }
 
     // end command buffer after layout transition, if any
@@ -263,8 +271,7 @@ void VulkanCommandContext::submit() {
                 throw std::runtime_error("VulkanCommandContext: failed to wait for device idle on swapchain recreation after present");
             }
             m_swapchain->recreate();
-        }
-        else if (result != VK_SUCCESS) {
+        } else if (result != VK_SUCCESS) {
             throw std::runtime_error("VulkanCommandContext: failed to present swapchain image");
         }
     }
@@ -345,9 +352,7 @@ void VulkanCommandContext::bind_resources(const ShaderResources& resources) {
     if (m_activeCommandBuffer == VK_NULL_HANDLE || !m_lastBoundShader) {
         return;
     }
-    m_resourceBinder->bind_resources(m_activeCommandBuffer,
-                                     m_lastBindPoint,
-                                     *m_lastBoundShader, resources, m_frameIndex);
+    m_resourceBinder->bind_resources(m_activeCommandBuffer, m_lastBindPoint, *m_lastBoundShader, resources, m_frameIndex);
 }
 
 void VulkanCommandContext::bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) {
@@ -361,8 +366,7 @@ void VulkanCommandContext::bind_vertex_buffers(const Buffer* const* vertexBuffer
         auto buffer = vertexBuffer[i];
         if (buffer) {
             bufferHandles[i] = buffer->handle();
-        }
-        else {
+        } else {
             bufferHandles[i] = VK_NULL_HANDLE;
         }
         bufferOffsets[i] = 0;
@@ -387,7 +391,6 @@ void VulkanCommandContext::draw(const DrawParams& params) {
 }
 
 void VulkanCommandContext::draw_indirect(const std::span<const DrawParams>& indirectParams) {
-
 }
 
 void VulkanCommandContext::draw_indexed(const DrawIndexedParams& params) {
@@ -439,10 +442,7 @@ void VulkanCommandContext::write_image(Image* image, const void* src, size_t siz
     auto commandBuffer = m_activeCommandBuffer;
 
     // Transition the image into the transfer-destination layout before writing.
-    vulkanImage->transition_to(commandBuffer,
-                              VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                              VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                              VK_PIPELINE_STAGE_TRANSFER_BIT);
+    vulkanImage->transition_to(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
 
     VkBufferImageCopy region = {};
     region.imageSubresource.aspectMask = vulkanImage->image_aspect();
@@ -463,10 +463,7 @@ void VulkanCommandContext::write_frame_buffer(FrameBuffer* frameBuffer, const Im
     }
     auto* vulkanFrameBuffer = static_cast<VulkanFrameBuffer*>(frameBuffer);
 
-    vulkanFrameBuffer->write(
-        reinterpret_cast<const VulkanImage* const*>(attachments),
-        attachmentCount
-    );
+    vulkanFrameBuffer->write(reinterpret_cast<const VulkanImage* const*>(attachments), attachmentCount);
 }
 
 void VulkanCommandContext::write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) {
@@ -527,5 +524,3 @@ void VulkanCommandContext::flush_buffer(Buffer* buffer, size_t offset, size_t si
 }
 
 }// namespace duk::rhi
-
-

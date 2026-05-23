@@ -50,4 +50,3 @@ VkQueueFlags VulkanQueue::flags() const {
 }
 
 }// namespace duk::rhi
-

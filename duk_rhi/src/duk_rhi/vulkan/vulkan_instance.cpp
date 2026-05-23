@@ -152,7 +152,7 @@ static bool queue_supports_present(VkPhysicalDevice physicalDevice, uint32_t fam
 static VulkanQueue* find_queue(VkPhysicalDevice physicalDevice, const std::vector<std::shared_ptr<VulkanQueue>>& queues, CommandQueue::Type::Mask type, const platform::Window* window) {
     auto requiredFlags = command_queue_type_to_vk_flags(type);
 
-    for (const auto& queue : queues) {
+    for (const auto& queue: queues) {
         if ((queue->flags() & requiredFlags) != requiredFlags) {
             continue;
         }
@@ -168,7 +168,7 @@ static VulkanQueue* find_queue(VkPhysicalDevice physicalDevice, const std::vecto
 static std::vector<std::shared_ptr<VulkanQueue>> create_vulkan_queues(VulkanInstance& instance, const ResolvedQueues& resolved) {
     std::vector<std::shared_ptr<VulkanQueue>> queues;
 
-    for (const auto& r : resolved.queues) {
+    for (const auto& r: resolved.queues) {
         VulkanQueueCreateInfo queueCreateInfo = {};
         queueCreateInfo.instance = &instance;
         queueCreateInfo.flags = r.flags;
@@ -241,7 +241,7 @@ static Capabilities populate_capabilities(VulkanPhysicalDevice* physicalDevice) 
 
     return caps;
 }
-} // namespace detail
+}// namespace detail
 
 VulkanInstance::VulkanInstance(const VulkanRHICreateInfo& createInfo)
     : m_instance(VK_NULL_HANDLE)
@@ -382,4 +382,3 @@ void VulkanInstance::select_vk_physical_device(uint32_t deviceIndex) {
 }
 
 }// namespace duk::rhi
-

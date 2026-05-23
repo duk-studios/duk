@@ -14,7 +14,6 @@ VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& createInfo)
     , m_usageFlags(createInfo.usageFlags)
     , m_memoryFlags(createInfo.memoryFlags)
     , m_indexType(createInfo.indexType) {
-
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = m_size;
@@ -108,10 +107,10 @@ void VulkanBuffer::flush(size_t offset, size_t size) {
         return;
     }
     VkMappedMemoryRange range = {};
-    range.sType  = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
     range.memory = m_memory;
     range.offset = static_cast<VkDeviceSize>(offset);
-    range.size   = static_cast<VkDeviceSize>(size);
+    range.size = static_cast<VkDeviceSize>(size);
     vkFlushMappedMemoryRanges(m_device, 1, &range);
 }
 

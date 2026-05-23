@@ -42,6 +42,7 @@ private:
     struct SpvReflectShaderModuleDeleter {
         void operator()(SpvReflectShaderModule* module) const noexcept;
     };
+
     std::unordered_map<ShaderModule::Bits, std::unique_ptr<SpvReflectShaderModule, SpvReflectShaderModuleDeleter>> m_stageModules;
 };
 

@@ -34,4 +34,3 @@ bool PipelineStateStack::empty() const {
 }
 
 }// namespace duk::rhi
-

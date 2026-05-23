@@ -39,4 +39,4 @@ VkAttachmentLoadOp convert_load_op(LoadOp loadOp) {
     return converted;
 }
 
-}
+}// namespace duk::rhi

@@ -41,4 +41,3 @@ private:
 }// namespace duk::rhi
 
 #endif// DUK_RHI_VULKAN_DESCRIPTOR_SET_ALLOCATOR_H
-

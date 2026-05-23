@@ -11,7 +11,7 @@ void VulkanFrameBuffer::write(const VulkanImage* const* attachments, uint32_t at
     m_attachments.assign(attachments, attachments + attachmentCount);
     m_width = std::numeric_limits<uint32_t>::max();
     m_height = std::numeric_limits<uint32_t>::max();
-    for (auto& attachment : m_attachments) {
+    for (auto& attachment: m_attachments) {
         m_width = std::min(m_width, attachment->width());
         m_height = std::min(m_height, attachment->height());
     }
@@ -42,4 +42,3 @@ const Image* VulkanFrameBuffer::at(uint32_t attachment) const {
 }
 
 }// namespace duk::rhi
-

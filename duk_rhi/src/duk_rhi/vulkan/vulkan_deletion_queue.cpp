@@ -15,11 +15,10 @@ VulkanDeletionQueue::~VulkanDeletionQueue() {
 void VulkanDeletionQueue::flush(uint32_t frameCounter) {
     std::vector<DeletionEntry> pendingEntries;
     pendingEntries.reserve(m_entries.size());
-    for (auto entry : m_entries) {
+    for (auto entry: m_entries) {
         if (frameCounter >= entry.deletionFrame) {
             entry.deleter();
-        }
-        else {
+        } else {
             pendingEntries.push_back(entry);
         }
     }
@@ -27,7 +26,7 @@ void VulkanDeletionQueue::flush(uint32_t frameCounter) {
 }
 
 void VulkanDeletionQueue::flush_all() {
-    for (auto entry : m_entries) {
+    for (auto entry: m_entries) {
         entry.deleter();
     }
     m_entries.clear();
@@ -42,4 +41,3 @@ std::size_t VulkanDeletionQueue::size() const {
 }
 
 }// namespace duk::rhi
-

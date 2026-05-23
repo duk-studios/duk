@@ -36,16 +36,9 @@ public:
 
     ~VulkanStaticRenderState() override;
 
-    void begin(VkCommandBuffer commandBuffer,
-               const VulkanFrameBuffer& frameBuffer,
-               VkAttachmentLoadOp loadOp,
-               VkAttachmentStoreOp storeOp,
-               const glm::vec4& clearColor) override;
+    void begin(VkCommandBuffer commandBuffer, const VulkanFrameBuffer& frameBuffer, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, const glm::vec4& clearColor) override;
 
-    void bind_pipeline(VkCommandBuffer commandBuffer,
-                       const VulkanShader& shader,
-                       const PipelineState& state,
-                       VkPipelineLayout pipelineLayout) override;
+    void bind_pipeline(VkCommandBuffer commandBuffer, const VulkanShader& shader, const PipelineState& state, VkPipelineLayout pipelineLayout) override;
 
     void end(VkCommandBuffer commandBuffer) override;
 
@@ -55,18 +48,11 @@ private:
         uint32_t colorAttachmentCount{0};
     };
 
-    CachedRenderPass get_or_create_render_pass(const VulkanFrameBuffer& frameBuffer,
-                                               VkAttachmentLoadOp loadOp,
-                                               VkAttachmentStoreOp storeOp);
+    CachedRenderPass get_or_create_render_pass(const VulkanFrameBuffer& frameBuffer, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp);
 
-    VkFramebuffer get_or_create_framebuffer(VkRenderPass renderPass,
-                                            const VulkanFrameBuffer& frameBuffer);
+    VkFramebuffer get_or_create_framebuffer(VkRenderPass renderPass, const VulkanFrameBuffer& frameBuffer);
 
-    VkPipeline get_or_create_pipeline(VkRenderPass renderPass,
-                                      uint32_t colorAttachmentCount,
-                                      const VulkanShader& shader,
-                                      const PipelineState& state,
-                                      VkPipelineLayout pipelineLayout);
+    VkPipeline get_or_create_pipeline(VkRenderPass renderPass, uint32_t colorAttachmentCount, const VulkanShader& shader, const PipelineState& state, VkPipelineLayout pipelineLayout);
 
 private:
     VkDevice m_device;
@@ -86,4 +72,3 @@ private:
 }// namespace duk::rhi
 
 #endif// DUK_RHI_VULKAN_STATIC_RENDER_STATE_VK_H
-

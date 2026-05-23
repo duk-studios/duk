@@ -19,14 +19,9 @@ public:
 
     DUK_NO_DISCARD virtual VkPipelineLayout pipeline_layout(const ShaderBindingLayout& bindingLayout) = 0;
 
-    virtual void bind_resources(VkCommandBuffer commandBuffer,
-                                VkPipelineBindPoint bindPoint,
-                                const VulkanShader& shader,
-                                const ShaderResources& resources,
-                                uint32_t frameIndex) = 0;
+    virtual void bind_resources(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, const VulkanShader& shader, const ShaderResources& resources, uint32_t frameIndex) = 0;
 };
 
 }// namespace duk::rhi
 
 #endif// DUK_RHI_VULKAN_RESOURCE_STATE_H
-

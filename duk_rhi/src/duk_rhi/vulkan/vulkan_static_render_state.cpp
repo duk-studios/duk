@@ -16,10 +16,14 @@ namespace detail {
 
 static VkCullModeFlagBits convert_cull_mode(PipelineState::Rasterizer::CullMode::Bits bit) {
     switch (bit) {
-        case PipelineState::Rasterizer::CullMode::NONE:  return VK_CULL_MODE_NONE;
-        case PipelineState::Rasterizer::CullMode::FRONT: return VK_CULL_MODE_FRONT_BIT;
-        case PipelineState::Rasterizer::CullMode::BACK:  return VK_CULL_MODE_BACK_BIT;
-        default: throw std::invalid_argument("unhandled PipelineState::Rasterizer::CullMode::Bits for Vulkan");
+        case PipelineState::Rasterizer::CullMode::NONE:
+            return VK_CULL_MODE_NONE;
+        case PipelineState::Rasterizer::CullMode::FRONT:
+            return VK_CULL_MODE_FRONT_BIT;
+        case PipelineState::Rasterizer::CullMode::BACK:
+            return VK_CULL_MODE_BACK_BIT;
+        default:
+            throw std::invalid_argument("unhandled PipelineState::Rasterizer::CullMode::Bits for Vulkan");
     }
 }
 
@@ -29,63 +33,105 @@ static VkCullModeFlags convert_cull_mode_mask(PipelineState::Rasterizer::CullMod
 
 static VkBlendOp convert_blend_op(PipelineState::Blend::Operator op) {
     switch (op) {
-        case PipelineState::Blend::Operator::ADD:              return VK_BLEND_OP_ADD;
-        case PipelineState::Blend::Operator::SUBTRACT:         return VK_BLEND_OP_SUBTRACT;
-        case PipelineState::Blend::Operator::REVERSE_SUBTRACT: return VK_BLEND_OP_REVERSE_SUBTRACT;
-        case PipelineState::Blend::Operator::MIN:              return VK_BLEND_OP_MIN;
-        case PipelineState::Blend::Operator::MAX:              return VK_BLEND_OP_MAX;
-        default: throw std::invalid_argument("unhandled PipelineState::Blend::Operator for Vulkan");
+        case PipelineState::Blend::Operator::ADD:
+            return VK_BLEND_OP_ADD;
+        case PipelineState::Blend::Operator::SUBTRACT:
+            return VK_BLEND_OP_SUBTRACT;
+        case PipelineState::Blend::Operator::REVERSE_SUBTRACT:
+            return VK_BLEND_OP_REVERSE_SUBTRACT;
+        case PipelineState::Blend::Operator::MIN:
+            return VK_BLEND_OP_MIN;
+        case PipelineState::Blend::Operator::MAX:
+            return VK_BLEND_OP_MAX;
+        default:
+            throw std::invalid_argument("unhandled PipelineState::Blend::Operator for Vulkan");
     }
 }
 
 static VkBlendFactor convert_blend_factor(PipelineState::Blend::Factor factor) {
     switch (factor) {
-        case PipelineState::Blend::Factor::ZERO:                  return VK_BLEND_FACTOR_ZERO;
-        case PipelineState::Blend::Factor::ONE:                   return VK_BLEND_FACTOR_ONE;
-        case PipelineState::Blend::Factor::SRC_COLOR:             return VK_BLEND_FACTOR_SRC_COLOR;
-        case PipelineState::Blend::Factor::ONE_MINUS_SRC_COLOR:   return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
-        case PipelineState::Blend::Factor::DST_COLOR:             return VK_BLEND_FACTOR_DST_COLOR;
-        case PipelineState::Blend::Factor::ONE_MINUS_DST_COLOR:   return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
-        case PipelineState::Blend::Factor::SRC_ALPHA:             return VK_BLEND_FACTOR_SRC_ALPHA;
-        case PipelineState::Blend::Factor::ONE_MINUS_SRC_ALPHA:   return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-        case PipelineState::Blend::Factor::DST_ALPHA:             return VK_BLEND_FACTOR_DST_ALPHA;
-        case PipelineState::Blend::Factor::ONE_MINUS_DST_ALPHA:   return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
-        case PipelineState::Blend::Factor::CONSTANT_COLOR:        return VK_BLEND_FACTOR_CONSTANT_COLOR;
-        case PipelineState::Blend::Factor::ONE_MINUS_CONSTANT_COLOR: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
-        case PipelineState::Blend::Factor::CONSTANT_ALPHA:        return VK_BLEND_FACTOR_CONSTANT_ALPHA;
-        case PipelineState::Blend::Factor::ONE_MINUS_CONSTANT_ALPHA: return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
-        case PipelineState::Blend::Factor::SRC_ALPHA_SATURATE:    return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
-        case PipelineState::Blend::Factor::SRC1_COLOR:            return VK_BLEND_FACTOR_SRC1_COLOR;
-        case PipelineState::Blend::Factor::ONE_MINUS_SRC1_COLOR:  return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
-        case PipelineState::Blend::Factor::SRC1_ALPHA:            return VK_BLEND_FACTOR_SRC1_ALPHA;
-        case PipelineState::Blend::Factor::ONE_MINUS_SRC1_ALPHA:  return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
-        default: throw std::invalid_argument("unhandled PipelineState::Blend::Factor for Vulkan");
+        case PipelineState::Blend::Factor::ZERO:
+            return VK_BLEND_FACTOR_ZERO;
+        case PipelineState::Blend::Factor::ONE:
+            return VK_BLEND_FACTOR_ONE;
+        case PipelineState::Blend::Factor::SRC_COLOR:
+            return VK_BLEND_FACTOR_SRC_COLOR;
+        case PipelineState::Blend::Factor::ONE_MINUS_SRC_COLOR:
+            return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
+        case PipelineState::Blend::Factor::DST_COLOR:
+            return VK_BLEND_FACTOR_DST_COLOR;
+        case PipelineState::Blend::Factor::ONE_MINUS_DST_COLOR:
+            return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
+        case PipelineState::Blend::Factor::SRC_ALPHA:
+            return VK_BLEND_FACTOR_SRC_ALPHA;
+        case PipelineState::Blend::Factor::ONE_MINUS_SRC_ALPHA:
+            return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+        case PipelineState::Blend::Factor::DST_ALPHA:
+            return VK_BLEND_FACTOR_DST_ALPHA;
+        case PipelineState::Blend::Factor::ONE_MINUS_DST_ALPHA:
+            return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
+        case PipelineState::Blend::Factor::CONSTANT_COLOR:
+            return VK_BLEND_FACTOR_CONSTANT_COLOR;
+        case PipelineState::Blend::Factor::ONE_MINUS_CONSTANT_COLOR:
+            return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+        case PipelineState::Blend::Factor::CONSTANT_ALPHA:
+            return VK_BLEND_FACTOR_CONSTANT_ALPHA;
+        case PipelineState::Blend::Factor::ONE_MINUS_CONSTANT_ALPHA:
+            return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA;
+        case PipelineState::Blend::Factor::SRC_ALPHA_SATURATE:
+            return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
+        case PipelineState::Blend::Factor::SRC1_COLOR:
+            return VK_BLEND_FACTOR_SRC1_COLOR;
+        case PipelineState::Blend::Factor::ONE_MINUS_SRC1_COLOR:
+            return VK_BLEND_FACTOR_ONE_MINUS_SRC1_COLOR;
+        case PipelineState::Blend::Factor::SRC1_ALPHA:
+            return VK_BLEND_FACTOR_SRC1_ALPHA;
+        case PipelineState::Blend::Factor::ONE_MINUS_SRC1_ALPHA:
+            return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
+        default:
+            throw std::invalid_argument("unhandled PipelineState::Blend::Factor for Vulkan");
     }
 }
 
 static VkPrimitiveTopology convert_topology(PipelineState::Rasterizer::Topology topology) {
     switch (topology) {
-        case PipelineState::Rasterizer::Topology::POINT_LIST:                    return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
-        case PipelineState::Rasterizer::Topology::LINE_LIST:                     return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
-        case PipelineState::Rasterizer::Topology::LINE_STRIP:                    return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-        case PipelineState::Rasterizer::Topology::TRIANGLE_LIST:                 return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        case PipelineState::Rasterizer::Topology::TRIANGLE_STRIP:                return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-        case PipelineState::Rasterizer::Topology::TRIANGLE_FAN:                  return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
-        case PipelineState::Rasterizer::Topology::LINE_LIST_WITH_ADJACENCY:      return VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY;
-        case PipelineState::Rasterizer::Topology::LINE_STRIP_WITH_ADJACENCY:     return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY;
-        case PipelineState::Rasterizer::Topology::TRIANGLE_LIST_WITH_ADJACENCY:  return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY;
-        case PipelineState::Rasterizer::Topology::TRIANGLE_STRIP_WITH_ADJACENCY: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY;
-        case PipelineState::Rasterizer::Topology::PATCH_LIST:                    return VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
-        default: throw std::invalid_argument("unhandled PipelineState::Rasterizer::Topology for Vulkan");
+        case PipelineState::Rasterizer::Topology::POINT_LIST:
+            return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+        case PipelineState::Rasterizer::Topology::LINE_LIST:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+        case PipelineState::Rasterizer::Topology::LINE_STRIP:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_LIST:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_STRIP:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_FAN:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+        case PipelineState::Rasterizer::Topology::LINE_LIST_WITH_ADJACENCY:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY;
+        case PipelineState::Rasterizer::Topology::LINE_STRIP_WITH_ADJACENCY:
+            return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_LIST_WITH_ADJACENCY:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY;
+        case PipelineState::Rasterizer::Topology::TRIANGLE_STRIP_WITH_ADJACENCY:
+            return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY;
+        case PipelineState::Rasterizer::Topology::PATCH_LIST:
+            return VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
+        default:
+            throw std::invalid_argument("unhandled PipelineState::Rasterizer::Topology for Vulkan");
     }
 }
 
 static VkPolygonMode convert_fill_mode(PipelineState::Rasterizer::FillMode fillMode) {
     switch (fillMode) {
-        case PipelineState::Rasterizer::FillMode::FILL:  return VK_POLYGON_MODE_FILL;
-        case PipelineState::Rasterizer::FillMode::LINE:  return VK_POLYGON_MODE_LINE;
-        case PipelineState::Rasterizer::FillMode::POINT: return VK_POLYGON_MODE_POINT;
-        default: throw std::invalid_argument("unhandled PipelineState::Rasterizer::FillMode for Vulkan");
+        case PipelineState::Rasterizer::FillMode::FILL:
+            return VK_POLYGON_MODE_FILL;
+        case PipelineState::Rasterizer::FillMode::LINE:
+            return VK_POLYGON_MODE_LINE;
+        case PipelineState::Rasterizer::FillMode::POINT:
+            return VK_POLYGON_MODE_POINT;
+        default:
+            throw std::invalid_argument("unhandled PipelineState::Rasterizer::FillMode for Vulkan");
     }
 }
 
@@ -106,13 +152,13 @@ VulkanStaticRenderState::VulkanStaticRenderState(const VulkanStaticRenderStateCr
 
 VulkanStaticRenderState::~VulkanStaticRenderState() {
     // Destroy all cached Vulkan objects. GPU-idle is assumed at this point.
-    for (auto& [key, pipeline] : m_pipelineCache) {
+    for (auto& [key, pipeline]: m_pipelineCache) {
         vkDestroyPipeline(m_device, pipeline, nullptr);
     }
-    for (auto& [key, framebuffer] : m_framebufferCache) {
+    for (auto& [key, framebuffer]: m_framebufferCache) {
         vkDestroyFramebuffer(m_device, framebuffer, nullptr);
     }
-    for (auto& [key, rp] : m_renderPassCache) {
+    for (auto& [key, rp]: m_renderPassCache) {
         vkDestroyRenderPass(m_device, rp.handle, nullptr);
     }
 }
@@ -121,11 +167,7 @@ VulkanStaticRenderState::~VulkanStaticRenderState() {
 // VulkanStaticRenderState interface
 // -----------------------------------------------------------------------------
 
-void VulkanStaticRenderState::begin(VkCommandBuffer commandBuffer,
-                                    const VulkanFrameBuffer& frameBuffer,
-                                    VkAttachmentLoadOp loadOp,
-                                    VkAttachmentStoreOp storeOp,
-                                    const glm::vec4& clearColor) {
+void VulkanStaticRenderState::begin(VkCommandBuffer commandBuffer, const VulkanFrameBuffer& frameBuffer, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, const glm::vec4& clearColor) {
     auto [renderPass, colorAttachmentCount] = get_or_create_render_pass(frameBuffer, loadOp, storeOp);
     auto framebuffer = get_or_create_framebuffer(renderPass, frameBuffer);
 
@@ -155,7 +197,7 @@ void VulkanStaticRenderState::begin(VkCommandBuffer commandBuffer,
     m_activeRenderPass = renderPass;
     m_activeFramebuffer = framebuffer;
     m_activeColorAttachmentCount = colorAttachmentCount;
-    m_activePipeline = VK_NULL_HANDLE; // Force pipeline rebind after render pass change.
+    m_activePipeline = VK_NULL_HANDLE;// Force pipeline rebind after render pass change.
 
     // The render pass will implicitly transition each attachment to its declared
     // finalLayout by the time vkCmdEndRenderPass returns. Update tracked layouts now
@@ -171,10 +213,7 @@ void VulkanStaticRenderState::begin(VkCommandBuffer commandBuffer,
     }
 }
 
-void VulkanStaticRenderState::bind_pipeline(VkCommandBuffer commandBuffer,
-                                             const VulkanShader& shader,
-                                             const PipelineState& state,
-                                             VkPipelineLayout pipelineLayout) {
+void VulkanStaticRenderState::bind_pipeline(VkCommandBuffer commandBuffer, const VulkanShader& shader, const PipelineState& state, VkPipelineLayout pipelineLayout) {
     if (!m_activeRenderPass || !m_activeFramebuffer) {
         throw std::logic_error("No active render pass when binding pipeline in VulkanStaticRenderState");
     }
@@ -202,10 +241,7 @@ void VulkanStaticRenderState::end(VkCommandBuffer commandBuffer) {
 // Cache helpers
 // -----------------------------------------------------------------------------
 
-VulkanStaticRenderState::CachedRenderPass VulkanStaticRenderState::get_or_create_render_pass(
-        const VulkanFrameBuffer& frameBuffer,
-        VkAttachmentLoadOp loadOp,
-        VkAttachmentStoreOp storeOp) {
+VulkanStaticRenderState::CachedRenderPass VulkanStaticRenderState::get_or_create_render_pass(const VulkanFrameBuffer& frameBuffer, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp) {
     auto count = frameBuffer.attachment_count();
 
     // Build a key from each attachment's pixel format, depth flag, and the load/store ops.
@@ -290,8 +326,7 @@ VulkanStaticRenderState::CachedRenderPass VulkanStaticRenderState::get_or_create
     return cached;
 }
 
-VkFramebuffer VulkanStaticRenderState::get_or_create_framebuffer(VkRenderPass renderPass,
-                                                              const VulkanFrameBuffer& frameBuffer) {
+VkFramebuffer VulkanStaticRenderState::get_or_create_framebuffer(VkRenderPass renderPass, const VulkanFrameBuffer& frameBuffer) {
     auto count = frameBuffer.attachment_count();
 
     size_t key = 0;
@@ -334,11 +369,7 @@ VkFramebuffer VulkanStaticRenderState::get_or_create_framebuffer(VkRenderPass re
     return framebuffer;
 }
 
-VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPass,
-                                                         uint32_t colorAttachmentCount,
-                                                         const VulkanShader& shader,
-                                                         const PipelineState& state,
-                                                         VkPipelineLayout pipelineLayout) {
+VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPass, uint32_t colorAttachmentCount, const VulkanShader& shader, const PipelineState& state, VkPipelineLayout pipelineLayout) {
     size_t key = std::hash<PipelineState>{}(state);
     duk::hash::hash_combine(key, shader.hash());
     duk::hash::hash_combine(key, reinterpret_cast<uintptr_t>(renderPass));
@@ -354,7 +385,7 @@ VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPa
     {
         auto& modules = shader.shader_modules();
         shaderStages.reserve(modules.size());
-        for (auto& [moduleType, module] : modules) {
+        for (auto& [moduleType, module]: modules) {
             VkPipelineShaderStageCreateInfo stageInfo = {};
             stageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             stageInfo.stage = convert_module(moduleType);
@@ -384,19 +415,19 @@ VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPa
 
     // ---- Viewport / scissor ----
     VkViewport viewport = {};
-    viewport.x        = state.viewport.offset.x;
-    viewport.width    = state.viewport.extent.x;
+    viewport.x = state.viewport.offset.x;
+    viewport.width = state.viewport.extent.x;
     viewport.minDepth = state.viewport.minDepth;
     viewport.maxDepth = state.viewport.maxDepth;
 
     if (state.rasterizer.origin == PipelineState::Rasterizer::Origin::BOTTOM_LEFT) {
         // Flip Y: move origin to bottom-left by offsetting y by the full height
         // and using a negative height. This is core Vulkan 1.1 behaviour.
-        viewport.y      = state.viewport.offset.y + state.viewport.extent.y;
+        viewport.y = state.viewport.offset.y + state.viewport.extent.y;
         viewport.height = -state.viewport.extent.y;
     } else {
         // DEFAULT and UPPER_LEFT both map to Vulkan's native upper-left origin.
-        viewport.y      = state.viewport.offset.y;
+        viewport.y = state.viewport.offset.y;
         viewport.height = state.viewport.extent.y;
     }
 
@@ -418,10 +449,8 @@ VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPa
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
     rasterizer.polygonMode = detail::convert_fill_mode(state.rasterizer.fillMode);
     rasterizer.lineWidth = 1.0f;
-    rasterizer.cullMode  = detail::convert_cull_mode_mask(state.rasterizer.cullMode);
-    rasterizer.frontFace = (state.rasterizer.origin == PipelineState::Rasterizer::Origin::BOTTOM_LEFT)
-                               ? VK_FRONT_FACE_CLOCKWISE
-                               : VK_FRONT_FACE_COUNTER_CLOCKWISE; // DEFAULT and UPPER_LEFT are both native for Vulkan
+    rasterizer.cullMode = detail::convert_cull_mode_mask(state.rasterizer.cullMode);
+    rasterizer.frontFace = (state.rasterizer.origin == PipelineState::Rasterizer::Origin::BOTTOM_LEFT) ? VK_FRONT_FACE_CLOCKWISE : VK_FRONT_FACE_COUNTER_CLOCKWISE;// DEFAULT and UPPER_LEFT are both native for Vulkan
     rasterizer.depthBiasEnable = VK_FALSE;
 
     // ---- Multisampling ----
@@ -432,8 +461,7 @@ VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPa
 
     // ---- Colour blend (one attachment state replicated per colour output) ----
     VkPipelineColorBlendAttachmentState blendAttachment = {};
-    blendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-                                     VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    blendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     if (state.blend.enabled) {
         blendAttachment.blendEnable = VK_TRUE;
         blendAttachment.srcColorBlendFactor = detail::convert_blend_factor(state.blend.srcColorBlendFactor);
@@ -500,4 +528,3 @@ VkPipeline VulkanStaticRenderState::get_or_create_pipeline(VkRenderPass renderPa
 }
 
 }// namespace duk::rhi
-
