@@ -4,6 +4,7 @@
 #define DUK_SHADER_GENERATOR_OPTIONS_H
 
 #include <duk_rhi/shader.h>
+#include <duk_rhi/shader_compiler.h>
 
 #include <string>
 #include <unordered_map>
@@ -18,6 +19,7 @@ struct Options {
     std::string outputNamespace;
     std::unordered_map<duk::rhi::ShaderModule::Bits, std::string> inputGlslPaths;
     std::vector<std::string> includeDirectories;
+    duk::rhi::OptimizationLevel optimizationLevel = duk::rhi::OptimizationLevel::PERFORMANCE;
     bool printDebugInfo = false;
 };
 

@@ -24,6 +24,7 @@ duk::shader_generator::Options parse_options(int argc, char* argv[]) {
             ("i,inc",  "Include output directory",                             cxxopts::value<std::string>())
             ("N,namespace", "Namespace for the generated class (e.g. duk::renderer)", cxxopts::value<std::string>()->default_value(""))
             ("I,include",   "GLSL include directory (repeatable)",             cxxopts::value<std::vector<std::string>>()->default_value(""))
+            ("O,opt",       "Optimization level: none, performance, size",     cxxopts::value<std::string>()->default_value("performance"))
             ("d,debug", "Print debug information");
     // clang-format on
 
@@ -37,6 +38,12 @@ duk::shader_generator::Options parse_options(int argc, char* argv[]) {
         options.shaderName = result["name"].as<std::string>();
         options.outputNamespace = result["namespace"].as<std::string>();
         options.printDebugInfo = result.count("debug") > 0;
+
+        const auto optLevel = result["opt"].as<std::string>();
+        if (optLevel == "none")              options.optimizationLevel = duk::rhi::OptimizationLevel::NONE;
+        else if (optLevel == "size")         options.optimizationLevel = duk::rhi::OptimizationLevel::SIZE;
+        else if (optLevel == "performance")  options.optimizationLevel = duk::rhi::OptimizationLevel::PERFORMANCE;
+        else throw std::invalid_argument("unknown optimization level: '" + optLevel + "' (valid: none, performance, size)");
 
         if (result.count("include")) {
             options.includeDirectories = result["include"].as<std::vector<std::string>>();

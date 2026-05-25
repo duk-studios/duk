@@ -29,6 +29,7 @@ duk::rhi::RuntimeShaderDataSource compile(const Options& options) {
     }
 
     rhi::ShaderCompilerCreateInfo createInfo;
+    createInfo.optimizationLevel = options.optimizationLevel;
     for (const auto& dir: options.includeDirectories) {
         createInfo.includeDirectories.emplace_back(dir);
     }
