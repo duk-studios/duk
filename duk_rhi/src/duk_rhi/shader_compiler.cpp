@@ -1,6 +1,7 @@
 /// shader_compiler.cpp
 
 #include <duk_rhi/shader_compiler.h>
+#include <duk_rhi/runtime_shader_data_source.h>
 
 #include <duk_hash/hash_combine.h>
 #include <duk_log/log.h>
@@ -118,6 +119,18 @@ private:
     std::vector<std::filesystem::path> m_searchPaths;
 };
 
+const char* stage_debug_name(ShaderModule::Bits stage) {
+    switch (stage) {
+        case ShaderModule::VERTEX:                  return "vertex";
+        case ShaderModule::TESSELLATION_CONTROL:    return "tessellation_control";
+        case ShaderModule::TESSELLATION_EVALUATION: return "tessellation_evaluation";
+        case ShaderModule::GEOMETRY:                return "geometry";
+        case ShaderModule::FRAGMENT:                return "fragment";
+        case ShaderModule::COMPUTE:                 return "compute";
+        default:                                    return "unknown";
+    }
+}
+
 }// anonymous namespace
 
 struct ShaderCompiler::Impl {
@@ -212,6 +225,36 @@ std::expected<std::vector<uint8_t>, ShaderCompileError> ShaderCompiler::compile(
     } catch (...) {
         return std::unexpected(ShaderCompileError{ShaderCompileError::Code::COMPILATION_FAILED, "unknown exception"});
     }
+}
+
+RuntimeShaderDataSource compile(
+        const ShaderCompiler& compiler,
+        const std::unordered_map<ShaderModule::Bits, std::string>& glslSources) {
+    RuntimeShaderDataSourceCreateInfo sourceCreateInfo;
+
+    for (const auto& [stage, source]: glslSources) {
+        auto result = compiler.compile(source, stage, stage_debug_name(stage));
+        if (!result) {
+            duk::log::fatal("shader compilation failed ({}): {}", stage_debug_name(stage), result.error().message);
+        }
+        switch (stage) {
+            case ShaderModule::VERTEX:                  sourceCreateInfo.vertexShaderCode = std::move(*result); break;
+            case ShaderModule::TESSELLATION_CONTROL:    sourceCreateInfo.tessellationControlShaderCode = std::move(*result); break;
+            case ShaderModule::TESSELLATION_EVALUATION: sourceCreateInfo.tessellationEvaluationShaderCode = std::move(*result); break;
+            case ShaderModule::GEOMETRY:                sourceCreateInfo.geometryShaderCode = std::move(*result); break;
+            case ShaderModule::FRAGMENT:                sourceCreateInfo.fragmentShaderCode = std::move(*result); break;
+            case ShaderModule::COMPUTE:                 sourceCreateInfo.computeShaderCode = std::move(*result); break;
+            default: break;
+        }
+    }
+
+    return RuntimeShaderDataSource(sourceCreateInfo);
+}
+
+RuntimeShaderDataSource compile(
+        const ShaderCompilerCreateInfo& createInfo,
+        const std::unordered_map<ShaderModule::Bits, std::string>& glslSources) {
+    return compile(ShaderCompiler(createInfo), glslSources);
 }
 
 }// namespace duk::rhi

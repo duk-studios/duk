@@ -137,6 +137,57 @@ TEST_CASE("ShaderCompiler cache interaction", "[rhi][shader_compiler]") {
     }
 }
 
+TEST_CASE("compile free function (ShaderCompiler overload)", "[rhi][shader_compiler]") {
+    auto compiler = make_compiler();
+
+    SECTION("vertex+fragment produces a source with both stages") {
+        const std::unordered_map<duk::rhi::ShaderModule::Bits, std::string> sources = {
+                {duk::rhi::ShaderModule::VERTEX,   std::string(kMinimalVertexShader)},
+                {duk::rhi::ShaderModule::FRAGMENT, std::string(kMinimalFragmentShader)},
+        };
+        const auto source = duk::rhi::compile(compiler, sources);
+
+        const auto mask = source.module_mask();
+        CHECK(mask & duk::rhi::ShaderModule::VERTEX);
+        CHECK(mask & duk::rhi::ShaderModule::FRAGMENT);
+        CHECK(source.shader_modules().size() == 2);
+        CHECK(source.hash() != 0);
+    }
+}
+
+TEST_CASE("compile free function (ShaderCompilerCreateInfo overload)", "[rhi][shader_compiler]") {
+    SECTION("compiles with default create info") {
+        duk::rhi::ShaderCompilerCreateInfo info{};
+        const std::unordered_map<duk::rhi::ShaderModule::Bits, std::string> sources = {
+                {duk::rhi::ShaderModule::VERTEX,   std::string(kMinimalVertexShader)},
+                {duk::rhi::ShaderModule::FRAGMENT, std::string(kMinimalFragmentShader)},
+        };
+        const auto source = duk::rhi::compile(info, sources);
+
+        CHECK(source.module_mask() & duk::rhi::ShaderModule::VERTEX);
+        CHECK(source.module_mask() & duk::rhi::ShaderModule::FRAGMENT);
+        CHECK(source.hash() != 0);
+    }
+
+    SECTION("virtual includes are forwarded to the compiler") {
+        duk::rhi::ShaderCompilerCreateInfo info{};
+        info.virtualIncludes["color.glsl"] = "vec4 red() { return vec4(1.0, 0.0, 0.0, 1.0); }\n";
+
+        const std::unordered_map<duk::rhi::ShaderModule::Bits, std::string> sources = {
+                {duk::rhi::ShaderModule::VERTEX,   std::string(kMinimalVertexShader)},
+                {duk::rhi::ShaderModule::FRAGMENT, R"glsl(
+#version 450
+#include "color.glsl"
+layout(location = 0) out vec4 outColor;
+void main() { outColor = red(); }
+)glsl"},
+        };
+        const auto source = duk::rhi::compile(info, sources);
+
+        CHECK(source.module_mask() & duk::rhi::ShaderModule::FRAGMENT);
+    }
+}
+
 TEST_CASE("ShaderCompiler virtual includes", "[rhi][shader_compiler]") {
     duk::rhi::ShaderCompilerCreateInfo info{};
     info.api = duk::rhi::API::VULKAN;

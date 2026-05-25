@@ -4,7 +4,7 @@
 #define DUK_RHI_SHADER_COMPILER_H
 
 #include <duk_rhi/instance.h>
-#include <duk_rhi/shader.h>
+#include <duk_rhi/runtime_shader_data_source.h>
 #include <duk_rhi/shader_cache.h>
 
 #include <cstdint>
@@ -66,6 +66,16 @@ private:
     struct Impl;
     std::unique_ptr<Impl> m_impl;
 };
+
+/// Compiles multiple GLSL stage sources using an existing ShaderCompiler instance.
+DUK_NO_DISCARD RuntimeShaderDataSource compile(
+        const ShaderCompiler& compiler,
+        const std::unordered_map<ShaderModule::Bits, std::string>& glslSources);
+
+/// Compiles multiple GLSL stage sources, constructing a ShaderCompiler from the given create info.
+DUK_NO_DISCARD RuntimeShaderDataSource compile(
+        const ShaderCompilerCreateInfo& createInfo,
+        const std::unordered_map<ShaderModule::Bits, std::string>& glslSources);
 
 }// namespace duk::rhi
 
