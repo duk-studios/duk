@@ -20,6 +20,54 @@ static void check_result(SpvReflectResult result) {
     }
 }
 
+static std::string member_type_name(SpvReflectTypeDescription* typeDesc) {
+    if (!typeDesc) {
+        return "unknown";
+    }
+    if ((typeDesc->type_flags & SPV_REFLECT_TYPE_FLAG_STRUCT) && typeDesc->type_name) {
+        return typeDesc->type_name;
+    }
+    const auto& num = typeDesc->traits.numeric;
+    if (typeDesc->type_flags & SPV_REFLECT_TYPE_FLAG_MATRIX) {
+        std::string prefix = (num.scalar.width > 32) ? "d" : "";
+        const auto cols = num.matrix.column_count;
+        const auto rows = num.matrix.row_count;
+        if (cols == rows) {
+            return prefix + "mat" + std::to_string(cols);
+        }
+        return prefix + "mat" + std::to_string(cols) + "x" + std::to_string(rows);
+    }
+    if (typeDesc->type_flags & SPV_REFLECT_TYPE_FLAG_VECTOR) {
+        std::string prefix;
+        if ((typeDesc->type_flags & SPV_REFLECT_TYPE_FLAG_FLOAT) && num.scalar.width > 32) {
+            prefix = "d";
+        } else if (typeDesc->type_flags & SPV_REFLECT_TYPE_FLAG_INT) {
+            prefix = num.scalar.signedness ? "i" : "u";
+        }
+        return prefix + "vec" + std::to_string(num.vector.component_count);
+    }
+    if (typeDesc->type_flags & SPV_REFLECT_TYPE_FLAG_FLOAT) {
+        return num.scalar.width > 32 ? "double" : "float";
+    }
+    if (typeDesc->type_flags & SPV_REFLECT_TYPE_FLAG_INT) {
+        return num.scalar.signedness ? "int" : "uint";
+    }
+    if (typeDesc->type_flags & SPV_REFLECT_TYPE_FLAG_BOOL) {
+        return "bool";
+    }
+    return "unknown";
+}
+
+static BufferMemberDescription make_buffer_member(const SpvReflectBlockVariable& spvMember) {
+    BufferMemberDescription member;
+    member.name = spvMember.name;
+    member.offset = spvMember.offset;
+    member.size = spvMember.size;
+    member.padding = spvMember.padded_size - spvMember.size;
+    member.typeName = member_type_name(spvMember.type_description);
+    return member;
+}
+
 static void fill_buffer_members(SpvReflectDescriptorBinding* spvBinding, BufferBindingDescription& bufferDesc) {
     for (auto memberIndex = 0u; memberIndex < spvBinding->block.member_count; memberIndex++) {
         const auto& spvMember = spvBinding->block.members[memberIndex];
@@ -27,22 +75,11 @@ static void fill_buffer_members(SpvReflectDescriptorBinding* spvBinding, BufferB
             bufferDesc.stride = spvMember.type_description->traits.array.stride;
             bufferDesc.size = bufferDesc.stride;
             for (auto i = 0u; i < spvMember.member_count; i++) {
-                const auto& inst = spvMember.members[i];
-                BufferMemberDescription member;
-                member.name = inst.name;
-                member.offset = inst.offset;
-                member.size = inst.size;
-                member.padding = inst.padded_size - inst.size;
-                bufferDesc.members.push_back(member);
+                bufferDesc.members.push_back(make_buffer_member(spvMember.members[i]));
             }
             return;
         }
-        BufferMemberDescription member;
-        member.name = spvMember.name;
-        member.offset = spvMember.offset;
-        member.size = spvMember.size;
-        member.padding = spvMember.padded_size - spvMember.size;
-        bufferDesc.members.push_back(member);
+        bufferDesc.members.push_back(make_buffer_member(spvMember));
     }
     bufferDesc.size = spvBinding->block.size;
     bufferDesc.stride = spvBinding->block.padded_size;

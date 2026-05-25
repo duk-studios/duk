@@ -40,6 +40,7 @@ struct BufferMemberDescription {
     uint32_t size;
     uint32_t padding;
     std::string name;
+    std::string typeName;
 
     uint32_t total_size() const {
         return size + padding;
