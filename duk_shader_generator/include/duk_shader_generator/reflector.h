@@ -6,7 +6,7 @@
 
 #include <duk_shader_generator/parser.h>
 #include <duk_rhi/descriptor.h>
-#include <duk_rhi/pipeline/shader.h>
+#include <../../../duk_rhi/include/duk_rhi/shader.h>
 #include <duk_rhi/vertex_layout.h>
 
 #include <cstdint>

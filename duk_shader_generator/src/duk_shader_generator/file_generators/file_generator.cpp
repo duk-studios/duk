@@ -2,19 +2,21 @@
 /// file_generator.cpp
 
 #include <duk_shader_generator/file_generators/file_generator.h>
-#include <duk_shader_generator/types.h>
 
+#include <cctype>
 #include <fstream>
 
-namespace duk::material_generator {
+namespace duk::shader_generator {
 
 namespace detail {
 
-static std::string include_guard_name(std::string name) {
-    for (auto& c: name) {
-        c = std::toupper(c);
+static std::string include_guard_name(const std::string& fileName) {
+    std::string guard = "DUK_GENERATED_";
+    for (char c: fileName) {
+        guard += static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
     }
-    return "DUK_RENDERER_" + name + "_H";
+    guard += "_H";
+    return guard;
 }
 
 }// namespace detail
@@ -22,46 +24,42 @@ static std::string include_guard_name(std::string name) {
 FileGenerator::~FileGenerator() = default;
 
 void FileGenerator::generate_include_guard_start(std::ostringstream& oss, const std::string& fileName) {
-    const auto includeGuard = detail::include_guard_name(fileName);
-    oss << "#ifndef " << includeGuard << std::endl;
-    oss << "#define " << includeGuard << std::endl;
+    const auto guard = detail::include_guard_name(fileName);
+    oss << "#ifndef " << guard << '\n';
+    oss << "#define " << guard << '\n';
 }
 
 void FileGenerator::generate_include_guard_end(std::ostringstream& oss, const std::string& fileName) {
-    const auto includeGuard = detail::include_guard_name(fileName);
-    oss << "#endif // " << includeGuard << std::endl;
+    const auto guard = detail::include_guard_name(fileName);
+    oss << "#endif// " << guard << '\n';
 }
 
 void FileGenerator::generate_include_directives(std::ostringstream& oss, std::span<const std::string> includes) {
     for (const auto& include: includes) {
-        oss << "#include <" << include << '>' << std::endl;
+        oss << "#include <" << include << ">\n";
     }
 }
 
-void FileGenerator::generate_namespace_start(std::ostringstream& oss, const std::string& materialName) {
-    oss << "namespace duk::renderer";
-    if (!materialName.empty()) {
-        oss << "::" << materialName;
+void FileGenerator::generate_namespace_start(std::ostringstream& oss, const std::string& namespaceName) {
+    if (namespaceName.empty()) {
+        return;
     }
-    oss << " {" << std::endl;
+    oss << "namespace " << namespaceName << " {\n";
 }
 
-void FileGenerator::generate_namespace_end(std::ostringstream& oss, const std::string& materialName) {
-    oss << "} // namespace duk::renderer";
-    if (!materialName.empty()) {
-        oss << "::" << materialName;
+void FileGenerator::generate_namespace_end(std::ostringstream& oss, const std::string& namespaceName) {
+    if (namespaceName.empty()) {
+        return;
     }
-    oss << std::endl;
+    oss << "}// namespace " << namespaceName << '\n';
 }
 
 void FileGenerator::write_file(const std::string& content, const std::string& filepath) {
     std::ofstream file(filepath);
-
     if (!file) {
         throw std::runtime_error("failed to write file at: " + filepath);
     }
-
     file << content;
 }
 
-}// namespace duk::material_generator
+}// namespace duk::shader_generator

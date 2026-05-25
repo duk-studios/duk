@@ -1,16 +1,17 @@
-/// 04/11/2023
 /// shader_data_source_generator.cpp
 
-#include <duk_shader_generator/file_generators/shader_data_source_file_generator.h>
+#include <duk_shader_generator/file_generators/shader_data_source_generator.h>
 #include <duk_shader_generator/file_generators/generator_utils.h>
+#include <duk_shader_generator/options.h>
 
-#include <duk_rhi/shader.h>
-#include <duk_rhi/vertex_layout.h>
+#include <duk_rhi/runtime_shader_data_source.h>
 #include <duk_tools/string.h>
 
 #include <cctype>
 #include <filesystem>
+#include <fstream>
 #include <iomanip>
+#include <stdexcept>
 #include <variant>
 
 namespace duk::shader_generator {
@@ -114,6 +115,18 @@ static const char* stage_enumerator(duk::rhi::ShaderModule::Bits stage) {
     }
 }
 
+static const char* stage_spirv_var_name(duk::rhi::ShaderModule::Bits stage) {
+    switch (stage) {
+        case rhi::ShaderModule::VERTEX:                  return "kVertexSpirV";
+        case rhi::ShaderModule::TESSELLATION_CONTROL:    return "kTessControlSpirV";
+        case rhi::ShaderModule::TESSELLATION_EVALUATION: return "kTessEvalSpirV";
+        case rhi::ShaderModule::GEOMETRY:                return "kGeometrySpirV";
+        case rhi::ShaderModule::FRAGMENT:                return "kFragmentSpirV";
+        case rhi::ShaderModule::COMPUTE:                 return "kComputeSpirV";
+        default:                                         return "kUnknownSpirV";
+    }
+}
+
 static std::string generate_spirv_array(const std::string& varName, const std::vector<uint8_t>& code) {
     std::ostringstream oss;
     oss << "static const std::array<uint8_t, " << code.size() << "> " << varName << " = {\n    ";
@@ -130,56 +143,28 @@ static std::string generate_spirv_array(const std::string& varName, const std::v
     return oss.str();
 }
 
-static std::string buffer_struct_name(const std::string& bindingName) {
-    return duk::tools::snake_to_pascal(bindingName) + "Data";
-}
-
 static bool has_buffer_members(const duk::rhi::BindingDescription& desc) {
     return std::holds_alternative<rhi::BufferBindingDescription>(desc.binding) &&
            !std::get<rhi::BufferBindingDescription>(desc.binding).members.empty();
 }
 
-static const char* stage_spirv_var_name(duk::rhi::ShaderModule::Bits stage) {
-    switch (stage) {
-        case rhi::ShaderModule::VERTEX:                  return "kVertexSpirV";
-        case rhi::ShaderModule::TESSELLATION_CONTROL:    return "kTessControlSpirV";
-        case rhi::ShaderModule::TESSELLATION_EVALUATION: return "kTessEvalSpirV";
-        case rhi::ShaderModule::GEOMETRY:                return "kGeometrySpirV";
-        case rhi::ShaderModule::FRAGMENT:                return "kFragmentSpirV";
-        case rhi::ShaderModule::COMPUTE:                 return "kComputeSpirV";
-        default:                                         return "kUnknownSpirV";
+static void write_file(const std::string& content, const std::filesystem::path& path) {
+    std::ofstream file(path);
+    if (!file) {
+        throw std::runtime_error("failed to write file at: " + path.string());
     }
-}
-
-}// namespace detail
-
-ShaderDataSourceFileGenerator::ShaderDataSourceFileGenerator(const Options& options, const GeneratedShaderData& data)
-    : m_options(options)
-    , m_data(data) {
-    m_fileName = options.shaderName + "_shader_data_source";
-    m_className = duk::tools::snake_to_pascal(options.shaderName) + "ShaderDataSource";
-    m_headerIncludePath = m_fileName + ".h";
-
-    {
-        std::ostringstream oss;
-        generate_header_file(oss);
-        const auto path = std::filesystem::path(options.outputIncludeDirectory) / (m_fileName + ".h");
-        write_file(oss.str(), path.string());
-    }
-
-    {
-        std::ostringstream oss;
-        generate_source_file(oss);
-        const auto path = std::filesystem::path(options.outputSourceDirectory) / (m_fileName + ".cpp");
-        write_file(oss.str(), path.string());
-    }
+    file << content;
 }
 
 // -----------------------------------------------------------------------
-// Header generation
+// Header content
 // -----------------------------------------------------------------------
 
-void ShaderDataSourceFileGenerator::generate_header_file(std::ostringstream& oss) {
+static std::string build_header_content(
+        const std::string& fileName,
+        const std::string& className,
+        const std::string& outputNamespace,
+        const duk::rhi::RuntimeShaderDataSource& source) {
     const std::string includes[] = {
             "duk_rhi/shader_data_source.h",
             "glm/glm.hpp",
@@ -188,32 +173,26 @@ void ShaderDataSourceFileGenerator::generate_header_file(std::ostringstream& oss
             "vector",
     };
 
-    generate_include_guard_start(oss, m_fileName);
+    std::ostringstream oss;
+    utils::generate_include_guard_start(oss, fileName);
     oss << '\n';
-    generate_include_directives(oss, includes);
+    utils::generate_include_directives(oss, includes);
     oss << '\n';
-    generate_namespace_start(oss, m_options.outputNamespace);
+    utils::generate_namespace_start(oss, outputNamespace);
     oss << '\n';
-    generate_class_declaration(oss);
-    oss << '\n';
-    generate_namespace_end(oss, m_options.outputNamespace);
-    oss << '\n';
-    generate_include_guard_end(oss, m_fileName);
-}
 
-void ShaderDataSourceFileGenerator::generate_class_declaration(std::ostringstream& oss) {
-    oss << "class " << m_className << " : public duk::rhi::ShaderDataSource {\n";
+    oss << "class " << className << " : public duk::rhi::ShaderDataSource {\n";
     oss << "public:\n";
 
-    // Inner structs for buffer bindings
-    for (const auto& desc: m_data.bindingLayout) {
-        if (!detail::has_buffer_members(desc)) {
+    for (const auto& desc: source.binding_layout()) {
+        if (!has_buffer_members(desc)) {
             continue;
         }
         const auto& bufDesc = std::get<rhi::BufferBindingDescription>(desc.binding);
-        oss << "    struct " << detail::buffer_struct_name(desc.name) << " {\n";
+        const auto structName = duk::tools::snake_to_pascal(desc.name) + "Data";
+        oss << "    struct " << structName << " {\n";
         for (const auto& member: bufDesc.members) {
-            oss << "        " << detail::glsl_to_cpp(member.typeName) << " " << member.name << ";\n";
+            oss << "        " << glsl_to_cpp(member.typeName) << " " << member.name << ";\n";
             if (member.padding > 0) {
                 oss << "        uint8_t _padding_" << member.name << "[" << member.padding << "];\n";
             }
@@ -221,15 +200,12 @@ void ShaderDataSourceFileGenerator::generate_class_declaration(std::ostringstrea
         oss << "    };\n\n";
     }
 
-    // Binding enum
     oss << "    enum class Binding : uint32_t {\n";
-    for (uint32_t i = 0; i < static_cast<uint32_t>(m_data.bindingLayout.size()); i++) {
-        oss << "        " << detail::to_screaming_snake_case(m_data.bindingLayout[i].name)
-            << " = " << i << ",\n";
+    for (uint32_t i = 0; i < static_cast<uint32_t>(source.binding_layout().size()); i++) {
+        oss << "        " << to_screaming_snake_case(source.binding_layout()[i].name) << " = " << i << ",\n";
     }
     oss << "    };\n\n";
 
-    // Overrides
     oss << "    duk::rhi::ShaderModule::Mask module_mask() const override;\n\n";
     oss << "    const std::vector<uint8_t>& shader_module_spir_v_code(duk::rhi::ShaderModule::Bits type) const override;\n\n";
     oss << "    const std::unordered_map<duk::rhi::ShaderModule::Bits, std::vector<uint8_t>>& shader_modules() const override;\n\n";
@@ -238,32 +214,24 @@ void ShaderDataSourceFileGenerator::generate_class_declaration(std::ostringstrea
     oss << "protected:\n";
     oss << "    duk::hash::Hash calculate_hash() const override;\n";
     oss << "};\n";
+
+    oss << '\n';
+    utils::generate_namespace_end(oss, outputNamespace);
+    oss << '\n';
+    utils::generate_include_guard_end(oss, fileName);
+
+    return oss.str();
 }
 
 // -----------------------------------------------------------------------
-// Source generation
+// Source content
 // -----------------------------------------------------------------------
 
-void ShaderDataSourceFileGenerator::generate_source_file(std::ostringstream& oss) {
-    // Includes
-    const std::string includes[] = {
-            m_headerIncludePath,
-            "duk_rhi/shader.h",
-            "duk_rhi/vertex_layout.h",
-            "array",
-            "unordered_map",
-    };
-    generate_include_directives(oss, includes);
-    oss << '\n';
-    generate_namespace_start(oss, m_options.outputNamespace);
-    oss << '\n';
-    generate_class_definition(oss);
-    oss << '\n';
-    generate_namespace_end(oss, m_options.outputNamespace);
-}
-
-void ShaderDataSourceFileGenerator::generate_class_definition(std::ostringstream& oss) {
-    // Canonical stage order for deterministic output
+static std::string build_source_content(
+        const std::string& headerIncludePath,
+        const std::string& className,
+        const std::string& outputNamespace,
+        const duk::rhi::RuntimeShaderDataSource& source) {
     static constexpr rhi::ShaderModule::Bits kStageOrder[] = {
             rhi::ShaderModule::VERTEX,
             rhi::ShaderModule::TESSELLATION_CONTROL,
@@ -273,46 +241,53 @@ void ShaderDataSourceFileGenerator::generate_class_definition(std::ostringstream
             rhi::ShaderModule::COMPUTE,
     };
 
-    // Build module mask
-    rhi::ShaderModule::Mask moduleMask = 0;
-    for (const auto& [stage, _]: m_data.modules) {
-        moduleMask |= stage;
-    }
+    rhi::ShaderModule::Mask moduleMask = source.module_mask();
+
+    const std::string includes[] = {
+            headerIncludePath,
+            "duk_rhi/shader.h",
+            "duk_rhi/vertex_layout.h",
+            "array",
+            "unordered_map",
+    };
+
+    std::ostringstream oss;
+    utils::generate_include_directives(oss, includes);
+    oss << '\n';
+    utils::generate_namespace_start(oss, outputNamespace);
+    oss << '\n';
 
     oss << "namespace {\n\n";
 
-    // Per-stage SPIR-V arrays
     std::vector<std::pair<rhi::ShaderModule::Bits, std::string>> stageVarNames;
     for (auto stage: kStageOrder) {
-        auto it = m_data.modules.find(stage);
-        if (it == m_data.modules.end()) {
+        auto it = source.shader_modules().find(stage);
+        if (it == source.shader_modules().end()) {
             continue;
         }
-        const std::string varName = detail::stage_spirv_var_name(stage);
-        oss << detail::generate_spirv_array(varName, it->second) << '\n';
+        const std::string varName = stage_spirv_var_name(stage);
+        oss << generate_spirv_array(varName, it->second) << '\n';
         stageVarNames.emplace_back(stage, varName);
     }
 
-    // Shader modules map
     oss << "static const std::unordered_map<duk::rhi::ShaderModule::Bits, std::vector<uint8_t>> kShaderModules = [] {\n";
     oss << "    std::unordered_map<duk::rhi::ShaderModule::Bits, std::vector<uint8_t>> m;\n";
     for (const auto& [stage, varName]: stageVarNames) {
-        oss << "    m[" << detail::stage_enumerator(stage) << "] = std::vector<uint8_t>(" << varName << ".begin(), " << varName << ".end());\n";
+        oss << "    m[" << stage_enumerator(stage) << "] = std::vector<uint8_t>(" << varName << ".begin(), " << varName << ".end());\n";
     }
     oss << "    return m;\n}();\n\n";
 
-    // Binding layout
     oss << "static const duk::rhi::ShaderBindingLayout kBindingLayout = [] {\n";
     oss << "    duk::rhi::ShaderBindingLayout layout;\n";
-    for (const auto& desc: m_data.bindingLayout) {
+    for (const auto& desc: source.binding_layout()) {
         oss << "    layout.push_back(duk::rhi::BindingDescription{\n";
         if (std::holds_alternative<rhi::ImageBindingDescription>(desc.binding)) {
             const auto& imgDesc = std::get<rhi::ImageBindingDescription>(desc.binding);
-            oss << "        duk::rhi::ImageBindingDescription{" << detail::image_binding_type_enumerator(imgDesc.type) << "},\n";
+            oss << "        duk::rhi::ImageBindingDescription{" << image_binding_type_enumerator(imgDesc.type) << "},\n";
         } else {
             const auto& bufDesc = std::get<rhi::BufferBindingDescription>(desc.binding);
             oss << "        duk::rhi::BufferBindingDescription{\n";
-            oss << "            " << detail::buffer_binding_type_enumerator(bufDesc.type) << ",\n";
+            oss << "            " << buffer_binding_type_enumerator(bufDesc.type) << ",\n";
             oss << "            " << bufDesc.size << "u,\n";
             oss << "            " << bufDesc.stride << "u,\n";
             oss << "            {\n";
@@ -328,39 +303,71 @@ void ShaderDataSourceFileGenerator::generate_class_definition(std::ostringstream
     }
     oss << "    return layout;\n}();\n\n";
 
-    // Vertex layout
     oss << "static const duk::rhi::VertexLayout kVertexLayout = {\n";
-    for (auto fmt: m_data.vertexLayout) {
-        oss << "    " << detail::vertex_format_enumerator(fmt) << ",\n";
+    for (auto fmt: source.vertex_layout()) {
+        oss << "    " << vertex_format_enumerator(fmt) << ",\n";
     }
     oss << "};\n\n";
 
     oss << "}// namespace\n\n";
 
-    // Method implementations
-    oss << "duk::rhi::ShaderModule::Mask " << m_className << "::module_mask() const {\n";
+    oss << "duk::rhi::ShaderModule::Mask " << className << "::module_mask() const {\n";
     oss << "    return " << utils::module_mask_expression(moduleMask) << ";\n";
     oss << "}\n\n";
 
-    oss << "const std::vector<uint8_t>& " << m_className << "::shader_module_spir_v_code(duk::rhi::ShaderModule::Bits type) const {\n";
+    oss << "const std::vector<uint8_t>& " << className << "::shader_module_spir_v_code(duk::rhi::ShaderModule::Bits type) const {\n";
     oss << "    return kShaderModules.at(type);\n";
     oss << "}\n\n";
 
-    oss << "const std::unordered_map<duk::rhi::ShaderModule::Bits, std::vector<uint8_t>>& " << m_className << "::shader_modules() const {\n";
+    oss << "const std::unordered_map<duk::rhi::ShaderModule::Bits, std::vector<uint8_t>>& " << className << "::shader_modules() const {\n";
     oss << "    return kShaderModules;\n";
     oss << "}\n\n";
 
-    oss << "const duk::rhi::ShaderBindingLayout& " << m_className << "::binding_layout() const {\n";
+    oss << "const duk::rhi::ShaderBindingLayout& " << className << "::binding_layout() const {\n";
     oss << "    return kBindingLayout;\n";
     oss << "}\n\n";
 
-    oss << "const duk::rhi::VertexLayout& " << m_className << "::vertex_layout() const {\n";
+    oss << "const duk::rhi::VertexLayout& " << className << "::vertex_layout() const {\n";
     oss << "    return kVertexLayout;\n";
     oss << "}\n\n";
 
-    oss << "duk::hash::Hash " << m_className << "::calculate_hash() const {\n";
-    oss << "    return static_cast<duk::hash::Hash>(" << m_data.hash << "ULL);\n";
+    oss << "duk::hash::Hash " << className << "::calculate_hash() const {\n";
+    oss << "    return static_cast<duk::hash::Hash>(" << source.hash() << "ULL);\n";
     oss << "}\n";
+
+    oss << '\n';
+    utils::generate_namespace_end(oss, outputNamespace);
+
+    return oss.str();
+}
+
+}// namespace detail
+
+// -----------------------------------------------------------------------
+// Public API
+// -----------------------------------------------------------------------
+
+GeneratedFiles generate_shader_data_source(
+        const std::string& shaderName,
+        const std::string& outputNamespace,
+        const duk::rhi::RuntimeShaderDataSource& source) {
+    const auto fileName = shaderName + "_shader_data_source";
+    const auto className = duk::tools::snake_to_pascal(shaderName) + "ShaderDataSource";
+    const auto headerIncludePath = fileName + ".h";
+
+    return GeneratedFiles{
+            detail::build_header_content(fileName, className, outputNamespace, source),
+            detail::build_source_content(headerIncludePath, className, outputNamespace, source),
+    };
+}
+
+void write_shader_data_source(const Options& options, const duk::rhi::RuntimeShaderDataSource& source) {
+    const auto files = generate_shader_data_source(options.shaderName, options.outputNamespace, source);
+    const auto fileName = options.shaderName + "_shader_data_source";
+
+    detail::write_file(files.headerContent, std::filesystem::path(options.outputIncludeDirectory) / (fileName + ".h"));
+    detail::write_file(files.sourceContent, std::filesystem::path(options.outputSourceDirectory)  / (fileName + ".cpp"));
 }
 
 }// namespace duk::shader_generator
+

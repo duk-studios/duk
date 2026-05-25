@@ -1,21 +1,21 @@
-/// 14/10/2023
 /// generator.h
 
 #ifndef DUK_SHADER_GENERATOR_GENERATOR_H
 #define DUK_SHADER_GENERATOR_GENERATOR_H
 
-#include <duk_shader_generator/parser.h>
-#include <duk_shader_generator/reflector.h>
+#include <duk_macros/macros.h>
+#include <duk_rhi/runtime_shader_data_source.h>
 
-namespace duk::material_generator {
+namespace duk::shader_generator {
 
-class Generator {
-public:
-    Generator(const Parser& parser, const Reflector& reflector);
+struct Options;
 
-    ~Generator();
-};
+/// Reads the GLSL file paths from Options, compiles them, and returns a RuntimeShaderDataSource.
+DUK_NO_DISCARD duk::rhi::RuntimeShaderDataSource compile(const Options& options);
 
-}// namespace duk::material_generator
+/// Compiles the shaders described by Options and writes the generated source files to disk.
+void generate(const Options& options);
+
+}// namespace duk::shader_generator
 
 #endif// DUK_SHADER_GENERATOR_GENERATOR_H

@@ -1,29 +1,19 @@
-
 set(DUK_SHADER_GENERATOR_HEADERS
-        include/duk_shader_generator/parser.h
-        include/duk_shader_generator/reflector.h
+        include/duk_shader_generator/options.h
         include/duk_shader_generator/generator.h
-        include/duk_shader_generator/types.h
-        include/duk_shader_generator/file_generators/file_generator.h
-        include/duk_shader_generator/file_generators/shader_data_source_file_generator.h
         include/duk_shader_generator/file_generators/generator_utils.h
+        include/duk_shader_generator/file_generators/shader_data_source_generator.h
         )
 
-set(DUK_SHADER_GENERATOR_SOURCES
-        src/duk_shader_generator/main.cpp
-        src/duk_shader_generator/parser.cpp
-        src/duk_shader_generator/reflector.cpp
+set(DUK_SHADER_GENERATOR_CORE_SOURCES
         src/duk_shader_generator/generator.cpp
-        src/duk_shader_generator/types.cpp
-        src/duk_shader_generator/file_generators/file_generator.cpp
-        src/duk_shader_generator/file_generators/shader_data_source_file_generator.cpp
         src/duk_shader_generator/file_generators/generator_utils.cpp
+        src/duk_shader_generator/file_generators/shader_data_source_generator.cpp
         )
 
-add_executable(duk.shader_generator ${DUK_SHADER_GENERATOR_HEADERS} ${DUK_SHADER_GENERATOR_SOURCES})
-add_executable(duk::shader_generator ALIAS duk.shader_generator)
+add_library(duk.shader_generator.core OBJECT ${DUK_SHADER_GENERATOR_HEADERS} ${DUK_SHADER_GENERATOR_CORE_SOURCES})
 
-target_include_directories(duk.shader_generator
+target_include_directories(duk.shader_generator.core
         PUBLIC
         include
 
@@ -31,9 +21,21 @@ target_include_directories(duk.shader_generator
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         )
 
+target_link_libraries(duk.shader_generator.core
+        PUBLIC
+        duk::rhi
+        duk::tools
+        )
+
+add_executable(duk.shader_generator src/duk_shader_generator/main.cpp)
+add_executable(duk::shader_generator ALIAS duk.shader_generator)
+
 target_link_libraries(duk.shader_generator
         PRIVATE
-        duk::rhi
+        duk.shader_generator.core
         cxxopts::cxxopts
-        spirv-reflect::spirv-reflect-static
-)
+        )
+
+if (DUK_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
