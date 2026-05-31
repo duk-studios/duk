@@ -22,32 +22,31 @@ static duk::hash::Hash calculate_hash(const rhi::VertexLayout& vertexLayout, rhi
 }// namespace detail
 
 MeshBuffer::ManagedBuffer::ManagedBuffer(const MeshBuffer::ManagedBufferCreateInfo& managedBufferCreateInfo)
-    : m_rhi(managedBufferCreateInfo.rhi)
+    : m_type(managedBufferCreateInfo.type)
+    , m_updateFrequency(managedBufferCreateInfo.updateFrequency)
+    , m_elementSize(managedBufferCreateInfo.elementSize)
     , m_allocationCounter(0) {
-    m_buffer = m_rhi->create_buffer({.type = managedBufferCreateInfo.type,
-                                     .updateFrequency = managedBufferCreateInfo.updateFrequency,
-                                     .elementCount = managedBufferCreateInfo.elementCount,
-                                     .elementSize = managedBufferCreateInfo.elementSize,
-                                     .commandQueue = managedBufferCreateInfo.commandQueue});
-
-    m_freeBlocks.push_back({.offset = 0, .size = m_buffer->byte_size()});
+    m_buffer = managedBufferCreateInfo.commandContext->create_buffer({
+        .type = m_type,
+        .updateFrequency = m_updateFrequency,
+        .size = managedBufferCreateInfo.size,
+    });
+    m_freeBlocks.push_back({.offset = 0, .size = m_buffer->size()});
 }
 
 MeshBuffer::ManagedBuffer::~ManagedBuffer() {
     assert(m_allocatedBlocks.empty());
 }
 
-uint32_t MeshBuffer::ManagedBuffer::allocate(size_t size) {
-    // try to allocate from current free blocks
+uint32_t MeshBuffer::ManagedBuffer::allocate(duk::rhi::CommandContext& commandContext, size_t size) {
     uint32_t allocationHandle = 0;
     if (allocate_from_free_blocks(&allocationHandle, size)) {
         return allocationHandle;
     }
 
-    // if we fail, expand the buffer by the given size
-    auto elementCount = size / m_buffer->element_size();
+    auto elementCount = size / m_elementSize;
     auto newBlockElementCount = (elementCount / kBufferElementBlockCount + 1) * kBufferElementBlockCount;
-    expand_by_element_count(newBlockElementCount);
+    expand_by_element_count(commandContext, newBlockElementCount);
     duk::log::verb("expanding managed buffer by {} elements", newBlockElementCount);
 
     // try to allocate again
@@ -72,21 +71,7 @@ void MeshBuffer::ManagedBuffer::free(uint32_t handle) {
 
     m_freeBlocks.emplace_back(block);
 
-    /// merge contiguous free blocks
     merge_free_blocks();
-}
-
-void MeshBuffer::ManagedBuffer::write(uint32_t handle, const void* src, size_t size, size_t offset) const {
-    const auto allocatedBlock = at(handle);
-
-    // make sure to not write on other allocations space
-    DUK_ASSERT(size + offset <= allocatedBlock.size);
-
-    m_buffer->write(src, size, allocatedBlock.offset + offset);
-}
-
-uint8_t* MeshBuffer::ManagedBuffer::write_ptr(uint32_t handle) const {
-    return m_buffer->write_ptr(offset_of(handle));
 }
 
 MeshBuffer::ManagedBuffer::Block MeshBuffer::ManagedBuffer::at(uint32_t handle) const {
@@ -122,7 +107,7 @@ const rhi::Buffer* MeshBuffer::ManagedBuffer::internal_buffer() const {
 }
 
 size_t MeshBuffer::ManagedBuffer::element_size() const {
-    return m_buffer->element_size();
+    return m_elementSize;
 }
 
 void MeshBuffer::ManagedBuffer::merge_free_blocks() {
@@ -130,8 +115,7 @@ void MeshBuffer::ManagedBuffer::merge_free_blocks() {
         return;
     }
 
-    // sort to facilitate merging
-    std::sort(m_freeBlocks.begin(), m_freeBlocks.end(), [](const Block& lhs, const Block& rhs) -> bool {
+    std::ranges::sort(m_freeBlocks, [](const Block& lhs, const Block& rhs) -> bool {
         return lhs.offset < rhs.offset;
     });
 
@@ -182,9 +166,7 @@ bool MeshBuffer::ManagedBuffer::allocate_from_free_blocks(uint32_t* allocationHa
             }
 
             auto handle = ++m_allocationCounter;
-
             m_allocatedBlocks.emplace(handle, allocatedBlock);
-
             *allocationHandle = handle;
             return true;
         }
@@ -192,21 +174,17 @@ bool MeshBuffer::ManagedBuffer::allocate_from_free_blocks(uint32_t* allocationHa
     return false;
 }
 
-void MeshBuffer::ManagedBuffer::expand_by_element_count(size_t count) {
-    // clang-format off
-    auto newBuffer = m_rhi->create_buffer({
-        .type = m_buffer->type(),
-        .updateFrequency = m_buffer->update_frequency(),
-        .elementCount = m_buffer->element_count() + count,
-        .elementSize = m_buffer->element_size(),
-        .commandQueue = m_buffer->command_queue()
+void MeshBuffer::ManagedBuffer::expand_by_element_count(duk::rhi::CommandContext& commandContext, size_t count) {
+    auto currentSize = m_buffer->size();
+    auto newBuffer = commandContext.create_buffer({
+        .type = m_type,
+        .updateFrequency = m_updateFrequency,
+        .size = currentSize + count * m_elementSize,
     });
-    // clang-format on
 
-    newBuffer->copy_from(m_buffer.get(), m_buffer->byte_size(), 0, 0);
+    commandContext.copy_to_buffer(newBuffer.get(), 0, currentSize, m_buffer.get(), 0);
 
-    m_freeBlocks.push_back({.offset = m_buffer->byte_size(), .size = count * m_buffer->element_size()});
-
+    m_freeBlocks.push_back({.offset = currentSize, .size = count * m_elementSize});
     merge_free_blocks();
 
     std::swap(m_buffer, newBuffer);
@@ -222,30 +200,29 @@ MeshBuffer::MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo)
         if (format == rhi::VertexInput::Format::UNDEFINED) {
             continue;
         }
+        auto elementSize = duk::rhi::VertexInput::size_of(format);
         ManagedBufferCreateInfo vertexBufferCreateInfo = {};
-        vertexBufferCreateInfo.rhi = meshBufferCreateInfo.rhi;
-        vertexBufferCreateInfo.commandQueue = meshBufferCreateInfo.commandQueue;
-        vertexBufferCreateInfo.elementSize = duk::rhi::VertexInput::size_of(format);
-        vertexBufferCreateInfo.elementCount = kBufferElementBlockCount;
+        vertexBufferCreateInfo.commandContext = meshBufferCreateInfo.commandContext;
+        vertexBufferCreateInfo.elementSize = elementSize;
+        vertexBufferCreateInfo.size = kBufferElementBlockCount * elementSize;
         vertexBufferCreateInfo.updateFrequency = meshBufferCreateInfo.updateFrequency;
         vertexBufferCreateInfo.type = rhi::Buffer::Type::VERTEX;
         m_vertexBuffers[i] = std::make_unique<ManagedBuffer>(vertexBufferCreateInfo);
     }
 
     if (meshBufferCreateInfo.indexType != rhi::IndexType::NONE) {
+        auto indexElementSize = rhi::index_size(m_indexType);
         ManagedBufferCreateInfo indexBufferCreateInfo = {};
-        indexBufferCreateInfo.rhi = meshBufferCreateInfo.rhi;
-        indexBufferCreateInfo.commandQueue = meshBufferCreateInfo.commandQueue;
-        indexBufferCreateInfo.elementSize = rhi::index_size(m_indexType);
-        indexBufferCreateInfo.elementCount = kBufferElementBlockCount;
+        indexBufferCreateInfo.commandContext = meshBufferCreateInfo.commandContext;
+        indexBufferCreateInfo.elementSize = indexElementSize;
+        indexBufferCreateInfo.size = kBufferElementBlockCount * indexElementSize;
         indexBufferCreateInfo.updateFrequency = meshBufferCreateInfo.updateFrequency;
-        indexBufferCreateInfo.type = rhi::buffer_type_from_index_type(m_indexType);
-
+        indexBufferCreateInfo.type = rhi::Buffer::Type::INDEX;
         m_indexBuffer = std::make_unique<ManagedBuffer>(indexBufferCreateInfo);
     }
 }
 
-uint32_t MeshBuffer::allocate(uint32_t vertexCount, uint32_t indexCount) {
+uint32_t MeshBuffer::allocate(duk::rhi::CommandContext& commandContext, uint32_t vertexCount, uint32_t indexCount) {
     auto handle = ++m_allocationCounter;
     Allocation allocation = {};
     allocation.vertexHandles.resize(m_vertexBuffers.size(), 0);
@@ -254,19 +231,18 @@ uint32_t MeshBuffer::allocate(uint32_t vertexCount, uint32_t indexCount) {
         if (!vertexBuffer) {
             continue;
         }
-        allocation.vertexHandles[i] = vertexBuffer->allocate(vertexCount * vertexBuffer->element_size());
+        allocation.vertexHandles[i] = vertexBuffer->allocate(commandContext, vertexCount * vertexBuffer->element_size());
 
         if (i == 0) {
             allocation.firstVertex = vertexBuffer->offset_of(allocation.vertexHandles[i]) / vertexBuffer->element_size();
         }
     }
-    allocation.indexHandle = m_indexBuffer ? m_indexBuffer->allocate(indexCount * m_indexBuffer->element_size()) : 0;
+    allocation.indexHandle = m_indexBuffer ? m_indexBuffer->allocate(commandContext, indexCount * m_indexBuffer->element_size()) : 0;
     if (allocation.indexHandle) {
         allocation.firstIndex = m_indexBuffer->offset_of(allocation.indexHandle) / m_indexBuffer->element_size();
     }
 
     m_allocations.emplace(handle, allocation);
-
     return handle;
 }
 
@@ -275,8 +251,7 @@ void MeshBuffer::free(uint32_t handle) {
     for (auto i = 0; i < allocation.vertexHandles.size(); i++) {
         auto& vertexBufferHandle = allocation.vertexHandles[i];
         if (vertexBufferHandle) {
-            auto& vertexBuffer = m_vertexBuffers.at(i);
-            vertexBuffer->free(vertexBufferHandle);
+            m_vertexBuffers.at(i)->free(vertexBufferHandle);
             vertexBufferHandle = 0;
         }
     }
@@ -287,34 +262,31 @@ void MeshBuffer::free(uint32_t handle) {
     }
 }
 
-void MeshBuffer::write_vertex(uint32_t handle, uint32_t bindingIndex, const void* src, size_t size, size_t offset) {
-    auto& allocation = m_allocations.at(handle);
-    auto& vertexBufferHandle = allocation.vertexHandles[bindingIndex];
-    if (!vertexBufferHandle) {
-        duk::log::fatal("tried to write to an vertex buffer that was not allocated");
-        return;
+std::optional<MeshBufferBlock> MeshBuffer::vertex_at(uint32_t handle, uint32_t bindingIndex) const {
+    const auto& allocation = m_allocations.at(handle);
+    const auto& managed = m_vertexBuffers.at(bindingIndex);
+    if (!managed || !allocation.vertexHandles[bindingIndex]) {
+        return std::nullopt;
     }
-    auto& vertexBuffer = m_vertexBuffers.at(bindingIndex);
-    vertexBuffer->write(vertexBufferHandle, src, size, offset);
+    const auto block = managed->at(allocation.vertexHandles[bindingIndex]);
+    return MeshBufferBlock{managed->internal_buffer(), block.offset, block.size};
 }
 
-void MeshBuffer::write_index(uint32_t handle, const void* src, size_t size, size_t offset) {
-    auto& allocation = m_allocations.at(handle);
-    if (!allocation.indexHandle) {
-        duk::log::fatal("tried to write to an index buffer that was not allocated");
-        return;
+std::optional<MeshBufferBlock> MeshBuffer::index_at(uint32_t handle) const {
+    if (!m_indexBuffer || !m_allocations.at(handle).indexHandle) {
+        return std::nullopt;
     }
-    m_indexBuffer->write(allocation.indexHandle, src, size, offset);
+    const auto& allocation = m_allocations.at(handle);
+    const auto block = m_indexBuffer->at(allocation.indexHandle);
+    return MeshBufferBlock{m_indexBuffer->internal_buffer(), block.offset, block.size};
 }
 
 uint32_t MeshBuffer::first_vertex(uint32_t handle) const {
-    auto& allocation = m_allocations.at(handle);
-    return allocation.firstVertex;
+    return m_allocations.at(handle).firstVertex;
 }
 
 uint32_t MeshBuffer::first_index(uint32_t handle) const {
-    auto& allocation = m_allocations.at(handle);
-    return allocation.firstIndex;
+    return m_allocations.at(handle).firstIndex;
 }
 
 duk::rhi::VertexLayout MeshBuffer::vertex_layout() const {
@@ -325,47 +297,13 @@ duk::rhi::IndexType MeshBuffer::index_type() const {
     return m_indexType;
 }
 
-void MeshBuffer::flush() {
-    for (auto& vertexBuffer: m_vertexBuffers) {
-        if (vertexBuffer) {
-            vertexBuffer->internal_buffer()->flush();
-        }
-    }
-
-    if (m_indexBuffer) {
-        m_indexBuffer->internal_buffer()->flush();
-    }
-}
-
-void MeshBuffer::bind(duk::rhi::CommandBuffer* commandBuffer) const {
-    duk::tools::FixedVector<const duk::rhi::Buffer*, 32> buffers;
-    for (auto i = 0; i < m_vertexLayout.size(); i++) {
-        if (const auto vertexBuffer = m_vertexBuffers[i].get()) {
-            buffers.emplace_back(vertexBuffer->internal_buffer());
-        } else {
-            buffers.emplace_back(nullptr);
-        }
-    }
-    commandBuffer->bind_vertex_buffer(buffers.data(), buffers.size(), 0);
-
-    if (m_indexBuffer) {
-        commandBuffer->bind_index_buffer(m_indexBuffer->internal_buffer());
-    }
-}
-
-MeshBufferPool::MeshBufferPool(const MeshBufferPoolCreateInfo& meshBufferPoolCreateInfo)
-    : m_rhi(meshBufferPoolCreateInfo.rhi)
-    , m_commandQueue(meshBufferPoolCreateInfo.commandQueue) {
-}
-
-MeshBuffer* MeshBufferPool::find_buffer(const rhi::VertexLayout& vertexLayout, rhi::IndexType indexType, rhi::Buffer::UpdateFrequency updateFrequency) {
+MeshBuffer* MeshBufferPool::find_buffer(duk::rhi::CommandContext& commandContext, const rhi::VertexLayout& vertexLayout, rhi::IndexType indexType, rhi::Buffer::UpdateFrequency updateFrequency) {
     auto hash = detail::calculate_hash(vertexLayout, indexType, updateFrequency);
 
     auto it = m_meshBuffers.find(hash);
     if (it == m_meshBuffers.end()) {
         MeshBufferCreateInfo meshBufferCreateInfo = {};
-        meshBufferCreateInfo.rhi = m_rhi;
-        meshBufferCreateInfo.commandQueue = m_commandQueue;
+        meshBufferCreateInfo.commandContext = &commandContext;
         meshBufferCreateInfo.indexType = indexType;
         meshBufferCreateInfo.vertexLayout = vertexLayout;
         meshBufferCreateInfo.updateFrequency = updateFrequency;
@@ -381,6 +319,21 @@ MeshBuffer* MeshBufferPool::find_buffer(const rhi::VertexLayout& vertexLayout, r
     }
 
     return it->second.get();
+}
+
+duk::rhi::ShaderInput make_shader_input(const MeshBuffer& meshBuffer, uint32_t handle) {
+    duk::rhi::ShaderInput input = {};
+    const auto vertexLayout = meshBuffer.vertex_layout();
+    for (auto i = 0u; i < static_cast<uint32_t>(vertexLayout.size()); i++) {
+        if (const auto block = meshBuffer.vertex_at(handle, i)) {
+            input.vertex[i] = {block->buffer, static_cast<uint32_t>(block->offset)};
+        }
+    }
+    if (const auto block = meshBuffer.index_at(handle)) {
+        input.index.resource = {block->buffer, static_cast<uint32_t>(block->offset)};
+        input.index.type = meshBuffer.index_type();
+    }
+    return input;
 }
 
 }// namespace duk::renderer

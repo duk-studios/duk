@@ -7,14 +7,20 @@
 
 #include <duk_renderer/vertex_types.h>
 #include <duk_rhi/index_types.h>
-#include <duk_rhi/rhi.h>
+#include <duk_rhi/command_context.h>
 #include <duk_tools/fixed_vector.h>
+#include <optional>
 
 namespace duk::renderer {
 
+struct MeshBufferBlock {
+    const rhi::Buffer* buffer{nullptr};
+    size_t offset{0};
+    size_t size{0};
+};
+
 struct MeshBufferCreateInfo {
-    duk::rhi::RHI* rhi;
-    duk::rhi::CommandQueue* commandQueue;
+    duk::rhi::CommandContext* commandContext;
     duk::rhi::IndexType indexType;
     duk::rhi::VertexLayout vertexLayout;
     duk::rhi::Buffer::UpdateFrequency updateFrequency;
@@ -23,12 +29,11 @@ struct MeshBufferCreateInfo {
 class MeshBuffer {
 private:
     struct ManagedBufferCreateInfo {
-        duk::rhi::RHI* rhi;
-        duk::rhi::CommandQueue* commandQueue;
+        duk::rhi::CommandContext* commandContext;
         duk::rhi::Buffer::Type type;
         duk::rhi::Buffer::UpdateFrequency updateFrequency;
-        size_t elementCount;
         size_t elementSize;
+        size_t size;
     };
 
     class ManagedBuffer {
@@ -43,13 +48,9 @@ private:
 
         ~ManagedBuffer();
 
-        uint32_t allocate(size_t size);
+        uint32_t allocate(duk::rhi::CommandContext& commandContext, size_t size);
 
         void free(uint32_t handle);
-
-        void write(uint32_t handle, const void* src, size_t size, size_t offset) const;
-
-        uint8_t* write_ptr(uint32_t handle) const;
 
         DUK_NO_DISCARD Block at(uint32_t handle) const;
 
@@ -68,10 +69,12 @@ private:
 
         bool allocate_from_free_blocks(uint32_t* allocationHandle, size_t size);
 
-        void expand_by_element_count(size_t size);
+        void expand_by_element_count(duk::rhi::CommandContext& commandContext, size_t count);
 
     private:
-        duk::rhi::RHI* m_rhi;
+        duk::rhi::Buffer::Type m_type;
+        duk::rhi::Buffer::UpdateFrequency m_updateFrequency;
+        size_t m_elementSize;
         std::shared_ptr<duk::rhi::Buffer> m_buffer;
         std::vector<Block> m_freeBlocks;
         std::unordered_map<uint32_t, Block> m_allocatedBlocks;
@@ -81,25 +84,21 @@ private:
 public:
     explicit MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo);
 
-    uint32_t allocate(uint32_t vertexCount, uint32_t indexCount);
+    uint32_t allocate(duk::rhi::CommandContext& commandContext, uint32_t vertexCount, uint32_t indexCount);
 
     void free(uint32_t handle);
 
-    void write_vertex(uint32_t handle, uint32_t bindingIndex, const void* src, size_t size, size_t offset);
+    DUK_NO_DISCARD uint32_t first_vertex(uint32_t handle) const;
 
-    void write_index(uint32_t handle, const void* src, size_t size, size_t offset);
+    DUK_NO_DISCARD uint32_t first_index(uint32_t handle) const;
 
-    uint32_t first_vertex(uint32_t handle) const;
+    DUK_NO_DISCARD duk::rhi::VertexLayout vertex_layout() const;
 
-    uint32_t first_index(uint32_t handle) const;
+    DUK_NO_DISCARD duk::rhi::IndexType index_type() const;
 
-    duk::rhi::VertexLayout vertex_layout() const;
+    DUK_NO_DISCARD std::optional<MeshBufferBlock> vertex_at(uint32_t handle, uint32_t bindingIndex) const;
 
-    duk::rhi::IndexType index_type() const;
-
-    void flush();
-
-    void bind(duk::rhi::CommandBuffer* commandBuffer) const;
+    DUK_NO_DISCARD std::optional<MeshBufferBlock> index_at(uint32_t handle) const;
 
 private:
     duk::rhi::VertexLayout m_vertexLayout;
@@ -118,22 +117,17 @@ private:
     uint32_t m_allocationCounter;
 };
 
-struct MeshBufferPoolCreateInfo {
-    duk::rhi::RHI* rhi;
-    duk::rhi::CommandQueue* commandQueue;
-};
-
 class MeshBufferPool {
 public:
-    explicit MeshBufferPool(const MeshBufferPoolCreateInfo& meshBufferPoolCreateInfo);
+    MeshBufferPool() = default;
 
-    MeshBuffer* find_buffer(const rhi::VertexLayout& vertexLayout, rhi::IndexType indexType, rhi::Buffer::UpdateFrequency updateFrequency);
+    MeshBuffer* find_buffer(duk::rhi::CommandContext& commandContext, const rhi::VertexLayout& vertexLayout, rhi::IndexType indexType, rhi::Buffer::UpdateFrequency updateFrequency);
 
 private:
-    duk::rhi::RHI* m_rhi;
-    duk::rhi::CommandQueue* m_commandQueue;
     std::unordered_map<duk::hash::Hash, std::unique_ptr<MeshBuffer>> m_meshBuffers;
 };
+
+DUK_NO_DISCARD duk::rhi::ShaderInput make_shader_input(const MeshBuffer& meshBuffer, uint32_t handle);
 
 }// namespace duk::renderer
 
