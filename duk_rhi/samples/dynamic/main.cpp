@@ -104,12 +104,12 @@ struct QuadAllocation {
     duk::rhi::Allocation color;
 };
 
-static QuadAllocation upload_quad(const duk::rhi::TransferCommands& transfer, duk::rhi::BufferAllocator& allocator, const MatricesUBO& matrices, const ColorUBO& color) {
+static QuadAllocation upload_quad(duk::rhi::BufferAllocator& allocator, const MatricesUBO& matrices, const ColorUBO& color) {
     QuadAllocation a{};
     a.matrices = allocator.alloc(sizeof(MatricesUBO));
     a.color = allocator.alloc(sizeof(ColorUBO));
-    transfer.write_buffer(allocator.buffer(), &matrices, a.matrices.size, a.matrices.offset);
-    transfer.write_buffer(allocator.buffer(), &color, a.color.size, a.color.offset);
+    allocator.buffer()->write(matrices, a.matrices.offset);
+    allocator.buffer()->write(color, a.color.offset);
     return a;
 }
 
@@ -118,9 +118,9 @@ static QuadAllocation upload_quad(const duk::rhi::TransferCommands& transfer, du
 // -----------------------------------------------------------------------
 
 static void draw_quad(const duk::rhi::RenderCommands& render, const duk::rhi::Buffer& buffer, uint32_t matricesSlot, uint32_t colorSlot, const QuadAllocation& alloc) {
-    duk::rhi::ShaderResources resources{};
-    resources.bindings[matricesSlot] = duk::rhi::BufferBinding{&buffer, static_cast<uint32_t>(alloc.matrices.offset)};
-    resources.bindings[colorSlot] = duk::rhi::BufferBinding{&buffer, static_cast<uint32_t>(alloc.color.offset)};
+    duk::rhi::ShaderBindings resources{};
+    resources.resources[matricesSlot] = duk::rhi::BufferResource{&buffer, static_cast<uint32_t>(alloc.matrices.offset)};
+    resources.resources[colorSlot] = duk::rhi::BufferResource{&buffer, static_cast<uint32_t>(alloc.color.offset)};
     render.bind_resources(resources);
 
     duk::rhi::DrawIndexedParams drawParams;
@@ -217,7 +217,7 @@ int main() {
     auto positionBuffer = ctx->create_buffer(positionBufferInfo);
 
     duk::rhi::BufferCreateInfo indexBufferInfo = {};
-    indexBufferInfo.type = duk::rhi::Buffer::Type::INDEX_16;
+    indexBufferInfo.type = duk::rhi::Buffer::Type::INDEX;
     indexBufferInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
     indexBufferInfo.size = sizeof(kIndices);
     auto indexBuffer = ctx->create_buffer(indexBufferInfo);
@@ -225,8 +225,8 @@ int main() {
     ctx->prepare();
     {
         auto transfer = ctx->transfer();
-        transfer.write_buffer(positionBuffer.get(), kPositions, sizeof(kPositions), 0);
-        transfer.write_buffer(indexBuffer.get(), kIndices, sizeof(kIndices), 0);
+        transfer.copy_to_buffer(positionBuffer.get(), 0, sizeof(kPositions), kPositions);
+        transfer.copy_to_buffer(indexBuffer.get(), 0, sizeof(kIndices), kIndices);
     }
     ctx->submit();
 
@@ -295,32 +295,26 @@ int main() {
         //    alloc() returns an Allocation with the aligned byte offset.
         //    We then write the data explicitly via write_buffer.
 
-        QuadAllocation quad0Alloc;
-        QuadAllocation quad1Alloc;
+        MatricesUBO quad0Matrices{};
+        quad0Matrices.model = glm::translate(glm::mat4(1.0f), glm::vec3(-1.1f, 0.0f, 0.0f));
+        quad0Matrices.model = glm::rotate(quad0Matrices.model, elapsed * glm::radians(60.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        quad0Matrices.view = view;
+        quad0Matrices.proj = proj;
+        ColorUBO quad0Color{};
+        quad0Color.color = glm::vec4(1.0f, 0.2f, 0.2f, 1.0f);// red
+        const auto quad0Alloc = upload_quad(*allocator, quad0Matrices, quad0Color);
 
-        {
-            auto transfer = ctx->transfer();
+        MatricesUBO quad1Matrices{};
+        quad1Matrices.model = glm::translate(glm::mat4(1.0f), glm::vec3(1.1f, 0.0f, 0.0f));
+        quad1Matrices.model = glm::rotate(quad1Matrices.model, -elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        quad1Matrices.view = view;
+        quad1Matrices.proj = proj;
+        ColorUBO quad1Color{};
+        quad1Color.color = glm::vec4(0.2f, 0.4f, 1.0f, 1.0f);// blue
+        const auto quad1Alloc = upload_quad(*allocator, quad1Matrices, quad1Color);
 
-            MatricesUBO quad0Matrices{};
-            quad0Matrices.model = glm::translate(glm::mat4(1.0f), glm::vec3(-1.1f, 0.0f, 0.0f));
-            quad0Matrices.model = glm::rotate(quad0Matrices.model, elapsed * glm::radians(60.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            quad0Matrices.view = view;
-            quad0Matrices.proj = proj;
-            ColorUBO quad0Color{};
-            quad0Color.color = glm::vec4(1.0f, 0.2f, 0.2f, 1.0f);// red
-            quad0Alloc = upload_quad(transfer, *allocator, quad0Matrices, quad0Color);
 
-            MatricesUBO quad1Matrices{};
-            quad1Matrices.model = glm::translate(glm::mat4(1.0f), glm::vec3(1.1f, 0.0f, 0.0f));
-            quad1Matrices.model = glm::rotate(quad1Matrices.model, -elapsed * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-            quad1Matrices.view = view;
-            quad1Matrices.proj = proj;
-            ColorUBO quad1Color{};
-            quad1Color.color = glm::vec4(0.2f, 0.4f, 1.0f, 1.0f);// blue
-            quad1Alloc = upload_quad(transfer, *allocator, quad1Matrices, quad1Color);
-        }
-
-        // -- Phase 2: render using the uploaded offsets --
+        // -- render using the uploaded offsets --
         {
             duk::rhi::RenderBeginParams renderBeginParams;
             renderBeginParams.clearColor = glm::vec4(0.05f, 0.05f, 0.05f, 1.0f);
@@ -332,9 +326,10 @@ int main() {
             // Shader, vertex buffer, and index buffer are shared by all quads.
             render.bind_shader(shader.get(), pipelineState);
 
-            const duk::rhi::Buffer* vertexBuffers[] = {positionBuffer.get()};
-            render.bind_vertex_buffers(vertexBuffers, 1);
-            render.bind_index_buffer(indexBuffer.get());
+            duk::rhi::ShaderInput input;
+            input.vertex[0] = duk::rhi::BufferResource{positionBuffer.get(), 0};
+            input.index = {duk::rhi::BufferResource{indexBuffer.get(), 0}, duk::rhi::IndexType::UINT16};
+            render.bind_input(input);
 
             // Quad 0: left, red, rotates counter-clockwise
             draw_quad(render, *allocator->buffer(), matricesSlot, colorSlot, quad0Alloc);

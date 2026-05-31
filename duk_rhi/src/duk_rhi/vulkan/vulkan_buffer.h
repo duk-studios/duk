@@ -16,7 +16,6 @@ struct VulkanBufferCreateInfo {
     size_t size;
     VkBufferUsageFlags usageFlags;
     VkMemoryPropertyFlags memoryFlags;
-    VkIndexType indexType{VK_INDEX_TYPE_MAX_ENUM};///< Only meaningful for index buffers.
     VkDevice device;
     const VulkanPhysicalDevice* physicalDevice;
 };
@@ -34,42 +33,34 @@ public:
 
     DUK_NO_DISCARD VkMemoryPropertyFlags memory_flags() const;
 
-    /// Only valid for index buffers (VK_BUFFER_USAGE_INDEX_BUFFER_BIT).
-    DUK_NO_DISCARD VkIndexType index_type() const;
-
-    /// Write directly into host-visible memory (no command buffer required).
-    /// Caller must ensure memory_flags() includes VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT.
-    void write(const void* src, size_t size, size_t offset);
-
-    /// Read directly from host-visible memory.
-    /// Caller must ensure memory_flags() includes VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT.
-    void read(void* dst, size_t size, size_t offset) const;
-
     /// Maps the entire buffer into CPU address space persistently and returns the base pointer.
     /// Caller must ensure memory_flags() includes VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT.
-    void* map();
+    void* map(size_t offset, size_t size);
 
     /// Unmaps a previously mapped buffer.  No-op if not currently mapped.
     void unmap();
 
     /// Flushes the given byte range of mapped memory to make CPU writes visible to the GPU.
-    /// No-op when the memory is HOST_COHERENT (which is the common case for dynamic buffers).
-    void flush(size_t offset, size_t size);
+    /// No-op when the memory is HOST_COHERENT
+    void flush(size_t offset, size_t size) const;
 
-    /// Returns the currently mapped base pointer, or nullptr if not mapped.
-    DUK_NO_DISCARD void* mapped_ptr() const;
+    /// Invalidates the given byte range of mapped memory to make GPU writes visible to the CPU.
+    /// No-op when the memory is HOST_COHERENT
+    void invalidate(size_t offset, size_t size) const;
 
     // -----------------------------------------------------------------------
     // Buffer public interface (read-only metadata)
     // -----------------------------------------------------------------------
     DUK_NO_DISCARD size_t size() const override;
 
+
+    DUK_NO_DISCARD void* data() const override;
+
 private:
     VkDevice m_device;
     size_t m_size;
     VkBufferUsageFlags m_usageFlags{0};
     VkMemoryPropertyFlags m_memoryFlags{0};
-    VkIndexType m_indexType{VK_INDEX_TYPE_MAX_ENUM};
     VkBuffer m_buffer{VK_NULL_HANDLE};
     VkDeviceMemory m_memory{VK_NULL_HANDLE};
     void* m_mapped{nullptr};

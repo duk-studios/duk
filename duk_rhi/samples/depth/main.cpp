@@ -202,7 +202,7 @@ int main() {
     auto positionBuffer = ctx->create_buffer(positionBufferCreateInfo);
 
     duk::rhi::BufferCreateInfo indexBufferCreateInfo = {};
-    indexBufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX_16;
+    indexBufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX;
     indexBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
     indexBufferCreateInfo.size = sizeof(kIndices);
     auto indexBuffer = ctx->create_buffer(indexBufferCreateInfo);
@@ -225,8 +225,8 @@ int main() {
     ctx->prepare();
     {
         auto transfer = ctx->transfer();
-        transfer.write_buffer(positionBuffer.get(), kPositions, sizeof(kPositions), 0);
-        transfer.write_buffer(indexBuffer.get(), kIndices, sizeof(kIndices), 0);
+        transfer.copy_to_buffer(positionBuffer.get(), 0, sizeof(kPositions), kPositions);
+        transfer.copy_to_buffer(indexBuffer.get(), 0, sizeof(kIndices), kIndices);
     }
     ctx->submit();
 
@@ -286,12 +286,9 @@ int main() {
 
         ctx->prepare_present();
 
-        {
-            auto transfer = ctx->transfer();
-            transfer.write_buffer(cameraUBOBuffer.get(), &cameraUbo, sizeof(cameraUbo), 0);
-            transfer.write_buffer(objectUBOBufferA.get(), &objectUboA, sizeof(objectUboA), 0);
-            transfer.write_buffer(objectUBOBufferB.get(), &objectUboB, sizeof(objectUboB), 0);
-        }
+        cameraUBOBuffer->write(cameraUbo);
+        objectUBOBufferA->write(objectUboA);
+        objectUBOBufferB->write(objectUboB);
 
         {
             duk::rhi::RenderBeginParams renderBeginParams;
@@ -301,26 +298,28 @@ int main() {
 
             auto render = ctx->render(renderBeginParams);
 
-            const duk::rhi::Buffer* vertexBuffers[] = {positionBuffer.get()};
-            render.bind_vertex_buffers(vertexBuffers, 1);
-            render.bind_index_buffer(indexBuffer.get());
+            duk::rhi::ShaderInput input = {};
+            input.vertex[0] = {positionBuffer.get()};
+            input.index.resource = {indexBuffer.get()};
+            input.index.type = duk::rhi::IndexType::UINT16;
+            render.bind_input(input);
 
             duk::rhi::DrawIndexedParams drawParams;
             drawParams.indexCount = kIndexCount;
             drawParams.instanceCount = 1;
 
             // Draw cube A
-            duk::rhi::ShaderResources resourcesA{};
-            resourcesA.bindings[cameraSlot] = duk::rhi::BufferBinding{cameraUBOBuffer.get()};
-            resourcesA.bindings[objectSlot] = duk::rhi::BufferBinding{objectUBOBufferA.get()};
+            duk::rhi::ShaderBindings resourcesA{};
+            resourcesA.resources[cameraSlot] = duk::rhi::BufferResource{cameraUBOBuffer.get()};
+            resourcesA.resources[objectSlot] = duk::rhi::BufferResource{objectUBOBufferA.get()};
             render.bind_shader(shader.get(), pipelineState);
             render.bind_resources(resourcesA);
             render.draw_indexed(drawParams);
 
             // Draw cube B
-            duk::rhi::ShaderResources resourcesB{};
-            resourcesB.bindings[cameraSlot] = duk::rhi::BufferBinding{cameraUBOBuffer.get()};
-            resourcesB.bindings[objectSlot] = duk::rhi::BufferBinding{objectUBOBufferB.get()};
+            duk::rhi::ShaderBindings resourcesB{};
+            resourcesB.resources[cameraSlot] = duk::rhi::BufferResource{cameraUBOBuffer.get()};
+            resourcesB.resources[objectSlot] = duk::rhi::BufferResource{objectUBOBufferB.get()};
             render.bind_shader(shader.get(), pipelineState);
             render.bind_resources(resourcesB);
             render.draw_indexed(drawParams);

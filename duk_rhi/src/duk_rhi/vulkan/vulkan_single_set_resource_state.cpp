@@ -17,23 +17,23 @@ namespace duk::rhi {
 
 namespace detail {
 
-static duk::hash::Hash hash_resources(const ShaderBindingLayout& layout, const ShaderResources& resources) {
+static duk::hash::Hash hash_resources(const ShaderBindingLayout& layout, const ShaderBindings& resources) {
     duk::hash::Hash h = 0;
     for (uint32_t i = 0; i < static_cast<uint32_t>(layout.size()); i++) {
         std::visit(
                 [&h](auto&& res) {
                     using T = std::decay_t<decltype(res)>;
-                    if constexpr (std::is_same_v<T, BufferBinding>) {
+                    if constexpr (std::is_same_v<T, BufferResource>) {
                         // All buffers are dynamic: offset is supplied at bind time via the
                         // dynamic offset array and must NOT be in the hash — the same
                         // descriptor set is reused for every offset into the same buffer.
                         duk::hash::hash_combine(h, reinterpret_cast<uintptr_t>(res.buffer));
-                    } else if constexpr (std::is_same_v<T, ImageBinding>) {
+                    } else if constexpr (std::is_same_v<T, ImageResource>) {
                         duk::hash::hash_combine(h, reinterpret_cast<uintptr_t>(res.image));
                         duk::hash::hash_combine(h, std::hash<Sampler>{}(res.sampler));
                     }
                 },
-                resources.bindings[i]);
+                resources.resources[i]);
     }
     return h;
 }
@@ -59,7 +59,7 @@ VkPipelineLayout VulkanSingleSetResourceState::pipeline_layout(const ShaderBindi
     return m_descriptorSetLayoutCache->get_pipeline_layout(bindingLayout);
 }
 
-void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, const VulkanShader& shader, const ShaderResources& resources, uint32_t frameIndex) {
+void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, const VulkanShader& shader, const ShaderBindings& resources, uint32_t frameIndex) {
     const auto& bindingLayout = shader.binding_layout();
     if (bindingLayout.empty()) {
         return;
@@ -84,7 +84,7 @@ void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer,
 
         for (uint32_t i = 0; i < static_cast<uint32_t>(bindingLayout.size()); i++) {
             const auto& bindingDesc = bindingLayout[i];
-            const auto& resource = resources.bindings[i];
+            const auto& resource = resources.resources[i];
 
             VkWriteDescriptorSet write = {};
             write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -97,7 +97,7 @@ void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer,
             bool valid = std::visit(
                     [&](auto&& res) -> bool {
                         using T = std::decay_t<decltype(res)>;
-                        if constexpr (std::is_same_v<T, BufferBinding>) {
+                        if constexpr (std::is_same_v<T, BufferResource>) {
                             if (!res.buffer) {
                                 return false;
                             }
@@ -113,7 +113,7 @@ void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer,
                             info.range = std::min<VkDeviceSize>(bufferBinding.size, res.buffer->size());
                             write.pBufferInfo = &info;
                             return true;
-                        } else if constexpr (std::is_same_v<T, ImageBinding>) {
+                        } else if constexpr (std::is_same_v<T, ImageResource>) {
                             if (!res.image) {
                                 return false;
                             }
@@ -154,7 +154,7 @@ void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer,
         const VkDeviceSize alignment = isUniform ? m_uniformBufferOffsetAlignment : m_storageBufferOffsetAlignment;
 
         uint32_t offset = 0;
-        if (const auto* bb = std::get_if<BufferBinding>(&resources.bindings[i])) {
+        if (const auto* bb = std::get_if<BufferResource>(&resources.resources[i])) {
             // Assert device alignment requirements in debug builds.
             DUK_ASSERT(alignment == 0 || (bb->offset % alignment) == 0);
             offset = bb->offset;

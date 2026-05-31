@@ -18,6 +18,8 @@
 
 #include <memory>
 
+#include "index_types.h"
+
 namespace duk::rhi {
 
 class CommandQueue;
@@ -40,28 +42,35 @@ struct ImageCreateInfo {
     Image::Usage usage;
 };
 
-/// Binds a sampled image (texture + sampler pair) to a logical descriptor slot.
-struct ImageBinding {
+struct ImageResource {
     const Image* image{nullptr};
     Sampler sampler{};
 };
 
-/// Binds a buffer (uniform or storage) to a logical descriptor slot.
-struct BufferBinding {
+struct BufferResource {
     const Buffer* buffer{nullptr};
     uint32_t offset{0};
 };
 
 /// A single resource bound to one logical descriptor slot.
 /// std::monostate means the slot is unused.
-using ShaderResource = std::variant<std::monostate, ImageBinding, BufferBinding>;
+using ShaderResource = std::variant<std::monostate, ImageResource, BufferResource>;
 
 static constexpr uint32_t kMaxShaderBindings = 32;
 
 /// Flat array of resources indexed by logical binding slot.
-/// Each slot index corresponds to the generated enum value for the named descriptor.
-struct ShaderResources {
-    std::array<ShaderResource, kMaxShaderBindings> bindings{};
+struct ShaderBindings {
+    std::array<ShaderResource, kMaxShaderBindings> resources{};
+};
+
+static constexpr uint32_t kMaxVertexShaderInputs = 16;
+
+struct ShaderInput {
+    std::array<BufferResource, kMaxVertexShaderInputs> vertex;
+    struct {
+        BufferResource resource;
+        IndexType type{IndexType::NONE};
+    } index;
 };
 
 struct RenderBeginParams {
@@ -108,11 +117,9 @@ public:
 
     void bind_shader(const Shader* shader, const PipelineState& pipelineState) const;
 
-    void bind_resources(const ShaderResources& resources) const;
+    void bind_resources(const ShaderBindings& resources) const;
 
-    void bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) const;
-
-    void bind_index_buffer(const Buffer* indexBuffer) const;
+    void bind_input(const ShaderInput& input) const;
 
     void draw(const DrawParams& params) const;
 
@@ -129,7 +136,7 @@ public:
 
     void bind_shader(const Shader* shader) const;
 
-    void bind_resources(const ShaderResources& resources) const;
+    void bind_resources(const ShaderBindings& resources) const;
 
     void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) const;
 };
@@ -142,9 +149,9 @@ public:
 
     void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) const;
 
-    void write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) const;
+    void copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const void* src) const;
 
-    void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) const;
+    void copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const Buffer* src, size_t srcOffset) const;
 };
 
 /// Shared, device-level context for resource creation, surface operations,
@@ -198,11 +205,9 @@ public:
 
     virtual void bind_render_shader(const Shader* shader, const PipelineState& pipelineState) = 0;
 
-    virtual void bind_resources(const ShaderResources& resources) = 0;
+    virtual void bind_resources(const ShaderBindings& resources) = 0;
 
-    virtual void bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) = 0;
-
-    virtual void bind_index_buffer(const Buffer* indexBuffer) = 0;
+    virtual void bind_input(const ShaderInput& vertexInput) = 0;
 
     virtual void draw(const DrawParams& params) = 0;
 
@@ -230,15 +235,17 @@ public:
 
     virtual void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) = 0;
 
-    virtual void write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) = 0;
-
-    virtual void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) = 0;
-
-    virtual void map_buffer(Buffer* buffer) = 0;
+    virtual void map_buffer(Buffer* buffer, size_t size, size_t offset) = 0;
 
     virtual void unmap_buffer(Buffer* buffer) = 0;
 
     virtual void flush_buffer(Buffer* buffer, size_t offset, size_t size) = 0;
+
+    virtual void invalidate_buffer(Buffer* buffer, size_t offset, size_t size) = 0;
+
+    virtual void copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const void* src) = 0;
+
+    virtual void copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const Buffer* src, size_t srcOffset) = 0;
 
 private:
     friend ScopedCommands;

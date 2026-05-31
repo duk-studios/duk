@@ -25,8 +25,7 @@ namespace detail {
 static VkBufferUsageFlags buffer_usage_flags(Buffer::Type type) {
     VkBufferUsageFlags flags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
     switch (type) {
-        case Buffer::Type::INDEX_16:
-        case Buffer::Type::INDEX_32:
+        case Buffer::Type::INDEX:
             flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
             break;
         case Buffer::Type::VERTEX:
@@ -54,11 +53,11 @@ static VkMemoryPropertyFlags buffer_memory_flags(Buffer::UpdateFrequency freq) {
     return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 }
 
-static VkIndexType buffer_index_type(Buffer::Type type) {
+static VkIndexType buffer_index_type(IndexType type) {
     switch (type) {
-        case Buffer::Type::INDEX_16:
+        case IndexType::UINT16:
             return VK_INDEX_TYPE_UINT16;
-        case Buffer::Type::INDEX_32:
+        case IndexType::UINT32:
             return VK_INDEX_TYPE_UINT32;
         default:
             return VK_INDEX_TYPE_MAX_ENUM;
@@ -320,13 +319,12 @@ std::shared_ptr<Buffer> VulkanCommandContext::create_buffer(const BufferCreateIn
     vulkanBufferCreateInfo.size = bufferCreateInfo.size;
     vulkanBufferCreateInfo.usageFlags = detail::buffer_usage_flags(bufferCreateInfo.type);
     vulkanBufferCreateInfo.memoryFlags = detail::buffer_memory_flags(bufferCreateInfo.updateFrequency);
-    vulkanBufferCreateInfo.indexType = detail::buffer_index_type(bufferCreateInfo.type);
     vulkanBufferCreateInfo.device = m_device;
     vulkanBufferCreateInfo.physicalDevice = &m_physicalDevice;
     auto buffer = make_managed<VulkanBuffer>(vulkanBufferCreateInfo);
     if (bufferCreateInfo.updateFrequency == Buffer::UpdateFrequency::DYNAMIC) {
         // keep dynamic buffers mapped for now
-        buffer->map();
+        buffer->map(0, VK_WHOLE_SIZE);
     }
     return buffer;
 }
@@ -380,39 +378,45 @@ void VulkanCommandContext::bind_render_shader(const Shader* shader, const Pipeli
     m_lastBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 }
 
-void VulkanCommandContext::bind_resources(const ShaderResources& resources) {
+void VulkanCommandContext::bind_resources(const ShaderBindings& resources) {
     if (m_activeCommandBuffer == VK_NULL_HANDLE || !m_lastBoundShader) {
         return;
     }
     m_resourceBinder->bind_resources(m_activeCommandBuffer, m_lastBindPoint, *m_lastBoundShader, resources, m_frameIndex);
 }
 
-void VulkanCommandContext::bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) {
+void VulkanCommandContext::bind_input(const ShaderInput& input) {
     if (m_activeCommandBuffer == VK_NULL_HANDLE) {
         return;
     }
-    const auto vertexBuffer = reinterpret_cast<const VulkanBuffer* const*>(vertexBuffers);
-    std::array<VkBuffer, 16> bufferHandles;
-    std::array<VkDeviceSize, 16> bufferOffsets;
-    for (uint32_t i = 0; i < count; ++i) {
-        auto buffer = vertexBuffer[i];
-        if (buffer) {
-            bufferHandles[i] = buffer->handle();
-        } else {
-            bufferHandles[i] = VK_NULL_HANDLE;
+    {
+        std::array<VkBuffer, kMaxVertexShaderInputs> buffers;
+        std::array<VkDeviceSize, kMaxVertexShaderInputs> offsets;
+        uint32_t bindCount = 0;
+        for (uint32_t i = 0; i < kMaxVertexShaderInputs; ++i) {
+            if (const auto vertexBuffer = static_cast<const VulkanBuffer*>(input.vertex[i].buffer)) {
+                buffers[i] = vertexBuffer->handle();
+                offsets[i] = input.vertex[i].offset;
+                bindCount = i + 1;
+            } else {
+                buffers[i] = VK_NULL_HANDLE;
+                offsets[i] = 0;
+            }
         }
-        bufferOffsets[i] = 0;
+        if (bindCount > 0) {
+            vkCmdBindVertexBuffers(m_activeCommandBuffer, 0, bindCount, buffers.data(), offsets.data());
+        }
     }
-    vkCmdBindVertexBuffers(m_activeCommandBuffer, 0, count, bufferHandles.data(), bufferOffsets.data());
-}
 
-void VulkanCommandContext::bind_index_buffer(const Buffer* buffer) {
-    if (m_activeCommandBuffer == VK_NULL_HANDLE) {
-        return;
+    if (input.index.type != IndexType::NONE && input.index.resource.buffer) {
+        const auto indexType = detail::buffer_index_type(input.index.type);
+        if (indexType == VK_INDEX_TYPE_MAX_ENUM) {
+            throw std::invalid_argument("unsupported index type for bind_input");
+        }
+        const auto indexBuffer = static_cast<const VulkanBuffer*>(input.index.resource.buffer);
+        vkCmdBindIndexBuffer(m_activeCommandBuffer, indexBuffer->handle(), input.index.resource.offset, indexType);
     }
-    const auto vulkanBuffer = static_cast<const VulkanBuffer*>(buffer);
-    DUK_ASSERT(vulkanBuffer->index_type() != VK_INDEX_TYPE_MAX_ENUM);
-    vkCmdBindIndexBuffer(m_activeCommandBuffer, vulkanBuffer->handle(), 0, vulkanBuffer->index_type());
+
 }
 
 void VulkanCommandContext::draw(const DrawParams& params) {
@@ -467,8 +471,8 @@ void VulkanCommandContext::write_image(Image* image, const void* src, size_t siz
     stagingCi.size = size;
 
     auto staging = std::make_unique<VulkanBuffer>(stagingCi);
-    staging->map();
-    staging->write(src, size, 0);
+    auto ptr = staging->map(0, VK_WHOLE_SIZE);
+    std::memcpy(ptr, src, size);
     staging->unmap();
 
     auto commandBuffer = m_activeCommandBuffer;
@@ -498,53 +502,8 @@ void VulkanCommandContext::write_frame_buffer(FrameBuffer* frameBuffer, const Im
     vulkanFrameBuffer->write(reinterpret_cast<const VulkanImage* const*>(attachments), attachmentCount);
 }
 
-void VulkanCommandContext::write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) {
-    if (m_activeCommandBuffer == VK_NULL_HANDLE) {
-        return;
-    }
-    auto* vulkanBuffer = static_cast<VulkanBuffer*>(buffer);
-
-    if (vulkanBuffer->memory_flags() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-        vulkanBuffer->write(src, size, offset);
-    } else {
-        // STATIC (device-local) buffer: upload via a temporary host-visible VulkanBuffer
-        // recorded into the current command buffer as a transfer source.
-        VulkanBufferCreateInfo stagingCreateInfo = {};
-        stagingCreateInfo.device = m_device;
-        stagingCreateInfo.physicalDevice = &m_physicalDevice;
-        stagingCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-        stagingCreateInfo.memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-        stagingCreateInfo.size = size;
-
-        auto staging = std::make_unique<VulkanBuffer>(stagingCreateInfo);
-        staging->map();
-        staging->write(src, size, 0);
-        staging->unmap();
-
-        VkBufferCopy region = {};
-        region.srcOffset = 0;
-        region.dstOffset = offset;
-        region.size = size;
-        vkCmdCopyBuffer(m_activeCommandBuffer, staging->handle(), vulkanBuffer->handle(), 1, &region);
-
-        // Keep the staging buffer alive until the GPU has finished using it.
-        m_deletionQueue.push(staging.release(), m_frameCounter);
-    }
-}
-
-void VulkanCommandContext::read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) {
-    if (m_activeCommandBuffer == VK_NULL_HANDLE) {
-        return;
-    }
-    auto* vulkanBuffer = static_cast<VulkanBuffer*>(buffer);
-    // Only host-visible (DYNAMIC) buffers support direct CPU reads.
-    // STATIC (device-local) reads would require a read-back staging pass — not yet implemented.
-    DUK_ASSERT(vulkanBuffer->memory_flags() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-    vulkanBuffer->read(dst, size, offset);
-}
-
-void VulkanCommandContext::map_buffer(Buffer* buffer) {
-    static_cast<VulkanBuffer*>(buffer)->map();
+void VulkanCommandContext::map_buffer(Buffer* buffer, size_t offset, size_t size) {
+    static_cast<VulkanBuffer*>(buffer)->map(offset, size);
 }
 
 void VulkanCommandContext::unmap_buffer(Buffer* buffer) {
@@ -553,6 +512,41 @@ void VulkanCommandContext::unmap_buffer(Buffer* buffer) {
 
 void VulkanCommandContext::flush_buffer(Buffer* buffer, size_t offset, size_t size) {
     static_cast<VulkanBuffer*>(buffer)->flush(offset, size);
+}
+
+void VulkanCommandContext::invalidate_buffer(Buffer* buffer, size_t offset, size_t size) {
+    static_cast<VulkanBuffer*>(buffer)->invalidate(offset, size);
+}
+
+void VulkanCommandContext::copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const void* src) {
+    // STATIC (device-local) buffer: upload via a temporary host-visible VulkanBuffer
+    // recorded into the current command buffer as a transfer source.
+    VulkanBufferCreateInfo stagingCreateInfo = {};
+    stagingCreateInfo.device = m_device;
+    stagingCreateInfo.physicalDevice = &m_physicalDevice;
+    stagingCreateInfo.usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    stagingCreateInfo.memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    stagingCreateInfo.size = size;
+
+    auto staging = std::make_unique<VulkanBuffer>(stagingCreateInfo);
+    const auto ptr = staging->map(0, VK_WHOLE_SIZE);
+    std::memcpy(ptr, src, size);
+    staging->unmap();
+
+    copy_to_buffer(buffer, offset, size, staging.get(), 0);
+
+    // Keep the staging buffer alive until the GPU has finished using it.
+    m_deletionQueue.push(staging.release(), m_frameCounter);
+}
+
+void VulkanCommandContext::copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const Buffer* src, size_t srcOffset) {
+    const auto dstBuffer = static_cast<VulkanBuffer*>(buffer);
+    const auto srcBuffer = static_cast<const VulkanBuffer*>(src);
+    VkBufferCopy region = {};
+    region.srcOffset = srcOffset;
+    region.dstOffset = offset;
+    region.size = size;
+    vkCmdCopyBuffer(m_activeCommandBuffer, srcBuffer->handle(), dstBuffer->handle(), 1, &region);
 }
 
 }// namespace duk::rhi

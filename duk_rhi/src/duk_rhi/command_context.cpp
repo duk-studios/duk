@@ -28,19 +28,14 @@ void RenderCommands::bind_shader(const Shader* shader, const PipelineState& pipe
     m_context.bind_render_shader(shader, pipelineState);
 }
 
-void RenderCommands::bind_resources(const ShaderResources& resources) const {
+void RenderCommands::bind_resources(const ShaderBindings& resources) const {
     DUK_ASSERT(valid());
     m_context.bind_resources(resources);
 }
 
-void RenderCommands::bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) const {
+void RenderCommands::bind_input(const ShaderInput& input) const {
     DUK_ASSERT(valid());
-    m_context.bind_vertex_buffers(vertexBuffers, count);
-}
-
-void RenderCommands::bind_index_buffer(const Buffer* indexBuffer) const {
-    DUK_ASSERT(valid());
-    m_context.bind_index_buffer(indexBuffer);
+    m_context.bind_input(input);
 }
 
 void RenderCommands::draw(const DrawParams& params) const {
@@ -72,7 +67,7 @@ void ComputeCommands::bind_shader(const Shader* shader) const {
     m_context.bind_compute_shader(shader);
 }
 
-void ComputeCommands::bind_resources(const ShaderResources& resources) const {
+void ComputeCommands::bind_resources(const ShaderBindings& resources) const {
     DUK_ASSERT(valid());
     m_context.bind_resources(resources);
 }
@@ -96,14 +91,14 @@ void TransferCommands::write_frame_buffer(FrameBuffer* frameBuffer, const Image*
     m_context.write_frame_buffer(frameBuffer, attachments, attachmentCount);
 }
 
-void TransferCommands::write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) const {
+void TransferCommands::copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const void* src) const {
     DUK_ASSERT(valid());
-    m_context.write_buffer(buffer, src, size, offset);
+    m_context.copy_to_buffer(buffer, offset, size, src);
 }
 
-void TransferCommands::read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) const {
+void TransferCommands::copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const Buffer* src, size_t srcOffset) const {
     DUK_ASSERT(valid());
-    m_context.read_buffer(buffer, dst, size, offset);
+    m_context.copy_to_buffer(buffer, offset, size, src, srcOffset);
 }
 
 CommandContext::~CommandContext() = default;

@@ -198,8 +198,8 @@ int main() {
     ctx->prepare();
     {
         auto transfer = ctx->transfer();
-        transfer.write_buffer(positionBuffer.get(), kPositions, sizeof(kPositions), 0);
-        transfer.write_buffer(colorBuffer.get(), kColors, sizeof(kColors), 0);
+        transfer.copy_to_buffer(positionBuffer.get(), 0, sizeof(kPositions), kPositions);
+        transfer.copy_to_buffer(colorBuffer.get(), 0, sizeof(kColors), kColors);
     }
     ctx->submit();
 
@@ -291,10 +291,7 @@ int main() {
 
         ctx->prepare_present();
 
-        {
-            auto transfer = ctx->transfer();
-            transfer.write_buffer(matricesUBO.get(), &ubo, sizeof(ubo), 0);
-        }
+        matricesUBO->write(&ubo, 0, sizeof(ubo));
 
         {
             duk::rhi::RenderBeginParams renderBeginParams;
@@ -306,12 +303,14 @@ int main() {
 
             render.bind_shader(shader.get(), pipelineState);
 
-            duk::rhi::ShaderResources resources{};
-            resources.bindings[matricesSlot] = duk::rhi::BufferBinding{matricesUBO.get()};
+            duk::rhi::ShaderBindings resources{};
+            resources.resources[matricesSlot] = duk::rhi::BufferResource{matricesUBO.get()};
             render.bind_resources(resources);
 
-            const duk::rhi::Buffer* vertexBuffers[] = {positionBuffer.get(), colorBuffer.get()};
-            render.bind_vertex_buffers(vertexBuffers, 2);
+            duk::rhi::ShaderInput input{};
+            input.vertex[0] = duk::rhi::BufferResource{positionBuffer.get()};
+            input.vertex[1] = duk::rhi::BufferResource{colorBuffer.get()};
+            render.bind_input(input);
 
             duk::rhi::DrawParams drawParams;
             drawParams.vertexCount = kVertexCount;

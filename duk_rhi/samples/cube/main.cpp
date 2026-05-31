@@ -219,7 +219,7 @@ int main() {
 
     // Index buffer — static, uploaded once at startup.
     duk::rhi::BufferCreateInfo indexBufferCreateInfo = {};
-    indexBufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX_16;
+    indexBufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX;
     indexBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
     indexBufferCreateInfo.size = sizeof(kIndices);
     auto indexBuffer = ctx->create_buffer(indexBufferCreateInfo);
@@ -242,9 +242,9 @@ int main() {
     ctx->prepare();
     {
         auto transfer = ctx->transfer();
-        transfer.write_buffer(positionBuffer.get(), kPositions, sizeof(kPositions), 0);
-        transfer.write_buffer(colorBuffer.get(), kColors, sizeof(kColors), 0);
-        transfer.write_buffer(indexBuffer.get(), kIndices, sizeof(kIndices), 0);
+        transfer.copy_to_buffer(positionBuffer.get(), 0, sizeof(kPositions), kPositions);
+        transfer.copy_to_buffer(colorBuffer.get(), 0, sizeof(kColors), kColors);
+        transfer.copy_to_buffer(indexBuffer.get(), 0, sizeof(kIndices), kIndices);
     }
     ctx->submit();
 
@@ -295,12 +295,11 @@ int main() {
 
         // Upload per-frame UBO.
         {
-            auto transfer = ctx->transfer();
-            transfer.write_buffer(matricesUBO.get(), &ubo, sizeof(ubo), 0);
+            std::memcpy(matricesUBO->data(), &ubo, sizeof(ubo));
 
             ColorUBO colorUbo{};
             colorUbo.intensity = (glm::sin(elapsed * 2.0f) + 1.0f) * 0.5f;
-            transfer.write_buffer(colorUBO.get(), &colorUbo, sizeof(colorUbo), 0);
+            std::memcpy(colorUBO->data(), &colorUbo, sizeof(colorUBO));
         }
 
         // Render pass.
@@ -312,17 +311,20 @@ int main() {
 
             auto render = ctx->render(renderBeginParams);
 
-            // Bind the uniform buffer at the logical slot resolved by name.
-            duk::rhi::ShaderResources resources{};
-            resources.bindings[matricesSlot] = duk::rhi::BufferBinding{matricesUBO.get()};
-            resources.bindings[colorSlot] = duk::rhi::BufferBinding{colorUBO.get()};
-
             render.bind_shader(shader.get(), pipelineState);
+
+            // Bind the uniform buffer at the logical slot resolved by name.
+            duk::rhi::ShaderBindings resources{};
+            resources.resources[matricesSlot] = duk::rhi::BufferResource{matricesUBO.get()};
+            resources.resources[colorSlot] = duk::rhi::BufferResource{colorUBO.get()};
             render.bind_resources(resources);
 
-            const duk::rhi::Buffer* vertexBuffers[] = {positionBuffer.get(), colorBuffer.get()};
-            render.bind_vertex_buffers(vertexBuffers, 2);
-            render.bind_index_buffer(indexBuffer.get());
+            duk::rhi::ShaderInput input{};
+            input.vertex[0] = {positionBuffer.get()};
+            input.vertex[1] = {colorBuffer.get()};
+            input.index.resource = {indexBuffer.get()};
+            input.index.type = duk::rhi::IndexType::UINT16;
+            render.bind_input(input);
 
             duk::rhi::DrawIndexedParams drawParams;
             drawParams.indexCount = kIndexCount;

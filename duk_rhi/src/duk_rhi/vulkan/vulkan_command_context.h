@@ -55,9 +55,8 @@ public:
     // -----------------------------------------------------------------------
     void render_begin(const RenderBeginParams& params) override;
     void bind_render_shader(const Shader* shader, const PipelineState& pipelineState) override;
-    void bind_resources(const ShaderResources& resources) override;
-    void bind_vertex_buffers(const Buffer* const* vertexBuffers, uint32_t count) override;
-    void bind_index_buffer(const Buffer* indexBuffer) override;
+    void bind_resources(const ShaderBindings& resources) override;
+    void bind_input(const ShaderInput& input) override;
     void draw(const DrawParams& params) override;
     void draw_indirect(const std::span<const DrawParams>& indirectParams) override;
     void draw_indexed(const DrawIndexedParams& params) override;
@@ -67,11 +66,12 @@ public:
     void dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ) override;
     void write_image(Image* image, const void* src, size_t size) override;
     void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) override;
-    void write_buffer(Buffer* buffer, const void* src, size_t size, size_t offset) override;
-    void read_buffer(Buffer* buffer, void* dst, size_t size, size_t offset) override;
-    void map_buffer(Buffer* buffer) override;
+    void map_buffer(Buffer* buffer, size_t offset, size_t size) override;
     void unmap_buffer(Buffer* buffer) override;
     void flush_buffer(Buffer* buffer, size_t offset, size_t size) override;
+    void invalidate_buffer(Buffer* buffer, size_t offset, size_t size) override;
+    void copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const void* src) override;
+    void copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const Buffer* src, size_t srcOffset) override;
 
 private:
     template<typename T, typename... Args>

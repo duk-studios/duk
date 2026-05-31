@@ -30,7 +30,7 @@ public:
 
     DUK_NO_DISCARD VkPipelineLayout pipeline_layout(const ShaderBindingLayout& bindingLayout) override;
 
-    void bind_resources(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, const VulkanShader& shader, const ShaderResources& resources, uint32_t frameIndex) override;
+    void bind_resources(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, const VulkanShader& shader, const ShaderBindings& resources, uint32_t frameIndex) override;
 
 private:
     VkDevice m_device;

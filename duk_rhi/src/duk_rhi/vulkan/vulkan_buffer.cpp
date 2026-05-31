@@ -12,8 +12,7 @@ VulkanBuffer::VulkanBuffer(const VulkanBufferCreateInfo& createInfo)
     : m_device(createInfo.device)
     , m_size(createInfo.size)
     , m_usageFlags(createInfo.usageFlags)
-    , m_memoryFlags(createInfo.memoryFlags)
-    , m_indexType(createInfo.indexType) {
+    , m_memoryFlags(createInfo.memoryFlags) {
     VkBufferCreateInfo bufferInfo = {};
     bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
     bufferInfo.size = m_size;
@@ -61,33 +60,14 @@ VkMemoryPropertyFlags VulkanBuffer::memory_flags() const {
     return m_memoryFlags;
 }
 
-VkIndexType VulkanBuffer::index_type() const {
-    return m_indexType;
-}
-
-void VulkanBuffer::write(const void* src, size_t size, size_t offset) {
-    DUK_ASSERT(m_mapped != nullptr);
-    std::memcpy(static_cast<char*>(m_mapped) + offset, src, size);
-}
-
-void VulkanBuffer::read(void* dst, size_t size, size_t offset) const {
-    DUK_ASSERT(m_memoryFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-    void* mapped = nullptr;
-    if (vkMapMemory(m_device, m_memory, offset, size, 0, &mapped) != VK_SUCCESS) {
-        throw std::runtime_error("VulkanBuffer::read: failed to map memory");
-    }
-    std::memcpy(dst, mapped, size);
-    vkUnmapMemory(m_device, m_memory);
-}
-
 size_t VulkanBuffer::size() const {
     return m_size;
 }
 
-void* VulkanBuffer::map() {
+void* VulkanBuffer::map(size_t offset, size_t size) {
     DUK_ASSERT(m_memoryFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
     if (!m_mapped) {
-        if (vkMapMemory(m_device, m_memory, 0, VK_WHOLE_SIZE, 0, &m_mapped) != VK_SUCCESS) {
+        if (vkMapMemory(m_device, m_memory, offset, size, 0, &m_mapped) != VK_SUCCESS) {
             throw std::runtime_error("VulkanBuffer::map: failed to map memory");
         }
     }
@@ -101,7 +81,7 @@ void VulkanBuffer::unmap() {
     }
 }
 
-void VulkanBuffer::flush(size_t offset, size_t size) {
+void VulkanBuffer::flush(size_t offset, size_t size) const {
     // Flushing is only necessary when memory is not HOST_COHERENT.
     if (m_memoryFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) {
         return;
@@ -114,7 +94,19 @@ void VulkanBuffer::flush(size_t offset, size_t size) {
     vkFlushMappedMemoryRanges(m_device, 1, &range);
 }
 
-void* VulkanBuffer::mapped_ptr() const {
+void VulkanBuffer::invalidate(size_t offset, size_t size) const {
+    if (m_memoryFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) {
+        return;
+    }
+    VkMappedMemoryRange range = {};
+    range.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    range.memory = m_memory;
+    range.offset = static_cast<VkDeviceSize>(offset);
+    range.size = static_cast<VkDeviceSize>(size);
+    vkInvalidateMappedMemoryRanges(m_device, 1, &range);
+}
+
+void* VulkanBuffer::data() const {
     return m_mapped;
 }
 

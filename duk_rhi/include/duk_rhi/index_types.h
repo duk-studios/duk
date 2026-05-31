@@ -14,16 +14,10 @@ enum class IndexType {
     UINT32
 };
 
-bool is_index_buffer(Buffer::Type type);
-
-IndexType index_type_from_buffer_type(Buffer::Type type);
-
-Buffer::Type buffer_type_from_index_type(IndexType indexType);
-
 size_t index_size(IndexType indexType);
 
 template<typename T>
-inline IndexType index_type() = delete;
+IndexType index_type() = delete;
 
 template<>
 inline IndexType index_type<uint16_t>() {
