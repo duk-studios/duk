@@ -1,7 +1,7 @@
 #ifndef DUK_CAMERA_GLSL
 #define DUK_CAMERA_GLSL
 
-layout(set = 0, binding = 0) uniform CameraUBO {
+uniform CameraUBO {
     mat4 view;
     mat4 invView;
     mat4 proj;

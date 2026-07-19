@@ -10,6 +10,8 @@
 #include <duk_rhi/pipeline_state.h>
 #include <duk_rhi/shader.h>
 #include <duk_rhi/shader_data_source.h>
+#include <duk_rhi/index_types.h>
+#include <duk_rhi/vertex_layout.h>
 
 #include <array>
 #include <variant>
@@ -17,8 +19,6 @@
 #include <duk_macros/macros.h>
 
 #include <memory>
-
-#include "index_types.h"
 
 namespace duk::rhi {
 
@@ -56,14 +56,12 @@ struct BufferResource {
 /// std::monostate means the slot is unused.
 using ShaderResource = std::variant<std::monostate, ImageResource, BufferResource>;
 
-static constexpr uint32_t kMaxShaderBindings = 32;
+static constexpr uint32_t kMaxShaderBindings = 16;
 
 /// Flat array of resources indexed by logical binding slot.
 struct ShaderBindings {
     std::array<ShaderResource, kMaxShaderBindings> resources{};
 };
-
-static constexpr uint32_t kMaxVertexShaderInputs = 16;
 
 struct ShaderInput {
     std::array<BufferResource, kMaxVertexShaderInputs> vertex;

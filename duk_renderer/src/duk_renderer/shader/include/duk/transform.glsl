@@ -1,14 +1,14 @@
 #ifndef DUK_TRANSFORM_GLSL
 #define DUK_TRANSFORM_GLSL
 
-#include "duk/instance.glsl"
+#include "instance.glsl"
 
 struct Transform {
     mat4 model;
     mat4 invModel;
 };
 
-layout(set = 0, binding = 1) readonly buffer TransformSBO {
+buffer TransformSBO {
     DUK_INSTANCE_DECLARE(Transform);
 } uTransform;
 

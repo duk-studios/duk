@@ -7,11 +7,11 @@ struct Properties {
     vec4 color;
 };
 
-layout(binding = 2) readonly buffer PropertiesSBO {
+readonly buffer PropertiesSBO {
     DUK_INSTANCE_DECLARE(Properties);
 } uProperties;
 
-layout(binding = 3) uniform sampler2D uBaseColor;
+uniform sampler2D uBaseColor;
 
 layout(location = 0) in vec3 vPosition;
 layout(location = 1) in vec3 vNormal;

@@ -350,10 +350,11 @@ static std::string build_source_content(
 GeneratedFiles generate_shader_data_source(
         const std::string& shaderName,
         const std::string& outputNamespace,
+        const std::string& headerIncludeDirectory,
         const duk::rhi::RuntimeShaderDataSource& source) {
     const auto fileName = shaderName + "_shader_data_source";
     const auto className = duk::tools::snake_to_pascal(shaderName) + "ShaderDataSource";
-    const auto headerIncludePath = fileName + ".h";
+    const auto headerIncludePath = headerIncludeDirectory + "/" + fileName + ".h";
 
     return GeneratedFiles{
             detail::build_header_content(fileName, className, outputNamespace, source),
@@ -362,7 +363,8 @@ GeneratedFiles generate_shader_data_source(
 }
 
 void write_shader_data_source(const Options& options, const duk::rhi::RuntimeShaderDataSource& source) {
-    const auto files = generate_shader_data_source(options.shaderName, options.outputNamespace, source);
+    const auto& includeDir = options.headerIncludePrefix.empty() ? options.outputIncludeDirectory : options.headerIncludePrefix;
+    const auto files = generate_shader_data_source(options.shaderName, options.outputNamespace, includeDir, source);
     const auto fileName = options.shaderName + "_shader_data_source";
 
     detail::write_file(files.headerContent, std::filesystem::path(options.outputIncludeDirectory) / (fileName + ".h"));

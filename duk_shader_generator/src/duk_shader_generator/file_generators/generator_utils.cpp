@@ -4,6 +4,7 @@
 #include <duk_shader_generator/file_generators/generator_utils.h>
 
 #include <cctype>
+#include <unordered_map>
 
 namespace duk::shader_generator::utils {
 
@@ -78,6 +79,24 @@ std::string module_mask_expression(duk::rhi::ShaderModule::Mask mask) {
     }
 
     return oss.str();
+}
+
+const std::string& glsl_to_cpp(const std::string& glslType) {
+    static const std::unordered_map<std::string, std::string> kMapping = {
+            {"bool",   "bool"},      {"int",    "int32_t"},  {"uint",   "uint32_t"},
+            {"float",  "float"},     {"double", "double"},
+            {"vec2",   "glm::vec2"}, {"vec3",   "glm::vec3"}, {"vec4",   "glm::vec4"},
+            {"ivec2",  "glm::ivec2"},{"ivec3",  "glm::ivec3"},{"ivec4",  "glm::ivec4"},
+            {"uvec2",  "glm::uvec2"},{"uvec3",  "glm::uvec3"},{"uvec4",  "glm::uvec4"},
+            {"dvec2",  "glm::dvec2"},{"dvec3",  "glm::dvec3"},{"dvec4",  "glm::dvec4"},
+            {"mat2",   "glm::mat2"}, {"mat3",   "glm::mat3"}, {"mat4",   "glm::mat4"},
+            {"mat2x2", "glm::mat2x2"},{"mat2x3","glm::mat2x3"},{"mat2x4","glm::mat2x4"},
+            {"mat3x2", "glm::mat3x2"},{"mat3x3","glm::mat3x3"},{"mat3x4","glm::mat3x4"},
+            {"mat4x2", "glm::mat4x2"},{"mat4x3","glm::mat4x3"},{"mat4x4","glm::mat4x4"},
+            {"dmat2",  "glm::dmat2"},{"dmat3",  "glm::dmat3"},{"dmat4",  "glm::dmat4"},
+    };
+    auto it = kMapping.find(glslType);
+    return it != kMapping.end() ? it->second : glslType;
 }
 
 }// namespace duk::shader_generator::utils

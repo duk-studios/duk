@@ -18,7 +18,7 @@ struct PointLight {
     float quadratic;
 };
 
-layout (set = 0, binding = 2) uniform LightsUBO {
+uniform LightsUBO {
     DirectionalLight directionalLights[8];
     int directionalLightCount;
     PointLight pointLights[32];

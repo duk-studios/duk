@@ -19,13 +19,13 @@ struct Properties {
     vec2 uvScale;
 };
 
-layout(binding = 3) readonly buffer PropertiesUBO {
+readonly buffer PropertiesUBO {
     DUK_INSTANCE_DECLARE(Properties);
 } uProperties;
 
-layout(binding = 4) uniform sampler2D uBaseColor;
-layout(binding = 5) uniform sampler2D uSpecular;
-layout(binding = 6) uniform sampler2D uEmissive;
+uniform sampler2D uBaseColor;
+uniform sampler2D uSpecular;
+uniform sampler2D uEmissive;
 
 void main() {
     vec3 view = normalize(duk_camera_position() - vPosition);

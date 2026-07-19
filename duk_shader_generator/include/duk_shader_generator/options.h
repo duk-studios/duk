@@ -13,17 +13,20 @@
 namespace duk::shader_generator {
 
 struct Options {
+    // Output config
     std::string outputSourceDirectory;
     std::string outputIncludeDirectory;
-    std::string shaderName;
+    std::string outputHeaderIncludePrefix;
     std::string outputNamespace;
-    std::unordered_map<duk::rhi::ShaderModule::Bits, std::string> inputGlslPaths;
+    std::string outputShaderName;
+
+    // Input
     std::vector<std::string> includeDirectories;
+    std::unordered_map<duk::rhi::ShaderModule::Bits, std::string> modulePaths;
+
     duk::rhi::OptimizationLevel optimizationLevel = duk::rhi::OptimizationLevel::PERFORMANCE;
-    bool printDebugInfo = false;
 };
 
 }// namespace duk::shader_generator
 
 #endif// DUK_SHADER_GENERATOR_OPTIONS_H
-

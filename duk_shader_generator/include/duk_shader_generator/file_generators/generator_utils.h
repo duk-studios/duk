@@ -33,6 +33,14 @@ void generate_namespace_end(std::ostringstream& oss, const std::string& namespac
 DUK_NO_DISCARD std::string module_mask_expression(duk::rhi::ShaderModule::Mask mask);
 
 // ---------------------------------------------------------------------------
+// GLSL → C++ type name mapping
+// ---------------------------------------------------------------------------
+
+// Returns the C++ type name for a GLSL primitive/vector/matrix type name.
+// Returns the input unchanged for struct types (they are user-defined).
+DUK_NO_DISCARD const std::string& glsl_to_cpp(const std::string& glslType);
+
+// ---------------------------------------------------------------------------
 // Generic iteration helper
 // ---------------------------------------------------------------------------
 

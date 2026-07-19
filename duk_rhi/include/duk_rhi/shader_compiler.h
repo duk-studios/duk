@@ -56,7 +56,11 @@ public:
 
     void add_include_directory(std::filesystem::path directory);
 
+    void add_include_directories(std::vector<std::filesystem::path> directories);
+
     void add_virtual_include(std::string path, std::string source);
+
+    void set_include_callback(std::function<void(const std::filesystem::path&, std::string_view)> callback);
 
     void set_cache(std::shared_ptr<ShaderCache> cache);
 
@@ -68,12 +72,12 @@ private:
 };
 
 /// Compiles multiple GLSL stage sources using an existing ShaderCompiler instance.
-DUK_NO_DISCARD RuntimeShaderDataSource compile(
+DUK_NO_DISCARD std::expected<RuntimeShaderDataSource, ShaderCompileError> compile(
         const ShaderCompiler& compiler,
         const std::unordered_map<ShaderModule::Bits, std::string>& glslSources);
 
 /// Compiles multiple GLSL stage sources, constructing a ShaderCompiler from the given create info.
-DUK_NO_DISCARD RuntimeShaderDataSource compile(
+DUK_NO_DISCARD std::expected<RuntimeShaderDataSource, ShaderCompileError> compile(
         const ShaderCompilerCreateInfo& createInfo,
         const std::unordered_map<ShaderModule::Bits, std::string>& glslSources);
 

@@ -10,6 +10,9 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include "duk_log/log.h"
+#include "duk_rhi/command_context.h"
+
 namespace duk::rhi {
 
 namespace detail {
@@ -148,6 +151,53 @@ static void remove_unsupported_attributes(std::vector<SpvReflectInterfaceVariabl
     });
 }
 
+static void extract_struct(StructTypeMap& types, SpvReflectBlockVariable* block) {
+    if (!block->type_description) {
+        return;
+    }
+
+    const bool isStruct = block->type_description->type_flags & SPV_REFLECT_TYPE_FLAG_STRUCT;
+    if (!isStruct || block->member_count == 0) {
+        return;
+    }
+
+    const char* rawName = block->type_description->type_name;
+    if (!rawName || rawName[0] == '\0') {
+        return;
+    }
+
+    const std::string typeName(rawName);
+    if (types.count(typeName)) {
+        for (uint32_t i = 0; i < block->member_count; i++) {
+            extract_struct(types, &block->members[i]);
+        }
+        return;
+    }
+
+    const bool isArray = block->type_description->type_flags & SPV_REFLECT_TYPE_FLAG_ARRAY;
+    const uint32_t structSize = isArray ? block->type_description->traits.array.stride : block->size;
+
+    StructDefinition def;
+    def.name = typeName;
+    def.size = structSize;
+
+    for (uint32_t i = 0; i < block->member_count; i++) {
+        auto& m = block->members[i];
+
+        StructMember member;
+        member.name = m.name ? m.name : "";
+        member.typeName = detail::member_type_name(m.type_description);
+        member.offset = m.offset;
+        member.size = m.size;
+        member.padding = m.padded_size > m.size ? m.padded_size - m.size : 0;
+        def.members.push_back(member);
+
+        extract_struct(types, &m);
+    }
+
+    types.emplace(typeName, std::move(def));
+}
+
 }// namespace detail
 
 // Canonical stage iteration order for deterministic layout merging.
@@ -230,11 +280,9 @@ VertexLayout ShaderReflection::vertex_layout() {
 
     detail::remove_unsupported_attributes(inputVariables);
 
-    std::vector<VertexInput::Format> attributes(inputVariables.size());
     for (auto* inputVariable: inputVariables) {
-        attributes.at(inputVariable->location) = detail::vertex_attribute_format(inputVariable->format);
+        vertexLayout.set(inputVariable->location, detail::vertex_attribute_format(inputVariable->format));
     }
-    vertexLayout.insert(attributes);
 
     return vertexLayout;
 }
@@ -283,6 +331,35 @@ std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>> ShaderReflection::r
 void ShaderReflection::SpvReflectShaderModuleDeleter::operator()(SpvReflectShaderModule* module) const noexcept {
     spvReflectDestroyShaderModule(module);
     delete module;
+}
+
+StructTypeMap ShaderReflection::extract_struct_types() {
+    StructTypeMap types;
+
+    for (auto stage: kStageOrder) {
+        auto it = m_stageModules.find(stage);
+        if (it == m_stageModules.end()) {
+            continue;
+        }
+        auto& mod = it->second;
+
+        uint32_t bindingCount = 0;
+        detail::check_result(spvReflectEnumerateDescriptorBindings(mod.get(), &bindingCount, nullptr));
+
+        std::vector<SpvReflectDescriptorBinding*> bindings(bindingCount);
+        detail::check_result(spvReflectEnumerateDescriptorBindings(mod.get(), &bindingCount, bindings.data()));
+
+        for (auto* spvBinding: bindings) {
+            if (spvBinding->descriptor_type != SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER &&
+                spvBinding->descriptor_type != SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER) {
+                continue;
+            }
+
+            detail::extract_struct(types, &spvBinding->block);
+        }
+    }
+
+    return types;
 }
 
 }// namespace duk::rhi

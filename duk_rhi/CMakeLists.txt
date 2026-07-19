@@ -22,6 +22,7 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/pipeline_state_stack.h
         include/duk_rhi/shader_compiler.h
         include/duk_rhi/shader_cache.h
+        include/duk_rhi/shader_reflection.h
         )
 
 set(DUK_RHI_SOURCES
@@ -34,10 +35,8 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/sampler.cpp
         src/duk_rhi/index_types.cpp
         src/duk_rhi/shader.cpp
-        src/duk_rhi/shader.cpp
         src/duk_rhi/shader_data_source.cpp
         src/duk_rhi/runtime_shader_data_source.cpp
-        src/duk_rhi/shader_reflection.h
         src/duk_rhi/shader_reflection.cpp
         src/duk_rhi/command_queue.cpp
         src/duk_rhi/command_context.cpp

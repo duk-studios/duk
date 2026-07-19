@@ -11,10 +11,12 @@
 #include <duk_math/math.h>
 
 #include <cstdint>
-#include <vector>
+#include <array>
 #include <span>
 
 namespace duk::rhi {
+
+static constexpr uint32_t kMaxVertexShaderInputs = 16;
 
 class VertexInput {
 public:
@@ -40,7 +42,7 @@ public:
 
 class VertexLayout {
 public:
-    using Container = std::vector<VertexInput::Format>;
+    using Container = std::array<VertexInput::Format, kMaxVertexShaderInputs>;
 
     VertexLayout();
 
@@ -48,15 +50,9 @@ public:
 
     void clear();
 
-    void insert(VertexInput::Format format);
+    void set(uint32_t location, VertexInput::Format format);
 
-    void insert(const std::initializer_list<VertexInput::Format>& formats);
-
-    void insert(const std::span<VertexInput::Format>& formats);
-
-    DUK_NO_DISCARD size_t size() const;
-
-    DUK_NO_DISCARD size_t byte_size() const;
+    VertexInput::Format get(uint32_t location) const;
 
     DUK_NO_DISCARD Container::iterator begin();
 
@@ -69,7 +65,7 @@ public:
     DUK_NO_DISCARD VertexInput::Format format_at(uint32_t location) const;
 
 private:
-    std::vector<VertexInput::Format> m_formats;
+    std::array<VertexInput::Format, kMaxVertexShaderInputs> m_formats;
 };
 
 //UINT8,

@@ -7,27 +7,32 @@
 #include <duk_shader_generator/generator.h>
 #include <duk_shader_generator/options.h>
 
+#include <string>
+
 namespace duk::shader_generator {
 
 class ShaderDataSourceFileGenerator : public FileGenerator {
 public:
-    ShaderDataSourceFileGenerator(const Options& options, const GeneratedShaderData& data);
+    ShaderDataSourceFileGenerator(const Options& options, const rhi::RuntimeShaderDataSource& shaderDataSource);
 
 private:
-    void generate_header_file(std::ostringstream& oss);
+    // --- shader data source header ---
+    void generate_header(std::ostringstream& oss) const;
 
-    void generate_source_file(std::ostringstream& oss);
+    void generate_class_declaration(std::ostringstream& oss) const;
 
-    void generate_class_declaration(std::ostringstream& oss);
+    // --- shader data source source ---
+    void generate_source(std::ostringstream& oss) const;
 
-    void generate_class_definition(std::ostringstream& oss);
+    void generate_class_definition(std::ostringstream& oss) const;
+
+    std::string header_include_path() const;
 
 private:
     const Options& m_options;
-    const GeneratedShaderData& m_data;
+    const rhi::RuntimeShaderDataSource& m_shaderDataSource;
     std::string m_fileName;
     std::string m_className;
-    std::string m_headerIncludePath;
 };
 
 }// namespace duk::shader_generator

@@ -13,31 +13,30 @@ duk::shader_generator::Options parse_options(int argc, char* argv[]) {
 
     // clang-format off
     cli.add_options()
-            ("v,vert", "Vertex shader GLSL source path",                       cxxopts::value<std::string>())
-            ("f,frag", "Fragment shader GLSL source path",                     cxxopts::value<std::string>())
-            ("g,geom", "Geometry shader GLSL source path",                     cxxopts::value<std::string>())
-            ("e,tese", "Tessellation Evaluation shader GLSL source path",      cxxopts::value<std::string>())
-            ("t,tesc", "Tessellation Control shader GLSL source path",         cxxopts::value<std::string>())
-            ("c,comp", "Compute shader GLSL source path",                      cxxopts::value<std::string>())
-            ("n,name", "Shader name (used to derive the generated class name)", cxxopts::value<std::string>())
-            ("s,src",  "Source output directory",                              cxxopts::value<std::string>())
-            ("i,inc",  "Include output directory",                             cxxopts::value<std::string>())
+            ("v,vert", "Vertex shader GLSL source path",                        cxxopts::value<std::string>())
+            ("f,frag", "Fragment shader GLSL source path",                      cxxopts::value<std::string>())
+            ("g,geom", "Geometry shader GLSL source path",                      cxxopts::value<std::string>())
+            ("e,tese", "Tessellation Evaluation shader GLSL source path",       cxxopts::value<std::string>())
+            ("t,tesc", "Tessellation Control shader GLSL source path",          cxxopts::value<std::string>())
+            ("c,comp", "Compute shader GLSL source path",                       cxxopts::value<std::string>())
+            ("n,name", "Shader name (used to derive the generated class name)", cxxopts::value<std::string>()->default_value(""))
+            ("s,src",  "Source output directory (shader mode only)",            cxxopts::value<std::string>()->default_value(""))
+            ("h,hdr",  "Header output directory",                               cxxopts::value<std::string>()->default_value(""))
+            ("p,prefix", "Logical include prefix used in generated #include directives (e.g. duk_renderer/shader/text)", cxxopts::value<std::string>()->default_value(""))
             ("N,namespace", "Namespace for the generated class (e.g. duk::renderer)", cxxopts::value<std::string>()->default_value(""))
-            ("I,include",   "GLSL include directory (repeatable)",             cxxopts::value<std::vector<std::string>>()->default_value(""))
-            ("O,opt",       "Optimization level: none, performance, size",     cxxopts::value<std::string>()->default_value("performance"))
-            ("d,debug", "Print debug information");
+            ("I,include",   "GLSL include directory (repeatable)",              cxxopts::value<std::vector<std::string>>()->default_value(""))
+            ("O,opt",       "Optimization level: none, performance, size",      cxxopts::value<std::string>()->default_value("performance"));
     // clang-format on
 
-    cxxopts::ParseResult result;
     try {
-        result = cli.parse(argc, argv);
+        cxxopts::ParseResult result = cli.parse(argc, argv);
 
         duk::shader_generator::Options options;
-        options.outputSourceDirectory = result["src"].as<std::string>();
-        options.outputIncludeDirectory = result["inc"].as<std::string>();
-        options.shaderName = result["name"].as<std::string>();
+        options.outputSourceDirectory  = result["src"].as<std::string>();
+        options.outputIncludeDirectory = result["hdr"].as<std::string>();
+        options.outputHeaderIncludePrefix = result["prefix"].as<std::string>();
+        options.outputShaderName = result["name"].as<std::string>();
         options.outputNamespace = result["namespace"].as<std::string>();
-        options.printDebugInfo = result.count("debug") > 0;
 
         const auto optLevel = result["opt"].as<std::string>();
         if (optLevel == "none")              options.optimizationLevel = duk::rhi::OptimizationLevel::NONE;
@@ -50,16 +49,19 @@ duk::shader_generator::Options parse_options(int argc, char* argv[]) {
             std::erase_if(options.includeDirectories, [](const std::string& s) { return s.empty(); });
         }
 
-        if (result.count("vert")) options.inputGlslPaths[duk::rhi::ShaderModule::VERTEX]                  = result["vert"].as<std::string>();
-        if (result.count("frag")) options.inputGlslPaths[duk::rhi::ShaderModule::FRAGMENT]                = result["frag"].as<std::string>();
-        if (result.count("geom")) options.inputGlslPaths[duk::rhi::ShaderModule::GEOMETRY]                = result["geom"].as<std::string>();
-        if (result.count("tesc")) options.inputGlslPaths[duk::rhi::ShaderModule::TESSELLATION_CONTROL]    = result["tesc"].as<std::string>();
-        if (result.count("tese")) options.inputGlslPaths[duk::rhi::ShaderModule::TESSELLATION_EVALUATION] = result["tese"].as<std::string>();
-        if (result.count("comp")) options.inputGlslPaths[duk::rhi::ShaderModule::COMPUTE]                 = result["comp"].as<std::string>();
+        const bool hasShaderSources = result.count("vert") || result.count("frag") || result.count("geom") ||
+                                      result.count("tesc") || result.count("tese") || result.count("comp");
 
-        if (options.inputGlslPaths.empty()) {
-            throw std::invalid_argument("no GLSL source files provided");
+        if (!hasShaderSources) {
+            throw std::invalid_argument("no GLSL modules provided (use stage flags)");
         }
+
+        if (result.count("vert")) options.modulePaths[duk::rhi::ShaderModule::VERTEX]                  = result["vert"].as<std::string>();
+        if (result.count("frag")) options.modulePaths[duk::rhi::ShaderModule::FRAGMENT]                = result["frag"].as<std::string>();
+        if (result.count("geom")) options.modulePaths[duk::rhi::ShaderModule::GEOMETRY]                = result["geom"].as<std::string>();
+        if (result.count("tesc")) options.modulePaths[duk::rhi::ShaderModule::TESSELLATION_CONTROL]    = result["tesc"].as<std::string>();
+        if (result.count("tese")) options.modulePaths[duk::rhi::ShaderModule::TESSELLATION_EVALUATION] = result["tese"].as<std::string>();
+        if (result.count("comp")) options.modulePaths[duk::rhi::ShaderModule::COMPUTE]                 = result["comp"].as<std::string>();
 
         return options;
     } catch (const std::exception&) {

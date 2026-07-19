@@ -1,14 +1,16 @@
 set(DUK_SHADER_GENERATOR_HEADERS
         include/duk_shader_generator/options.h
         include/duk_shader_generator/generator.h
+        include/duk_shader_generator/file_generators/file_generator.h
         include/duk_shader_generator/file_generators/generator_utils.h
-        include/duk_shader_generator/file_generators/shader_data_source_generator.h
+        include/duk_shader_generator/file_generators/shader_data_source_file_generator.h
         )
 
 set(DUK_SHADER_GENERATOR_CORE_SOURCES
         src/duk_shader_generator/generator.cpp
+        src/duk_shader_generator/file_generators/file_generator.cpp
         src/duk_shader_generator/file_generators/generator_utils.cpp
-        src/duk_shader_generator/file_generators/shader_data_source_generator.cpp
+        src/duk_shader_generator/file_generators/shader_data_source_file_generator.cpp
         )
 
 add_library(duk.shader_generator.core OBJECT ${DUK_SHADER_GENERATOR_HEADERS} ${DUK_SHADER_GENERATOR_CORE_SOURCES})

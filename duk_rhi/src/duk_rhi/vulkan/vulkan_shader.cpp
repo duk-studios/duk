@@ -86,10 +86,11 @@ VulkanShader::VulkanShader(const VulkanShaderCreateInfo& shaderCreateInfo)
     // -------------------------------------------------------------------------
     // Vertex input attribute and binding descriptions.
     // -------------------------------------------------------------------------
-    m_inputAttributes.reserve(m_vertexLayout.size());
-    m_inputBindings.reserve(m_vertexLayout.size());
 
     for (auto& format: m_vertexLayout) {
+        if (format == VertexInput::Format::UNDEFINED) {
+            continue;
+        }
         VkVertexInputAttributeDescription inputAttributeDescription = {};
         inputAttributeDescription.binding = static_cast<uint32_t>(m_inputAttributes.size());
         inputAttributeDescription.location = inputAttributeDescription.binding;

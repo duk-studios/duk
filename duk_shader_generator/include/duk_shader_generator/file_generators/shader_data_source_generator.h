@@ -19,9 +19,12 @@ struct GeneratedFiles {
 };
 
 /// Generates the header and source text for a ShaderDataSource subclass.
+/// headerIncludeDirectory is the logical include path used in the generated .cpp's #include directive
+/// (e.g. "duk_renderer/shader/text"), distinct from the physical outputIncludeDirectory.
 DUK_NO_DISCARD GeneratedFiles generate_shader_data_source(
         const std::string& shaderName,
         const std::string& outputNamespace,
+        const std::string& headerIncludeDirectory,
         const rhi::RuntimeShaderDataSource& source);
 
 /// Calls generate_shader_data_source and writes the two output files to disk.

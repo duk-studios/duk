@@ -55,12 +55,39 @@ public:
         m_searchPaths.push_back(std::move(path));
     }
 
+    void set_include_callback(std::function<void(const std::filesystem::path&, std::string_view)> callback) {
+        m_includeCallback = std::move(callback);
+    }
+
     void add_virtual_include(std::string path, std::string source) {
         m_virtualIncludes.emplace(std::move(path), std::move(source));
     }
 
-    shaderc_include_result* GetInclude(const char* requested_source, shaderc_include_type /*type*/, const char* /*requesting_source*/, size_t /*include_depth*/) override {
-        auto it = m_virtualIncludes.find(requested_source);
+    shaderc_include_result* GetInclude(const char* requestedSource, shaderc_include_type /*type*/, const char* requestingSource, size_t /*include_depth*/) override {
+
+        std::filesystem::path localPath(requestingSource);
+        localPath.replace_filename(requestedSource);
+        if (std::filesystem::exists(localPath)) {
+            std::ifstream file(localPath, std::ios::binary);
+            if (file) {
+                std::ostringstream ss;
+                ss << file.rdbuf();
+                auto* result = new shaderc_include_result{};
+                auto* content = new std::string(ss.str());
+                auto* sourceName = new std::string(localPath.generic_string());
+                if (m_includeCallback) {
+                    m_includeCallback(localPath, *content);
+                }
+                result->source_name = sourceName->c_str();
+                result->source_name_length = sourceName->size();
+                result->content = content->c_str();
+                result->content_length = content->size();
+                result->user_data = new std::pair<std::string*, std::string*>(sourceName, content);
+                return result;
+            }
+        }
+
+        auto it = m_virtualIncludes.find(requestedSource);
         if (it != m_virtualIncludes.end()) {
             auto* result = new shaderc_include_result{};
             auto* content = new std::string(it->second);
@@ -73,7 +100,7 @@ public:
             return result;
         }
 
-        std::filesystem::path requestedPath(requested_source);
+        std::filesystem::path requestedPath(requestedSource);
 
         for (const auto& dir: m_searchPaths) {
             auto candidate = dir / requestedPath;
@@ -85,6 +112,9 @@ public:
                     auto* result = new shaderc_include_result{};
                     auto* content = new std::string(ss.str());
                     auto* sourceName = new std::string(candidate.generic_string());
+                    if (m_includeCallback) {
+                        m_includeCallback(candidate, *content);
+                    }
                     result->source_name = sourceName->c_str();
                     result->source_name_length = sourceName->size();
                     result->content = content->c_str();
@@ -116,6 +146,7 @@ public:
 
 private:
     std::unordered_map<std::string, std::string> m_virtualIncludes;
+    std::function<void(const std::filesystem::path&, std::string_view)> m_includeCallback;
     std::vector<std::filesystem::path> m_searchPaths;
 };
 
@@ -153,6 +184,7 @@ ShaderCompiler::ShaderCompiler(const ShaderCompilerCreateInfo& createInfo)
     m_impl->options.SetAutoBindUniforms(true);
     m_impl->options.SetAutoMapLocations(true);
     m_impl->options.SetOptimizationLevel(to_shaderc_optimization(createInfo.optimizationLevel));
+    m_impl->options.SetGenerateDebugInfo();
 
     auto includer = std::make_unique<FileIncluder>();
     m_impl->includer = includer.get();
@@ -178,8 +210,18 @@ void ShaderCompiler::add_include_directory(std::filesystem::path directory) {
     m_impl->includer->add_search_path(std::move(directory));
 }
 
+void ShaderCompiler::add_include_directories(std::vector<std::filesystem::path> directories) {
+    for (auto& dir: directories) {
+        m_impl->includer->add_search_path(std::move(dir));
+    }
+}
+
 void ShaderCompiler::add_virtual_include(std::string path, std::string source) {
     m_impl->includer->add_virtual_include(std::move(path), std::move(source));
+}
+
+void ShaderCompiler::set_include_callback(std::function<void(const std::filesystem::path&, std::string_view)> callback) {
+    m_impl->includer->set_include_callback(std::move(callback));
 }
 
 void ShaderCompiler::set_cache(std::shared_ptr<ShaderCache> cache) {
@@ -227,7 +269,7 @@ std::expected<std::vector<uint8_t>, ShaderCompileError> ShaderCompiler::compile(
     }
 }
 
-RuntimeShaderDataSource compile(
+std::expected<RuntimeShaderDataSource, ShaderCompileError> compile(
         const ShaderCompiler& compiler,
         const std::unordered_map<ShaderModule::Bits, std::string>& glslSources) {
     RuntimeShaderDataSourceCreateInfo sourceCreateInfo;
@@ -235,7 +277,7 @@ RuntimeShaderDataSource compile(
     for (const auto& [stage, source]: glslSources) {
         auto result = compiler.compile(source, stage, stage_debug_name(stage));
         if (!result) {
-            duk::log::fatal("shader compilation failed ({}): {}", stage_debug_name(stage), result.error().message);
+            return std::unexpected(std::move(result.error()));
         }
         switch (stage) {
             case ShaderModule::VERTEX:                  sourceCreateInfo.vertexShaderCode = std::move(*result); break;
@@ -251,7 +293,7 @@ RuntimeShaderDataSource compile(
     return RuntimeShaderDataSource(sourceCreateInfo);
 }
 
-RuntimeShaderDataSource compile(
+std::expected<RuntimeShaderDataSource, ShaderCompileError> compile(
         const ShaderCompilerCreateInfo& createInfo,
         const std::unordered_map<ShaderModule::Bits, std::string>& glslSources) {
     return compile(ShaderCompiler(createInfo), glslSources);

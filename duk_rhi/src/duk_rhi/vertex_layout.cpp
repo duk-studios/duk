@@ -47,57 +47,46 @@ size_t VertexInput::size_of(VertexInput::Format type) {
 
 /// VertexLayout ///
 
-VertexLayout::VertexLayout() = default;
+VertexLayout::VertexLayout() {
+    m_formats.fill(VertexInput::Format::UNDEFINED);
+}
 
-VertexLayout::VertexLayout(const std::initializer_list<VertexInput::Format>& formats)
-    : m_formats(formats) {
+VertexLayout::VertexLayout(const std::initializer_list<VertexInput::Format>& formats) : VertexLayout() {
+    if (formats.size() > kMaxVertexShaderInputs) {
+        throw std::runtime_error("VertexLayout: too many attributes");
+    }
+    std::copy_n(formats.begin(), formats.size(), m_formats.begin());
 }
 
 void VertexLayout::clear() {
-    m_formats.clear();
+    m_formats.fill(VertexInput::Format::UNDEFINED);
 }
 
-void VertexLayout::insert(VertexInput::Format format) {
-    m_formats.push_back(format);
+void VertexLayout::set(uint32_t location, VertexInput::Format format) {
+    m_formats[location] = format;
 }
 
-void VertexLayout::insert(const std::initializer_list<VertexInput::Format>& formats) {
-    m_formats.insert(m_formats.end(), formats);
-}
-
-void VertexLayout::insert(const std::span<VertexInput::Format>& formats) {
-    m_formats.insert(m_formats.end(), formats.begin(), formats.end());
-}
-
-size_t VertexLayout::size() const {
-    return m_formats.size();
-}
-
-size_t VertexLayout::byte_size() const {
-    size_t size = 0;
-    for (auto& attribute: m_formats) {
-        size += VertexInput::size_of(attribute);
-    }
-    return size;
+VertexInput::Format VertexLayout::get(uint32_t location) const {
+    return m_formats[location];
 }
 
 VertexInput::Format VertexLayout::format_at(uint32_t location) const {
     return m_formats[location];
 }
 
-std::vector<VertexInput::Format>::iterator VertexLayout::begin() {
+VertexLayout::Container::iterator VertexLayout::begin() {
     return m_formats.begin();
 }
 
-std::vector<VertexInput::Format>::iterator VertexLayout::end() {
+VertexLayout::Container::iterator VertexLayout::end() {
     return m_formats.end();
 }
 
-std::vector<VertexInput::Format>::const_iterator VertexLayout::begin() const {
+VertexLayout::Container::const_iterator VertexLayout::begin() const {
     return m_formats.cbegin();
 }
 
-std::vector<VertexInput::Format>::const_iterator VertexLayout::end() const {
+VertexLayout::Container::const_iterator VertexLayout::end() const {
     return m_formats.cend();
 }
 

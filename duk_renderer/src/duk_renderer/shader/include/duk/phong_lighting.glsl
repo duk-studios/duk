@@ -1,7 +1,7 @@
 #ifndef DUK_PHONG_LIGHTING_GLSL
 #define DUK_PHONG_LIGHTING_GLSL
 
-#include "duk/lighting.glsl"
+#include "lighting.glsl"
 
 vec3 duk_calculate_phong_light(in LightValue light, in float shininess, in vec3 normal, in vec3 view, in vec3 lightDirection, in float attenuation) {
     vec3 result = vec3(0);
