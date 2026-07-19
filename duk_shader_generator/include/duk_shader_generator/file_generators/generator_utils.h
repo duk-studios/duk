@@ -26,6 +26,8 @@ void generate_namespace_start(std::ostringstream& oss, const std::string& namesp
 
 void generate_namespace_end(std::ostringstream& oss, const std::string& namespaceName);
 
+void write_file(const std::string& content, const std::string& filepath);
+
 // ---------------------------------------------------------------------------
 // RHI-specific expression utilities
 // ---------------------------------------------------------------------------

@@ -4,6 +4,8 @@
 #include <duk_shader_generator/file_generators/generator_utils.h>
 
 #include <cctype>
+#include <fstream>
+#include <stdexcept>
 #include <unordered_map>
 
 namespace duk::shader_generator::utils {
@@ -50,6 +52,14 @@ void generate_namespace_end(std::ostringstream& oss, const std::string& namespac
         return;
     }
     oss << "}// namespace " << namespaceName << '\n';
+}
+
+void write_file(const std::string& content, const std::string& filepath) {
+    std::ofstream file(filepath);
+    if (!file) {
+        throw std::runtime_error("failed to write file at: " + filepath);
+    }
+    file << content;
 }
 
 std::string module_mask_expression(duk::rhi::ShaderModule::Mask mask) {

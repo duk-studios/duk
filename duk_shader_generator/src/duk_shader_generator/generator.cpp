@@ -44,7 +44,7 @@ void generate(const Options& options) {
     if (!shaderDataSource) {
         throw std::runtime_error("failed to compile shader source " + shaderDataSource.error().message);
     }
-    ShaderDataSourceFileGenerator generator(options, shaderDataSource.value());
+    generate_shader_data_source_files(options, shaderDataSource.value());
 }
 
 }// namespace duk::shader_generator
