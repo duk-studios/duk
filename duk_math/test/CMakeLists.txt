@@ -1,6 +1,8 @@
 
 set(DUK_MATH_TEST_SOURCES
         glm.cc
+        aabb.cc
+        frustum.cc
 )
 
 add_executable(duk.math.test ${DUK_MATH_TEST_SOURCES})
