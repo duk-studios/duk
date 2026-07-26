@@ -4,9 +4,9 @@
 #ifndef DUK_RENDERER_MESH_H
 #define DUK_RENDERER_MESH_H
 
-#include <duk_rhi/command/command_buffer.h>
-
 #include <duk_resource/handle.h>
+
+#include <cstdint>
 
 namespace duk::renderer {
 
@@ -14,17 +14,31 @@ class MeshBuffer;
 
 class Mesh {
 public:
-    virtual ~Mesh();
+    Mesh(MeshBuffer& meshBuffer, uint32_t handle, uint32_t vertexCount, uint32_t indexCount);
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+    Mesh(Mesh&& other) noexcept = delete;
+    Mesh& operator=(Mesh&& other) noexcept = delete;
 
-    virtual const MeshBuffer* buffer() const = 0;
+    ~Mesh();
 
-    virtual uint32_t vertex_count() const = 0;
+    DUK_NO_DISCARD const MeshBuffer& buffer() const;
 
-    virtual uint32_t vertex_offset() const = 0;
+    DUK_NO_DISCARD uint32_t handle() const;
 
-    virtual uint32_t index_count() const = 0;
+    DUK_NO_DISCARD uint32_t vertex_count() const;
 
-    virtual uint32_t index_offset() const = 0;
+    DUK_NO_DISCARD uint32_t vertex_offset() const;
+
+    DUK_NO_DISCARD uint32_t index_count() const;
+
+    DUK_NO_DISCARD uint32_t index_offset() const;
+
+private:
+    MeshBuffer& m_meshBuffer;
+    uint32_t m_handle;
+    uint32_t m_vertexCount;
+    uint32_t m_indexCount;
 };
 
 using MeshResource = duk::resource::Handle<Mesh>;

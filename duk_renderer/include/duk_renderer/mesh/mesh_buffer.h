@@ -96,7 +96,7 @@ public:
 
     DUK_NO_DISCARD duk::rhi::IndexType index_type() const;
 
-    DUK_NO_DISCARD std::optional<MeshBufferBlock> vertex_at(uint32_t handle, uint32_t bindingIndex) const;
+    DUK_NO_DISCARD std::optional<MeshBufferBlock> vertex_at(uint32_t handle, uint32_t attributeLocationIndex) const;
 
     DUK_NO_DISCARD std::optional<MeshBufferBlock> index_at(uint32_t handle) const;
 
@@ -107,7 +107,7 @@ private:
     std::unique_ptr<ManagedBuffer> m_indexBuffer;
 
     struct Allocation {
-        duk::tools::FixedVector<uint32_t, 16> vertexHandles;
+        duk::tools::FixedVector<uint32_t, rhi::kMaxVertexShaderInputs> vertexHandles;
         uint32_t firstVertex;
         uint32_t indexHandle;
         uint32_t firstIndex;

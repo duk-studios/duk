@@ -194,7 +194,7 @@ MeshBuffer::MeshBuffer(const MeshBufferCreateInfo& meshBufferCreateInfo)
     : m_vertexLayout(meshBufferCreateInfo.vertexLayout)
     , m_indexType(meshBufferCreateInfo.indexType)
     , m_allocationCounter(0) {
-    m_vertexBuffers.resize(m_vertexLayout.size());
+    m_vertexBuffers.resize(rhi::kMaxVertexShaderInputs);
     for (auto i = 0; i < m_vertexBuffers.size(); i++) {
         const auto format = meshBufferCreateInfo.vertexLayout.format_at(i);
         if (format == rhi::VertexInput::Format::UNDEFINED) {
@@ -262,13 +262,13 @@ void MeshBuffer::free(uint32_t handle) {
     }
 }
 
-std::optional<MeshBufferBlock> MeshBuffer::vertex_at(uint32_t handle, uint32_t bindingIndex) const {
+std::optional<MeshBufferBlock> MeshBuffer::vertex_at(uint32_t handle, uint32_t attributeLocationIndex) const {
     const auto& allocation = m_allocations.at(handle);
-    const auto& managed = m_vertexBuffers.at(bindingIndex);
-    if (!managed || !allocation.vertexHandles[bindingIndex]) {
+    const auto& managed = m_vertexBuffers.at(attributeLocationIndex);
+    if (!managed || !allocation.vertexHandles[attributeLocationIndex]) {
         return std::nullopt;
     }
-    const auto block = managed->at(allocation.vertexHandles[bindingIndex]);
+    const auto block = managed->at(allocation.vertexHandles[attributeLocationIndex]);
     return MeshBufferBlock{managed->internal_buffer(), block.offset, block.size};
 }
 
@@ -323,8 +323,7 @@ MeshBuffer* MeshBufferPool::find_buffer(duk::rhi::CommandContext& commandContext
 
 duk::rhi::ShaderInput make_shader_input(const MeshBuffer& meshBuffer, uint32_t handle) {
     duk::rhi::ShaderInput input = {};
-    const auto vertexLayout = meshBuffer.vertex_layout();
-    for (auto i = 0u; i < static_cast<uint32_t>(vertexLayout.size()); i++) {
+    for (auto i = 0u; i < rhi::kMaxVertexShaderInputs; i++) {
         if (const auto block = meshBuffer.vertex_at(handle, i)) {
             input.vertex[i] = {block->buffer, static_cast<uint32_t>(block->offset)};
         }
