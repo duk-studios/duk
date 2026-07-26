@@ -45,11 +45,13 @@ struct ImageCreateInfo {
 struct ImageResource {
     const Image* image{nullptr};
     Sampler sampler{};
+    bool operator==(const ImageResource&) const noexcept = default;
 };
 
 struct BufferResource {
     const Buffer* buffer{nullptr};
     uint32_t offset{0};
+    bool operator==(const BufferResource&) const noexcept = default;
 };
 
 /// A single resource bound to one logical descriptor slot.
@@ -61,14 +63,16 @@ static constexpr uint32_t kMaxShaderBindings = 16;
 /// Flat array of resources indexed by logical binding slot.
 struct ShaderBindings {
     std::array<ShaderResource, kMaxShaderBindings> resources{};
+    bool operator==(const ShaderBindings&) const noexcept = default;
 };
 
 struct ShaderInput {
     std::array<BufferResource, kMaxVertexShaderInputs> vertex;
-    struct {
+    struct IndexBuffer {
         BufferResource resource;
         IndexType type{IndexType::NONE};
     } index;
+    bool operator==(const ShaderInput&) const noexcept;
 };
 
 struct RenderBeginParams {

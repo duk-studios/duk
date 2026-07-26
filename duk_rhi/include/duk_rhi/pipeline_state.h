@@ -27,11 +27,15 @@ struct PipelineState {
         glm::vec2 offset{0.0f, 0.0f};
         float minDepth{0.0f};
         float maxDepth{1.0f};
+
+        bool operator==(const Viewport& rhs) const noexcept = default;
     };
 
     struct Scissor {
         glm::u32vec2 extent{0, 0};
         glm::ivec2 offset{0, 0};
+
+        bool operator==(const Scissor& rhs) const noexcept = default;
     };
 
     struct Blend {
@@ -72,6 +76,8 @@ struct PipelineState {
         Factor dstAlphaBlendFactor{Factor::ZERO};
         Operator alphaBlendOp{Operator::ADD};
         bool enabled{false};
+
+        bool operator==(const Blend& rhs) const noexcept = default;
     };
 
     struct Rasterizer {
@@ -117,12 +123,16 @@ struct PipelineState {
         FillMode fillMode{FillMode::FILL};
         Origin origin{Origin::DEFAULT};
         bool depthTesting{false};
+
+        bool operator==(const Rasterizer& rhs) const noexcept = default;
     };
 
     Viewport viewport{};
     Scissor scissor{};
     Blend blend{};
     Rasterizer rasterizer{};
+
+    bool operator==(const PipelineState& rhs) const noexcept = default;
 };
 
 }// namespace duk::rhi

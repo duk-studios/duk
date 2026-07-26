@@ -4,6 +4,10 @@
 
 namespace duk::rhi {
 
+bool ShaderInput::operator==(const ShaderInput& rhs) const noexcept {
+    return vertex == rhs.vertex && index.resource == rhs.index.resource && index.type == rhs.index.type;
+}
+
 bool ScopedCommands::valid() const {
     return m_commandId == m_context.m_commandCounter;
 }
