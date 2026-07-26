@@ -100,14 +100,14 @@ struct ColorUBO {
 // -----------------------------------------------------------------------
 
 struct QuadAllocation {
-    duk::rhi::Allocation matrices;
-    duk::rhi::Allocation color;
+    duk::rhi::BufferAllocation matrices;
+    duk::rhi::BufferAllocation color;
 };
 
 static QuadAllocation upload_quad(duk::rhi::BufferAllocator& allocator, const MatricesUBO& matrices, const ColorUBO& color) {
     QuadAllocation a{};
-    a.matrices = allocator.alloc(sizeof(MatricesUBO));
-    a.color = allocator.alloc(sizeof(ColorUBO));
+    a.matrices = allocator.alloc(sizeof(MatricesUBO)).value();
+    a.color = allocator.alloc(sizeof(ColorUBO)).value();
     allocator.buffer()->write(matrices, a.matrices.offset);
     allocator.buffer()->write(color, a.color.offset);
     return a;
@@ -239,11 +239,13 @@ int main() {
     // -------------------------------------------------------------------
     constexpr uint32_t kFramesInFlight = 2;
 
-    duk::rhi::BufferCreateInfo bufferAllocatorInfo = {};
+    duk::rhi::BufferAllocatorCreateInfo bufferAllocatorInfo = {};
     bufferAllocatorInfo.type = duk::rhi::Buffer::Type::UNIFORM;
     bufferAllocatorInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
     bufferAllocatorInfo.size = 4096;
-    auto allocator = duk::rhi::create_buffer_allocator(*ctx, bufferAllocatorInfo, rhi->capabilities().minUniformBufferOffsetAlignment, kFramesInFlight);
+    bufferAllocatorInfo.alignment = rhi->capabilities().minUniformBufferOffsetAlignment;
+    bufferAllocatorInfo.framesInFlight = kFramesInFlight;
+    auto allocator = duk::rhi::BufferAllocator(*ctx, bufferAllocatorInfo);
 
     // -------------------------------------------------------------------
     // Per-frame state
@@ -289,7 +291,7 @@ int main() {
         ctx->prepare_present();
 
         // Reset the allocator at the start of every frame.
-        allocator->reset();
+        allocator.reset();
 
         // -- Phase 1: alloc offsets and upload uniform data --
         //    alloc() returns an Allocation with the aligned byte offset.
@@ -302,7 +304,7 @@ int main() {
         quad0Matrices.proj = proj;
         ColorUBO quad0Color{};
         quad0Color.color = glm::vec4(1.0f, 0.2f, 0.2f, 1.0f);// red
-        const auto quad0Alloc = upload_quad(*allocator, quad0Matrices, quad0Color);
+        const auto quad0Alloc = upload_quad(allocator, quad0Matrices, quad0Color);
 
         MatricesUBO quad1Matrices{};
         quad1Matrices.model = glm::translate(glm::mat4(1.0f), glm::vec3(1.1f, 0.0f, 0.0f));
@@ -311,7 +313,7 @@ int main() {
         quad1Matrices.proj = proj;
         ColorUBO quad1Color{};
         quad1Color.color = glm::vec4(0.2f, 0.4f, 1.0f, 1.0f);// blue
-        const auto quad1Alloc = upload_quad(*allocator, quad1Matrices, quad1Color);
+        const auto quad1Alloc = upload_quad(allocator, quad1Matrices, quad1Color);
 
 
         // -- render using the uploaded offsets --
@@ -332,10 +334,10 @@ int main() {
             render.bind_input(input);
 
             // Quad 0: left, red, rotates counter-clockwise
-            draw_quad(render, *allocator->buffer(), matricesSlot, colorSlot, quad0Alloc);
+            draw_quad(render, *allocator.buffer(), matricesSlot, colorSlot, quad0Alloc);
 
             // Quad 1: right, blue, rotates clockwise
-            draw_quad(render, *allocator->buffer(), matricesSlot, colorSlot, quad1Alloc);
+            draw_quad(render, *allocator.buffer(), matricesSlot, colorSlot, quad1Alloc);
         }
 
         ctx->submit();

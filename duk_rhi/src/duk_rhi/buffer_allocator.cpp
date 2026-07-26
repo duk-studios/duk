@@ -7,23 +7,33 @@
 
 namespace duk::rhi {
 
-BufferAllocator::BufferAllocator(std::shared_ptr<Buffer> buffer, size_t alignment, uint32_t framesInFlight)
-    : m_buffer(std::move(buffer))
-    , m_alignment(alignment > 0 ? alignment : 1)
-    , m_framesInFlight(framesInFlight > 0 ? framesInFlight : 1)
+BufferAllocator::BufferAllocator(CommandContext& context, const BufferAllocatorCreateInfo& createInfo)
+    : m_buffer(nullptr)
+    , m_alignment(createInfo.alignment)
+    , m_framesInFlight(createInfo.framesInFlight)
     , m_frameIndex(0)
-    , m_sectionSize(m_buffer->size() / m_framesInFlight)
+    , m_sectionSize(0)
     , m_cursor(0) {
-    DUK_ASSERT(m_buffer != nullptr);
-    DUK_ASSERT(m_sectionSize > 0);
+    const size_t effectiveAlignment = createInfo.alignment > 0 ? createInfo.alignment : 1;
+    const size_t sectionSize = (createInfo.size + effectiveAlignment - 1) & ~(effectiveAlignment - 1);
+
+    BufferCreateInfo bufferCreateInfo = {};
+    bufferCreateInfo.updateFrequency = createInfo.updateFrequency;
+    bufferCreateInfo.type = createInfo.type;
+    bufferCreateInfo.size = sectionSize * createInfo.framesInFlight;
+
+    m_buffer = context.create_buffer(bufferCreateInfo);
+    m_sectionSize = sectionSize;
 }
 
-Allocation BufferAllocator::alloc(size_t size) {
+std::optional<BufferAllocation> BufferAllocator::alloc(size_t size) {
     const size_t aligned = (m_cursor + m_alignment - 1) & ~(m_alignment - 1);
     const size_t sectionEnd = static_cast<size_t>(m_frameIndex) * m_sectionSize + m_sectionSize;
-    DUK_ASSERT(aligned + size <= sectionEnd);
+    if (aligned + size > sectionEnd) {
+        return std::nullopt;
+    }
     m_cursor = aligned + size;
-    return Allocation{aligned, size};
+    return BufferAllocation{aligned, size};
 }
 
 void BufferAllocator::reset() {
@@ -39,14 +49,14 @@ bool BufferAllocator::valid() const {
     return m_buffer != nullptr;
 }
 
-std::shared_ptr<BufferAllocator> create_buffer_allocator(CommandContext& context, const BufferCreateInfo& bufferInfo, size_t alignment, uint32_t framesInFlight) {
-    const size_t effectiveAlignment = alignment > 0 ? alignment : 1;
-    const size_t sectionSize = (bufferInfo.size + effectiveAlignment - 1) & ~(effectiveAlignment - 1);
+size_t BufferAllocator::remaining() const {
+    const size_t aligned = (m_cursor + m_alignment - 1) & ~(m_alignment - 1);
+    const size_t sectionEnd = static_cast<size_t>(m_frameIndex) * m_sectionSize + m_sectionSize;
+    return sectionEnd - aligned;
+}
 
-    BufferCreateInfo actualInfo = bufferInfo;
-    actualInfo.size = sectionSize * framesInFlight;
-
-    return std::make_shared<BufferAllocator>(context.create_buffer(actualInfo), effectiveAlignment, framesInFlight);
+size_t BufferAllocator::capacity() const {
+    return m_sectionSize;
 }
 
 }// namespace duk::rhi
