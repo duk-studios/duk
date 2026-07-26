@@ -10,6 +10,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/sort.h
         include/duk_renderer/register_types.h
         include/duk_renderer/texture.h
+        include/duk_renderer/draw_context.h
         include/duk_renderer/components/camera.h
         include/duk_renderer/components/lighting.h
         include/duk_renderer/components/material_slot.h
@@ -69,6 +70,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/vertex_types.cpp
         src/duk_renderer/register_types.cpp
         src/duk_renderer/texture.cpp
+        src/duk_renderer/draw_context.cpp
         src/duk_renderer/components/camera.cpp
         src/duk_renderer/components/lighting.cpp
         src/duk_renderer/components/material_slot.cpp
