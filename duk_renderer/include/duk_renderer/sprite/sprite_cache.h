@@ -7,24 +7,22 @@
 
 #include <duk_renderer/sprite/sprite.h>
 
-#include "duk_tools/globals.h"
-
 namespace duk::renderer {
 
-class Material;
-class SpriteMesh;
+class MeshBufferPool;
+class Mesh;
 
 class SpriteCache {
 public:
-    std::shared_ptr<Material> material_for(const duk::tools::Globals& globals, const Sprite& sprite);
+    explicit SpriteCache(std::shared_ptr<MeshBufferPool> meshBuffer);
 
-    std::shared_ptr<SpriteMesh> mesh_for(const duk::tools::Globals& globals, const Sprite& sprite, uint32_t index);
+    const Mesh* mesh_for(rhi::CommandContext& commandContext, const SpriteMetrics& spriteMetrics);
 
     void clear();
 
 private:
-    std::unordered_map<duk::hash::Hash, std::shared_ptr<Material>> m_materials;
-    std::unordered_map<duk::hash::Hash, std::shared_ptr<SpriteMesh>> m_meshes;
+    std::shared_ptr<MeshBufferPool> m_meshBufferPool;
+    std::unordered_map<duk::hash::Hash, std::shared_ptr<Mesh>> m_meshes;
 };
 
 }// namespace duk::renderer

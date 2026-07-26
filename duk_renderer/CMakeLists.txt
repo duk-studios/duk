@@ -21,6 +21,7 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/sprite/sprite_builtins.h
         include/duk_renderer/sprite/sprite_cache.h
         include/duk_renderer/sprite/sprite_handler.h
+        include/duk_renderer/sprite/sprite_draw.h
         include/duk_renderer/image/image.h
         include/duk_renderer/image/image_builtins.h
         include/duk_renderer/image/image_handler.h
@@ -71,6 +72,7 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/sprite/sprite_builtins.cpp
         src/duk_renderer/sprite/sprite_cache.cpp
         src/duk_renderer/sprite/sprite_handler.cpp
+        src/duk_renderer/sprite/sprite_draw.cpp
         src/duk_renderer/mesh/draw_buffer.cpp
         src/duk_renderer/mesh/dynamic_mesh.cpp
         src/duk_renderer/mesh/empty_mesh.cpp

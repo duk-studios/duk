@@ -2,71 +2,82 @@
 // Created by Ricardo on 23/04/2024.
 //
 #include <duk_renderer/sprite/sprite_cache.h>
-#include <duk_renderer/sprite/sprite_mesh.h>
 #include <duk_renderer/mesh/mesh_buffer.h>
-#include <duk_renderer/renderer.h>
 #include <duk_renderer/material/material.h>
 
 namespace duk::renderer {
 
 namespace detail {
 
-duk::hash::Hash calculate_mesh_hash(const Sprite& sprite, uint32_t index) {
+duk::hash::Hash calculate_mesh_hash(const SpriteMetrics& spriteMetrics) {
     duk::hash::Hash hash = 0;
-    duk::hash::hash_combine(hash, &sprite);
-    duk::hash::hash_combine(hash, index);
+    duk::hash::hash_combine(hash, &spriteMetrics.position.min);
+    duk::hash::hash_combine(hash, &spriteMetrics.position.max);
+    duk::hash::hash_combine(hash, &spriteMetrics.uv.min);
+    duk::hash::hash_combine(hash, &spriteMetrics.uv.max);
     return hash;
 }
 
-duk::hash::Hash calculate_material_hash(const Sprite& sprite) {
-    duk::hash::Hash hash = 0;
-    duk::hash::hash_combine(hash, &sprite);
-    return hash;
+std::shared_ptr<Mesh> make_sprite_mesh(rhi::CommandContext& commandContext, MeshBufferPool& meshBufferPool, const SpriteMetrics& spriteMetrics) {
+    static const VertexAttributes s_vertexAttributes({VertexAttributes::POSITION, VertexAttributes::UV});
+    auto& meshBuffer = *meshBufferPool.find_buffer(commandContext, s_vertexAttributes.vertex_layout(), rhi::IndexType::UINT32, rhi::Buffer::UpdateFrequency::DYNAMIC);
+
+    const auto meshHandle = meshBuffer.allocate(commandContext, 4, 6);
+    const auto [position, uv] = spriteMetrics;
+    {
+        const auto& posMin = position.min;
+        const auto& posMax = position.max;
+
+        std::array positions = {glm::vec3(posMin.x, posMin.y, 0.0f), glm::vec3(posMax.x, posMin.y, 0.0f), glm::vec3(posMin.x, posMax.y, 0.0f), glm::vec3(posMax.x, posMax.y, 0.0f)};
+
+        const auto block = meshBuffer.vertex_at(meshHandle, VertexAttributes::POSITION).value();
+        block.buffer->write(positions.data(), block.offset, positions.size() * sizeof(glm::vec3));
+    }
+
+    {
+        const auto& uvMin = uv.min;
+        const auto& uvMax = uv.max;
+
+        std::array uvs = {glm::vec2(uvMin.x, uvMax.y), glm::vec2(uvMax.x, uvMax.y), glm::vec2(uvMin.x, uvMin.y), glm::vec2(uvMax.x, uvMin.y)};
+
+        const auto block = meshBuffer.vertex_at(meshHandle, VertexAttributes::UV).value();
+        block.buffer->write(uvs.data(), block.offset, uvs.size() * sizeof(glm::vec2));
+    }
+
+    {
+        std::array indices = {0, 2, 1, 2, 3, 1};
+
+        const auto block = meshBuffer.index_at(meshHandle).value();
+        block.buffer->write(indices.data(), block.offset, indices.size() * sizeof(uint32_t));
+    }
+
+    return std::make_shared<Mesh>(meshBuffer, meshHandle, 4, 6);
 }
+
 
 }// namespace detail
 
-std::shared_ptr<Material> SpriteCache::material_for(const duk::tools::Globals& globals, const Sprite& sprite) {
-    const auto hash = detail::calculate_material_hash(sprite);
-    if (const auto it = m_materials.find(hash); it != m_materials.end()) {
-        return it->second;
-    }
-
-    auto renderer = globals.get<Renderer>();
-    auto builtins = globals.get<Builtins>();
-
-    auto material = create_color_material(renderer, builtins, true);
-
-    material->set("uBaseColor", sprite.image(), {duk::rhi::Sampler::Filter::NEAREST, duk::rhi::Sampler::WrapMode::CLAMP_TO_EDGE});
-
-    m_materials.emplace(hash, material);
-
-    return material;
+SpriteCache::SpriteCache(std::shared_ptr<MeshBufferPool> meshBufferPool)
+    : m_meshBufferPool(std::move(meshBufferPool)) {
 }
 
-std::shared_ptr<SpriteMesh> SpriteCache::mesh_for(const duk::tools::Globals& globals, const Sprite& sprite, uint32_t index) {
-    const auto hash = detail::calculate_mesh_hash(sprite, index);
+const Mesh* SpriteCache::mesh_for(rhi::CommandContext& commandContext, const SpriteMetrics& spriteMetrics) {
+    const auto hash = detail::calculate_mesh_hash(spriteMetrics);
     if (const auto it = m_meshes.find(hash); it != m_meshes.end()) {
-        return it->second;
+        return it->second.get();
     }
 
-    auto renderer = globals.get<Renderer>();
+    auto mesh = detail::make_sprite_mesh(commandContext, *m_meshBufferPool, spriteMetrics);
 
-    SpriteMeshCreateInfo spriteMeshCreateInfo = {};
-    spriteMeshCreateInfo.sprite = &sprite;
-    spriteMeshCreateInfo.spriteIndex = index;
-    spriteMeshCreateInfo.meshBufferPool = renderer->mesh_buffer_pool();
-
-    auto mesh = std::make_shared<SpriteMesh>(spriteMeshCreateInfo);
-
-    m_meshes.emplace(hash, mesh);
-
-    return mesh;
+    auto [it, inserted] = m_meshes.emplace(hash, mesh);
+    if (!inserted) {
+        return nullptr;
+    }
+    return it->second.get();
 }
 
 void SpriteCache::clear() {
     m_meshes.clear();
-    m_materials.clear();
 }
 
 }// namespace duk::renderer
