@@ -21,7 +21,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/sprite/sprite_builtins.h
         include/duk_renderer/sprite/sprite_cache.h
         include/duk_renderer/sprite/sprite_handler.h
-        include/duk_renderer/sprite/sprite_mesh.h
         include/duk_renderer/image/image.h
         include/duk_renderer/image/image_builtins.h
         include/duk_renderer/image/image_handler.h
@@ -35,7 +34,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/mesh/static_mesh.h
         include/duk_renderer/mesh/static_mesh_builder.h
         include/duk_renderer/mesh/static_mesh_data_source.h
-        include/duk_renderer/material/globals/global_descriptors.h
         include/duk_renderer/material/material.h
         include/duk_renderer/material/material_handler.h
         include/duk_renderer/material/material_buffer.h
@@ -44,14 +42,6 @@ set(DUK_RENDERER_HEADERS
         include/duk_renderer/material/uniform_buffer.h
         include/duk_renderer/material/storage_buffer.h
         include/duk_renderer/material/material_descriptor_set.h
-        include/duk_renderer/shader/pipeline_cache.h
-        include/duk_renderer/shader/shader_pipeline.h
-        include/duk_renderer/shader/shader_module.h
-        include/duk_renderer/shader/shader_module_builtins.h
-        include/duk_renderer/shader/shader_module_handler.h
-        include/duk_renderer/shader/shader_pipeline_data.h
-        include/duk_renderer/shader/shader_pipeline_builtins.h
-        include/duk_renderer/shader/shader_pipeline_handler.h
         include/duk_renderer/material/globals/lights_types.h
         include/duk_renderer/material/globals/camera_types.h
         include/duk_renderer/material/draw_entry.h
@@ -81,24 +71,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/sprite/sprite_builtins.cpp
         src/duk_renderer/sprite/sprite_cache.cpp
         src/duk_renderer/sprite/sprite_handler.cpp
-        src/duk_renderer/sprite/sprite_mesh.cpp
-        src/duk_renderer/shader/pipeline_cache.cpp
-        src/duk_renderer/shader/shader_module.cpp
-        src/duk_renderer/shader/shader_module_builtins.cpp
-        src/duk_renderer/shader/shader_module_handler.cpp
-        src/duk_renderer/shader/shader_pipeline.cpp
-        src/duk_renderer/shader/shader_pipeline_builtins.cpp
-        src/duk_renderer/shader/shader_pipeline_handler.cpp
-        src/duk_renderer/shader/color/color_shader_data_source.h
-        src/duk_renderer/shader/color/color_shader_data_source.cpp
-        src/duk_renderer/shader/fullscreen/fullscreen_shader_data_source.h
-        src/duk_renderer/shader/fullscreen/fullscreen_shader_data_source.cpp
-        src/duk_renderer/shader/phong/phong_shader_data_source.h
-        src/duk_renderer/shader/phong/phong_shader_data_source.cpp
-        src/duk_renderer/shader/text/text_shader_data_source.h
-        src/duk_renderer/shader/text/text_shader_data_source.cpp
-        src/duk_renderer/shader/image/image_shader_data_source.h
-        src/duk_renderer/shader/image/image_shader_data_source.cpp
         src/duk_renderer/mesh/draw_buffer.cpp
         src/duk_renderer/mesh/dynamic_mesh.cpp
         src/duk_renderer/mesh/empty_mesh.cpp
@@ -120,7 +92,6 @@ set(DUK_RENDERER_SOURCES
         src/duk_renderer/material/uniform_buffer.cpp
         src/duk_renderer/material/storage_buffer.cpp
         src/duk_renderer/material/material_descriptor_set.cpp
-        src/duk_renderer/material/globals/global_descriptors.cpp
         src/duk_renderer/passes/forward_pass.cpp
         src/duk_renderer/passes/pass.cpp
         src/duk_renderer/passes/present_pass.cpp
