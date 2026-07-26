@@ -1,11 +1,11 @@
-duk_add_shader(duk.renderer.shaders.text
+duk_add_shader(duk.renderer
         NAME "text"
-        GLSL_SOURCES
-        ${CMAKE_CURRENT_LIST_DIR}/text.vert
-        ${CMAKE_CURRENT_LIST_DIR}/text.frag
-        INC_DIR ${DUK_SHADER_INC_DIR}/text
-        SRC_DIR ${DUK_SHADER_SRC_DIR}/text
+        MODULES
+        text.vert
+        text.frag
+        HEADER_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+        SOURCE_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}
         NAMESPACE "duk::renderer"
         HEADER_INCLUDE_PREFIX "duk_renderer/shader/text"
-        LIBRARIES duk.renderer.shaders.duk
+        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/../include"
 )

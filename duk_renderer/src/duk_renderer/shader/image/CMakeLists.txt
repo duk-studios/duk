@@ -1,11 +1,11 @@
-duk_add_shader(duk.renderer.shaders.image
+duk_add_shader(duk.renderer
         NAME "image"
-        GLSL_SOURCES
-        ${CMAKE_CURRENT_LIST_DIR}/image.vert
-        ${CMAKE_CURRENT_LIST_DIR}/image.frag
-        INC_DIR ${DUK_SHADER_INC_DIR}/image
-        SRC_DIR ${DUK_SHADER_SRC_DIR}/image
+        MODULES
+        image.vert
+        image.frag
+        HEADER_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+        SOURCE_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}
         NAMESPACE "duk::renderer"
         HEADER_INCLUDE_PREFIX "duk_renderer/shader/image"
-        LIBRARIES duk.renderer.shaders.duk
+        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/../include"
 )

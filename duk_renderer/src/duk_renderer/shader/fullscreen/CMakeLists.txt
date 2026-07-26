@@ -1,11 +1,11 @@
-duk_add_shader(duk.renderer.shaders.fullscreen
+duk_add_shader(duk.renderer
         NAME "fullscreen"
-        GLSL_SOURCES
-        ${CMAKE_CURRENT_LIST_DIR}/fullscreen.vert
-        ${CMAKE_CURRENT_LIST_DIR}/fullscreen.frag
-        INC_DIR ${DUK_SHADER_INC_DIR}/fullscreen
-        SRC_DIR ${DUK_SHADER_SRC_DIR}/fullscreen
+        MODULES
+        fullscreen.vert
+        fullscreen.frag
+        HEADER_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+        SOURCE_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}
         NAMESPACE "duk::renderer"
         HEADER_INCLUDE_PREFIX "duk_renderer/shader/fullscreen"
-        LIBRARIES duk.renderer.shaders.duk
+        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/../include"
 )

@@ -1,11 +1,11 @@
-duk_add_shader(duk.renderer.shaders.phong
+duk_add_shader(duk.renderer
         NAME "phong"
-        GLSL_SOURCES
-        ${CMAKE_CURRENT_LIST_DIR}/phong.vert
-        ${CMAKE_CURRENT_LIST_DIR}/phong.frag
-        INC_DIR ${DUK_SHADER_INC_DIR}/phong
-        SRC_DIR ${DUK_SHADER_SRC_DIR}/phong
+        MODULES
+        phong.vert
+        phong.frag
+        HEADER_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+        SOURCE_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}
         NAMESPACE "duk::renderer"
         HEADER_INCLUDE_PREFIX "duk_renderer/shader/phong"
-        LIBRARIES duk.renderer.shaders.duk
+        INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/../include"
 )
