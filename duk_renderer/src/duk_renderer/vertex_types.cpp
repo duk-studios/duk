@@ -35,10 +35,10 @@ VertexAttributes::VertexAttributes(const std::set<Type>& attributes) {
         const auto attributeType = static_cast<Type>(attributeIndex);
         const auto format = format_of(attributeType);
         if (!attributes.contains(attributeType)) {
-            m_layout.insert(duk::rhi::VertexInput::Format::UNDEFINED);
+            m_layout.set(attributeIndex, duk::rhi::VertexInput::Format::UNDEFINED);
             continue;
         }
-        m_layout.insert(format);
+        m_layout.set(attributeIndex, format);
         m_attributes.set(attributeIndex);
         m_attributeOffset[attributeIndex] = offset;
         offset += duk::rhi::VertexInput::size_of(format);
