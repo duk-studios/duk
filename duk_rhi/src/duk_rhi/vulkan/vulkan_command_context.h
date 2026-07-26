@@ -4,6 +4,7 @@
 #define DUK_RHI_VULKAN_COMMAND_CONTEXT_H
 
 #include <duk_rhi/command_context.h>
+#include <duk_rhi/buffer_allocator.h>
 #include <duk_rhi/vulkan/vulkan_deletion_queue.h>
 #include <duk_rhi/vulkan/vulkan_image.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
@@ -75,11 +76,37 @@ public:
 
 private:
     template<typename T, typename... Args>
-    DUK_NO_DISCARD std::shared_ptr<T> make_managed(Args&&... args) {
+    DUK_NO_DISCARD std::shared_ptr<T> make_shared_managed(Args&&... args) {
         return std::shared_ptr<T>(new T(std::forward<Args>(args)...), [this](T* ptr) {
             m_deletionQueue.push(ptr, m_frameCounter);
         });
     }
+
+    template<typename T>
+    struct UniqueDeleter {
+        UniqueDeleter() : m_deletionQueue(nullptr), m_frameCounter{nullptr} {}
+        UniqueDeleter(VulkanDeletionQueue& deletionQueue, uint32_t& frameCounter)
+            : m_deletionQueue(&deletionQueue)
+            , m_frameCounter(&frameCounter) {}
+
+        void operator()(T* ptr) const noexcept {
+            if (m_deletionQueue && m_frameCounter) {
+                m_deletionQueue->push(ptr, *m_frameCounter);
+            }
+            else {
+                delete ptr;
+            }
+        }
+        VulkanDeletionQueue* m_deletionQueue;
+        uint32_t* m_frameCounter;
+    };
+
+    template<typename T, typename... Args>
+    DUK_NO_DISCARD auto make_unique_managed(Args&&... args) {
+        return std::unique_ptr<T, UniqueDeleter<T>>(new T(std::forward<Args>(args)...), UniqueDeleter<T>(m_deletionQueue, m_frameCounter));
+    }
+
+    std::optional<BufferAllocation> allocate_indirect(size_t size);
 
 private:
     VulkanInstance& m_instance;
@@ -106,6 +133,7 @@ private:
     std::unique_ptr<VulkanFrameBuffer> m_defaultFrameBuffer;
     PixelFormat m_defaultDepthFormat{PixelFormat::UNDEFINED};
     std::unique_ptr<VulkanImage> m_defaultDepthImage;
+    std::unique_ptr<BufferAllocator, UniqueDeleter<BufferAllocator>> m_indirectBufferAllocator;
 
     VulkanDeletionQueue m_deletionQueue;
 

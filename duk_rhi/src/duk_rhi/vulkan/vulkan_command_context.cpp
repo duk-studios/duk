@@ -311,7 +311,7 @@ std::shared_ptr<Shader> VulkanCommandContext::create_shader(const ShaderCreateIn
     VulkanShaderCreateInfo vulkanShaderCreateInfo = {};
     vulkanShaderCreateInfo.shaderDataSource = shaderCreateInfo.shaderDataSource;
     vulkanShaderCreateInfo.device = m_device;
-    return make_managed<VulkanShader>(vulkanShaderCreateInfo);
+    return make_shared_managed<VulkanShader>(vulkanShaderCreateInfo);
 }
 
 std::shared_ptr<Buffer> VulkanCommandContext::create_buffer(const BufferCreateInfo& bufferCreateInfo) {
@@ -321,7 +321,7 @@ std::shared_ptr<Buffer> VulkanCommandContext::create_buffer(const BufferCreateIn
     vulkanBufferCreateInfo.memoryFlags = detail::buffer_memory_flags(bufferCreateInfo.updateFrequency);
     vulkanBufferCreateInfo.device = m_device;
     vulkanBufferCreateInfo.physicalDevice = &m_physicalDevice;
-    auto buffer = make_managed<VulkanBuffer>(vulkanBufferCreateInfo);
+    auto buffer = make_shared_managed<VulkanBuffer>(vulkanBufferCreateInfo);
     if (bufferCreateInfo.updateFrequency == Buffer::UpdateFrequency::DYNAMIC) {
         // keep dynamic buffers mapped for now
         buffer->map(0, VK_WHOLE_SIZE);
@@ -339,11 +339,11 @@ std::shared_ptr<Image> VulkanCommandContext::create_image(const ImageCreateInfo&
     vulkanMemoryImageCreateInfo.usageFlags = detail::image_usage_flags(imageCreateInfo.usage);
     vulkanMemoryImageCreateInfo.memoryFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     vulkanMemoryImageCreateInfo.aspectFlags = detail::image_aspect_flags(imageCreateInfo.usage, imageCreateInfo.format);
-    return make_managed<VulkanImage>(vulkanMemoryImageCreateInfo);
+    return make_shared_managed<VulkanImage>(vulkanMemoryImageCreateInfo);
 }
 
 std::shared_ptr<FrameBuffer> VulkanCommandContext::create_frame_buffer() {
-    return make_managed<VulkanFrameBuffer>();
+    return make_shared_managed<VulkanFrameBuffer>();
 }
 
 void VulkanCommandContext::render_begin(const RenderBeginParams& params) {
@@ -427,6 +427,25 @@ void VulkanCommandContext::draw(const DrawParams& params) {
 }
 
 void VulkanCommandContext::draw_indirect(const std::span<const DrawParams>& indirectParams) {
+    if (m_activeCommandBuffer == VK_NULL_HANDLE) {
+        return;
+    }
+
+    const auto buffer = static_cast<VulkanBuffer*>(m_indirectBufferAllocator->buffer());
+    const auto bufferSize = indirectParams.size() * sizeof(DrawParams);
+    const auto allocation = allocate_indirect(bufferSize).value();
+    auto writeOffset = allocation.offset;
+    for (const auto& indirectParam : indirectParams) {
+        VkDrawIndirectCommand drawParam = {};
+        drawParam.firstInstance = indirectParam.firstInstance;
+        drawParam.firstVertex = indirectParam.firstVertex;
+        drawParam.instanceCount = indirectParam.instanceCount;
+        drawParam.vertexCount = indirectParam.vertexCount;
+        buffer->write(drawParam, writeOffset);
+        writeOffset += sizeof(VkDrawIndirectCommand);
+    }
+
+    vkCmdDrawIndirect(m_activeCommandBuffer, buffer->handle(), allocation.offset, indirectParams.size(), sizeof(VkDrawIndirectCommand));
 }
 
 void VulkanCommandContext::draw_indexed(const DrawIndexedParams& params) {
@@ -437,6 +456,26 @@ void VulkanCommandContext::draw_indexed(const DrawIndexedParams& params) {
 }
 
 void VulkanCommandContext::draw_indexed_indirect(const std::span<const DrawIndexedParams>& indexedIndirectParams) {
+    if (m_activeCommandBuffer == VK_NULL_HANDLE) {
+        return;
+    }
+
+    const auto bufferSize = indexedIndirectParams.size() * sizeof(DrawParams);
+    const auto allocation = allocate_indirect(bufferSize).value();
+    const auto buffer = static_cast<VulkanBuffer*>(m_indirectBufferAllocator->buffer());
+    auto writeOffset = allocation.offset;
+    for (const auto& indirectParam : indexedIndirectParams) {
+        VkDrawIndexedIndirectCommand drawParam = {};
+        drawParam.firstInstance = indirectParam.firstInstance;
+        drawParam.firstIndex = indirectParam.firstIndex;
+        drawParam.instanceCount = indirectParam.instanceCount;
+        drawParam.indexCount = indirectParam.indexCount;
+        drawParam.vertexOffset = indirectParam.vertexOffset;
+        buffer->write(drawParam, writeOffset);
+        writeOffset += sizeof(VkDrawIndexedIndirectCommand);
+    }
+
+    vkCmdDrawIndirect(m_activeCommandBuffer, buffer->handle(), allocation.offset, indexedIndirectParams.size(), sizeof(VkDrawIndexedIndirectCommand));
 }
 
 void VulkanCommandContext::render_end() {
@@ -547,6 +586,25 @@ void VulkanCommandContext::copy_to_buffer(Buffer* buffer, size_t offset, size_t 
     region.dstOffset = offset;
     region.size = size;
     vkCmdCopyBuffer(m_activeCommandBuffer, srcBuffer->handle(), dstBuffer->handle(), 1, &region);
+}
+
+std::optional<BufferAllocation> VulkanCommandContext::allocate_indirect(size_t size) {
+
+    if (!m_indirectBufferAllocator || m_indirectBufferAllocator->remaining() < size) {
+        constexpr auto kChunkSize = 4096;
+        const auto previousSize = m_indirectBufferAllocator ? m_indirectBufferAllocator->capacity() : 0;
+        const auto newSize = previousSize + ((size / kChunkSize) + 1) * kChunkSize;
+        BufferAllocatorCreateInfo indirectBufferCreateInfo = {};
+        indirectBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::DYNAMIC;
+        indirectBufferCreateInfo.size = newSize;
+        indirectBufferCreateInfo.alignment = 16;
+        indirectBufferCreateInfo.framesInFlight = m_framesInFlight;
+        indirectBufferCreateInfo.type = Buffer::Type::INDIRECT;
+
+        m_indirectBufferAllocator = make_unique_managed<BufferAllocator>(*this, indirectBufferCreateInfo);
+    }
+
+    return m_indirectBufferAllocator->alloc(size);
 }
 
 }// namespace duk::rhi
