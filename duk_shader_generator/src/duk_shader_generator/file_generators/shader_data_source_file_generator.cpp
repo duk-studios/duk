@@ -72,20 +72,14 @@ static const char* stage_enumerator(rhi::ShaderModule::Bits stage) {
     }
 }
 
-static const char* image_binding_type_enumerator(rhi::ImageBindingType type) {
+static const char* binding_type_enumerator(rhi::BindingType type) {
     switch (type) {
-        case rhi::ImageBindingType::IMAGE:         return "duk::rhi::ImageBindingType::IMAGE";
-        case rhi::ImageBindingType::IMAGE_SAMPLER: return "duk::rhi::ImageBindingType::IMAGE_SAMPLER";
-        case rhi::ImageBindingType::STORAGE_IMAGE: return "duk::rhi::ImageBindingType::STORAGE_IMAGE";
-        default:                                   return "duk::rhi::ImageBindingType::IMAGE";
-    }
-}
-
-static const char* buffer_binding_type_enumerator(rhi::BufferBindingType type) {
-    switch (type) {
-        case rhi::BufferBindingType::UNIFORM_BUFFER: return "duk::rhi::BufferBindingType::UNIFORM_BUFFER";
-        case rhi::BufferBindingType::STORAGE_BUFFER: return "duk::rhi::BufferBindingType::STORAGE_BUFFER";
-        default:                                     return "duk::rhi::BufferBindingType::UNIFORM_BUFFER";
+        case rhi::BindingType::IMAGE:          return "duk::rhi::BindingType::IMAGE";
+        case rhi::BindingType::SAMPLER_IMAGE:  return "duk::rhi::BindingType::SAMPLER_IMAGE";
+        case rhi::BindingType::STORAGE_IMAGE:  return "duk::rhi::BindingType::STORAGE_IMAGE";
+        case rhi::BindingType::UNIFORM_BUFFER: return "duk::rhi::BindingType::UNIFORM_BUFFER";
+        case rhi::BindingType::STORAGE_BUFFER: return "duk::rhi::BindingType::STORAGE_BUFFER";
+        default:                               throw std::runtime_error("Unknown image binding type");
     }
 }
 
@@ -138,7 +132,7 @@ static void generate_class_declaration(
     oss << "    duk::rhi::ShaderModule::Mask module_mask() const override;\n\n";
     oss << "    const std::vector<uint8_t>& shader_module_spir_v_code(duk::rhi::ShaderModule::Bits type) const override;\n\n";
     oss << "    const std::unordered_map<duk::rhi::ShaderModule::Bits, std::vector<uint8_t>>& shader_modules() const override;\n\n";
-    oss << "    const duk::rhi::ShaderBindingLayout& binding_layout() const override;\n\n";
+    oss << "    const duk::rhi::BindingLayout& binding_layout() const override;\n\n";
     oss << "    const duk::rhi::VertexLayout& vertex_layout() const override;\n\n";
     oss << "protected:\n";
     oss << "    duk::hash::Hash calculate_hash() const override;\n";
@@ -200,31 +194,17 @@ static void generate_class_definition(
     }
     oss << "    return m;\n}();\n\n";
 
-    oss << "static const duk::rhi::ShaderBindingLayout kBindingLayout = [] {\n";
-    oss << "    duk::rhi::ShaderBindingLayout layout;\n";
+    oss << "static const duk::rhi::BindingLayout kBindingLayout = [] {\n";
+    oss << "    duk::rhi::BindingLayout layout;\n";
     for (const auto& desc: bindingLayout) {
+        const auto bindingType = binding_type_enumerator(desc.type);
         oss << "    layout.push_back(duk::rhi::BindingDescription{\n";
-        if (std::holds_alternative<rhi::ImageBindingDescription>(desc.binding)) {
-            const auto& imgDesc = std::get<rhi::ImageBindingDescription>(desc.binding);
-            oss << "        duk::rhi::ImageBindingDescription{"
-                << image_binding_type_enumerator(imgDesc.type) << "},\n";
-        } else {
-            const auto& bufDesc = std::get<rhi::BufferBindingDescription>(desc.binding);
-            oss << "        duk::rhi::BufferBindingDescription{\n";
-            oss << "            " << buffer_binding_type_enumerator(bufDesc.type) << ",\n";
-            oss << "            " << bufDesc.size << "u,\n";
-            oss << "            " << bufDesc.stride << "u,\n";
-            oss << "            {\n";
-            for (const auto& member: bufDesc.members) {
-                oss << "                duk::rhi::BufferMemberDescription{"
-                    << member.offset << "u, " << member.size << "u, " << member.padding
-                    << "u, \"" << member.name << "\", \"" << member.typeName << "\"},\n";
-            }
-            oss << "            }\n";
-            oss << "        },\n";
-        }
-        oss << "        " << utils::module_mask_expression(desc.moduleMask) << ",\n";
-        oss << "        \"" << desc.name << "\"\n";
+        oss << "            .type = " << bindingType << ",\n";
+        oss << "            .moduleMask = " << utils::module_mask_expression(desc.moduleMask) << ",\n";
+        oss << "            .name = \"" << desc.name << "\",\n";
+        oss << "            .size = " << desc.size << ",\n";
+        oss << "            .stride = " << desc.stride << ",\n";
+        oss << "            .members = " << utils::binding_members_expression(desc.members) << "\n";
         oss << "    });\n";
     }
     oss << "    return layout;\n}();\n\n";
@@ -247,7 +227,7 @@ static void generate_class_definition(
         << className << "::shader_modules() const {\n";
     oss << "    return kShaderModules;\n}\n\n";
 
-    oss << "const duk::rhi::ShaderBindingLayout& " << className << "::binding_layout() const {\n";
+    oss << "const duk::rhi::BindingLayout& " << className << "::binding_layout() const {\n";
     oss << "    return kBindingLayout;\n}\n\n";
 
     oss << "const duk::rhi::VertexLayout& " << className << "::vertex_layout() const {\n";

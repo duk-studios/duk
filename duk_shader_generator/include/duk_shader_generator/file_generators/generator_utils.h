@@ -34,6 +34,8 @@ void write_file(const std::string& content, const std::string& filepath);
 
 DUK_NO_DISCARD std::string module_mask_expression(duk::rhi::ShaderModule::Mask mask);
 
+DUK_NO_DISCARD std::string binding_members_expression(const std::vector<rhi::BindingMemberDescription>& members);
+
 // ---------------------------------------------------------------------------
 // GLSL → C++ type name mapping
 // ---------------------------------------------------------------------------

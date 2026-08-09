@@ -91,6 +91,22 @@ std::string module_mask_expression(duk::rhi::ShaderModule::Mask mask) {
     return oss.str();
 }
 
+std::string binding_members_expression(const std::vector<rhi::BindingMemberDescription>& members) {
+    std::ostringstream oss;
+    oss << "{";
+    for (const auto& member: members) {
+        oss << "\n";
+        oss << "                duk::rhi::BindingMemberDescription{"
+            << member.offset << "u, " << member.size << "u, " << member.padding
+            << "u, \"" << member.name << "\", \"" << member.typeName << "\"},";
+    }
+    if (!members.empty()) {
+        oss << "\n";
+    }
+    oss << "}";
+    return oss.str();
+}
+
 const std::string& glsl_to_cpp(const std::string& glslType) {
     static const std::unordered_map<std::string, std::string> kMapping = {
             {"bool",   "bool"},      {"int",    "int32_t"},  {"uint",   "uint32_t"},
