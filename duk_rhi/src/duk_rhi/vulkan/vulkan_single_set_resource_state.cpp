@@ -17,7 +17,7 @@ namespace duk::rhi {
 
 namespace detail {
 
-static duk::hash::Hash hash_resources(const ShaderBindingLayout& layout, const ShaderBindings& resources) {
+static duk::hash::Hash hash_resources(const BindingLayout& layout, const ShaderBindings& resources) {
     duk::hash::Hash h = 0;
     for (uint32_t i = 0; i < static_cast<uint32_t>(layout.size()); i++) {
         std::visit(
@@ -55,7 +55,7 @@ VulkanSingleSetResourceState::VulkanSingleSetResourceState(const VulkanSingleSet
     m_descriptorSetCache = std::make_unique<VulkanDescriptorSetCache>(setCacheCreateInfo);
 }
 
-VkPipelineLayout VulkanSingleSetResourceState::pipeline_layout(const ShaderBindingLayout& bindingLayout) {
+VkPipelineLayout VulkanSingleSetResourceState::pipeline_layout(const BindingLayout& bindingLayout) {
     return m_descriptorSetLayoutCache->get_pipeline_layout(bindingLayout);
 }
 
@@ -109,8 +109,7 @@ void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer,
                             // Clamp the range to the actual buffer size so that validation passes
                             // when the buffer was allocated smaller than the reflection-reported size
                             // (which may still be padded by the driver/compiler).
-                            const auto bufferBinding = std::get<BufferBindingDescription>(bindingDesc.binding);
-                            info.range = std::min<VkDeviceSize>(bufferBinding.size, res.buffer->size());
+                            info.range = std::min<VkDeviceSize>(bindingDesc.size, res.buffer->size());
                             write.pBufferInfo = &info;
                             return true;
                         } else if constexpr (std::is_same_v<T, ImageResource>) {
@@ -146,11 +145,11 @@ void VulkanSingleSetResourceState::bind_resources(VkCommandBuffer commandBuffer,
     // The offset must satisfy the physical device's minimum alignment requirement.
     std::vector<uint32_t> dynamicOffsets;
     for (uint32_t i = 0; i < static_cast<uint32_t>(bindingLayout.size()); i++) {
-        if (!std::holds_alternative<BufferBindingDescription>(bindingLayout[i].binding)) {
+        if (bindingLayout[i].type != BindingType::UNIFORM_BUFFER && bindingLayout[i].type != BindingType::STORAGE_BUFFER) {
             continue;
         }
 
-        const bool isUniform = std::get<BufferBindingDescription>(bindingLayout[i].binding).type == BufferBindingType::UNIFORM_BUFFER;
+        const bool isUniform = bindingLayout[i].type == BindingType::UNIFORM_BUFFER;
         const VkDeviceSize alignment = isUniform ? m_uniformBufferOffsetAlignment : m_storageBufferOffsetAlignment;
 
         uint32_t offset = 0;

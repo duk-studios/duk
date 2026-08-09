@@ -5,7 +5,6 @@
 #define DUK_RHI_SHADER_DATA_SOURCE_H
 
 #include <duk_rhi/shader.h>
-#include <duk_rhi/vertex_layout.h>
 
 #include <duk_hash/data_source.h>
 
@@ -29,7 +28,7 @@ public:
     /// Flat ordered binding layout for this shader.
     /// Generated data sources back this with a compile-time enum;
     /// runtime data sources derive it by reflecting the SPIR-V.
-    DUK_NO_DISCARD virtual const ShaderBindingLayout& binding_layout() const = 0;
+    DUK_NO_DISCARD virtual const BindingLayout& binding_layout() const = 0;
 
     /// Vertex attribute layout for this shader (empty for compute).
     /// Runtime data sources derive this by reflecting the vertex SPIR-V.

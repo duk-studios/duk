@@ -3,15 +3,16 @@
 //
 
 #include <duk_rhi/shader_reflection.h>
+#include <duk_rhi/binding_layout.h>
+#include <duk_rhi/command_context.h>
+
+#include <duk_log/log.h>
 
 #define SPIRV_REFLECT_USE_SYSTEM_SPIRV_H
 #include <spirv_reflect.h>
 
 #include <algorithm>
 #include <stdexcept>
-
-#include "duk_log/log.h"
-#include "duk_rhi/command_context.h"
 
 namespace duk::rhi {
 
@@ -61,8 +62,8 @@ static std::string member_type_name(SpvReflectTypeDescription* typeDesc) {
     return "unknown";
 }
 
-static BufferMemberDescription make_buffer_member(const SpvReflectBlockVariable& spvMember) {
-    BufferMemberDescription member;
+static BindingMemberDescription make_buffer_member(const SpvReflectBlockVariable& spvMember) {
+    BindingMemberDescription member;
     member.name = spvMember.name;
     member.offset = spvMember.offset;
     member.size = spvMember.size;
@@ -71,52 +72,60 @@ static BufferMemberDescription make_buffer_member(const SpvReflectBlockVariable&
     return member;
 }
 
-static void fill_buffer_members(SpvReflectDescriptorBinding* spvBinding, BufferBindingDescription& bufferDesc) {
+static void fill_buffer_members(SpvReflectDescriptorBinding* spvBinding, BindingDescription& desc) {
     for (auto memberIndex = 0u; memberIndex < spvBinding->block.member_count; memberIndex++) {
         const auto& spvMember = spvBinding->block.members[memberIndex];
         if (spvMember.type_description->op == SpvOpTypeRuntimeArray) {
-            bufferDesc.stride = spvMember.type_description->traits.array.stride;
-            bufferDesc.size = bufferDesc.stride;
+            desc.stride = spvMember.type_description->traits.array.stride;
+            desc.size = desc.stride;
             for (auto i = 0u; i < spvMember.member_count; i++) {
-                bufferDesc.members.push_back(make_buffer_member(spvMember.members[i]));
+                desc.members.push_back(make_buffer_member(spvMember.members[i]));
             }
             return;
         }
-        bufferDesc.members.push_back(make_buffer_member(spvMember));
+        desc.members.push_back(make_buffer_member(spvMember));
     }
-    bufferDesc.size = spvBinding->block.size;
-    bufferDesc.stride = spvBinding->block.padded_size;
+    desc.size = spvBinding->block.size;
+    desc.stride = spvBinding->block.padded_size;
+}
+
+static BindingType convert_binding_type(SpvReflectDescriptorType type) {
+    BindingType result;
+
+    switch (type) {
+        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE:
+        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER:
+            result = BindingType::IMAGE;
+            break;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER:
+            result = BindingType::SAMPLER_IMAGE;
+            break;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE:
+            result = BindingType::STORAGE_IMAGE;
+            break;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
+        case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+        case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER:
+            result = BindingType::UNIFORM_BUFFER;
+            break;
+        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
+        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER:
+            result = BindingType::STORAGE_BUFFER;
+            break;
+        default:
+            throw std::runtime_error("Unsupported binding type: " + std::to_string(type));
+    }
+    return result;
 }
 
 static BindingDescription make_binding_description(SpvReflectDescriptorBinding* spvBinding, ShaderModule::Bits stage) {
-    BindingDescription desc;
+    BindingDescription desc = {};
     desc.name = spvBinding->name;
     desc.moduleMask = stage;
-
-    switch (spvBinding->descriptor_type) {
-        case SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
-        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER: {
-            BufferBindingDescription bufferDesc;
-            bufferDesc.type = spvBinding->descriptor_type == SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER ? BufferBindingType::UNIFORM_BUFFER : BufferBindingType::STORAGE_BUFFER;
-            fill_buffer_members(spvBinding, bufferDesc);
-            desc.binding = std::move(bufferDesc);
-            break;
-        }
-        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLER:
-        case SPV_REFLECT_DESCRIPTOR_TYPE_SAMPLED_IMAGE: {
-            desc.binding = ImageBindingDescription{ImageBindingType::IMAGE};
-            break;
-        }
-        case SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER: {
-            desc.binding = ImageBindingDescription{ImageBindingType::IMAGE_SAMPLER};
-            break;
-        }
-        case SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE: {
-            desc.binding = ImageBindingDescription{ImageBindingType::STORAGE_IMAGE};
-            break;
-        }
-        default:
-            break;
+    desc.type = convert_binding_type(spvBinding->descriptor_type);
+    if (desc.type == BindingType::UNIFORM_BUFFER || desc.type == BindingType::STORAGE_BUFFER) {
+        fill_buffer_members(spvBinding, desc);
     }
 
     return desc;
@@ -224,8 +233,8 @@ ShaderReflection::~ShaderReflection() {
     m_stageModules.clear();
 }
 
-ShaderBindingLayout ShaderReflection::binding_layout() {
-    ShaderBindingLayout bindingLayout;
+BindingLayout ShaderReflection::binding_layout() {
+    BindingLayout bindingLayout;
     std::unordered_map<std::string, uint32_t> nameToIndex;
 
     for (auto stage: kStageOrder) {
@@ -242,7 +251,7 @@ ShaderBindingLayout ShaderReflection::binding_layout() {
         detail::check_result(spvReflectEnumerateDescriptorBindings(mod.get(), &bindingCount, bindings.data()));
 
         // Sort by (set, binding) for a stable per-stage slot assignment.
-        std::sort(bindings.begin(), bindings.end(), [](const SpvReflectDescriptorBinding* a, const SpvReflectDescriptorBinding* b) {
+        std::ranges::sort(bindings, [](const SpvReflectDescriptorBinding* a, const SpvReflectDescriptorBinding* b) {
             return a->set != b->set ? a->set < b->set : a->binding < b->binding;
         });
 
@@ -287,7 +296,7 @@ VertexLayout ShaderReflection::vertex_layout() {
     return vertexLayout;
 }
 
-std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>> ShaderReflection::remap_bindings(const ShaderBindingLayout& bindingLayout) {
+std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>> ShaderReflection::remap_bindings(const BindingLayout& bindingLayout) {
     // Build name → logical index from the authoritative layout.
     std::unordered_map<std::string, uint32_t> nameToIndex;
     nameToIndex.reserve(bindingLayout.size());

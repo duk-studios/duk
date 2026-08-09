@@ -47,7 +47,7 @@ public:
 
     /// Reflects and returns the merged flat binding layout across all stages.
     /// A descriptor shared across stages appears once; its moduleMask accumulates all stages.
-    DUK_NO_DISCARD ShaderBindingLayout binding_layout();
+    DUK_NO_DISCARD BindingLayout binding_layout();
 
     /// Reflects and returns the vertex attribute layout from the VERTEX stage.
     /// Returns an empty layout if no vertex stage is present.
@@ -55,7 +55,7 @@ public:
 
     /// Patches the binding decorations in each stage's SPIR-V so that every descriptor
     /// lands on (set=0, binding=logicalIndex) as dictated by @p bindingLayout.
-    DUK_NO_DISCARD std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>> remap_bindings(const ShaderBindingLayout& bindingLayout);
+    DUK_NO_DISCARD std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>> remap_bindings(const BindingLayout& bindingLayout);
 
     /// Recursively extracts all named struct type definitions referenced by buffer bindings
     /// across all reflected stages.

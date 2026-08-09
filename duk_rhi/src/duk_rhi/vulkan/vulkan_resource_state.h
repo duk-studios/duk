@@ -17,7 +17,7 @@ class VulkanResourceState {
 public:
     virtual ~VulkanResourceState() = default;
 
-    DUK_NO_DISCARD virtual VkPipelineLayout pipeline_layout(const ShaderBindingLayout& bindingLayout) = 0;
+    DUK_NO_DISCARD virtual VkPipelineLayout pipeline_layout(const BindingLayout& bindingLayout) = 0;
 
     virtual void bind_resources(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, const VulkanShader& shader, const ShaderBindings& resources, uint32_t frameIndex) = 0;
 };

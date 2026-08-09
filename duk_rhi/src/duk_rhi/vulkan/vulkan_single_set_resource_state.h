@@ -28,7 +28,7 @@ class VulkanSingleSetResourceState : public VulkanResourceState {
 public:
     explicit VulkanSingleSetResourceState(const VulkanSingleSetResourceBinderCreateInfo& createInfo);
 
-    DUK_NO_DISCARD VkPipelineLayout pipeline_layout(const ShaderBindingLayout& bindingLayout) override;
+    DUK_NO_DISCARD VkPipelineLayout pipeline_layout(const BindingLayout& bindingLayout) override;
 
     void bind_resources(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint, const VulkanShader& shader, const ShaderBindings& resources, uint32_t frameIndex) override;
 

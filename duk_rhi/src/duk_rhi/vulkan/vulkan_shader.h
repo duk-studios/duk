@@ -5,6 +5,8 @@
 #define DUK_RHI_VULKAN_SHADER_H
 
 #include <duk_rhi/shader.h>
+#include <duk_rhi/binding_layout.h>
+#include <duk_rhi/vertex_layout.h>
 #include <duk_rhi/shader_data_source.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 
@@ -41,7 +43,7 @@ public:
     DUK_NO_DISCARD const BindingLocation& binding_location(uint32_t logicalIndex) const;
 
     // Shader interface
-    DUK_NO_DISCARD const ShaderBindingLayout& binding_layout() const override;
+    DUK_NO_DISCARD const BindingLayout& binding_layout() const override;
     DUK_NO_DISCARD const VertexLayout& vertex_layout() const override;
     DUK_NO_DISCARD bool is_graphics_shader() const override;
     DUK_NO_DISCARD bool is_compute_shader() const override;
@@ -53,7 +55,7 @@ private:
     ShaderModule::Mask m_moduleMask;
 
     /// Flat backend-agnostic binding layout sourced from the ShaderDataSource.
-    ShaderBindingLayout m_bindingLayout;
+    BindingLayout m_bindingLayout;
 
     /// Maps logical binding index → Vulkan (set, binding).
     std::vector<BindingLocation> m_bindingRemapTable;

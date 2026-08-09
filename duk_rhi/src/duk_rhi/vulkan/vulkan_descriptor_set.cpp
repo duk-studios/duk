@@ -14,33 +14,27 @@
 namespace duk::rhi {
 
 VkDescriptorType convert_descriptor_type(const BindingDescription& binding) {
-    return std::visit(
-            [](auto&& b) -> VkDescriptorType {
-                using T = std::decay_t<decltype(b)>;
-                if constexpr (std::is_same_v<T, BufferBindingDescription>) {
-                    switch (b.type) {
-                        case BufferBindingType::UNIFORM_BUFFER:
-                            return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-                        case BufferBindingType::STORAGE_BUFFER:
-                            return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-                        default:
-                            throw std::logic_error("unsupported BufferBindingType for VkDescriptorType conversion");
-                    }
-                } else {
-                    static_assert(std::is_same_v<T, ImageBindingDescription>);
-                    switch (b.type) {
-                        case ImageBindingType::IMAGE:
-                            return VK_DESCRIPTOR_TYPE_SAMPLER;
-                        case ImageBindingType::IMAGE_SAMPLER:
-                            return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                        case ImageBindingType::STORAGE_IMAGE:
-                            return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-                        default:
-                            throw std::logic_error("unsupported ImageBindingType for VkDescriptorType conversion");
-                    }
-                }
-            },
-            binding.binding);
+    VkDescriptorType result;
+    switch (binding.type) {
+        case BindingType::UNIFORM_BUFFER:
+            result = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+            break;
+        case BindingType::STORAGE_BUFFER:
+            result = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+            break;
+        case BindingType::IMAGE:
+            result = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+            break;
+        case BindingType::SAMPLER_IMAGE:
+            result = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            break;
+        case BindingType::STORAGE_IMAGE:
+            result = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            break;
+        default:
+            throw std::runtime_error("Unsupported binding type in convert_descriptor_type: " + std::to_string(static_cast<int>(binding.type)));
+    }
+    return result;
 }
 
 VulkanDescriptorSetLayoutCache::VulkanDescriptorSetLayoutCache(const VulkanDescriptorSetLayoutCacheCreateInfo& descriptorSetLayoutCacheCreateInfo)
@@ -54,7 +48,7 @@ VulkanDescriptorSetLayoutCache::~VulkanDescriptorSetLayoutCache() {
     }
 }
 
-VkDescriptorSetLayout VulkanDescriptorSetLayoutCache::get_layout(const ShaderBindingLayout& bindingLayout) {
+VkDescriptorSetLayout VulkanDescriptorSetLayoutCache::get_layout(const BindingLayout& bindingLayout) {
     auto hash = calculate_hash(bindingLayout);
     auto it = m_descriptorLayoutCache.find(hash);
     if (it != m_descriptorLayoutCache.end()) {
@@ -63,7 +57,7 @@ VkDescriptorSetLayout VulkanDescriptorSetLayoutCache::get_layout(const ShaderBin
     return create_descriptor_set_layout(bindingLayout, hash).descriptorSetLayout;
 }
 
-const std::vector<VkDescriptorSetLayoutBinding>& VulkanDescriptorSetLayoutCache::get_bindings(const ShaderBindingLayout& bindingLayout) {
+const std::vector<VkDescriptorSetLayoutBinding>& VulkanDescriptorSetLayoutCache::get_bindings(const BindingLayout& bindingLayout) {
     auto hash = calculate_hash(bindingLayout);
     auto it = m_descriptorLayoutCache.find(hash);
     if (it != m_descriptorLayoutCache.end()) {
@@ -72,7 +66,7 @@ const std::vector<VkDescriptorSetLayoutBinding>& VulkanDescriptorSetLayoutCache:
     return create_descriptor_set_layout(bindingLayout, hash).bindings;
 }
 
-VkPipelineLayout VulkanDescriptorSetLayoutCache::get_pipeline_layout(const ShaderBindingLayout& bindingLayout) {
+VkPipelineLayout VulkanDescriptorSetLayoutCache::get_pipeline_layout(const BindingLayout& bindingLayout) {
     auto hash = calculate_hash(bindingLayout);
     auto it = m_descriptorLayoutCache.find(hash);
     if (it != m_descriptorLayoutCache.end()) {
@@ -81,22 +75,17 @@ VkPipelineLayout VulkanDescriptorSetLayoutCache::get_pipeline_layout(const Shade
     return create_descriptor_set_layout(bindingLayout, hash).pipelineLayout;
 }
 
-duk::hash::Hash VulkanDescriptorSetLayoutCache::calculate_hash(const ShaderBindingLayout& bindingLayout) {
+duk::hash::Hash VulkanDescriptorSetLayoutCache::calculate_hash(const BindingLayout& bindingLayout) {
     duk::hash::Hash hash = 0;
     for (auto& desc: bindingLayout) {
-        duk::hash::hash_combine(hash, desc.binding.index());
+        duk::hash::hash_combine(hash, desc.type);
         duk::hash::hash_combine(hash, desc.moduleMask);
         duk::hash::hash_combine(hash, desc.name);
-        std::visit(
-                [&hash](auto&& b) {
-                    duk::hash::hash_combine(hash, static_cast<uint32_t>(b.type));
-                },
-                desc.binding);
     }
     return hash;
 }
 
-const VulkanDescriptorSetLayoutCache::CacheEntry& VulkanDescriptorSetLayoutCache::create_descriptor_set_layout(const ShaderBindingLayout& bindingLayout, duk::hash::Hash hash) {
+const VulkanDescriptorSetLayoutCache::CacheEntry& VulkanDescriptorSetLayoutCache::create_descriptor_set_layout(const BindingLayout& bindingLayout, duk::hash::Hash hash) {
     std::vector<VkDescriptorSetLayoutBinding> bindings;
     bindings.reserve(bindingLayout.size());
     for (auto& desc: bindingLayout) {

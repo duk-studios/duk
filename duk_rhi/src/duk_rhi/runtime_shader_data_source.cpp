@@ -53,7 +53,7 @@ const std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>>& RuntimeShade
     return m_shaderModules;
 }
 
-const ShaderBindingLayout& RuntimeShaderDataSource::binding_layout() const {
+const BindingLayout& RuntimeShaderDataSource::binding_layout() const {
     return m_bindingLayout;
 }
 

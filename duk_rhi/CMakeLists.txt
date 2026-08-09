@@ -7,6 +7,7 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/pixel.h
         include/duk_rhi/sampler.h
         include/duk_rhi/vertex_layout.h
+        include/duk_rhi/binding_layout.h
         include/duk_rhi/buffer.h
         include/duk_rhi/buffer_allocator.h
         include/duk_rhi/image_data_source.h
@@ -14,6 +15,7 @@ set(DUK_RHI_HEADERS
         include/duk_rhi/index_types.h
         include/duk_rhi/pipeline_state.h
         include/duk_rhi/shader.h
+        include/duk_rhi/shader_module.h
         include/duk_rhi/shader_data_source.h
         include/duk_rhi/runtime_shader_data_source.h
         include/duk_rhi/pipeline_flags.h
@@ -29,6 +31,7 @@ set(DUK_RHI_SOURCES
         src/duk_rhi/instance.cpp
         src/duk_rhi/exception.cpp
         src/duk_rhi/vertex_layout.cpp
+        src/duk_rhi/binding_layout.cpp
         src/duk_rhi/frame_buffer.cpp
         src/duk_rhi/image.cpp
         src/duk_rhi/pixel.cpp

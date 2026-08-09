@@ -5,6 +5,7 @@
 #define DUK_RHI_VULKAN_DESCRIPTOR_SET_H
 
 #include <duk_rhi/shader.h>
+#include <duk_rhi/binding_layout.h>
 #include <duk_rhi/vulkan/vulkan_import.h>
 #include <duk_rhi/vulkan/vulkan_sampler.h>
 
@@ -27,11 +28,11 @@ public:
 
     ~VulkanDescriptorSetLayoutCache();
 
-    DUK_NO_DISCARD VkDescriptorSetLayout get_layout(const ShaderBindingLayout& bindingLayout);
+    DUK_NO_DISCARD VkDescriptorSetLayout get_layout(const BindingLayout& bindingLayout);
 
-    DUK_NO_DISCARD const std::vector<VkDescriptorSetLayoutBinding>& get_bindings(const ShaderBindingLayout& bindingLayout);
+    DUK_NO_DISCARD const std::vector<VkDescriptorSetLayoutBinding>& get_bindings(const BindingLayout& bindingLayout);
 
-    DUK_NO_DISCARD VkPipelineLayout get_pipeline_layout(const ShaderBindingLayout& bindingLayout);
+    DUK_NO_DISCARD VkPipelineLayout get_pipeline_layout(const BindingLayout& bindingLayout);
 
 private:
     struct CacheEntry {
@@ -40,9 +41,9 @@ private:
         std::vector<VkDescriptorSetLayoutBinding> bindings;
     };
 
-    static duk::hash::Hash calculate_hash(const ShaderBindingLayout& bindingLayout);
+    static duk::hash::Hash calculate_hash(const BindingLayout& bindingLayout);
 
-    const CacheEntry& create_descriptor_set_layout(const ShaderBindingLayout& bindingLayout, duk::hash::Hash hash);
+    const CacheEntry& create_descriptor_set_layout(const BindingLayout& bindingLayout, duk::hash::Hash hash);
 
     VkDevice m_device;
     std::unordered_map<duk::hash::Hash, CacheEntry> m_descriptorLayoutCache;

@@ -5,6 +5,7 @@
 #include <duk_rhi/vulkan/vulkan_flags.h>
 #include <duk_rhi/vulkan/vulkan_vertex.h>
 #include <duk_rhi/shader_reflection.h>
+#include <duk_rhi/binding_layout.h>
 
 #include <stdexcept>
 
@@ -128,7 +129,7 @@ const BindingLocation& VulkanShader::binding_location(uint32_t logicalIndex) con
     return m_bindingRemapTable.at(logicalIndex);
 }
 
-const ShaderBindingLayout& VulkanShader::binding_layout() const {
+const BindingLayout& VulkanShader::binding_layout() const {
     return m_bindingLayout;
 }
 

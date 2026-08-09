@@ -5,6 +5,8 @@
 #define DUK_RHI_STD_SHADER_DATA_SOURCE_H
 
 #include <duk_rhi/shader_data_source.h>
+#include <duk_rhi/binding_layout.h>
+#include <duk_rhi/vertex_layout.h>
 
 #include <string_view>
 #include <vector>
@@ -38,7 +40,7 @@ public:
 
     const std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>>& shader_modules() const override;
 
-    const ShaderBindingLayout& binding_layout() const override;
+    const BindingLayout& binding_layout() const override;
 
     const VertexLayout& vertex_layout() const override;
 
@@ -52,7 +54,7 @@ protected:
 private:
     std::unordered_map<ShaderModule::Bits, std::vector<uint8_t>> m_shaderModules;
     ShaderModule::Mask m_moduleMask;
-    ShaderBindingLayout m_bindingLayout;
+    BindingLayout m_bindingLayout;
     VertexLayout m_vertexLayout;
 };
 
