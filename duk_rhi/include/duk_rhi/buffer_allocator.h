@@ -16,8 +16,8 @@ namespace duk::rhi {
 class CommandContext;
 
 struct BufferAllocatorCreateInfo {
-    Buffer::Type type;
-    Buffer::UpdateFrequency updateFrequency;
+    BufferType::Mask type;
+    BufferProperties properties;
     size_t size;
     size_t alignment;
     uint32_t framesInFlight;

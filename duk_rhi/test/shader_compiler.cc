@@ -145,7 +145,7 @@ TEST_CASE("compile free function (ShaderCompiler overload)", "[rhi][shader_compi
                 {duk::rhi::ShaderModule::VERTEX,   std::string(kMinimalVertexShader)},
                 {duk::rhi::ShaderModule::FRAGMENT, std::string(kMinimalFragmentShader)},
         };
-        const auto source = duk::rhi::compile(compiler, sources);
+        const auto source = duk::rhi::compile(compiler, sources).value();
 
         const auto mask = source.module_mask();
         CHECK(mask & duk::rhi::ShaderModule::VERTEX);
@@ -162,7 +162,7 @@ TEST_CASE("compile free function (ShaderCompilerCreateInfo overload)", "[rhi][sh
                 {duk::rhi::ShaderModule::VERTEX,   std::string(kMinimalVertexShader)},
                 {duk::rhi::ShaderModule::FRAGMENT, std::string(kMinimalFragmentShader)},
         };
-        const auto source = duk::rhi::compile(info, sources);
+        const auto source = duk::rhi::compile(info, sources).value();
 
         CHECK(source.module_mask() & duk::rhi::ShaderModule::VERTEX);
         CHECK(source.module_mask() & duk::rhi::ShaderModule::FRAGMENT);
@@ -182,7 +182,7 @@ layout(location = 0) out vec4 outColor;
 void main() { outColor = red(); }
 )glsl"},
         };
-        const auto source = duk::rhi::compile(info, sources);
+        const auto source = duk::rhi::compile(info, sources).value();
 
         CHECK(source.module_mask() & duk::rhi::ShaderModule::FRAGMENT);
     }

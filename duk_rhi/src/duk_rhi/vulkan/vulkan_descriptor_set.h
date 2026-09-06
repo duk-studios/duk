@@ -20,7 +20,7 @@ struct VulkanDescriptorSetLayoutCacheCreateInfo {
     VkDevice device;
 };
 
-/// Caches VkDescriptorSetLayout objects keyed by the ShaderBindingLayout that describes them.
+/// Caches VkDescriptorSetLayout objects keyed by the BindingLayout that describes them.
 /// All descriptors are placed in a single VkDescriptorSetLayout (set=0).
 class VulkanDescriptorSetLayoutCache {
 public:

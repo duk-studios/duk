@@ -12,21 +12,27 @@
 
 namespace duk::rhi {
 
+struct BufferType {
+    enum Type : uint32_t {
+        UNDEFINED = 0,
+        INDEX = 1 << 0,
+        VERTEX = 1 << 1,
+        UNIFORM = 1 << 2,
+        STORAGE = 1 << 3,
+        INDIRECT = 1 << 4
+    };
+    using Mask = uint32_t;
+};
+
+enum class BufferProperties {
+    UNDEFINED = 0,
+    HOST_VISIBLE,
+    HOST_COHERENT,
+    DEVICE_LOCAL
+};
+
 class Buffer {
 public:
-    enum class UpdateFrequency {
-        STATIC,///< Device-local; written via staging through the command context.
-        DYNAMIC///< Host-visible; written directly by the CPU through the command context.
-    };
-
-    enum class Type {
-        INDEX,
-        VERTEX,
-        UNIFORM,
-        STORAGE,
-        INDIRECT
-    };
-
     virtual ~Buffer() = default;
 
     /// Return the requested size of the buffer in bytes. The actual allocated size may be larger.
@@ -34,6 +40,10 @@ public:
 
     /// Returns the currently mapped base pointer, or nullptr if not mapped.
     DUK_NO_DISCARD virtual void* data() const = 0;
+
+    DUK_NO_DISCARD virtual BufferProperties properties() const = 0;
+
+    DUK_NO_DISCARD virtual BufferType::Mask type() const = 0;
 
     void write(const void* src, size_t offset, size_t size) const;
 

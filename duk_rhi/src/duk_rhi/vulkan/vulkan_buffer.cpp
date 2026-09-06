@@ -60,10 +60,6 @@ VkMemoryPropertyFlags VulkanBuffer::memory_flags() const {
     return m_memoryFlags;
 }
 
-size_t VulkanBuffer::size() const {
-    return m_size;
-}
-
 void* VulkanBuffer::map(size_t offset, size_t size) {
     DUK_ASSERT(m_memoryFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
     if (!m_mapped) {
@@ -106,8 +102,45 @@ void VulkanBuffer::invalidate(size_t offset, size_t size) const {
     vkInvalidateMappedMemoryRanges(m_device, 1, &range);
 }
 
+size_t VulkanBuffer::size() const {
+    return m_size;
+}
+
 void* VulkanBuffer::data() const {
     return m_mapped;
+}
+
+BufferProperties VulkanBuffer::properties() const {
+    if (m_memoryFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) {
+        return BufferProperties::HOST_COHERENT;
+    }
+    if (m_memoryFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
+        return BufferProperties::HOST_VISIBLE;
+    }
+    if (m_memoryFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) {
+        return BufferProperties::DEVICE_LOCAL;
+    }
+    return BufferProperties::UNDEFINED;
+}
+
+BufferType::Mask VulkanBuffer::type() const {
+    BufferType::Mask type = 0;
+    if (m_usageFlags & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) {
+        type |= BufferType::VERTEX;
+    }
+    if (m_usageFlags & VK_BUFFER_USAGE_INDEX_BUFFER_BIT) {
+        type |= BufferType::INDEX;
+    }
+    if (m_usageFlags & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
+        type |= BufferType::UNIFORM;
+    }
+    if (m_usageFlags & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) {
+        type |= BufferType::STORAGE;
+    }
+    if (m_usageFlags & VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT) {
+        type |= BufferType::INDIRECT;
+    }
+    return type;
 }
 
 }// namespace duk::rhi

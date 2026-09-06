@@ -196,14 +196,14 @@ int main() {
     // Geometry buffers (shared by both cubes)
     // -----------------------------------------------------------------------
     duk::rhi::BufferCreateInfo positionBufferCreateInfo = {};
-    positionBufferCreateInfo.type = duk::rhi::Buffer::Type::VERTEX;
-    positionBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
+    positionBufferCreateInfo.type = duk::rhi::BufferType::VERTEX;
+    positionBufferCreateInfo.properties = duk::rhi::BufferProperties::DEVICE_LOCAL;
     positionBufferCreateInfo.size = sizeof(kPositions);
     auto positionBuffer = ctx->create_buffer(positionBufferCreateInfo);
 
     duk::rhi::BufferCreateInfo indexBufferCreateInfo = {};
-    indexBufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX;
-    indexBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
+    indexBufferCreateInfo.type = duk::rhi::BufferType::INDEX;
+    indexBufferCreateInfo.properties = duk::rhi::BufferProperties::DEVICE_LOCAL;
     indexBufferCreateInfo.size = sizeof(kIndices);
     auto indexBuffer = ctx->create_buffer(indexBufferCreateInfo);
 
@@ -211,15 +211,17 @@ int main() {
     // Uniform buffers
     // -----------------------------------------------------------------------
     duk::rhi::BufferCreateInfo uniformBufferCreateInfo = {};
-    uniformBufferCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
-    uniformBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
-
+    uniformBufferCreateInfo.type = duk::rhi::BufferType::UNIFORM;
+    uniformBufferCreateInfo.properties = duk::rhi::BufferProperties::HOST_COHERENT;
     uniformBufferCreateInfo.size = sizeof(CameraUBO);
     auto cameraUBOBuffer = ctx->create_buffer(uniformBufferCreateInfo);
+    ctx->map_buffer(cameraUBOBuffer.get());
 
     uniformBufferCreateInfo.size = sizeof(ObjectUBO);
     auto objectUBOBufferA = ctx->create_buffer(uniformBufferCreateInfo);
     auto objectUBOBufferB = ctx->create_buffer(uniformBufferCreateInfo);
+    ctx->map_buffer(objectUBOBufferA.get());
+    ctx->map_buffer(objectUBOBufferB.get());
 
     // Upload static mesh data
     ctx->prepare();

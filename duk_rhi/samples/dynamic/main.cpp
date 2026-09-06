@@ -211,14 +211,14 @@ int main() {
     // Geometry buffers — static, uploaded once
     // -------------------------------------------------------------------
     duk::rhi::BufferCreateInfo positionBufferInfo = {};
-    positionBufferInfo.type = duk::rhi::Buffer::Type::VERTEX;
-    positionBufferInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
+    positionBufferInfo.type = duk::rhi::BufferType::VERTEX;
+    positionBufferInfo.properties = duk::rhi::BufferProperties::DEVICE_LOCAL;
     positionBufferInfo.size = sizeof(kPositions);
     auto positionBuffer = ctx->create_buffer(positionBufferInfo);
 
     duk::rhi::BufferCreateInfo indexBufferInfo = {};
-    indexBufferInfo.type = duk::rhi::Buffer::Type::INDEX;
-    indexBufferInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
+    indexBufferInfo.type = duk::rhi::BufferType::INDEX;
+    indexBufferInfo.properties = duk::rhi::BufferProperties::DEVICE_LOCAL;
     indexBufferInfo.size = sizeof(kIndices);
     auto indexBuffer = ctx->create_buffer(indexBufferInfo);
 
@@ -240,12 +240,13 @@ int main() {
     constexpr uint32_t kFramesInFlight = 2;
 
     duk::rhi::BufferAllocatorCreateInfo bufferAllocatorInfo = {};
-    bufferAllocatorInfo.type = duk::rhi::Buffer::Type::UNIFORM;
-    bufferAllocatorInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
+    bufferAllocatorInfo.type = duk::rhi::BufferType::UNIFORM;
+    bufferAllocatorInfo.properties = duk::rhi::BufferProperties::HOST_COHERENT;
     bufferAllocatorInfo.size = 4096;
     bufferAllocatorInfo.alignment = rhi->capabilities().minUniformBufferOffsetAlignment;
     bufferAllocatorInfo.framesInFlight = kFramesInFlight;
     auto allocator = duk::rhi::BufferAllocator(*ctx, bufferAllocatorInfo);
+    ctx->map_buffer(allocator.buffer());
 
     // -------------------------------------------------------------------
     // Per-frame state

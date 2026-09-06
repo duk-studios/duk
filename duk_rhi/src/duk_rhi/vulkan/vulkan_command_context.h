@@ -68,6 +68,7 @@ public:
     void write_image(Image* image, const void* src, size_t size) override;
     void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) override;
     void map_buffer(Buffer* buffer, size_t offset, size_t size) override;
+    void map_buffer(Buffer* buffer) override;
     void unmap_buffer(Buffer* buffer) override;
     void flush_buffer(Buffer* buffer, size_t offset, size_t size) override;
     void invalidate_buffer(Buffer* buffer, size_t offset, size_t size) override;

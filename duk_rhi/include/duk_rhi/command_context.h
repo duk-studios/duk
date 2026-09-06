@@ -30,8 +30,8 @@ struct ShaderCreateInfo {
 };
 
 struct BufferCreateInfo {
-    Buffer::Type type;
-    Buffer::UpdateFrequency updateFrequency;
+    BufferType::Mask type;
+    BufferProperties properties;
     size_t size;
 };
 
@@ -238,6 +238,8 @@ public:
     virtual void write_frame_buffer(FrameBuffer* frameBuffer, const Image* const* attachments, uint32_t attachmentCount) = 0;
 
     virtual void map_buffer(Buffer* buffer, size_t size, size_t offset) = 0;
+
+    virtual void map_buffer(Buffer* buffer) = 0;
 
     virtual void unmap_buffer(Buffer* buffer) = 0;
 

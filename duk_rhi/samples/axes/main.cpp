@@ -184,14 +184,14 @@ int main() {
     // Geometry buffers — static, uploaded once
     // -----------------------------------------------------------------------
     duk::rhi::BufferCreateInfo positionBufferInfo = {};
-    positionBufferInfo.type = duk::rhi::Buffer::Type::VERTEX;
-    positionBufferInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
+    positionBufferInfo.type = duk::rhi::BufferType::VERTEX;
+    positionBufferInfo.properties = duk::rhi::BufferProperties::DEVICE_LOCAL;
     positionBufferInfo.size = sizeof(kPositions);
     auto positionBuffer = ctx->create_buffer(positionBufferInfo);
 
     duk::rhi::BufferCreateInfo colorBufferInfo = {};
-    colorBufferInfo.type = duk::rhi::Buffer::Type::VERTEX;
-    colorBufferInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
+    colorBufferInfo.type = duk::rhi::BufferType::VERTEX;
+    colorBufferInfo.properties = duk::rhi::BufferProperties::DEVICE_LOCAL;
     colorBufferInfo.size = sizeof(kColors);
     auto colorBuffer = ctx->create_buffer(colorBufferInfo);
 
@@ -207,10 +207,11 @@ int main() {
     // Matrices uniform buffer — dynamic, written every frame
     // -----------------------------------------------------------------------
     duk::rhi::BufferCreateInfo uniformBufferInfo = {};
-    uniformBufferInfo.type = duk::rhi::Buffer::Type::UNIFORM;
-    uniformBufferInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
+    uniformBufferInfo.type = duk::rhi::BufferType::UNIFORM;
+    uniformBufferInfo.properties = duk::rhi::BufferProperties::HOST_COHERENT;
     uniformBufferInfo.size = sizeof(MatricesUBO);
     auto matricesUBO = ctx->create_buffer(uniformBufferInfo);
+    ctx->map_buffer(matricesUBO.get());
 
     const auto matricesSlot = shaderDataSource.binding_index("matrices");
 

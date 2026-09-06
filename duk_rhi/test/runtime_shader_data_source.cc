@@ -215,21 +215,20 @@ TEST_CASE("RuntimeShaderDataSource vertex layout", "[rhi][runtime_shader_data_so
     SECTION("no vertex inputs yields empty layout") {
         auto source = make_source({{duk::rhi::ShaderModule::VERTEX, kMinimalVert, "test.vert"},
                                    {duk::rhi::ShaderModule::FRAGMENT, kMinimalFrag, "test.frag"}});
-        CHECK(source.vertex_layout().size() == 0);
+        CHECK(std::ranges::all_of(source.vertex_layout(), [](auto format) { return format == duk::rhi::VertexInput::Format::UNDEFINED; }));
     }
 
     SECTION("vec3 at location 0 and vec2 at location 1") {
         auto source = make_source({{duk::rhi::ShaderModule::VERTEX, kVertWithAttributes, "attrs.vert"},
                                    {duk::rhi::ShaderModule::FRAGMENT, kMinimalFrag, "test.frag"}});
         const auto& layout = source.vertex_layout();
-        REQUIRE(layout.size() == 2);
         CHECK(layout.format_at(0) == duk::rhi::VertexInput::Format::VEC3);
         CHECK(layout.format_at(1) == duk::rhi::VertexInput::Format::VEC2);
     }
 
     SECTION("vertex layout is empty for a compute-only source") {
         auto source = make_source({{duk::rhi::ShaderModule::COMPUTE, kComputeWithSSBO, "test.comp"}});
-        CHECK(source.vertex_layout().size() == 0);
+        CHECK(std::ranges::all_of(source.vertex_layout(), [](auto format) { return format == duk::rhi::VertexInput::Format::UNDEFINED; }));
     }
 }
 
@@ -247,10 +246,7 @@ TEST_CASE("RuntimeShaderDataSource image binding", "[rhi][runtime_shader_data_so
         const auto& desc = layout[0];
         CHECK(desc.name == "diffuseTexture");
         CHECK(desc.moduleMask & duk::rhi::ShaderModule::FRAGMENT);
-
-        REQUIRE(std::holds_alternative<duk::rhi::ImageBindingDescription>(desc.binding));
-        const auto& imgDesc = std::get<duk::rhi::ImageBindingDescription>(desc.binding);
-        CHECK(imgDesc.type == duk::rhi::ImageBindingType::IMAGE_SAMPLER);
+        CHECK(desc.type == duk::rhi::BindingType::SAMPLER_IMAGE);
     }
 }
 
@@ -268,46 +264,43 @@ TEST_CASE("RuntimeShaderDataSource uniform buffer binding", "[rhi][runtime_shade
         const auto& desc = layout[0];
         CHECK(desc.name == "transform");
         CHECK(desc.moduleMask & duk::rhi::ShaderModule::FRAGMENT);
-
-        REQUIRE(std::holds_alternative<duk::rhi::BufferBindingDescription>(desc.binding));
-        const auto& bufDesc = std::get<duk::rhi::BufferBindingDescription>(desc.binding);
-        CHECK(bufDesc.type == duk::rhi::BufferBindingType::UNIFORM_BUFFER);
-        REQUIRE(bufDesc.members.size() == 3);
+        CHECK(desc.type == duk::rhi::BindingType::UNIFORM_BUFFER);
+        REQUIRE(desc.members.size() == 3);
     }
 
     SECTION("member names") {
         auto source = make_source({{duk::rhi::ShaderModule::VERTEX, kMinimalVert, "test.vert"},
                                    {duk::rhi::ShaderModule::FRAGMENT, kFragWithUBO, "ubo.frag"}});
-        const auto& bufDesc = std::get<duk::rhi::BufferBindingDescription>(source.binding_layout()[0].binding);
-        CHECK(bufDesc.members[0].name == "model");
-        CHECK(bufDesc.members[1].name == "cameraPos");
-        CHECK(bufDesc.members[2].name == "time");
+        const auto& desc = source.binding_layout()[0];
+        CHECK(desc.members[0].name == "model");
+        CHECK(desc.members[1].name == "cameraPos");
+        CHECK(desc.members[2].name == "time");
     }
 
     SECTION("member type names") {
         auto source = make_source({{duk::rhi::ShaderModule::VERTEX, kMinimalVert, "test.vert"},
                                    {duk::rhi::ShaderModule::FRAGMENT, kFragWithUBO, "ubo.frag"}});
-        const auto& bufDesc = std::get<duk::rhi::BufferBindingDescription>(source.binding_layout()[0].binding);
-        CHECK(bufDesc.members[0].typeName == "mat4");
-        CHECK(bufDesc.members[1].typeName == "vec3");
-        CHECK(bufDesc.members[2].typeName == "float");
+        const auto& desc = source.binding_layout()[0];
+        CHECK(desc.members[0].typeName == "mat4");
+        CHECK(desc.members[1].typeName == "vec3");
+        CHECK(desc.members[2].typeName == "float");
     }
 
     SECTION("member offsets are non-decreasing") {
         auto source = make_source({{duk::rhi::ShaderModule::VERTEX, kMinimalVert, "test.vert"},
                                    {duk::rhi::ShaderModule::FRAGMENT, kFragWithUBO, "ubo.frag"}});
-        const auto& bufDesc = std::get<duk::rhi::BufferBindingDescription>(source.binding_layout()[0].binding);
-        for (size_t i = 1; i < bufDesc.members.size(); i++) {
-            CHECK(bufDesc.members[i].offset > bufDesc.members[i - 1].offset);
+        const auto& desc = source.binding_layout()[0];
+        for (size_t i = 1; i < desc.members.size(); i++) {
+            CHECK(desc.members[i].offset > desc.members[i - 1].offset);
         }
     }
 
     SECTION("buffer size is positive") {
         auto source = make_source({{duk::rhi::ShaderModule::VERTEX, kMinimalVert, "test.vert"},
                                    {duk::rhi::ShaderModule::FRAGMENT, kFragWithUBO, "ubo.frag"}});
-        const auto& bufDesc = std::get<duk::rhi::BufferBindingDescription>(source.binding_layout()[0].binding);
-        CHECK(bufDesc.size > 0);
-        CHECK(bufDesc.stride >= bufDesc.size);
+        const auto& desc = source.binding_layout()[0];
+        CHECK(desc.size > 0);
+        CHECK(desc.stride >= desc.size);
     }
 }
 
@@ -320,10 +313,7 @@ TEST_CASE("RuntimeShaderDataSource storage buffer binding", "[rhi][runtime_shade
         const auto& desc = layout[0];
         CHECK(desc.name == "data");
         CHECK(desc.moduleMask & duk::rhi::ShaderModule::COMPUTE);
-
-        REQUIRE(std::holds_alternative<duk::rhi::BufferBindingDescription>(desc.binding));
-        const auto& bufDesc = std::get<duk::rhi::BufferBindingDescription>(desc.binding);
-        CHECK(bufDesc.type == duk::rhi::BufferBindingType::STORAGE_BUFFER);
+        CHECK(desc.type == duk::rhi::BindingType::STORAGE_BUFFER);
     }
 }
 
@@ -351,8 +341,8 @@ TEST_CASE("RuntimeShaderDataSource shared bindings", "[rhi][runtime_shader_data_
         const auto albedoIdx = source.binding_index("albedo");
         const auto materialIdx = source.binding_index("material");
 
-        CHECK(std::holds_alternative<duk::rhi::ImageBindingDescription>(layout[albedoIdx].binding));
-        CHECK(std::holds_alternative<duk::rhi::BufferBindingDescription>(layout[materialIdx].binding));
+        CHECK(layout[albedoIdx].type == duk::rhi::BindingType::SAMPLER_IMAGE);
+        CHECK(layout[materialIdx].type == duk::rhi::BindingType::UNIFORM_BUFFER);
     }
 }
 

@@ -18,7 +18,7 @@ BufferAllocator::BufferAllocator(CommandContext& context, const BufferAllocatorC
     const size_t sectionSize = (createInfo.size + effectiveAlignment - 1) & ~(effectiveAlignment - 1);
 
     BufferCreateInfo bufferCreateInfo = {};
-    bufferCreateInfo.updateFrequency = createInfo.updateFrequency;
+    bufferCreateInfo.properties = createInfo.properties;
     bufferCreateInfo.type = createInfo.type;
     bufferCreateInfo.size = sectionSize * createInfo.framesInFlight;
 

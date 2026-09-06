@@ -46,6 +46,8 @@ using BindingLayout = std::vector<BindingDescription>;
 
 std::optional<BindingDescription> find_binding(const BindingLayout& layout, const std::string_view& name);
 
+std::optional<BindingMemberDescription> find_member(const std::vector<BindingMemberDescription>& members, const std::string_view& name);
+
 }
 
 #endif //DUK_RHI_BINDING_LAYOUT_H

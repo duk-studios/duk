@@ -53,8 +53,11 @@ public:
     // -----------------------------------------------------------------------
     DUK_NO_DISCARD size_t size() const override;
 
-
     DUK_NO_DISCARD void* data() const override;
+
+    DUK_NO_DISCARD BufferProperties properties() const override;
+
+    DUK_NO_DISCARD BufferType::Mask type() const override;
 
 private:
     VkDevice m_device;

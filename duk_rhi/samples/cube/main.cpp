@@ -205,38 +205,40 @@ int main() {
 
     // Position vertex buffer — static, uploaded once at startup.
     duk::rhi::BufferCreateInfo positionBufferCreateInfo = {};
-    positionBufferCreateInfo.type = duk::rhi::Buffer::Type::VERTEX;
-    positionBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
+    positionBufferCreateInfo.type = duk::rhi::BufferType::VERTEX;
+    positionBufferCreateInfo.properties = duk::rhi::BufferProperties::DEVICE_LOCAL;
     positionBufferCreateInfo.size = sizeof(kPositions);
     auto positionBuffer = ctx->create_buffer(positionBufferCreateInfo);
 
     // Colour vertex buffer — static, uploaded once at startup.
     duk::rhi::BufferCreateInfo colorBufferCreateInfo = {};
-    colorBufferCreateInfo.type = duk::rhi::Buffer::Type::VERTEX;
-    colorBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
+    colorBufferCreateInfo.type = duk::rhi::BufferType::VERTEX;
+    colorBufferCreateInfo.properties = duk::rhi::BufferProperties::DEVICE_LOCAL;
     colorBufferCreateInfo.size = sizeof(kColors);
     auto colorBuffer = ctx->create_buffer(colorBufferCreateInfo);
 
     // Index buffer — static, uploaded once at startup.
     duk::rhi::BufferCreateInfo indexBufferCreateInfo = {};
-    indexBufferCreateInfo.type = duk::rhi::Buffer::Type::INDEX;
-    indexBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::STATIC;
+    indexBufferCreateInfo.type = duk::rhi::BufferType::INDEX;
+    indexBufferCreateInfo.properties = duk::rhi::BufferProperties::DEVICE_LOCAL;
     indexBufferCreateInfo.size = sizeof(kIndices);
     auto indexBuffer = ctx->create_buffer(indexBufferCreateInfo);
 
     // Uniform buffer — dynamic, written every frame with the current MVP matrices.
     duk::rhi::BufferCreateInfo uniformBufferCreateInfo = {};
-    uniformBufferCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
-    uniformBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
+    uniformBufferCreateInfo.type = duk::rhi::BufferType::UNIFORM;
+    uniformBufferCreateInfo.properties = duk::rhi::BufferProperties::HOST_COHERENT;
     uniformBufferCreateInfo.size = sizeof(MatricesUBO);
     auto matricesUBO = ctx->create_buffer(uniformBufferCreateInfo);
+    ctx->map_buffer(matricesUBO.get(), 0, sizeof(MatricesUBO));
 
     // Color uniform buffer — dynamic, animated intensity value.
     duk::rhi::BufferCreateInfo colorUniformBufferCreateInfo = {};
-    colorUniformBufferCreateInfo.type = duk::rhi::Buffer::Type::UNIFORM;
-    colorUniformBufferCreateInfo.updateFrequency = duk::rhi::Buffer::UpdateFrequency::DYNAMIC;
+    colorUniformBufferCreateInfo.type = duk::rhi::BufferType::UNIFORM;
+    colorUniformBufferCreateInfo.properties = duk::rhi::BufferProperties::HOST_COHERENT;
     colorUniformBufferCreateInfo.size = sizeof(ColorUBO);
     auto colorUBO = ctx->create_buffer(colorUniformBufferCreateInfo);
+    ctx->map_buffer(colorUBO.get(), 0, sizeof(ColorUBO));
 
     // Upload static mesh data.
     ctx->prepare();

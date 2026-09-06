@@ -22,35 +22,37 @@ namespace duk::rhi {
 
 namespace detail {
 
-static VkBufferUsageFlags buffer_usage_flags(Buffer::Type type) {
+static VkBufferUsageFlags buffer_usage_flags(BufferType::Mask type) {
     VkBufferUsageFlags flags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-    switch (type) {
-        case Buffer::Type::INDEX:
-            flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-            break;
-        case Buffer::Type::VERTEX:
-            flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-            break;
-        case Buffer::Type::UNIFORM:
-            flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-            break;
-        case Buffer::Type::STORAGE:
-            flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-            break;
-        case Buffer::Type::INDIRECT:
-            flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
-            break;
-        default:
-            throw std::invalid_argument("unhandled Buffer::Type");
+    if (type & BufferType::VERTEX) {
+        flags |= VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    }
+    if (type & BufferType::INDEX) {
+        flags |= VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    }
+    if (type & BufferType::STORAGE) {
+        flags |= VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+    }
+    if (type & BufferType::INDIRECT) {
+        flags |= VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
+    }
+    if (type & BufferType::UNIFORM) {
+        flags |= VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     }
     return flags;
 }
 
-static VkMemoryPropertyFlags buffer_memory_flags(Buffer::UpdateFrequency freq) {
-    if (freq == Buffer::UpdateFrequency::STATIC) {
-        return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+static VkMemoryPropertyFlags buffer_memory_flags(BufferProperties properties) {
+    switch (properties) {
+        case BufferProperties::HOST_VISIBLE:
+            return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+        case BufferProperties::HOST_COHERENT:
+            return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        case BufferProperties::DEVICE_LOCAL:
+            return VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+        default:
+            throw std::invalid_argument("unhandled buffer properties");
     }
-    return VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 }
 
 static VkIndexType buffer_index_type(IndexType type) {
@@ -318,15 +320,10 @@ std::shared_ptr<Buffer> VulkanCommandContext::create_buffer(const BufferCreateIn
     VulkanBufferCreateInfo vulkanBufferCreateInfo = {};
     vulkanBufferCreateInfo.size = bufferCreateInfo.size;
     vulkanBufferCreateInfo.usageFlags = detail::buffer_usage_flags(bufferCreateInfo.type);
-    vulkanBufferCreateInfo.memoryFlags = detail::buffer_memory_flags(bufferCreateInfo.updateFrequency);
+    vulkanBufferCreateInfo.memoryFlags = detail::buffer_memory_flags(bufferCreateInfo.properties);
     vulkanBufferCreateInfo.device = m_device;
     vulkanBufferCreateInfo.physicalDevice = &m_physicalDevice;
-    auto buffer = make_shared_managed<VulkanBuffer>(vulkanBufferCreateInfo);
-    if (bufferCreateInfo.updateFrequency == Buffer::UpdateFrequency::DYNAMIC) {
-        // keep dynamic buffers mapped for now
-        buffer->map(0, VK_WHOLE_SIZE);
-    }
-    return buffer;
+    return make_shared_managed<VulkanBuffer>(vulkanBufferCreateInfo);
 }
 
 std::shared_ptr<Image> VulkanCommandContext::create_image(const ImageCreateInfo& imageCreateInfo) {
@@ -545,6 +542,10 @@ void VulkanCommandContext::map_buffer(Buffer* buffer, size_t offset, size_t size
     static_cast<VulkanBuffer*>(buffer)->map(offset, size);
 }
 
+void VulkanCommandContext::map_buffer(Buffer* buffer) {
+    static_cast<VulkanBuffer*>(buffer)->map(0, buffer->size());
+}
+
 void VulkanCommandContext::unmap_buffer(Buffer* buffer) {
     static_cast<VulkanBuffer*>(buffer)->unmap();
 }
@@ -567,15 +568,12 @@ void VulkanCommandContext::copy_to_buffer(Buffer* buffer, size_t offset, size_t 
     stagingCreateInfo.memoryFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     stagingCreateInfo.size = size;
 
-    auto staging = std::make_unique<VulkanBuffer>(stagingCreateInfo);
+    auto staging = make_unique_managed<VulkanBuffer>(stagingCreateInfo);
     const auto ptr = staging->map(0, VK_WHOLE_SIZE);
     std::memcpy(ptr, src, size);
     staging->unmap();
 
     copy_to_buffer(buffer, offset, size, staging.get(), 0);
-
-    // Keep the staging buffer alive until the GPU has finished using it.
-    m_deletionQueue.push(staging.release(), m_frameCounter);
 }
 
 void VulkanCommandContext::copy_to_buffer(Buffer* buffer, size_t offset, size_t size, const Buffer* src, size_t srcOffset) {
@@ -595,13 +593,14 @@ std::optional<BufferAllocation> VulkanCommandContext::allocate_indirect(size_t s
         const auto previousSize = m_indirectBufferAllocator ? m_indirectBufferAllocator->capacity() : 0;
         const auto newSize = previousSize + ((size / kChunkSize) + 1) * kChunkSize;
         BufferAllocatorCreateInfo indirectBufferCreateInfo = {};
-        indirectBufferCreateInfo.updateFrequency = Buffer::UpdateFrequency::DYNAMIC;
+        indirectBufferCreateInfo.properties = BufferProperties::HOST_COHERENT;
         indirectBufferCreateInfo.size = newSize;
         indirectBufferCreateInfo.alignment = 16;
         indirectBufferCreateInfo.framesInFlight = m_framesInFlight;
-        indirectBufferCreateInfo.type = Buffer::Type::INDIRECT;
+        indirectBufferCreateInfo.type = BufferType::INDIRECT;
 
         m_indirectBufferAllocator = make_unique_managed<BufferAllocator>(*this, indirectBufferCreateInfo);
+        map_buffer(m_indirectBufferAllocator->buffer(), 0, newSize);
     }
 
     return m_indirectBufferAllocator->alloc(size);
